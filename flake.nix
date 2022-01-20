@@ -13,7 +13,12 @@
     in
     {
       overlay = (final: prev: { });
-      packages = forAllSystems (system: { });
+      packages = forAllSystems (system: {
+        hello =
+          let
+            pkgs = nixpkgsFor.${system}; in
+          pkgs.writeText "hello.txt" "hello circles pink!";
+      });
       defaultPackage = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system}; in
