@@ -19,11 +19,14 @@
             pkgs = nixpkgsFor.${system}; in
           pkgs.writeText "hello.txt" "hello circles pink!";
       });
+
       defaultPackage = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system}; in
         pkgs.writeText "hello.txt" "hello circles pink!");
-      #checks = self.packages;
+
+      checks = self.packages;
+
       devShell = forAllSystems (system:
         let pkgs = nixpkgsFor.${system};
         in
