@@ -11,7 +11,7 @@ builtins.mapAttrs
         {
           buildInputs = [ pkgs.hello pkgs.cowsay ];
         } ''
-        hello | cowsay > $out
+        hello world | cowsay > $out
       '';
     }
   )
