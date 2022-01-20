@@ -17,7 +17,7 @@
         hello =
           let
             pkgs = nixpkgsFor.${system}; in
-          pkgs.writeText "hello.txt" "hello circles pink!";
+          pkgs.writeText "hello.txt" "hello circles pink! #0";
       });
 
       defaultPackage = forAllSystems (system:
