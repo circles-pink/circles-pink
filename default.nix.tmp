@@ -1,0 +1,15 @@
+let
+  pkgs = import
+    (builtins.fetchGit {
+      # Descriptive name to make the store path easier to identify
+      name = "nixos-unstable-2018-09-12";
+      url = "https://github.com/nixos/nixpkgs/";
+      # Commit hash for nixos-unstable as of 2018-09-12
+      # `git ls-remote https://github.com/nixos/nixpkgs nixos-unstable`
+      # ref = "refs/heads/nixos-unstable";
+      rev = "b4797eaffc45f360849067549c709295f0c0c1d2";
+    }); in
+
+{
+  foo = pkgs.writeText "hello.txt" "hello circles pink! #5";
+}
