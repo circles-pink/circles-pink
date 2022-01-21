@@ -2,7 +2,11 @@
   # inspired by: https://serokell.io/blog/practical-nix-flakes#packaging-existing-applications
   description = "Circles Pink monorepo";
   inputs.nixpkgs.url = "nixpkgs";
-  outputs = { self, nixpkgs }:
+  inputs.flake-compat = {
+    url = github:edolstra/flake-compat;
+    flake = false;
+  };
+  outputs = { self, nixpkgs, flake-compat }:
     let
       supportedSystems = [ "x86_64-linux" ];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
