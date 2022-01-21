@@ -14,7 +14,7 @@ let
 
   # update hash if desired or use different pinning solution
   effectsSrc = builtins.fetchTarball
-    "https://github.com/hercules-ci/hercules-ci-effects/archive/b67cfbbb31802389e1fb6a9c75360968d201693b.tar.gz";
+    "https://github.com/hercules-ci/hercules-ci-effects/archive/2e165352d92782e7ae149f4f1a9b3174f718a3af.tar.gz";
 
   inherit (pkgs.effects) runNixOps runIf;
   inherit (pkgs) lib;
