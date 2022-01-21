@@ -12,7 +12,7 @@
       });
     in
     {
-      overlay = (final: prev: { });
+      overlay = import ./nix/overlay.nix;
       packages = forAllSystems (system: {
         hello =
           let
@@ -32,11 +32,15 @@
         in
         pkgs.mkShell {
           nativeBuildInputs = with pkgs; [
-            hello
+            nixpkgs-fmt
+            git
+            vscode
           ];
 
           # Change the prompt to show that you are in a devShell
-          shellHook = "export PS1='\\e[1;34mdev > \\e[0m'";
+          shellHook = "
+            export PS1='\\e[1;32mnix@$PWD$ \\e[0m'
+          ";
         });
     };
 }
