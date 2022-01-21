@@ -16,14 +16,15 @@ in
           listen = [{ port = 80; }];
           documentRoot = pkgs.runCommand "ff" { } ''
             mkdir $out
-            echo bla > $out/index.html
+            echo bla2 > $out/index.html
           '';
         };
       };
 
       environment.systemPackages = [ pkgs.busybox ];
 
-      boot.cleanTmpDir = true;
+      # boot.cleanTmpDir = true;
+      boot.tmpOnTmpfs = true;
       networking.hostName = "circles-pink";
 
       services.openssh.enable = true;
@@ -31,6 +32,8 @@ in
       users.users.root.openssh.authorizedKeys.keys = [
         key
       ];
+
+      systemd.mounts = [ ];
 
       imports = [ (modulesPath + "/profiles/qemu-guest.nix") ];
       boot.loader.grub.device = "/dev/sda";

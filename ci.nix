@@ -4,7 +4,7 @@ let
 
 
   nixpkgs = builtins.fetchTarball
-    "https://github.com/NixOS/nixpkgs/archive/a6a3a368dda.tar.gz";
+    "https://github.com/NixOS/nixpkgs/archive/1caf78f4bf5cba45eb04c45a3c9b46bde8fa50e0.tar.gz";
   pkgs = import nixpkgs {
     system = "x86_64-linux";
     overlays = [
