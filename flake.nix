@@ -17,12 +17,13 @@
     in
     {
       overlay = import ./nix/overlay.nix;
-      packages = forAllSystems (system: {
-        hello =
-          let
-            pkgs = nixpkgsFor.${system}; in
-          pkgs.writeText "hello.txt" "hello circles pink! #0";
-      });
+      packages = forAllSystems (system:
+        let
+          pkgs = nixpkgsFor.${system}; in
+        {
+          hello = pkgs.writeText "hello.txt" "hello circles pink! #0";
+          inherit pkgs;
+        });
 
       defaultPackage = forAllSystems (system:
         let
