@@ -29,6 +29,13 @@ in
       name = "foo";
       src = lib.cleanSource ./.;
       networkFiles = [ "networks/network.nix" ];
+      userSetupScript = ''
+        writeSSHKey
+      '';
+      inputs = [ pkgs.openssh ];
+      secretsMap = {
+        "ssh" = "default-ssh";
+      };
     }
   );
 }
