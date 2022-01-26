@@ -18,8 +18,6 @@
     {
       overlay = import ./nix/overlay.nix;
 
-      nixopsConfigurations.default = ./networks/network.nix;
-
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system}; in
