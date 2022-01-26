@@ -1,2 +1,4 @@
 result
 *.key
+/node_modules
+dist/

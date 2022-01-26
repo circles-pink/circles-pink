@@ -1,7 +1,6 @@
 {
-  "name": "circles-pink",
+  "name": "circles-pink-2",
   "version": "1.0.0",
-  "description": "Circles-Pink npm packages",
   "private": true,
   "workspaces": [
     "pkgs/ts/*"

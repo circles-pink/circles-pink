@@ -23,6 +23,7 @@
           pkgs = nixpkgsFor.${system}; in
         {
           hello = pkgs.writeText "hello.txt" "hello circles pink! #0";
+          sample = pkgs.circles-pink.yarn;
           inherit pkgs;
         });
 
@@ -42,7 +43,7 @@
             git
             vscode
             bashInteractive
-            nodePackages.node2nix
+            yarn
           ];
 
           # Change the prompt to show that you are in a devShell
