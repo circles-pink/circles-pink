@@ -6,7 +6,10 @@ in
   network.description = "Circles Pink Network";
 
   webserver =
-    { config, pkgs, modulesPath, system, ... }:
+    { config, pkgs, modulesPath, ... }:
+    let
+      system = "x86_64-linux";
+    in
     {
       services.httpd.enable = true;
       services.httpd.adminAddr = "admin@teal.ooo";
@@ -14,7 +17,10 @@ in
       services.httpd.virtualHosts = {
         "circles.pink" = {
           listen = [{ port = 80; }];
-          documentRoot = (import ../default.nix).${system}.hello;
+          documentRoot = pkgs.runCommand "output" { } ''
+            mkdir $out
+            cp ${(import ../default.nix).packages.${system}.hello} $out/index.html
+          '';
         };
       };
 
