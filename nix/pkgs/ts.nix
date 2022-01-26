@@ -32,11 +32,30 @@ rec {
   builds = {
     storybook = pkgs.runCommand "storybook" { } ''
       mkdir $out
+
       ${pkgs.yarn}/bin/yarn \
         --cwd ${workspaces.storybook}/libexec/storybook/deps/storybook \
         build \
         --output-dir $out
     '';
+
+    other =
+      let
+        nodeDeps = pkgs.haskellPackages.yarn2nix.nixLib.buildNodeDeps
+          (pkgs.lib.composeExtensions
+            (self: super: {
+              submodule1 = super._buildNodePackage
+                (pkgs.haskellPackages.yarn2nix.nixLib.callTemplate ../../pkgs/ts/storybook/yarn-packages.nix self);
+            })
+            (pkgs.callPackage ../../yarn-packages.nix { }));
+      in
+      pkgs.haskellPackages.yarn2nix.nixLib.buildNodePackage
+        ({
+          src = ../../pkgs/ts/storybook;
+        } //
+        (pkgs.haskellPackages.yarn2nix.nixLib.callTemplate ../../template.nix nodeDeps));
   };
+
+
 
 }

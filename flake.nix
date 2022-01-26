@@ -23,9 +23,11 @@
           pkgs = nixpkgsFor.${system}; in
         {
           hello = pkgs.writeText "hello.txt" "THIS!!!";
+
           sample = pkgs.circles-pink.yarn;
           inherit pkgs;
-        });
+        } // pkgs.circles-pink
+      );
 
       checks = self.packages;
 
@@ -40,6 +42,8 @@
             bashInteractive
             yarn
             nix-tree
+            haskellPackages.yarn2nix
+            miniserve
           ];
 
           # Change the prompt to show that you are in a devShell
