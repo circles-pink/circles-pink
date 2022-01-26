@@ -17,6 +17,9 @@
     in
     {
       overlay = import ./nix/overlay.nix;
+
+      nixopsConfigurations.default = ./networks/network.nix;
+
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system}; in
@@ -40,12 +43,15 @@
             nixpkgs-fmt
             git
             vscode
+            bashInteractive
           ];
 
           # Change the prompt to show that you are in a devShell
           shellHook = "
             export PS1='\\e[1;32mnix@$PWD$ \\e[0m'
-          ";
+          " + ''
+            alias code=codium
+          '';
         });
     };
 }
