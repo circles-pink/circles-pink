@@ -1,8 +1,0 @@
-{
-    "name": "hello-world",
-    "description": "Circles Pink hello-world",
-    "version": "1.0.0",
-    "scripts": {
-        "build": "tsc"
-    }
-}

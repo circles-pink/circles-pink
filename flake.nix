@@ -44,6 +44,7 @@
             vscode
             bashInteractive
             yarn
+            nix-tree
           ];
 
           # Change the prompt to show that you are in a devShell

@@ -4,5 +4,8 @@
   "private": true,
   "workspaces": [
     "pkgs/ts/*"
-  ]
+  ],
+  "dependencies": {
+    "cspell": "^5.16.0"
+  }
 }

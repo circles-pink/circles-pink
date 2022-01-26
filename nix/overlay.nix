@@ -5,4 +5,6 @@
     yarn =
       import ./pkgs/yarn.nix { pkgs = final; };
   };
+
+  cspell = (import ./pkgs/yarn.nix { pkgs = final; }).bins.cspell;
 })
