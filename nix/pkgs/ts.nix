@@ -35,7 +35,8 @@ rec {
       ${pkgs.yarn}/bin/yarn \
         --cwd ${workspaces.storybook}/libexec/storybook/deps/storybook \
         build \
-        --output-path $out
+        --output-dir $out
     '';
   };
+
 }

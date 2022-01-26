@@ -6,7 +6,7 @@ in
   network.description = "Circles Pink Network";
 
   webserver =
-    { config, pkgs, modulesPath, ... }:
+    { config, pkgs, modulesPath, system, ... }:
     {
       services.httpd.enable = true;
       services.httpd.adminAddr = "admin@teal.ooo";
@@ -14,10 +14,7 @@ in
       services.httpd.virtualHosts = {
         "circles.pink" = {
           listen = [{ port = 80; }];
-          documentRoot = pkgs.runCommand "ff" { } ''
-            mkdir $out
-            echo bla2 > $out/index.html
-          '';
+          documentRoot = (import ../default.nix).${system}.hello;
         };
       };
 

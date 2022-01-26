@@ -22,15 +22,10 @@
         let
           pkgs = nixpkgsFor.${system}; in
         {
-          hello = pkgs.writeText "hello.txt" "hello circles pink! #0";
+          hello = pkgs.writeText "hello.txt" "THIS!!!";
           sample = pkgs.circles-pink.yarn;
           inherit pkgs;
         });
-
-      defaultPackage = forAllSystems (system:
-        let
-          pkgs = nixpkgsFor.${system}; in
-        pkgs.writeText "hello.txt" "hello circles pink!");
 
       checks = self.packages;
 

@@ -2,4 +2,3 @@ result
 *.key
 node_modules/
 dist/
-storybook-static/
