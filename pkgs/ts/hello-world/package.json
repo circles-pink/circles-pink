@@ -1,0 +1,7 @@
+{
+    "name": "@circles-pink/hello-world",
+    "description": "Circles Pink hello-world",
+    "scripts": {
+        "build": "tsc"
+    }
+}
