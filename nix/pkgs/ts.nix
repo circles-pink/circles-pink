@@ -30,13 +30,28 @@ rec {
   };
 
   builds = {
-    storybook = pkgs.runCommand "storybook" { } ''
+    storybook = pkgs.runCommand "storybook" { dontMakeSourcesWritable = false; } ''
       mkdir $out
 
       ${pkgs.yarn}/bin/yarn \
         --cwd ${workspaces.storybook}/libexec/storybook/deps/storybook \
         build \
         --output-dir $out
+    '';
+
+    storybook2 = pkgs.runCommand "storybook" { } ''
+      tmp=`mktemp -d`
+
+      cd $tmp
+      cp -r ${workspaces.storybook}/* -t .
+      mkdir libexec/storybook/deps/storybook/dist 
+      chmod -R 777 libexec
+      cd libexec/storybook/deps/storybook
+      ${pkgs.yarn}/bin/yarn build
+
+      mkdir $out
+      cp -r $tmp/* -t $out
+
     '';
 
     other =

@@ -1,11 +1,14 @@
 {
   # inspired by: https://serokell.io/blog/practical-nix-flakes#packaging-existing-applications
   description = "Circles Pink monorepo";
+
   inputs.nixpkgs.url = "nixpkgs";
+
   inputs.flake-compat = {
     url = github:edolstra/flake-compat;
     flake = false;
   };
+
   outputs = { self, nixpkgs, flake-compat }:
     let
       supportedSystems = [ "x86_64-linux" ];
@@ -26,11 +29,7 @@
         {
           hello = pkgs.writeText "hello.txt" "THIS!!!";
           sample = pkgs.circles-pink.yarn;
-          test = let nixLib = pkgs.haskellPackages.yarn2nix.nixLib; in
-            nixLib.buildNodePackage
-              ({ src = nixLib.removePrefixes [ "node_modules" ] ./.; } //
-              nixLib.callTemplate ./pkgs/ts/npm-package.nix
-                (nixLib.buildNodeDeps (pkgs.callPackage ./pkgs/ts/npm-deps.nix { })));
+
           inherit pkgs;
         } // pkgs.circles-pink
       );
@@ -48,7 +47,6 @@
             bashInteractive
             yarn
             nix-tree
-            haskellPackages.yarn2nix
             miniserve
           ];
 

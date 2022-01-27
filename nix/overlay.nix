@@ -3,8 +3,9 @@
 
   circles-pink =
     {
-      ts = (import ./pkgs/ts.nix { pkgs = final; }).builds;
-    };
+      #ts = (import ./pkgs/ts.nix { pkgs = final; }).builds;
 
-  cspell = (import ./pkgs/ts.nix { pkgs = final; }).bins.cspell;
-})
+      cspell = (import ./pkgs/ts.nix { pkgs = final; }).bins.cspell;
+    };
+}
+)
