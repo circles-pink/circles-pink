@@ -49,7 +49,10 @@
             nix-tree
             miniserve
             nodePackages.node2nix
+            nodePackages.purty
             nodejs
+            purescript
+            spago
           ];
 
           # Change the prompt to show that you are in a devShell

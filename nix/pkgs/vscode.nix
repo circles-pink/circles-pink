@@ -2,7 +2,21 @@
 let
   extensions = with pkgs.vscode-extensions; [
     jnoortheen.nix-ide
-  ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [ ];
+  ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
+    {
+      name = "ide-purescript";
+      publisher = "nwolverson";
+      version = "0.25.8";
+      sha256 = "sha256-z5/DO6XQSpHRzt0iDD6+CQ8ayFqYAw8lG5aigYPrN7A=";
+    }
+
+    {
+      name = "language-purescript";
+      publisher = "nwolverson";
+      version = "0.2.7";
+      sha256 = "sha256-cQnFWzqA4eBbjDiZGDFtg0/FUXf5weYOeZ1GiooYn9g=";
+    }
+  ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {
     vscode = pkgs.vscodium;

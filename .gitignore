@@ -2,3 +2,5 @@ result
 *.key
 node_modules/
 dist/
+output/
+.spago/
