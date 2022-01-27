@@ -12,7 +12,9 @@
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
       nixpkgsFor = forAllSystems (system: import nixpkgs {
         inherit system;
-        overlays = [ self.overlay ];
+        overlays = [
+          self.overlay
+        ];
       });
     in
     {
@@ -23,8 +25,12 @@
           pkgs = nixpkgsFor.${system}; in
         {
           hello = pkgs.writeText "hello.txt" "THIS!!!";
-
           sample = pkgs.circles-pink.yarn;
+          test = let nixLib = pkgs.haskellPackages.yarn2nix.nixLib; in
+            nixLib.buildNodePackage
+              ({ src = nixLib.removePrefixes [ "node_modules" ] ./.; } //
+              nixLib.callTemplate ./pkgs/ts/npm-package.nix
+                (nixLib.buildNodeDeps (pkgs.callPackage ./pkgs/ts/npm-deps.nix { })));
           inherit pkgs;
         } // pkgs.circles-pink
       );

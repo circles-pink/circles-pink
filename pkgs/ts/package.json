@@ -1,7 +1,6 @@
 {
-    "name": "storybook",
+    "name": "circles-pink",
     "version": "1.0.0",
-    "description": "Circles Pink Storybook",
     "devDependencies": {
         "@babel/core": "^7.16.12",
         "babel-loader": "^8.2.3"
