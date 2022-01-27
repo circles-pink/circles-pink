@@ -49,6 +49,7 @@
             nix-tree
             miniserve
             nodePackages.node2nix
+            nodejs
           ];
 
           # Change the prompt to show that you are in a devShell
