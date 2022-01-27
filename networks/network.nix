@@ -19,7 +19,7 @@ in
           listen = [{ port = 80; }];
           documentRoot = pkgs.runCommand "output" { } ''
             mkdir $out
-            cp ${(import ../default.nix).packages.${system}.ts.mono} $out/storybook
+            cp -r ${(import ../default.nix).packages.${system}.ts.mono} $out/storybook
           '';
         };
       };
