@@ -4,6 +4,7 @@ import Prelude
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
+import Type.Equality (class TypeEquals)
 import Undefined (undefined)
 
 --------------------------------------------------------------------------------
@@ -31,14 +32,21 @@ instance arrayTS :: TS b => TS (Array b) where
 instance tupleTS :: (TS a, TS b) => TS (Tuple a b) where
   toTs _ = "[" <> toTs (undefined :: a) <> ", " <> toTs (undefined :: b) <> "]"
 
-instance functionTS :: (TS a, TS b) => TS (Function a b) where
+buildFn :: Array String -> String -> String
+buildFn _ _ = "TODO"
+
+instance fn3TS :: (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (Function a3 b))) where
   toTs _ =
-    "(" <> "x: "
-      <> toTs (undefined :: a)
-      <> ") => ("
-      <> "x: "
-      <> toTs (undefined :: b)
-      <> ")"
+    buildFn
+      [ toTs (undefined :: a1)
+      , toTs (undefined :: a2)
+      , toTs (undefined :: a3)
+      ]
+      (toTs (undefined :: b))
+else instance fn2TS :: (TS a1, TS a2, TS b) => TS (Function a1 (Function a2 b)) where
+  toTs _ = buildFn [ toTs (undefined :: a1), toTs (undefined :: a2) ] (toTs (undefined :: b))
+else instance fn1TS :: (TS a1, TS b) => TS (Function a1 b) where
+  toTs _ = buildFn [ toTs (undefined :: a1) ] (toTs (undefined :: b))
 
 tsDeclare :: forall a. TS a => String -> a -> String
 tsDeclare nm tscode = "export declare const " <> nm <> ": " <> toTs tscode
@@ -49,6 +57,9 @@ myApi x y = (x > 5) && (y /= "Hello")
 
 myApi_ :: Function Int (Function String Boolean)
 myApi_ x y = (x > 5) && (y /= "Hello")
+
+f1 :: Int -> String
+f1 _ = ""
 
 gravity :: Number
 gravity = 9.81
@@ -77,3 +88,4 @@ main = do
   log $ tsDeclare "hobbies" hobbies
   log $ tsDeclare "ages" ages
   log $ tsDeclare "circles" circles
+  log $ tsDeclare "myApi" myApi
