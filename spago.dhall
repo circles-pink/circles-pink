@@ -14,6 +14,7 @@ to generate this file without the comments in this block.
 , dependencies =
   [ "console"
   , "effect"
+  , "foldable-traversable"
   , "prelude"
   , "psci-support"
   , "tuples"

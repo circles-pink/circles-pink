@@ -1,10 +1,11 @@
 module Main where
 
 import Prelude
+import Data.Foldable (fold)
+import Data.FunctorWithIndex (mapWithIndex)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
-import Type.Equality (class TypeEquals)
 import Undefined (undefined)
 
 --------------------------------------------------------------------------------
@@ -33,7 +34,17 @@ instance tupleTS :: (TS a, TS b) => TS (Tuple a b) where
   toTs _ = "[" <> toTs (undefined :: a) <> ", " <> toTs (undefined :: b) <> "]"
 
 buildFn :: Array String -> String -> String
-buildFn _ _ = "TODO"
+buildFn args t =
+  fold
+    (mapWithIndex buildStr args)
+    <> t
+  where
+  buildStr i x =
+    "(x"
+      <> show (i + 1)
+      <> ": "
+      <> x
+      <> ") => "
 
 instance fn3TS :: (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (Function a3 b))) where
   toTs _ =
@@ -76,10 +87,6 @@ ages = [ 3.0, 5.0, 6.0 ]
 circles :: Tuple Number String
 circles = Tuple 13.0 "Hello"
 
--- api =
---   { myApi
---   , gravity
---   }
 --------------------------------------------------------------------------------
 main :: Effect Unit
 main = do
