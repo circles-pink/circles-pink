@@ -33,24 +33,7 @@
     "root": {
       "inputs": {
         "flake-compat": "flake-compat",
-        "nixpkgs": "nixpkgs",
-        "yarn2nix": "yarn2nix"
-      }
-    },
-    "yarn2nix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1636712353,
-        "narHash": "sha256-f2YrNQTNC6vsXraMxUH1pfQ68dHd9RhmYvmljJTJg24=",
-        "owner": "Profpatsch",
-        "repo": "yarn2nix",
-        "rev": "c7212cd5de1fd8c323fe9c67e677c5b5e861ed59",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Profpatsch",
-        "repo": "yarn2nix",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

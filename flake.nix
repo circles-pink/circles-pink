@@ -48,6 +48,7 @@
             yarn
             nix-tree
             miniserve
+            nodePackages.node2nix
           ];
 
           # Change the prompt to show that you are in a devShell
