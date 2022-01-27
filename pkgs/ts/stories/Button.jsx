@@ -1,6 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './button.css';
+import * as Foo from "../src/sample"
+
+
+Foo.myFn()
 
 console.log("Hello4")
 

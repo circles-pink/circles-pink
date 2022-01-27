@@ -22,13 +22,21 @@ var PS = {};
   $PS["Main"] = $PS["Main"] || {};
   var exports = $PS["Main"];
   var Effect_Console = $PS["Effect.Console"];                
+  var toTs = function (dict) {
+      return dict.toTs;
+  };
+  var name = "Foo";
   var myApi = function (x) {
       return function (y) {
           return x > 5 && y !== "Hello";
       };
   };
   var main = Effect_Console.log("Hello");
+  var gravity = 9.81;
+  exports["toTs"] = toTs;
   exports["main"] = main;
   exports["myApi"] = myApi;
+  exports["gravity"] = gravity;
+  exports["name"] = name;
 })(PS);
 module.exports = PS["Main"];
