@@ -1,8 +1,11 @@
 module Core.State.Onboard where
 
+import Prelude
+
 data State
   = InfoGeneral
-  | AskUsername { username :: String }
+  | AskUsername
+    { username :: String }
   | AskEmail
     { username :: String
     , email :: String
@@ -47,6 +50,9 @@ data State
     , url :: String
     }
 
+init :: State
+init = InfoGeneral
+
 data Msg
   = SetUsername String
   | SetEmail String
@@ -58,38 +64,44 @@ data Msg
   | Prev
   | Skip
 
-reducer :: Msg -> State -> State
-reducer m s = case s of
+type Env m
+  = { apiCheckUserName :: String -> m Boolean
+    }
+
+reducer :: forall m. Monad m => Env m -> Msg -> State -> m State
+reducer env m s = case s of
   InfoGeneral -> case m of
-    Next -> AskUsername { username: "" }
-    _ -> s
+    Next -> pure $ AskUsername { username: "" }
+    _ -> pure s
   AskUsername s' -> case m of
-    SetUsername n -> AskUsername { username: n }
-    Next ->
-      if true then
-        AskEmail
-          { email: ""
-          , privacy: false
-          , terms: false
-          , username: s'.username
-          }
-      else
-        s
-    _ -> s
+    SetUsername n -> pure $ AskUsername { username: n }
+    Next -> do
+      isOk <- env.apiCheckUserName s'.username
+      pure
+        $ if isOk then
+            AskEmail
+              { email: ""
+              , privacy: false
+              , terms: false
+              , username: s'.username
+              }
+          else
+            s
+    _ -> pure $ s
   AskEmail _ -> case m of
-    SetEmail _ -> s
-    SetPrivacy _ -> s
-    SetTerms _ -> s
-    _ -> s
+    SetEmail _ -> pure $ s
+    SetPrivacy _ -> pure $ s
+    SetTerms _ -> pure $ s
+    _ -> pure $ s
   InfoSecurity _ -> case m of
-    _ -> s
+    _ -> pure $ s
   MagicWords _ -> case m of
-    _ -> s
+    _ -> pure $ s
   CheckMagicWord _ -> case m of
-    SetMagicWord _ -> s
-    _ -> s
+    SetMagicWord _ -> pure $ s
+    _ -> pure $ s
   AskPhoto _ -> case m of
-    SetPhoto _ -> s
-    _ -> s
+    SetPhoto _ -> pure $ s
+    _ -> pure $ s
   Submit _ -> case m of
-    _ -> s
+    _ -> pure $ s

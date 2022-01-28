@@ -1,98 +1,57 @@
-module Main where
+module Main
+  ( env
+  , main
+  , mainAff
+  ) where
 
 import Prelude
-import Data.Foldable (fold)
-import Data.FunctorWithIndex (mapWithIndex)
-import Data.Tuple (Tuple(..))
+import Affjax (printError)
+import Affjax as AX
+import Affjax.RequestBody (RequestBody(..))
+import Affjax.ResponseFormat as ResponseFormat
+import Core.State.Onboard (Msg(..))
+import Core.State.Onboard as O
+import Data.Argonaut.Core (fromObject, fromString, stringifyWithIndent)
+import Data.Either (Either(..))
+import Data.HTTP.Method (Method(..), print)
+import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Console (log)
-import Undefined (undefined)
+import Effect.Aff (Aff, runAff_)
+import Effect.Class.Console (log, logShow)
+import Foreign.Object (fromFoldable)
 
---------------------------------------------------------------------------------
-class TS a where
-  toTs :: a -> String
+env :: O.Env Aff
+env =
+  { apiCheckUserName:
+      \u -> do
+        log $ "checking " <> u
+        r <-
+          AX.request
+            $ AX.defaultRequest
+                { url = "https://api.circles.garden/api/users"
+                , method = Left POST
+                , responseFormat = ResponseFormat.json
+                , content = Just $ Json $ fromObject $ fromFoldable [ "username" /\ fromString u ]
+                }
+        case r of
+          Left e -> do
+            log "ERROR"
+            log $ printError e
+          Right { body } -> log $ stringifyWithIndent 2 body
+        log ("API CALL: " <> u)
+        pure (u == "foobar")
+  }
 
-instance numberTS :: TS Number where
-  toTs _ = "number"
+reducerAff :: O.Msg -> O.State -> Aff O.State
+reducerAff = O.reducer env
 
-instance intTS :: TS Int where
-  toTs _ = "number"
+mainAff :: Aff O.State
+mainAff =
+  reducerAff O.Next O.init
+    >>= reducerAff (O.SetUsername "nico")
+    >>= reducerAff O.Next
 
-instance stringTS :: TS String where
-  toTs _ = "string"
-
-instance charTS :: TS Char where
-  toTs _ = "string"
-
-instance booleanTS :: TS Boolean where
-  toTs _ = "boolean"
-
-instance arrayTS :: TS b => TS (Array b) where
-  toTs _ = "Array<" <> toTs (undefined :: b) <> ">"
-
-instance tupleTS :: (TS a, TS b) => TS (Tuple a b) where
-  toTs _ = "[" <> toTs (undefined :: a) <> ", " <> toTs (undefined :: b) <> "]"
-
-buildFn :: Array String -> String -> String
-buildFn args t =
-  fold
-    (mapWithIndex buildStr args)
-    <> t
-  where
-  buildStr i x =
-    "(x"
-      <> show (i + 1)
-      <> ": "
-      <> x
-      <> ") => "
-
-instance fn3TS :: (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (Function a3 b))) where
-  toTs _ =
-    buildFn
-      [ toTs (undefined :: a1)
-      , toTs (undefined :: a2)
-      , toTs (undefined :: a3)
-      ]
-      (toTs (undefined :: b))
-else instance fn2TS :: (TS a1, TS a2, TS b) => TS (Function a1 (Function a2 b)) where
-  toTs _ = buildFn [ toTs (undefined :: a1), toTs (undefined :: a2) ] (toTs (undefined :: b))
-else instance fn1TS :: (TS a1, TS b) => TS (Function a1 b) where
-  toTs _ = buildFn [ toTs (undefined :: a1) ] (toTs (undefined :: b))
-
-tsDeclare :: forall a. TS a => String -> a -> String
-tsDeclare nm tscode = "export declare const " <> nm <> ": " <> toTs tscode
-
---------------------------------------------------------------------------------
-myApi :: Int -> String -> Boolean
-myApi x y = (x > 5) && (y /= "Hello")
-
-myApi_ :: Function Int (Function String Boolean)
-myApi_ x y = (x > 5) && (y /= "Hello")
-
-f1 :: Int -> String
-f1 _ = ""
-
-gravity :: Number
-gravity = 9.81
-
-name :: String
-name = "Foo"
-
-hobbies :: Array String
-hobbies = [ "lesen", "fussball" ]
-
-ages :: Array Number
-ages = [ 3.0, 5.0, 6.0 ]
-
-circles :: Tuple Number String
-circles = Tuple 13.0 "Hello"
-
---------------------------------------------------------------------------------
 main :: Effect Unit
 main = do
-  log $ tsDeclare "gravity" gravity
-  log $ tsDeclare "name" name
-  log $ tsDeclare "hobbies" hobbies
-  log $ tsDeclare "ages" ages
-  log $ tsDeclare "circles" circles
-  log $ tsDeclare "myApi" myApi
+  runAff_ (const $ pure unit) mainAff

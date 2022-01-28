@@ -12,9 +12,16 @@ to generate this file without the comments in this block.
 -}
 { name = "my-project"
 , dependencies =
-  [ "console"
+  [ "aff"
+  , "affjax"
+  , "argonaut-core"
+  , "console"
   , "effect"
+  , "either"
   , "foldable-traversable"
+  , "foreign-object"
+  , "http-methods"
+  , "maybe"
   , "prelude"
   , "psci-support"
   , "tuples"
