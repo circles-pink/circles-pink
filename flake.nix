@@ -22,6 +22,9 @@
           inherit system;
           overlays = [
             overlay
+            (prev: final: {
+              purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
+            })
           ];
         };
       in
@@ -32,6 +35,8 @@
             hello = pkgs.writeText "hello.txt" "THIS!!!";
             sample = pkgs.circles-pink.yarn;
 
+            foo = pkgs.purescript-tsd-gen;
+
             inherit pkgs;
           } // pkgs.circles-pink
         ;
@@ -40,19 +45,20 @@
 
         devShell =
           pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [
-              nixpkgs-fmt
-              git
-              vscode
-              bashInteractive
-              yarn
-              nix-tree
-              miniserve
-              nodePackages.node2nix
-              nodePackages.purty
-              nodejs
-              purescript
-              spago
+            nativeBuildInputs = [
+              pkgs.nixpkgs-fmt
+              pkgs.git
+              pkgs.vscode
+              pkgs.bashInteractive
+              pkgs.yarn
+              pkgs.nix-tree
+              pkgs.miniserve
+              pkgs.nodePackages.node2nix
+              pkgs.nodePackages.purty
+              pkgs.nodejs
+              pkgs.purescript
+              pkgs.spago
+              pkgs.purescript-tsd-gen
             ];
 
             # Change the prompt to show that you are in a devShell

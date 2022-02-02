@@ -1,6 +1,8 @@
 module Core.State.Onboard where
 
 import Prelude
+import Effect.Promise (Promise)
+import Undefined (undefined)
 
 data State
   = InfoGeneral

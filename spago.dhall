@@ -23,6 +23,7 @@ to generate this file without the comments in this block.
   , "http-methods"
   , "maybe"
   , "prelude"
+  , "promises"
   , "psci-support"
   , "tuples"
   , "type-equality"
