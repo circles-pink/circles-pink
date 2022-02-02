@@ -69,6 +69,9 @@
               pkgs.spago
               pkgs.purescript-tsd-gen
               pkgs.spago2nix
+              pkgs.cspell
+              pkgs.ts-node
+              pkgs.circles-pink.patchTsTypes
             ];
 
             # Change the prompt to show that you are in a devShell

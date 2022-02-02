@@ -1,6 +1,6 @@
 { pkgs, ... }:
 rec {
-  result = import ./../../pkgs/ts/default.nix {
+  result = import ./../../materialized/node2nix/default.nix {
     inherit pkgs;
   };
 
@@ -15,4 +15,6 @@ rec {
 
     cp -r $tmp/lib/node_modules/circles-pink/dist $out
   '';
+
+  default = mono;
 }

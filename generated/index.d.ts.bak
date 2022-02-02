@@ -1,5 +1,0 @@
-export declare const myApi: (x: number) => (x: string) => boolean
-
-export declare const gravity: number
-
-export declare const name: string

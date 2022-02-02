@@ -31,15 +31,30 @@ rec {
     '';
   };
 
-  #   pursOutputWithTS = pkgs.runCommand "pursOutputWithTS"
-  #     {
-  #       buildInputs = [ pkgs.purescript-tsd-gen ];
-  #     }
-  #     ''
-  #       mkdir $out
-  #       cp -r ${pursOutput}/* -t out
-  #       purs-tsd-gen -d output
-  #     '';
+  pursOutputWithTS = pkgs.runCommand "pursOutputWithTS"
+    {
+      buildInputs = [ pkgs.purescript-tsd-gen ];
+    }
+    ''
+      tmp=`mktemp -d`
+      cd $tmp
+      cp -r ${pursOutput}/* -t .
+      chmod -R 777 $tmp
+      purs-tsd-gen -d .
 
-  default = pursOutput;
+      mkdir $out
+      cp -r $tmp/* -t $out
+    '';
+
+  pursOutputWithTSPatched = pkgs.runCommand "pursOutputWithTSPatched"
+    {
+      buildInputs = [ pkgs.patchTsTypes ];
+    }
+    ''
+      mkdir $out
+      cp -r ${pursOutputWithTS}/* -t $out
+      patchTsTypes $out
+    '';
+
+  default = pursOutputWithTSPatched;
 }
