@@ -4,63 +4,63 @@
 
   inputs.nixpkgs.url = "nixpkgs";
 
+  inputs.purescript-tsd-gen.url = github:thought2/purescript-tsd-gen/flake;
+
+  inputs.flake-utils.url = "github:numtide/flake-utils";
+
   inputs.flake-compat = {
     url = github:edolstra/flake-compat;
     flake = false;
   };
 
-  outputs = { self, nixpkgs, flake-compat }:
-    let
-      supportedSystems = [ "x86_64-linux" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
-      nixpkgsFor = forAllSystems (system: import nixpkgs {
-        inherit system;
-        overlays = [
-          self.overlay
-        ];
-      });
-    in
-    {
-      overlay = import ./nix/overlay.nix;
+  outputs = { self, nixpkgs, flake-compat, flake-utils, purescript-tsd-gen }:
+    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+      let
+        overlay = import ./nix/overlay.nix;
 
-      packages = forAllSystems (system:
-        let
-          pkgs = nixpkgsFor.${system}; in
-        {
-          hello = pkgs.writeText "hello.txt" "THIS!!!";
-          sample = pkgs.circles-pink.yarn;
-
-          inherit pkgs;
-        } // pkgs.circles-pink
-      );
-
-      checks = self.packages;
-
-      devShell = forAllSystems (system:
-        let pkgs = nixpkgsFor.${system};
-        in
-        pkgs.mkShell {
-          nativeBuildInputs = with pkgs; [
-            nixpkgs-fmt
-            git
-            vscode
-            bashInteractive
-            yarn
-            nix-tree
-            miniserve
-            nodePackages.node2nix
-            nodePackages.purty
-            nodejs
-            purescript
-            spago
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            overlay
           ];
+        };
+      in
+      {
 
-          # Change the prompt to show that you are in a devShell
-          shellHook = "
+        packages =
+          {
+            hello = pkgs.writeText "hello.txt" "THIS!!!";
+            sample = pkgs.circles-pink.yarn;
+
+            inherit pkgs;
+          } // pkgs.circles-pink
+        ;
+
+        checks = self.packages;
+
+        devShell =
+          pkgs.mkShell {
+            nativeBuildInputs = with pkgs; [
+              nixpkgs-fmt
+              git
+              vscode
+              bashInteractive
+              yarn
+              nix-tree
+              miniserve
+              nodePackages.node2nix
+              nodePackages.purty
+              nodejs
+              purescript
+              spago
+            ];
+
+            # Change the prompt to show that you are in a devShell
+            shellHook = "
             export PS1='\\e[1;32mnix@$PWD$ \\e[0m'
           " + ''
-            alias code=codium
-          '';
-        });
-    };
+              alias code=codium
+            '';
+          };
+      });
 }
