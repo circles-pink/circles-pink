@@ -24,7 +24,7 @@ env :: O.Env Aff
 env =
   { apiCheckUserName:
       \user -> do
-        log $ "checking " <> user
+        log $ "BBBchecking " <> user
         result <-
           AX.request
             $ AX.defaultRequest

@@ -6,8 +6,11 @@
   ts-node = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.ts-node;
 
   circles-pink =
-    {
-      ts = (import ./pkgs/ts.nix { pkgs = final; }).default;
+    rec {
+      ts = (import ./pkgs/ts.nix {
+        pkgs = final;
+        pursOutput = purs.default;
+      });
 
       ts-root = (import ./pkgs/ts-root.nix { pkgs = final; });
 
@@ -15,6 +18,6 @@
         ${final.ts-node}/bin/ts-node ${../scripts/ts/patchTsTypes.ts} $@
       '';
 
-      purs = (import ./pkgs/purs.nix { pkgs = final; }).default;
+      purs = (import ./pkgs/purs.nix { pkgs = final; });
     };
 })

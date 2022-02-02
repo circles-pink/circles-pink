@@ -4,32 +4,51 @@ let
   spagoPkgs = import ../../materialized/spago-packages.nix { inherit pkgs; };
 in
 rec {
-  pursOutput = pkgs.stdenv.mkDerivation {
-    name = "pursOutput";
-    buildInputs = [
-      spagoPkgs.installSpagoStyle
-      spagoPkgs.buildSpagoStyle
-    ];
-    nativeBuildInputs = [
-      pkgs.purescript
-      pkgs.spago
-    ];
-    src = ./.;
-    unpackPhase = ''
-      cp ${../../packages.dhall} ./packages.dhall
-      cp ${../../spago.dhall} ./spago.dhall
-      mkdir -p pkgs/purs/src
-      cp -r ${../../pkgs/purs/src} -t pkgs/purs/src
-      install-spago-style
-    '';
-    buildPhase = ''
+  dependencies = pkgs.runCommand "dependencies"
+    {
+      buildInputs = [
+        spagoPkgs.buildSpagoStyle
+        spagoPkgs.installSpagoStyle
+      ];
+      nativeBuildInputs = [
+        pkgs.purescript
+        pkgs.spago
+      ];
+    } ''
+    mkdir $out    
+    cd $out
+    install-spago-style
+    build-spago-style
+  '';
+
+  pursOutput = pkgs.runCommand "pursOutput"
+    {
+      buildInputs = [
+        spagoPkgs.buildSpagoStyle
+      ];
+      nativeBuildInputs = [
+        pkgs.purescript
+        pkgs.spago
+      ];
+    }
+    ''
+      tmp=`mktemp -d`
+      cp ${../../packages.dhall} $tmp/packages.dhall
+      cp ${../../spago.dhall} $tmp/spago.dhall
+      cp -r ${dependencies}/.spago $tmp/.spago
+      cp -r ${dependencies}/output $tmp/output
+      
+      mkdir -p $tmp/pkgs/purs
+      cp -r ${../../pkgs/purs/src} $tmp/pkgs/purs/src
+      
+      chmod -R 777 $tmp
+      
+      cd $tmp
       build-spago-style "./pkgs/purs/src/**/*.purs"
+      
+      cp -r $tmp/output $out
     '';
-    installPhase = ''
-      mkdir $out
-      mv output/* -t $out
-    '';
-  };
+
 
   pursOutputWithTS = pkgs.runCommand "pursOutputWithTS"
     {
@@ -48,12 +67,16 @@ rec {
 
   pursOutputWithTSPatched = pkgs.runCommand "pursOutputWithTSPatched"
     {
-      buildInputs = [ pkgs.patchTsTypes ];
+      buildInputs = [ pkgs.circles-pink.patchTsTypes ];
     }
     ''
+      tmp=`mktemp -d`
+      cp -r ${pursOutputWithTS}/* -t $tmp
+      chmod -R 777 $tmp
+      patchTsTypes $tmp
+      
       mkdir $out
-      cp -r ${pursOutputWithTS}/* -t $out
-      patchTsTypes $out
+      cp -r $tmp/* -t $out
     '';
 
   default = pursOutputWithTSPatched;

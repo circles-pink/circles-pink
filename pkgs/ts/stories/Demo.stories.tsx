@@ -1,8 +1,8 @@
 import React from 'react';
 
-import * as StateOnboardTS from "../../../output/Core.State.Onboard.TS"
+import * as StateOnboardTS from "../../../generated/output/Core.State.Onboard.TS"
 
-import * as StateOnboard from "../../../output/Core.State.Onboard"
+import * as StateOnboard from "../../../generated/output/Core.State.Onboard"
 
 
 const x = StateOnboardTS.reducerPromise({
