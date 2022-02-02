@@ -83,6 +83,22 @@
         "type": "github"
       }
     },
+    "easy-purescript-nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1643701815,
+        "narHash": "sha256-0o4s6xvsbOrAqSu2ue2fEdSh0TuNXnQpTAIlbVKAkJA=",
+        "owner": "justinwoo",
+        "repo": "easy-purescript-nix",
+        "rev": "b6d056937dd6851110574462aac92afc77334301",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinwoo",
+        "repo": "easy-purescript-nix",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -369,6 +385,7 @@
     },
     "root": {
       "inputs": {
+        "easy-purescript-nix": "easy-purescript-nix",
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",

@@ -6,24 +6,29 @@
 
   inputs.purescript-tsd-gen.url = github:thought2/purescript-tsd-gen/flake;
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-utils.url = github:numtide/flake-utils;
+
+  inputs.easy-purescript-nix = {
+    url = github:justinwoo/easy-purescript-nix;
+    flake = false;
+  };
 
   inputs.flake-compat = {
     url = github:edolstra/flake-compat;
     flake = false;
   };
 
-  outputs = { self, nixpkgs, flake-compat, flake-utils, purescript-tsd-gen }:
-    flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
+  outputs = inputs:
+    inputs.flake-utils.lib.eachSystem [ "x86_64-linux" ] (system:
       let
         overlay = import ./nix/overlay.nix;
 
-        pkgs = import nixpkgs {
+        pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
             overlay
             (prev: final: {
-              purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
+              purescript-tsd-gen = inputs.purescript-tsd-gen.defaultPackage.${system};
             })
           ];
         };
@@ -41,7 +46,7 @@
           } // pkgs.circles-pink
         ;
 
-        checks = self.packages;
+        checks = inputs.self.packages;
 
         devShell =
           pkgs.mkShell {
