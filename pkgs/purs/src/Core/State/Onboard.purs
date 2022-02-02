@@ -66,6 +66,7 @@ data Msg
 
 type Env m
   = { apiCheckUserName :: String -> m Boolean
+    , apiCheckEmail :: String -> m Boolean
     }
 
 reducer :: forall m. Monad m => Env m -> Msg -> State -> m State
@@ -87,11 +88,45 @@ reducer env m s = case s of
               }
           else
             s
+    Prev -> pure $ InfoGeneral
     _ -> pure $ s
-  AskEmail _ -> case m of
-    SetEmail _ -> pure $ s
-    SetPrivacy _ -> pure $ s
-    SetTerms _ -> pure $ s
+  AskEmail s'' -> case m of
+    SetEmail e ->
+      pure
+        $ AskEmail
+            { email: e
+            , privacy: s''.privacy
+            , terms: s''.terms
+            , username: s''.username
+            }
+    SetPrivacy p ->
+      pure
+        $ AskEmail
+            { email: s''.email
+            , privacy: p
+            , terms: s''.terms
+            , username: s''.username
+            }
+    SetTerms t ->
+      pure
+        $ AskEmail
+            { email: s''.email
+            , privacy: s''.privacy
+            , terms: t
+            , username: s''.username
+            }
+    Next -> do
+      isOk <- env.apiCheckEmail s''.email
+      pure
+        $ if isOk then
+            InfoSecurity
+              { email: s''.email
+              , privacy: s''.privacy
+              , terms: s''.terms
+              , username: s''.username
+              }
+          else
+            s
     _ -> pure $ s
   InfoSecurity _ -> case m of
     _ -> pure $ s
