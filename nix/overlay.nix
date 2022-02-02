@@ -5,7 +5,7 @@
     {
       ts = (import ./pkgs/ts.nix { pkgs = final; });
 
-      purs = (import ./pkgs/purs.nix { pkgs = final; });
+      purs = (import ./pkgs/purs.nix { pkgs = final; }).default;
 
       #ts = import ./../pkgs/ts/default.nix { pkgs = final; };
 
