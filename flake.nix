@@ -23,15 +23,19 @@
       let
         overlay = import ./nix/overlay.nix;
 
+        self = inputs.self;
         pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
             overlay
             (prev: final: {
-              purescript-tsd-gen = inputs.purescript-tsd-gen.defaultPackage.${system};
+              purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
+              spago2nix = easy-purescript-nix.spago2nix;
             })
           ];
         };
+        purescript-tsd-gen = inputs.purescript-tsd-gen;
+        easy-purescript-nix = inputs.easy-purescript-nix { inherit pkgs; };
       in
       {
 
@@ -46,7 +50,7 @@
           } // pkgs.circles-pink
         ;
 
-        checks = inputs.self.packages;
+        checks = self.packages;
 
         devShell =
           pkgs.mkShell {
@@ -64,6 +68,7 @@
               pkgs.purescript
               pkgs.spago
               pkgs.purescript-tsd-gen
+              pkgs.spago2nix
             ];
 
             # Change the prompt to show that you are in a devShell
