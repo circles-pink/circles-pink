@@ -19,6 +19,7 @@ rec {
     tmp=`mktemp -d`
     cp -r ${inRepo} $tmp/project
     chmod -R 777 $tmp/project
+   
     cd $tmp/project/pkgs/ts
     export OUTPUT_DIR=$tmp/dist; npm run build
 
