@@ -35,7 +35,7 @@
           ];
         };
         purescript-tsd-gen = inputs.purescript-tsd-gen;
-        easy-purescript-nix = inputs.easy-purescript-nix { inherit pkgs; };
+        easy-purescript-nix = import inputs.easy-purescript-nix { inherit pkgs; };
       in
       {
 
