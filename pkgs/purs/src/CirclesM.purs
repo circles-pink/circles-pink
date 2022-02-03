@@ -1,6 +1,7 @@
 module CirclesM (CirclesM, exec, act, input) where
 
 import Prelude
+import Core.State.Onboard (Env)
 import Control.Monad.State (StateT)
 import Control.Monad.State as S
 import Core.State.Onboard as O
@@ -26,5 +27,5 @@ act = undefined
 input :: CirclesM String
 input = undefined
 
-exec :: forall a. CirclesM a -> O.State -> Aff O.State
-exec (CirclesM m) s = S.execStateT m s
+exec :: forall a. Env Aff -> CirclesM a -> O.State -> Aff O.State
+exec _ (CirclesM m) s = S.execStateT m s
