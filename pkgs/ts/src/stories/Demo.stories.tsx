@@ -4,15 +4,33 @@ import * as StateOnboard from "../../../../generated/output/Core.State.Onboard"
 import * as GardenEnv from '../../../../generated/output/Garden.Env'
 
 import { ComponentMeta } from '@storybook/react';
+import { Aff } from '../../../../generated/output/Effect.Aff';
+import { Unit } from '../../../../output/Data.Unit';
+import { Effect } from '../../../../output/Effect';
+import { StateMachine, useStateMachine } from '../useStateMachine';
 
-// const x = () => StateOnboardTS.reducerPromise({
-//     apiCheckUserName: (u: string) => 1 as unknown as Promise<boolean>,
-//     apiCheckEmail: (e: string) => 1 as unknown as Promise<boolean>,
-// })((st) => 1 as any)(StateOnboard.SetUsername.create("hello"))(StateOnboard.init)
+const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
+    = StateOnboardTS.reducerAff(GardenEnv.env)
 
-const x = StateOnboardTS.reducerAff(GardenEnv.env)
 
-const Button = ({ }) => <button>Hello</button>
+const Button = ({ }) => {
+    const [state, act] = useStateMachine(myStateMachine);
+
+    switch (state.$$pursTag) {
+        case "InfoGeneral": return (
+            <div>
+                InfoGeneral
+                <button onClick={() => act(new StateOnboard.Next)}>Next</button>
+            </div>
+        )
+        case "AskUsername": return (
+            <div>
+                Ask UserName
+                ....
+            </div>
+        )
+    }
+}
 
 export default {
     title: 'Demo',
