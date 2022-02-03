@@ -1,6 +1,9 @@
 dev-storybook:
 	npm run storybook --prefix pkgs/ts
 
+build-storybook:
+	export OUTPUT_DIR=../../dist; npm run build --prefix pkgs/ts
+
 spago2nix:
 	mkdir -p materialized;
 	spago2nix generate; mv spago-packages.nix -t materialized;
@@ -13,6 +16,9 @@ node2nix:
 	  --composition materialized/node2nix/default.nix \
 	  --node-env materialized/node2nix/node-env.nix \
 	  --output materialized/node2nix/node-packages.nix
+
+npm-install:
+	npm install --prefix pkgs/ts
 
 clean-materialized:
 	rm -rf materialized
