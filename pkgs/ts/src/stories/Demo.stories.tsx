@@ -14,9 +14,9 @@ const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
 
 
 const Button = ({ }) => {
-    const [state, act] = useStateMachine(myStateMachine);
+    const [state, act] = useStateMachine(StateOnboard.init, myStateMachine);
 
-    switch (state.$$pursTag) {
+    switch (state.constructor.name as StateOnboard.State["$$pursTag"]) {
         case "InfoGeneral": return (
             <div>
                 InfoGeneral
@@ -29,6 +29,7 @@ const Button = ({ }) => {
                 ....
             </div>
         )
+        default: return (<div>????{state.$$pursType}</div>)
     }
 }
 

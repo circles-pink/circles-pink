@@ -73,6 +73,7 @@
               pkgs.circles-pink.patchTsTypes
               pkgs.gnumake
               pkgs.fff
+              pkgs.nodePackages.prettier
             ];
 
             # Change the prompt to show that you are in a devShell
