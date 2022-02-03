@@ -26,18 +26,18 @@ clean-materialized:
 materialize: clean-materialized spago2nix node2nix
 
 clean-generate:
-	rm -rf generated;
+	rm -rf pkgs/ts/src/generated;
 
 spago-build:
 	spago build
-	mkdir -p generated
-	cp -r output -t generated
+	mkdir -p pkgs/ts/src/generated
+	cp -r output -t pkgs/ts/src/generated
 
 purs-tsd-gen:
-	purs-tsd-gen --directory generated/output
+	purs-tsd-gen --directory pkgs/ts/src/generated/output
 
 patchTsTypes:
-	patchTsTypes generated/output
+	patchTsTypes pkgs/ts/src/generated/output
 
 generate: spago-build purs-tsd-gen patchTsTypes
 
