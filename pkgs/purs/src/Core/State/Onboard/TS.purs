@@ -5,7 +5,9 @@ import Core.State.Onboard (Env, Msg, State)
 import Core.State.Onboard as O
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
+import Effect.Class (liftEffect)
 import Undefined (undefined)
 
-reducerAff :: Env Aff -> (State -> Aff Unit) -> Msg -> State -> Effect Unit
-reducerAff e f m s = O.reducer e f m s # launchAff_
+--- type StateMachine = (s -> Effect Unit) -> m -> s -> Effect Unit
+reducerAff :: Env Aff -> (State -> Effect Unit) -> Msg -> State -> Effect Unit
+reducerAff e f m s = O.reducer e (liftEffect <<< f) m s # launchAff_
