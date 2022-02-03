@@ -9,6 +9,8 @@ import Affjax (printError)
 import Affjax as AX
 import Affjax.RequestBody (RequestBody(..))
 import Affjax.ResponseFormat as ResponseFormat
+import CirclesM (CirclesM)
+import CirclesM as C
 import Core.State.Onboard as O
 import Data.Argonaut.Core (fromObject, fromString, stringifyWithIndent)
 import Data.Either (Either(..))
@@ -19,6 +21,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class.Console (log)
 import Foreign.Object (fromFoldable)
+import Undefined (undefined)
 
 env :: O.Env Aff
 env =
@@ -72,18 +75,18 @@ env =
             pure true
   }
 
-reducerAff :: O.Msg -> O.State -> Aff O.State
-reducerAff = O.reducer env
+script :: CirclesM Unit
+script = do
+  C.act $ O.Next
+  C.act $ O.SetUsername "hellohello"
+  C.act $ O.Next
+  C.act $ O.SetEmail "nico@hello.de"
+  C.act $ O.SetPrivacy true
+  C.act $ O.SetTerms true
+  C.act $ O.Next
 
 mainAff :: Aff O.State
-mainAff =
-  reducerAff O.Next O.init
-    >>= reducerAff (O.SetUsername "hellohello")
-    >>= reducerAff O.Next
-    >>= reducerAff (O.SetEmail "nico@hello.de")
-    >>= reducerAff (O.SetPrivacy true)
-    >>= reducerAff (O.SetTerms true)
-    >>= reducerAff O.Next
+mainAff = C.exec script O.init
 
 main :: Effect Unit
 main = do

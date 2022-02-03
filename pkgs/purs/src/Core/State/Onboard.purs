@@ -71,30 +71,30 @@ type Env m
     , apiCheckEmail :: String -> m Boolean
     }
 
-reducer :: forall m. Monad m => Env m -> Msg -> State -> m State
-reducer env m s = case s of
+reducer :: forall m. Monad m => Env m -> (State -> m Unit) -> Msg -> State -> m Unit
+reducer env setState m s = case s of
   InfoGeneral -> case m of
-    Next -> pure $ AskUsername { username: "" }
-    _ -> pure s
+    Next -> setState $ AskUsername { username: "" }
+    _ -> pure unit
   AskUsername s' -> case m of
-    SetUsername n -> pure $ AskUsername { username: n }
+    SetUsername n -> setState $ AskUsername { username: n }
     Next -> do
       isOk <- env.apiCheckUserName s'.username
-      pure
-        $ if isOk then
-            AskEmail
+      if isOk then
+        setState
+          $ AskEmail
               { email: ""
               , privacy: false
               , terms: false
               , username: s'.username
               }
-          else
-            s
-    Prev -> pure $ InfoGeneral
-    _ -> pure $ s
+      else
+        pure unit
+    Prev -> setState $ InfoGeneral
+    _ -> pure unit
   AskEmail s'' -> case m of
     SetEmail e ->
-      pure
+      setState
         $ AskEmail
             { email: e
             , privacy: s''.privacy
@@ -102,7 +102,7 @@ reducer env m s = case s of
             , username: s''.username
             }
     SetPrivacy p ->
-      pure
+      setState
         $ AskEmail
             { email: s''.email
             , privacy: p
@@ -110,7 +110,7 @@ reducer env m s = case s of
             , username: s''.username
             }
     SetTerms t ->
-      pure
+      setState
         $ AskEmail
             { email: s''.email
             , privacy: s''.privacy
@@ -119,26 +119,26 @@ reducer env m s = case s of
             }
     Next -> do
       isOk <- env.apiCheckEmail s''.email
-      pure
-        $ if isOk then
-            InfoSecurity
+      if isOk then
+        setState
+          $ InfoSecurity
               { email: s''.email
               , privacy: s''.privacy
               , terms: s''.terms
               , username: s''.username
               }
-          else
-            s
-    _ -> pure $ s
+      else
+        pure unit
+    _ -> pure unit
   InfoSecurity _ -> case m of
-    _ -> pure $ s
+    _ -> pure unit
   MagicWords _ -> case m of
-    _ -> pure $ s
+    _ -> pure unit
   CheckMagicWord _ -> case m of
-    SetMagicWord _ -> pure $ s
-    _ -> pure $ s
+    SetMagicWord _ -> pure unit
+    _ -> pure unit
   AskPhoto _ -> case m of
-    SetPhoto _ -> pure $ s
-    _ -> pure $ s
+    SetPhoto _ -> pure unit
+    _ -> pure unit
   Submit _ -> case m of
-    _ -> pure $ s
+    _ -> pure unit

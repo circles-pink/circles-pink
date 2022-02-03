@@ -45,3 +45,6 @@ rw-result:
 	rm -rf rw-result
 	cp -r -H --dereference result/ rw-result
 	chmod -R 777 rw-result
+
+ci:
+	nix build .#ts.default
