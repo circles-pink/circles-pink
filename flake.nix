@@ -1,5 +1,4 @@
 {
-  # inspired by: https://serokell.io/blog/practical-nix-flakes#packaging-existing-applications
   description = "Circles Pink monorepo";
 
   inputs.nixpkgs.url = "nixpkgs";
@@ -72,14 +71,24 @@
               pkgs.cspell
               pkgs.ts-node
               pkgs.circles-pink.patchTsTypes
+              pkgs.gnumake
+              pkgs.fff
             ];
 
             # Change the prompt to show that you are in a devShell
-            shellHook = "
-            export PS1='\\e[1;32mnix@$PWD$ \\e[0m'
-          " + ''
+            shellHook = ''
+              . ${pkgs.complete-alias}/bin/complete_alias
+
               alias code=codium
-            '';
+              alias mk=make
+              
+              complete -F _complete_alias mk
+              complete -F _complete_alias code
+
+              REPO_ROOT=$PWD
+              export EDITOR=codium
+            '' +
+            "export PS1='\\e[1;36m@circles.pink\\e[0m:\\e[1;34m`echo $PWD | sed s#'$REPO_ROOT'#*#`\\e[0m$ '";
           };
       });
 }
