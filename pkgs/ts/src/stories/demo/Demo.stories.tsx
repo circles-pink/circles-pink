@@ -1,10 +1,10 @@
 import React from 'react';
-import * as StateOnboardTS from "../generated/output/Core.State.Onboard.TS"
-import * as StateOnboard from "../generated/output/Core.State.Onboard"
-import * as GardenEnv from '../generated/output/Garden.Env'
+import * as StateOnboardTS from "../../generated/output/Core.State.Onboard.TS"
+import * as StateOnboard from "../../generated/output/Core.State.Onboard"
+import * as GardenEnv from '../../generated/output/Garden.Env'
 
 import { ComponentMeta } from '@storybook/react';
-import { StateMachine, useStateMachine } from '../useStateMachine';
+import { StateMachine, useStateMachine } from '../../useStateMachine';
 
 const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
   = StateOnboardTS.reducerAff(GardenEnv.env)
@@ -34,7 +34,7 @@ const Button = ({ }) => {
 }
 
 export default {
-  title: 'Demo',
+  title: 'Components/Demo',
   component: Button,
 } as ComponentMeta<typeof Button>;
 
