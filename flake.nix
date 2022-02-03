@@ -78,15 +78,17 @@
             # Change the prompt to show that you are in a devShell
             shellHook = ''
               . ${pkgs.complete-alias}/bin/complete_alias
+              
+              REPO_ROOT=$PWD
+              export EDITOR=codium
 
               alias code=codium
               alias mk=make
+              alias cd-root="cd $REPO_ROOT"
               
               complete -F _complete_alias mk
               complete -F _complete_alias code
 
-              REPO_ROOT=$PWD
-              export EDITOR=codium
             '' +
             "export PS1='\\e[1;36m@circles.pink\\e[0m:\\e[1;34m`echo $PWD | sed s#'$REPO_ROOT'#*#`\\e[0m$ '";
           };
