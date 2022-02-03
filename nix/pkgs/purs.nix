@@ -41,7 +41,7 @@ rec {
       mkdir -p $tmp/pkgs/purs
       cp -r ${../../pkgs/purs/src} $tmp/pkgs/purs/src
       
-      chmod -R 777 $tmp
+      chmod -R +w $tmp
       
       cd $tmp
       build-spago-style "./pkgs/purs/src/**/*.purs"
@@ -58,7 +58,7 @@ rec {
       tmp=`mktemp -d`
       cd $tmp
       cp -r ${pursOutput}/* -t .
-      chmod -R 777 $tmp
+      chmod -R +w $tmp
       purs-tsd-gen -d .
 
       mkdir $out
@@ -72,7 +72,7 @@ rec {
     ''
       tmp=`mktemp -d`
       cp -r ${pursOutputWithTS}/* -t $tmp
-      chmod -R 777 $tmp
+      chmod -R +w $tmp
       patchTsTypes $tmp
       
       mkdir $out

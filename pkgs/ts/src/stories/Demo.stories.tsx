@@ -1,9 +1,11 @@
 import React from 'react';
 
-import * as StateOnboardTS from "../../../generated/output/Core.State.Onboard.TS"
+import * as StateOnboardTS from "../../../../generated/output/Core.State.Onboard.TS"
 
-import * as StateOnboard from "../../../generated/output/Core.State.Onboard"
+import * as StateOnboard from "../../../../generated/output/Core.State.Onboard"
 
+
+// TODO: remove!!
 
 const x = StateOnboardTS.reducerPromise({
     apiCheckEmail: (e: string) => 1 as unknown as Promise<boolean>,

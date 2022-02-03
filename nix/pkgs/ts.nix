@@ -1,27 +1,24 @@
 { pkgs, pursOutput, ... }:
 rec {
-  result = import ./../../materialized/node2nix/default.nix {
+  nodeDependencies = (import ./../../materialized/node2nix/default.nix {
     inherit pkgs;
-  };
-
-  sourceWithNodeModules = pkgs.runCommand "sourceWithNodeModules" { } ''
-    cp -r ${result.package}/lib/node_modules/circles-pink $out
-  '';
-
-  inRepo = pkgs.runCommand "sourceWithNodeModules" { } ''
-    mkdir -p $out/pkgs
-    cp -r ${sourceWithNodeModules} $out/pkgs/ts
-    mkdir -p $out/generated
-    cp -r ${pursOutput} $out/generated/output
-  '';
+  }).nodeDependencies;
 
   mono = pkgs.runCommand "mono" { buildInputs = [ pkgs.nodejs ]; } ''
     tmp=`mktemp -d`
-    cp -r ${inRepo} $tmp/project
-    chmod -R 777 $tmp/project
-   
-    cd $tmp/project/pkgs/ts
-    export OUTPUT_DIR=$tmp/dist; npm run build
+    
+    mkdir -p $tmp/generated
+    cp -r ${pursOutput} $tmp/generated/output
+
+    mkdir -p $tmp/pkgs
+
+    cp -r ${../../pkgs/ts} $tmp/pkgs/ts
+    chmod -R +w $tmp
+
+    cp -r ${nodeDependencies}/lib/node_modules $tmp/pkgs/ts/node_modules
+
+    chmod -R +w $tmp
+    export OUTPUT_DIR=$tmp/dist; npm run build --prefix $tmp/pkgs/ts
 
     cp -r $tmp/dist $out
   '';
