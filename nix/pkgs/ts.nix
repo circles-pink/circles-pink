@@ -23,7 +23,5 @@ rec {
     cp -r $tmp/dist $out
   '';
 
-  nodeDependencies = (import ./default.nix { inherit pkgs; }).shell.nodeDependencies;
-
   default = mono;
 }
