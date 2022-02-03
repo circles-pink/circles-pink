@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { Unit } from '../../../generated/output/Data.Unit';
-import { Aff } from '../../../generated/output/Effect.Aff';
-import { unit } from '../../../output/Data.Unit';
-import { Effect } from '../../../output/Effect';
+import { useState } from 'react';
+import { Unit } from './generated/output/Data.Unit';
+import { unit } from './generated/output/Data.Unit';
+import { Effect } from './generated/output/Effect';
 
 export type StateMachine<S, M> = (setState: (st: S) => Effect<Unit>) => (msg: M) => (s: S) => Effect<Unit>
 
