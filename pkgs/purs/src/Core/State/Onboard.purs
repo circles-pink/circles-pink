@@ -127,8 +127,17 @@ reducer env setState m s = case s of
               }
       else
         pure unit
+    Prev -> setState $ AskUsername { username: s''.username }
     _ -> pure unit
-  InfoSecurity _ -> case m of
+  InfoSecurity s3' -> case m of
+    Prev ->
+      setState
+        $ AskEmail
+            { email: s3'.email
+            , privacy: s3'.privacy
+            , terms: s3'.terms
+            , username: s3'.username
+            }
     _ -> pure unit
   MagicWords _ -> case m of
     _ -> pure unit
