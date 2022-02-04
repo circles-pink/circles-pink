@@ -1,19 +1,23 @@
-{ pkgs, ... }: rec {
-  src = pkgs.nix-filter.filter {
-    root = ../../.;
-    include = [
-      "package.json"
-      "yarn.lock"
-      "pkgs/ts_/cli/package.json"
-      "pkgs/ts_/storybook/package.json"
-      "pkgs/ts_/common/package.json"
-    ];
-  };
+{ pkgs, pursOutput, ... }: rec {
 
   localPackages = {
     common = ../../pkgs/ts_/common;
     storybook = ../../pkgs/ts_/storybook;
     cli = ../../pkgs/ts_/cli;
+  };
+
+  src = pkgs.nix-filter.filter {
+    root = ../../.;
+    include = [
+      "package.json"
+      "yarn.lock"
+    ] ++ (
+      pkgs.lib.pipe localPackages [
+        builtins.attrNames
+        (map (name: "pkgs/ts_/${name}/package.json"))
+      ]
+    )
+    ;
   };
 
   emptyWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
@@ -27,6 +31,8 @@
       then
         rm -rf $dir
         cp -r ${drv} $dir
+        chmod +w $dir
+        ln -s ../../node_modules $dir/node_modules
       fi
     ''))
     (builtins.concatStringsSep "\n")
