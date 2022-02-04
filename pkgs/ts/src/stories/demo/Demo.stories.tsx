@@ -7,6 +7,7 @@ import * as GardenEnv from '../../../../../generated/output/Garden.Env'
 import { ComponentMeta } from '@storybook/react';
 import { StateMachine, useStateMachine } from '../../useStateMachine';
 import { Msg } from '../../../../../generated/output/Core.State.Onboard';
+import { match } from '../../type-utils/Matcher';
 
 const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
   = StateOnboardTS.reducerAff(GardenEnv.env)
@@ -18,72 +19,67 @@ const inputClass = "shadow appearance-none border border-pink-600 rounded w-full
 const Button = ({ }) => {
   const [state, act] = useStateMachine(StateOnboard.init, myStateMachine);
 
-  switch (state.constructor.name as StateOnboard.State["$$pursTag"]) {
-    case "InfoGeneral": return (
-      <DemoCard
-        title="Welcome to Circles"
-        sub="Let's get you a circles Wallet!"
-        next={{
-          act,
-          msg: new StateOnboard.Next,
-          label: "Next"
-        }}
-      />
-    )
-    case "AskUsername": return (
-      <DemoCard
-        title="Tell me your Name!"
-        sub="Choose wisely, you cannot change it later!"
-        username={{
-          act,
-          placeholder: 'Your amazing username',
-          value: (state as Extract<StateOnboard.State, { "$$pursTag": "AskUsername" }>).value0.username
-        }}
-        next={{
-          act,
-          msg: new StateOnboard.Next,
-          label: "Next"
-        }}
-        back={{
-          act,
-          msg: new StateOnboard.Prev,
-          label: "Back"
-        }}
-      />
-    )
-    case "AskEmail": return (
-      <DemoCard
-        title="How can I contact you?"
-        sub="Please submit a valid e-mail address."
-        email={{
-          act,
-          placeholder: 'Enter your E-Mail',
-          value: (state as Extract<StateOnboard.State, { "$$pursTag": "AskEmail" }>).value0.email
-        }}
-        next={{
-          act,
-          msg: new StateOnboard.Next,
-          label: "Next"
-        }}
-        back={{
-          act,
-          msg: new StateOnboard.Prev,
-          label: "Back"
-        }}
-      />
-    )
-    default: return (
-      <DemoCard
-        title="Ooops, state not found."
-        sub="Go back an try again! :/"
-        back={{
-          act,
-          msg: new StateOnboard.Prev,
-          label: "Back"
-        }}
-      />
-    )
-  }
+  return match(state)({
+    InfoGeneral: () => (<DemoCard
+      title="Welcome to Circles"
+      sub="Let's get you a circles Wallet!"
+      next={{
+        act,
+        msg: new StateOnboard.Next,
+        label: "Next"
+      }}
+    />),
+
+    AskUsername: (state) => <DemoCard
+      title="Tell me your Name!"
+      sub="Choose wisely, you cannot change it later!"
+      username={{
+        act,
+        placeholder: 'Your amazing username',
+        value: state.value0.username
+      }}
+      next={{
+        act,
+        msg: new StateOnboard.Next,
+        label: "Next"
+      }}
+      back={{
+        act,
+        msg: new StateOnboard.Prev,
+        label: "Back"
+      }}
+    />,
+
+    AskEmail: (state) => <DemoCard
+      title="How can I contact you?"
+      sub="Please submit a valid e-mail address."
+      email={{
+        act,
+        placeholder: 'Enter your E-Mail',
+        value: state.value0.email
+      }}
+      next={{
+        act,
+        msg: new StateOnboard.Next,
+        label: "Next"
+      }}
+      back={{
+        act,
+        msg: new StateOnboard.Prev,
+        label: "Back"
+      }}
+    />,
+
+    _: () => (<DemoCard
+      title="Ooops, state not found."
+      sub="Go back an try again! :/"
+      back={{
+        act,
+        msg: new StateOnboard.Prev,
+        label: "Back"
+      }}
+    />)
+  })
 }
 
 export default {
