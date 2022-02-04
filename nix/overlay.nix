@@ -12,6 +12,11 @@
         pursOutput = purs.default;
       });
 
+      ts_ = (import ./pkgs/ts_.nix {
+        pkgs = final;
+        pursOutput = purs.default;
+      });
+
       ts-root = (import ./pkgs/ts-root.nix { pkgs = final; });
 
       patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
