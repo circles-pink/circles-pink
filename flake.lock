@@ -247,6 +247,21 @@
         "type": "github"
       }
     },
+    "nix-filter": {
+      "locked": {
+        "lastModified": 1642416301,
+        "narHash": "sha256-oDAx4I236QoOkEjihZaAbap0Gp0ibuvEK3NJ/UhohvI=",
+        "owner": "numtide",
+        "repo": "nix-filter",
+        "rev": "26dd9843a9dd5ae67b605bfef731e4ef9df10370",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "nix-filter",
+        "type": "github"
+      }
+    },
     "nix-tools": {
       "flake": false,
       "locked": {
@@ -388,6 +403,7 @@
         "easy-purescript-nix": "easy-purescript-nix",
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
+        "nix-filter": "nix-filter",
         "nixpkgs": "nixpkgs",
         "purescript-tsd-gen": "purescript-tsd-gen"
       }
