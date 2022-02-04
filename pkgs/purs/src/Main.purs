@@ -10,6 +10,8 @@ import Core.State.Onboard as O
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Garden.Env (env)
+import HTTP.Milkis as HM
+import Milkis.Impl.Node (nodeFetch)
 
 script :: CirclesM Unit
 script = do
@@ -22,7 +24,7 @@ script = do
   C.act $ O.Next
 
 mainAff :: Aff O.State
-mainAff = C.exec env script O.init
+mainAff = C.exec (env { request: HM.request nodeFetch }) script O.init
 
 main :: Effect Unit
 main = do
