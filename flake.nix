@@ -7,6 +7,8 @@
 
   inputs.flake-utils.url = github:numtide/flake-utils;
 
+  inputs.nix-filter.url = github:numtide/nix-filter;
+
   inputs.easy-purescript-nix = {
     url = github:justinwoo/easy-purescript-nix;
     flake = false;
@@ -30,9 +32,11 @@
             (prev: final: {
               purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
               spago2nix = easy-purescript-nix.spago2nix;
+              nix-filter = nix-filter.lib;
             })
           ];
         };
+        nix-filter = inputs.nix-filter;
         purescript-tsd-gen = inputs.purescript-tsd-gen;
         easy-purescript-nix = import inputs.easy-purescript-nix { inherit pkgs; };
       in

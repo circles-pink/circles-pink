@@ -1,7 +1,8 @@
 {
-  "name": "@circles-pink/storybook",
+  "name": "storybook",
   "version": "1.0.0",
   "dependencies": {
-    "react": "^17.0.2"
+    "react": "^17.0.2",
+    "common": "*"
   }
 }
