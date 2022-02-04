@@ -71,6 +71,8 @@
               pkgs.cspell
               pkgs.ts-node
               pkgs.circles-pink.patchTsTypes
+              pkgs.circles-pink.search-bar.update
+              pkgs.circles-pink.search-bar.remove
               pkgs.gnumake
               pkgs.fff
               pkgs.nodePackages.prettier

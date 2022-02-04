@@ -5,7 +5,10 @@
 
   ts-node = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.ts-node;
 
+  search-bar-patcher = import ./pkgs/search-bar-patcher.nix;
+
   circles-pink =
+
     rec {
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
@@ -19,5 +22,7 @@
       '';
 
       purs = (import ./pkgs/purs.nix { pkgs = final; });
+
+      search-bar = import ./pkgs/search-bar.nix { pkgs = final; };
     };
 })
