@@ -1,12 +1,12 @@
 import React, { ReactElement } from 'react';
 
-import * as StateOnboardTS from "../../generated/output/Core.State.Onboard.TS"
-import * as StateOnboard from "../../generated/output/Core.State.Onboard"
-import * as GardenEnv from '../../generated/output/Garden.Env'
+import * as StateOnboardTS from "../../../../../generated/output/Core.State.Onboard.TS"
+import * as StateOnboard from "../../../../../generated/output/Core.State.Onboard"
+import * as GardenEnv from '../../../../../generated/output/Garden.Env'
 
 import { ComponentMeta } from '@storybook/react';
 import { StateMachine, useStateMachine } from '../../useStateMachine';
-import { Msg } from '../../generated/output/Core.State.Onboard';
+import { Msg } from '../../../../../generated/output/Core.State.Onboard';
 
 const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
   = StateOnboardTS.reducerAff(GardenEnv.env)
@@ -121,7 +121,7 @@ type DemoCardProps = {
 
 const DemoCard = ({ title, sub, username, email, next, back }: DemoCardProps): ReactElement => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 border-2 border-pink-500">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
         <div>
           <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl mb-2">
