@@ -14,6 +14,7 @@ to generate this file without the comments in this block.
 , dependencies =
   [ "aff"
   , "affjax"
+  , "argonaut"
   , "argonaut-core"
   , "console"
   , "effect"
@@ -22,6 +23,7 @@ to generate this file without the comments in this block.
   , "foreign-object"
   , "http-methods"
   , "maybe"
+  , "milkis"
   , "prelude"
   , "promises"
   , "psci-support"
