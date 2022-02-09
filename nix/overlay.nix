@@ -20,7 +20,8 @@
       ts-root = (import ./pkgs/ts-root.nix { pkgs = final; });
 
       patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
-        ${final.ts-node}/bin/ts-node ${../scripts/ts/patchTsTypes.ts} $@
+        cd ${ts_.workspaces.dev-utils}/libexec/dev-utils/deps/dev-utils/
+        ${final.ts-node}/bin/ts-node ./src/patchTsTypes.ts $@
       '';
 
       purs = (import ./pkgs/purs.nix { pkgs = final; });

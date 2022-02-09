@@ -37,7 +37,7 @@ purs-tsd-gen:
 	purs-tsd-gen --directory generated/output
 
 patchTsTypes:
-	patchTsTypes generated/output
+	patchTsTypes $(PWD)/generated/output
 
 generate: spago-build purs-tsd-gen patchTsTypes
 
