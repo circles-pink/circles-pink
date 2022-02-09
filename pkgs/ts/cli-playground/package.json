@@ -1,5 +1,5 @@
 {
-    "name": "ts-cli",
+    "name": "cli-playground",
     "version": "1.0.0",
     "type": "module",
     "dependencies": {
