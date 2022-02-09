@@ -68,14 +68,14 @@ rec {
   pursOutputWithTSPatched = pkgs.runCommand "pursOutputWithTSPatched"
     {
       buildInputs = [
-        # pkgs.circles-pink.patchTsTypes
+        pkgs.circles-pink.patchTsTypes
       ];
     }
     ''
       tmp=`mktemp -d`
       cp -r ${pursOutputWithTS}/* -t $tmp
       chmod -R +w $tmp
-      # patchTsTypes $tmp
+      patchTsTypes $tmp
       
       mkdir $out
       cp -r $tmp/* -t $out

@@ -42,4 +42,4 @@ rw-result:
 	chmod -R 777 rw-result
 
 ci: generate
-	nix build .#ts.builds.storybook
+	nix -L build .#ts.builds.storybook

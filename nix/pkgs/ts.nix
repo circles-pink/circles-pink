@@ -24,7 +24,7 @@
   };
 
   emptyWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
-    src = ../..;
+    inherit src;
   };
 
   replaceEmptyLocalDep = pkgName: pkgs.lib.pipe localPackages [
@@ -83,8 +83,15 @@
       # cp -r ${workspaces.storybook}/libexec/storybook/node_modules/ \
       #   $tmp/node_modules
 
-      cp -r ${workspaces.storybook}/libexec/ $tmp/libexec
-      ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
+      cp -r ${workspaces.storybook}/libexec/storybook/node_modules $tmp/node_modules
+      # target=`realpath -L $tmp/node_modules/circles`
+      chmod -R +w $tmp
+      rm -rf $tmp/node_modules/circles
+      cp -r ${workspaces.storybook}/libexec/storybook/deps/circles $tmp/node_modules/circles
+      
+      # ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
+
+
       chmod -R +w $tmp
 
       cp -r ${workspaces.storybook}/libexec/storybook/deps/storybook/node_modules/ \
