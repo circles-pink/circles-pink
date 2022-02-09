@@ -1,27 +1,88 @@
-{ pkgs, pursOutput, ... }:
-rec {
-  nodeDependencies = (import ./../../materialized/node2nix/default.nix {
-    inherit pkgs;
-  }).nodeDependencies;
+{ pkgs, pursOutput, ... }: rec {
 
-  mono = pkgs.runCommand "mono" { buildInputs = [ pkgs.nodejs ]; } ''
-    tmp=`mktemp -d`
+  localPackages = {
+    dev-utils = ../../pkgs/ts/dev-utils;
+    common = ../../pkgs/ts/common;
+    storybook = ../../pkgs/ts/storybook;
+    cli = ../../pkgs/ts/cli;
+    # cli-playground = ../../pkgs/ts/cli-playground;
+  };
+
+  src = pkgs.nix-filter.filter {
+    root = ../../.;
+    include = [
+      "package.json"
+      "yarn.lock"
+    ] ++ (
+      pkgs.lib.pipe localPackages [
+        builtins.attrNames
+        (map (name: "pkgs/ts/${name}/package.json"))
+      ]
+    )
+    ;
+  };
+
+  emptyWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
+    src = ../..;
+  };
+
+  replaceEmptyLocalDep = pkgName: pkgs.lib.pipe localPackages [
+    (pkgs.lib.mapAttrsToList (depName: drv: ''
+      dir="$tmp/libexec/${pkgName}/deps/${depName}"
+      if [ -d $dir ];
+      then
+        tmpNodeModules=`mktemp -d`
+        cp -r $dir/node_modules/ $tmpNodeModules/node_modules
+        rm -rf $dir
+        cp -r ${drv} $dir
+        chmod +w $dir
+        rm -rf $dir/node_modules
+        cp -r $tmpNodeModules/node_modules $dir/node_modules
+      fi
+    ''))
+    (builtins.concatStringsSep "\n")
+  ];
+
+  workspaces =
+    builtins.mapAttrs
+      (name: value: pkgs.runCommand "" { } ''
+        tmp=`mktemp -d`
+        cp -r ${value}/* -t $tmp
+        chmod -R +w $tmp
+
+        ${replaceEmptyLocalDep name}
+
+        cp -r $tmp $out
+      '')
+      emptyWorkspaces;
+
+  builds = {
+    storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
+      tmp=`mktemp -d`
     
-    mkdir -p $tmp/generated
-    cp -r ${pursOutput} $tmp/generated/output
+      mkdir -p $tmp/generated
+      cp -r ${pursOutput} $tmp/generated/output
 
-    mkdir -p $tmp/pkgs
+      mkdir -p $tmp/pkgs/ts
 
-    cp -r ${../../pkgs/ts} $tmp/pkgs/ts
-    chmod -R +w $tmp
+      cp ${../../package.json} $tmp/package.json
 
-    cp -r ${nodeDependencies}/lib/node_modules $tmp/pkgs/ts/node_modules
+      cp -r ${../../pkgs/ts/storybook} $tmp/pkgs/ts/storybook
+      chmod -R +w $tmp
 
-    chmod -R +w $tmp
-    export OUTPUT_DIR=$tmp/dist; npm run build --prefix $tmp/pkgs/ts
+      cp -r ${workspaces.storybook}/libexec/storybook/node_modules/ \
+        $tmp/node_modules
 
-    cp -r $tmp/dist $out
-  '';
+      cp -r ${workspaces.storybook}/libexec/storybook/deps/storybook/node_modules/ \
+        $tmp/pkgs/ts/storybook/node_modules
 
-  default = mono;
+      chmod -R +w $tmp
+
+      cd $tmp
+      export OUTPUT_DIR=$tmp/dist; yarn workspace storybook run build
+
+      cp -r $tmp $out
+    '';
+  };
+
 }
