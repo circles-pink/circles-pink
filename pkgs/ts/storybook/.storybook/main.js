@@ -12,14 +12,14 @@ module.exports = {
     '@storybook/addon-actions',
     '@storybook/addon-knobs',
     '@storybook/addon-notes',
-    {
-      name: '@storybook/addon-postcss',
-      options: {
-        postcssLoaderOptions: {
-          implementation: require('postcss'),
-        },
-      },
-    },
+    // {
+    //   name: '@storybook/addon-postcss',
+    //   options: {
+    //     postcssLoaderOptions: {
+    //       implementation: require('postcss'),
+    //     },
+    //   },
+    //},
   ],
   // webpackFinal: async config => {
   //   config.module.rules = [
