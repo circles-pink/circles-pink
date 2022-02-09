@@ -39,12 +39,12 @@ purs-tsd-gen:
 patchTsTypes:
 	patchTsTypes $(PWD)/generated/output
 
-generate: spago-build purs-tsd-gen patchTsTypes
+generate: materialize spago-build purs-tsd-gen patchTsTypes
 
 rw-result:
 	rm -rf rw-result
 	cp -r -H --dereference result/ rw-result
 	chmod -R 777 rw-result
 
-ci:
+ci: generate
 	nix build .#ts.default
