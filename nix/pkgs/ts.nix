@@ -91,7 +91,6 @@
       
       # ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
 
-
       chmod -R +w $tmp
 
       cp -r ${workspaces.storybook}/libexec/storybook/deps/storybook/node_modules/ \
@@ -101,7 +100,9 @@
       cd $tmp
       export OUTPUT_DIR=$tmp/dist; yarn workspace storybook run build
 
-      cp -r $tmp $out
+      chmod -R +w $tmp
+
+      cp -r $tmp/dist $out
     '';
   };
 
