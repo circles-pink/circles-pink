@@ -11,6 +11,10 @@ spago2nix:
 npm-install:
 	npm install --prefix pkgs/ts
 
+clean-install:
+	rm -rf node_modules
+	rm -rf pkgs/ts/*/node_modules
+
 clean-materialized:
 	rm -rf materialized
 
