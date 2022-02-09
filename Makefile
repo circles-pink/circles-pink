@@ -8,8 +8,8 @@ spago2nix:
 	mkdir -p materialized;
 	spago2nix generate; mv spago-packages.nix -t materialized;
 
-npm-install:
-	npm install --prefix pkgs/ts
+yarn-install:
+	yarn install
 
 clean-install:
 	rm -rf node_modules
