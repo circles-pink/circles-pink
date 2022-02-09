@@ -24,7 +24,7 @@ script = do
   C.act $ O.Next
 
 mainAff :: Aff O.State
-mainAff = C.exec (env { request: HM.request nodeFetch }) script O.init
+mainAff = C.exec (env { request: HM.milkisRequest nodeFetch }) script O.init
 
 main :: Effect Unit
 main = do

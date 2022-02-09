@@ -31,6 +31,7 @@ to generate this file without the comments in this block.
   , "tuples"
   , "type-equality"
   , "undefined"
+  , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
 , sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]

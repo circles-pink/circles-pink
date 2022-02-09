@@ -1,0 +1,8 @@
+{
+  "name": "dev-utils",
+  "version": "1.0.0",
+  "dependencies": {
+    "@types/glob": "^7.2.0",
+    "glob": "^7.2.0"
+  }
+}

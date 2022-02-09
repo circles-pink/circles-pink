@@ -20,13 +20,12 @@ matchMethod = case _ of
   DELETE -> M.deleteMethod
   _ -> M.getMethod
 
-request :: FetchImpl -> ReqFn
-request fetchImpl { url, method, body } parser =
+milkisRequest :: FetchImpl -> ReqFn
+milkisRequest fetchImpl { url, method, body } =
   ( \res ->
-      parser
-        { body: unsafeCoerce $ M.json res
-        , status: M.statusCode res
-        }
+      { body: unsafeCoerce $ M.json res
+      , status: M.statusCode res
+      }
   )
     <$> fetch fetchImpl (URL url)
         { method: matchMethod method

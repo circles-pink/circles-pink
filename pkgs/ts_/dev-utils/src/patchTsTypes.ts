@@ -1,5 +1,6 @@
 import { join } from "path"
 import * as fs from "fs"
+import * as glob from "glob"
 
 const args = process.argv.slice(2)
 
@@ -27,3 +28,16 @@ const DIR = args[0];
     fs.writeFileSync(filePath, newSrc)
 }
 
+{
+    const files = glob.sync(join(DIR, "*/*.d.ts"));
+
+    for (let filePath in files) {
+        console.log(filePath)
+        const oldSrc = fs.readFileSync(filePath).toString();
+
+        const newSrc = oldSrc
+            .replace(/any/g, "{ readonly Opaque : unique symbol; }");
+
+        fs.writeFileSync(filePath, newSrc)
+    }
+}

@@ -3,6 +3,8 @@ import React, { ReactElement } from 'react';
 import * as StateOnboardTS from "../../../../../generated/output/Core.State.Onboard.TS"
 import * as StateOnboard from "../../../../../generated/output/Core.State.Onboard"
 import * as GardenEnv from '../../../../../generated/output/Garden.Env'
+import { milkisRequest } from '../../../../../generated/output/HTTP.Milkis'
+import { windowFetch } from '../../../../../generated/output/Milkis.Impl.Window'
 
 import { ComponentMeta } from '@storybook/react';
 import { StateMachine, useStateMachine } from '../../useStateMachine';
@@ -10,7 +12,9 @@ import { Msg } from '../../../../../generated/output/Core.State.Onboard';
 import { match } from '../../type-utils/Matcher';
 
 const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
-  = StateOnboardTS.reducerAff(GardenEnv.env)
+  = StateOnboardTS.reducerAff(GardenEnv.env({
+    request: milkisRequest(windowFetch)
+  }))
 
 const nextButton = "bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full mr-1"
 const backButton = "bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full mr-1"

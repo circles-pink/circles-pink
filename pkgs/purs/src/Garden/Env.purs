@@ -30,10 +30,10 @@ env { request } =
           , method: POST
           , body: encodeJson { username: user }
           }
-          ( \{ status, body } -> case status of
-              0 -> true
-              _ -> false
-          )
+          <#> ( \{ status, body } -> case status of
+                0 -> true
+                _ -> false
+            )
   , apiCheckEmail:
       \email -> do
         log $ "checking " <> email
