@@ -1,5 +1,7 @@
 import tw from 'twin.macro'
 
+const Button = tw.button`border hover:border-black`
+
 export const DemoComponent = () => {
-    return <button tw="bg-black">Hello!</button>
+    return <Button>Hello!</Button>
 }
