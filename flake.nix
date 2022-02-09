@@ -67,6 +67,7 @@
               pkgs.miniserve
               pkgs.nodePackages.node2nix
               pkgs.nodePackages.purty
+              pkgs.nodePackages.typescript
               pkgs.nodejs
               pkgs.purescript
               pkgs.spago

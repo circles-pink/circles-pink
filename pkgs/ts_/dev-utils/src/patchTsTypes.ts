@@ -31,8 +31,7 @@ const DIR = args[0];
 {
     const files = glob.sync(join(DIR, "*/*.d.ts"));
 
-    for (let filePath in files) {
-        console.log(filePath)
+    for (let filePath of files) {
         const oldSrc = fs.readFileSync(filePath).toString();
 
         const newSrc = oldSrc
