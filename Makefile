@@ -1,8 +1,8 @@
 dev-storybook:
-	npm run storybook --prefix pkgs/ts
+	yarn workspace storybook run storybook
 
 build-storybook:
-	export OUTPUT_DIR=../../dist; npm run build --prefix pkgs/ts
+	export OUTPUT_DIR=../../../dist; yarn workspace storybook run build
 
 spago2nix:
 	mkdir -p materialized;
