@@ -75,7 +75,7 @@
               pkgs.spago2nix
               pkgs.cspell
               pkgs.ts-node
-              pkgs.circles-pink.patchTsTypes
+              # pkgs.circles-pink.patchTsTypes
               pkgs.gnumake
               pkgs.fff
               pkgs.nodePackages.prettier

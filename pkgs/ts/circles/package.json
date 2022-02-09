@@ -1,0 +1,8 @@
+{
+  "name": "circles",
+  "version": "1.0.0",
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^17.0.2"
+  }
+}

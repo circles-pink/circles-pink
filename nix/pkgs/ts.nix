@@ -6,6 +6,7 @@
     storybook = ../../pkgs/ts/storybook;
     cli = ../../pkgs/ts/cli;
     # cli-playground = ../../pkgs/ts/cli-playground;
+    circles = ../../pkgs/ts/circles;
   };
 
   src = pkgs.nix-filter.filter {
