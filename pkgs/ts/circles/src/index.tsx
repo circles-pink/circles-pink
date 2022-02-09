@@ -1,3 +1,5 @@
+import tw from 'twin.macro'
+
 export const DemoComponent = () => {
-    return <button>Hello!</button>
+    return <button tw="bg-black">Hello!</button>
 }
