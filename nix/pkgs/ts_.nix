@@ -1,6 +1,7 @@
 { pkgs, pursOutput, ... }: rec {
 
   localPackages = {
+    dev-utils = ../../pkgs/ts_/dev-utils;
     common = ../../pkgs/ts_/common;
     storybook = ../../pkgs/ts_/storybook;
     cli = ../../pkgs/ts_/cli;

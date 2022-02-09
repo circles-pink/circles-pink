@@ -13,4 +13,4 @@ type Res
   = { status :: Int, body :: Json }
 
 type ReqFn
-  = forall a. Req -> (Res -> a) -> Aff a
+  = Req -> Aff Res
