@@ -75,6 +75,7 @@
       mkdir -p $tmp/pkgs/ts
 
       cp ${../../package.json} $tmp/package.json
+      chmod -R +w $tmp
 
       cp -r ${../../pkgs/ts/storybook} $tmp/pkgs/ts/storybook
       chmod -R +w $tmp
@@ -82,11 +83,12 @@
       # cp -r ${workspaces.storybook}/libexec/storybook/node_modules/ \
       #   $tmp/node_modules
 
-      ln -s ${workspaces.storybook}/libexec/storybook/node_modules $tmp/node_modules
+      cp -r ${workspaces.storybook}/libexec/ $tmp/libexec
+      ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
+      chmod -R +w $tmp
 
       cp -r ${workspaces.storybook}/libexec/storybook/deps/storybook/node_modules/ \
         $tmp/pkgs/ts/storybook/node_modules
-
       chmod -R +w $tmp
 
       cd $tmp
