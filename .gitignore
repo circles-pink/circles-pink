@@ -6,3 +6,4 @@ output/
 .spago/
 .psc-ide-port
 /.spago2nix
+/tmp

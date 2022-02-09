@@ -12,15 +12,8 @@
         pursOutput = purs.default;
       });
 
-      ts_ = (import ./pkgs/ts_.nix {
-        pkgs = final;
-        pursOutput = purs.default;
-      });
-
-      ts-root = (import ./pkgs/ts-root.nix { pkgs = final; });
-
       patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
-        cd ${ts_.workspaces.dev-utils}/libexec/dev-utils/deps/dev-utils/
+        cd ${ts.workspaces.dev-utils}/libexec/dev-utils/deps/dev-utils/
         ${final.ts-node}/bin/ts-node ./src/patchTsTypes.ts $@
       '';
 
