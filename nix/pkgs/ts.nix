@@ -81,7 +81,7 @@
       cd $tmp
       export OUTPUT_DIR=$tmp/dist; yarn workspace storybook run build
 
-      cp -r $tmp $out
+      cp -r $tmp/dist $out
     '';
   };
 
