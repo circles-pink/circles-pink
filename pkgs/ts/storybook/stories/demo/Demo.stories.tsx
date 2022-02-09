@@ -1,6 +1,7 @@
 import React, { ReactElement } from 'react';
 import { ComponentMeta } from '@storybook/react';
-import { DemoComponent } from 'circles/src';
+import { DemoComponent } from 'circles/src/bar';
+import { pi } from "circles/src/foo"
 
 const Button = ({ }): ReactElement => {
   return <DemoComponent />
