@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   stories: [
     "../stories/**/*.stories.mdx",
@@ -11,6 +13,23 @@ module.exports = {
   webpackFinal: async config => {
     config.module.rules = [
       ...config.module.rules,
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                ident: 'postcss',
+                plugins: [
+                  require('autoprefixer'),
+                ],
+              },
+            },
+          },
+        ],
+        include: path.resolve(__dirname, '../'),
+      },
       {
         test: /\.(ts|tsx)$/,
         use: [
