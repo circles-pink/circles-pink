@@ -69,8 +69,7 @@
     storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
       tmp=`mktemp -d`
     
-      mkdir -p $tmp/generated
-      cp -r ${pursOutput} $tmp/generated/output
+     
 
       mkdir -p $tmp/pkgs/ts
 
@@ -88,6 +87,10 @@
       chmod -R +w $tmp
       rm -rf $tmp/node_modules/circles
       cp -r ${workspaces.storybook}/libexec/storybook/deps/circles $tmp/node_modules/circles
+      chmod -R +w $tmp
+
+      mkdir -p $tmp/node_modules/circles/node_modules/generated
+      cp -r ${pursOutput} $tmp/node_modules/circles/node_modules/generated/output
       
       # ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
 

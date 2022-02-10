@@ -1,13 +1,15 @@
+import '../style/global.css';
+
 import React, { ReactElement } from 'react';
-import { DialogCard } from './onboarding/DialogCard';
+import { DialogCard } from './DialogCard';
 
-import * as GardenEnv from '../../../../generated/output/Garden.Env'
-import { milkisRequest } from '../../../../generated/output/HTTP.Milkis'
-import { windowFetch } from '../../../../generated/output/Milkis.Impl.Window'
+import * as GardenEnv from 'generated/output/Garden.Env';
+import { milkisRequest } from 'generated/output/HTTP.Milkis';
+import { windowFetch } from 'generated/output/Milkis.Impl.Window';
 
-import * as StateOnboardTS from "../../../../generated/output/Core.State.Onboard.TS"
-import { StateMachine, useStateMachine } from './onboarding/useStateMachine';
-import * as StateOnboard from "../../../../generated/output/Core.State.Onboard"
+import * as StateOnboardTS from "generated/output/Core.State.Onboard.TS";
+import { StateMachine, useStateMachine } from './useStateMachine';
+import * as StateOnboard from "generated/output/Core.State.Onboard";
 
 const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
   = StateOnboardTS.reducerAff(GardenEnv.env({
