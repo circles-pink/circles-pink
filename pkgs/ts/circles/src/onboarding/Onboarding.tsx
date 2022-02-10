@@ -34,7 +34,7 @@ export const Onboarding = (): ReactElement => {
     case "AskUsername": return (
       <DialogCard
         title="Tell me your Name!"
-        sub="Choose wisely, you cannot change it later!"
+        sub="Choose wisely, you can not change it later!"
         username={{
           act,
           placeholder: 'Your amazing username',
