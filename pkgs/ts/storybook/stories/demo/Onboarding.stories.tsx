@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { ComponentMeta } from '@storybook/react';
-import { Onboarding } from 'circles/src/Onboarding';
+import { Onboarding } from 'circles/src/onboarding/Onboarding';
 
 
 export default {

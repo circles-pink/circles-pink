@@ -1,10 +1,8 @@
 import React, { ReactElement } from 'react';
-import tw from 'twin.macro'
+import tw from 'twin.macro';
 
-import { Msg } from '../../../../../generated/output/Core.State.Onboard';
-import * as StateOnboard from "../../../../../generated/output/Core.State.Onboard"
-
-import '../style/global.css';
+import { Msg } from 'generated/output/Core.State.Onboard';
+import * as StateOnboard from "generated/output/Core.State.Onboard";
 
 type DemoCardProps = {
   title: string,
