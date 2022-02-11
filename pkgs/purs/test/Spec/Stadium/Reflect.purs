@@ -7,37 +7,36 @@ import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import Type.Proxy (Proxy(..))
 import Data.Tuple.Nested ((/\), type (/\))
-import Stadium (type (||))
 
-type SM
-  = { state1 ::
-        { data :: Int
-        , actions ::
-            { next ::
-                { data :: String
-                , to :: Proxy "state2" || "state3"
-                }
-            , setName ::
-                { data :: String
-                , to :: Proxy "state1"
-                }
-            }
-        }
-    , state2 ::
-        { data :: Int
-        , actions ::
-            { next ::
-                { data :: String
-                , to :: Proxy "state2" || "state3"
-                }
-            , setName ::
-                { data :: String
-                , to :: Proxy "state1"
-                }
-            }
-        }
-    }
-
+-- import Stadium (type (||))
+-- type SM
+--   = { state1 ::
+--         { data :: Int
+--         , actions ::
+--             { next ::
+--                 { data :: String
+--                 , to :: Proxy "state2" || "state3"
+--                 }
+--             , setName ::
+--                 { data :: String
+--                 , to :: Proxy "state1"
+--                 }
+--             }
+--         }
+--     , state2 ::
+--         { data :: Int
+--         , actions ::
+--             { next ::
+--                 { data :: String
+--                 , to :: Proxy "state2" || "state3"
+--                 }
+--             , setName ::
+--                 { data :: String
+--                 , to :: Proxy "state1"
+--                 }
+--             }
+--         }
+--     }
 --------------------------------------------------------------------------------
 tests :: TestSuite
 tests =

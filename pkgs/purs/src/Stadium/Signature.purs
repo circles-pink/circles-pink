@@ -19,5 +19,7 @@ instance sigInt :: Signature Int where
   showSignature _ = "Int"
 else instance sigUnit :: Signature Unit where
   showSignature _ = "Unit"
+else instance sigString :: Signature String where
+  showSignature _ = "String"
 else instance sigOther :: Signature a where
-  showSignature _ = "<signature not implemented>"
+  showSignature _ = "<signature not implemented yet>"

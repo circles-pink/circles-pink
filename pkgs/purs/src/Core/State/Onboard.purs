@@ -1,6 +1,7 @@
 module Core.State.Onboard where
 
 import Prelude
+import Undefined (undefined)
 
 data State
   = InfoGeneral
@@ -49,6 +50,37 @@ data State
     , words :: Array String
     , url :: String
     }
+
+infoGeneral :: State
+infoGeneral = InfoGeneral
+
+match ::
+  forall z.
+  { onInfoGeneral :: Unit -> z
+  , onAskUserName :: { username :: String } -> z
+  , onAskEmail ::
+      { username :: String
+      , email :: String
+      , privacy :: Boolean
+      , terms :: Boolean
+      } ->
+      z
+  } ->
+  State -> z
+match arms state = case state of
+  InfoGeneral -> arms.onInfoGeneral unit
+  AskUsername x -> arms.onAskUserName x
+  AskEmail x -> arms.onAskEmail x
+  _ -> undefined
+
+x :: Int
+x =
+  match
+    { onInfoGeneral: \_ -> 0
+    , onAskUserName: \_ -> 1
+    , onAskEmail: \_ -> 2
+    }
+    init
 
 init :: State
 init = InfoGeneral
