@@ -1,32 +1,67 @@
 module StateMachine.Types
   ( Action
-  , State
+  , AskEmail
+  , AskUserName
+  , InfoGeneral
+  , InfoSecurity
   , Protocol
+  , State
+  , init
   ) where
 
 import Prelude
 import Data.Tuple.Nested (type (/\))
-import Data.Variant (Variant)
-import Type.Proxy (Proxy)
+import Data.Variant (Variant, inj, match)
+import Type.Proxy (Proxy(..))
+
+--------------------------------------------------------------------------------
+-- Constructors
+--------------------------------------------------------------------------------
+init :: State
+init = inj (Proxy :: _ "infoGeneral") unit
+
+--------------------------------------------------------------------------------
+-- Destructors
+--------------------------------------------------------------------------------
+matchState ::
+  forall z.
+  { infoGeneral :: InfoGeneral -> z
+  , askUserName :: AskUserName -> z
+  , askEmail :: AskEmail -> z
+  , infoSecurity :: InfoSecurity -> z
+  } ->
+  State -> z
+matchState = match
+
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+type InfoGeneral
+  = Unit
+
+type AskUserName
+  = { username :: String }
+
+type AskEmail
+  = { username :: String
+    , email :: String
+    , privacy :: Boolean
+    , terms :: Boolean
+    }
+
+type InfoSecurity
+  = { username :: String
+    , email :: String
+    , privacy :: Boolean
+    , terms :: Boolean
+    }
 
 type State
   = Variant
-      ( infoGeneral :: Unit
-      , askUserName ::
-          { username :: String
-          }
-      , askEmail ::
-          { username :: String
-          , email :: String
-          , privacy :: Boolean
-          , terms :: Boolean
-          }
-      , infoSecurity ::
-          { username :: String
-          , email :: String
-          , privacy :: Boolean
-          , terms :: Boolean
-          }
+      ( infoGeneral :: InfoGeneral
+      , askUserName :: AskUserName
+      , askEmail :: AskEmail
+      , infoSecurity :: InfoSecurity
       -- , magicWords ::
       --     { username :: String
       --     , email :: String

@@ -1,4 +1,4 @@
-module StateMachine.Control where
+module StateMachine.Control (Env, controller) where
 
 import Prelude
 import Data.Variant (case_, default, inj, on, onMatch)
