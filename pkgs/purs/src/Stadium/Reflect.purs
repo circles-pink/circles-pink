@@ -2,11 +2,15 @@ module Stadium.Reflect
   ( SmAction
   , SmState
   , StateMachine
-  , reflectStateMachine
   , reflectStateMachine'
   , class ReflectStateMachine
+  , reflectStateMachine
   , class ReflectSmState
   , reflectSmState
+  , class ReflectSmActions
+  , reflectSmActions
+  , class ReflectSmAction
+  , reflectSmAction
   ) where
 
 import Prelude
@@ -25,6 +29,21 @@ type SmAction
     , to :: Array String
     }
 
+class ReflectSmAction :: Row Type -> Constraint
+class ReflectSmAction r where
+  reflectSmAction :: Proxy r -> SmAction
+
+instance reflectSmActionInst ::
+  ( Signature d
+  , Cons "data" d trash r
+  , Cons "to" t trash r
+  ) =>
+  ReflectSmAction r where
+  reflectSmAction _ =
+    { data: showSignature (Proxy :: _ d)
+    , to: undefined
+    }
+
 --------------------------------------------------------------------------------
 type SmActions
   = Array (String /\ SmAction)
@@ -37,10 +56,10 @@ instance reflectSmActionsNil :: ReflectSmActions Nil where
   reflectSmActions _ = []
 
 instance reflectSmActionsCons ::
-  (IsSymbol s, ReflectSmState r, ReflectSmActions tail) =>
+  (IsSymbol s, ReflectSmAction r, ReflectSmActions tail) =>
   ReflectSmActions (Cons s (Record r) tail) where
   reflectSmActions _ =
-    [ reflectSymbol (Proxy :: _ s) /\ undefined ]
+    [ reflectSymbol (Proxy :: _ s) /\ reflectSmAction (Proxy :: _ r) ]
       <> reflectSmActions (Proxy :: _ tail)
 
 --------------------------------------------------------------------------------
@@ -74,8 +93,15 @@ class ReflectSmState :: Row Type -> Constraint
 class ReflectSmState r where
   reflectSmState :: Proxy r -> SmState
 
-instance reflectSmStateInst :: (Signature d, Cons "data" d trash r) => ReflectSmState r where
+instance reflectSmStateInst ::
+  ( Signature d
+  , Cons "data" d trash1 r
+  , ReflectSmActions as
+  , Cons "actions" (Record a) trash2 r
+  , RowToList a as
+  ) =>
+  ReflectSmState r where
   reflectSmState _ =
     { data: showSignature (Proxy :: _ d)
-    , actions: []
+    , actions: reflectSmActions (Proxy :: _ as)
     }

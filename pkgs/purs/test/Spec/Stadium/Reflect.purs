@@ -22,8 +22,8 @@ test_empty =
 
 --------------------------------------------------------------------------------
 type NonEmptySm
-  = { state1 :: { data :: Unit }
-    , state2 :: { data :: Unit }
+  = { state1 :: { data :: Unit, actions :: {} }
+    , state2 :: { data :: Unit, actions :: {} }
     }
 
 test_nonempty :: TestSuite
