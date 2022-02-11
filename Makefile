@@ -30,8 +30,7 @@ spago-build:
 
 purs-tsd-gen:
 	purs-tsd-gen --directory generated/output && \
-	mkdir -p pkgs/ts/circles/node_modules && \
-	cp -r generated pkgs/ts/circles/node_modules/generated
+	cp -r generated/output pkgs/ts/generated
 
 patchTsTypes:
 	patchTsTypes $(PWD)/pkgs/ts/circles/node_modules/generated/output
