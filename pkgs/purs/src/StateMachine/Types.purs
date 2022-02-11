@@ -1,4 +1,4 @@
-module StateMachine.Protocol
+module StateMachine.Types
   ( Action
   , State
   , Protocol
@@ -15,17 +15,18 @@ type State
       , askUserName ::
           { username :: String
           }
-      -- , askEmail ::
-      --     { email :: String
-      --     , privacy :: Boolean
-      --     , terms :: Boolean
-      --     }
-      -- , infoSecurity ::
-      --     { username :: String
-      --     , email :: String
-      --     , privacy :: Boolean
-      --     , terms :: Boolean
-      --     }
+      , askEmail ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          }
+      , infoSecurity ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          }
       -- , magicWords ::
       --     { username :: String
       --     , email :: String
@@ -70,17 +71,17 @@ type Action
             , next :: Unit
             , setUserName :: String
             )
-      -- , askEmail ::
-      --     Variant
-      --       ( prev :: Unit
-      --       , next :: Unit
-      --       , setEmail :: String
-      --       , setTerms :: Boolean
-      --       , setPrivacy :: Boolean
-      --       )
-      -- , infoSecurity ::
-      --     Variant
-      --       ( prev :: Unit )
+      , askEmail ::
+          Variant
+            ( prev :: Unit
+            , next :: Unit
+            , setEmail :: String
+            , setTerms :: Boolean
+            , setPrivacy :: Boolean
+            )
+      , infoSecurity ::
+          Variant
+            ( prev :: Unit )
       -- , magicWords :: Variant ()
       -- , checkMagicWord ::
       --     Variant
@@ -104,20 +105,20 @@ type Protocol
             , setUserName :: { toStates :: Proxy "askUserName" /\ Unit }
             }
         }
-    -- , askEmail ::
-    --     { actions ::
-    --         { prev :: { toStates :: Proxy "askUserName" /\ Unit }
-    --         , next :: { toStates :: Proxy "infoSecurity" /\ Unit }
-    --         , setEmail :: { toStates :: Proxy "askEmail" /\ Unit }
-    --         , setTerms :: { toStates :: Proxy "askEmail" /\ Unit }
-    --         , setPrivacy :: { toStates :: Proxy "askEmail" /\ Unit }
-    --         }
-    --     }
-    -- , infoSecurity ::
-    --     { actions ::
-    --         { prev :: { toStates :: Proxy "askEmail" /\ Unit }
-    --         }
-    --     }
+    , askEmail ::
+        { actions ::
+            { prev :: { toStates :: Proxy "askUserName" /\ Unit }
+            , next :: { toStates :: Proxy "infoSecurity" /\ Unit }
+            , setEmail :: { toStates :: Proxy "askEmail" /\ Unit }
+            , setTerms :: { toStates :: Proxy "askEmail" /\ Unit }
+            , setPrivacy :: { toStates :: Proxy "askEmail" /\ Unit }
+            }
+        }
+    , infoSecurity ::
+        { actions ::
+            { prev :: { toStates :: Proxy "askEmail" /\ Unit }
+            }
+        }
     -- , magicWords :: { actions :: {} }
     -- , checkMagicWord ::
     --     { actions ::
