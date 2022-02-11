@@ -33,7 +33,7 @@ purs-tsd-gen:
 	cp -r generated/output pkgs/ts/generated
 
 patchTsTypes:
-	patchTsTypes $(PWD)/pkgs/ts/circles/node_modules/generated/output
+	patchTsTypes $(PWD)/pkgs/ts/generated/output
 
 generate: materialize spago-build purs-tsd-gen patchTsTypes
 

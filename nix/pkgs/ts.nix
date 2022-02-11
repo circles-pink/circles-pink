@@ -5,8 +5,9 @@
     common = ../../pkgs/ts/common;
     storybook = ../../pkgs/ts/storybook;
     cli = ../../pkgs/ts/cli;
-    # cli-playground = ../../pkgs/ts/cli-playground;
     circles = ../../pkgs/ts/circles;
+    generated = ../../pkgs/ts/generated;
+    # cli-playground = ../../pkgs/ts/cli-playground;
   };
 
   src = pkgs.nix-filter.filter {
@@ -68,8 +69,6 @@
   builds = {
     storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
       tmp=`mktemp -d`
-    
-     
 
       mkdir -p $tmp/pkgs/ts
 
@@ -88,6 +87,13 @@
       rm -rf $tmp/node_modules/circles
       cp -r ${workspaces.storybook}/libexec/storybook/deps/circles $tmp/node_modules/circles
       chmod -R +w $tmp
+
+      # cp -r ${workspaces.storybook}/libexec/storybook/node_modules $tmp/node_modules
+      # # target=`realpath -L $tmp/node_modules/generated`
+      # chmod -R +w $tmp
+      # rm -rf $tmp/node_modules/generated
+      # cp -r ${workspaces.storybook}/libexec/storybook/deps/generated $tmp/node_modules/generated
+      # chmod -R +w $tmp
 
       mkdir -p $tmp/node_modules/circles/node_modules/generated
       cp -r ${pursOutput} $tmp/node_modules/circles/node_modules/generated/output
