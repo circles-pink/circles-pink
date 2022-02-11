@@ -6,10 +6,12 @@ module StateMachine.Types
   , InfoSecurity
   , Protocol
   , State
+  , action
   , init
   ) where
 
 import Prelude
+import Core.State.Onboard (infoGeneral)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj, match)
 import Type.Proxy (Proxy(..))
@@ -19,6 +21,45 @@ import Type.Proxy (Proxy(..))
 --------------------------------------------------------------------------------
 init :: State
 init = inj (Proxy :: _ "infoGeneral") unit
+
+action ::
+  { infoGeneral ::
+      { next :: Unit -> Action
+      }
+  , askUserName ::
+      { prev :: Unit -> Action
+      , next :: Unit -> Action
+      }
+  , askEmail ::
+      { prev :: Unit -> Action
+      , next :: Unit -> Action
+      , setEmail :: String -> Action
+      , setTerms :: Boolean -> Action
+      , setPrivacy :: Boolean -> Action
+      }
+  , infoSecurity ::
+      { prev :: Unit -> Action
+      }
+  }
+action =
+  { infoGeneral:
+      { next: \x -> inj (Proxy :: _ "infoGeneral") (inj (Proxy :: _ "next") x)
+      }
+  , askUserName:
+      { prev: \x -> inj (Proxy :: _ "askUserName") (inj (Proxy :: _ "prev") x)
+      , next: \x -> inj (Proxy :: _ "askUserName") (inj (Proxy :: _ "next") x)
+      }
+  , askEmail:
+      { prev: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "prev") x)
+      , next: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "next") x)
+      , setEmail: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "setEmail") x)
+      , setTerms: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "setTerms") x)
+      , setPrivacy: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "setPrivacy") x)
+      }
+  , infoSecurity:
+      { prev: \x -> inj (Proxy :: _ "askEmail") (inj (Proxy :: _ "prev") x)
+      }
+  }
 
 --------------------------------------------------------------------------------
 -- Destructors
