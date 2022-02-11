@@ -6,36 +6,9 @@ import Stadium.Reflect as R
 import Test.Unit (TestSuite, suite, test)
 import Test.Unit.Assert as Assert
 import Type.Proxy (Proxy(..))
-import Data.Tuple.Nested ((/\))
+import Data.Tuple.Nested ((/\), type (/\))
 import Stadium (type (||))
 
---------------------------------------------------------------------------------
-type EmptySm
-  = {}
-
-test_empty :: TestSuite
-test_empty =
-  test "Empty StateMachine" do
-    Assert.assert "is empty"
-      $ R.reflectStateMachine (Proxy :: _ EmptySm)
-      == []
-
---------------------------------------------------------------------------------
-type NonEmptySm
-  = { state1 :: { data :: Unit, actions :: {} }
-    , state2 :: { data :: Unit, actions :: {} }
-    }
-
-test_nonempty :: TestSuite
-test_nonempty =
-  test "Nonempty StateMachine" do
-    Assert.assert "is empty"
-      $ R.reflectStateMachine (Proxy :: _ NonEmptySm)
-      == [ "state1" /\ { data: "Unit", actions: [] }
-        , "state2" /\ { data: "Unit", actions: [] }
-        ]
-
---------------------------------------------------------------------------------
 type SM
   = { state1 ::
         { data :: Int
@@ -70,5 +43,80 @@ tests :: TestSuite
 tests =
   suite "Stadium.Reflect" do
     suite "reflectStateMachine" do
-      test_empty
-      test_nonempty
+      test "Empty StateMachine" do
+        let
+          smProxy = Proxy :: _ {}
+        Assert.assert "is empty"
+          $ R.reflectStateMachine smProxy
+          == []
+      test "Nonempty StateMachine" do
+        let
+          smProxy =
+            Proxy ::
+              _
+                { state1 :: { data :: Unit, actions :: {} }
+                , state2 :: { data :: Unit, actions :: {} }
+                }
+        Assert.assert "has states"
+          $ R.reflectStateMachine smProxy
+          == [ "state1" /\ { data: "Unit", actions: [] }
+            , "state2" /\ { data: "Unit", actions: [] }
+            ]
+      test "With action" do
+        let
+          smProxy =
+            Proxy ::
+              _
+                { state1 ::
+                    { data :: Unit
+                    , actions ::
+                        { action1 :: { data :: Unit, toStates :: Unit }
+                        }
+                    }
+                }
+        Assert.assert "has action"
+          $ R.reflectStateMachine smProxy
+          == [ "state1"
+                /\ { data: "Unit"
+                  , actions:
+                      [ "action1" /\ { data: "Unit", toStates: [] }
+                      ]
+                  }
+            ]
+      test "With action and toStates" do
+        let
+          smProxy =
+            Proxy ::
+              _
+                { state1 ::
+                    { data :: Unit
+                    , actions ::
+                        { action1 ::
+                            { data :: Unit
+                            , toStates :: Proxy "state1" /\ Proxy "state2" /\ Unit
+                            }
+                        , action2 ::
+                            { data :: Unit
+                            , toStates :: Unit
+                            }
+                        }
+                    }
+                , state2 ::
+                    { data :: Unit
+                    , actions :: {}
+                    }
+                }
+        Assert.assert "has action with states"
+          $ R.reflectStateMachine smProxy
+          == [ "state1"
+                /\ { data: "Unit"
+                  , actions:
+                      [ "action1" /\ { data: "Unit", toStates: [ "state1", "state2" ] }
+                      , "action2" /\ { data: "Unit", toStates: [] }
+                      ]
+                  }
+            , "state2"
+                /\ { data: "Unit"
+                  , actions: []
+                  }
+            ]

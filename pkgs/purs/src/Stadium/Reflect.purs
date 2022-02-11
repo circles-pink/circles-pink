@@ -2,6 +2,7 @@ module Stadium.Reflect
   ( SmAction
   , SmState
   , StateMachine
+  , ToStates
   , reflectStateMachine'
   , class ReflectStateMachine
   , reflectStateMachine
@@ -11,6 +12,8 @@ module Stadium.Reflect
   , reflectSmActions
   , class ReflectSmAction
   , reflectSmAction
+  , class ReflectToStates
+  , reflectToStates
   ) where
 
 import Prelude
@@ -23,10 +26,25 @@ import Stadium.Signature (class Signature, showSignature)
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 
+type ToStates
+  = Array String
+
+class ReflectToStates :: Type -> Constraint
+class ReflectToStates a where
+  reflectToStates :: Proxy a -> ToStates
+
+instance reflectToStatesUnit :: ReflectToStates Unit where
+  reflectToStates _ = []
+
+instance reflectToStatesTuple :: (IsSymbol s, ReflectToStates tail) => ReflectToStates (Proxy s /\ tail) where
+  reflectToStates _ =
+    [ reflectSymbol (Proxy :: _ s) ]
+      <> reflectToStates (Proxy :: _ tail)
+
 --------------------------------------------------------------------------------
 type SmAction
   = { data :: String
-    , to :: Array String
+    , toStates :: ToStates
     }
 
 class ReflectSmAction :: Row Type -> Constraint
@@ -35,13 +53,14 @@ class ReflectSmAction r where
 
 instance reflectSmActionInst ::
   ( Signature d
-  , Cons "data" d trash r
-  , Cons "to" t trash r
+  , Cons "data" d trash1 r
+  , ReflectToStates t
+  , Cons "toStates" t trash2 r
   ) =>
   ReflectSmAction r where
   reflectSmAction _ =
     { data: showSignature (Proxy :: _ d)
-    , to: undefined
+    , toStates: reflectToStates (Proxy :: _ t)
     }
 
 --------------------------------------------------------------------------------
