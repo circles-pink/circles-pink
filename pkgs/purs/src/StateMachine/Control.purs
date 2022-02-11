@@ -13,11 +13,12 @@ type Env m
     }
 
 controller ::
-  forall ac m.
-  Monad m => Env m -> S.Control P.State ac m
+  forall m.
+  Monad m => Env m -> S.Control P.State P.Action m
 controller env =
-  S.mkController (Proxy :: _ P.CirclesStateMachine) \setState msg -> do
+  S.mkController (Proxy :: _ P.Protocol) \setState msg -> do
     case_
       # on (Proxy :: _ "infoGeneral") (\_ -> pure unit)
       # on (Proxy :: _ "askUserName") (\{ username } -> pure unit)
       # on (Proxy :: _ "askEmail") (\{ email } -> pure unit)
+      # undefined

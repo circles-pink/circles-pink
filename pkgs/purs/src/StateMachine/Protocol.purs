@@ -1,62 +1,133 @@
 module StateMachine.Protocol
-  ( AskEmail
-  , AskUserName
-  , CirclesStateMachine
-  , InfoGeneral
+  ( Action
   , State
+  , Protocol
   ) where
 
 import Prelude
-import Core.State.Onboard (State(..))
-import Data.Tuple (Tuple(..))
-import Data.Tuple.Nested ((/\), type (/\))
+import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant)
 import Type.Proxy (Proxy)
 
-type InfoGeneral
-  = Unit
-
-type AskUserName
-  = { username :: String }
-
-type AskEmail
-  = { email :: String }
-
 type State
   = Variant
-      ( infoGeneral :: InfoGeneral
-      , askUserName :: AskUserName
-      , askEmail :: AskEmail
+      ( infoGeneral :: Unit
+      , askUserName ::
+          { username :: String
+          }
+      , askEmail ::
+          { email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          }
+      , infoSecurity ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          }
+      , magicWords ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          , words :: Array String
+          }
+      , checkMagicWord ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          , words :: Array String
+          , word :: String
+          }
+      , askPhoto ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          , words :: Array String
+          , url :: String
+          }
+      , submit ::
+          { username :: String
+          , email :: String
+          , privacy :: Boolean
+          , terms :: Boolean
+          , words :: Array String
+          , url :: String
+          }
       )
 
--- type Action
---   = Variant
---       ( infoGeneral :: InfoGeneral
---       , askUserName :: AskUserName
---       , askEmail :: AskEmail
---       )
-type CirclesStateMachine
+type Action
+  = Variant
+      ( infoGeneral ::
+          Variant
+            ( next :: Unit )
+      , askUserName ::
+          Variant
+            ( prev :: Unit
+            , next :: Unit
+            , setUserName :: String
+            )
+      , askEmail ::
+          Variant
+            ( prev :: Unit
+            , next :: Unit
+            , setEmail :: String
+            , setTerms :: Boolean
+            , setPrivacy :: Boolean
+            )
+      , infoSecurity ::
+          Variant
+            ( prev :: Unit )
+      , magicWords :: Variant ()
+      , checkMagicWord ::
+          Variant
+            ( setMagicWord :: String )
+      , askPhoto ::
+          Variant
+            ( setPhoto :: String )
+      , submit :: Variant ()
+      )
+
+type Protocol
   = { infoGeneral ::
-        { data :: InfoGeneral
-        , actions ::
-            { next :: { data :: Unit, toStates :: Proxy "askUserName" /\ Unit }
+        { actions ::
+            { next :: { toStates :: Proxy "askUserName" /\ Unit }
             }
         }
     , askUserName ::
-        { data :: AskUserName
-        , actions ::
-            { prev :: { data :: Unit, toStates :: Proxy "infoGeneral" /\ Unit }
-            , next :: { data :: Unit, toStates :: Proxy "askEmail" /\ Unit }
-            , setUserName :: { data :: String, toStates :: Proxy "askUserName" /\ Unit }
+        { actions ::
+            { prev :: { toStates :: Proxy "infoGeneral" /\ Unit }
+            , next :: { toStates :: Proxy "askEmail" /\ Unit }
+            , setUserName :: { toStates :: Proxy "askUserName" /\ Unit }
             }
         }
     , askEmail ::
-        { data :: AskEmail
-        , actions ::
-            { prev :: { data :: Unit, toStates :: Proxy "askUserName" /\ Unit }
-            , setEmail :: { data :: String, toStates :: Proxy "askEmail" /\ Unit }
-            , setTerms :: { data :: String, toStates :: Proxy "askEmail" /\ Unit }
-            , setPrivacy :: { data :: String, toStates :: Proxy "askEmail" /\ Unit }
+        { actions ::
+            { prev :: { toStates :: Proxy "askUserName" /\ Unit }
+            , next :: { toStates :: Proxy "infoSecurity" /\ Unit }
+            , setEmail :: { toStates :: Proxy "askEmail" /\ Unit }
+            , setTerms :: { toStates :: Proxy "askEmail" /\ Unit }
+            , setPrivacy :: { toStates :: Proxy "askEmail" /\ Unit }
             }
         }
+    , infoSecurity ::
+        { actions ::
+            { prev :: { toStates :: Proxy "askEmail" /\ Unit }
+            }
+        }
+    , magicWords :: { actions :: {} }
+    , checkMagicWord ::
+        { actions ::
+            { setMagicWord :: { toStates :: Proxy "checkMagicWord" /\ Unit }
+            }
+        }
+    , askPhoto ::
+        { actions ::
+            { setPhoto :: { toStates :: Proxy "askPhoto" /\ Unit }
+            }
+        }
+    , submit :: { actions :: {} }
     }
