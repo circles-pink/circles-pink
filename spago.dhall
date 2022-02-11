@@ -26,6 +26,7 @@ to generate this file without the comments in this block.
   , "prelude"
   , "promises"
   , "psci-support"
+  , "test-unit"
   , "transformers"
   , "tuples"
   , "type-equality"
