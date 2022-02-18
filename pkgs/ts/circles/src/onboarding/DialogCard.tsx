@@ -1,35 +1,36 @@
 import React, { ReactElement } from 'react';
 import tw from 'twin.macro';
 
-//import { Msg } from 'generated/output/Core.State.Onboard';
-//import * as StateOnboard from "generated/output/Core.State.Onboard";
+import { CirclesAction as Msg } from 'generated/output/CirclesPink.StateMachine.Action';
 
-type DemoCardProps = any
+import { CirclesState as StateOnboard } from 'generated/output/CirclesPink.StateMachine.State';
 
-// type DemoCardProps = {
-//   title: string,
-//   sub: string,
-//   username?: {
-//     act: (m: Msg) => void,
-//     placeholder: string;
-//     value: string;
-//   },
-//   email?: {
-//     act: (m: Msg) => void,
-//     placeholder: string;
-//     value: string;
-//   },
-//   next?: {
-//     act: (m: Msg) => void,
-//     msg: Msg,
-//     label: string
-//   },
-//   back?: {
-//     act: (m: Msg) => void,
-//     msg: Msg,
-//     label: string
-//   },
-// }
+
+
+type DemoCardProps = {
+  title: string,
+  sub: string,
+  username?: {
+    act: (m: Msg) => void,
+    placeholder: string;
+    value: string;
+  },
+  email?: {
+    act: (m: Msg) => void,
+    placeholder: string;
+    value: string;
+  },
+  next?: {
+    act: (m: Msg) => void,
+    msg: Msg,
+    label: string
+  },
+  back?: {
+    act: (m: Msg) => void,
+    msg: Msg,
+    label: string
+  },
+}
 
 const Frame = tw.div`bg-gray-50 border-2 border-pink-500`;
 const Card = tw.div`max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between`;
