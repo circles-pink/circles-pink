@@ -81,6 +81,7 @@
               pkgs.nodePackages.prettier
               pkgs.dhall
               pkgs.dhall-lsp-server
+              pkgs.graphviz
             ];
 
             # Change the prompt to show that you are in a devShell

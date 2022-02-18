@@ -1,4 +1,4 @@
-{ pkgs, pursOutput, ... }: rec {
+{ pkgs, pursOutput, assets, ... }: rec {
 
   localPackages = {
     dev-utils = ../../pkgs/ts/dev-utils;
@@ -7,6 +7,7 @@
     cli = ../../pkgs/ts/cli;
     circles = ../../pkgs/ts/circles;
     generated = ../../pkgs/ts/generated;
+    assets = ../../pkgs/ts/assets;
     # cli-playground = ../../pkgs/ts/cli-playground;
   };
 
@@ -78,27 +79,19 @@
       cp -r ${../../pkgs/ts/storybook} $tmp/pkgs/ts/storybook
       chmod -R +w $tmp
 
-      # cp -r ${workspaces.storybook}/libexec/storybook/node_modules/ \
-      #   $tmp/node_modules
-
       cp -r ${workspaces.storybook}/libexec/storybook/node_modules $tmp/node_modules
-      # target=`realpath -L $tmp/node_modules/circles`
       chmod -R +w $tmp
       rm -rf $tmp/node_modules/circles
       cp -r ${workspaces.storybook}/libexec/storybook/deps/circles $tmp/node_modules/circles
       chmod -R +w $tmp
 
-      # cp -r ${workspaces.storybook}/libexec/storybook/node_modules $tmp/node_modules
-      # # target=`realpath -L $tmp/node_modules/generated`
-      # chmod -R +w $tmp
-      # rm -rf $tmp/node_modules/generated
-      # cp -r ${workspaces.storybook}/libexec/storybook/deps/generated $tmp/node_modules/generated
-      # chmod -R +w $tmp
-
       mkdir -p $tmp/node_modules/circles/node_modules/generated
       cp -r ${pursOutput} $tmp/node_modules/circles/node_modules/generated/output
-      
-      # ln -s $tmp/libexec/storybook/node_modules $tmp/node_modules
+
+      chmod -R +w $tmp
+
+      mkdir -p $tmp/node_modules/storybook/node_modules/assets
+      cp -r ${assets} $tmp/node_modules/storybook/node_modules/assets/src
 
       chmod -R +w $tmp
 
