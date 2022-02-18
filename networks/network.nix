@@ -17,10 +17,8 @@ in
       services.httpd.virtualHosts = {
         "circles.pink" = {
           listen = [{ port = 80; }];
-          documentRoot = pkgs.runCommand "output" { } ''
-            mkdir $out
-            cp -r ${(import ../default.nix).packages.${system}.ts.builds.storybook} $out/storybook
-          '';
+          documentRoot =
+            (import ../default.nix).packages.${system}.publicDir;
         };
       };
 

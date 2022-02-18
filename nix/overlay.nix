@@ -18,5 +18,17 @@
       '';
 
       purs = (import ./pkgs/purs.nix { pkgs = final; });
+
+      stateMachineGraph = final.runCommand "stateMachineGraph"
+        { buildInputs = [ final.nodejs ]; }
+        ''
+          node -e 'require("${purs.default}/CirclesPink.GenGraph").main()' $out
+        '';
+
+      publicDir = final.runCommand "output" { } ''
+        cp -r ${ts.builds.storybook} $out
+        chmod -R +w $out
+        cp -r ${final.runCommand "assets" {} ''mkdir $out''} $out/assets
+      '';
     };
 })
