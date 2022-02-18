@@ -37,10 +37,15 @@ patchTsTypes:
 
 generate: materialize spago-build purs-tsd-gen patchTsTypes
 
+assets: generate
+	mkdir -p ./pkgs/ts/assets/src/ && \
+	node -e 'require("./output/CirclesPink.GenGraph").main()' "./pkgs/ts/assets/src/circles-state-machine.dot" && \
+	dot -Tsvg ./pkgs/ts/assets/src/circles-state-machine.dot > ./pkgs/ts/assets/src/circles-state-machine.svg
+
 rw-result:
 	rm -rf rw-result
 	cp -r -H --dereference result/ rw-result
 	chmod -R 777 rw-result
 
 ci: generate
-	nix -L build .#ts.builds.storybook
+	nix -L build .#publicDir

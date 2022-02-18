@@ -10,6 +10,7 @@
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
         pursOutput = purs.default;
+        inherit assets;
       });
 
       patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
@@ -19,16 +20,26 @@
 
       purs = (import ./pkgs/purs.nix { pkgs = final; });
 
-      stateMachineGraph = final.runCommand "stateMachineGraph"
+      stateMachineGraphDot = final.runCommand "stateMachineGraph"
         { buildInputs = [ final.nodejs ]; }
         ''
           node -e 'require("${purs.default}/CirclesPink.GenGraph").main()' $out
         '';
 
+      stateMachineGraphSvg = final.runCommand "stateMachineGraph"
+        { buildInputs = [ final.graphviz ]; }
+        ''
+          dot -Tsvg ${stateMachineGraphDot} > $out
+        '';
+
+      assets = final.runCommand "assets" { } ''
+        mkdir $out
+        cp ${stateMachineGraphDot} $out/circles-state-machine.dot
+        cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
+      '';
+
       publicDir = final.runCommand "output" { } ''
         cp -r ${ts.builds.storybook} $out
-        chmod -R +w $out
-        cp -r ${final.runCommand "assets" {} ''mkdir $out''} $out/assets
       '';
     };
 })

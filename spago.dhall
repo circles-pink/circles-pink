@@ -24,6 +24,8 @@ to generate this file without the comments in this block.
   , "http-methods"
   , "maybe"
   , "milkis"
+  , "node-buffer"
+  , "node-fs"
   , "node-process"
   , "prelude"
   , "promises"
