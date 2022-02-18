@@ -90,8 +90,9 @@
 
       chmod -R +w $tmp
 
-      mkdir -p $tmp/node_modules/storybook/node_modules/assets
-      cp -r ${assets} $tmp/node_modules/storybook/node_modules/assets/src
+      rm $tmp/node_modules/assets
+      mkdir -p $tmp/node_modules/assets
+      cp -r ${assets} $tmp/node_modules/assets/src
 
       chmod -R +w $tmp
 
@@ -105,6 +106,7 @@
       chmod -R +w $tmp
 
       cp -r $tmp/dist $out
+
     '';
   };
 
