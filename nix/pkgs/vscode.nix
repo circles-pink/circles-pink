@@ -16,6 +16,20 @@ let
       version = "0.2.7";
       sha256 = "sha256-cQnFWzqA4eBbjDiZGDFtg0/FUXf5weYOeZ1GiooYn9g=";
     }
+
+    {
+      name = "vscode-dhall-lsp-server";
+      publisher = "dhall";
+      version = "0.0.4";
+      sha256 = "sha256-WopWzMCtiiLrx3pHNiDMZYFdjS359vu3T+6uI5A+Nv4=";
+    }
+
+    {
+      name = "dhall-lang";
+      publisher = "dhall";
+      version = "0.0.4";
+      sha256 = "sha256-7vYQ3To2hIismo9IQWRWwKsu4lXZUh0Or89WDLMmQGk=";
+    }
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {

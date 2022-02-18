@@ -79,6 +79,8 @@
               pkgs.gnumake
               pkgs.fff
               pkgs.nodePackages.prettier
+              pkgs.dhall
+              pkgs.dhall-lsp-server
             ];
 
             # Change the prompt to show that you are in a devShell
