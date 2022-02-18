@@ -7,10 +7,13 @@ import Data.Variant (Variant)
 
 type CirclesAction
   = Variant
-      ( state1 ::
+      ( infoGeneral ::
           Variant
-            ( action1 :: Int
-            , action2 :: Boolean
+            ( next :: Unit
             )
-      , state2 :: Variant ()
+      , askUsername ::
+          Variant
+            ( prev :: Unit
+            , setUsername :: String
+            )
       )

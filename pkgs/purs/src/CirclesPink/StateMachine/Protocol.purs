@@ -7,10 +7,13 @@ import Type.Data.List (type (:>), Nil')
 
 type CirclesProtocol
   = P.Protocol
-      ( state1 ::
+      ( infoGeneral ::
           P.State
-            ( action1 :: P.Action Nil'
-            , action2 :: P.Action ("state2" :> "state1" :> Nil')
+            ( next :: P.Action ("askUsername" :> Nil')
             )
-      , state2 :: P.State ()
+      , askUsername ::
+          P.State
+            ( prev :: P.Action ("infoGeneral" :> Nil')
+            , setUsername :: P.Action ("askUsername" :> Nil')
+            )
       )
