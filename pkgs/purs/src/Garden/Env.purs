@@ -3,13 +3,13 @@ module Garden.Env
   ) where
 
 import Prelude
-import Core.State.Onboard as O
 import Data.Argonaut (encodeJson)
 import Data.HTTP.Method (Method(..))
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
+import CirclesPink.StateMachine.Control as C
 
-env :: { request :: ReqFn } -> O.Env Aff
+env :: { request :: ReqFn } -> C.Env Aff
 env { request } =
   { apiCheckUserName:
       \username ->

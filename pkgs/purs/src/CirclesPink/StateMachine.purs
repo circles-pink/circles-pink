@@ -1,6 +1,7 @@
 module CirclesPink.StateMachine
   ( CirclesStateMachine
   , check
+  , _circlesStateMachine
   ) where
 
 import Prelude
@@ -15,6 +16,9 @@ type CirclesStateMachine
       P.CirclesProtocol
       S.CirclesState
       A.CirclesAction
+
+_circlesStateMachine :: Proxy CirclesStateMachine
+_circlesStateMachine = Proxy :: _ CirclesStateMachine
 
 check :: Unit
 check = STM.validate (Proxy :: _ CirclesStateMachine)
