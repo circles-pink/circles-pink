@@ -15,8 +15,8 @@ type Env m
     , apiCheckEmail :: String -> m Boolean
     }
 
-circlesControl :: forall m. Monad m => (CirclesState -> m Unit) -> CirclesState -> CirclesAction -> m Unit
-circlesControl =
+circlesControl :: forall m. Monad m => Env m -> (CirclesState -> m Unit) -> CirclesState -> CirclesAction -> m Unit
+circlesControl env =
   C.mkControl
     _circlesStateMachine
     { infoGeneral:

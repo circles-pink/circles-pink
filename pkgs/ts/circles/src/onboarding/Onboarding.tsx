@@ -6,9 +6,14 @@ import { DialogCard } from './DialogCard';
 import * as GardenEnv from 'generated/output/Garden.Env';
 import { milkisRequest } from 'generated/output/HTTP.Milkis';
 import { windowFetch } from 'generated/output/Milkis.Impl.Window';
+import { circlesControlEff } from 'generated/output/CirclesPink.TS';
+import { init } from 'generated/output/CirclesPink.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.StateMachine.Action';
+
 
 //import * as StateOnboardTS from "generated/output/Core.State.Onboard.TS";
 import { StateMachine, useStateMachine } from './useStateMachine';
+import { unit } from 'generated/output/Data.Unit';
 //import * as StateOnboard from "generated/output/Core.State.Onboard";
 
 // const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
@@ -16,8 +21,50 @@ import { StateMachine, useStateMachine } from './useStateMachine';
 //     request: milkisRequest(windowFetch)
 //   }))
 
+const control = circlesControlEff(GardenEnv.env({
+  request: milkisRequest(windowFetch)
+}))
+
 export const Onboarding = () => {
-  return <div>.....</div>
+  const [state, act] = useStateMachine(init, control);
+
+
+  switch (state.type) {
+    case "infoGeneral": return (
+
+      <DialogCard
+        title="Welcome to Circles"
+        sub="Let's get you a circles Wallet!"
+        next={{
+          act,
+          msg: A._infoGeneral(A._next(unit)),
+          label: "Next"
+        }}
+      />
+
+    )
+    case "askUsername": return (
+      <DialogCard
+        title="Tell me your Name!"
+        sub="Choose wisely, you can not change it later!"
+        username={{
+          act,
+          placeholder: 'Your amazing username',
+          value: state.value.username
+        }}
+        // next={{
+        //   act,
+        //   msg: A._askUsername(A._next(unit)),
+        //   label: "Next"
+        // }}
+        back={{
+          act,
+          msg: A._askUsername(A._prev(unit)),
+          label: "Back"
+        }}
+      />
+    )
+  }
 }
 
 // export const Onboarding = (): ReactElement => {
