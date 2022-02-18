@@ -26,12 +26,14 @@ to generate this file without the comments in this block.
   , "prelude"
   , "promises"
   , "psci-support"
+  , "stadium"
   , "transformers"
   , "tuples"
   , "type-equality"
+  , "typelevel-lists"
   , "undefined"
   , "unsafe-coerce"
-  , "stadium"
+  , "variant"
   ]
 , packages = ./packages.dhall
 , sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]
