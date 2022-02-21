@@ -35,7 +35,7 @@
       makefileGraphSvg = final.runCommand "makefileGraphSvg"
         { buildInputs = [ final.graphviz final.makefile2graph final.gnumake ]; }
         ''
-          make -Bnd ${../Makefile} | make2graph | dot -Tsvg -o $out
+          make -Bnd -f ${../Makefile} | make2graph | dot -Tsvg -o $out
         '';
 
       assets = final.runCommand "assets" { } ''
