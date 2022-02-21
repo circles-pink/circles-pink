@@ -82,6 +82,7 @@
               pkgs.dhall
               pkgs.dhall-lsp-server
               pkgs.graphviz
+              pkgs.makefile2graph
             ];
 
             # Change the prompt to show that you are in a devShell

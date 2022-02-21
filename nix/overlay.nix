@@ -32,10 +32,17 @@
           dot -Tsvg ${stateMachineGraphDot} > $out
         '';
 
+      makefileGraphSvg = final.runCommand "makefileGraphSvg"
+        { buildInputs = [ final.graphviz final.make2graph finak.gnumake ]; }
+        ''
+          make -Bnd | make2graph | dot -Tsvg -o $out
+        '';
+
       assets = final.runCommand "assets" { } ''
         mkdir $out
         cp ${stateMachineGraphDot} $out/circles-state-machine.dot
         cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
+        cp ${makefileGraphSvg} $out/circles-makefile.svg
       '';
 
       publicDir = final.runCommand "output" { } ''
