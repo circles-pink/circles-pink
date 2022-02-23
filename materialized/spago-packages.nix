@@ -785,6 +785,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "remotedata" = pkgs.stdenv.mkDerivation {
+        name = "remotedata";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/krisajenkins/purescript-remotedata.git";
+          rev = "cc9932a6c19262d8e4217c534c658a127562c14c";
+          sha256 = "1kr4wbsqd3kaf8c4w13m988602qvcm3262v0aij01jrms4p1x92q";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "safe-coerce" = pkgs.stdenv.mkDerivation {
         name = "safe-coerce";
         version = "v1.0.0";

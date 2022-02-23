@@ -32,6 +32,9 @@ const AskUsername = tw.input`${inputStyle}`;
 export const Onboarding = () => {
   const [state, act] = useStateMachine(init, control);
 
+  console.log(state);
+
+
   switch (state.type) {
     case "infoGeneral": return (
 

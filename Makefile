@@ -34,13 +34,14 @@ spago-build: spago-clean
 	cp -r output -t generated
 
 purs-tsd-gen:
-	purs-tsd-gen --directory generated/output && \
-	cp -r generated/output pkgs/ts/generated
+	purs-tsd-gen --directory generated/output
 
 patchTsTypes: yarn-install 
-	patchTsTypes $(PWD)/pkgs/ts/generated/output
+	patchTsTypes $(PWD)/generated/output
 
-assets: generate
+assets: generate assets-nd
+	
+assets-nd:
 	mkdir -p ./pkgs/ts/assets/src/ && \
 	node -e 'require("./output/CirclesPink.GenGraph").main()' "./pkgs/ts/assets/src/circles-state-machine.dot" && \
 	dot -Tsvg ./pkgs/ts/assets/src/circles-state-machine.dot > ./pkgs/ts/assets/src/circles-state-machine.svg && \
@@ -51,7 +52,15 @@ rw-result:
 	cp -r -H --dereference result/ rw-result
 	chmod -R 777 rw-result
 
-generate: materialize clean-generate spago-build purs-tsd-gen patchTsTypes
+generate: materialize clean-generate generate-nd
+	
+
+generate-nd:
+	make spago-build 
+	make purs-tsd-gen
+	make patchTsTypes
+	cp -r generated/output pkgs/ts/generated
+
 
 ci: materialize
 	nix -L build .#publicDir

@@ -1,23 +1,19 @@
 module CirclesPink.StateMachine.State
   ( CirclesState
   , UserData
-  , UsernameCheckResult
   , _askUsername
   , _infoGeneral
   , init
   ) where
 
+import Prelude
 import Data.Variant (Variant, inj)
+import Network.RemoteData (RemoteData(..))
 import Type.Proxy (Proxy(..))
-
-type UsernameCheckResult
-  = { username :: String
-    , isValid :: Boolean
-    }
 
 type UserData
   = { username :: String
-    , usernameCheckResult :: UsernameCheckResult
+    , usernameApiResult :: RemoteData Unit Unit
     }
 
 type CirclesState
@@ -30,10 +26,7 @@ init :: CirclesState
 init =
   _infoGeneral
     { username: ""
-    , usernameCheckResult:
-        { username: ""
-        , isValid: false
-        }
+    , usernameApiResult: NotAsked
     }
 
 _infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )

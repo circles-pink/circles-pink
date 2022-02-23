@@ -3,24 +3,33 @@ module Garden.Env
   ) where
 
 import Prelude
-import Data.Argonaut (encodeJson)
+import CirclesPink.StateMachine.Control as C
+import Data.Argonaut (JsonDecodeError, decodeJson, encodeJson)
+import Data.Either (Either)
 import Data.HTTP.Method (Method(..))
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
-import CirclesPink.StateMachine.Control as C
 
 env :: { request :: ReqFn } -> C.Env Aff
 env { request } =
   { apiCheckUserName:
       \username ->
         request
-          { url: "https://api.circles.garden/api/users"
+          { url: "https://api.circles.garden/api/usersx"
           , method: POST
           , body: encodeJson { username }
           }
-          <#> ( \{ status } -> case status of
-                200 -> true
-                _ -> false
+          <#> ( \{ status, body } ->
+                let
+                  result :: Either JsonDecodeError { username :: String }
+                  result = decodeJson body
+                in
+                  { username: username
+                  , isValid:
+                      case status of
+                        200 -> true
+                        _ -> false
+                  }
             )
   , apiCheckEmail:
       \email ->
