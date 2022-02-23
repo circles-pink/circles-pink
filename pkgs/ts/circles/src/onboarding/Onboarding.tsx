@@ -34,7 +34,6 @@ export const Onboarding = () => {
 
   console.log(state);
 
-
   switch (state.type) {
     case "infoGeneral": return (
 

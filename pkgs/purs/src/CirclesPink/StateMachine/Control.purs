@@ -13,6 +13,8 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Variant (Variant)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
@@ -25,7 +27,7 @@ type Env m
     , apiCheckEmail :: String -> ExceptV (CirclesError + ()) m Boolean
     }
 
-circlesControl :: forall m. Monad m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
+circlesControl :: forall m. MonadEffect m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
 circlesControl env =
   C.mkControl
     _circlesStateMachine
@@ -35,10 +37,13 @@ circlesControl env =
         { prev: \set _ _ -> set $ \st -> S._infoGeneral st
         , setUsername:
             \set _ x -> do
+              log "hello1"
               set $ \st -> S._askUsername st { username = x }
+              log "hello2"
               set
                 $ \st ->
                     S._askUsername st { usernameApiResult = _loading :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean } }
+              log "hello3"
               result <- runExceptT $ env.apiCheckUserName x
               set
                 $ \st ->

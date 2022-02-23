@@ -13,6 +13,7 @@ import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff)
+import Effect.Class.Console (logShow)
 import HTTP (NetworkError, Req, ReqFn, Res, _errUnknown)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -30,10 +31,18 @@ env { request } =
   { apiCheckUserName:
       \username ->
         request
-          { url: "https://api.circles.gardenx/api/usersx"
+          { url: "https://api.circles.garden/api/users"
           , method: POST
           , body: encodeJson { username }
           }
+          -- <#> ( \x -> do
+          
+          --       logShow x
+          
+          --       pure x
+          
+          --   )
+          
           # runExceptT
           <#> ( \result -> case result of
                 Left e -> Left e

@@ -797,18 +797,6 @@ let
         installPhase = "ln -s $src $out";
       };
 
-    "remotedata" = pkgs.stdenv.mkDerivation {
-        name = "remotedata";
-        version = "v5.0.0";
-        src = pkgs.fetchgit {
-          url = "https://github.com/krisajenkins/purescript-remotedata.git";
-          rev = "cc9932a6c19262d8e4217c534c658a127562c14c";
-          sha256 = "1kr4wbsqd3kaf8c4w13m988602qvcm3262v0aij01jrms4p1x92q";
-        };
-        phases = "installPhase";
-        installPhase = "ln -s $src $out";
-      };
-
     "safe-coerce" = pkgs.stdenv.mkDerivation {
         name = "safe-coerce";
         version = "v1.0.0";
@@ -835,11 +823,11 @@ let
 
     "stadium" = pkgs.stdenv.mkDerivation {
         name = "stadium";
-        version = "cda29ba09046a0686b3968f38a863d77eccc9448";
+        version = "12c2f084ef9828f5b9636c87129a8eb565e08f44";
         src = pkgs.fetchgit {
           url = "https://github.com/circles-pink/purescript-stadium.git";
-          rev = "cda29ba09046a0686b3968f38a863d77eccc9448";
-          sha256 = "082fqr2mx26m6xv4lihgjfxlqiyr2zgl0jzzaxhikxyhxi27wxx5";
+          rev = "12c2f084ef9828f5b9636c87129a8eb565e08f44";
+          sha256 = "1bfk6nvd2zn10yky7lif09jxcyqzxgi84vwbphdjb713bdc7cnd6";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
