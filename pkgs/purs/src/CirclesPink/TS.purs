@@ -10,5 +10,5 @@ import Effect.Class (liftEffect)
 import Undefined (undefined)
 
 --- type StateMachine = (s -> Effect Unit) -> m -> s -> Effect Unit
-circlesControlEff :: Env Aff -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+--circlesControlEff :: Env Aff -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 circlesControlEff e f s a = circlesControl e (liftEffect <<< f) s a # launchAff_

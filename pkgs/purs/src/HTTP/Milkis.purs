@@ -4,12 +4,14 @@ module HTTP.Milkis
   ) where
 
 import Prelude
+import Control.Monad.Except (ExceptT(..), except, lift)
 import Data.Argonaut (stringify)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
-import Effect.Aff (catchError)
-import HTTP (NetworkError(..), ReqFn)
-import Milkis (URL(..), fetch)
+import Data.Variant (Variant)
+import Effect.Aff (Aff, catchError)
+import HTTP (NetworkError(..), ReqFn, _errUnknown)
+import Milkis (Response, URL(..), fetch)
 import Milkis as M
 import Milkis.Impl (FetchImpl)
 import Unsafe.Coerce (unsafeCoerce)
@@ -22,7 +24,7 @@ matchMethod = case _ of
   DELETE -> M.deleteMethod
   _ -> M.getMethod
 
-milkisRequest :: FetchImpl -> ReqFn
+milkisRequest :: forall r. FetchImpl -> ReqFn r
 milkisRequest fetchImpl { url, method, body } =
   fetch fetchImpl (URL url)
     { method: matchMethod method
@@ -34,4 +36,5 @@ milkisRequest fetchImpl { url, method, body } =
             , status: M.statusCode res
             }
       )
-    # \m -> catchError m (\e -> pure $ Left ErrUnknown)
+    # (\m -> catchError m (\_ -> pure $ Left _errUnknown))
+    # ExceptT

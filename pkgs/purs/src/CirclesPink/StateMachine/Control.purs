@@ -9,20 +9,20 @@ import CirclesPink.StateMachine.Action (CirclesAction)
 import CirclesPink.StateMachine.State (CirclesState)
 import CirclesPink.StateMachine.State as S
 import CirlesPink.StateMachine.Error (CirclesError)
-import Data.Either (Either)
-import Network.RemoteData (RemoteData(..))
+import Control.Monad.Except (runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
+import Data.Either (Either(..))
+import Data.Variant (Variant)
+import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
+import Type.Row (type (+))
 import Undefined (undefined)
 
 type Env m
   = { apiCheckUserName ::
         String ->
-        m
-          ( Either
-              CirclesError
-              { username :: String, isValid :: Boolean }
-          )
-    , apiCheckEmail :: String -> m Boolean
+        ExceptV (CirclesError + ()) m { isValid :: Boolean }
+    , apiCheckEmail :: String -> ExceptV (CirclesError + ()) m Boolean
     }
 
 circlesControl :: forall m. Monad m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
@@ -36,20 +36,17 @@ circlesControl env =
         , setUsername:
             \set _ x -> do
               set $ \st -> S._askUsername st { username = x }
-        -- set $ \st -> S._askUsername st { usernameApiResult = Loading }
-        -- result <- env.apiCheckUserName x
-        -- set
-        --   $ \st -> undefined
-        -- if result.username == st.username then
-        --   S._askUsername
-        --     st
-        --       { usernameApiResult =
-        --         if result.isValid then
-        --           Success unit
-        --         else
-        --           Failure unit
-        --       }
-        -- else
-        --   S._askUsername st
+              set
+                $ \st ->
+                    S._askUsername st { usernameApiResult = _loading :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean } }
+              result <- runExceptT $ env.apiCheckUserName x
+              set
+                $ \st ->
+                    if x == st.username then case result of
+                      Left e -> S._askUsername st { usernameApiResult = _failure e }
+                      Right x -> S._askUsername st { usernameApiResult = _success x }
+                    else
+                      S._askUsername st
+              pure unit
         }
     }

@@ -14,7 +14,7 @@ import Type.Proxy (Proxy(..))
 
 type UserData
   = { username :: String
-    , usernameApiResult :: RemoteData CirclesError { isValid :: Boolean }
+    , usernameApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
     }
 
 type CirclesState
