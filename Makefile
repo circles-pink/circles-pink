@@ -20,7 +20,8 @@ clean-install:
 clean-materialized:
 	rm -rf materialized
 
-materialize: clean-materialized spago2nix
+materialize: clean-materialized
+	make spago2nix
 
 clean-generate:
 	rm -rf generated;

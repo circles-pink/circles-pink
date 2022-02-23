@@ -14,6 +14,7 @@ import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 //import * as StateOnboardTS from "generated/output/Core.State.Onboard.TS";
 import { StateMachine, useStateMachine } from './useStateMachine';
 import { unit } from 'generated/output/Data.Unit';
+import tw from 'twin.macro';
 //import * as StateOnboard from "generated/output/Core.State.Onboard";
 
 // const myStateMachine: StateMachine<StateOnboard.State, StateOnboard.Msg>
@@ -27,6 +28,9 @@ const control = circlesControlEff(GardenEnv.env({
 
 export const Onboarding = () => {
   const [state, act] = useStateMachine(init, control);
+
+  const inputStyle = 'shadow appearance-none border border-pink-600 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight w-full'
+  const AskUsername = tw.input`${inputStyle}`;
 
 
   switch (state.type) {
@@ -47,11 +51,6 @@ export const Onboarding = () => {
       <DialogCard
         title="Tell me your Name!"
         sub="Choose wisely, you can not change it later!"
-        username={{
-          act,
-          placeholder: 'Your amazing username',
-          value: state.value.username
-        }}
         // next={{
         //   act,
         //   msg: A._askUsername(A._next(unit)),
@@ -62,7 +61,13 @@ export const Onboarding = () => {
           msg: A._askUsername(A._prev(unit)),
           label: "Back"
         }}
-      />
+      >
+        <AskUsername type="text"
+          value={state.value.username}
+          placeholder={'Your amazing username'}
+          onChange={(e) => A._askUsername(A._setUsername(e.target.value))}
+        />
+      </DialogCard>
     )
   }
 }
