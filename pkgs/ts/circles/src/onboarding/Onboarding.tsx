@@ -26,12 +26,11 @@ const control = circlesControlEff(GardenEnv.env({
   request: milkisRequest(windowFetch)
 }))
 
+const inputStyle = 'shadow appearance-none border border-pink-600 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight w-full'
+const AskUsername = tw.input`${inputStyle}`;
+
 export const Onboarding = () => {
   const [state, act] = useStateMachine(init, control);
-
-  const inputStyle = 'shadow appearance-none border border-pink-600 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight w-full'
-  const AskUsername = tw.input`${inputStyle}`;
-
 
   switch (state.type) {
     case "infoGeneral": return (
@@ -65,7 +64,7 @@ export const Onboarding = () => {
         <AskUsername type="text"
           value={state.value.username}
           placeholder={'Your amazing username'}
-          onChange={(e) => A._askUsername(A._setUsername(e.target.value))}
+          onChange={(e) => act(A._askUsername(A._setUsername(e.target.value)))}
         />
       </DialogCard>
     )
