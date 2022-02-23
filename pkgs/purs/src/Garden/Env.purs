@@ -5,17 +5,15 @@ module Garden.Env
 import Prelude
 import CirclesPink.StateMachine.Control as C
 import CirlesPink.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), except, mapExcept, mapExceptT, runExceptT)
-import Control.Monad.Except.Checked (ExceptV)
-import Data.Argonaut (class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson)
+import Control.Monad.Except (ExceptT(..), runExceptT)
+import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Variant (Variant, inj)
 import Debug (spy)
 import Effect.Aff (Aff)
-import Effect.Class.Console (logShow)
-import HTTP (NetworkError, Req, ReqFn, Res, _errUnknown)
+import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Undefined (undefined)
@@ -32,18 +30,10 @@ env { request } =
   { apiCheckUserName:
       \username ->
         request
-          { url: "https://api.circles.garden/api/users"
+          { url: "https://api.circles.garden/api/users/"
           , method: POST
           , body: encodeJson { username }
           }
-          -- <#> ( \x -> do
-          
-          --       logShow x
-          
-          --       pure x
-          
-          --   )
-          
           # runExceptT
           <#> ( spy "log"
             )

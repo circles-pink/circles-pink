@@ -18,7 +18,6 @@ import Effect.Class.Console (log)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
-import Undefined (undefined)
 
 type Env m
   = { apiCheckUserName ::

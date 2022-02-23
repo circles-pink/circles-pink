@@ -63,11 +63,17 @@ export const Onboarding = () => {
           label: "Back"
         }}
       >
-        <AskUsername type="text"
-          value={state.value.username}
-          placeholder={'Your amazing username'}
-          onChange={(e) => act(A._askUsername(A._setUsername(e.target.value)))}
-        />
+        <>
+          <AskUsername type="text"
+            value={state.value.username}
+            placeholder={'Your amazing username'}
+            onChange={(e) => act(A._askUsername(A._setUsername(e.target.value)))}
+          />
+          <pre>
+            {console.log(state.value)}
+            {JSON.stringify(state.value.usernameApiResult, null, 2)}
+          </pre>
+        </>
       </DialogCard>
     )
   }

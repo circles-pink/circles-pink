@@ -11,7 +11,7 @@ import Data.HTTP.Method (Method(..))
 import Data.Variant (Variant)
 import Effect.Aff (Aff, catchError)
 import HTTP (NetworkError(..), ReqFn, _errUnknown)
-import Milkis (Response, URL(..), fetch)
+import Milkis (Response, URL(..), fetch, makeHeaders)
 import Milkis as M
 import Milkis.Impl (FetchImpl)
 import Unsafe.Coerce (unsafeCoerce)
@@ -29,6 +29,10 @@ milkisRequest fetchImpl { url, method, body } =
   fetch fetchImpl (URL url)
     { method: matchMethod method
     , body: stringify body
+    , headers:
+        makeHeaders
+          { "Content-Type": "application/json"
+          }
     }
     >>= ( \res -> do
           res' <- M.json res
