@@ -30,11 +30,13 @@ milkisRequest fetchImpl { url, method, body } =
     { method: matchMethod method
     , body: stringify body
     }
-    <#> ( \res ->
-          Right
-            { body: unsafeCoerce $ M.json res
-            , status: M.statusCode res
-            }
+    >>= ( \res -> do
+          res' <- M.json res
+          pure
+            $ Right
+                { body: unsafeCoerce res'
+                , status: M.statusCode res
+                }
       )
     # (\m -> catchError m (\_ -> pure $ Left _errUnknown))
     # ExceptT

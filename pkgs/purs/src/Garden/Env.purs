@@ -12,6 +12,7 @@ import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Variant (Variant, inj)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class.Console (logShow)
 import HTTP (NetworkError, Req, ReqFn, Res, _errUnknown)
@@ -44,6 +45,8 @@ env { request } =
           --   )
           
           # runExceptT
+          <#> ( spy "log"
+            )
           <#> ( \result -> case result of
                 Left e -> Left e
                 Right x

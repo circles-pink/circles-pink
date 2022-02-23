@@ -19,6 +19,7 @@ to generate this file without the comments in this block.
   , "bifunctors"
   , "checked-exceptions"
   , "console"
+  , "debug"
   , "effect"
   , "either"
   , "foldable-traversable"
