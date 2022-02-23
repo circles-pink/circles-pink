@@ -1,15 +1,17 @@
-module HTTP.Milkis where
+module HTTP.Milkis
+  ( matchMethod
+  , milkisRequest
+  ) where
 
 import Prelude
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, encodeJson, stringify)
+import Data.Argonaut (stringify)
+import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
-import Effect.Aff (Aff)
-import HTTP (ReqFn)
+import Effect.Aff (catchError)
+import HTTP (NetworkError(..), ReqFn)
 import Milkis (URL(..), fetch)
 import Milkis as M
 import Milkis.Impl (FetchImpl)
-import Milkis.Impl.Window (windowFetch)
-import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
 
 matchMethod :: Method -> M.Method
@@ -22,12 +24,14 @@ matchMethod = case _ of
 
 milkisRequest :: FetchImpl -> ReqFn
 milkisRequest fetchImpl { url, method, body } =
-  ( \res ->
-      { body: unsafeCoerce $ M.json res
-      , status: M.statusCode res
-      }
-  )
-    <$> fetch fetchImpl (URL url)
-        { method: matchMethod method
-        , body: stringify body
-        }
+  fetch fetchImpl (URL url)
+    { method: matchMethod method
+    , body: stringify body
+    }
+    <#> ( \res ->
+          Right
+            { body: unsafeCoerce $ M.json res
+            , status: M.statusCode res
+            }
+      )
+    # \m -> catchError m (\e -> pure $ Left ErrUnknown)

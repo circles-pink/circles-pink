@@ -1,8 +1,12 @@
 module HTTP
-  ( Req, ReqFn, Res
+  ( NetworkError(..)
+  , Req
+  , ReqFn
+  , Res
   ) where
 
 import Data.Argonaut (Json)
+import Data.Either (Either)
 import Data.HTTP.Method (Method)
 import Effect.Aff (Aff)
 
@@ -12,5 +16,8 @@ type Req
 type Res
   = { status :: Int, body :: Json }
 
+data NetworkError
+  = ErrUnknown
+
 type ReqFn
-  = Req -> Aff Res
+  = Req -> Aff (Either NetworkError Res)
