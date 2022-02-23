@@ -25,7 +25,10 @@ materialize: clean-materialized spago2nix
 clean-generate:
 	rm -rf generated;
 
-spago-build:
+spago-clean:
+	rm -rf .spago output
+
+spago-build: spago-clean
 	spago build
 	mkdir -p generated
 	cp -r output -t generated

@@ -15,14 +15,14 @@ type Env m
     , apiCheckEmail :: String -> m Boolean
     }
 
-circlesControl :: forall m. Monad m => Env m -> (CirclesState -> m Unit) -> CirclesState -> CirclesAction -> m Unit
+circlesControl :: forall m. Monad m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
 circlesControl env =
   C.mkControl
     _circlesStateMachine
     { infoGeneral:
-        { next: \set st _ -> set $ S._askUsername st }
+        { next: \set _ _ -> set $ \st -> S._askUsername st }
     , askUsername:
-        { prev: \set st _ -> set $ S._infoGeneral st
-        , setUsername: \set st x -> set $ S._askUsername st { username = x }
+        { prev: \set _ _ -> set $ \st -> S._infoGeneral st
+        , setUsername: \set _ x -> set $ \st -> S._askUsername st { username = x }
         }
     }

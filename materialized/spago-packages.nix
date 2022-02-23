@@ -811,10 +811,10 @@ let
 
     "stadium" = pkgs.stdenv.mkDerivation {
         name = "stadium";
-        version = "v0.1.0-rc1";
+        version = "9f5b70e987c07d698c4f691ff45ba44650c6d8bb";
         src = pkgs.fetchgit {
           url = "https://github.com/circles-pink/purescript-stadium.git";
-          rev = "dedb6c513db2acc9e6ffc5313444d649acc5505a";
+          rev = "9f5b70e987c07d698c4f691ff45ba44650c6d8bb";
           sha256 = "1j7lm9g5kzck7f5dl6bfrdwq4jx97avfkhvap4saflmj76hb3zg2";
         };
         phases = "installPhase";
