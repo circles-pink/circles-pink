@@ -17,7 +17,6 @@ import Effect.Class (class MonadEffect)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
-import Undefined (undefined)
 
 type Env m
   = { apiCheckUserName ::
@@ -54,7 +53,17 @@ circlesControl env =
         , next:
             \set _ _ ->
               set
-                $ \st -> undefined
+                $ \st ->
+                    let
+                      usernameValid =
+                        default false
+                          # onMatch
+                              { success: (\r -> r.isValid) }
+                    in
+                      if usernameValid st.usernameApiResult then
+                        S._askEmail st
+                      else
+                        S._askUsername st
         }
     , askEmail:
         { prev: \set _ _ -> set $ \st -> S._askUsername st
@@ -73,5 +82,23 @@ circlesControl env =
                     else
                       S._askEmail st
               pure unit
+        , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
+        , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
+        , next:
+            \set _ _ ->
+              set
+                $ \st ->
+                    let
+                      emailValid =
+                        default false
+                          # onMatch
+                              { success: (\r -> r.isValid) }
+                    in
+                      if (emailValid st.emailApiResult) && st.terms && st.privacy then
+                        S._infoSecurity st
+                      else
+                        S._askEmail st
         }
+    , infoSecurity:
+        { prev: \set _ _ -> set $ \st -> S._askEmail st }
     }

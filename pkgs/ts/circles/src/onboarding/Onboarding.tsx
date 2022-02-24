@@ -14,6 +14,7 @@ import { useStateMachine } from './useStateMachine';
 import { AskUsername } from './view/AskUsername';
 import { InfoGeneral } from './view/InfoGeneral';
 import { AskEmail } from './view/AskEmail';
+import { InfoSecurity } from './view/InfoSecurity';
 
 const control = circlesControlEff(
   GardenEnv.env({
@@ -41,12 +42,18 @@ export const Onboarding = (): ReactElement => {
       return (
         <AskEmail
           email={state.value.email}
-          debug={JSON.stringify(state.value.emailApiResult, null, 2)}
+          terms={state.value.terms}
+          privacy={state.value.privacy}
           setEmail={(n: string) => act(A._askEmail(A._setEmail(n)))}
+          setTerms={() => act(A._askEmail(A._setTerms(unit)))}
+          setPrivacy={() => act(A._askEmail(A._setPrivacy(unit)))}
           back={() => act(A._askEmail(A._prev(unit)))}
-          // next={() => act(A._askEmail(A._next(unit)))}
+          next={() => act(A._askEmail(A._next(unit)))}
+          debug={JSON.stringify(state.value.emailApiResult, null, 2)}
         />
       );
+    case 'infoSecurity':
+      return <InfoSecurity back={() => act(A._infoSecurity(A._prev(unit)))} />;
     default:
       return <h2>Invalid State</h2>;
   }
