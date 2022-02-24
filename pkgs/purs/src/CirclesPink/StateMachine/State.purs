@@ -1,6 +1,5 @@
 module CirclesPink.StateMachine.State where
 
-import Prelude
 import CirlesPink.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
@@ -11,6 +10,8 @@ type UserData
     , usernameApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
     , email :: String
     , emailApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
+    , terms :: Boolean
+    , privacy :: Boolean
     }
 
 type CirclesState
@@ -18,6 +19,7 @@ type CirclesState
       ( infoGeneral :: UserData
       , askUsername :: UserData
       , askEmail :: UserData
+      , infoSecurity :: UserData
       )
 
 init :: CirclesState
@@ -27,6 +29,8 @@ init =
     , usernameApiResult: _notAsked
     , email: ""
     , emailApiResult: _notAsked
+    , terms: false
+    , privacy: false
     }
 
 _infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )
@@ -37,3 +41,6 @@ _askUsername = inj (Proxy :: _ "askUsername")
 
 _askEmail :: forall a v. a -> Variant ( askEmail :: a | v )
 _askEmail = inj (Proxy :: _ "askEmail")
+
+_infoSecurity :: forall a v. a -> Variant ( infoSecurity :: a | v )
+_infoSecurity = inj (Proxy :: _ "infoSecurity")

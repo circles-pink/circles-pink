@@ -20,6 +20,13 @@ type CirclesAction
           Variant
             ( prev :: Unit
             , setEmail :: String
+            , setTerms :: Unit
+            , setPrivacy :: Unit
+            , next :: Unit
+            )
+      , infoSecurity ::
+          Variant
+            ( prev :: Unit
             )
       )
 
@@ -33,6 +40,9 @@ _askUsername = inj (Proxy :: _ "askUsername")
 _askEmail :: forall a v. a -> Variant ( askEmail :: a | v )
 _askEmail = inj (Proxy :: _ "askEmail")
 
+_infoSecurity :: forall a v. a -> Variant ( infoSecurity :: a | v )
+_infoSecurity = inj (Proxy :: _ "infoSecurity")
+
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )
 _next = inj (Proxy :: _ "next")
@@ -45,3 +55,9 @@ _setUsername = inj (Proxy :: _ "setUsername")
 
 _setEmail :: forall a v. a -> Variant ( setEmail :: a | v )
 _setEmail = inj (Proxy :: _ "setEmail")
+
+_setTerms :: forall a v. a -> Variant ( setTerms :: a | v )
+_setTerms = inj (Proxy :: _ "setTerms")
+
+_setPrivacy :: forall a v. a -> Variant ( setPrivacy :: a | v )
+_setPrivacy = inj (Proxy :: _ "setPrivacy")
