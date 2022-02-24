@@ -30,6 +30,13 @@ let
       version = "0.0.4";
       sha256 = "sha256-7vYQ3To2hIismo9IQWRWwKsu4lXZUh0Or89WDLMmQGk=";
     }
+
+    {
+      name = "mdx";
+      publisher = "silvenon";
+      version = "0.1.0";
+      sha256 = "sha256-4zdlvH91dTFKWBnHyjFEzBuT8g/dBzgNQpK2D/bD+tc=";
+    }
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {
