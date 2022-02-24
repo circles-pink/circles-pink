@@ -3,4 +3,6 @@
         "statusBar.background": "#6c0075",
         "statusBar.foreground": "#ffffff",
     },
+    "purescript.outputDirectory": "pkgs/ts/generated/output/",
+    "purescript.buildCommand": "spago build --purs-args '--json-errors --output pkgs/ts/generated/output'",
 }
