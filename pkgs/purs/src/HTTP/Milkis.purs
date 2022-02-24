@@ -4,14 +4,13 @@ module HTTP.Milkis
   ) where
 
 import Prelude
-import Control.Monad.Except (ExceptT(..), except, lift)
+import Control.Monad.Except (ExceptT(..))
 import Data.Argonaut (stringify)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
-import Data.Variant (Variant)
-import Effect.Aff (Aff, catchError)
-import HTTP (NetworkError(..), ReqFn, _errUnknown)
-import Milkis (Response, URL(..), fetch, makeHeaders)
+import Effect.Aff (catchError)
+import HTTP (ReqFn, _errUnknown)
+import Milkis (URL(..), fetch, makeHeaders)
 import Milkis as M
 import Milkis.Impl (FetchImpl)
 import Unsafe.Coerce (unsafeCoerce)
@@ -31,8 +30,7 @@ milkisRequest fetchImpl { url, method, body } =
     , body: stringify body
     , headers:
         makeHeaders
-          { "Content-Type": "application/json"
-          }
+          { "Content-Type": "application/json" }
     }
     >>= ( \res -> do
           res' <- M.json res
