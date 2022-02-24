@@ -12,7 +12,7 @@ import CirlesPink.StateMachine.Error (CirclesError)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Variant (Variant)
+import Data.Variant (Variant, default, onMatch)
 import Effect.Class (class MonadEffect)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -51,7 +51,10 @@ circlesControl env =
                     else
                       S._askUsername st
               pure unit
-        , next: \set _ _ -> set $ \st -> S._askEmail st
+        , next:
+            \set _ _ ->
+              set
+                $ \st -> undefined
         }
     , askEmail:
         { prev: \set _ _ -> set $ \st -> S._askUsername st
