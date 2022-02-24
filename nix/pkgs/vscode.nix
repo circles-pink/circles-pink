@@ -37,6 +37,13 @@ let
       version = "0.1.0";
       sha256 = "sha256-4zdlvH91dTFKWBnHyjFEzBuT8g/dBzgNQpK2D/bD+tc=";
     }
+
+    {
+      name = "prettier-vscode";
+      publisher = "esbenp";
+      version = "9.3.0";
+      sha256 = "sha256-hJgPjWf7a8+ltjmXTK8U/MwqgIZqBjmcCfHsAk2G3PA=";
+    }
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {
