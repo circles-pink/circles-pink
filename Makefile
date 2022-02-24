@@ -1,3 +1,5 @@
+PURS_OUTPUT=pkgs/ts/generated/output
+
 all: dev-storybook build-storybook ci rw-result
 
 dev-storybook: assets
@@ -33,19 +35,18 @@ endif
 
 spago-clean:
 ifeq ($(PRUNE),true)
-	rm -rf .spago output
+	rm -rf .spago $(PURS_OUTPUT)
 endif
 
 spago-build: spago-clean
-	spago build
 	mkdir -p generated
-	cp -r output -t generated
+	spago build --purs-args '--output $(PURS_OUTPUT)'
 
 purs-tsd-gen:
-	purs-tsd-gen --directory generated/output
+	purs-tsd-gen --directory $(PURS_OUTPUT)
 
 patchTsTypes: yarn-install 
-	patchTsTypes $(PWD)/generated/output
+	patchTsTypes $(PWD)/$(PURS_OUTPUT)
 
 assets: generate
 	mkdir -p ./pkgs/ts/assets/src/ && \
@@ -62,7 +63,6 @@ generate: materialize clean-generate
 	make spago-build 
 	make purs-tsd-gen
 	make patchTsTypes
-	cp -r generated/output pkgs/ts/generated
 
 ci: materialize
 	nix -L build .#publicDir
