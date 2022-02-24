@@ -14,16 +14,18 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Variant (Variant)
 import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
+import Undefined (undefined)
 
 type Env m
   = { apiCheckUserName ::
         String ->
         ExceptV (CirclesError + ()) m { isValid :: Boolean }
-    , apiCheckEmail :: String -> ExceptV (CirclesError + ()) m Boolean
+    , apiCheckEmail ::
+        String ->
+        ExceptV (CirclesError + ()) m { isValid :: Boolean }
     }
 
 circlesControl :: forall m. MonadEffect m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
@@ -35,22 +37,38 @@ circlesControl env =
     , askUsername:
         { prev: \set _ _ -> set $ \st -> S._infoGeneral st
         , setUsername:
-            \set _ x -> do
-              log "hello1"
-              set $ \st -> S._askUsername st { username = x }
-              log "hello2"
+            \set _ username -> do
+              set $ \st -> S._askUsername st { username = username }
               set
                 $ \st ->
                     S._askUsername st { usernameApiResult = _loading :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean } }
-              log "hello3"
-              result <- runExceptT $ env.apiCheckUserName x
+              result <- runExceptT $ env.apiCheckUserName username
               set
                 $ \st ->
-                    if x == st.username then case result of
+                    if username == st.username then case result of
                       Left e -> S._askUsername st { usernameApiResult = _failure e }
                       Right x -> S._askUsername st { usernameApiResult = _success x }
                     else
                       S._askUsername st
+              pure unit
+        , next: \set _ _ -> set $ \st -> S._askEmail st
+        }
+    , askEmail:
+        { prev: \set _ _ -> set $ \st -> S._askUsername st
+        , setEmail:
+            \set _ email -> do
+              set $ \st -> S._askEmail st { email = email }
+              set
+                $ \st ->
+                    S._askEmail st { emailApiResult = _loading :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean } }
+              result <- runExceptT $ env.apiCheckEmail email
+              set
+                $ \st ->
+                    if email == st.email then case result of
+                      Left e -> S._askEmail st { emailApiResult = _failure e }
+                      Right x -> S._askEmail st { emailApiResult = _success x }
+                    else
+                      S._askEmail st
               pure unit
         }
     }

@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Button } from '../../components/forms';
+import { ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 
@@ -16,7 +16,7 @@ export const InfoGeneral = ({ next }: InfoGeneralProps): ReactElement => {
           <SubClaim>Let's get you a circles Wallet!</SubClaim>
         </Text>
       }
-      control={<Button onClick={() => next()}>Next</Button>}
+      control={<ButtonPink onClick={() => next()}>Next</ButtonPink>}
     />
   );
 };

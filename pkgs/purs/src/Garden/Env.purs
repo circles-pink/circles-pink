@@ -51,12 +51,28 @@ env { request } =
                   Right { isValid: false }
             )
           # ExceptT
-  , apiCheckEmail: undefined
-  -- \email ->
-  --   request 
-  --     { url: "https://api.circles.garden/api/users"
-  --     , method: POST
-  --     , body: encodeJson { email }
-  --     }
-  --     <#> (\_ -> true)
+  , apiCheckEmail:
+      \email ->
+        request
+          { url: "https://api.circles.garden/api/users/"
+          , method: POST
+          , body: encodeJson { email }
+          }
+          # runExceptT
+          <#> (spy "log")
+          <#> ( \result -> case result of
+                Left e -> Left e
+                Right x
+                  | x.status /= 200 && x.status /= 409 -> Left $ _errService
+                  | otherwise -> Right x
+            )
+          <#> ( \result -> do
+                res <- result
+                body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
+                if body'.status == "ok" then
+                  Right { isValid: true }
+                else
+                  Right { isValid: false }
+            )
+          # ExceptT
   }
