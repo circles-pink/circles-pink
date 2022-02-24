@@ -35,8 +35,7 @@ env { request } =
           , body: encodeJson { username }
           }
           # runExceptT
-          <#> ( spy "log"
-            )
+          <#> (spy "log")
           <#> ( \result -> case result of
                 Left e -> Left e
                 Right x
