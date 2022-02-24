@@ -4,42 +4,42 @@ import { DialogCard } from '../DialogCard';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { ButtonGray, ButtonPink, Input } from '../../components/forms';
 
-type AskUsernameProps = {
-  username: string;
+type AskEmailProps = {
+  email: string;
   debug?: string;
-  setUsername: (n: string) => void;
+  setEmail: (n: string) => void;
   back: () => void;
-  next: () => void;
+  // next: () => void;
 };
 
-export const AskUsername = ({
-  username,
+export const AskEmail = ({
+  email,
   debug,
-  setUsername,
+  setEmail,
   back,
-  next,
-}: AskUsernameProps): ReactElement => {
+}: // next,
+AskEmailProps): ReactElement => {
   return (
     <DialogCard
       text={
         <Text>
-          <Claim>Tell me your Name!</Claim>
-          <SubClaim>Choose wisely, you can not change it later!</SubClaim>
+          <Claim>How can I contact you?</Claim>
+          <SubClaim>Please submit a valid e-mail address.</SubClaim>
         </Text>
       }
       interaction={
         <Input
           type="text"
-          value={username}
-          placeholder={'Your amazing username'}
-          onChange={e => setUsername(e.target.value)}
+          value={email}
+          placeholder={'Enter your E-Mail'}
+          onChange={e => setEmail(e.target.value)}
         />
       }
       debug={<pre>{debug}</pre>}
       control={
         <>
           <ButtonGray onClick={() => back()}>Back</ButtonGray>
-          <ButtonPink onClick={() => next()}>Next</ButtonPink>
+          {/* <ButtonPink onClick={() => next()}>Next</ButtonPink> */}
         </>
       }
     />
