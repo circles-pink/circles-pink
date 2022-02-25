@@ -8,10 +8,10 @@ import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
-  = RemoteData (Variant CirclesError) { isValid :: Boolean }
+  = RemoteData CirclesError { isValid :: Boolean }
 
 type EmailApiResult
-  = RemoteData (Variant CirclesError) { isValid :: Boolean }
+  = RemoteData CirclesError { isValid :: Boolean }
 
 type UserData
   = { username :: String

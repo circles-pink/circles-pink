@@ -1,6 +1,7 @@
 module CirlesPink.StateMachine.Error where
 
 import Prelude
+import Data.Variant (Variant)
 
 type CirclesError' r
   = ( errService :: Unit
@@ -9,7 +10,8 @@ type CirclesError' r
     )
 
 type CirclesError
-  = ( errService :: Unit
-    , errParse :: Unit
-    , errNetwork :: Unit
-    )
+  = Variant
+      ( errService :: Unit
+      , errParse :: Unit
+      , errNetwork :: Unit
+      )

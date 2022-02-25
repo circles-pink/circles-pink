@@ -5,21 +5,21 @@ module Garden.Env
 import Prelude
 import CirclesPink.StateMachine.Control as C
 import CirlesPink.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), lift, runExceptT)
+import Control.Monad.Except (ExceptT(..), runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
-import Data.Variant (Variant, inj)
+import Data.Variant (inj)
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey as P
 
-_errService :: Variant CirclesError
+_errService :: CirclesError
 _errService = inj (Proxy :: _ "errService") unit
 
-_errParse :: Variant CirclesError
+_errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
 env ∷
