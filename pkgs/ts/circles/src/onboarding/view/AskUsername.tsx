@@ -2,22 +2,24 @@ import React, { ReactElement } from 'react';
 import { DialogCard } from '../DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
-import { ButtonGray, ButtonPink, Input } from '../../components/forms';
+import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 
 type AskUsernameProps = {
   username: string;
-  debug?: string;
+  indicatorColor: string;
   setUsername: (n: string) => void;
   back: () => void;
   next: () => void;
+  debug?: string;
 };
 
 export const AskUsername = ({
   username,
-  debug,
   setUsername,
+  indicatorColor,
   back,
   next,
+  debug,
 }: AskUsernameProps): ReactElement => {
   return (
     <DialogCard
@@ -28,7 +30,8 @@ export const AskUsername = ({
         </Text>
       }
       interaction={
-        <Input
+        <InputWithProps
+          indicatorColor={indicatorColor}
           type="text"
           value={username}
           placeholder={'Your amazing username'}

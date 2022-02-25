@@ -2,31 +2,33 @@ import React, { ReactElement } from 'react';
 import { DialogCard } from '../DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
-import { ButtonGray, ButtonPink, Input } from '../../components/forms';
+import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 import { LabeledCheckbox } from '../../components/Checkbox';
 
 type AskEmailProps = {
   email: string;
   terms: boolean;
   privacy: boolean;
-  debug?: string;
+  indicatorColor: string;
   setEmail: (n: string) => void;
   setTerms: () => void;
   setPrivacy: () => void;
   back: () => void;
   next: () => void;
+  debug?: string;
 };
 
 export const AskEmail = ({
   email,
   terms,
   privacy,
-  debug,
+  indicatorColor,
   setEmail,
   setTerms,
   setPrivacy,
   back,
   next,
+  debug,
 }: AskEmailProps): ReactElement => {
   return (
     <DialogCard
@@ -38,7 +40,8 @@ export const AskEmail = ({
       }
       interaction={
         <>
-          <Input
+          <InputWithProps
+            indicatorColor={indicatorColor}
             type="text"
             value={email}
             placeholder={'Enter your E-Mail'}
