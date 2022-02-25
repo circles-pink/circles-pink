@@ -12,5 +12,5 @@ exports.entropyToMnemonicImpl = function (entropy) {
 };
 
 exports.mnemonicToEntropyImpl = function (mnemonic) {
-  return bip.menmonicToEntropy(mnemonic);
+  return bip.mnemonicToEntropy(mnemonic);
 };
