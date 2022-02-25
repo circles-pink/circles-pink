@@ -26,9 +26,7 @@ type Env m
     , apiCheckEmail ::
         String ->
         ExceptV (CirclesError + ()) m { isValid :: Boolean }
-    -- , generatePrivateKey :: ExceptV () m PrivateKey
-    -- , keyToMnemonic :: PrivateKey -> Array String
-    -- , mnemonicToKey :: Array String -> PrivateKey
+    , generatePrivateKey :: m PrivateKey
     }
 
 circlesControl :: forall m. MonadEffect m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit
@@ -105,7 +103,10 @@ circlesControl env =
         }
     , infoSecurity:
         { prev: \set _ _ -> set $ \st -> S._askEmail st
-        , next: \set _ _ -> set $ \st -> S._magicWords st
+        , next:
+            \set _ _ -> do
+              pk <- env.generatePrivateKey
+              set $ \st -> S._magicWords st { privateKey = pk }
         }
     , magicWords:
         { prev: \set _ _ -> set $ \st -> S._infoSecurity st }

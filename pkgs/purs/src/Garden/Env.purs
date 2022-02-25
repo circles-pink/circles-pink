@@ -5,17 +5,17 @@ module Garden.Env
 import Prelude
 import CirclesPink.StateMachine.Control as C
 import CirlesPink.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), runExceptT)
+import Control.Monad.Except (ExceptT(..), lift, runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Variant (Variant, inj)
--- import Debug (spy)
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Wallet.PrivateKey as P
 
 _errService :: forall r. Variant (CirclesError + r)
 _errService = inj (Proxy :: _ "errService") unit
@@ -82,4 +82,5 @@ env { request } =
                     Right { isValid: false }
               )
             # ExceptT
+  , generatePrivateKey: P.genPrivateKey
   }
