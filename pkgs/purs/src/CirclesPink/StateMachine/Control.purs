@@ -17,6 +17,7 @@ import Effect.Class (class MonadEffect)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
+import Wallet.PrivateKey (PrivateKey)
 
 type Env m
   = { apiCheckUserName ::
@@ -25,6 +26,9 @@ type Env m
     , apiCheckEmail ::
         String ->
         ExceptV (CirclesError + ()) m { isValid :: Boolean }
+    , generatePrivateKey :: ExceptV () m PrivateKey
+    , keyToMnemonic :: PrivateKey -> Array String
+    , mnemonicToKey :: Array String -> PrivateKey
     }
 
 circlesControl :: forall m. MonadEffect m => Env m -> ((CirclesState -> CirclesState) -> m Unit) -> CirclesState -> CirclesAction -> m Unit

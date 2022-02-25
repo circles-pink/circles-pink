@@ -125,6 +125,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "bip39" = pkgs.stdenv.mkDerivation {
+        name = "bip39";
+        version = "v1.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/athanclark/purescript-bip39.git";
+          rev = "aca4085739cc47be776e8ba6dcf8cc19f3379e5a";
+          sha256 = "0l8823ma9mhmn8a99f9s7xlnhccrxdpjlpg31vbai8749lyzy0yk";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "catenable-lists" = pkgs.stdenv.mkDerivation {
         name = "catenable-lists";
         version = "v6.0.1";
@@ -852,6 +864,18 @@ let
           url = "https://github.com/purescript/purescript-strings.git";
           rev = "157e372a23e4becd594d7e7bff6f372a6f63dd82";
           sha256 = "0hyaa4d8gyyvac2nxnwqkn2rvi5vax4bi4yv10mpk7rgb8rv7mb8";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "subtlecrypto" = pkgs.stdenv.mkDerivation {
+        name = "subtlecrypto";
+        version = "v0.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/athanclark/purescript-subtlecrypto.git";
+          rev = "d442f77b1587bec690ed2361810e5e47130d4f7b";
+          sha256 = "09jv6l5zgrd8f802k0m4iqli64b42i2mmdk38pfgykmqjfmawg08";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
