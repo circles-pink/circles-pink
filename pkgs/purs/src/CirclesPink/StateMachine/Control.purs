@@ -9,7 +9,7 @@ import CirclesPink.StateMachine.Action (CirclesAction)
 import CirclesPink.StateMachine.State (CirclesState)
 import CirclesPink.StateMachine.State as S
 import CirlesPink.StateMachine.Error (CirclesError)
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Variant (Variant, default, onMatch)
@@ -22,10 +22,10 @@ import Wallet.PrivateKey (PrivateKey)
 type Env m
   = { apiCheckUserName ::
         String ->
-        ExceptV CirclesError m { isValid :: Boolean }
+        ExceptT CirclesError m { isValid :: Boolean }
     , apiCheckEmail ::
         String ->
-        ExceptV CirclesError m { isValid :: Boolean }
+        ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
     }
 
@@ -42,7 +42,7 @@ circlesControl env =
               set $ \st -> S._askUsername st { username = username }
               set
                 $ \st ->
-                    S._askUsername st { usernameApiResult = _loading :: RemoteData (Variant CirclesError) { isValid :: Boolean } }
+                    S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
               result <- runExceptT $ env.apiCheckUserName username
               set
                 $ \st ->
@@ -74,7 +74,7 @@ circlesControl env =
               set $ \st -> S._askEmail st { email = email }
               set
                 $ \st ->
-                    S._askEmail st { emailApiResult = _loading :: RemoteData (Variant CirclesError) { isValid :: Boolean } }
+                    S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
               result <- runExceptT $ env.apiCheckEmail email
               set
                 $ \st ->

@@ -1,4 +1,4 @@
 crypto = require("crypto");
-bip = require("bip39");
+bip39 = require("bip39");
 
 exports.globalRequires = {};

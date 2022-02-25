@@ -58,7 +58,7 @@ export const Onboarding = (): ReactElement => {
         />
       );
     case 'magicWords':
-      return <MagicWords back={() => act(A._infoSecurity(A._prev(unit)))} />;
+      return <MagicWords state={state.value} act={act} />;
     default:
       return <h2>Invalid State</h2>;
   }
