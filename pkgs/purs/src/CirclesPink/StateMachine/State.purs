@@ -5,6 +5,7 @@ import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 
+-- import Wallet.PrivateKey (Mnemonic, PrivateKey)
 type UserData
   = { username :: String
     , usernameApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
@@ -12,6 +13,7 @@ type UserData
     , emailApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
     , terms :: Boolean
     , privacy :: Boolean
+    -- , privateKey :: PrivateKey
     }
 
 type CirclesState
@@ -31,6 +33,7 @@ init =
     , emailApiResult: _notAsked
     , terms: false
     , privacy: false
+    -- , privateKey: ""
     }
 
 _infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )
