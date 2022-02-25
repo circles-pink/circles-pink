@@ -33,6 +33,7 @@
               purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
               spago2nix = easy-purescript-nix.spago2nix;
               nix-filter = nix-filter.lib;
+              nodejs = final.nodejs-17_x;
             })
           ];
         };
@@ -68,7 +69,7 @@
               pkgs.nodePackages.node2nix
               pkgs.nodePackages.purty
               pkgs.nodePackages.typescript
-              pkgs.nodejs
+              pkgs.nodejs-17_x
               pkgs.purescript
               pkgs.spago
               pkgs.purescript-tsd-gen

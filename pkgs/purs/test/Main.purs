@@ -3,9 +3,11 @@ module Test.Main where
 import Prelude
 import Effect (Effect)
 import Test.Unit.Main (runTest)
-import Wallet.PrivateKey as Wallet.PrivateKey
+import Test.Wallet.PrivateKey as Test.Wallet.PrivateKey
+
+foreign import globalRequires :: {}
 
 main :: Effect Unit
 main =
   runTest do
-    Wallet.PrivateKey.tests
+    Test.Wallet.PrivateKey.tests
