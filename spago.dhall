@@ -15,6 +15,7 @@ to generate this file without the comments in this block.
   [ "aff"
   , "argonaut"
   , "argonaut-core"
+  , "arraybuffer"
   , "arrays"
   , "bifunctors"
   , "bip39"
