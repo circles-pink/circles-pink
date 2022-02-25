@@ -15,6 +15,7 @@ import { AskUsername } from './view/AskUsername';
 import { InfoGeneral } from './view/InfoGeneral';
 import { AskEmail } from './view/AskEmail';
 import { InfoSecurity } from './view/InfoSecurity';
+import { mapIndicatorColors } from './mapIndicatorColors';
 
 const control = circlesControlEff(
   GardenEnv.env({
@@ -32,10 +33,11 @@ export const Onboarding = (): ReactElement => {
       return (
         <AskUsername
           username={state.value.username}
-          debug={JSON.stringify(state.value.usernameApiResult, null, 2)}
           setUsername={(n: string) => act(A._askUsername(A._setUsername(n)))}
+          indicatorColor={mapIndicatorColors(state.value.usernameApiResult)}
           back={() => act(A._askUsername(A._prev(unit)))}
           next={() => act(A._askUsername(A._next(unit)))}
+          debug={JSON.stringify(state.value.usernameApiResult, null, 2)}
         />
       );
     case 'askEmail':
@@ -44,6 +46,7 @@ export const Onboarding = (): ReactElement => {
           email={state.value.email}
           terms={state.value.terms}
           privacy={state.value.privacy}
+          indicatorColor={mapIndicatorColors(state.value.emailApiResult)}
           setEmail={(n: string) => act(A._askEmail(A._setEmail(n)))}
           setTerms={() => act(A._askEmail(A._setTerms(unit)))}
           setPrivacy={() => act(A._askEmail(A._setPrivacy(unit)))}

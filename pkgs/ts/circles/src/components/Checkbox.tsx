@@ -1,4 +1,4 @@
-// Source: https://medium.com/@colebemis/building-a-checkbox-component-with-react-and-styled-components-8d3aa1d826dd
+// Inspired by: https://medium.com/@colebemis/building-a-checkbox-component-with-react-and-styled-components-8d3aa1d826dd
 
 import React, { ReactElement } from 'react';
 import { styled } from 'twin.macro';
@@ -16,10 +16,10 @@ export const LabeledCheckbox = ({
 }: LabeledCheckboxProps): ReactElement => {
   return (
     <div>
-      <label>
+      <Label>
         <Checkbox checked={checked} onChange={() => setChecked()} />
         <span>{label}</span>
-      </label>
+      </Label>
     </div>
   );
 };
@@ -41,6 +41,10 @@ const Checkbox = ({ checked, ...props }: CheckboxProps) => (
     </StyledCheckbox>
   </CheckboxContainer>
 );
+
+const Label = styled.label`
+  cursor: pointer;
+`;
 
 const HiddenCheckbox = styled.input`
   // Hide checkbox visually but remain accessible to screen readers.
@@ -73,7 +77,7 @@ const StyledCheckbox = styled.div<StyledCheckboxProps>`
   display: inline-block;
   width: 16px;
   height: 16px;
-  background: ${props => (props.checked ? 'pink' : 'white')};
+  background: ${props => (props.checked ? '#ff4785' : 'white')};
   border-radius: 3px;
   transition: all 150ms;
   border: 1px solid pink;
