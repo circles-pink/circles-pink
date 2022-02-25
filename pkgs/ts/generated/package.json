@@ -1,5 +1,7 @@
 {
   "name": "generated",
   "version": "1.0.0",
-  "dependencies": {}
+  "dependencies": {
+    "bip39": "^3.0.4"
+  }
 }
