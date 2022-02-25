@@ -1,18 +1,15 @@
 import React, { ReactElement } from 'react';
-import {
-  ButtonGray,
-  // ButtonPink
-} from '../../components/forms';
+import { ButtonGray, ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 
 type InfoSecurityProps = {
   back: () => void;
-  // next: () => void;
+  next: () => void;
 };
 
 export const InfoSecurity = ({
-  // next,
+  next,
   back,
 }: InfoSecurityProps): ReactElement => {
   return (
@@ -26,7 +23,7 @@ export const InfoSecurity = ({
       control={
         <>
           <ButtonGray onClick={() => back()}>Back</ButtonGray>
-          {/* <ButtonPink onClick={() => next()}>Next</ButtonPink> */}
+          <ButtonPink onClick={() => next()}>Next</ButtonPink>
         </>
       }
     />
