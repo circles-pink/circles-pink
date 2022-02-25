@@ -10,11 +10,11 @@ module Wallet.PrivateKey
   ) where
 
 import Prelude
+import Data.String (Pattern(..))
+import Data.String as S
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Data.String (Pattern(..))
-import Data.String as S
 
 --------------------------------------------------------------------------------
 -- Types
@@ -25,8 +25,12 @@ type Entropy
 newtype PrivateKey
   = PrivateKey Entropy
 
+derive instance privateKeyEq :: Eq PrivateKey
+
 newtype Mnemonic
   = Mnemonic (Array String)
+
+derive instance mnemonicEq :: Eq Mnemonic
 
 --------------------------------------------------------------------------------
 -- API
@@ -41,7 +45,7 @@ toEntropy :: PrivateKey -> Entropy
 toEntropy (PrivateKey e) = e
 
 genPrivateKey :: Aff PrivateKey
-genPrivateKey = liftEffect genPrivateKeyImpl
+genPrivateKey = liftEffect genPrivateKeyImpl <#> (PrivateKey <<< S.drop 2)
 
 keyToMnemonic :: PrivateKey -> Mnemonic
 keyToMnemonic k =
@@ -65,7 +69,7 @@ separator = " "
 --------------------------------------------------------------------------------
 -- FFI
 --------------------------------------------------------------------------------
-foreign import genPrivateKeyImpl :: Effect PrivateKey
+foreign import genPrivateKeyImpl :: Effect String
 
 foreign import entropyToMnemonicImpl :: String -> String
 

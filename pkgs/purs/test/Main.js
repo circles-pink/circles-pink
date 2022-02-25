@@ -1,3 +1,4 @@
-crypto = require("crypto")
+crypto = require("crypto");
+bip = require("bip39");
 
-exports.globalRequires = {}
+exports.globalRequires = {};
