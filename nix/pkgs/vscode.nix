@@ -44,6 +44,14 @@ let
       version = "9.3.0";
       sha256 = "sha256-hJgPjWf7a8+ltjmXTK8U/MwqgIZqBjmcCfHsAk2G3PA=";
     }
+
+    {
+      name = "errorlens";
+      publisher = "usernamehw";
+      version = "3.4.1";
+      sha256 = "sha256-cJ1/jfCU+Agiyi1Qdd0AfyOTzwxOEfox4vLSJ0/UKNc=";
+    }
+
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {
