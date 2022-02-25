@@ -1,10 +1,6 @@
 module CirlesPink.StateMachine.Error where
 
 import Prelude
-import Data.Variant (Variant)
-import HTTP (NetworkError)
-import Type.Proxy (Proxy(..))
-import Type.Row (type (+))
 
 type CirclesError' r
   = ( errService :: Unit
@@ -12,5 +8,8 @@ type CirclesError' r
     | r
     )
 
-type CirclesError r
-  = NetworkError + CirclesError' + r
+type CirclesError
+  = ( errService :: Unit
+    , errParse :: Unit
+    , errNetwork :: Unit
+    )

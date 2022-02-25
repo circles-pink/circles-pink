@@ -16,6 +16,7 @@ import { InfoGeneral } from './view/InfoGeneral';
 import { AskEmail } from './view/AskEmail';
 import { InfoSecurity } from './view/InfoSecurity';
 import { mapIndicatorColors } from './mapIndicatorColors';
+import { MagicWords } from './view/MagicWords';
 
 export const Onboarding = (): ReactElement => {
   const [state, act] = useStateMachine(init, control);
@@ -50,9 +51,14 @@ export const Onboarding = (): ReactElement => {
         />
       );
     case 'infoSecurity':
-      return <InfoSecurity back={() => act(A._infoSecurity(A._prev(unit)))} />;
+      return (
+        <InfoSecurity
+          back={() => act(A._infoSecurity(A._prev(unit)))}
+          next={() => act(A._infoSecurity(A._next(unit)))}
+        />
+      );
     case 'magicWords':
-      return <InfoSecurity back={() => act(A._infoSecurity(A._prev(unit)))} />;
+      return <MagicWords back={() => act(A._infoSecurity(A._prev(unit)))} />;
     default:
       return <h2>Invalid State</h2>;
   }

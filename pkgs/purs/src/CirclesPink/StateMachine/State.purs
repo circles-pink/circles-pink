@@ -7,12 +7,17 @@ import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
--- import Wallet.PrivateKey (Mnemonic, PrivateKey)
+type UsernameApiResult
+  = RemoteData (Variant CirclesError) { isValid :: Boolean }
+
+type EmailApiResult
+  = RemoteData (Variant CirclesError) { isValid :: Boolean }
+
 type UserData
   = { username :: String
-    , usernameApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
+    , usernameApiResult :: UsernameApiResult
     , email :: String
-    , emailApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
+    , emailApiResult :: EmailApiResult
     , terms :: Boolean
     , privacy :: Boolean
     , privateKey :: PrivateKey

@@ -14,13 +14,12 @@ import Data.Variant (Variant, inj)
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
-import Type.Row (type (+))
 import Wallet.PrivateKey as P
 
-_errService :: forall r. Variant (CirclesError + r)
+_errService :: Variant CirclesError
 _errService = inj (Proxy :: _ "errService") unit
 
-_errParse :: forall r. Variant (CirclesError + r)
+_errParse :: Variant CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
 env ∷

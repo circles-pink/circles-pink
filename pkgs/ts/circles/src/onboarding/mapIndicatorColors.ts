@@ -1,38 +1,11 @@
-import { Unit } from 'generated/output/Data.Unit';
+import {
+  EmailApiResult,
+  UsernameApiResult,
+} from 'generated/output/CirclesPink.StateMachine.State';
 
-type ApiResult =
-  | {
-      type: 'notAsked';
-      value: Unit;
-    }
-  | {
-      type: 'loading';
-      value: Unit;
-    }
-  | {
-      type: 'failure';
-      value:
-        | {
-            type: 'errNetwork';
-            value: Unit;
-          }
-        | {
-            type: 'errService';
-            value: Unit;
-          }
-        | {
-            type: 'errParse';
-            value: Unit;
-          };
-    }
-  | {
-      type: 'success';
-      value: {
-        isValid: boolean;
-      };
-    };
-
-export const mapIndicatorColors = (apiResult: ApiResult) => {
+export const mapIndicatorColors = (
+  apiResult: UsernameApiResult | EmailApiResult
+) => {
   switch (apiResult.type) {
     case 'notAsked':
     case 'loading':
