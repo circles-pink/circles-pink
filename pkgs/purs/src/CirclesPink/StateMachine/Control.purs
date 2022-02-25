@@ -104,5 +104,9 @@ circlesControl env =
                         S._askEmail st
         }
     , infoSecurity:
-        { prev: \set _ _ -> set $ \st -> S._askEmail st }
+        { prev: \set _ _ -> set $ \st -> S._askEmail st
+        , next: \set _ _ -> set $ \st -> S._magicWords st
+        }
+    , magicWords:
+        { prev: \set _ _ -> set $ \st -> S._infoSecurity st }
     }

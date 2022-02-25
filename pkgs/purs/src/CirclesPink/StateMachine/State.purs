@@ -4,6 +4,8 @@ import CirlesPink.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
+import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey as P
 
 -- import Wallet.PrivateKey (Mnemonic, PrivateKey)
 type UserData
@@ -13,7 +15,7 @@ type UserData
     , emailApiResult :: RemoteData (Variant (CirclesError ())) { isValid :: Boolean }
     , terms :: Boolean
     , privacy :: Boolean
-    -- , privateKey :: PrivateKey
+    , privateKey :: PrivateKey
     }
 
 type CirclesState
@@ -22,6 +24,7 @@ type CirclesState
       , askUsername :: UserData
       , askEmail :: UserData
       , infoSecurity :: UserData
+      , magicWords :: UserData
       )
 
 init :: CirclesState
@@ -33,7 +36,7 @@ init =
     , emailApiResult: _notAsked
     , terms: false
     , privacy: false
-    -- , privateKey: ""
+    , privateKey: P.zeroKey
     }
 
 _infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )
@@ -47,3 +50,6 @@ _askEmail = inj (Proxy :: _ "askEmail")
 
 _infoSecurity :: forall a v. a -> Variant ( infoSecurity :: a | v )
 _infoSecurity = inj (Proxy :: _ "infoSecurity")
+
+_magicWords :: forall a v. a -> Variant ( magicWords :: a | v )
+_magicWords = inj (Proxy :: _ "magicWords")

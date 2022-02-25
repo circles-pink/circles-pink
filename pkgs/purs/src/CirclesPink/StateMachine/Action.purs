@@ -27,6 +27,11 @@ type CirclesAction
       , infoSecurity ::
           Variant
             ( prev :: Unit
+            , next :: Unit
+            )
+      , magicWords ::
+          Variant
+            ( prev :: Unit
             )
       )
 
@@ -42,6 +47,9 @@ _askEmail = inj (Proxy :: _ "askEmail")
 
 _infoSecurity :: forall a v. a -> Variant ( infoSecurity :: a | v )
 _infoSecurity = inj (Proxy :: _ "infoSecurity")
+
+_magicWords :: forall a v. a -> Variant ( magicWords :: a | v )
+_magicWords = inj (Proxy :: _ "magicWords")
 
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )

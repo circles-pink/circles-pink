@@ -7,6 +7,7 @@ module Wallet.PrivateKey
   , mnemonicToKey
   , toEntropy
   , toString
+  , zeroKey
   ) where
 
 import Prelude
@@ -59,6 +60,9 @@ mnemonicToKey (Mnemonic ws) =
   S.joinWith separator ws
     # mnemonicToEntropyImpl
     # PrivateKey
+
+zeroKey :: PrivateKey
+zeroKey = PrivateKey "0000000000000000000000000000000000000000000000000000000000000000"
 
 --------------------------------------------------------------------------------
 -- Util
