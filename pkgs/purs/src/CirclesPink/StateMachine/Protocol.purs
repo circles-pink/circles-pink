@@ -28,6 +28,11 @@ type CirclesProtocol
       , infoSecurity ::
           P.State
             ( prev :: P.Action ("askEmail" :> Nil')
-            -- , next :: P.Action ("magicWords" :> Nil')
+            , next :: P.Action ("magicWords" :> Nil')
+            )
+      , magicWords ::
+          P.State
+            ( prev :: P.Action ("infoSecurity" :> Nil')
+            -- , next :: P.Action ("...." :> Nil')
             )
       )

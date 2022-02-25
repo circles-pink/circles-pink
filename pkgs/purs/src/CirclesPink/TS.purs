@@ -7,8 +7,15 @@ import CirclesPink.StateMachine.State (CirclesState)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
-import Undefined (undefined)
+import Garden.Env as Garden
+import HTTP.Milkis (milkisRequest)
+import Milkis.Impl.Window (windowFetch)
 
---- type StateMachine = (s -> Effect Unit) -> m -> s -> Effect Unit
---circlesControlEff :: Env Aff -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+circlesControlEff :: Env Aff -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 circlesControlEff e f s a = circlesControl e (liftEffect <<< f) s a # launchAff_
+
+control :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+control =
+  milkisRequest windowFetch
+    # (\request -> Garden.env { request })
+    # circlesControlEff

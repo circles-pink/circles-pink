@@ -5,7 +5,7 @@ import React, { ReactElement } from 'react';
 import * as GardenEnv from 'generated/output/Garden.Env';
 import { milkisRequest } from 'generated/output/HTTP.Milkis';
 import { windowFetch } from 'generated/output/Milkis.Impl.Window';
-import { circlesControlEff } from 'generated/output/CirclesPink.TS';
+import { circlesControlEff, control } from 'generated/output/CirclesPink.TS';
 import { init } from 'generated/output/CirclesPink.StateMachine.State';
 import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 import { unit } from 'generated/output/Data.Unit';
@@ -16,12 +16,6 @@ import { InfoGeneral } from './view/InfoGeneral';
 import { AskEmail } from './view/AskEmail';
 import { InfoSecurity } from './view/InfoSecurity';
 import { mapIndicatorColors } from './mapIndicatorColors';
-
-const control = circlesControlEff(
-  GardenEnv.env({
-    request: milkisRequest(windowFetch),
-  })
-);
 
 export const Onboarding = (): ReactElement => {
   const [state, act] = useStateMachine(init, control);
