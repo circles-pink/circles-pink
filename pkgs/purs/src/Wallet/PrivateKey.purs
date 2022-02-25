@@ -1,54 +1,72 @@
 module Wallet.PrivateKey
-  ( genPrivateKey
+  ( Mnemonic
+  , PrivateKey
+  , genPrivateKey
+  , getWords
   , keyToMnemonic
   , mnemonicToKey
-  , PrivateKey
-  , tests
+  , toEntropy
+  , toString
   ) where
 
 import Prelude
-import Crypto.Subtle.Constants.EC (ecdsa, p256)
-import Crypto.Subtle.Key.Generate (ec, generateKeyPair)
-import Crypto.Subtle.Key.Types (CryptoKey, CryptoKeyPair(..), allUsages, exportKey, raw)
-import Data.ArrayBuffer.BIP39 (entropyToMnemonic, mnemonicToEntropy)
-import Data.ArrayBuffer.Typed (whole)
-import Data.ArrayBuffer.Types (Uint8Array)
-import Data.Maybe (Maybe(..))
+import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Partial.Unsafe (unsafePartial)
-import Test.Unit as T
-import Test.Unit.Assert as A
+import Data.String (Pattern(..))
+import Data.String as S
+
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+type Entropy
+  = String
 
 newtype PrivateKey
-  = PrivateKey Uint8Array
+  = PrivateKey Entropy
 
-keyToMnemonic :: PrivateKey -> String
-keyToMnemonic (PrivateKey k) =
-  unsafePartial case entropyToMnemonic k of
-    Just x -> x
+newtype Mnemonic
+  = Mnemonic (Array String)
 
-mnemonicToKey :: String -> PrivateKey
-mnemonicToKey mn =
-  unsafePartial case mnemonicToEntropy mn of
-    Just x -> PrivateKey x
+--------------------------------------------------------------------------------
+-- API
+--------------------------------------------------------------------------------
+getWords :: Mnemonic -> Array String
+getWords (Mnemonic ws) = ws
+
+toString :: PrivateKey -> String
+toString (PrivateKey k) = "0x" <> k
+
+toEntropy :: PrivateKey -> Entropy
+toEntropy (PrivateKey e) = e
 
 genPrivateKey :: Aff PrivateKey
-genPrivateKey =
-  generateKeyPair (ec ecdsa p256) true allUsages
-    >>= \(CryptoKeyPair { privateKey }) -> cryptoKeyToPrivateKey privateKey
+genPrivateKey = liftEffect genPrivateKeyImpl
 
-cryptoKeyToPrivateKey :: CryptoKey -> Aff PrivateKey
-cryptoKeyToPrivateKey ck =
-  exportKey raw ck
-    >>= (liftEffect <<< whole)
-    <#> PrivateKey
+keyToMnemonic :: PrivateKey -> Mnemonic
+keyToMnemonic k =
+  toEntropy k
+    # entropyToMnemonicImpl
+    # S.split (Pattern separator)
+    # Mnemonic
+
+mnemonicToKey :: Mnemonic -> PrivateKey
+mnemonicToKey (Mnemonic ws) =
+  S.joinWith separator ws
+    # mnemonicToEntropyImpl
+    # PrivateKey
 
 --------------------------------------------------------------------------------
--- Tests
+-- Util
 --------------------------------------------------------------------------------
-tests :: T.TestSuite
-tests =
-  T.suite "PrivateKey" do
-    T.test "graph1" do
-      A.equal 1 1
+separator :: String
+separator = " "
+
+--------------------------------------------------------------------------------
+-- FFI
+--------------------------------------------------------------------------------
+foreign import genPrivateKeyImpl :: Effect PrivateKey
+
+foreign import entropyToMnemonicImpl :: String -> String
+
+foreign import mnemonicToEntropyImpl :: String -> String
