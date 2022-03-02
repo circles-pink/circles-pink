@@ -1,4 +1,4 @@
-module CirclesPink.StateMachine.Protocol
+module CirclesPink.Garden.StateMachine.Protocol
   ( CirclesProtocol
   ) where
 

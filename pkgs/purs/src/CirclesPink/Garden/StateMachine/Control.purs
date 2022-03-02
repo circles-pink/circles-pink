@@ -1,14 +1,14 @@
-module CirclesPink.StateMachine.Control
+module CirclesPink.Garden.StateMachine.Control
   ( Env
   , circlesControl
   ) where
 
 import Prelude
-import CirclesPink.StateMachine (_circlesStateMachine)
-import CirclesPink.StateMachine.Action (CirclesAction)
-import CirclesPink.StateMachine.State (CirclesState)
-import CirclesPink.StateMachine.State as S
-import CirlesPink.StateMachine.Error (CirclesError)
+import CirclesPink.Garden.StateMachine (_circlesStateMachine)
+import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.State as S
+import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))

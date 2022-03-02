@@ -1,4 +1,4 @@
-module CirclesPink.StateMachine.Action where
+module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
 import Data.Variant (Variant, inj)

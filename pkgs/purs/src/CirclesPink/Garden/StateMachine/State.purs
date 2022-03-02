@@ -1,6 +1,6 @@
-module CirclesPink.StateMachine.State where
+module CirclesPink.Garden.StateMachine.State where
 
-import CirlesPink.StateMachine.Error (CirclesError)
+import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))

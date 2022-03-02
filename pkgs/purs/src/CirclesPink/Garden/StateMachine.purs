@@ -1,13 +1,13 @@
-module CirclesPink.StateMachine
+module CirclesPink.Garden.StateMachine
   ( CirclesStateMachine
   , check
   , _circlesStateMachine
   ) where
 
 import Prelude
-import CirclesPink.StateMachine.Action as A
-import CirclesPink.StateMachine.Protocol as P
-import CirclesPink.StateMachine.State as S
+import CirclesPink.Garden.StateMachine.Action as A
+import CirclesPink.Garden.StateMachine.Protocol as P
+import CirclesPink.Garden.StateMachine.State as S
 import Stadium.Type.StateMachine as STM
 import Type.Proxy (Proxy(..))
 

@@ -1,13 +1,13 @@
-module CirclesPink.TS where
+module CirclesPink.Garden.TS where
 
 import Prelude
-import CirclesPink.StateMachine.Action (CirclesAction)
-import CirclesPink.StateMachine.Control (Env, circlesControl)
-import CirclesPink.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Control (Env, circlesControl)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
-import Garden.Env as Garden
+import CirclesPink.Garden.Env as Garden
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Window (windowFetch)
 

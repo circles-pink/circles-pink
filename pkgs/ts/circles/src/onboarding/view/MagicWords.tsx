@@ -1,5 +1,5 @@
-import * as A from 'generated/output/CirclesPink.StateMachine.Action';
-import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
+import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import { unit } from 'generated/output/Data.Unit';
 import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
 import React, { ReactElement } from 'react';

@@ -1,4 +1,4 @@
-import * as A from 'generated/output/CirclesPink.StateMachine.Action';
+import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from 'generated/output/Data.Unit';
 import React, { ReactElement } from 'react';
 import { ButtonPink } from '../../components/forms';

@@ -1,7 +1,7 @@
 module CirclesPink.GenGraph where
 
 import Prelude
-import CirclesPink.StateMachine (_circlesStateMachine)
+import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import Data.Array ((!!))
 import Data.Maybe (maybe)
 import Dot as D
