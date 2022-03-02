@@ -1,4 +1,4 @@
-module CirclesPink.GenGraph where
+module CirclesPink.Garden.GenGraph where
 
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)

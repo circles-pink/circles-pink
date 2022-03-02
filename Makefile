@@ -58,7 +58,7 @@ patchTsTypes: yarn-install
 
 assets: generate
 	mkdir -p ./pkgs/ts/assets/src/ && \
-	node -e 'require("./output/CirclesPink.GenGraph").main()' "./pkgs/ts/assets/src/circles-state-machine.dot" && \
+	node -e 'require("./$(PURS_OUTPUT)/CirclesPink.Garden.GenGraph").main()' "./pkgs/ts/assets/src/circles-state-machine.dot" && \
 	dot -Tsvg ./pkgs/ts/assets/src/circles-state-machine.dot > ./pkgs/ts/assets/src/circles-state-machine.svg && \
 	make -Bnd | make2graph | dot -Tsvg -o ./pkgs/ts/assets/src/circles-makefile.svg
 
