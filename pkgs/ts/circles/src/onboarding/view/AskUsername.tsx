@@ -1,26 +1,19 @@
+import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 import React, { ReactElement } from 'react';
 import { DialogCard } from '../DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
 import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
+import { mapIndicatorColors } from '../mapIndicatorColors';
+import { unit } from 'generated/output/Data.Unit';
 
 type AskUsernameProps = {
-  username: string;
-  indicatorColor: string;
-  setUsername: (n: string) => void;
-  back: () => void;
-  next: () => void;
-  debug?: string;
+  state: UserData;
+  act: (ac: A.CirclesAction) => void;
 };
 
-export const AskUsername = ({
-  username,
-  setUsername,
-  indicatorColor,
-  back,
-  next,
-  debug,
-}: AskUsernameProps): ReactElement => {
+export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
   return (
     <DialogCard
       text={
@@ -31,18 +24,22 @@ export const AskUsername = ({
       }
       interaction={
         <InputWithProps
-          indicatorColor={indicatorColor}
+          indicatorColor={mapIndicatorColors(state.usernameApiResult)}
           type="text"
-          value={username}
+          value={state.username}
           placeholder={'Your amazing username'}
-          onChange={e => setUsername(e.target.value)}
+          onChange={e => act(A._askUsername(A._setUsername(e.target.value)))}
         />
       }
-      debug={<pre>{debug}</pre>}
+      debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
         <>
-          <ButtonGray onClick={() => back()}>Back</ButtonGray>
-          <ButtonPink onClick={() => next()}>Next</ButtonPink>
+          <ButtonGray onClick={() => act(A._askUsername(A._prev(unit)))}>
+            Back
+          </ButtonGray>
+          <ButtonPink onClick={() => act(A._askUsername(A._next(unit)))}>
+            Next
+          </ButtonPink>
         </>
       }
     />

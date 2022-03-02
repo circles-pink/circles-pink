@@ -1,35 +1,20 @@
+import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 import React, { ReactElement } from 'react';
 import { DialogCard } from '../DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
 import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 import { LabeledCheckbox } from '../../components/Checkbox';
+import { mapIndicatorColors } from '../mapIndicatorColors';
+import { unit } from 'generated/output/Data.Unit';
 
 type AskEmailProps = {
-  email: string;
-  terms: boolean;
-  privacy: boolean;
-  indicatorColor: string;
-  setEmail: (n: string) => void;
-  setTerms: () => void;
-  setPrivacy: () => void;
-  back: () => void;
-  next: () => void;
-  debug?: string;
+  state: UserData;
+  act: (ac: A.CirclesAction) => void;
 };
 
-export const AskEmail = ({
-  email,
-  terms,
-  privacy,
-  indicatorColor,
-  setEmail,
-  setTerms,
-  setPrivacy,
-  back,
-  next,
-  debug,
-}: AskEmailProps): ReactElement => {
+export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
   return (
     <DialogCard
       text={
@@ -41,29 +26,33 @@ export const AskEmail = ({
       interaction={
         <>
           <InputWithProps
-            indicatorColor={indicatorColor}
+            indicatorColor={mapIndicatorColors(state.emailApiResult)}
             type="text"
-            value={email}
+            value={state.email}
             placeholder={'Enter your E-Mail'}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => act(A._askEmail(A._setEmail(e.target.value)))}
           />
           <LabeledCheckbox
             label="Accept terms"
-            checked={terms}
-            setChecked={setTerms}
+            checked={state.terms}
+            setChecked={() => act(A._askEmail(A._setTerms(unit)))}
           />
           <LabeledCheckbox
             label="Accept privacy"
-            checked={privacy}
-            setChecked={setPrivacy}
+            checked={state.privacy}
+            setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}
           />
         </>
       }
-      debug={<pre>{debug}</pre>}
+      debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
         <>
-          <ButtonGray onClick={() => back()}>Back</ButtonGray>
-          <ButtonPink onClick={() => next()}>Next</ButtonPink>
+          <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
+            Back
+          </ButtonGray>
+          <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
+            Next
+          </ButtonPink>
         </>
       }
     />

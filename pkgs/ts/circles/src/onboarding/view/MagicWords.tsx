@@ -11,18 +11,11 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 
 type MagicWordsProps = {
-  // back: () => void;
-  // next: () => void;
   state: UserData;
   act: (ac: A.CirclesAction) => void;
 };
 
-export const MagicWords = ({
-  // next,
-  // back,
-  state,
-  act,
-}: MagicWordsProps): ReactElement => {
+export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
   return (
     <DialogCard
       text={
