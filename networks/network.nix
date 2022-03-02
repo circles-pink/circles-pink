@@ -11,20 +11,8 @@ in
       system = "x86_64-linux";
     in
     {
-      # services.httpd.enable = true;
-      # services.httpd.adminAddr = "admin@teal.ooo";
-
-      # services.httpd.virtualHosts = {
-      #   "circles.pink" = {
-      #     listen = [{ port = 80; }];
-      #     documentRoot =
-      #       (import ../default.nix).packages.${system}.publicDir;
-      #   };
-      # };
-
       environment.systemPackages = [ pkgs.busybox ];
 
-      # boot.cleanTmpDir = true;
       boot.tmpOnTmpfs = true;
       networking.hostName = "circles-pink";
 
@@ -53,23 +41,11 @@ in
           "circles.pink" = {
             forceSSL = true;
             enableACME = true;
-            # All serverAliases will be added as extra domain names on the certificate.
             serverAliases = [ "circles.pink" ];
             locations."/" = {
               root = (import ../default.nix).packages.${system}.publicDir;
             };
           };
-
-          # We can also add a different vhost and reuse the same certificate
-          # but we have to append extraDomainNames manually.
-          # security.acme.certs."circles.pink".extraDomainNames = [ "circles.pink" ];
-          # "baz.example.com" = {
-          #   forceSSL = true;
-          #   useACMEHost = "circles.pink";
-          #   locations."/" = {
-          #     root = (import ../default.nix).packages.${system}.publicDir;
-          #   };
-          # };
         };
       };
 
