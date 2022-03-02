@@ -11,16 +11,16 @@ in
       system = "x86_64-linux";
     in
     {
-      services.httpd.enable = true;
-      services.httpd.adminAddr = "admin@teal.ooo";
+      # services.httpd.enable = true;
+      # services.httpd.adminAddr = "admin@teal.ooo";
 
-      services.httpd.virtualHosts = {
-        "circles.pink" = {
-          listen = [{ port = 80; }];
-          documentRoot =
-            (import ../default.nix).packages.${system}.publicDir;
-        };
-      };
+      # services.httpd.virtualHosts = {
+      #   "circles.pink" = {
+      #     listen = [{ port = 80; }];
+      #     documentRoot =
+      #       (import ../default.nix).packages.${system}.publicDir;
+      #   };
+      # };
 
       environment.systemPackages = [ pkgs.busybox ];
 
@@ -44,5 +44,34 @@ in
       networking.firewall.allowedTCPPorts = [ 80 22 ];
 
       deployment.targetHost = "circles.pink";
+
+      # security.acme.acceptTerms = true;
+      # security.acme.email = "circles.pink@protonmail.com";
+      services.nginx = {
+        enable = true;
+        virtualHosts = {
+          "circles.pink" = {
+            forceSSL = false;
+            enableACME = false;
+            # All serverAliases will be added as extra domain names on the certificate.
+            serverAliases = [ "circles.pink" ];
+            locations."/" = {
+              root = (import ../default.nix).packages.${system}.publicDir;
+            };
+          };
+
+          # We can also add a different vhost and reuse the same certificate
+          # but we have to append extraDomainNames manually.
+          # security.acme.certs."circles.pink".extraDomainNames = [ "circles.pink" ];
+          # "baz.example.com" = {
+          #   forceSSL = true;
+          #   useACMEHost = "circles.pink";
+          #   locations."/" = {
+          #     root = (import ../default.nix).packages.${system}.publicDir;
+          #   };
+          # };
+        };
+      };
+
     };
 }
