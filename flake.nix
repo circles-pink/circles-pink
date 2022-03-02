@@ -84,6 +84,7 @@
               pkgs.dhall-lsp-server
               pkgs.graphviz
               pkgs.makefile2graph
+              pkgs.circles-pink.runGarden
             ];
 
             # Change the prompt to show that you are in a devShell

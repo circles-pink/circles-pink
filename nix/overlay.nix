@@ -23,7 +23,7 @@
       stateMachineGraphDot = final.runCommand "stateMachineGraph"
         { buildInputs = [ final.nodejs ]; }
         ''
-          node -e 'require("${purs.default}/CirclesPink.GenGraph").main()' $out
+          node -e 'require("${purs.default}/CirclesPink.Garden.GenGraph").main()' $out
         '';
 
       stateMachineGraphSvg = final.runCommand "stateMachineGraph"
@@ -47,6 +47,10 @@
 
       publicDir = final.runCommand "output" { } ''
         cp -r ${ts.builds.storybook} $out
+      '';
+
+      runGarden = final.writeShellScriptBin "run-garden" ''
+        ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
     };
 })
