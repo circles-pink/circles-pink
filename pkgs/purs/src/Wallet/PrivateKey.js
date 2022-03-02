@@ -8,9 +8,9 @@ exports.genPrivateKeyImpl = function () {
 };
 
 exports.entropyToMnemonicImpl = function (entropy) {
-  return bip.entropyToMnemonic(entropy);
+  return bip39.entropyToMnemonic(entropy);
 };
 
 exports.mnemonicToEntropyImpl = function (mnemonic) {
-  return bip.mnemonicToEntropy(mnemonic);
+  return bip39.mnemonicToEntropy(mnemonic);
 };

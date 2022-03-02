@@ -4,6 +4,10 @@ export const Input = tw.input`shadow appearance-none border border-pink-600 roun
 export const ButtonGray = tw.button`bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`;
 export const ButtonPink = tw.button`bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`;
 
+type StyledInputProps = {
+  indicatorColor: string;
+};
+
 export const InputWithProps = styled.input<StyledInputProps>`
   border: 1px solid ${props => props.indicatorColor};
   border-radius: 0.25rem;
@@ -16,7 +20,3 @@ export const InputWithProps = styled.input<StyledInputProps>`
   line-height: 1.25;
   outline: none;
 `;
-
-type StyledInputProps = {
-  indicatorColor: string;
-};

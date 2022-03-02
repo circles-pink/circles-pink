@@ -1,5 +1,6 @@
-import { CirclesAction } from 'generated/output/CirclesPink.StateMachine.Action';
+import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
+import { unit } from 'generated/output/Data.Unit';
 import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
 import React, { ReactElement } from 'react';
 import {
@@ -10,30 +11,38 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 
 type MagicWordsProps = {
-  //back: () => void;
+  // back: () => void;
   // next: () => void;
   state: UserData;
-  act: (ac: CirclesAction) => void;
+  act: (ac: A.CirclesAction) => void;
 };
 
 export const MagicWords = ({
+  // next,
+  // back,
   state,
   act,
-}: // next,
-//back,
-MagicWordsProps): ReactElement => {
+}: MagicWordsProps): ReactElement => {
   return (
     <DialogCard
       text={
         <Text>
-          <Claim>Let's talk about Security!!!!!!</Claim>
-          <SubClaim>Most important: Keep your seedphrase save!</SubClaim>
+          <Claim>One key to rule them all...</Claim>
+          <SubClaim>
+            Anyone with these words has full control over your Trustnetwork and
+            can spend your $CRC!
+          </SubClaim>
+          <SubClaim>
+            You should write this on a sheet of paper to keep your Coins save.
+          </SubClaim>
           <pre>{getWords(keyToMnemonic(state.privateKey)).join(' ')}</pre>
         </Text>
       }
       control={
         <>
-          {/* <ButtonGray onClick={() => back()}>Back</ButtonGray> */}
+          <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
+            Back
+          </ButtonGray>
           {/* <ButtonPink onClick={() => next()}>Next</ButtonPink> */}
         </>
       }
@@ -41,4 +50,4 @@ MagicWordsProps): ReactElement => {
   );
 };
 
-//back={() => act(A._infoSecurity(A._prev(unit)))}
+// back={() => act(A._infoSecurity(A._prev(unit)))}
