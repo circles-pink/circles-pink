@@ -1,9 +1,11 @@
-(final: prev: {
+(final: prev: rec {
   vscode = (import ./pkgs/vscode.nix { pkgs = final; });
 
   cspell = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.cspell;
 
   ts-node = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.ts-node;
+
+  depcruise = circles-pink.ts.bins.depcruise;
 
   circles-pink =
     rec {
@@ -36,6 +38,14 @@
         { buildInputs = [ final.graphviz final.makefile2graph final.gnumake ]; }
         ''
           make -Bnd -f ${../Makefile} | make2graph | dot -Tsvg -o $out
+        '';
+
+      moduleDependencyGraph = final.runCommand "moduleDependencyGraph"
+        { buildInputs = [ final.graphviz final.depcruise ]; }
+        ''
+          cd ${../.}
+          echo $PWD
+          depcruise --output-type dot $PWD/pkgs/ts/*/src > $out
         '';
 
       assets = final.runCommand "assets" { } ''

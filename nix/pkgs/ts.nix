@@ -67,6 +67,12 @@
       '')
       emptyWorkspaces;
 
+  bins = {
+    depcruise = pkgs.writeShellScriptBin "depcruise" ''
+      ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
+    '';
+  };
+
   builds = {
     storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
       tmp=`mktemp -d`
