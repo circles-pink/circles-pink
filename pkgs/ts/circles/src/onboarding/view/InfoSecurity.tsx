@@ -1,16 +1,19 @@
+import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.StateMachine.Action';
 import React, { ReactElement } from 'react';
 import { ButtonGray, ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
+import { unit } from 'generated/output/Data.Unit';
 
 type InfoSecurityProps = {
-  back: () => void;
-  next: () => void;
+  state: UserData;
+  act: (ac: A.CirclesAction) => void;
 };
 
 export const InfoSecurity = ({
-  next,
-  back,
+  state,
+  act,
 }: InfoSecurityProps): ReactElement => {
   return (
     <DialogCard
@@ -22,8 +25,12 @@ export const InfoSecurity = ({
       }
       control={
         <>
-          <ButtonGray onClick={() => back()}>Back</ButtonGray>
-          <ButtonPink onClick={() => next()}>Next</ButtonPink>
+          <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
+            Back
+          </ButtonGray>
+          <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
+            Next
+          </ButtonPink>
         </>
       }
     />
