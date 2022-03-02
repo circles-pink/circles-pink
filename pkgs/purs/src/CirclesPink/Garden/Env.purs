@@ -1,10 +1,10 @@
-module Garden.Env
+module CirclesPink.Garden.Env
   ( env
   ) where
 
 import Prelude
-import CirclesPink.StateMachine.Control as C
-import CirlesPink.StateMachine.Error (CirclesError, CirclesError')
+import CirclesPink.Garden.StateMachine.Control as C
+import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)

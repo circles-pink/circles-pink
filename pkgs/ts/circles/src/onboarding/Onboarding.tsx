@@ -2,8 +2,8 @@ import '../style/global.css';
 
 import React, { ReactElement } from 'react';
 
-import { control } from 'generated/output/CirclesPink.TS';
-import { init } from 'generated/output/CirclesPink.StateMachine.State';
+import { control } from 'generated/output/CirclesPink.Garden.TS';
+import { init } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 
 import { useStateMachine } from './useStateMachine';
 import { AskUsername } from './view/AskUsername';

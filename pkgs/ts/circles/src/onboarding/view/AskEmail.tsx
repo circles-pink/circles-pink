@@ -1,5 +1,5 @@
-import { UserData } from 'generated/output/CirclesPink.StateMachine.State';
-import * as A from 'generated/output/CirclesPink.StateMachine.Action';
+import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement } from 'react';
 import { DialogCard } from '../DialogCard';
 

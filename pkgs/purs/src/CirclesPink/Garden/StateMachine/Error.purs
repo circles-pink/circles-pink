@@ -1,4 +1,4 @@
-module CirlesPink.StateMachine.Error where
+module CirclesPink.Garden.StateMachine.Error where
 
 import Prelude
 import Data.Variant (Variant)

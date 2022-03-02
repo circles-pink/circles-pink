@@ -5,7 +5,7 @@ import CirclesM as C
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class.Console (log)
-import Garden.Env (env)
+import CirclesPink.Garden.Env (env)
 import HTTP.Milkis as HM
 import Milkis.Impl.Node (nodeFetch)
 
