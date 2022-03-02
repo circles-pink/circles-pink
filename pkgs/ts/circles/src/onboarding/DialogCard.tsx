@@ -10,7 +10,7 @@ type DemoCardProps = {
 
 const Frame = tw.div`bg-gray-50 border-2 border-pink-500`;
 const Card = tw.div`max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between`;
-const Content = tw.div``;
+const Content = tw.div`lg:w-1/2`;
 const Control = tw.div`mt-8 flex lg:mt-0 lg:flex-shrink-0`;
 const Debug = tw.div`p-8`;
 
