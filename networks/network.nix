@@ -41,18 +41,18 @@ in
       boot.initrd.kernelModules = [ "nvme" ];
       fileSystems."/" = { device = "/dev/sda1"; fsType = "ext4"; };
 
-      networking.firewall.allowedTCPPorts = [ 80 22 ];
+      networking.firewall.allowedTCPPorts = [ 80 22 443 ];
 
       deployment.targetHost = "circles.pink";
 
-      # security.acme.acceptTerms = true;
-      # security.acme.email = "circles.pink@protonmail.com";
+      security.acme.acceptTerms = true;
+      security.acme.email = "circles.pink@protonmail.com";
       services.nginx = {
         enable = true;
         virtualHosts = {
           "circles.pink" = {
-            forceSSL = false;
-            enableACME = false;
+            forceSSL = true;
+            enableACME = true;
             # All serverAliases will be added as extra domain names on the certificate.
             serverAliases = [ "circles.pink" ];
             locations."/" = {
