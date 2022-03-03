@@ -17,14 +17,14 @@ export const FadeIn = ({
   return (
     <ClassNames>
       {({ css, cx }) => (
-        <>
-          {React.cloneElement(children, {
-            className: css`
-              opacity: 0;
-              animation: ${fadeIn(direction)} 0.75s ease ${delay}s forwards;
-            `,
-          })}
-        </>
+        <div
+          className={css`
+            opacity: 0;
+            animation: ${fadeIn(direction)} 0.2s ease-in-out ${delay}s forwards;
+          `}
+        >
+          {children}
+        </div>
       )}
     </ClassNames>
   );
