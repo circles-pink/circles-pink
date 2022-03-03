@@ -31,6 +31,7 @@ to generate this file without the comments in this block.
   , "maybe"
   , "milkis"
   , "monad-unlift"
+  , "newtype"
   , "node-buffer"
   , "node-fs"
   , "node-process"

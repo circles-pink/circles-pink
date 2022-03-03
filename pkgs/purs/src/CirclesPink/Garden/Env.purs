@@ -1,5 +1,5 @@
 module CirclesPink.Garden.Env
-  ( env
+  ( env, testEnv
   ) where
 
 import Prelude
@@ -10,10 +10,13 @@ import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
+import Data.Identity (Identity(..))
 import Data.Variant (inj)
 import Effect.Aff (Aff)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
+import Undefined (undefined)
+import Wallet.PrivateKey (zeroKey)
 import Wallet.PrivateKey as P
 
 _errService :: CirclesError
@@ -81,4 +84,11 @@ env { request } =
               )
             # ExceptT
   , generatePrivateKey: P.genPrivateKey
+  }
+
+testEnv :: C.Env Identity
+testEnv =
+  { apiCheckUserName: \_ -> pure { isValid: true }
+  , apiCheckEmail: \_ -> pure { isValid: true }
+  , generatePrivateKey: pure zeroKey
   }
