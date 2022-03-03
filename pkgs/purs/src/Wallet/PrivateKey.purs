@@ -28,6 +28,9 @@ newtype PrivateKey
 
 derive instance privateKeyEq :: Eq PrivateKey
 
+instance showPrivateKey :: Show PrivateKey where
+  show _ = "***private_key***"
+
 newtype Mnemonic
   = Mnemonic (Array String)
 
