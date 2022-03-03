@@ -3,7 +3,10 @@ import '../style/global.css';
 import React, { ReactElement } from 'react';
 
 import { control } from 'generated/output/CirclesPink.Garden.TS';
-import { init } from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import {
+  CirclesState,
+  init,
+} from 'generated/output/CirclesPink.Garden.StateMachine.State';
 
 import { useStateMachine } from './useStateMachine';
 import { AskUsername } from './view/AskUsername';
@@ -12,8 +15,12 @@ import { AskEmail } from './view/AskEmail';
 import { InfoSecurity } from './view/InfoSecurity';
 import { MagicWords } from './view/MagicWords';
 
-export const Onboarding = (): ReactElement => {
-  const [state, act] = useStateMachine(init, control);
+type OnboardingProps = {
+  initState?: CirclesState;
+};
+
+export const Onboarding = ({ initState }: OnboardingProps): ReactElement => {
+  const [state, act] = useStateMachine(initState || init, control);
 
   switch (state.type) {
     case 'infoGeneral':

@@ -30,7 +30,7 @@ type Env m
 
 circlesControl ::
   forall t m.
-  MonadEffect m =>
+  Monad m =>
   MonadTrans t =>
   Monad (t m) =>
   Env m -> ((CirclesState -> CirclesState) -> t m Unit) -> CirclesState -> CirclesAction -> t m Unit
