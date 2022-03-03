@@ -41,11 +41,17 @@
         '';
 
       moduleDependencyGraph = final.runCommand "moduleDependencyGraph"
-        { buildInputs = [ final.graphviz final.depcruise ]; }
+        {
+          buildInputs = [
+            final.graphviz
+            final.depcruise
+            final.nodePackages.typescript
+            final.nodejs
+          ];
+        }
         ''
-          cd ${../.}
-          echo $PWD
-          depcruise --output-type dot $PWD/pkgs/ts/*/src > $out
+          cd ${../pkgs/ts}
+          depcruise --include-only '^.*/src' --output-type dot */src | dot -T svg > $out
         '';
 
       assets = final.runCommand "assets" { } ''
@@ -53,6 +59,7 @@
         cp ${stateMachineGraphDot} $out/circles-state-machine.dot
         cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
         cp ${makefileGraphSvg} $out/circles-makefile.svg
+        cp ${moduleDependencyGraph} $out/module-dep-graph.svg
       '';
 
       publicDir = final.runCommand "output" { } ''
