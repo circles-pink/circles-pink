@@ -14,7 +14,8 @@ type EmailApiResult
   = RemoteData CirclesError { isValid :: Boolean }
 
 type UserData
-  = { username :: String
+  = { animation :: String
+    , username :: String
     , usernameApiResult :: UsernameApiResult
     , email :: String
     , emailApiResult :: EmailApiResult
@@ -35,7 +36,8 @@ type CirclesState
 init :: CirclesState
 init =
   _infoGeneral
-    { username: ""
+    { animation: "left"
+    , username: ""
     , usernameApiResult: _notAsked
     , email: ""
     , emailApiResult: _notAsked

@@ -16,7 +16,7 @@ export const InfoSecurity = ({
   state,
   act,
 }: InfoSecurityProps): ReactElement => {
-  const direction: Direction = 'left';
+  const direction: Direction = state.animation as Direction;
   const incrementBy = 0.05;
   const getDelay = (
     n => () =>

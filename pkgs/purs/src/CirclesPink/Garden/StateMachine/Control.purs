@@ -37,9 +37,16 @@ circlesControl env =
   C.mkControl
     _circlesStateMachine
     { infoGeneral:
-        { next: \set _ _ -> set $ \st -> S._askUsername st }
+        { next:
+            \set _ _ -> do
+              set $ \st -> S._infoGeneral st { animation = "left" }
+              set $ \st -> S._askUsername st
+        }
     , askUsername:
-        { prev: \set _ _ -> set $ \st -> S._infoGeneral st
+        { prev:
+            \set _ _ -> do
+              set $ \st -> S._askUsername st { animation = "right" }
+              set $ \st -> S._infoGeneral st
         , setUsername:
             \set _ username -> do
               set $ \st -> S._askUsername st { username = username }
@@ -55,7 +62,8 @@ circlesControl env =
                     else
                       S._askUsername st
         , next:
-            \set _ _ ->
+            \set _ _ -> do
+              set $ \st -> S._askUsername st { animation = "left" }
               set
                 $ \st ->
                     let
@@ -70,7 +78,10 @@ circlesControl env =
                         S._askUsername st
         }
     , askEmail:
-        { prev: \set _ _ -> set $ \st -> S._askUsername st
+        { prev:
+            \set _ _ -> do
+              set $ \st -> S._askEmail st { animation = "right" }
+              set $ \st -> S._askUsername st
         , setEmail:
             \set _ email -> do
               set $ \st -> S._askEmail st { email = email }
@@ -89,7 +100,8 @@ circlesControl env =
         , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
         , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
         , next:
-            \set _ _ ->
+            \set _ _ -> do
+              set $ \st -> S._askEmail st { animation = "left" }
               set
                 $ \st ->
                     let
@@ -104,12 +116,20 @@ circlesControl env =
                         S._askEmail st
         }
     , infoSecurity:
-        { prev: \set _ _ -> set $ \st -> S._askEmail st
+        { prev:
+            \set _ _ -> do
+              set $ \st -> S._infoSecurity st { animation = "right" }
+              set $ \st -> S._askEmail st
         , next:
             \set _ _ -> do
+              set $ \st -> S._infoSecurity st { animation = "left" }
               pk <- lift $ env.generatePrivateKey
               set $ \st -> S._magicWords st { privateKey = pk }
         }
     , magicWords:
-        { prev: \set _ _ -> set $ \st -> S._infoSecurity st }
+        { prev:
+            \set _ _ -> do
+              set $ \st -> S._magicWords st { animation = "right" }
+              set $ \st -> S._infoSecurity st
+        }
     }

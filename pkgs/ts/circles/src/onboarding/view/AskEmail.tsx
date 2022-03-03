@@ -16,7 +16,7 @@ type AskEmailProps = {
 };
 
 export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
-  const direction: Direction = 'left';
+  const direction: Direction = state.animation as Direction;
   const incrementBy = 0.05;
   const getDelay = (
     n => () =>
