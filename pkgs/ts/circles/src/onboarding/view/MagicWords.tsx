@@ -18,7 +18,7 @@ type MagicWordsProps = {
 
 export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
   const direction: Direction = 'left';
-  const incrementBy = 0.1;
+  const incrementBy = 0.05;
   const getDelay = (
     n => () =>
       (n += incrementBy)
