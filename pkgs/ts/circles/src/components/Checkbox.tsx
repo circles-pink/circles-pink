@@ -15,12 +15,10 @@ export const LabeledCheckbox = ({
   label,
 }: LabeledCheckboxProps): ReactElement => {
   return (
-    <div>
-      <Label>
-        <Checkbox checked={checked} onChange={() => setChecked()} />
-        <span>{label}</span>
-      </Label>
-    </div>
+    <Label>
+      <Checkbox checked={checked} onChange={() => setChecked()} />
+      <span>{label}</span>
+    </Label>
   );
 };
 
