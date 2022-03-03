@@ -57,12 +57,12 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
               Back
             </ButtonGray>
 
-            {/* <ButtonPink onClick={() => next()}>Next</ButtonPink> */}
+            {/* <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
+              Next
+            </ButtonPink> */}
           </>
         </FadeIn>
       }
     />
   );
 };
-
-// back={() => act(A._infoSecurity(A._prev(unit)))}
