@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "bip39": "^3.0.4",
-    "ethereumjs-wallet": "^1.0.2"
+    "ethereumjs-wallet": "^1.0.2",
+    "node-fetch": "^2.0.0"
   }
 }

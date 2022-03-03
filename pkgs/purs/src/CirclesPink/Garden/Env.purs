@@ -22,8 +22,7 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env ∷
-  { request ∷ ReqFn (CirclesError' ()) } -> C.Env Aff
+env :: { request :: ReqFn (CirclesError' ()) } -> C.Env Aff
 env { request } =
   { apiCheckUserName:
       \username ->
