@@ -50,8 +50,8 @@ const getCssProp = (direction: Direction) => {
     case 'right':
       return 'translatex(10px)';
     case 'up':
-      return 'translatey(-10px)';
-    case 'down':
       return 'translatey(10px)';
+    case 'down':
+      return 'translatey(-10px)';
   }
 };
