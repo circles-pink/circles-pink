@@ -7,3 +7,4 @@ output/
 .psc-ide-port
 /.spago2nix
 /tmp
+pkgs/ts/assets/src/
