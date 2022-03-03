@@ -17,7 +17,6 @@ import Milkis.Impl.Node (nodeFetch)
 import Stadium.Control (toStateT)
 import Undefined (undefined)
 
---act :: CirclesAction -> StateT CirclesState Aff Unit
 control ::
   ((CirclesState -> CirclesState) -> StateT CirclesState Aff Unit) ->
   CirclesState -> CirclesAction -> StateT CirclesState Aff Unit
@@ -54,5 +53,4 @@ result = execStateT script init
 
 main :: Effect Unit
 main = do
-  log "hello script"
   runAff_ (\_ -> pure unit) result
