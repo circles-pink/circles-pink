@@ -102,6 +102,12 @@
 
       chmod -R +w $tmp
 
+      rm $tmp/node_modules/generated
+      mkdir -p $tmp/node_modules/generated
+      cp -r ${pursOutput} $tmp/node_modules/generated/output
+
+      chmod -R +w $tmp
+
       cp -r ${workspaces.storybook}/libexec/storybook/deps/storybook/node_modules/ \
         $tmp/pkgs/ts/storybook/node_modules
       chmod -R +w $tmp
