@@ -8,6 +8,7 @@ import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 import { LabeledCheckbox } from '../../components/Checkbox';
 import { mapIndicatorColors } from '../mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
+import { Direction, FadeIn } from '../../components/animation/FadeIn';
 
 type AskEmailProps = {
   state: UserData;
@@ -15,44 +16,77 @@ type AskEmailProps = {
 };
 
 export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
+  const direction: Direction = 'left';
+  const incrementBy = 0.05;
+  const getDelay = (
+    n => () =>
+      (n += incrementBy)
+  )(0 - incrementBy);
+
   return (
     <DialogCard
       text={
         <Text>
-          <Claim>How do you want to be notified?</Claim>
-          <SubClaim>Please submit a valid e-mail address.</SubClaim>
+          <FadeIn direction={direction} delay={getDelay()}>
+            <Claim>How do you want to be notified?</Claim>
+          </FadeIn>
+
+          <FadeIn direction={direction} delay={getDelay()}>
+            <SubClaim>Please submit a valid e-mail address.</SubClaim>
+          </FadeIn>
         </Text>
       }
       interaction={
         <>
-          <InputWithProps
-            indicatorColor={mapIndicatorColors(state.emailApiResult)}
-            type="text"
-            value={state.email}
-            placeholder={'Enter your E-Mail'}
-            onChange={e => act(A._askEmail(A._setEmail(e.target.value)))}
-          />
-          <LabeledCheckbox
-            label="Accept terms"
-            checked={state.terms}
-            setChecked={() => act(A._askEmail(A._setTerms(unit)))}
-          />
-          <LabeledCheckbox
-            label="Accept privacy"
-            checked={state.privacy}
-            setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}
-          />
+          <FadeIn direction={direction} delay={getDelay()}>
+            <InputWithProps
+              autoFocus
+              indicatorColor={mapIndicatorColors(state.emailApiResult)}
+              type="text"
+              value={state.email}
+              placeholder={'Enter your E-Mail'}
+              onChange={e => act(A._askEmail(A._setEmail(e.target.value)))}
+              onKeyPress={e =>
+                e.key === 'Enter' && act(A._askEmail(A._next(unit)))
+              }
+            />
+          </FadeIn>
+
+          <FadeIn direction={direction} delay={getDelay()}>
+            <div>
+              <LabeledCheckbox
+                label="Accept terms"
+                checked={state.terms}
+                setChecked={() => act(A._askEmail(A._setTerms(unit)))}
+              />
+            </div>
+          </FadeIn>
+
+          <FadeIn direction={direction} delay={getDelay()}>
+            <div>
+              <LabeledCheckbox
+                label="Accept privacy"
+                checked={state.privacy}
+                setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}
+              />
+            </div>
+          </FadeIn>
         </>
       }
       debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
         <>
-          <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
-            Back
-          </ButtonGray>
-          <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
-            Next
-          </ButtonPink>
+          <FadeIn direction={direction} delay={getDelay()}>
+            <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
+              Back
+            </ButtonGray>
+          </FadeIn>
+
+          <FadeIn direction={direction} delay={getDelay()}>
+            <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
+              Next
+            </ButtonPink>
+          </FadeIn>
         </>
       }
     />
