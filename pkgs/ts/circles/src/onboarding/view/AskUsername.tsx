@@ -52,19 +52,17 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       }
       debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
-        <>
-          <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn direction={direction} delay={getDelay()}>
+          <>
             <ButtonGray onClick={() => act(A._askUsername(A._prev(unit)))}>
               Back
             </ButtonGray>
-          </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
             <ButtonPink onClick={() => act(A._askUsername(A._next(unit)))}>
               Next
             </ButtonPink>
-          </FadeIn>
-        </>
+          </>
+        </FadeIn>
       }
     />
   );

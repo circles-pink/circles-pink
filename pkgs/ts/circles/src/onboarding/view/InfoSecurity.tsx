@@ -37,19 +37,17 @@ export const InfoSecurity = ({
         </Text>
       }
       control={
-        <>
-          <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn direction={direction} delay={getDelay()}>
+          <>
             <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
               Back
             </ButtonGray>
-          </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
             <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
               Next
             </ButtonPink>
-          </FadeIn>
-        </>
+          </>
+        </FadeIn>
       }
     />
   );

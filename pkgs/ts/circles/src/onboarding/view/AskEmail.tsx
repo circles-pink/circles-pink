@@ -75,19 +75,17 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       }
       debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
-        <>
-          <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn direction={direction} delay={getDelay()}>
+          <>
             <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
               Back
             </ButtonGray>
-          </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
             <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
               Next
             </ButtonPink>
-          </FadeIn>
-        </>
+          </>
+        </FadeIn>
       }
     />
   );
