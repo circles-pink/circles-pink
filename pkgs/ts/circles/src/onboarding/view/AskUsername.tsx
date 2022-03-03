@@ -15,7 +15,7 @@ type AskUsernameProps = {
 };
 
 export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
-  const direction: Direction = 'left';
+  const direction: Direction = state.animation as Direction;
   const incrementBy = 0.05;
   const getDelay = (
     n => () =>

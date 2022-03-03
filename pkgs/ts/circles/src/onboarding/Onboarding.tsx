@@ -17,7 +17,7 @@ export const Onboarding = (): ReactElement => {
 
   switch (state.type) {
     case 'infoGeneral':
-      return <InfoGeneral act={act} />;
+      return <InfoGeneral state={state.value} act={act} />;
     case 'askUsername':
       return <AskUsername state={state.value} act={act} />;
     case 'askEmail':

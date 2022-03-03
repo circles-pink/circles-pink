@@ -5,13 +5,15 @@ import { ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 
 type InfoGeneralProps = {
+  state: UserData;
   act: (ac: A.CirclesAction) => void;
 };
 
-export const InfoGeneral = ({ act }: InfoGeneralProps): ReactElement => {
-  const direction: Direction = 'left';
+export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
+  const direction: Direction = state.animation as Direction;
   const incrementBy = 0.05;
   const getDelay = (
     n => () =>
