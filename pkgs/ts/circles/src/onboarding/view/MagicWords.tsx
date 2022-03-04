@@ -4,13 +4,15 @@ import { unit } from 'generated/output/Data.Unit';
 import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
 import React, { ReactElement } from 'react';
 import tw from 'twin.macro';
-import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import {
   ButtonGray,
   // ButtonPink
 } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
+import { directionToOrientation } from '../directionToOrientation';
+import { getIncrementor } from '../getCounter';
 
 type MagicWordsProps = {
   state: UserData;
@@ -21,31 +23,25 @@ const WordGrit = tw.div`flex flex-wrap items-center`;
 const Word = tw.div`lg:w-3/12 w-3/6 p-2`;
 
 export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
-  const direction: Direction =
-    state.direction.type === 'forwards' ? 'left' : 'right';
-
-  const incrementBy = 0.05;
-  const getDelay = (
-    n => () =>
-      (n += incrementBy)
-  )(0 - incrementBy);
+  const orientation: Orientation = directionToOrientation(state.direction);
+  const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
       text={
         <Text>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <Claim>One key to rule them all...</Claim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>
               Anyone with these words has full control over your Trustnetwork
               and can spend your $CRC!
             </SubClaim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>
               You should write this on a sheet of paper to keep your Coins save.
             </SubClaim>
@@ -55,7 +51,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             {getWords(keyToMnemonic(state.privateKey)).map((word, index) => {
               return (
                 <Word key={`${word}-${index}`}>
-                  <FadeIn direction={direction} delay={getDelay()}>
+                  <FadeIn orientation={orientation} delay={getDelay()}>
                     <span>{word}</span>
                   </FadeIn>
                 </Word>
@@ -65,7 +61,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
         </Text>
       }
       control={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
               Back

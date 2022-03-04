@@ -4,8 +4,10 @@ import React, { ReactElement, useState } from 'react';
 import { ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
-import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import { getIncrementor } from '../getCounter';
+import { directionToOrientation } from '../directionToOrientation';
 
 type InfoGeneralProps = {
   state: UserData;
@@ -13,30 +15,24 @@ type InfoGeneralProps = {
 };
 
 export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
-  const direction: Direction =
-    state.direction.type === 'forwards' ? 'left' : 'right';
-
-  const incrementBy = 0.05;
-  const getDelay = (
-    n => () =>
-      (n += incrementBy)
-  )(0 - incrementBy);
+  const orientation: Orientation = directionToOrientation(state.direction);
+  const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
       text={
         <Text>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <Claim>Welcome to Circles</Claim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>Let's get you a circles Wallet!</SubClaim>
           </FadeIn>
         </Text>
       }
       control={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <ButtonPink onClick={() => act(A._infoGeneral(A._next(unit)))}>
             Next
           </ButtonPink>

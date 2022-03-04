@@ -1,16 +1,16 @@
 import { ClassNames, keyframes } from '@emotion/react';
 import React, { ReactElement } from 'react';
 
-export type Direction = 'left' | 'right' | 'up' | 'down';
+export type Orientation = 'left' | 'right' | 'up' | 'down';
 
 type FadeInProps = {
-  direction?: Direction;
+  orientation?: Orientation;
   delay?: number;
   children: ReactElement;
 };
 
 export const FadeIn = ({
-  direction = 'left',
+  orientation = 'left',
   delay = 0,
   children,
 }: FadeInProps): ReactElement => {
@@ -20,7 +20,8 @@ export const FadeIn = ({
         <div
           className={css`
             opacity: 0;
-            animation: ${fadeIn(direction)} 0.2s ease-in-out ${delay}s forwards;
+            animation: ${fadeIn(orientation)} 0.2s ease-in-out ${delay}s
+              forwards;
           `}
         >
           {children}
@@ -30,11 +31,11 @@ export const FadeIn = ({
   );
 };
 
-const fadeIn = (direction: Direction): string => {
+const fadeIn = (orientation: Orientation): string => {
   return keyframes`
     from {
         opacity:0;
-        transform: ${getTransform(direction)};
+        transform: ${getTransform(orientation)};
     }
     to {
         opacity:1;
@@ -43,8 +44,8 @@ const fadeIn = (direction: Direction): string => {
 `;
 };
 
-const getTransform = (direction: Direction) => {
-  switch (direction) {
+const getTransform = (orientation: Orientation) => {
+  switch (orientation) {
     case 'left':
       return 'translatex(-10px)';
     case 'right':
