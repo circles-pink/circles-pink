@@ -1,54 +1,64 @@
 module CirclesPink.Garden.CirclesCore
-  ( CirclesCore
-  , Options
-  , Provider
-  , Web3
+  ( Err
+  , ErrNative
+  , ErrService
+  , module Exp
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
+  , printErr
+  , userRegister
   ) where
 
+import Prelude
+import CirclesPink.Garden.CirclesCore.Bindings (Options, Provider, Web3, CirclesCore) as Exp
+import CirclesPink.Garden.CirclesCore.Bindings as B
+import Control.Monad.Except (ExceptT(..))
+import Control.Monad.Except.Checked (ExceptV)
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
+import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
+import Effect.Exception (Error, message, try)
+import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
 
---------------------------------------------------------------------------------
--- Types
---------------------------------------------------------------------------------
-type Options
-  = { apiServiceEndpoint :: String
-    , graphNodeEndpoint :: String
-    , hubAddress :: String
-    , proxyFactoryAddress :: String
-    , relayServiceEndpoint :: String
-    , safeMasterAddress :: String
-    , subgraphName :: String
-    }
+newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + r) Effect B.Provider
+newWebSocketProvider x1 =
+  B.newWebSocketProvider x1
+    # try
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
 
---------------------------------------------------------------------------------
--- FFI
---------------------------------------------------------------------------------
-newCirclesCore :: Web3 -> Options -> Effect (Either String CirclesCore)
-newCirclesCore = _newCirclesCore mkEither
+newWeb3 :: B.Provider -> Effect B.Web3
+newWeb3 = B.newWeb3
 
-foreign import _newCirclesCore :: MkEither -> Web3 -> Options -> Effect (Either String CirclesCore)
+newCirclesCore :: forall r. B.Web3 -> B.Options -> ExceptV (ErrNative + r) Effect B.CirclesCore
+newCirclesCore x1 x2 =
+  B.newCirclesCore x1 x2
+    # try
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
 
-foreign import newWeb3 :: Provider -> Effect Web3
+type ErrNative r
+  = ( errNative :: Error | r )
 
-newWebSocketProvider :: String -> Effect (Either String Provider)
-newWebSocketProvider = _newWebSocketProvider mkEither
+type ErrService r
+  = ( errService :: Unit | r )
 
-type MkEither
-  = { left :: forall a b. a -> Either a b
-    , right :: forall a b. b -> Either a b
-    }
+type Err r
+  = ErrNative + ErrService + r
 
-mkEither :: MkEither
-mkEither = { left: Left, right: Right }
+printErr :: Variant (Err ()) -> String
+printErr =
+  case_
+    # on (Proxy :: _ "errNative") (\e -> "Native Error: " <> message e)
+    # on (Proxy :: _ "errService") (\_ -> "service error")
 
-foreign import _newWebSocketProvider :: MkEither -> String -> Effect (Either String Provider)
-
-foreign import data Web3 :: Type
-
-foreign import data CirclesCore :: Type
-
-foreign import data Provider :: Type
+userRegister :: forall r. B.CirclesCore -> B.UserOptions -> ExceptV (ErrService + ErrNative + r) Effect Unit
+userRegister x1 x2 =
+  B.userRegister x1 x2
+    # try
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
+    # ExceptT
