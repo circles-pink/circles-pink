@@ -1,9 +1,11 @@
 module CirclesPink.Garden.StateMachine.Control
   ( Env
+  , RegisterError
   , circlesControl
   ) where
 
 import Prelude
+import CirclesPink.Garden.CirclesCore.Bindings (UserOptions)
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -12,20 +14,21 @@ import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Data.Either (Either(..))
-import Data.Variant (default, onMatch)
-import Effect.Class (class MonadEffect)
+import Data.Variant (Variant, default, onMatch)
+import Effect (Effect)
+import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Wallet.PrivateKey (PrivateKey)
 
+type RegisterError
+  = Variant ( errService :: Unit, errNative :: Error )
+
 type Env m
-  = { apiCheckUserName ::
-        String ->
-        ExceptT CirclesError m { isValid :: Boolean }
-    , apiCheckEmail ::
-        String ->
-        ExceptT CirclesError m { isValid :: Boolean }
+  = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
+    , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
+    , userRegister :: UserOptions -> ExceptT RegisterError m Unit
     }
 
 circlesControl ::
