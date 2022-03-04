@@ -83,8 +83,7 @@
               pkgs.dhall
               pkgs.dhall-lsp-server
               pkgs.graphviz
-              pkgs.makefile2graph
-              pkgs.circles-pink.runGarden
+              pkgs.makefile2grap
               pkgs.depcruise
             ];
 
