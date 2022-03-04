@@ -21,6 +21,8 @@ rec {
     build-spago-style
   '';
 
+  sources = ../../pkgs/purs/src;
+
   pursOutput = pkgs.runCommand "pursOutput"
     {
       buildInputs = [
@@ -39,7 +41,7 @@ rec {
       cp -r ${dependencies}/output $tmp/output
       
       mkdir -p $tmp/pkgs/purs
-      cp -r ${../../pkgs/purs/src} $tmp/pkgs/purs/src
+      cp -r ${sources} $tmp/pkgs/purs/src
       
       chmod -R +w $tmp
       

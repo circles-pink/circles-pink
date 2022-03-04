@@ -70,5 +70,32 @@
         export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
+
+      purs-deps-json = final.runCommand "purs-deps.json"
+        { buildInputs = [ final.purescript final.jq ]; }
+        ''
+          shopt -s globstar
+          purs graph  ${purs.sources}/**/*.purs ${purs.dependencies}/.spago/*/*/src/**/*.purs | jq > $out
+        '';
+
+      purs-deps = final.runCommand "purs-deps" { } (
+        let
+          src = final.writeText "purs-deps" ''
+            #!${final.nodejs}/bin/node
+            require("${purs.pursOutput}/PursDeps").main()
+          '';
+        in
+        ''
+          mkdir -p $out/bin
+          cp ${src} $out/bin/purs-deps
+          chmod +x $out/bin/purs-deps
+        ''
+      );
+
+      purs-moduleDependencyGraphDot = final.runCommand "purs-moduleDependencyGraph.dot"
+        { buildInputs = [ purs-deps ]; }
+        ''
+          purs-deps --depsJsonPath ${purs-deps-json} > $out
+        '';
     };
 })
