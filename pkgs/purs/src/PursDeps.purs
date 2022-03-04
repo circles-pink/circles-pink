@@ -5,13 +5,14 @@ module PursDeps
 import Prelude
 import Control.Monad.Except (ExceptT, except, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.Reader (ReaderT, ask, runReaderT)
+import Control.Monad.Reader (ReaderT, ask, asks, runReaderT)
 import Data.Either (Either(..))
 import Data.Foldable (fold)
 import Data.Map (Map)
 import Data.Variant (Variant)
 import Debug (spy)
 import Effect (Effect)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Node.Process (exit)
 import Options.Applicative (Parser, (<**>))
@@ -49,7 +50,10 @@ main = do
     Right _ -> exit 0
   where
   cap :: Cap Effect
-  cap = { readFile: \_ -> pure "abc" }
+  cap =
+    { readFile: \_ -> pure "abc"
+    , log: undefined
+    }
 
   prog =
     O.info (parseOpts <**> O.helper)
@@ -63,13 +67,16 @@ main = do
 -- Error
 --------------------------------------------------------------------------------
 type Err r
-  = (ErrReadFile + ErrParse + r)
+  = (ErrReadFile + ErrParse + ErrLog + r)
 
 type ErrReadFile r
   = ( errReadFile :: String | r )
 
 type ErrParse r
   = ( errParse :: String | r )
+
+type ErrLog r
+  = ( errLog :: String | r )
 
 printError :: Variant (Err ()) -> String
 printError _ = "error"
@@ -95,25 +102,21 @@ runResult cap r = runExceptT $ runReaderT r cap
 --------------------------------------------------------------------------------
 -- Main
 --------------------------------------------------------------------------------
-type Cap r m
-  = { readFile :: String -> ExceptV (ErrReadFile + r) m String
+type Cap m
+  = { readFile :: forall r. String -> ExceptV (ErrReadFile + r) m String
+    , log :: forall r. String -> ExceptV (ErrLog + r) m Unit
     }
-
-type CapErr r
-  = ErrReadFile + r
-
-moo :: forall r m. String -> ExceptV (ErrReadFile + r) m String
-moo = undefined
 
 parse :: forall r. String -> Either (Variant (ErrParse + r)) PursDeps
 parse = undefined
 
-main' :: forall r' m. Monad m => Union (CapErr ()) r' (Err ()) => Nub r' r' => Result () { opts :: Opts, cap :: Cap r' m } m Unit
+main' :: forall r' m r. Monad m => Result r { opts :: Opts, cap :: Cap m } m Unit
 main' = do
-  { cap, opts } <- ask
-  --res <- lift $ cap.readFile opts.depsJsonPath
-  r <- lift $ cap.readFile ""
-  res' <- lift $ except $ parse "res"
+  cap :: Cap m <- asks _.cap
+  opts <- asks _.opts
+  r <- lift $ cap.readFile opts.depsJsonPath
+  res' <- lift $ except $ parse r
   let
     x = spy "res" res'
+  lift $ cap.log ""
   pure unit
