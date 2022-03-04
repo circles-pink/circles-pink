@@ -5,7 +5,9 @@ import { ButtonGray, ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../DialogCard';
 import { unit } from 'generated/output/Data.Unit';
-import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { Orientation, FadeIn } from '../../components/animation/FadeIn';
+import { getIncrementor } from '../getCounter';
+import { directionToOrientation } from '../directionToOrientation';
 
 type InfoSecurityProps = {
   state: UserData;
@@ -16,30 +18,24 @@ export const InfoSecurity = ({
   state,
   act,
 }: InfoSecurityProps): ReactElement => {
-  const direction: Direction =
-    state.direction.type === 'forwards' ? 'left' : 'right';
-
-  const incrementBy = 0.05;
-  const getDelay = (
-    n => () =>
-      (n += incrementBy)
-  )(0 - incrementBy);
+  const orientation: Orientation = directionToOrientation(state.direction);
+  const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
       text={
         <Text>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <Claim>Let's talk about Security</Claim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>Most important: Keep your seedphrase save!</SubClaim>
           </FadeIn>
         </Text>
       }
       control={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
               Back

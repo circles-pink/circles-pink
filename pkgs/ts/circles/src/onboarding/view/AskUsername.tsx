@@ -7,7 +7,9 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 import { mapIndicatorColors } from '../mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
-import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { Orientation, FadeIn } from '../../components/animation/FadeIn';
+import { getIncrementor } from '../getCounter';
+import { directionToOrientation } from '../directionToOrientation';
 
 type AskUsernameProps = {
   state: UserData;
@@ -15,30 +17,24 @@ type AskUsernameProps = {
 };
 
 export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
-  const direction: Direction =
-    state.direction.type === 'forwards' ? 'left' : 'right';
-
-  const incrementBy = 0.05;
-  const getDelay = (
-    n => () =>
-      (n += incrementBy)
-  )(0 - incrementBy);
+  const orientation: Orientation = directionToOrientation(state.direction);
+  const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
       text={
         <Text>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <Claim>Tell me your Name!</Claim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>Choose wisely, you can not change it later!</SubClaim>
           </FadeIn>
         </Text>
       }
       interaction={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <InputWithProps
             autoFocus
             indicatorColor={mapIndicatorColors(state.usernameApiResult)}
@@ -54,7 +50,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       }
       debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._askUsername(A._prev(unit)))}>
               Back

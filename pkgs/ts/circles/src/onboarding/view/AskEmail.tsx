@@ -8,7 +8,9 @@ import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
 import { LabeledCheckbox } from '../../components/Checkbox';
 import { mapIndicatorColors } from '../mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
-import { Direction, FadeIn } from '../../components/animation/FadeIn';
+import { Orientation, FadeIn } from '../../components/animation/FadeIn';
+import { getIncrementor } from '../getCounter';
+import { directionToOrientation } from '../directionToOrientation';
 
 type AskEmailProps = {
   state: UserData;
@@ -16,31 +18,25 @@ type AskEmailProps = {
 };
 
 export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
-  const direction: Direction =
-    state.direction.type === 'forwards' ? 'left' : 'right';
-
-  const incrementBy = 0.05;
-  const getDelay = (
-    n => () =>
-      (n += incrementBy)
-  )(0 - incrementBy);
+  const orientation: Orientation = directionToOrientation(state.direction);
+  const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
       text={
         <Text>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <Claim>How do you want to be notified?</Claim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>Please submit a valid e-mail address.</SubClaim>
           </FadeIn>
         </Text>
       }
       interaction={
         <>
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <InputWithProps
               autoFocus
               indicatorColor={mapIndicatorColors(state.emailApiResult)}
@@ -54,7 +50,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
             />
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
                 label="Accept terms"
@@ -64,7 +60,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
             </div>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
+          <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
                 label="Accept privacy"
@@ -77,7 +73,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       }
       debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
-        <FadeIn direction={direction} delay={getDelay()}>
+        <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
               Back
