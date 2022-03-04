@@ -1,6 +1,14 @@
-module CirclesPink.Garden.CirclesCore where
+module CirclesPink.Garden.CirclesCore
+  ( CirclesCore
+  , Options
+  , Provider
+  , Web3
+  , newCirclesCore
+  , newWeb3
+  , newWebSocketProvider
+  ) where
 
-import Data.Either (Either)
+import Data.Either (Either(..))
 import Effect (Effect)
 
 --------------------------------------------------------------------------------
@@ -19,11 +27,25 @@ type Options
 --------------------------------------------------------------------------------
 -- FFI
 --------------------------------------------------------------------------------
-foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
+newCirclesCore :: Web3 -> Options -> Effect (Either String CirclesCore)
+newCirclesCore = _newCirclesCore mkEither
 
-foreign import newWeb3 :: Provider -> Effect (Either String Web3)
+foreign import _newCirclesCore :: MkEither -> Web3 -> Options -> Effect (Either String CirclesCore)
 
-foreign import newWebSocketProvider :: String -> Effect Provider
+foreign import newWeb3 :: Provider -> Effect Web3
+
+newWebSocketProvider :: String -> Effect (Either String Provider)
+newWebSocketProvider = _newWebSocketProvider mkEither
+
+type MkEither
+  = { left :: forall a b. a -> Either a b
+    , right :: forall a b. b -> Either a b
+    }
+
+mkEither :: MkEither
+mkEither = { left: Left, right: Right }
+
+foreign import _newWebSocketProvider :: MkEither -> String -> Effect (Either String Provider)
 
 foreign import data Web3 :: Type
 

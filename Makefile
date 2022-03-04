@@ -42,11 +42,11 @@ spago-build: spago-clean
 	mkdir -p generated
 	spago build --purs-args '--output $(PURS_OUTPUT)'
 
-spago-test: spago-clean
+spago-test: spago-clean yarn-install
 	mkdir -p generated
 	spago test --purs-args '--output $(PURS_OUTPUT)'
 
-spago-test-watch: spago-clean
+spago-test-watch: spago-clean yarn-install
 	mkdir -p generated
 	spago test --watch --purs-args '--output $(PURS_OUTPUT)'
 
