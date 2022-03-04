@@ -3,17 +3,21 @@ module PursDeps
   ) where
 
 import Prelude
-import Control.Monad.Except (ExceptT, lift, runExceptT)
+import Control.Monad.Except (ExceptT, except, lift, runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Data.Either (Either(..))
 import Data.Foldable (fold)
 import Data.Map (Map)
+import Data.Variant (Variant)
 import Debug (spy)
 import Effect (Effect)
 import Effect.Class.Console (log)
 import Node.Process (exit)
 import Options.Applicative (Parser, (<**>))
 import Options.Applicative as O
+import Prim.Row (class Cons, class Nub, class Union)
+import Type.Row (type (+))
 import Undefined (undefined)
 
 --------------------------------------------------------------------------------
@@ -58,10 +62,16 @@ main = do
 --------------------------------------------------------------------------------
 -- Error
 --------------------------------------------------------------------------------
-data Err
-  = Err
+type Err r
+  = (ErrReadFile + ErrParse + r)
 
-printError :: Err -> String
+type ErrReadFile r
+  = ( errReadFile :: String | r )
+
+type ErrParse r
+  = ( errParse :: String | r )
+
+printError :: Variant (Err ()) -> String
 printError _ = "error"
 
 --------------------------------------------------------------------------------
@@ -76,23 +86,34 @@ type ModuleName
 --------------------------------------------------------------------------------
 -- Result
 --------------------------------------------------------------------------------
-type Result r m a
-  = ReaderT r (ExceptT Err m) a
+type Result r env m a
+  = ReaderT env (ExceptV (Err + r) m) a
 
-runResult :: forall r m a. r -> Result r m a -> m (Either Err a)
+runResult :: forall env m a. env -> Result () env m a -> m (Either (Variant (Err ())) a)
 runResult cap r = runExceptT $ runReaderT r cap
 
 --------------------------------------------------------------------------------
 -- Main
 --------------------------------------------------------------------------------
-type Cap m
-  = { readFile :: String -> ExceptT Err m String
+type Cap r m
+  = { readFile :: String -> ExceptV (ErrReadFile + r) m String
     }
 
-main' :: forall m. Monad m => Result { opts :: Opts, cap :: Cap m } m Unit
+type CapErr r
+  = ErrReadFile + r
+
+moo :: forall r m. String -> ExceptV (ErrReadFile + r) m String
+moo = undefined
+
+parse :: forall r. String -> Either (Variant (ErrParse + r)) PursDeps
+parse = undefined
+
+main' :: forall r' m. Monad m => Union (CapErr ()) r' (Err ()) => Nub r' r' => Result () { opts :: Opts, cap :: Cap r' m } m Unit
 main' = do
   { cap, opts } <- ask
-  res <- lift $ cap.readFile opts.depsJsonPath
+  --res <- lift $ cap.readFile opts.depsJsonPath
+  r <- lift $ cap.readFile ""
+  res' <- lift $ except $ parse "res"
   let
-    x = spy "res" res
+    x = spy "res" res'
   pure unit
