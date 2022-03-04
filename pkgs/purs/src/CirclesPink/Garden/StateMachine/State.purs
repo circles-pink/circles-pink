@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.State where
 
+import Prelude
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)
@@ -32,6 +33,8 @@ type CirclesState
       , askEmail :: UserData
       , infoSecurity :: UserData
       , magicWords :: UserData
+      , submit :: UserData
+      , dashboard :: UserData
       )
 
 init :: CirclesState
@@ -61,3 +64,9 @@ _infoSecurity = inj (Proxy :: _ "infoSecurity")
 
 _magicWords :: forall a v. a -> Variant ( magicWords :: a | v )
 _magicWords = inj (Proxy :: _ "magicWords")
+
+_submit :: forall a v. a -> Variant ( submit :: a | v )
+_submit = inj (Proxy :: _ "submit")
+
+_dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
+_dashboard = inj (Proxy :: _ "dashboard")

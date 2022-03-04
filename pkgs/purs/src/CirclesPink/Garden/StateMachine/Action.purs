@@ -32,7 +32,14 @@ type CirclesAction
       , magicWords ::
           Variant
             ( prev :: Unit
+            , next :: Unit
             )
+      , submit ::
+          Variant
+            ( prev :: Unit
+            , submit :: Unit
+            )
+      , dashboard :: Variant ()
       )
 
 ----
@@ -50,6 +57,12 @@ _infoSecurity = inj (Proxy :: _ "infoSecurity")
 
 _magicWords :: forall a v. a -> Variant ( magicWords :: a | v )
 _magicWords = inj (Proxy :: _ "magicWords")
+
+_submit :: forall a v. a -> Variant ( submit :: a | v )
+_submit = inj (Proxy :: _ "submit")
+
+_dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
+_dashboard = inj (Proxy :: _ "dashboard")
 
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )

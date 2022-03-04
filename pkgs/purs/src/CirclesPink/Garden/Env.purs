@@ -6,7 +6,7 @@ import Prelude
 import CirclesPink.Garden.CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control as C
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), lift, runExceptT)
+import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
@@ -87,20 +87,20 @@ env { request } =
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
       \options ->
-        map liftEffect do
+        mapExceptT liftEffect do
           provider <- CC.newWebSocketProvider "ws://localhost:8545"
-          -- web3 <- lift $ CC.newWeb3 provider
-          -- circlesCore <-
-          --   CC.newCirclesCore web3
-          --     { apiServiceEndpoint: ""
-          --     , graphNodeEndpoint: ""
-          --     , hubAddress: "0x0000000000000000000000000000000000000000"
-          --     , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
-          --     , relayServiceEndpoint: ""
-          --     , safeMasterAddress: "0x0000000000000000000000000000000000000000"
-          --     , subgraphName: ""
-          --     }
-          pure unit
+          web3 <- lift $ CC.newWeb3 provider
+          circlesCore <-
+            CC.newCirclesCore web3
+              { apiServiceEndpoint: "https://api.circles.garden"
+              , graphNodeEndpoint: "https://api.thegraph.com"
+              , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+              , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
+              , relayServiceEndpoint: "https://relay.circles.garden"
+              , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
+              , subgraphName: "CirclesUBI/circles-subgraph"
+              }
+          CC.userRegister circlesCore options
   }
 
 testEnv :: C.Env Identity
