@@ -34,7 +34,7 @@ const fadeIn = (direction: Direction): string => {
   return keyframes`
     from {
         opacity:0;
-        transform: ${getCssProp(direction)};
+        transform: ${getTransform(direction)};
     }
     to {
         opacity:1;
@@ -43,7 +43,7 @@ const fadeIn = (direction: Direction): string => {
 `;
 };
 
-const getCssProp = (direction: Direction) => {
+const getTransform = (direction: Direction) => {
   switch (direction) {
     case 'left':
       return 'translatex(-10px)';

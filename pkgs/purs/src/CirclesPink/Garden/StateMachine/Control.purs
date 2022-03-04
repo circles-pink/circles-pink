@@ -6,6 +6,7 @@ module CirclesPink.Garden.StateMachine.Control
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
@@ -39,13 +40,13 @@ circlesControl env =
     { infoGeneral:
         { next:
             \set _ _ -> do
-              set $ \st -> S._infoGeneral st { animation = "left" }
+              set $ \st -> S._infoGeneral st { direction = D._forwards }
               set $ \st -> S._askUsername st
         }
     , askUsername:
         { prev:
             \set _ _ -> do
-              set $ \st -> S._askUsername st { animation = "right" }
+              set $ \st -> S._askUsername st { direction = D._backwards }
               set $ \st -> S._infoGeneral st
         , setUsername:
             \set _ username -> do
@@ -63,7 +64,7 @@ circlesControl env =
                       S._askUsername st
         , next:
             \set _ _ -> do
-              set $ \st -> S._askUsername st { animation = "left" }
+              set $ \st -> S._askUsername st { direction = D._forwards }
               set
                 $ \st ->
                     let
@@ -80,7 +81,7 @@ circlesControl env =
     , askEmail:
         { prev:
             \set _ _ -> do
-              set $ \st -> S._askEmail st { animation = "right" }
+              set $ \st -> S._askEmail st { direction = D._backwards }
               set $ \st -> S._askUsername st
         , setEmail:
             \set _ email -> do
@@ -101,7 +102,7 @@ circlesControl env =
         , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
         , next:
             \set _ _ -> do
-              set $ \st -> S._askEmail st { animation = "left" }
+              set $ \st -> S._askEmail st { direction = D._forwards }
               set
                 $ \st ->
                     let
@@ -118,18 +119,18 @@ circlesControl env =
     , infoSecurity:
         { prev:
             \set _ _ -> do
-              set $ \st -> S._infoSecurity st { animation = "right" }
+              set $ \st -> S._infoSecurity st { direction = D._backwards }
               set $ \st -> S._askEmail st
         , next:
             \set _ _ -> do
-              set $ \st -> S._infoSecurity st { animation = "left" }
+              set $ \st -> S._infoSecurity st { direction = D._forwards }
               pk <- lift $ env.generatePrivateKey
               set $ \st -> S._magicWords st { privateKey = pk }
         }
     , magicWords:
         { prev:
             \set _ _ -> do
-              set $ \st -> S._magicWords st { animation = "right" }
+              set $ \st -> S._magicWords st { direction = D._backwards }
               set $ \st -> S._infoSecurity st
         }
     }

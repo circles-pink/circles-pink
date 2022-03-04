@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.State where
 
+import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
@@ -14,7 +15,7 @@ type EmailApiResult
   = RemoteData CirclesError { isValid :: Boolean }
 
 type UserData
-  = { animation :: String
+  = { direction :: D.Direction
     , username :: String
     , usernameApiResult :: UsernameApiResult
     , email :: String
@@ -36,7 +37,7 @@ type CirclesState
 init :: CirclesState
 init =
   _infoGeneral
-    { animation: "left"
+    { direction: D._forwards
     , username: ""
     , usernameApiResult: _notAsked
     , email: ""

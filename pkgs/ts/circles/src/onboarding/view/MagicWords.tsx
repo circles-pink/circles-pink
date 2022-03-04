@@ -3,6 +3,7 @@ import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State
 import { unit } from 'generated/output/Data.Unit';
 import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
 import React, { ReactElement } from 'react';
+import tw from 'twin.macro';
 import { Direction, FadeIn } from '../../components/animation/FadeIn';
 import {
   ButtonGray,
@@ -16,8 +17,13 @@ type MagicWordsProps = {
   act: (ac: A.CirclesAction) => void;
 };
 
+const WordGrit = tw.div`flex flex-wrap items-center`;
+const Word = tw.div`lg:w-3/12 w-3/6 p-2`;
+
 export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
-  const direction: Direction = state.animation as Direction;
+  const direction: Direction =
+    state.direction.type === 'forwards' ? 'left' : 'right';
+
   const incrementBy = 0.05;
   const getDelay = (
     n => () =>
@@ -45,9 +51,17 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             </SubClaim>
           </FadeIn>
 
-          <FadeIn direction={direction} delay={getDelay()}>
-            <pre>{getWords(keyToMnemonic(state.privateKey)).join(' ')}</pre>
-          </FadeIn>
+          <WordGrit>
+            {getWords(keyToMnemonic(state.privateKey)).map((word, index) => {
+              return (
+                <Word key={`${word}-${index}`}>
+                  <FadeIn direction={direction} delay={getDelay()}>
+                    <span>{word}</span>
+                  </FadeIn>
+                </Word>
+              );
+            })}
+          </WordGrit>
         </Text>
       }
       control={
