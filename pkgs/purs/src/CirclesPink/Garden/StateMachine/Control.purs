@@ -121,9 +121,7 @@ circlesControl env =
         }
     , infoSecurity:
         { prev:
-            \set _ _ -> do
-              set $ \st -> S._infoSecurity st { direction = D._backwards }
-              set $ \st -> S._askEmail st
+            \set _ _ -> set $ \st -> S._askEmail st { direction = D._backwards }
         , next:
             \set _ _ -> do
               set $ \st -> S._infoSecurity st { direction = D._forwards }
@@ -135,5 +133,12 @@ circlesControl env =
             \set _ _ -> do
               set $ \st -> S._magicWords st { direction = D._backwards }
               set $ \st -> S._infoSecurity st
+        , next: \set _ _ -> pure unit
         }
+    , submit:
+        { prev: \set _ _ -> pure unit
+        , submit: \set _ _ -> pure unit
+        }
+    , dashboard:
+        {}
     }
