@@ -24,6 +24,7 @@ to generate this file without the comments in this block.
   , "debug"
   , "effect"
   , "either"
+  , "exceptions"
   , "foldable-traversable"
   , "foreign-object"
   , "http-methods"

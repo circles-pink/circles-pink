@@ -3,19 +3,20 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
+import CirclesPink.Garden.CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control as C
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), runExceptT)
+import Control.Monad.Except (ExceptT(..), lift, runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
-import Data.Identity (Identity(..))
+import Data.Identity (Identity)
 import Data.Variant (inj)
 import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
-import Undefined (undefined)
 import Wallet.PrivateKey (zeroKey)
 import Wallet.PrivateKey as P
 
@@ -84,6 +85,22 @@ env { request } =
               )
             # ExceptT
   , generatePrivateKey: P.genPrivateKey
+  , userRegister:
+      \options ->
+        map liftEffect do
+          provider <- CC.newWebSocketProvider "ws://localhost:8545"
+          -- web3 <- lift $ CC.newWeb3 provider
+          -- circlesCore <-
+          --   CC.newCirclesCore web3
+          --     { apiServiceEndpoint: ""
+          --     , graphNodeEndpoint: ""
+          --     , hubAddress: "0x0000000000000000000000000000000000000000"
+          --     , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
+          --     , relayServiceEndpoint: ""
+          --     , safeMasterAddress: "0x0000000000000000000000000000000000000000"
+          --     , subgraphName: ""
+          --     }
+          pure unit
   }
 
 testEnv :: C.Env Identity
@@ -91,4 +108,5 @@ testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
   , generatePrivateKey: pure zeroKey
+  , userRegister: \_ -> pure unit
   }
