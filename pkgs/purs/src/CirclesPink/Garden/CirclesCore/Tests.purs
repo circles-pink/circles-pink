@@ -2,14 +2,13 @@ module CirclesPink.Garden.CirclesCore.Tests where
 
 import Prelude
 import CirclesPink.Garden.CirclesCore as CC
-import Control.Monad.Except (ExceptT(..), lift, runExceptT)
+import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), isRight)
 import Data.Variant (Variant)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Test.Unit as T
 import Test.Unit.Assert as A
-import Unsafe.Coerce (unsafeCoerce)
 
 tests :: T.TestSuite
 tests =
