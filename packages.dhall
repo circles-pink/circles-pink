@@ -124,5 +124,5 @@ in  upstream
       , "variant"
       ]
     , repo = "https://github.com/circles-pink/purescript-stadium.git"
-    , version = "fe351bdcc311667032b04ed1bbd2c9a7f56bdabf"
+    , version = "bc2d7b9365898ba2f121a8b88fa4879738239f19"
     }
