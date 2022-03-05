@@ -15,7 +15,6 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Data.Either (Either(..))
 import Data.Variant (Variant, default, onMatch)
-import Effect (Effect)
 import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -133,11 +132,11 @@ circlesControl env =
             \set _ _ -> do
               set $ \st -> S._magicWords st { direction = D._backwards }
               set $ \st -> S._infoSecurity st
-        , next: \set _ _ -> pure unit
+        , next: \_ _ _ -> pure unit
         }
     , submit:
-        { prev: \set _ _ -> pure unit
-        , submit: \set _ _ -> pure unit
+        { prev: \_ _ _ -> pure unit
+        , submit: \_ _ _ -> pure unit
         }
     , dashboard:
         {}
