@@ -16,7 +16,7 @@ let
   effectsSrc = builtins.fetchTarball
     "https://github.com/hercules-ci/hercules-ci-effects/archive/2e165352d92782e7ae149f4f1a9b3174f718a3af.tar.gz";
 
-  inherit (pkgs.effects) runNixOps runIf;
+  inherit (pkgs.effects) runNixOps2 runIf;
   inherit (pkgs) lib;
 in
 {
@@ -25,7 +25,7 @@ in
   # };
 
   neat-network = runIf true (
-    runNixOps {
+    runNixOps2 {
       name = "foo";
       src = lib.cleanSource ./.;
       networkFiles = [ "networks/network.nix" ];
