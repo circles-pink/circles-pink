@@ -34,13 +34,13 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 
   const words = getWords(keyToMnemonic(state.privateKey));
 
-  const [copyBtnLabel, setCopyBtnLabel] = useState(t('magicWords.copyBtn'));
+  const [copyNotify, setCopyNotify] = useState('');
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(words.join(' '));
-    setCopyBtnLabel(t('magicWords.copiedInfo'));
+    setCopyNotify(t('magicWords.copiedInfo'));
     setTimeout(() => {
-      setCopyBtnLabel(t('magicWords.copyBtn'));
+      setCopyNotify('');
     }, 1000);
   };
 
@@ -93,7 +93,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
           <FadeIn orientation={'down'} delay={getWordDelay()}>
             <ButtonRow>
               <ButtonPinkFullWidth onClick={() => copyToClipboard()}>
-                {copyBtnLabel}
+                {copyNotify ? copyNotify : t('magicWords.copyBtn')}
               </ButtonPinkFullWidth>
               <ButtonPinkFullWidth
                 onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
