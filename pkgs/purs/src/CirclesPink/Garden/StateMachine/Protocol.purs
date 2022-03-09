@@ -33,6 +33,7 @@ type CirclesProtocol
       , magicWords ::
           P.State
             ( prev :: P.Action ("infoSecurity" :> "magicWords" :> Nil')
+            , newPrivKey :: P.Action ("magicWords" :> Nil')
             , next :: P.Action ("submit" :> Nil')
             )
       , submit ::

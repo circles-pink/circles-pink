@@ -32,6 +32,7 @@ type CirclesAction
       , magicWords ::
           Variant
             ( prev :: Unit
+            , newPrivKey :: Unit
             , next :: Unit
             )
       , submit ::
@@ -82,3 +83,6 @@ _setTerms = inj (Proxy :: _ "setTerms")
 
 _setPrivacy :: forall a v. a -> Variant ( setPrivacy :: a | v )
 _setPrivacy = inj (Proxy :: _ "setPrivacy")
+
+_newPrivKey :: forall a v. a -> Variant ( newPrivKey :: a | v )
+_newPrivKey = inj (Proxy :: _ "newPrivKey")
