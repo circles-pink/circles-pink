@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { Onboarding } from "circles/src/onboarding/Onboarding";
+import { Onboarding } from "circles/src/onboarding";
 import * as Steps from "generated/output/CirclesPink.Garden.StateMachine.Steps";
 
 export default {

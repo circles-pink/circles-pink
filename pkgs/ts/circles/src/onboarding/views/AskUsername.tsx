@@ -1,15 +1,15 @@
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement } from 'react';
-import { DialogCard } from '../DialogCard';
+import { DialogCard } from '../../components/DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
 import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
-import { mapIndicatorColors } from '../mapIndicatorColors';
+import { mapIndicatorColors } from '../utils/mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
 import { Orientation, FadeIn } from '../../components/animation/FadeIn';
-import { getIncrementor } from '../getCounter';
-import { directionToOrientation } from '../directionToOrientation';
+import { getIncrementor } from '../utils/getCounter';
+import { directionToOrientation } from '../utils/directionToOrientation';
 
 type AskUsernameProps = {
   state: UserData;

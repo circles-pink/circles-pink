@@ -10,21 +10,22 @@ import {
   // ButtonPink
 } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
-import { DialogCard } from '../DialogCard';
-import { directionToOrientation } from '../directionToOrientation';
-import { getIncrementor } from '../getCounter';
+import { DialogCard } from '../../components/DialogCard';
+import { directionToOrientation } from '../utils/directionToOrientation';
+import { getIncrementor } from '../utils/getCounter';
 
 type MagicWordsProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
 };
 
-const WordGrit = tw.div`flex flex-wrap items-center`;
-const Word = tw.div`lg:w-3/12 w-3/6 p-2`;
+const WordGrit = tw.div`flex flex-wrap items-center border-solid border-pink-500 border`;
+const Word = tw.div`lg:w-3/12 w-3/6 p-2 border-solid border-pink-500 border p-1`;
 
 export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
+  const getWordDelay = getIncrementor(0, 0.02);
 
   return (
     <DialogCard
@@ -46,18 +47,6 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
               You should write this on a sheet of paper to keep your Coins save.
             </SubClaim>
           </FadeIn>
-
-          <WordGrit>
-            {getWords(keyToMnemonic(state.privateKey)).map((word, index) => {
-              return (
-                <Word key={`${word}-${index}`}>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <span>{word}</span>
-                  </FadeIn>
-                </Word>
-              );
-            })}
-          </WordGrit>
         </Text>
       }
       control={
@@ -72,6 +61,19 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             </ButtonPink> */}
           </>
         </FadeIn>
+      }
+      mainContent={
+        <WordGrit>
+          {getWords(keyToMnemonic(state.privateKey)).map((word, index) => {
+            return (
+              <Word key={`${word}-${index}`}>
+                <FadeIn orientation={'up'} delay={getWordDelay()}>
+                  <span>{word}</span>
+                </FadeIn>
+              </Word>
+            );
+          })}
+        </WordGrit>
       }
     />
   );
