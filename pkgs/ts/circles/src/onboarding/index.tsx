@@ -1,4 +1,4 @@
-import '../style/global.css';
+import '../styles/global.css';
 
 import React, { ReactElement } from 'react';
 
@@ -8,12 +8,14 @@ import {
   init,
 } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 
-import { useStateMachine } from './useStateMachine';
-import { AskUsername } from './view/AskUsername';
-import { InfoGeneral } from './view/InfoGeneral';
-import { AskEmail } from './view/AskEmail';
-import { InfoSecurity } from './view/InfoSecurity';
-import { MagicWords } from './view/MagicWords';
+import { useStateMachine } from './utils/useStateMachine';
+import {
+  AskUsername,
+  InfoGeneral,
+  AskEmail,
+  InfoSecurity,
+  MagicWords,
+} from './views';
 
 type OnboardingProps = {
   initState?: CirclesState;

@@ -3,11 +3,11 @@ import { unit } from 'generated/output/Data.Unit';
 import React, { ReactElement, useState } from 'react';
 import { ButtonPink } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
-import { DialogCard } from '../DialogCard';
+import { DialogCard } from '../../components/DialogCard';
 import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
-import { getIncrementor } from '../getCounter';
-import { directionToOrientation } from '../directionToOrientation';
+import { getIncrementor } from '../utils/getCounter';
+import { directionToOrientation } from '../utils/directionToOrientation';
 
 type InfoGeneralProps = {
   state: UserData;
