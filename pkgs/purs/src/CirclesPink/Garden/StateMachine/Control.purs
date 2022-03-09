@@ -41,15 +41,11 @@ circlesControl env =
     _circlesStateMachine
     { infoGeneral:
         { next:
-            \set _ _ -> do
-              set $ \st -> S._infoGeneral st { direction = D._forwards }
-              set $ \st -> S._askUsername st
+            \set _ _ -> set $ \st -> S._askUsername st { direction = D._forwards }
         }
     , askUsername:
         { prev:
-            \set _ _ -> do
-              set $ \st -> S._askUsername st { direction = D._backwards }
-              set $ \st -> S._infoGeneral st
+            \set _ _ -> set $ \st -> S._infoGeneral st { direction = D._backwards }
         , setUsername:
             \set _ username -> do
               set $ \st -> S._askUsername st { username = username }
@@ -65,8 +61,7 @@ circlesControl env =
                     else
                       S._askUsername st
         , next:
-            \set _ _ -> do
-              set $ \st -> S._askUsername st { direction = D._forwards }
+            \set _ _ ->
               set
                 $ \st ->
                     let
@@ -76,15 +71,13 @@ circlesControl env =
                               { success: (\r -> r.isValid) }
                     in
                       if usernameValid st.usernameApiResult then
-                        S._askEmail st
+                        S._askEmail st { direction = D._forwards }
                       else
-                        S._askUsername st
+                        S._askUsername st { direction = D._forwards }
         }
     , askEmail:
         { prev:
-            \set _ _ -> do
-              set $ \st -> S._askEmail st { direction = D._backwards }
-              set $ \st -> S._askUsername st
+            \set _ _ -> set $ \st -> S._askUsername st { direction = D._backwards }
         , setEmail:
             \set _ email -> do
               set $ \st -> S._askEmail st { email = email }
@@ -103,8 +96,7 @@ circlesControl env =
         , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
         , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
         , next:
-            \set _ _ -> do
-              set $ \st -> S._askEmail st { direction = D._forwards }
+            \set _ _ ->
               set
                 $ \st ->
                     let
@@ -114,24 +106,21 @@ circlesControl env =
                               { success: (\r -> r.isValid) }
                     in
                       if (emailValid st.emailApiResult) && st.terms && st.privacy then
-                        S._infoSecurity st
+                        S._infoSecurity st { direction = D._forwards }
                       else
-                        S._askEmail st
+                        S._askEmail st { direction = D._forwards }
         }
     , infoSecurity:
         { prev:
             \set _ _ -> set $ \st -> S._askEmail st { direction = D._backwards }
         , next:
             \set _ _ -> do
-              set $ \st -> S._infoSecurity st { direction = D._forwards }
               pk <- lift $ env.generatePrivateKey
-              set $ \st -> S._magicWords st { privateKey = pk }
+              set $ \st -> S._magicWords st { privateKey = pk, direction = D._forwards }
         }
     , magicWords:
         { prev:
-            \set _ _ -> do
-              set $ \st -> S._magicWords st { direction = D._backwards }
-              set $ \st -> S._infoSecurity st
+            \set _ _ -> set $ \st -> S._infoSecurity st { direction = D._backwards }
         , newPrivKey:
             \set _ _ -> do
               pk <- lift $ env.generatePrivateKey

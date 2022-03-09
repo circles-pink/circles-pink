@@ -9,17 +9,17 @@ type CirclesProtocol
   = P.Protocol
       ( infoGeneral ::
           P.State
-            ( next :: P.Action ("infoGeneral" :> "askUsername" :> Nil')
+            ( next :: P.Action ("askUsername" :> Nil')
             )
       , askUsername ::
           P.State
-            ( prev :: P.Action ("askUsername" :> "infoGeneral" :> Nil')
+            ( prev :: P.Action ("infoGeneral" :> Nil')
             , setUsername :: P.Action ("askUsername" :> Nil')
             , next :: P.Action ("askUsername" :> "askEmail" :> Nil')
             )
       , askEmail ::
           P.State
-            ( prev :: P.Action ("askEmail" :> "askUsername" :> Nil')
+            ( prev :: P.Action ("askUsername" :> Nil')
             , setEmail :: P.Action ("askEmail" :> Nil')
             , setTerms :: P.Action ("askEmail" :> Nil')
             , setPrivacy :: P.Action ("askEmail" :> Nil')
@@ -28,11 +28,11 @@ type CirclesProtocol
       , infoSecurity ::
           P.State
             ( prev :: P.Action ("askEmail" :> Nil')
-            , next :: P.Action ("infoSecurity" :> "magicWords" :> Nil')
+            , next :: P.Action ("magicWords" :> Nil')
             )
       , magicWords ::
           P.State
-            ( prev :: P.Action ("infoSecurity" :> "magicWords" :> Nil')
+            ( prev :: P.Action ("infoSecurity" :> Nil')
             , newPrivKey :: P.Action ("magicWords" :> Nil')
             , next :: P.Action ("submit" :> Nil')
             )

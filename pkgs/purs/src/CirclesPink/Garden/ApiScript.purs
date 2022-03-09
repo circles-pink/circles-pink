@@ -4,18 +4,15 @@ import Prelude
 import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
-import CirclesPink.Garden.StateMachine.Control (Env, circlesControl)
+import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
-import Control.Monad.State (StateT(..), execState, execStateT, get, lift)
-import Data.Identity (Identity(..))
+import Control.Monad.State (StateT, execStateT, get, lift)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log, logShow)
+import Effect.Class.Console (logShow)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Stadium.Control (toStateT)
-import Undefined (undefined)
 
 control ::
   ((CirclesState -> CirclesState) -> StateT CirclesState Aff Unit) ->
