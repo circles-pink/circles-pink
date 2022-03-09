@@ -19,12 +19,19 @@ import {
   MagicWords,
 } from './views';
 
+type Language = 'en' | 'de';
+
 type OnboardingProps = {
   initState?: CirclesState;
+  lang?: Language;
 };
 
-export const Onboarding = ({ initState }: OnboardingProps): ReactElement => {
+export const Onboarding = ({
+  initState,
+  lang = 'en',
+}: OnboardingProps): ReactElement => {
   const [state, act] = useStateMachine(initState || init, control);
+  i18n.changeLanguage(lang);
 
   return (
     <I18nextProvider i18n={i18n}>
