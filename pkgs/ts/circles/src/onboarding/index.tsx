@@ -1,16 +1,12 @@
-import '../styles/global.css';
+import React, { ReactElement } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../i18n';
-
-import React, { ReactElement } from 'react';
-
 import { control } from 'generated/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
   init,
 } from 'generated/output/CirclesPink.Garden.StateMachine.State';
-
-import { useStateMachine } from './utils/useStateMachine';
+import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
   InfoGeneral,
@@ -18,6 +14,9 @@ import {
   InfoSecurity,
   MagicWords,
 } from './views';
+
+// Style
+import '../styles/global.css';
 
 type Language = 'en' | 'de';
 
