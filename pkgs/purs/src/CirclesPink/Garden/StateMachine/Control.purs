@@ -132,6 +132,10 @@ circlesControl env =
             \set _ _ -> do
               set $ \st -> S._magicWords st { direction = D._backwards }
               set $ \st -> S._infoSecurity st
+        , newPrivKey:
+            \set _ _ -> do
+              pk <- lift $ env.generatePrivateKey
+              set $ \st -> S._magicWords st { privateKey = pk }
         , next: \_ _ _ -> pure unit
         }
     , submit:
