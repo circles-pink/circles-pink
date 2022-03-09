@@ -7,8 +7,14 @@ export default {
   component: Onboarding,
   argTypes: {
     lang: {
+      defaultValue: "en",
       options: ["en", "de"],
       control: { type: "inline-radio" },
+    },
+  },
+  parameters: {
+    previewTabs: {
+      "storybook/docs/panel": { hidden: true },
     },
   },
 } as ComponentMeta<typeof Onboarding>;

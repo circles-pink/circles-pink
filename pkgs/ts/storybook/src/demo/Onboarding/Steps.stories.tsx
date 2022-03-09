@@ -9,8 +9,14 @@ export default {
   argTypes: {
     initState: { control: { disable: true }, table: { disable: true } },
     lang: {
+      defaultValue: "en",
       options: ["en", "de"],
       control: { type: "inline-radio" },
+    },
+  },
+  parameters: {
+    previewTabs: {
+      "storybook/docs/panel": { hidden: true },
     },
   },
 } as ComponentMeta<typeof Onboarding>;
