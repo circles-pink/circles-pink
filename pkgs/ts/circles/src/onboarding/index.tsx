@@ -1,4 +1,6 @@
 import '../styles/global.css';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../i18n';
 
 import React, { ReactElement } from 'react';
 
@@ -24,18 +26,19 @@ type OnboardingProps = {
 export const Onboarding = ({ initState }: OnboardingProps): ReactElement => {
   const [state, act] = useStateMachine(initState || init, control);
 
-  switch (state.type) {
-    case 'infoGeneral':
-      return <InfoGeneral state={state.value} act={act} />;
-    case 'askUsername':
-      return <AskUsername state={state.value} act={act} />;
-    case 'askEmail':
-      return <AskEmail state={state.value} act={act} />;
-    case 'infoSecurity':
-      return <InfoSecurity state={state.value} act={act} />;
-    case 'magicWords':
-      return <MagicWords state={state.value} act={act} />;
-    default:
-      return <h2>Invalid State</h2>;
-  }
+  return (
+    <I18nextProvider i18n={i18n}>
+      {
+        {
+          infoGeneral: <InfoGeneral state={state.value} act={act} />,
+          askUsername: <AskUsername state={state.value} act={act} />,
+          askEmail: <AskEmail state={state.value} act={act} />,
+          infoSecurity: <InfoSecurity state={state.value} act={act} />,
+          magicWords: <MagicWords state={state.value} act={act} />,
+          dashboard: null,
+          submit: null,
+        }[state.type]
+      }
+    </I18nextProvider>
+  );
 };

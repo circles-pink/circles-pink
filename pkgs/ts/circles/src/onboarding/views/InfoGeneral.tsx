@@ -8,6 +8,7 @@ import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
+import { t } from 'i18next';
 
 type InfoGeneralProps = {
   state: UserData;
@@ -23,18 +24,18 @@ export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>Welcome to Circles</Claim>
+            <Claim>{t('infoGeneral.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>Let's get you a circles Wallet!</SubClaim>
+            <SubClaim>{t('infoGeneral.subClaim')}</SubClaim>
           </FadeIn>
         </Text>
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <ButtonPink onClick={() => act(A._infoGeneral(A._next(unit)))}>
-            Next
+            {t('nextButton')}
           </ButtonPink>
         </FadeIn>
       }

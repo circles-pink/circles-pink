@@ -11,6 +11,7 @@ import { unit } from 'generated/output/Data.Unit';
 import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
+import { t } from 'i18next';
 
 type AskEmailProps = {
   state: UserData;
@@ -26,11 +27,11 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>How do you want to be notified?</Claim>
+            <Claim>{t('askEmail.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>Please submit a valid e-mail address.</SubClaim>
+            <SubClaim>{t('askEmail.subClaim')}</SubClaim>
           </FadeIn>
         </Text>
       }
@@ -42,7 +43,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
               indicatorColor={mapIndicatorColors(state.emailApiResult)}
               type="text"
               value={state.email}
-              placeholder={'Enter your E-Mail'}
+              placeholder={t('askEmail.emailPlaceholder')}
               onChange={e => act(A._askEmail(A._setEmail(e.target.value)))}
               onKeyPress={e =>
                 e.key === 'Enter' && act(A._askEmail(A._next(unit)))
@@ -53,7 +54,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
-                label="Accept terms"
+                label={t('askEmail.termsLabel')}
                 checked={state.terms}
                 setChecked={() => act(A._askEmail(A._setTerms(unit)))}
               />
@@ -63,7 +64,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
-                label="Accept privacy"
+                label={t('askEmail.privacyLabel')}
                 checked={state.privacy}
                 setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}
               />
@@ -76,11 +77,11 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
-              Back
+              {t('prevButton')}
             </ButtonGray>
 
             <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
-              Next
+              {t('nextButton')}
             </ButtonPink>
           </>
         </FadeIn>
