@@ -8,6 +8,7 @@ import { unit } from 'generated/output/Data.Unit';
 import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
+import { t } from 'i18next';
 
 type InfoSecurityProps = {
   state: UserData;
@@ -26,11 +27,11 @@ export const InfoSecurity = ({
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>Let's talk about Security</Claim>
+            <Claim>{t('infoSecurity.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>Most important: Keep your seedphrase save!</SubClaim>
+            <SubClaim>{t('infoSecurity.subClaim')}</SubClaim>
           </FadeIn>
         </Text>
       }
@@ -38,11 +39,11 @@ export const InfoSecurity = ({
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
-              Back
+              {t('prevButton')}
             </ButtonGray>
 
             <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
-              Next
+              {t('nextButton')}
             </ButtonPink>
           </>
         </FadeIn>

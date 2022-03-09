@@ -14,6 +14,7 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { getIncrementor } from '../utils/getCounter';
+import { t } from 'i18next';
 
 type MagicWordsProps = {
   state: UserData;
@@ -33,15 +34,13 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 
   const words = getWords(keyToMnemonic(state.privateKey));
 
-  const initLabel = 'Copy to clipboard';
-
-  const [copyBtnLabel, setCopyBtnLabel] = useState(initLabel);
+  const [copyBtnLabel, setCopyBtnLabel] = useState(t('magicWords.copyBtn'));
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(words.join(' '));
-    setCopyBtnLabel('Copied!');
+    setCopyBtnLabel(t('magicWords.copiedInfo'));
     setTimeout(() => {
-      setCopyBtnLabel(initLabel);
+      setCopyBtnLabel(t('magicWords.copyBtn'));
     }, 1000);
   };
 
@@ -50,20 +49,15 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>One key to rule them all...</Claim>
+            <Claim>{t('magicWords.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>
-              Anyone with these words has full control over your Trustnetwork
-              and can spend your $CRC!
-            </SubClaim>
+            <SubClaim>{t('magicWords.subClaim1')}</SubClaim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>
-              You should write this on a sheet of paper to keep your Coins save.
-            </SubClaim>
+            <SubClaim>{t('magicWords.subClaim2')}</SubClaim>
           </FadeIn>
         </Text>
       }
@@ -71,11 +65,11 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
-              Back
+              {t('prevButton')}
             </ButtonGray>
 
             {/* <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
-              Next
+              {t('nextButton')}
             </ButtonPink> */}
           </>
         </FadeIn>
@@ -104,7 +98,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
               <ButtonPinkFullWidth
                 onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
               >
-                Generate new Phrase
+                {t('magicWords.newPhraseBtn')}
               </ButtonPinkFullWidth>
             </ButtonRow>
           </FadeIn>
