@@ -67,7 +67,7 @@
       '';
 
       runGarden = final.writeShellScriptBin "run-garden" ''
-        export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules
+        export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
     };

@@ -125,11 +125,21 @@ circlesControl env =
             \set _ _ -> do
               pk <- lift $ env.generatePrivateKey
               set $ \st -> S._magicWords st { privateKey = pk }
-        , next: \_ _ _ -> pure unit
+        , next: \set _ _ -> set $ \st -> S._submit st { direction = D._forwards }
         }
     , submit:
-        { prev: \_ _ _ -> pure unit
-        , submit: \_ _ _ -> pure unit
+        { prev: \set _ _ -> set $ \st -> S._magicWords st { direction = D._backwards }
+        , submit:
+            \_ st _ -> do
+              result <-
+                lift $ runExceptT
+                  $ env.userRegister
+                      { email: st.email
+                      , nonce: 0
+                      , safeAddress: ""
+                      , username: st.username
+                      }
+              pure unit
         }
     , dashboard:
         {}
