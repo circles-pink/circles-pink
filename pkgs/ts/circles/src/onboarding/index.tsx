@@ -34,17 +34,15 @@ export const Onboarding = ({
 
   return (
     <I18nextProvider i18n={i18n}>
-      {
-        {
-          infoGeneral: <InfoGeneral state={state.value} act={act} />,
-          askUsername: <AskUsername state={state.value} act={act} />,
-          askEmail: <AskEmail state={state.value} act={act} />,
-          infoSecurity: <InfoSecurity state={state.value} act={act} />,
-          magicWords: <MagicWords state={state.value} act={act} />,
-          dashboard: null,
-          submit: null,
-        }[state.type]
-      }
+      {{
+        infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
+        askUsername: () => <AskUsername state={state.value} act={act} />,
+        askEmail: () => <AskEmail state={state.value} act={act} />,
+        infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
+        magicWords: () => <MagicWords state={state.value} act={act} />,
+        dashboard: () => null,
+        submit: () => null,
+      }[state.type]()}
     </I18nextProvider>
   );
 };
