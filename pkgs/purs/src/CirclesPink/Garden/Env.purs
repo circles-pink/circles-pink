@@ -13,6 +13,7 @@ import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Variant (inj)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import HTTP (ReqFn)
@@ -89,36 +90,33 @@ env { request } =
   , userRegister:
       \options ->
         mapExceptT liftEffect do
-          provider <- CC.newWebSocketProvider "ws://localhost:8545"
-          web3 <- lift $ CC.newWeb3 provider
-          circlesCore <-
-            CC.newCirclesCore web3
-              { apiServiceEndpoint: "https://api.circles.garden"
-              , graphNodeEndpoint: "https://api.thegraph.com"
-              , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-              , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
-              , relayServiceEndpoint: "https://relay.circles.garden"
-              , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
-              , subgraphName: "CirclesUBI/circles-subgraph"
-              }
+          web3 <- getWeb3
+          circlesCore <- getCirclesCore web3
           CC.userRegister circlesCore options
   , getSafeAddress:
-      \nonce ->
-        mapExceptT liftEffect do
-          provider <- CC.newWebSocketProvider "ws://localhost:8545"
-          web3 <- lift $ CC.newWeb3 provider
-          circlesCore <-
-            CC.newCirclesCore web3
-              { apiServiceEndpoint: "https://api.circles.garden"
-              , graphNodeEndpoint: "https://api.thegraph.com"
-              , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-              , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
-              , relayServiceEndpoint: "https://relay.circles.garden"
-              , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
-              , subgraphName: "CirclesUBI/circles-subgraph"
-              }
-          CC.safePredictAddress circlesCore account nonce
+      \{ nonce, privKey } -> do
+        web3 <- mapExceptT liftEffect getWeb3
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3
+        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        address <- CC.safePredictAddress circlesCore account { nonce: nonce }
+        pure address
   }
+
+getWeb3 = do
+  provider <- CC.newWebSocketProvider "ws://localhost:8545"
+  web3 <- lift $ CC.newWeb3 provider
+  pure web3
+
+getCirclesCore web3 =
+  CC.newCirclesCore web3
+    { apiServiceEndpoint: "https://api.circles.garden"
+    , graphNodeEndpoint: "https://api.thegraph.com"
+    , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+    , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
+    , relayServiceEndpoint: "https://relay.circles.garden"
+    , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
+    , subgraphName: "CirclesUBI/circles-subgraph"
+    }
 
 testEnv :: C.Env Identity
 testEnv =

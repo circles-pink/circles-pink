@@ -17,5 +17,6 @@ exports.userRegister = (circlesCore) => (options) => () =>
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
-exports.safePredictAddress = (circlesCore) => (account) => (nonce) => () =>
-  circlesCore.safe.predictAddress(account, nonce);
+exports.safePredictAddressImpl =
+  (circlesCore) => (account) => (options) => (cb) => (onErr, onSucc) =>
+    circlesCore.safe.predictAddress(account, options).then(onSucc).catch(onErr);

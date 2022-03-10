@@ -13,8 +13,11 @@ module CirclesPink.Garden.CirclesCore.Bindings
   , userRegister
   ) where
 
+import Prelude
 import Data.BigInt (BigInt)
 import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Aff.Compat (EffectFnAff(..), fromEffectFnAff)
 
 foreign import data Provider :: Type
 
@@ -30,7 +33,10 @@ foreign import newWeb3 :: Provider -> Effect Web3
 
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
-foreign import safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> Effect String
+foreign import safePredictAddressImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
+
+safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
+safePredictAddress x1 x2 x3 = fromEffectFnAff $ safePredictAddressImpl x1 x2 x3
 
 type Options
   = { apiServiceEndpoint :: String

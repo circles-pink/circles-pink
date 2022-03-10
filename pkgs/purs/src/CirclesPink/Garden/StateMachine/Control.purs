@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.Control
   ( Env
+  , GetSafeAddressError
   , RegisterError
   , circlesControl
   ) where
@@ -15,20 +16,26 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Data.Either (Either(..))
 import Data.Variant (Variant, default, onMatch)
+import Debug (spy)
+import Effect.Class.Console (logShow)
 import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Wallet.PrivateKey (Address, Nonce, PrivateKey)
+import Wallet.PrivateKey as P
 
 type RegisterError
   = Variant ( errService :: Unit, errNative :: Error )
+
+type GetSafeAddressError
+  = Variant ( errNative :: Error )
 
 type Env m
   = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
     , userRegister :: UserOptions -> ExceptT RegisterError m Unit
-    , getSafeAddress :: Nonce -> ExceptT (Variant ()) m Address
+    , getSafeAddress :: { nonce :: Nonce, privKey :: PrivateKey } -> ExceptT GetSafeAddressError m Address
     }
 
 circlesControl ::
@@ -132,14 +139,20 @@ circlesControl env =
         { prev: \set _ _ -> set $ \st -> S._magicWords st { direction = D._backwards }
         , submit:
             \_ st _ -> do
+              let
+                address = P.privKeyToAddress st.privateKey
+
+                nonce = P.addressToNonce address
               result <-
-                lift $ runExceptT
-                  $ env.userRegister
-                      { email: st.email
-                      , nonce: 0
-                      , safeAddress: ""
-                      , username: st.username
-                      }
+                lift $ runExceptT $ env.getSafeAddress { nonce, privKey: st.privateKey }
+              let
+                x = spy "" result
+              -- $ env.userRegister
+              --     { email: st.email
+              --     , nonce: 0
+              --     , safeAddress: ""
+              --     , username: st.username
+              --     }
               pure unit
         }
     , dashboard:

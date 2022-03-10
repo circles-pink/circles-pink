@@ -48,6 +48,7 @@ script opts = do
   act $ A._askEmail $ A._next unit
   act $ A._infoSecurity $ A._next unit
   act $ A._magicWords $ A._next unit
+  act $ A._submit $ A._submit unit
 
 result :: Aff CirclesState
 result = execStateT (script opts) init

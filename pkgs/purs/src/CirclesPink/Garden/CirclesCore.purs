@@ -21,6 +21,7 @@ import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
+import Effect.Aff (Aff, attempt)
 import Effect.Exception (Error, message, try)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -51,11 +52,11 @@ privKeyToAccount w3 pk =
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
 
-safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Effect P.Address
-safePredictAddress cc ac n =
-  B.safePredictAddress cc ac n
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
+safePredictAddress cc ac opts =
+  B.safePredictAddress cc ac { nonce: P.nonceToBigInt opts.nonce }
     <#> P.unsafeAddrFromString
-    # try
+    # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
 
