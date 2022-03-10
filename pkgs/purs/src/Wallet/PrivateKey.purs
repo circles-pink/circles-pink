@@ -1,13 +1,17 @@
 module Wallet.PrivateKey
   ( Address
   , Mnemonic
+  , Nonce
   , PrivateKey
   , addrToString
+  , addressToNonce
   , genPrivateKey
   , getWords
   , keyToMnemonic
   , mnemonicToKey
+  , nonceToInt
   , privKeyToAddress
+  , sampleAddress
   , sampleKey
   , toEntropy
   , toString
@@ -29,6 +33,9 @@ type Entropy
 
 newtype Address
   = Address String
+
+newtype Nonce
+  = Nonce Int
 
 newtype PrivateKey
   = PrivateKey Entropy
@@ -55,6 +62,9 @@ toString (PrivateKey k) = "0x" <> k
 addrToString :: Address -> String
 addrToString (Address a) = a
 
+nonceToInt :: Nonce -> Int
+nonceToInt (Nonce n) = n
+
 toEntropy :: PrivateKey -> Entropy
 toEntropy (PrivateKey e) = e
 
@@ -80,8 +90,14 @@ zeroKey = PrivateKey "0000000000000000000000000000000000000000000000000000000000
 sampleKey :: PrivateKey
 sampleKey = PrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
 
+sampleAddress :: Address
+sampleAddress = Address "0xfb7dc4d8f841af32d777e698d6c71409e85955d9"
+
 privKeyToAddress :: PrivateKey -> Address
 privKeyToAddress pk = Address $ privKeyToAddressImpl $ toString pk
+
+addressToNonce :: Address -> Nonce
+addressToNonce a = Nonce $ addressToNonceImpl $ addrToString a
 
 --------------------------------------------------------------------------------
 -- Util
@@ -99,3 +115,5 @@ foreign import entropyToMnemonicImpl :: String -> String
 foreign import mnemonicToEntropyImpl :: String -> String
 
 foreign import privKeyToAddressImpl :: String -> String
+
+foreign import addressToNonceImpl :: String -> Int

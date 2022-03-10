@@ -14,6 +14,10 @@ exports.privKeyToAddressImpl = function (privKey) {
     .getAddressString();
 };
 
+exports.addressToNonceImpl = function (address) {
+  return parseInt(address.slice(30), 16);
+};
+
 exports.entropyToMnemonicImpl = function (entropy) {
   return bip39.entropyToMnemonic(entropy);
 };
