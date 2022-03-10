@@ -71,3 +71,6 @@ generate: materialize clean-generate
 
 ci: materialize
 	nix -L build .#publicDir
+
+run-garden:
+	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden

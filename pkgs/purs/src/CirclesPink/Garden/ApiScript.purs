@@ -9,7 +9,7 @@ import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.State (StateT, execStateT, get, lift)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class.Console (logShow)
+import Effect.Class.Console (log, logShow)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Stadium.Control (toStateT)
@@ -23,30 +23,37 @@ control =
     # circlesControl
 
 act :: CirclesAction -> StateT CirclesState Aff Unit
-act = toStateT control
+act ac = do
+  log ("ACTION: " <> show ac)
+  toStateT control ac
+  st <- get
+  log ("STATE: " <> show st)
+  log ""
 
-script :: StateT CirclesState Aff Unit
-script = do
-  logState
+type Options
+  = { username :: String
+    , email :: String
+    }
+
+script :: Options -> StateT CirclesState Aff Unit
+script opts = do
   act $ A._infoGeneral $ A._next unit
-  logState
-  act $ A._askUsername $ A._setUsername "fooo"
-  logState
+  act $ A._askUsername $ A._setUsername opts.username
   act $ A._askUsername $ A._next unit
-  logState
-  act $ A._askEmail $ A._setEmail "helloworld@helloworld.com"
+  act $ A._askEmail $ A._setEmail opts.email
   act $ A._askEmail $ A._setTerms unit
   act $ A._askEmail $ A._setPrivacy unit
-  logState
   act $ A._askEmail $ A._next unit
-  logState
   act $ A._infoSecurity $ A._next unit
-  logState
-  where
-  logState = get >>= (logShow >>> lift)
+  act $ A._magicWords $ A._next unit
 
 result :: Aff CirclesState
-result = execStateT script init
+result = execStateT (script opts) init
+  where
+  opts =
+    { username: "pinkie001"
+    , email: "pinkie001@pinkie001.net"
+    }
 
 main :: Effect Unit
 main = do
