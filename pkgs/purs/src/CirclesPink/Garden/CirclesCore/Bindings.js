@@ -13,3 +13,6 @@ exports.newCirclesCore = (web3) => (options) => () =>
 
 exports.userRegister = (circlesCore) => (options) => () =>
   circlesCore.user.register(options);
+
+// exports.safePredictAddress = (circlesCore) => (account) => () =>
+//   circlesCore.safe.predictAddress(account);

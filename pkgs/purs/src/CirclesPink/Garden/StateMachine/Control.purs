@@ -18,7 +18,7 @@ import Data.Variant (Variant, default, onMatch)
 import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
-import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey (Address, Nonce, PrivateKey)
 
 type RegisterError
   = Variant ( errService :: Unit, errNative :: Error )
@@ -28,6 +28,7 @@ type Env m
     , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
     , userRegister :: UserOptions -> ExceptT RegisterError m Unit
+    , getSafeAddress :: Nonce -> ExceptT (Variant ()) m Address
     }
 
 circlesControl ::
