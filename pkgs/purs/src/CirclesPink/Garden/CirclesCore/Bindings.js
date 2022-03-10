@@ -14,5 +14,8 @@ exports.newCirclesCore = (web3) => (options) => () =>
 exports.userRegister = (circlesCore) => (options) => () =>
   circlesCore.user.register(options);
 
-// exports.safePredictAddress = (circlesCore) => (account) => () =>
-//   circlesCore.safe.predictAddress(account);
+exports.privKeyToAccount = (web3) => (privKey) => () =>
+  web3.eth.accounts.privateKeyToAccount(privKey);
+
+exports.safePredictAddress = (circlesCore) => (account) => (nonce) => () =>
+  circlesCore.safe.predictAddress(account, nonce);

@@ -15,11 +15,11 @@ module Wallet.PrivateKey
   , sampleKey
   , toEntropy
   , toString
+  , unsafeAddrFromString
   , zeroKey
   ) where
 
 import Prelude
-
 import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.String (Pattern(..))
@@ -64,6 +64,9 @@ toString (PrivateKey k) = "0x" <> k
 
 addrToString :: Address -> String
 addrToString (Address a) = a
+
+unsafeAddrFromString :: String -> Address
+unsafeAddrFromString s = Address s
 
 nonceToString :: Nonce -> String
 nonceToString (Nonce n) = B.toString n

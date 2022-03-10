@@ -7,6 +7,8 @@ module CirclesPink.Garden.CirclesCore
   , newWeb3
   , newWebSocketProvider
   , printErr
+  , privKeyToAccount
+  , safePredictAddress
   , userRegister
   ) where
 
@@ -22,6 +24,8 @@ import Effect (Effect)
 import Effect.Exception (Error, message, try)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey as P
 
 newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + r) Effect B.Provider
 newWebSocketProvider x1 =
@@ -36,6 +40,21 @@ newWeb3 = B.newWeb3
 newCirclesCore :: forall r. B.Web3 -> B.Options -> ExceptV (ErrNative + r) Effect B.CirclesCore
 newCirclesCore x1 x2 =
   B.newCirclesCore x1 x2
+    # try
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
+
+privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrNative + r) Effect B.Account
+privKeyToAccount w3 pk =
+  B.privKeyToAccount w3 (P.toString pk)
+    # try
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
+
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Effect P.Address
+safePredictAddress cc ac n =
+  B.safePredictAddress cc ac n
+    <#> P.unsafeAddrFromString
     # try
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
