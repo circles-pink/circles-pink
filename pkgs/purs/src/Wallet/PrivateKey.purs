@@ -9,6 +9,7 @@ module Wallet.PrivateKey
   , getWords
   , keyToMnemonic
   , mnemonicToKey
+  , nonceToBigInt
   , nonceToString
   , privKeyToAddress
   , sampleAddress
@@ -70,6 +71,9 @@ unsafeAddrFromString s = Address s
 
 nonceToString :: Nonce -> String
 nonceToString (Nonce n) = B.toString n
+
+nonceToBigInt :: Nonce -> BigInt
+nonceToBigInt (Nonce n) = n
 
 toEntropy :: PrivateKey -> Entropy
 toEntropy (PrivateKey e) = e
