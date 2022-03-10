@@ -117,7 +117,7 @@ env { request } =
               , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
               , subgraphName: "CirclesUBI/circles-subgraph"
               }
-          CC.safePredictAddress circlesCore nonce
+          CC.safePredictAddress circlesCore account nonce
   }
 
 testEnv :: C.Env Identity

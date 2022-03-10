@@ -1,5 +1,6 @@
 module CirclesPink.Garden.CirclesCore.Bindings
-  ( CirclesCore
+  ( Account
+  , CirclesCore
   , Options
   , Provider
   , UserOptions
@@ -7,9 +8,12 @@ module CirclesPink.Garden.CirclesCore.Bindings
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
+  , privKeyToAccount
+  , safePredictAddress
   , userRegister
   ) where
 
+import Data.BigInt (BigInt)
 import Effect (Effect)
 
 foreign import data Provider :: Type
@@ -18,9 +22,15 @@ foreign import data Web3 :: Type
 
 foreign import data CirclesCore :: Type
 
+foreign import data Account :: Type
+
 foreign import newWebSocketProvider :: String -> Effect Provider
 
 foreign import newWeb3 :: Provider -> Effect Web3
+
+foreign import privKeyToAccount :: Web3 -> String -> Effect Account
+
+foreign import safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> Effect String
 
 type Options
   = { apiServiceEndpoint :: String
