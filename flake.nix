@@ -116,7 +116,7 @@
                 effects = self.effects { src.ref = null; };
               in
               {
-                deploy-nixops-example-prebuilt = effects.nixops-example.prebuilt;
+                deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
               };
           };
