@@ -34,4 +34,4 @@ tests =
     T.test "privKeyToAddress" do
       A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
     T.test "addressToNonce" do
-      A.equal (P.nonceToInt $ P.addressToNonce P.sampleAddress) 22032785429977
+      A.equal (P.nonceToString $ P.addressToNonce P.sampleAddress) "22032785429977"
