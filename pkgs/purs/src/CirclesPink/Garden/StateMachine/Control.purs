@@ -143,16 +143,16 @@ circlesControl env =
                 address = P.privKeyToAddress st.privateKey
 
                 nonce = P.addressToNonce address
-              result <-
+              safeAddress <-
                 lift $ runExceptT $ env.getSafeAddress { nonce, privKey: st.privateKey }
               let
-                x = spy "" result
-              -- $ env.userRegister
-              --     { email: st.email
-              --     , nonce: 0
-              --     , safeAddress: ""
-              --     , username: st.username
-              --     }
+                x = spy "safeAddress" safeAddress
+              -- env.userRegister
+              --   { email: st.email
+              --   , nonce
+              --   , safeAddress
+              --   , username: st.username
+              --   }
               pure unit
         }
     , dashboard:
