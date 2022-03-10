@@ -17,7 +17,8 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
-import Wallet.PrivateKey (zeroKey)
+import Undefined (undefined)
+import Wallet.PrivateKey (sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
 _errService :: CirclesError
@@ -101,6 +102,22 @@ env { request } =
               , subgraphName: "CirclesUBI/circles-subgraph"
               }
           CC.userRegister circlesCore options
+  , getSafeAddress:
+      \nonce ->
+        mapExceptT liftEffect do
+          provider <- CC.newWebSocketProvider "ws://localhost:8545"
+          web3 <- lift $ CC.newWeb3 provider
+          circlesCore <-
+            CC.newCirclesCore web3
+              { apiServiceEndpoint: "https://api.circles.garden"
+              , graphNodeEndpoint: "https://api.thegraph.com"
+              , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
+              , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
+              , relayServiceEndpoint: "https://relay.circles.garden"
+              , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
+              , subgraphName: "CirclesUBI/circles-subgraph"
+              }
+          CC.safePredictAddress circlesCore nonce
   }
 
 testEnv :: C.Env Identity
@@ -109,4 +126,5 @@ testEnv =
   , apiCheckEmail: \_ -> pure { isValid: true }
   , generatePrivateKey: pure zeroKey
   , userRegister: \_ -> pure unit
+  , getSafeAddress: \_ -> pure sampleAddress
   }
