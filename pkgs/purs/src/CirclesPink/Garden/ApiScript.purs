@@ -10,6 +10,7 @@ import Control.Monad.State (StateT, execStateT, get, lift)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class.Console (log, logShow)
+import HTTP (addLogging)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Stadium.Control (toStateT)
@@ -19,6 +20,7 @@ control ::
   CirclesState -> CirclesAction -> StateT CirclesState Aff Unit
 control =
   milkisRequest nodeFetch
+    # addLogging
     # (\request -> env { request })
     # circlesControl
 
