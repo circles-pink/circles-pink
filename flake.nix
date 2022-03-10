@@ -111,7 +111,7 @@
         {
 
           checks = {
-            ${cdSystem} =
+            x86_64-linux =
               let
                 effects = self.effects { src.ref = null; };
               in
