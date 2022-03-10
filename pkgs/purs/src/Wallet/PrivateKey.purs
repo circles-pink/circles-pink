@@ -1,10 +1,14 @@
 module Wallet.PrivateKey
-  ( Mnemonic
+  ( Address
+  , Mnemonic
   , PrivateKey
+  , addrToString
   , genPrivateKey
   , getWords
   , keyToMnemonic
   , mnemonicToKey
+  , privKeyToAddress
+  , sampleKey
   , toEntropy
   , toString
   , zeroKey
@@ -22,6 +26,9 @@ import Effect.Class (liftEffect)
 --------------------------------------------------------------------------------
 type Entropy
   = String
+
+newtype Address
+  = Address String
 
 newtype PrivateKey
   = PrivateKey Entropy
@@ -45,6 +52,9 @@ getWords (Mnemonic ws) = ws
 toString :: PrivateKey -> String
 toString (PrivateKey k) = "0x" <> k
 
+addrToString :: Address -> String
+addrToString (Address a) = a
+
 toEntropy :: PrivateKey -> Entropy
 toEntropy (PrivateKey e) = e
 
@@ -67,6 +77,12 @@ mnemonicToKey (Mnemonic ws) =
 zeroKey :: PrivateKey
 zeroKey = PrivateKey "0000000000000000000000000000000000000000000000000000000000000000"
 
+sampleKey :: PrivateKey
+sampleKey = PrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
+
+privKeyToAddress :: PrivateKey -> Address
+privKeyToAddress pk = Address $ privKeyToAddressImpl $ toString pk
+
 --------------------------------------------------------------------------------
 -- Util
 --------------------------------------------------------------------------------
@@ -81,3 +97,5 @@ foreign import genPrivateKeyImpl :: Effect String
 foreign import entropyToMnemonicImpl :: String -> String
 
 foreign import mnemonicToEntropyImpl :: String -> String
+
+foreign import privKeyToAddressImpl :: String -> String
