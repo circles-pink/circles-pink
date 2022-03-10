@@ -9,7 +9,7 @@ module Wallet.PrivateKey
   , getWords
   , keyToMnemonic
   , mnemonicToKey
-  , nonceToInt
+  , nonceToString
   , privKeyToAddress
   , sampleAddress
   , sampleKey
@@ -19,6 +19,9 @@ module Wallet.PrivateKey
   ) where
 
 import Prelude
+
+import Data.BigInt (BigInt)
+import Data.BigInt as B
 import Data.String (Pattern(..))
 import Data.String as S
 import Effect (Effect)
@@ -35,7 +38,7 @@ newtype Address
   = Address String
 
 newtype Nonce
-  = Nonce Int
+  = Nonce BigInt
 
 newtype PrivateKey
   = PrivateKey Entropy
@@ -62,8 +65,8 @@ toString (PrivateKey k) = "0x" <> k
 addrToString :: Address -> String
 addrToString (Address a) = a
 
-nonceToInt :: Nonce -> Int
-nonceToInt (Nonce n) = n
+nonceToString :: Nonce -> String
+nonceToString (Nonce n) = B.toString n
 
 toEntropy :: PrivateKey -> Entropy
 toEntropy (PrivateKey e) = e
@@ -116,4 +119,4 @@ foreign import mnemonicToEntropyImpl :: String -> String
 
 foreign import privKeyToAddressImpl :: String -> String
 
-foreign import addressToNonceImpl :: String -> Int
+foreign import addressToNonceImpl :: String -> BigInt
