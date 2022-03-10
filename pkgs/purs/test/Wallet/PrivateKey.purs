@@ -32,4 +32,6 @@ tests =
         A.equal (P.zeroKey # P.keyToMnemonic # P.getWords)
           [ "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "art" ]
     T.test "privKeyToAddress" do
-      A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) "0xfb7dc4d8f841af32d777e698d6c71409e85955d9"
+      A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
+    T.test "addressToNonce" do
+      A.equal (P.nonceToInt $ P.addressToNonce P.sampleAddress) 22032785429977
