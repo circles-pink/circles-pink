@@ -1,6 +1,6 @@
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
@@ -12,6 +12,7 @@ import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
+import { ThemeContext } from '../../context/theme';
 
 type AskEmailProps = {
   state: UserData;
@@ -21,6 +22,7 @@ type AskEmailProps = {
 export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
+  const { theme } = useContext(ThemeContext);
 
   return (
     <DialogCard
@@ -54,7 +56,9 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
-                label={t('askEmail.termsLabel')}
+                background={theme.baseColor}
+                borderColor={theme.baseColor}
+                label={t('askEmail.termsLabel') + theme.baseColor}
                 checked={state.terms}
                 setChecked={() => act(A._askEmail(A._setTerms(unit)))}
               />
@@ -64,6 +68,8 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
               <LabeledCheckbox
+                background={theme.baseColor}
+                borderColor={theme.baseColor}
                 label={t('askEmail.privacyLabel')}
                 checked={state.privacy}
                 setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}

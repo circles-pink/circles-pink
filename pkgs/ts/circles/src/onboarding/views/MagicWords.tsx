@@ -21,7 +21,7 @@ type MagicWordsProps = {
   act: (ac: A.CirclesAction) => void;
 };
 
-const WordGrid = tw.div`grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 bg-pink-100 py-2 pl-2 rounded-lg mb-4`;
+const WordGrid = tw.div`grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 bg-green-100 py-2 pl-2 rounded-lg mb-4`;
 const WordContainer = tw.div`py-1 mr-2`;
 const Word = tw.div`p-2 bg-white w-full text-center rounded-full relative`;
 const WordNumber = tw.span`select-none text-sm absolute left-2 text-gray-400`;

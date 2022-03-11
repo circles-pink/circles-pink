@@ -8,6 +8,11 @@ export default {
   component: Onboarding,
   argTypes: {
     initState: { control: { disable: true }, table: { disable: true } },
+    baseColor: {
+      defaultValue: "hotpink",
+      options: ["hotpink", "teal"],
+      control: { type: "inline-radio" },
+    },
     lang: {
       defaultValue: "en",
       options: ["en", "de"],
@@ -22,21 +27,41 @@ export default {
 } as ComponentMeta<typeof Onboarding>;
 
 export const InfoGeneral = (args): ReactElement => (
-  <Onboarding lang={args.lang} initState={Steps.infoGeneral} />
+  <Onboarding
+    lang={args.lang}
+    baseColor={args.baseColor}
+    initState={Steps.infoGeneral}
+  />
 );
 
 export const AskUsername = (args): ReactElement => (
-  <Onboarding lang={args.lang} initState={Steps.askUsername} />
+  <Onboarding
+    lang={args.lang}
+    baseColor={args.baseColor}
+    initState={Steps.askUsername}
+  />
 );
 
 export const AskEmail = (args): ReactElement => (
-  <Onboarding lang={args.lang} initState={Steps.askEmail} />
+  <Onboarding
+    lang={args.lang}
+    baseColor={args.baseColor}
+    initState={Steps.askEmail}
+  />
 );
 
 export const InfoSecurity = (args): ReactElement => (
-  <Onboarding lang={args.lang} initState={Steps.infoSecurity} />
+  <Onboarding
+    lang={args.lang}
+    baseColor={args.baseColor}
+    initState={Steps.infoSecurity}
+  />
 );
 
 export const MagicWords = (args): ReactElement => (
-  <Onboarding lang={args.lang} initState={Steps.magicWords} />
+  <Onboarding
+    lang={args.lang}
+    baseColor={args.baseColor}
+    initState={Steps.magicWords}
+  />
 );
