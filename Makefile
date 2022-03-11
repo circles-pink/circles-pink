@@ -72,5 +72,8 @@ generate: materialize clean-generate
 ci: materialize
 	nix -L build .#publicDir
 
-run-garden:
+run-garden-nix:
 	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden
+
+run-garden: yarn-install
+	make spago-build && node inspect -e 'require("./$(PURS_OUTPUT)/CirclesPink.Garden.ApiScript").main()'

@@ -88,11 +88,11 @@ env { request } =
             # ExceptT
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
-      \options ->
-        mapExceptT liftEffect do
-          web3 <- getWeb3
-          circlesCore <- getCirclesCore web3
-          CC.userRegister circlesCore options
+      \privKey options -> do
+        web3 <- mapExceptT liftEffect $ getWeb3
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3
+        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        CC.userRegister circlesCore account options
   , getSafeAddress:
       \{ nonce, privKey } -> do
         web3 <- mapExceptT liftEffect getWeb3
@@ -123,6 +123,6 @@ testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
   , generatePrivateKey: pure zeroKey
-  , userRegister: \_ -> pure unit
+  , userRegister: \_ _ -> pure unit
   , getSafeAddress: \_ -> pure sampleAddress
   }
