@@ -20,6 +20,7 @@ to generate this file without the comments in this block.
   , "arrays"
   , "bifunctors"
   , "checked-exceptions"
+  , "codec-argonaut"
   , "console"
   , "debug"
   , "effect"
