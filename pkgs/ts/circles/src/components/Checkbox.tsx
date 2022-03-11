@@ -1,22 +1,31 @@
 // Inspired by: https://medium.com/@colebemis/building-a-checkbox-component-with-react-and-styled-components-8d3aa1d826dd
 
 import React, { ReactElement } from 'react';
-import { styled } from 'twin.macro';
+import tw, { styled } from 'twin.macro';
 
 type LabeledCheckboxProps = {
   checked: boolean;
   setChecked: () => void;
   label?: string;
+  background: string;
+  borderColor: string;
 };
 
 export const LabeledCheckbox = ({
   checked = false,
   setChecked,
   label,
+  background,
+  borderColor,
 }: LabeledCheckboxProps): ReactElement => {
   return (
     <Label>
-      <Checkbox checked={checked} onChange={() => setChecked()} />
+      <Checkbox
+        checked={checked}
+        background={background}
+        borderColor={borderColor}
+        onChange={() => setChecked()}
+      />
       <span>{label}</span>
     </Label>
   );
@@ -24,13 +33,24 @@ export const LabeledCheckbox = ({
 
 type CheckboxProps = {
   checked: boolean;
+  background: string;
+  borderColor: string;
   onChange: () => void;
 };
 
-const Checkbox = ({ checked, ...props }: CheckboxProps) => (
+const Checkbox = ({
+  checked,
+  background,
+  borderColor,
+  ...props
+}: CheckboxProps) => (
   <CheckboxContainer>
     <HiddenCheckbox checked={checked} {...props} />
-    <StyledCheckbox checked={checked}>
+    <StyledCheckbox
+      checked={checked}
+      background={background}
+      borderColor={borderColor}
+    >
       {checked && (
         <Icon viewBox="0 0 24 24">
           <polyline points="20 6 9 17 4 12" />
@@ -69,17 +89,20 @@ const Icon = styled.svg`
 
 type StyledCheckboxProps = {
   checked: boolean;
+  background: string;
+  borderColor: string;
 };
 
-const StyledCheckbox = styled.div<StyledCheckboxProps>`
-  display: inline-block;
+const StyledCheckbox = styled.div((props: StyledCheckboxProps) => [
+  `display: inline-block;
   width: 16px;
   height: 16px;
-  background: ${props => (props.checked ? '#ff4785' : 'white')};
   border-radius: 3px;
   transition: all 150ms;
-  border: 1px solid pink;
-`;
+  border: 1px solid ${props.borderColor};
+  background: ${props.checked ? props.background : 'white'};
+`,
+]);
 
 const CheckboxContainer = styled.div`
   display: inline-block;
