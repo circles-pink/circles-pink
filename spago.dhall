@@ -37,6 +37,7 @@ to generate this file without the comments in this block.
   , "node-fs"
   , "node-process"
   , "optparse"
+  , "ordered-collections"
   , "partial"
   , "prelude"
   , "promises"

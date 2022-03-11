@@ -1,14 +1,15 @@
-import { Meta } from '@storybook/addon-docs';
-import Code from './assets/code-brackets.svg';
-import Colors from './assets/colors.svg';
-import Comments from './assets/comments.svg';
-import Direction from './assets/direction.svg';
-import Flow from './assets/flow.svg';
-import Plugin from './assets/plugin.svg';
-import Repo from './assets/repo.svg';
-import StackAlt from './assets/stackalt.svg';
-import MakeFileGraph from 'assets/src/circles-makefile.svg';
-import ModuleGraph from 'assets/src/module-dep-graph.svg';
+import { Meta } from "@storybook/addon-docs";
+import Code from "./assets/code-brackets.svg";
+import Colors from "./assets/colors.svg";
+import Comments from "./assets/comments.svg";
+import Direction from "./assets/direction.svg";
+import Flow from "./assets/flow.svg";
+import Plugin from "./assets/plugin.svg";
+import Repo from "./assets/repo.svg";
+import StackAlt from "./assets/stackalt.svg";
+import MakeFileGraph from "assets/src/circles-makefile.svg";
+import ModuleGraph from "assets/src/module-dep-graph.svg";
+import PursModuleGraph from "assets/src/purs-moduleDependencyGraph.svg";
 
 <Meta title="Docs/Internal" />
 
@@ -123,6 +124,8 @@ import ModuleGraph from 'assets/src/module-dep-graph.svg';
 <div className="subheading">Makefile</div>
 <img src={MakeFileGraph} alt="Circles Makefile Graph" />
 
+<div className="subheading">TS Module Dependencies</div>
+<img src={ModuleGraph} alt="TS Module Dependencies" />
 
-<div className="subheading">Module Dependencies</div>
-<img src={ModuleGraph} alt="Module Dependencies" />
+<div className="subheading">Purs Module Dependencies</div>
+<img src={PursModuleGraph} alt="Purs Module Dependencies" />

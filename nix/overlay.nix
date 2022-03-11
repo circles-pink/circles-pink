@@ -60,6 +60,7 @@
         cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
         cp ${makefileGraphSvg} $out/circles-makefile.svg
         cp ${moduleDependencyGraph} $out/module-dep-graph.svg
+        cp ${purs-moduleDependencyGraphSvg} $out/purs-moduleDependencyGraph.svg
       '';
 
       publicDir = final.runCommand "output" { } ''
@@ -96,6 +97,12 @@
         { buildInputs = [ purs-deps ]; }
         ''
           purs-deps --depsJsonPath ${purs-deps-json} > $out
+        '';
+
+      purs-moduleDependencyGraphSvg = final.runCommand "purs-moduleDependencyGraph.svg"
+        { buildInputs = [ final.graphviz ]; }
+        ''
+          dot -Tsvg ${purs-moduleDependencyGraphDot} > $out 
         '';
     };
 })
