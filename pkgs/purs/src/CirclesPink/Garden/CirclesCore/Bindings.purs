@@ -51,10 +51,13 @@ type Options
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
 
 type UserOptions
-  = { nonce :: Int
+  = { nonce :: BigInt
     , safeAddress :: String
     , username :: String
     , email :: String
     }
 
-foreign import userRegister :: CirclesCore -> UserOptions -> Effect Boolean
+foreign import userRegisterImpl :: CirclesCore -> Account -> UserOptions -> EffectFnAff Boolean
+
+userRegister :: CirclesCore -> Account -> UserOptions -> Aff Boolean
+userRegister x1 x2 x3 = fromEffectFnAff $ userRegisterImpl x1 x2 x3

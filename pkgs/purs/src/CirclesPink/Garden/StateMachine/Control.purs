@@ -6,7 +6,7 @@ module CirclesPink.Garden.StateMachine.Control
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore.Bindings (UserOptions)
+import CirclesPink.Garden.CirclesCore (UserOptions)
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -14,6 +14,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
@@ -23,19 +24,20 @@ import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Wallet.PrivateKey (Address, Nonce, PrivateKey)
 import Wallet.PrivateKey as P
+import Type.Row (type (+))
 
-type RegisterError
-  = Variant ( errService :: Unit, errNative :: Error )
+type RegisterError r
+  = ( errService :: Unit, errNative :: Error | r )
 
-type GetSafeAddressError
-  = Variant ( errNative :: Error )
+type GetSafeAddressError r
+  = ( errNative :: Error | r )
 
 type Env m
   = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
-    , userRegister :: UserOptions -> ExceptT RegisterError m Unit
-    , getSafeAddress :: { nonce :: Nonce, privKey :: PrivateKey } -> ExceptT GetSafeAddressError m Address
+    , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
+    , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
     }
 
 circlesControl ::
@@ -143,16 +145,18 @@ circlesControl env =
                 address = P.privKeyToAddress st.privateKey
 
                 nonce = P.addressToNonce address
-              safeAddress <-
-                lift $ runExceptT $ env.getSafeAddress { nonce, privKey: st.privateKey }
+              result :: Either (Variant (GetSafeAddressError + RegisterError + ())) Unit <-
+                (lift <<< runExceptT) do
+                  safeAddress <- env.getSafeAddress { nonce, privKey: st.privateKey }
+                  env.userRegister
+                    st.privateKey
+                    { email: st.email
+                    , nonce
+                    , safeAddress
+                    , username: st.username
+                    }
               let
-                x = spy "safeAddress" safeAddress
-              -- env.userRegister
-              --   { email: st.email
-              --   , nonce
-              --   , safeAddress
-              --   , username: st.username
-              --   }
+                x = spy "result" result
               pure unit
         }
     , dashboard:

@@ -2,6 +2,7 @@ module CirclesPink.Garden.CirclesCore
   ( Err
   , ErrNative
   , ErrService
+  , UserOptions
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -13,7 +14,7 @@ module CirclesPink.Garden.CirclesCore
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore.Bindings (Options, Provider, Web3, CirclesCore) as Exp
+import CirclesPink.Garden.CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account) as Exp
 import CirclesPink.Garden.CirclesCore.Bindings as B
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
@@ -25,7 +26,7 @@ import Effect.Aff (Aff, attempt)
 import Effect.Exception (Error, message, try)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigInt)
 import Wallet.PrivateKey as P
 
 newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + r) Effect B.Provider
@@ -75,10 +76,22 @@ printErr =
     # on (Proxy :: _ "errNative") (\e -> "Native Error: " <> message e)
     # on (Proxy :: _ "errService") (\_ -> "service error")
 
-userRegister :: forall r. B.CirclesCore -> B.UserOptions -> ExceptV (ErrService + ErrNative + r) Effect Unit
-userRegister x1 x2 =
-  B.userRegister x1 x2
-    # try
+type UserOptions
+  = { nonce :: Nonce
+    , safeAddress :: Address
+    , username :: String
+    , email :: String
+    }
+
+userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+userRegister cc ac opts =
+  B.userRegister cc ac
+    { nonce: nonceToBigInt opts.nonce
+    , safeAddress: addrToString opts.safeAddress
+    , username: opts.username
+    , email: opts.email
+    }
+    # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
     <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
     # ExceptT
