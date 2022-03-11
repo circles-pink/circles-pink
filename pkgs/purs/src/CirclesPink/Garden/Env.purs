@@ -103,7 +103,7 @@ env { request } =
   }
 
 getWeb3 = do
-  provider <- CC.newWebSocketProvider "ws://localhost:8545"
+  provider <- CC.newWebSocketProvider "wss://dark-frosty-field.xdai.quiknode.pro"
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
