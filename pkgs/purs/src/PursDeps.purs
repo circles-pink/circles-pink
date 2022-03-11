@@ -52,7 +52,7 @@ main = do
   cap :: Cap Effect
   cap =
     { readFile: \_ -> pure "abc"
-    , log: undefined
+    , log: \s -> liftEffect $ log s
     }
 
   prog =
@@ -115,8 +115,8 @@ main' = do
   cap :: Cap m <- asks _.cap
   opts <- asks _.opts
   r <- lift $ cap.readFile opts.depsJsonPath
-  res' <- lift $ except $ parse r
-  let
-    x = spy "res" res'
-  lift $ cap.log ""
+  -- res' <- lift $ except $ parse r
+  -- let
+  --   x = spy "res" res'
+  lift $ cap.log "digraph mygraph { a1 -> a2; a2 -> a3; }"
   pure unit
