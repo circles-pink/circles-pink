@@ -1,37 +1,47 @@
 module PursDeps
-  ( main
-  , tests
+  ( DepEntry
+  , ErrParse
+  , ModuleName
+  , PursDeps
+  , main
+  , parse
+  , printError
   ) where
 
 import Prelude
 import Control.Monad.Error.Class (try)
 import Control.Monad.Except (ExceptT(..), except, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.Reader (ReaderT, ask, asks, runReaderT)
-import Data.Argonaut (Json, JsonDecodeError, decodeJson, encodeJson, parseJson, printJsonDecodeError, stringify)
+import Control.Monad.Reader (ReaderT, asks, runReaderT)
+import Data.Argonaut (class DecodeJson, Json, JsonDecodeError(..), decodeJson, parseJson, printJsonDecodeError, (.:))
 import Data.Argonaut as AG
+import Data.Array (filter, foldr)
+import Data.Array as A
 import Data.Bifunctor (lmap)
-import Data.Codec.Argonaut (JsonCodec, jobject)
-import Data.Codec.Argonaut.Record (object)
-import Data.Either (Either(..), hush)
+import Data.Either (Either(..), note)
 import Data.Foldable (fold)
-import Data.Map (Map, fromFoldable)
+import Data.Map (Map)
+import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.String (Pattern(..))
+import Data.String as S
+import Data.String.Regex as R
+import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Unsafe (unsafeRegex)
+import Data.Traversable (traverse)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant, case_, inj, on, onMatch)
+import Data.Variant (Variant, case_, inj, on)
 import Debug (spy)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log)
-import Foreign.Object (Object, toUnfoldable)
+import Foreign.Object (toUnfoldable) as O
+import Foreign.Object as FO
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (readTextFile)
 import Node.Process (exit)
 import Options.Applicative (Parser, (<**>))
-import Options.Applicative as O
-import Prim.Row (class Cons, class Nub, class Union)
-import Test.Unit as T
-import Test.Unit.Assert as A
+import Options.Applicative (execParser, fullDesc, header, help, helper, info, long, progDesc, strOption) as O
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Undefined (undefined)
@@ -105,10 +115,47 @@ printError =
 -- Types
 --------------------------------------------------------------------------------
 type PursDeps
-  = Map String Json --{ path :: ModuleName, depends :: Array ModuleName }
+  = Array (ModuleName /\ DepEntry)
+
+type DepEntry
+  = { path :: String, depends :: Array ModuleName }
 
 type ModuleName
-  = String
+  = Array String
+
+--------------------------------------------------------------------------------
+-- ModuleTree
+--------------------------------------------------------------------------------
+newtype ModuleForest
+  = ModuleForest
+  ( Map String
+      { exists :: Boolean
+      , depends :: Array ModuleName
+      , subModules :: ModuleForest
+      }
+  )
+
+emptyModuleForest :: ModuleForest
+emptyModuleForest = ModuleForest M.empty
+
+insert :: ModuleName /\ DepEntry -> ModuleForest -> ModuleForest
+insert (mn /\ de) (ModuleForest mf) = case A.uncons mn of
+  Nothing -> ModuleForest mf
+  Just { head, tail }
+    | tail == [] ->
+      ModuleForest
+        $ M.insertWith
+            (\old _ -> old { exists = true })
+            head
+            { exists: true, subModules: emptyModuleForest, depends: de.depends }
+            mf
+  Just { head, tail } ->
+    ModuleForest
+      $ M.insertWith
+          (\old _ -> old { subModules = insert (tail /\ de) old.subModules })
+          head
+          { exists: false, subModules: insert (tail /\ de) emptyModuleForest, depends: de.depends }
+          mf
 
 --------------------------------------------------------------------------------
 -- Result
@@ -120,6 +167,50 @@ runResult :: forall env m a. env -> Result () env m a -> m (Either (Variant (Err
 runResult cap r = runExceptT $ runReaderT r cap
 
 --------------------------------------------------------------------------------
+-- Parse
+--------------------------------------------------------------------------------
+decodePursDeps :: Json -> Either JsonDecodeError PursDeps
+decodePursDeps j = do
+  obj <- AG.toObject j # note (TypeMismatch "object")
+  let
+    xs :: Array (String /\ _)
+    xs = O.toUnfoldable obj
+  xs' <- traverse (decodeKV (decodeModuleName <<< AG.fromString) decodeDepEntry) xs
+  pure $ xs'
+
+decodeModuleName :: Json -> Either JsonDecodeError ModuleName
+decodeModuleName j = do
+  s <- AG.toString j # note (TypeMismatch "string")
+  pure $ S.split (Pattern ".") s
+
+decodeDepEntry :: Json -> Either JsonDecodeError DepEntry
+decodeDepEntry j = do
+  obj <- AG.toObject j # note (TypeMismatch "object")
+  path <-
+    FO.lookup "path" obj
+      # note (AtKey "path" $ MissingValue)
+      >>= (AG.toString >>> note (TypeMismatch "string"))
+  depends' <-
+    FO.lookup "depends" obj
+      # note (AtKey "depends" $ MissingValue)
+      >>= (AG.toArray >>> note (TypeMismatch "string"))
+  depends <- traverse decodeModuleName depends'
+  pure $ { path, depends }
+
+decodeKV ::
+  forall k v.
+  (String -> Either JsonDecodeError k) ->
+  (Json -> Either JsonDecodeError v) ->
+  String /\ Json -> Either JsonDecodeError (k /\ v)
+decodeKV decK decV (k /\ v) = do
+  k' <- decK k
+  v' <- decV v
+  pure (k' /\ v')
+
+parse :: forall r. String -> Either (Variant (ErrParse + r)) PursDeps
+parse s = parseJson s >>= decodePursDeps # lmap (inj (Proxy :: _ "errParse"))
+
+--------------------------------------------------------------------------------
 -- Main
 --------------------------------------------------------------------------------
 type Cap m
@@ -127,44 +218,6 @@ type Cap m
     , log :: forall r. String -> ExceptV r m Unit
     }
 
-codec :: Json -> Maybe PursDeps
-codec j = do
-  obj <- AG.toObject j
-  let
-    xs :: Array (String /\ Json)
-    xs = toUnfoldable obj
-
-    mp = fromFoldable xs
-  pure mp
-
-cd :: JsonCodec (Array (String /\ Json))
-cd = jobject # pris
-
---c = objectOf (recordOf { path: cModuleName, depends: arrayOf cModuleName })
--- <#> (toUnfoldable >>> fromFoldable)
-parse :: forall r. String -> Either (Variant (ErrParse + r)) PursDeps
-parse s = undefined -- parseJson s >>= decodeJson # lmap (inj (Proxy :: _ "errParse"))
-
-tests :: T.TestSuite
-tests =
-  T.suite "PursDeps" do
-    T.test "parse" do
-      let
-        data_ :: String
-        data_ =
-          (stringify <<< encodeJson)
-            { "Apple": { path: "", depends: [ "Foo.Bar" ] }
-            , "Nut": { path: "", depends: [ "Foo.Bar" ] }
-            }
-      -- parsed :: PursDeps
-      -- parsed =
-      --   fromFoldable
-      --     [ "Apple" /\ { path: "", depends: [ "Foo.Bar" ] }
-      --     , "Nut" /\ { path: "", depends: [ "Foo.Bar" ] }
-      --     ]
-      A.equal 1 1
-
---A.equal (data_ # parse # hush) (Just parsed)
 main' :: forall r' m r. Monad m => Result r { opts :: Opts, cap :: Cap m } m Unit
 main' = do
   cap :: Cap m <- asks _.cap
@@ -172,6 +225,15 @@ main' = do
   r <- lift $ cap.readFile opts.depsJsonPath
   res' <- lift $ except $ parse r
   let
-    x = spy "res" res'
+    res'' =
+      filter
+        ( \(k /\ v) ->
+            not $ R.test (unsafeRegex "\\.spago" noFlags) v.path
+        )
+        res'
+
+    modForest = foldr insert emptyModuleForest res''
+
+    x = spy "modForest" modForest
   lift $ cap.log "digraph mygraph { a1 -> a2; a2 -> a3; }"
   pure unit
