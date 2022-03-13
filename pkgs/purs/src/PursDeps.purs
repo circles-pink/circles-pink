@@ -38,6 +38,7 @@ import Effect.Class.Console (error)
 import Effect.Class.Console as C
 import Foreign.Object (toUnfoldable) as O
 import Foreign.Object as FO
+import Language.Dot as D
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (readTextFile)
 import Node.Process (exit)
@@ -45,6 +46,7 @@ import Options.Applicative (Parser, ParserInfo, (<**>))
 import Options.Applicative (execParser, fullDesc, helper, info, long, strOption) as O
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- Opts
@@ -98,13 +100,14 @@ type ModuleName
 -- ModuleTree
 --------------------------------------------------------------------------------
 newtype ModuleForest
-  = ModuleForest
-  ( Map String
-      { exists :: Boolean
-      , depends :: Array ModuleName
-      , subModules :: ModuleForest
-      }
-  )
+  = ModuleForest (Map String ModuleTree)
+
+derive instance eqModuleForest :: Eq ModuleForest
+
+type ModuleTree
+  = { exists :: Boolean
+    , subModules :: ModuleForest
+    }
 
 emptyModuleForest :: ModuleForest
 emptyModuleForest = ModuleForest M.empty
@@ -118,14 +121,14 @@ insert (mn /\ de) (ModuleForest mf) = case A.uncons mn of
         $ M.insertWith
             (\old _ -> old { exists = true })
             head
-            { exists: true, subModules: emptyModuleForest, depends: de.depends }
+            { exists: true, subModules: emptyModuleForest }
             mf
   Just { head, tail } ->
     ModuleForest
       $ M.insertWith
           (\old _ -> old { subModules = insert (tail /\ de) old.subModules })
           head
-          { exists: false, subModules: insert (tail /\ de) emptyModuleForest, depends: de.depends }
+          { exists: false, subModules: insert (tail /\ de) emptyModuleForest }
           mf
 
 --------------------------------------------------------------------------------
@@ -193,11 +196,54 @@ parse s = parseJson s >>= decodePursDeps # lmap (inj (Proxy :: _ "errParse"))
 data Dot
   = Dot
 
-forestToDot :: ModuleForest -> Dot
-forestToDot _ = Dot
+toDot :: PursDeps -> D.Graph
+toDot pd =
+  D.Graph
+    { strict: true
+    , type: D.directed_
+    , id: Nothing
+    , stmts: join [ addNodes $ writeForest pd, addEdges pd ]
+    }
 
-printDot :: Dot -> String
-printDot _ = "digraph mygraph { a1 -> a2; a2 -> a3; }"
+addNodes :: ModuleForest -> Array D.Stmt
+addNodes (ModuleForest mf) = M.toUnfoldable mf >>= treeToDot []
+
+addEdges :: PursDeps -> Array D.Stmt
+addEdges _ = []
+
+getSubModules :: Array String -> ModuleForest -> Array D.Stmt
+getSubModules scope (ModuleForest mp) =
+  M.toUnfoldable mp
+    >>= treeToDot scope
+
+treeToDot :: Array String -> String /\ ModuleTree -> Array D.Stmt
+treeToDot scope (n /\ t) =
+  join
+    [ if t.exists then
+        [ D.nodeStmt
+            $ D.NodeStmt
+                { id: D.NodeId { id: D.Id $ moduleNameToId (scope <> [ n ]) }
+                , attrs: [ D.label n, D.shape $ D.box_ ]
+                }
+        ]
+      else
+        []
+    , if t.subModules /= emptyModuleForest then
+        [ D.clusterSubGraph
+            $ D.ClusterSubGraph
+                { id: Just $ D.Id $ moduleNameToId (scope <> [ n ])
+                , stmts:
+                    join
+                      [ [ D.attrStmt $ D.cluster [ D.label n ] ]
+                      , getSubModules (scope <> [ n ]) t.subModules
+                      ]
+                }
+        ]
+      else
+        []
+    ]
+  where
+  moduleNameToId = S.joinWith "__"
 
 --------------------------------------------------------------------------------
 -- Util
@@ -245,12 +291,12 @@ logStr x = do
 
 main' :: forall r m. Monad m => Result r m Unit
 main' = do
-  modForest <-
+  pursDeps <-
     readFile
       >>= parseDeps
-      <#> (filterDeps >>> writeForest)
-  forestToDot modForest
-    # printDot
+      <#> filterDeps
+  toDot pursDeps
+    # D.printGraph
     # logStr
 
 --------------------------------------------------------------------------------

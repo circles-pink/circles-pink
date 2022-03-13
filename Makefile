@@ -57,7 +57,11 @@ patchTsTypes: yarn-install
 	patchTsTypes $(PWD)/$(PURS_OUTPUT)
 
 assets: generate
-	nix build .#assets -o ./pkgs/ts/assets/src
+	nix build .#assets -o result-assets
+	mkdir -p ./pkgs/ts/assets/src
+	rm -rf ./pkgs/ts/assets/src/*
+	cp -r result-assets/* -t ./pkgs/ts/assets/src
+	rm result-assets
 
 rw-result:
 	rm -rf rw-result
