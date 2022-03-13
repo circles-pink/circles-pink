@@ -13,7 +13,7 @@ import Control.Monad.Error.Class (try)
 import Control.Monad.Except (ExceptT(..), except, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Reader (ReaderT, asks, runReaderT)
-import Data.Argonaut (class DecodeJson, Json, JsonDecodeError(..), decodeJson, parseJson, printJsonDecodeError, (.:))
+import Data.Argonaut (Json, JsonDecodeError(..), parseJson, printJsonDecodeError)
 import Data.Argonaut as AG
 import Data.Array (filter, foldr)
 import Data.Array as A
@@ -25,73 +25,44 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.String (Pattern(..))
 import Data.String as S
+import Data.String.Regex (Regex)
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 import Data.Traversable (traverse)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, case_, inj, on)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error, log)
+import Effect.Class.Console (error)
+import Effect.Class.Console as C
 import Foreign.Object (toUnfoldable) as O
 import Foreign.Object as FO
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (readTextFile)
 import Node.Process (exit)
-import Options.Applicative (Parser, (<**>))
-import Options.Applicative (execParser, fullDesc, header, help, helper, info, long, progDesc, strOption) as O
+import Options.Applicative (Parser, ParserInfo, (<**>))
+import Options.Applicative (execParser, fullDesc, helper, info, long, strOption) as O
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- Opts
 --------------------------------------------------------------------------------
 type Opts
-  = { depsJsonPath :: String
-    }
+  = { depsJsonPath :: String }
 
 parseOpts :: Parser Opts
 parseOpts = ado
   depsJsonPath <-
     O.strOption
-      $ fold
-          [ O.long "depsJsonPath"
-          -- , O.metavar "DEPS_JSON_PATH"
-          , O.help "..."
-          ]
+      $ fold [ O.long "depsJsonPath" ]
   in { depsJsonPath }
 
-main :: Effect Unit
-main = do
-  opts <- O.execParser prog
-  r <- runResult { opts, cap } main'
-  case r of
-    Left e -> do
-      error $ printError e
-      exit 1
-    Right _ -> exit 0
-  where
-  cap :: Cap Effect
-  cap =
-    { readFile:
-        \p ->
-          readTextFile UTF8 p
-            # try
-            <#> lmap (const $ inj (Proxy :: _ "errReadFile") p)
-            # ExceptT
-    , log: \s -> liftEffect $ log s
-    }
-
-  prog =
-    O.info (parseOpts <**> O.helper)
-      $ fold
-          [ O.fullDesc
-          , O.progDesc "Print a greeting for TARGET"
-          , O.header "hello - a test for purescript-optparse"
-          ]
+prog :: ParserInfo Opts
+prog =
+  O.info (parseOpts <**> O.helper)
+    $ fold [ O.fullDesc ]
 
 --------------------------------------------------------------------------------
 -- Error
@@ -115,7 +86,7 @@ printError =
 -- Types
 --------------------------------------------------------------------------------
 type PursDeps
-  = Array (ModuleName /\ DepEntry)
+  = Map ModuleName DepEntry
 
 type DepEntry
   = { path :: String, depends :: Array ModuleName }
@@ -160,11 +131,17 @@ insert (mn /\ de) (ModuleForest mf) = case A.uncons mn of
 --------------------------------------------------------------------------------
 -- Result
 --------------------------------------------------------------------------------
-type Result r env m a
+type Result' r env m a
   = ReaderT env (ExceptV (Err + r) m) a
 
-runResult :: forall env m a. env -> Result () env m a -> m (Either (Variant (Err ())) a)
-runResult cap r = runExceptT $ runReaderT r cap
+type Env m
+  = { opts :: Opts, cap :: Cap m }
+
+type Result r m a
+  = Result' r (Env m) m a
+
+runResult :: forall env m a. env -> Result' () env m a -> m (Either (Variant (Err ())) a)
+runResult cap' r = runExceptT $ runReaderT r cap'
 
 --------------------------------------------------------------------------------
 -- Parse
@@ -176,7 +153,7 @@ decodePursDeps j = do
     xs :: Array (String /\ _)
     xs = O.toUnfoldable obj
   xs' <- traverse (decodeKV (decodeModuleName <<< AG.fromString) decodeDepEntry) xs
-  pure $ xs'
+  pure $ M.fromFoldable xs'
 
 decodeModuleName :: Json -> Either JsonDecodeError ModuleName
 decodeModuleName j = do
@@ -211,29 +188,96 @@ parse :: forall r. String -> Either (Variant (ErrParse + r)) PursDeps
 parse s = parseJson s >>= decodePursDeps # lmap (inj (Proxy :: _ "errParse"))
 
 --------------------------------------------------------------------------------
--- Main
+-- Dot
+--------------------------------------------------------------------------------
+data Dot
+  = Dot
+
+forestToDot :: ModuleForest -> Dot
+forestToDot _ = Dot
+
+printDot :: Dot -> String
+printDot _ = "digraph mygraph { a1 -> a2; a2 -> a3; }"
+
+--------------------------------------------------------------------------------
+-- Util
+--------------------------------------------------------------------------------
+filterPursDeps :: Regex -> Map ModuleName DepEntry -> Map ModuleName DepEntry
+filterPursDeps reg mp =
+  let
+    mp' = M.filter (\v -> not $ R.test reg v.path) mp
+  in
+    map (\x -> x { depends = filter (\y -> M.member y mp') x.depends }) mp'
+
+--------------------------------------------------------------------------------
+-- Main'
 --------------------------------------------------------------------------------
 type Cap m
-  = { readFile :: forall r. String -> ExceptV (ErrReadFile + r) m String
-    , log :: forall r. String -> ExceptV r m Unit
+  = { readFile :: CapReadFile m
+    , log :: CapLog m
     }
 
-main' :: forall r' m r. Monad m => Result r { opts :: Opts, cap :: Cap m } m Unit
-main' = do
-  cap :: Cap m <- asks _.cap
+type CapReadFile m
+  = forall r. String -> ExceptV (ErrReadFile + r) m String
+
+type CapLog m
+  = forall r. String -> ExceptV r m Unit
+
+readFile :: forall r m. Monad m => Result r m String
+readFile = do
+  cap' :: Cap m <- asks _.cap
   opts <- asks _.opts
-  r <- lift $ cap.readFile opts.depsJsonPath
-  res' <- lift $ except $ parse r
-  let
-    res'' =
-      filter
-        ( \(k /\ v) ->
-            not $ R.test (unsafeRegex "\\.spago" noFlags) v.path
-        )
-        res'
+  lift $ cap'.readFile opts.depsJsonPath
 
-    modForest = foldr insert emptyModuleForest res''
+parseDeps :: forall r m. Monad m => String -> Result r m PursDeps
+parseDeps = lift <<< except <<< parse
 
-    x = spy "modForest" modForest
-  lift $ cap.log "digraph mygraph { a1 -> a2; a2 -> a3; }"
-  pure unit
+filterDeps :: PursDeps -> PursDeps
+filterDeps = filterPursDeps (unsafeRegex "\\.spago" noFlags)
+
+writeForest :: PursDeps -> ModuleForest
+writeForest = foldr insert emptyModuleForest <<< M.toUnfoldable
+
+logStr :: forall r m. Monad m => String -> Result r m Unit
+logStr x = do
+  cap' :: Cap m <- asks _.cap
+  lift $ cap'.log x
+
+main' :: forall r m. Monad m => Result r m Unit
+main' = do
+  modForest <-
+    readFile
+      >>= parseDeps
+      <#> (filterDeps >>> writeForest)
+  forestToDot modForest
+    # printDot
+    # logStr
+
+--------------------------------------------------------------------------------
+-- Main
+--------------------------------------------------------------------------------
+main :: Effect Unit
+main = do
+  opts <- O.execParser prog
+  r <- runResult { opts, cap } main'
+  case r of
+    Left e -> do
+      error $ printError e
+      exit 1
+    Right _ -> exit 0
+
+cap :: Cap Effect
+cap =
+  { readFile: capReadFile
+  , log: capLog
+  }
+
+capReadFile :: CapReadFile Effect
+capReadFile p =
+  readTextFile UTF8 p
+    # try
+    <#> lmap (const $ inj (Proxy :: _ "errReadFile") p)
+    # ExceptT
+
+capLog :: CapLog Effect
+capLog s = liftEffect $ C.log s
