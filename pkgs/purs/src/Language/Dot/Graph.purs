@@ -1,5 +1,7 @@
 module Language.Dot.Graph
-  ( CompassPt
+  ( AttrStmt
+  , ClusterSubGraph(..)
+  , CompassPt
   , EdgeEnd
   , EdgeStmt(..)
   , Graph(..)
@@ -7,7 +9,9 @@ module Language.Dot.Graph
   , NodeStmt(..)
   , Port(..)
   , Stmt
-  , SubGraph(..)
+  , attrStmt
+  , cluster
+  , clusterSubGraph
   , directed_
   , nodeStmt
   , undirected_
@@ -16,7 +20,7 @@ module Language.Dot.Graph
 import Prelude
 import Data.Maybe (Maybe)
 import Data.Variant (Variant, inj)
-import Language.Dot.Attr (Attr, E, N)
+import Language.Dot.Attr (Attr, E, N, C)
 import Language.Dot.Id (Id(..))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
@@ -38,28 +42,41 @@ undirected_ = inj (Proxy :: _ "undirected") unit
 nodeStmt :: forall a v. a -> Variant ( nodeStmt :: a | v )
 nodeStmt = inj (Proxy :: _ "nodeStmt")
 
+attrStmt :: forall a v. a -> Variant ( attrStmt :: a | v )
+attrStmt = inj (Proxy :: _ "attrStmt")
+
+cluster :: forall a v. a -> Variant ( cluster :: a | v )
+cluster = inj (Proxy :: _ "cluster")
+
+clusterSubGraph :: forall a v. a -> Variant ( clusterSubGraph :: a | v )
+clusterSubGraph = inj (Proxy :: _ "clusterSubGraph")
+
 type Stmt
   = Variant
       ( nodeStmt :: NodeStmt
-      , edgeStmt :: EdgeStmt
-      --, attrStmt :: AttrStmt
-      , subGraph :: SubGraph
+      --, edgeStmt :: EdgeStmt
+      , attrStmt :: AttrStmt
+      , clusterSubGraph :: ClusterSubGraph
+      --, subGraph :: SubGraph
       )
 
-data SubGraph
-  = SubGraph { id :: Id, stmts :: Array Stmt }
+data ClusterSubGraph
+  = ClusterSubGraph { id :: Maybe Id, stmts :: Array Stmt }
 
--- data AttrStmt
---   = AttrStmt
---     ( Variant
---         ( graph :: Unit
---         , node :: Unit
---         , edge :: Unit
---         )
---     )
---     (Array (Attr a))
+type AttrStmt
+  = ( Variant
+        ( cluster :: Array (Attr C)
+        --  graph :: Array (Attr G)
+        --, node :: Unit
+        --, edge :: Unit
+        )
+    )
+
 newtype NodeId
-  = NodeId { id :: Id, port :: Maybe Port }
+  = NodeId
+  { id :: Id
+  --, port :: Maybe Port
+  }
 
 data Port
   = Port Id (Maybe CompassPt)
@@ -84,7 +101,7 @@ newtype NodeStmt
 type EdgeEnd
   = Variant
       ( nodeId :: NodeId
-      , subgraph :: SubGraph
+      -- , subgraph :: SubGraph
       )
 
 data EdgeStmt
