@@ -206,6 +206,9 @@ toDot pd =
         join
           [ addNodes $ writeForest pd
           , addEdges pd
+          , [ D.attrStmt $ D.graph [ D.unsafeAttr "rankdir" "LR" ]
+            , D.attrStmt $ D.edge [ D.unsafeAttr "arrowsize" "0.5" ]
+            ]
           ]
     }
 

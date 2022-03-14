@@ -14,7 +14,9 @@ module Language.Dot.Graph
   , cluster
   , clusterSubGraph
   , directed_
+  , edge
   , edgeStmt
+  , graph
   , nodeId
   , nodeStmt
   , undirected_
@@ -23,7 +25,7 @@ module Language.Dot.Graph
 import Prelude
 import Data.Maybe (Maybe)
 import Data.Variant (Variant, inj)
-import Language.Dot.Attr (Attr, E, N, C)
+import Language.Dot.Attr (Attr, C, E, G, N)
 import Language.Dot.Id (Id(..))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
@@ -57,6 +59,12 @@ attrStmt = inj (Proxy :: _ "attrStmt")
 cluster :: forall a v. a -> Variant ( cluster :: a | v )
 cluster = inj (Proxy :: _ "cluster")
 
+graph :: forall a v. a -> Variant ( graph :: a | v )
+graph = inj (Proxy :: _ "graph")
+
+edge :: forall a v. a -> Variant ( edge :: a | v )
+edge = inj (Proxy :: _ "edge")
+
 nodeId :: forall a v. a -> Variant ( nodeId :: a | v )
 nodeId = inj (Proxy :: _ "nodeId")
 
@@ -78,9 +86,9 @@ data ClusterSubGraph
 type AttrStmt
   = ( Variant
         ( cluster :: Array (Attr C)
-        --  graph :: Array (Attr G)
+        , graph :: Array (Attr G)
         --, node :: Unit
-        --, edge :: Unit
+        , edge :: Array (Attr E)
         )
     )
 

@@ -11,6 +11,7 @@ module Language.Dot.Attr
   , label
   , labelImpl
   , shape
+  , unsafeAttr
   ) where
 
 import Prelude
@@ -48,6 +49,9 @@ labelImpl value = Attr { key: Id "label", value: Id value }
 
 shape :: Shape -> Attr N
 shape s = Attr { key: Id "shape", value: Id $ shapeToString s }
+
+unsafeAttr :: forall a. String -> String -> Attr a
+unsafeAttr key value = Attr { key: Id key, value: Id value }
 
 --------------------------------------------------------------------------------
 -- AttrTypes

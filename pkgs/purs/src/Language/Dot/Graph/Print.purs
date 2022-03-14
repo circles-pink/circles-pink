@@ -106,6 +106,20 @@ printAttrStmt =
                 , join $ map (\x -> printAttrb x # indentMatrix) attrs
                 , [ [ "]" ] ]
                 ]
+        , "graph":
+            \attrs ->
+              join
+                [ [ [ "graph", "[" ] ]
+                , join $ map (\x -> printAttrb x # indentMatrix) attrs
+                , [ [ "]" ] ]
+                ]
+        , "edge":
+            \attrs ->
+              join
+                [ [ [ "edge", "[" ] ]
+                , join $ map (\x -> printAttrb x # indentMatrix) attrs
+                , [ [ "]" ] ]
+                ]
         }
 
 printAttrb :: forall a. Attr a -> Matrix
