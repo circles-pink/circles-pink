@@ -17,7 +17,11 @@ import {
 
 // Style
 import '../styles/global.css';
-import { ThemeProvider, ThemeContext } from '../context/theme';
+import {
+  ThemeProvider,
+  ThemeContext,
+  ThemeContextType,
+} from '../context/theme';
 import chroma from 'chroma-js';
 
 type Language = 'en' | 'de';
@@ -28,32 +32,38 @@ type OnboardingProps = {
   baseColor?: string;
 };
 
-export const Onboarding = ({
+export const Onboarding = (props: OnboardingProps) => {
+  return (
+    <ThemeProvider>
+      <OnboardingContent {...props} />
+    </ThemeProvider>
+  );
+};
+
+const OnboardingContent = ({
   initState,
   lang = 'en',
   baseColor,
 }: OnboardingProps): ReactElement => {
-  const { theme, setTheme } = useContext(ThemeContext);
+  const [theme, setColor] = useContext(ThemeContext);
   const [state, act] = useStateMachine(initState || init, control);
   i18n.changeLanguage(lang);
 
   useEffect(() => {
-    if (baseColor) setTheme({ baseColor: chroma(baseColor).hex() });
+    if (baseColor) setColor(baseColor);
   }, [baseColor]);
 
   return (
-    <ThemeProvider>
-      <I18nextProvider i18n={i18n}>
-        {{
-          infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
-          askUsername: () => <AskUsername state={state.value} act={act} />,
-          askEmail: () => <AskEmail state={state.value} act={act} />,
-          infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
-          magicWords: () => <MagicWords state={state.value} act={act} />,
-          dashboard: () => null,
-          submit: () => null,
-        }[state.type]()}
-      </I18nextProvider>
-    </ThemeProvider>
+    <I18nextProvider i18n={i18n}>
+      {{
+        infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
+        askUsername: () => <AskUsername state={state.value} act={act} />,
+        askEmail: () => <AskEmail state={state.value} act={act} />,
+        infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
+        magicWords: () => <MagicWords state={state.value} act={act} />,
+        dashboard: () => null,
+        submit: () => null,
+      }[state.type]()}
+    </I18nextProvider>
   );
 };

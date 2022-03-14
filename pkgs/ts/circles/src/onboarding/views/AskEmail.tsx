@@ -4,15 +4,15 @@ import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
-import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
-import { LabeledCheckbox } from '../../components/Checkbox';
+import { Button, Input, Checkbox } from '../../components/forms';
 import { mapIndicatorColors } from '../utils/mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
-import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import { FadeIn } from 'anima-react';
+import { Orientation } from 'anima-react/dist/components/FadeIn';
 
 type AskEmailProps = {
   state: UserData;
@@ -22,14 +22,14 @@ type AskEmailProps = {
 export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
-  const { theme } = useContext(ThemeContext);
+  const [theme] = useContext(ThemeContext);
 
   return (
     <DialogCard
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>{t('askEmail.claim')}</Claim>
+            <Claim color={theme.baseColor}>{t('askEmail.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -40,7 +40,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       interaction={
         <>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <InputWithProps
+            <Input
               autoFocus
               indicatorColor={mapIndicatorColors(state.emailApiResult)}
               type="text"
@@ -55,10 +55,10 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
 
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
-              <LabeledCheckbox
+              <Checkbox
                 background={theme.baseColor}
                 borderColor={theme.baseColor}
-                label={t('askEmail.termsLabel') + theme.baseColor}
+                label={t('askEmail.termsLabel')}
                 checked={state.terms}
                 setChecked={() => act(A._askEmail(A._setTerms(unit)))}
               />
@@ -67,7 +67,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
 
           <FadeIn orientation={orientation} delay={getDelay()}>
             <div>
-              <LabeledCheckbox
+              <Checkbox
                 background={theme.baseColor}
                 borderColor={theme.baseColor}
                 label={t('askEmail.privacyLabel')}
@@ -82,13 +82,16 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <ButtonGray onClick={() => act(A._askEmail(A._prev(unit)))}>
+            <Button onClick={() => act(A._askEmail(A._prev(unit)))}>
               {t('prevButton')}
-            </ButtonGray>
+            </Button>
 
-            <ButtonPink onClick={() => act(A._askEmail(A._next(unit)))}>
+            <Button
+              color={theme.baseColor}
+              onClick={() => act(A._askEmail(A._next(unit)))}
+            >
               {t('nextButton')}
-            </ButtonPink>
+            </Button>
           </>
         </FadeIn>
       }

@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext } from 'react';
-import tw, { styled, theme } from 'twin.macro';
+import tw, { css, styled } from 'twin.macro';
 import { ThemeContext } from '../context/theme';
 
 type FrameProps = {
@@ -7,8 +7,10 @@ type FrameProps = {
 };
 
 const Frame = styled.div((props: FrameProps) => [
-  `bg-gray-50 border border-dotted`,
-  `border-color: ${props.borderColor}`,
+  tw`bg-gray-50 border border-dotted`,
+  css`
+    border-color: ${props.borderColor};
+  `,
 ]);
 
 const CardHead = tw.div`max-w-7xl mx-auto pt-12 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-4 lg:px-8 lg:flex lg:justify-between`;
@@ -33,7 +35,7 @@ export const DialogCard = ({
   mainContent,
   debug,
 }: DemoCardProps): ReactElement => {
-  const { theme } = useContext(ThemeContext);
+  const [theme] = useContext(ThemeContext);
 
   return (
     <>

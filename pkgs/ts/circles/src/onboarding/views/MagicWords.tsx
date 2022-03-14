@@ -2,32 +2,26 @@ import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import { unit } from 'generated/output/Data.Unit';
 import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
-import React, { ReactElement, useState } from 'react';
-import tw from 'twin.macro';
-import { Orientation, FadeIn } from '../../components/animation/FadeIn';
-import {
-  ButtonGray,
-  ButtonPinkFullWidth,
-  // ButtonPink
-} from '../../components/forms';
+import React, { ReactElement, useContext, useState } from 'react';
+import tw, { css, styled } from 'twin.macro';
+import { FadeIn, ZoomIn } from 'anima-react';
+import { Orientation } from 'anima-react/dist/components/FadeIn';
+import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
+import { ThemeContext } from '../../context/theme';
+import { lighten } from '../utils/colorUtils';
 
 type MagicWordsProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
 };
 
-const WordGrid = tw.div`grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 bg-green-100 py-2 pl-2 rounded-lg mb-4`;
-const WordContainer = tw.div`py-1 mr-2`;
-const Word = tw.div`p-2 bg-white w-full text-center rounded-full relative`;
-const WordNumber = tw.span`select-none text-sm absolute left-2 text-gray-400`;
-const ButtonRow = tw.div`flex`;
-
 export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
+  const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
   const getWordDelay = getIncrementor(0, 0.02);
@@ -49,7 +43,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>{t('magicWords.claim')}</Claim>
+            <Claim color={theme.baseColor}>{t('magicWords.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -64,42 +58,59 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <ButtonGray onClick={() => act(A._infoSecurity(A._prev(unit)))}>
+            <Button onClick={() => act(A._infoSecurity(A._prev(unit)))}>
               {t('prevButton')}
-            </ButtonGray>
+            </Button>
 
-            {/* <ButtonPink onClick={() => act(A._infoSecurity(A._next(unit)))}>
+            {/* <Button
+              color={theme.baseColor}
+              onClick={() => act(A._infoSecurity(A._next(unit)))}
+            >
               {t('nextButton')}
-            </ButtonPink> */}
+            </Button> */}
           </>
         </FadeIn>
       }
       mainContent={
         <>
-          <WordGrid>
+          <WordGrid theme={theme.baseColor}>
             {words.map((word, index) => {
               return (
                 <WordContainer key={`${word}-${index}`}>
-                  <FadeIn orientation={'up'} delay={getWordDelay()}>
+                  <ZoomIn orientation={'down'} delay={getWordDelay()}>
                     <Word>
                       <WordNumber>{index + 1}</WordNumber>
                       <span>{word}</span>
                     </Word>
-                  </FadeIn>
+                  </ZoomIn>
                 </WordContainer>
               );
             })}
           </WordGrid>
           <FadeIn orientation={'down'} delay={getWordDelay()}>
             <ButtonRow>
-              <ButtonPinkFullWidth onClick={() => copyToClipboard()}>
-                {copyNotify ? copyNotify : t('magicWords.copyBtn')}
-              </ButtonPinkFullWidth>
-              <ButtonPinkFullWidth
+              <Button
+                light={true}
+                fullWidth={true}
+                color={theme.baseColor}
+                onClick={() => copyToClipboard()}
+              >
+                {copyNotify ? (
+                  <ZoomIn>
+                    <span>{copyNotify}</span>
+                  </ZoomIn>
+                ) : (
+                  t('magicWords.copyBtn')
+                )}
+              </Button>
+              <Button
+                light={true}
+                fullWidth={true}
+                color={theme.baseColor}
                 onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
               >
                 {t('magicWords.newPhraseBtn')}
-              </ButtonPinkFullWidth>
+              </Button>
             </ButtonRow>
           </FadeIn>
         </>
@@ -107,3 +118,20 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
     />
   );
 };
+
+type WordGridProps = {
+  theme: string;
+};
+
+const WordGrid = styled.div((props: WordGridProps) => {
+  return [
+    css`
+      background: ${lighten(props.theme)};
+    `,
+    tw`grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 py-2 pl-2 rounded-lg mb-4`,
+  ];
+});
+const WordContainer = tw.div`py-1 mr-2`;
+const Word = tw.div`p-2 bg-white w-full text-center rounded-full relative`;
+const WordNumber = tw.span`select-none text-sm absolute left-2 text-gray-400`;
+const ButtonRow = tw.div`flex`;
