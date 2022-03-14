@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import chroma from 'chroma-js';
 
-type Theme = {
+export type Theme = {
   baseColor: string;
 };
 
@@ -9,24 +9,36 @@ const defaultTheme: Theme = {
   baseColor: chroma('hotpink').hex(),
 };
 
-type UpdateType = React.Dispatch<React.SetStateAction<typeof defaultTheme>>;
+export type ThemeContextType = {
+  baseColor: string;
+  setTheme: (theme: Theme) => void;
+};
 
-const setTheme: UpdateType = () => defaultTheme;
+type SetColor = (color: string) => void;
 
-export const ThemeContext = React.createContext({
-  theme: defaultTheme,
-  setTheme,
-});
+export const ThemeContext: React.Context<[Theme, SetColor]> =
+  React.createContext(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    [defaultTheme, _ => {}]
+  );
 
 type ThemeProviderProps = {
   children: ReactElement;
 };
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [theme, setTheme] = useState(defaultTheme);
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+
+  const setColor = (color: string) => {
+    console.log(color);
+    setThemeState({
+      baseColor: chroma(color).hex(),
+    });
+    console.log(theme);
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={[theme, setColor]}>
       {children}
     </ThemeContext.Provider>
   );

@@ -1,16 +1,18 @@
 import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
-import { ButtonGray, ButtonPink, InputWithProps } from '../../components/forms';
+import { Button, Input } from '../../components/forms';
 import { mapIndicatorColors } from '../utils/mapIndicatorColors';
 import { unit } from 'generated/output/Data.Unit';
-import { Orientation, FadeIn } from '../../components/animation/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
+import { FadeIn } from 'anima-react';
+import { Orientation } from 'anima-react/dist/components/FadeIn';
+import { ThemeContext } from '../../context/theme';
 
 type AskUsernameProps = {
   state: UserData;
@@ -18,6 +20,7 @@ type AskUsernameProps = {
 };
 
 export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
+  const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
 
@@ -26,7 +29,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim>{t('askUsername.claim')}</Claim>
+            <Claim color={theme.baseColor}>{t('askUsername.claim')}</Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -36,7 +39,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       }
       interaction={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <InputWithProps
+          <Input
             autoFocus
             indicatorColor={mapIndicatorColors(state.usernameApiResult)}
             type="text"
@@ -53,13 +56,16 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <ButtonGray onClick={() => act(A._askUsername(A._prev(unit)))}>
+            <Button onClick={() => act(A._askUsername(A._prev(unit)))}>
               {t('prevButton')}
-            </ButtonGray>
+            </Button>
 
-            <ButtonPink onClick={() => act(A._askUsername(A._next(unit)))}>
+            <Button
+              color={theme.baseColor}
+              onClick={() => act(A._askUsername(A._next(unit)))}
+            >
               {t('nextButton')}
-            </ButtonPink>
+            </Button>
           </>
         </FadeIn>
       }

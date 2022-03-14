@@ -1,9 +1,9 @@
 // Inspired by: https://medium.com/@colebemis/building-a-checkbox-component-with-react-and-styled-components-8d3aa1d826dd
 
 import React, { ReactElement } from 'react';
-import tw, { styled } from 'twin.macro';
+import { styled } from 'twin.macro';
 
-type LabeledCheckboxProps = {
+type CheckboxProps = {
   checked: boolean;
   setChecked: () => void;
   label?: string;
@@ -11,16 +11,16 @@ type LabeledCheckboxProps = {
   borderColor: string;
 };
 
-export const LabeledCheckbox = ({
+export const Checkbox = ({
   checked = false,
   setChecked,
   label,
   background,
   borderColor,
-}: LabeledCheckboxProps): ReactElement => {
+}: CheckboxProps): ReactElement => {
   return (
     <Label>
-      <Checkbox
+      <CheckboxInternal
         checked={checked}
         background={background}
         borderColor={borderColor}
@@ -31,34 +31,36 @@ export const LabeledCheckbox = ({
   );
 };
 
-type CheckboxProps = {
+type CheckboxInternalProps = {
   checked: boolean;
   background: string;
   borderColor: string;
   onChange: () => void;
 };
 
-const Checkbox = ({
+const CheckboxInternal = ({
   checked,
   background,
   borderColor,
   ...props
-}: CheckboxProps) => (
-  <CheckboxContainer>
-    <HiddenCheckbox checked={checked} {...props} />
-    <StyledCheckbox
-      checked={checked}
-      background={background}
-      borderColor={borderColor}
-    >
-      {checked && (
-        <Icon viewBox="0 0 24 24">
-          <polyline points="20 6 9 17 4 12" />
-        </Icon>
-      )}
-    </StyledCheckbox>
-  </CheckboxContainer>
-);
+}: CheckboxInternalProps) => {
+  return (
+    <CheckboxContainer>
+      <HiddenCheckbox checked={checked} {...props} />
+      <StyledCheckbox
+        checked={checked}
+        background={background}
+        borderColor={borderColor}
+      >
+        {checked && (
+          <Icon viewBox="0 0 24 24">
+            <polyline points="20 6 9 17 4 12" />
+          </Icon>
+        )}
+      </StyledCheckbox>
+    </CheckboxContainer>
+  );
+};
 
 const Label = styled.label`
   cursor: pointer;

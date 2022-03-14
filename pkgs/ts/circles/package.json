@@ -9,6 +9,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@types/chroma-js": "^2.1.3",
+    "anima-react": "^0.0.6",
     "chroma-js": "^2.4.2",
     "generated": "*",
     "i18next": "^21.6.13",
