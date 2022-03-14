@@ -5,6 +5,7 @@ module Language.Dot.Graph
   , EdgeEnd
   , EdgeStmt(..)
   , Graph(..)
+  , GraphType
   , NodeId(..)
   , NodeStmt(..)
   , Port(..)
@@ -13,6 +14,8 @@ module Language.Dot.Graph
   , cluster
   , clusterSubGraph
   , directed_
+  , edgeStmt
+  , nodeId
   , nodeStmt
   , undirected_
   ) where
@@ -28,10 +31,13 @@ import Unsafe.Coerce (unsafeCoerce)
 newtype Graph
   = Graph
   { strict :: Boolean
-  , type :: Variant ( directed :: Unit, undirected :: Unit )
+  , type :: GraphType
   , id :: Maybe Id
   , stmts :: Array Stmt
   }
+
+type GraphType
+  = Variant ( directed :: Unit, undirected :: Unit )
 
 directed_ :: forall v. Variant ( directed :: Unit | v )
 directed_ = inj (Proxy :: _ "directed") unit
@@ -42,11 +48,17 @@ undirected_ = inj (Proxy :: _ "undirected") unit
 nodeStmt :: forall a v. a -> Variant ( nodeStmt :: a | v )
 nodeStmt = inj (Proxy :: _ "nodeStmt")
 
+edgeStmt :: forall a v. a -> Variant ( edgeStmt :: a | v )
+edgeStmt = inj (Proxy :: _ "edgeStmt")
+
 attrStmt :: forall a v. a -> Variant ( attrStmt :: a | v )
 attrStmt = inj (Proxy :: _ "attrStmt")
 
 cluster :: forall a v. a -> Variant ( cluster :: a | v )
 cluster = inj (Proxy :: _ "cluster")
+
+nodeId :: forall a v. a -> Variant ( nodeId :: a | v )
+nodeId = inj (Proxy :: _ "nodeId")
 
 clusterSubGraph :: forall a v. a -> Variant ( clusterSubGraph :: a | v )
 clusterSubGraph = inj (Proxy :: _ "clusterSubGraph")
@@ -54,7 +66,7 @@ clusterSubGraph = inj (Proxy :: _ "clusterSubGraph")
 type Stmt
   = Variant
       ( nodeStmt :: NodeStmt
-      --, edgeStmt :: EdgeStmt
+      , edgeStmt :: EdgeStmt
       , attrStmt :: AttrStmt
       , clusterSubGraph :: ClusterSubGraph
       --, subGraph :: SubGraph
