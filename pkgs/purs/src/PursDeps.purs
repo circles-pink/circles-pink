@@ -202,14 +202,29 @@ toDot pd =
     { strict: true
     , type: D.directed_
     , id: Nothing
-    , stmts: join [ addNodes $ writeForest pd, addEdges pd ]
+    , stmts:
+        join
+          [ addNodes $ writeForest pd
+          , addEdges pd
+          ]
     }
 
 addNodes :: ModuleForest -> Array D.Stmt
 addNodes (ModuleForest mf) = M.toUnfoldable mf >>= treeToDot []
 
 addEdges :: PursDeps -> Array D.Stmt
-addEdges _ = []
+addEdges pd = M.toUnfoldable pd >>= addEdgesPerModule
+
+addEdgesPerModule :: ModuleName /\ DepEntry -> Array D.Stmt
+addEdgesPerModule (source /\ de) = de.depends <#> \target -> D.edgeStmt $ addEdge source target
+
+addEdge :: ModuleName -> ModuleName -> D.EdgeStmt
+addEdge source target =
+  D.EdgeStmt
+    (D.nodeId $ D.NodeId { id: D.Id $ moduleNameToId source })
+    (D.nodeId $ D.NodeId { id: D.Id $ moduleNameToId target })
+    []
+    []
 
 getSubModules :: Array String -> ModuleForest -> Array D.Stmt
 getSubModules scope (ModuleForest mp) =
@@ -242,8 +257,6 @@ treeToDot scope (n /\ t) =
       else
         []
     ]
-  where
-  moduleNameToId = S.joinWith "__"
 
 --------------------------------------------------------------------------------
 -- Util
@@ -254,6 +267,9 @@ filterPursDeps reg mp =
     mp' = M.filter (\v -> not $ R.test reg v.path) mp
   in
     map (\x -> x { depends = filter (\y -> M.member y mp') x.depends }) mp'
+
+moduleNameToId :: ModuleName -> String
+moduleNameToId = S.joinWith "__"
 
 --------------------------------------------------------------------------------
 -- Main'

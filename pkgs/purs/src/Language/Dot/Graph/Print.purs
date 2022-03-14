@@ -1,12 +1,15 @@
 module Language.Dot.Graph.Print where
 
 import Prelude
+import Data.Array (intercalate)
+import Data.Array as A
+import Data.Function (on)
 import Data.Maybe (Maybe(..))
 import Data.String (joinWith)
 import Data.String as S
 import Data.Variant (case_, onMatch)
 import Language.Dot.Attr (Attr(..))
-import Language.Dot.Graph (ClusterSubGraph(..), Graph(..), NodeId(..), NodeStmt(..), Stmt, AttrStmt, clusterSubGraph)
+import Language.Dot.Graph (AttrStmt, ClusterSubGraph(..), EdgeEnd, EdgeStmt(..), Graph(..), NodeId(..), NodeStmt(..), Stmt, GraphType, clusterSubGraph)
 import Language.Dot.Id (Id(..))
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
@@ -22,7 +25,7 @@ printGraph' (Graph g) =
   join
     [ [ join [ strict g.strict, [ graphType g.type ], getId g.id, [ "{" ] ]
       ]
-    , join (map (printStmt >>> indentMatrix) g.stmts)
+    , join (map (printStmt g.type >>> indentMatrix) g.stmts)
     , [ [ "}" ]
       ]
     ]
@@ -40,20 +43,21 @@ printGraph' (Graph g) =
 
   getId (Just id) = [ printId id ]
 
-printStmt :: Stmt -> Matrix
-printStmt =
+printStmt :: GraphType -> Stmt -> Matrix
+printStmt gt =
   case_
     # onMatch
-        { "clusterSubGraph": \x -> printClusterSubGraph x
+        { "clusterSubGraph": \x -> printClusterSubGraph gt x
         , "nodeStmt": \x -> printNodeStmt x
+        , "edgeStmt": \x -> printEdgeStmt gt x
         , "attrStmt": \x -> printAttrStmt x
         }
 
-printClusterSubGraph :: ClusterSubGraph -> Matrix
-printClusterSubGraph (ClusterSubGraph { id, stmts }) =
+printClusterSubGraph :: GraphType -> ClusterSubGraph -> Matrix
+printClusterSubGraph gt (ClusterSubGraph { id, stmts }) =
   join
     [ [ join [ [ "subgraph" ], getId id, [ "{" ] ] ]
-    , join (map (\x -> printStmt x # indentMatrix) stmts)
+    , join (map (\x -> printStmt gt x # indentMatrix) stmts)
     , [ [ "}" ] ]
     ]
   where
@@ -68,6 +72,28 @@ printNodeStmt (NodeStmt { id, attrs }) =
     , join (map (\x -> printAttrb x # indentMatrix) attrs)
     , [ [ "]" ] ]
     ]
+
+printEdgeStmt :: GraphType -> EdgeStmt -> Matrix
+printEdgeStmt gt (EdgeStmt source target targets attrs) =
+  join
+    [ [ printEdgeEnds gt ([ source, target ] <> targets) <> [ "[" ] ]
+    , join (map (\x -> printAttrb x # indentMatrix) attrs)
+    , [ [ "]" ] ]
+    ]
+
+printEdgeEnds :: GraphType -> Array EdgeEnd -> Array String
+printEdgeEnds gt edgeEnds = edgeEnds <#> printEdgeEnd # A.intersperse (printConnec gt)
+
+printConnec :: GraphType -> String
+printConnec =
+  case_
+    # onMatch
+        { "directed": \_ -> "->"
+        , "undirected": \_ -> "--"
+        }
+
+printEdgeEnd :: EdgeEnd -> String
+printEdgeEnd = case_ # onMatch { "nodeId": printNodeId }
 
 printAttrStmt :: AttrStmt -> Matrix
 printAttrStmt =
