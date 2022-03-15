@@ -109,12 +109,6 @@ const clamp =
   (n: number): number =>
     n < l ? l : n > h ? h : n;
 
-const reMap =
-  (sl: number, sh: number) =>
-  (tl: number, th: number) =>
-  (n: number): number =>
-    1;
-
 const norm = (n: number): number => (n + 1) / 2;
 
 // -----------------------------------------------------------------------------
@@ -127,6 +121,7 @@ export type StepIndicatorProps = {
   height?: number;
   debug?: boolean;
   circleRadius?: number;
+  speed: number;
 };
 
 export const StepIndicator = ({
@@ -135,6 +130,7 @@ export const StepIndicator = ({
   height = 80,
   debug = false,
   circleRadius = 10,
+  speed = 0.001,
 }: StepIndicatorProps): ReactElement => {
   // Hooks
   const countDots = steps.length;
@@ -156,6 +152,7 @@ export const StepIndicator = ({
     time,
     debug,
     circleRadius,
+    speed: speed,
   };
 
   return (
@@ -181,7 +178,7 @@ export const StepIndicator = ({
 interface StepIndicator_Props
   extends ExtraData,
     PrevSelected,
-    Required<Pick<StepIndicatorProps, 'debug' | 'circleRadius'>> {
+    Required<Pick<StepIndicatorProps, 'debug' | 'circleRadius' | 'speed'>> {
   width: number;
   height: number;
   time: number;
@@ -228,8 +225,8 @@ interface StepProps extends StepIndicator_Props {
   relTime: number;
 }
 
-const getPos = (pos: number, time: number, height: number) =>
-  norm(Math.sin(pos * Math.PI + time * 0.001)) * height;
+const getPos = (pos: number, time: number, height: number, speed: number) =>
+  norm(Math.sin(pos * Math.PI + time * speed)) * height;
 
 export const Step = (props: StepProps): ReactElement => {
   const {
@@ -242,9 +239,10 @@ export const Step = (props: StepProps): ReactElement => {
     time,
     relTime,
     prevSelected,
+    speed,
   } = props;
 
-  const y = getPos(step.position, time, height);
+  const y = getPos(step.position, time, height, speed);
 
   const dir = prevSelected < selected ? 0 : -1;
   const color =
@@ -284,6 +282,7 @@ const Panel = (props: PanelProps) => {
     prevSelected,
     relTime,
     time,
+    speed,
   } = props;
   const dir = prevSelected < selected ? 0 : -1;
   const animFwd = index == prevSelected && index + 1 == selected;
@@ -301,9 +300,9 @@ const Panel = (props: PanelProps) => {
       <Line
         {...props}
         x1={0}
-        y1={getPos(steps[index].position, time, height)}
+        y1={getPos(steps[index].position, time, height, speed)}
         x2={stepWidth}
-        y2={getPos(steps[index + 1].position, time, height)}
+        y2={getPos(steps[index + 1].position, time, height, speed)}
         m={m}
       />
       {debug ? (
