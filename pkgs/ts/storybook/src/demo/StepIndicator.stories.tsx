@@ -6,12 +6,9 @@ export default {
   title: "Components/StepIndicator",
   component: StepIndicator,
   argTypes: {
-    // lang: {
-    //   defaultValue: "en",
-    //   options: ["en", "de"],
-    //   control: { type: "inline-radio" },
-    // },
-    // initState: { control: { disable: true }, table: { disable: true } },
+    selected: {
+      defaultValue: 2,
+    },
     steps: {
       defaultValue: [
         { label: "1" },
@@ -22,6 +19,9 @@ export default {
         { label: "6" },
       ],
       control: { disable: true },
+    },
+    speed: {
+      control: { type: "range", min: 0, max: 0.01, step: 0.0001 },
     },
   },
   parameters: {
