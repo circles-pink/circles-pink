@@ -52,6 +52,13 @@ let
       sha256 = "sha256-cJ1/jfCU+Agiyi1Qdd0AfyOTzwxOEfox4vLSJ0/UKNc=";
     }
 
+    {
+      name = "glassit";
+      publisher = "s-nlf-fh";
+      version = "0.2.4";
+      sha256 = "sha256-YmohKiypAl9sbnmg3JKtvcGnyNnmHvLKK1ifl4SmyQY=";
+    }
+
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {

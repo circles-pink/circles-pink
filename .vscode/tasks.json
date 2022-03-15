@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev-storybook",
+      "runOptions": { "runOn": "default" },
+      "type": "shell",
+      "command": "nix",
+      "isBackground": true,
+      "args": ["develop", "-c", "make", "dev-storybook"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": false,
+        "panel": "dedicated"
+      }
+    }
+  ]
+}
