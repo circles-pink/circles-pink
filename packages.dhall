@@ -125,7 +125,7 @@ in  upstream
       , "dot-language"
       ]
     , repo = "https://github.com/circles-pink/purescript-stadium.git"
-    , version = "0a56e8c69d3a570f321429a0367ecee85d4fda3d"
+    , version = "f42d841ad086a6e7f8eaac1b18032aa1d5f6ada3"
     }
   with dot-language =
     { dependencies =
@@ -148,5 +148,5 @@ in  upstream
       , "variant"
       ]
     , repo = "https://github.com/thought2/purescript-dot-language.git"
-    , version = "76abe9daa5370214f2733f45bd277d59a98e890c"
+    , version = "c3a6a831349b4ff2acb5a789557cefd7ca5d1ecd"
     }

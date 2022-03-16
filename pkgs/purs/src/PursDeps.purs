@@ -193,9 +193,6 @@ parse s = parseJson s >>= decodePursDeps # lmap (inj (Proxy :: _ "errParse"))
 --------------------------------------------------------------------------------
 -- Dot
 --------------------------------------------------------------------------------
-data Dot
-  = Dot
-
 toDot :: PursDeps -> D.Graph
 toDot pd =
   D.Graph
