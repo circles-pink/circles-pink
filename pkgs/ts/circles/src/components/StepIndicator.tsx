@@ -21,8 +21,8 @@ type Step = { label: string };
 // -----------------------------------------------------------------------------
 
 const colors = {
-  green: '#80ffbf',
-  grey: '#cccccc',
+  green: 'hotpink',
+  grey: '#ebebeb',
 };
 
 // -----------------------------------------------------------------------------
@@ -121,7 +121,7 @@ export type StepIndicatorProps = {
   height?: number;
   debug?: boolean;
   circleRadius?: number;
-  speed: number;
+  speed?: number;
 };
 
 export const StepIndicator = ({
@@ -345,7 +345,7 @@ const Line = ({ x1, y1, x2, y2, m, circleRadius }: LineProps) => {
         x2={xm}
         y2={ym}
         stroke={colors.green}
-        style={{ strokeWidth: circleRadius / 2 }}
+        style={{ strokeWidth: circleRadius / 2.5 }}
       />
       <line
         x1={xm}
@@ -353,7 +353,7 @@ const Line = ({ x1, y1, x2, y2, m, circleRadius }: LineProps) => {
         x2={x2}
         y2={y2}
         stroke={colors.grey}
-        style={{ strokeWidth: circleRadius / 2 }}
+        style={{ strokeWidth: circleRadius / 2.5 }}
       />
     </>
   );
