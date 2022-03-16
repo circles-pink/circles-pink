@@ -4,11 +4,10 @@ module CirclesPink.Garden.StateMachine.Steps
   , infoGeneral
   , infoSecurity
   , magicWords
-  )
-  where
+  , submit
+  ) where
 
 import Prelude
-
 import CirclesPink.Garden.Env (testEnv)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
@@ -51,8 +50,12 @@ infoSecurity =
   execFrom askEmail do
     act $ A._askEmail $ A._next unit
 
-
 magicWords :: CirclesState
 magicWords =
   execFrom infoSecurity do
     act $ A._infoSecurity $ A._next unit
+
+submit :: CirclesState
+submit =
+  execFrom magicWords do
+    act $ A._magicWords $ A._next unit

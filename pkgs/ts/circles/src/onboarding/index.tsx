@@ -13,6 +13,7 @@ import {
   AskEmail,
   InfoSecurity,
   MagicWords,
+  Submit,
 } from './views';
 
 // Style
@@ -89,8 +90,8 @@ const OnboardingContent = ({
           askEmail: () => <AskEmail state={state.value} act={act} />,
           infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
           magicWords: () => <MagicWords state={state.value} act={act} />,
+          submit: () => <Submit state={state.value} act={act} />,
           dashboard: () => null,
-          submit: () => null,
         }[state.type]()}
       </I18nextProvider>
     </AnimProvider>

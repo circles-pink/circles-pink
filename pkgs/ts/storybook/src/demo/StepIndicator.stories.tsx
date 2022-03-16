@@ -17,6 +17,7 @@ export default {
         { label: "4" },
         { label: "5" },
         { label: "6" },
+        { label: "7" },
       ],
       control: { disable: true },
     },

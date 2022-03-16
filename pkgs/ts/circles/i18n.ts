@@ -7,6 +7,7 @@ export const resources = {
     translations: {
       nextButton: 'Next',
       prevButton: 'Back',
+      submitButton: 'Submit',
       infoGeneral: {
         claim: 'Welcome to Circles',
         subClaim: "Let's get you a circles Wallet!",
@@ -37,12 +38,17 @@ export const resources = {
         copiedInfo: 'Copied!',
         newPhraseBtn: 'Generate new Phrase',
       },
+      submit: {
+        claim: 'This is your data',
+        subClaim: 'If everything is correct you can submit them',
+      },
     },
   },
   de: {
     translations: {
       nextButton: 'Weiter',
       prevButton: 'Zurück',
+      submitButton: 'Abschicken',
       infoGeneral: {
         claim: 'Willkommen bei Circles',
         subClaim: 'Lege eine Wallet an und werde Teil des Vertrauensnetzwerks!',
@@ -72,6 +78,10 @@ export const resources = {
         copyBtn: 'In die Zwischenablage kopieren',
         copiedInfo: 'Kopiert!',
         newPhraseBtn: 'Neuen Schlüssel generieren',
+      },
+      submit: {
+        claim: 'Diese Daten hast du angegeben',
+        subClaim: 'Wenn alles stimmt kannst du sie abschicken.',
       },
     },
   },
