@@ -247,11 +247,11 @@ let
 
     "dot-language" = pkgs.stdenv.mkDerivation {
         name = "dot-language";
-        version = "76abe9daa5370214f2733f45bd277d59a98e890c";
+        version = "c3a6a831349b4ff2acb5a789557cefd7ca5d1ecd";
         src = pkgs.fetchgit {
           url = "https://github.com/thought2/purescript-dot-language.git";
-          rev = "76abe9daa5370214f2733f45bd277d59a98e890c";
-          sha256 = "1wfwcaz1cw9k2sqdrnq0ri5yy4h7lrn4pyf0ncd8c48sxdhna67k";
+          rev = "c3a6a831349b4ff2acb5a789557cefd7ca5d1ecd";
+          sha256 = "1q92mh17q8n079c58jv6r3d07pkjm72ngy7l3nrbzfxklv7ppxfl";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
@@ -943,11 +943,11 @@ let
 
     "stadium" = pkgs.stdenv.mkDerivation {
         name = "stadium";
-        version = "0a56e8c69d3a570f321429a0367ecee85d4fda3d";
+        version = "f42d841ad086a6e7f8eaac1b18032aa1d5f6ada3";
         src = pkgs.fetchgit {
           url = "https://github.com/circles-pink/purescript-stadium.git";
-          rev = "0a56e8c69d3a570f321429a0367ecee85d4fda3d";
-          sha256 = "1dwcwvgd6v0d7qn2m6srpvf23wqjrf7lwpgmvsykyabmpv8x8vr2";
+          rev = "f42d841ad086a6e7f8eaac1b18032aa1d5f6ada3";
+          sha256 = "1m41figdl1lb60lq347n3wcp9z0f4vr8vp9xni33b029h422nhkv";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
