@@ -124,5 +124,28 @@ in  upstream
       , "variant"
       ]
     , repo = "https://github.com/circles-pink/purescript-stadium.git"
-    , version = "bc2d7b9365898ba2f121a8b88fa4879738239f19"
+    , version = "e06ab45fa0ed0bd6e9b07a53723ebf58c34842f4"
+    }
+  with dot-language =
+    { dependencies =
+      [ "arrays"
+      , "console"
+      , "effect"
+      , "foldable-traversable"
+      , "maybe"
+      , "node-buffer"
+      , "node-fs"
+      , "prelude"
+      , "psci-support"
+      , "test-unit"
+      , "tuples"
+      , "type-equality"
+      , "typelevel-lists"
+      , "typelevel-prelude"
+      , "undefined"
+      , "unsafe-coerce"
+      , "variant"
+      ]
+    , repo = "https://github.com/thought2/purescript-dot-language.git"
+    , version = "76abe9daa5370214f2733f45bd277d59a98e890c"
     }
