@@ -833,6 +833,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "promises" = pkgs.stdenv.mkDerivation {
+        name = "promises";
+        version = "v3.1.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/thimoteus/purescript-promises.git";
+          rev = "76aac1f6583c39a3745f862636d16c7292d29690";
+          sha256 = "17vc9ambjad1sjlkv72d5zrhq3m1m5wix2fkqflbbfwabk5qisvz";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "psci-support" = pkgs.stdenv.mkDerivation {
         name = "psci-support";
         version = "v5.0.0";

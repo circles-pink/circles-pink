@@ -19,6 +19,7 @@ to generate this file without the comments in this block.
   , "checked-exceptions"
   , "console"
   , "debug"
+  , "dot-language"
   , "effect"
   , "either"
   , "exceptions"
@@ -35,6 +36,7 @@ to generate this file without the comments in this block.
   , "optparse"
   , "ordered-collections"
   , "prelude"
+  , "promises"
   , "psci-support"
   , "stadium"
   , "strings"
@@ -46,7 +48,6 @@ to generate this file without the comments in this block.
   , "undefined"
   , "unsafe-coerce"
   , "variant"
-  , "dot-language"
   ]
 , packages = ./packages.dhall
 , sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]
