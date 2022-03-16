@@ -122,9 +122,10 @@ in  upstream
       , "undefined"
       , "unsafe-coerce"
       , "variant"
+      , "dot-language"
       ]
     , repo = "https://github.com/circles-pink/purescript-stadium.git"
-    , version = "e06ab45fa0ed0bd6e9b07a53723ebf58c34842f4"
+    , version = "0a56e8c69d3a570f321429a0367ecee85d4fda3d"
     }
   with dot-language =
     { dependencies =

@@ -1,11 +1,10 @@
 module CirclesPink.Garden.GenGraph where
 
 import Prelude
-
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import Data.Array ((!!))
 import Data.Maybe (Maybe(..), maybe)
-import Dot as D
+import Language.Dot as D
 import Effect (Effect)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
@@ -21,5 +20,5 @@ main = do
   R.reflectStateMachine _circlesStateMachine
     # G.fromStateMachineData "Circles StateMachine"
     # G.graphToDot { entryPoint: Just "infoGeneral" }
-    # D.toString
+    # D.printGraph
     # writeTextFile UTF8 filePath
