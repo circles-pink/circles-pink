@@ -226,7 +226,7 @@ interface StepProps extends StepIndicator_Props {
 }
 
 const getPos = (pos: number, time: number, height: number, speed: number) =>
-  norm(Math.sin(pos * Math.PI + time * speed)) * height;
+  norm(Math.sin(pos * Math.PI + time * (speed * (0.75 + 0.25 * pos)))) * height;
 
 export const Step = (props: StepProps): ReactElement => {
   const {
