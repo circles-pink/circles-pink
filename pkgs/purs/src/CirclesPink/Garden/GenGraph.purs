@@ -1,9 +1,10 @@
 module CirclesPink.Garden.GenGraph where
 
 import Prelude
+
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import Data.Array ((!!))
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe(..), maybe)
 import Dot as D
 import Effect (Effect)
 import Node.Encoding (Encoding(..))
@@ -19,6 +20,6 @@ main = do
     filePath = maybe "circles-pink-graph.dot" identity $ args !! 1
   R.reflectStateMachine _circlesStateMachine
     # G.fromStateMachineData "Circles StateMachine"
-    # G.graphToDot
+    # G.graphToDot { entryPoint: Just "infoGeneral" }
     # D.toString
     # writeTextFile UTF8 filePath
