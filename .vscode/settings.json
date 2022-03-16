@@ -9,6 +9,5 @@
   },
   "[purescript]": {
     "editor.defaultFormatter": "nwolverson.ide-purescript"
-  },
-  "purescript.buildOpenedFiles": true
+  }
 }
