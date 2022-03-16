@@ -23,6 +23,7 @@ import {
   ThemeContextType,
 } from '../context/theme';
 import chroma from 'chroma-js';
+import { StepIndicator } from '../components/StepIndicator';
 
 type Language = 'en' | 'de';
 

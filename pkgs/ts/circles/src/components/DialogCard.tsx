@@ -1,6 +1,7 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { ThemeContext } from '../context/theme';
+import { StepIndicator } from './StepIndicator';
 
 type FrameProps = {
   borderColor: string;
@@ -13,8 +14,9 @@ const Frame = styled.div((props: FrameProps) => [
   `,
 ]);
 
-const CardHead = tw.div`max-w-7xl mx-auto pt-12 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-4 lg:px-8 lg:flex lg:justify-between`;
-const CardBody = tw.div`max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:pb-16 lg:px-8`;
+const StepIndicatorContainer = tw.div`p-4`;
+const CardHead = tw.div`max-w-7xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-4 lg:px-8 lg:flex lg:justify-between`;
+const CardBody = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8`;
 const IntroContent = tw.div`lg:w-1/2`;
 const MainContent = tw.div`w-full`;
 const Control = tw.div`mt-8 flex lg:mt-0 lg:flex-shrink-0 lg:mt-8`;
@@ -40,6 +42,21 @@ export const DialogCard = ({
   return (
     <>
       <Frame borderColor={theme.baseColor}>
+        <StepIndicatorContainer>
+          <StepIndicator
+            height={24}
+            speed={0.0004}
+            selected={2}
+            steps={[
+              { label: '1' },
+              { label: '2' },
+              { label: '3' },
+              { label: '4' },
+              { label: '5' },
+              { label: '6' },
+            ]}
+          />
+        </StepIndicatorContainer>
         <CardHead>
           <IntroContent>
             {text}
