@@ -58,16 +58,16 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <Button onClick={() => act(A._infoSecurity(A._prev(unit)))}>
+            <Button onClick={() => act(A._magicWords(A._prev(unit)))}>
               {t('prevButton')}
             </Button>
 
-            {/* <Button
+            <Button
               color={theme.baseColor}
-              onClick={() => act(A._infoSecurity(A._next(unit)))}
+              onClick={() => act(A._magicWords(A._next(unit)))}
             >
               {t('nextButton')}
-            </Button> */}
+            </Button>
           </>
         </FadeIn>
       }

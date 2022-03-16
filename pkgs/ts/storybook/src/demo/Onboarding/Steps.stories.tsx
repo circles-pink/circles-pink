@@ -34,3 +34,7 @@ export const InfoSecurity = (args): ReactElement => (
 export const MagicWords = (args): ReactElement => (
   <Onboarding {...args} initState={Steps.magicWords} />
 );
+
+export const Submit = (args): ReactElement => (
+  <Onboarding {...args} initState={Steps.submit} />
+);
