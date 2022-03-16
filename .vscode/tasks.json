@@ -15,6 +15,21 @@
         "focus": false,
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "spago-test-watch",
+      "runOptions": { "runOn": "default" },
+      "type": "shell",
+      "command": "nix",
+      "isBackground": true,
+      "args": ["develop", "-c", "make", "spago-test-watch"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": false,
+        "panel": "dedicated"
+      }
     }
   ]
 }
