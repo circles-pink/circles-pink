@@ -9,6 +9,8 @@
 
   inputs.nix-filter.url = github:numtide/nix-filter;
 
+  inputs.nixops.url = github:NixOS/nixops;
+
   inputs.easy-purescript-nix = {
     url = github:justinwoo/easy-purescript-nix;
     flake = false;
@@ -41,6 +43,7 @@
             spago2nix = easy-purescript-nix.spago2nix;
             nix-filter = nix-filter.lib;
             nodejs = final.nodejs-17_x;
+            nixopsLatest = inputs.nixops.defaultPackage.${system};
           })
         ];
       };
@@ -86,6 +89,8 @@
                   pkgs.graphviz
                   pkgs.makefile2graph
                   pkgs.depcruise
+                  pkgs.nixops
+                  pkgs.virtualboxHeadless
                 ];
 
                 # Change the prompt to show that you are in a devShell
@@ -127,22 +132,47 @@
             effectsArgs = args;
           };
 
-          nixopsConfigurations.default =
-            let
-              accessKeyId = "nixops-example";
-              region = "us-east-1";
-              tags = { };
-              name = "default";
-            in
-            {
-              nixpkgs = inputs.nixpkgs;
-              network.description = name;
+          # nixopsConfigurations.default =
+          #   let
+          #     accessKeyId = "nixops-example";
+          #     region = "us-east-1";
+          #     tags = { };
+          #     name = "default";
+          #   in
+          #   {
+          #     nixpkgs = inputs.nixpkgs;
+          #     network.description = name;
 
-              network = {
-                storage.memory = { };
+          #     network = {
+          #       storage.memory = { };
+          #     };
+
+          #   } // (import ./networks/network.nix { inherit pkgs; });
+
+          nixopsConfigurations.default = {
+            network.storage.legacy = {
+              databasefile = "~/.nixops/deployments.nixops";
+            };
+
+            #network.description = "My Network";
+
+            defaults = {
+              imports = [ ./networks/network.nix ];
+            };
+
+            webserver =
+              { config, pkgs, ... }:
+              {
+                deployment.targetEnv = "virtualbox";
+                deployment.libvirtd.x = "x";
+                # deployment.virtualbox.memorySize = 1024; # megabytes
+                # deployment.virtualbox.vcpu = 2; # number of cpus
               };
 
-            } // (import ./networks/network.nix { inherit pkgs; });
+            nixpkgs = inputs.nixpkgs;
+          };
+
+          nixopsConfigurations.default2 = { };
 
           effects = { src }:
             let
