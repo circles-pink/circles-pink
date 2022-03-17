@@ -6,6 +6,7 @@
     storybook = ../../pkgs/ts/storybook;
     cli = ../../pkgs/ts/cli;
     circles = ../../pkgs/ts/circles;
+    circles-directus = ../../pkgs/ts/circles-directus;
     generated = ../../pkgs/ts/generated;
     assets = ../../pkgs/ts/assets;
     # cli-playground = ../../pkgs/ts/cli-playground;
@@ -70,6 +71,10 @@
   bins = {
     depcruise = pkgs.writeShellScriptBin "depcruise" ''
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
+    '';
+    circles-directus = pkgs.writeShellScriptBin "circles-directus" ''
+      export NODE_PATH=${workspaces.circles-directus}/libexec/circles-directus/node_modules:${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/node_modules
+      ${pkgs.nodejs}/bin/node ${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/src $@
     '';
   };
 
