@@ -42,8 +42,6 @@ export const DialogCard = ({
   const [theme] = useContext(ThemeContext);
   const anim = useAnimContext();
 
-  console.log(anim);
-
   return (
     <>
       <Frame borderColor={theme.baseColor}>
