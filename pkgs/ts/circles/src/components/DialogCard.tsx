@@ -1,7 +1,7 @@
 import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
-import { useAnimContext } from '../context/anim';
+import { stateToIndex, useAnimContext } from '../context/anim';
 import { ThemeContext } from '../context/theme';
 import { StepIndicator } from './StepIndicator';
 
@@ -51,7 +51,9 @@ export const DialogCard = ({
           <StepIndicator
             height={24}
             speed={0.0004}
-            selected={2}
+            selected={stateToIndex(anim.selected)}
+            prevSelected={stateToIndex(anim.prevSelected)}
+            lastAction={anim.lastAction}
             steps={[
               { label: '1' },
               { label: '2' },

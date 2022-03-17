@@ -5,17 +5,17 @@ import { CirclesState } from 'generated/output/CirclesPink.Garden.StateMachine.S
 // Types
 // -----------------------------------------------------------------------------
 
-type AnimState = {
-  cur: CirclesState['type'];
-  prev: CirclesState['type'];
+export type AnimState = {
+  selected: CirclesState['type'];
+  prevSelected: CirclesState['type'];
   lastAction: number;
 };
 
 type AnimProviderProps = { state: CirclesState; children: ReactElement };
 
 const initAnimState: AnimState = {
-  cur: 'infoGeneral',
-  prev: 'infoGeneral',
+  selected: 'infoGeneral',
+  prevSelected: 'infoGeneral',
   lastAction: 0,
 };
 
@@ -42,15 +42,15 @@ export const AnimProvider = ({ state, children }: AnimProviderProps) => {
 
 const useAnimState = (state: CirclesState): AnimState => {
   const [animState, setAnimState] = useState<AnimState>({
-    cur: state.type,
-    prev: state.type,
+    selected: state.type,
+    prevSelected: state.type,
     lastAction: 0,
   });
 
   useEffect(() => {
     setAnimState(s => ({
-      cur: state.type,
-      prev: s.cur,
+      selected: state.type,
+      prevSelected: s.selected,
       lastAction: performance.now(),
     }));
   }, [state.type]);
@@ -62,8 +62,10 @@ const useAnimState = (state: CirclesState): AnimState => {
 // Utils
 // -----------------------------------------------------------------------------
 
-export const stateToIndex = (state: CirclesState): number | null => {
-  switch (state.type) {
+export const stateToIndex = (
+  stateType: CirclesState['type']
+): number | undefined => {
+  switch (stateType) {
     case 'infoGeneral':
       return 0;
     case 'askUsername':
@@ -77,6 +79,6 @@ export const stateToIndex = (state: CirclesState): number | null => {
     case 'submit':
       return 5;
     default:
-      return null;
+      return undefined;
   }
 };
