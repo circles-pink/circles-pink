@@ -72,33 +72,6 @@ const useExtraData = (old: { steps: Step[] }) => {
 };
 
 // -----------------------------------------------------------------------------
-// Hooks / usePrevSelected
-// -----------------------------------------------------------------------------
-
-type PrevSelected = {
-  selected: number;
-  prevSelected: number;
-  lastAction: number;
-};
-
-const usePrevSelected = (newSelected: number): PrevSelected => {
-  const [prevSelected, setPrevSelected] = useState<PrevSelected>({
-    selected: 0,
-    prevSelected: 0,
-    lastAction: 0,
-  });
-  useEffect(() => {
-    setPrevSelected(s => ({
-      selected: newSelected,
-      prevSelected: s.selected,
-      lastAction: performance.now(),
-    }));
-  }, [newSelected]);
-
-  return prevSelected;
-};
-
-// -----------------------------------------------------------------------------
 // Utils
 // -----------------------------------------------------------------------------
 
@@ -117,27 +90,29 @@ const norm = (n: number): number => (n + 1) / 2;
 
 export type StepIndicatorProps = {
   steps?: NonEmptyArray<Step>;
-  selected?: number;
   height?: number;
   debug?: boolean;
   circleRadius?: number;
   speed?: number;
+  selected?: number;
+  prevSelected?: number;
+  lastAction?: number;
 };
 
 export const StepIndicator = ({
-  selected = 0,
   steps = [{ label: 'A' }],
   height = 80,
   debug = false,
   circleRadius = 10,
   speed = 0.001,
+  selected = 0,
+  prevSelected = 0,
+  lastAction = 0,
 }: StepIndicatorProps): ReactElement => {
   // Hooks
   const countDots = steps.length;
-  const selected_ = selected % countDots;
 
   const extraData = useExtraData({ steps });
-  const prevSelected = usePrevSelected(selected_);
   const [size, ref] = useDimensions();
   const time = useAnimation();
 
@@ -145,8 +120,9 @@ export const StepIndicator = ({
 
   const props = {
     ...extraData,
-    ...prevSelected,
-    selected: selected_,
+    selected: selected % countDots,
+    prevSelected: prevSelected % countDots,
+    lastAction,
     width: size.width,
     height: size.height,
     time,
@@ -177,8 +153,17 @@ export const StepIndicator = ({
 
 interface StepIndicator_Props
   extends ExtraData,
-    PrevSelected,
-    Required<Pick<StepIndicatorProps, 'debug' | 'circleRadius' | 'speed'>> {
+    Required<
+      Pick<
+        StepIndicatorProps,
+        | 'selected'
+        | 'prevSelected'
+        | 'lastAction'
+        | 'debug'
+        | 'circleRadius'
+        | 'speed'
+      >
+    > {
   width: number;
   height: number;
   time: number;
