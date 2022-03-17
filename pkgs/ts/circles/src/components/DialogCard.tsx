@@ -1,5 +1,7 @@
+import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
+import { useAnimContext } from '../context/anim';
 import { ThemeContext } from '../context/theme';
 import { StepIndicator } from './StepIndicator';
 
@@ -38,6 +40,9 @@ export const DialogCard = ({
   debug,
 }: DemoCardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
+  const anim = useAnimContext();
+
+  console.log(anim);
 
   return (
     <>

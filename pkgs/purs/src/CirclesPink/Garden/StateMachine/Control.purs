@@ -16,15 +16,16 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Variant (Variant, default, onMatch)
+import Data.Maybe (Maybe(..))
+import Data.Variant (Variant, case_, default, on, onMatch)
 import Debug (spy)
 import Effect.Class.Console (logShow)
 import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
+import Type.Row (type (+))
 import Wallet.PrivateKey (Address, Nonce, PrivateKey)
 import Wallet.PrivateKey as P
-import Type.Row (type (+))
 
 type RegisterError r
   = ( errService :: Unit, errNative :: Error | r )
