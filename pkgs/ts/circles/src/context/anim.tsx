@@ -51,7 +51,7 @@ const useAnimState = (state: CirclesState): AnimState => {
     setAnimState(s => ({
       selected: state.type,
       prevSelected: s.selected,
-      lastAction: performance.now(),
+      lastAction: performance.timeOrigin + performance.now(),
     }));
   }, [state.type]);
 

@@ -7,6 +7,7 @@ import * as IO from 'fp-ts/IO';
 import { pipe } from 'fp-ts/lib/function';
 import { number } from 'fp-ts';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
+import * as G from '@no-day/fp-ts-generators';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -34,41 +35,13 @@ const useAnimation = (): number => {
 
   useEffect(() => {
     const tick = (n: number) => {
-      setTime(n);
+      setTime(performance.timeOrigin + n);
       requestAnimationFrame(tick);
     };
     tick(performance.now());
   }, []);
 
   return time;
-};
-
-// -----------------------------------------------------------------------------
-// Hooks / useExtraData
-// -----------------------------------------------------------------------------
-
-type ExtraData = { steps: (Step & StepExtra)[] };
-
-const useExtraData = (old: { steps: Step[] }) => {
-  const [data, setData] = useState<null | ExtraData>(null);
-
-  useEffect(() => {
-    const newData = pipe(
-      old.steps,
-      A.traverse(IO.Applicative)(o =>
-        pipe(
-          R.random,
-          IO.map(position => ({ ...o, position }))
-        )
-      )
-    );
-
-    setData({
-      steps: newData(),
-    });
-  }, [JSON.stringify(old)]);
-
-  return data;
 };
 
 // -----------------------------------------------------------------------------
@@ -83,6 +56,26 @@ const clamp =
     n < l ? l : n > h ? h : n;
 
 const norm = (n: number): number => (n + 1) / 2;
+
+// -----------------------------------------------------------------------------
+// Utils / addExtraData
+// -----------------------------------------------------------------------------
+
+type ExtraData = { steps: (Step & StepExtra)[] };
+
+const gen = (n: number): G.Gen<number[]> =>
+  G.vectorOf(n)(G.float({ min: 0, max: 1 }));
+
+const seed = G.mkSeed(30985848);
+
+const addExtraData = (steps: Step[]): (Step & StepExtra)[] => {
+  const randomFloats = G.generate({ seed })(gen(steps.length));
+
+  return A.zipWith(steps, randomFloats, (step, position) => ({
+    ...step,
+    position,
+  }));
+};
 
 // -----------------------------------------------------------------------------
 // Components / StepIndicator
@@ -112,14 +105,11 @@ export const StepIndicator = ({
   // Hooks
   const countDots = steps.length;
 
-  const extraData = useExtraData({ steps });
   const [size, ref] = useDimensions();
   const time = useAnimation();
 
-  if (!extraData) return <></>;
-
   const props = {
-    ...extraData,
+    steps: addExtraData(steps),
     selected: selected % countDots,
     prevSelected: prevSelected % countDots,
     lastAction,
