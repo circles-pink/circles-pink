@@ -56,7 +56,7 @@
         (system:
           {
 
-            packages = pkgs.circles-pink;
+            packages = { inherit pkgs; } // pkgs.circles-pink;
 
             checks = self.packages;
 
@@ -90,7 +90,7 @@
                   pkgs.makefile2graph
                   pkgs.depcruise
                   pkgs.nixops
-                  pkgs.virtualboxHeadless
+                  #pkgs.virtualboxHeadless
                 ];
 
                 # Change the prompt to show that you are in a devShell
