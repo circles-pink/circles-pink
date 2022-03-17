@@ -42,7 +42,7 @@
             purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
             spago2nix = easy-purescript-nix.spago2nix;
             nix-filter = nix-filter.lib;
-            nodejs = final.nodejs-17_x;
+            # nodejs = final.nodejs-17_x;
             nixopsLatest = inputs.nixops.defaultPackage.${system};
           })
         ];
