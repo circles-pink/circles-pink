@@ -1,5 +1,10 @@
 {
   "name": "circles-directus",
   "version": "1.0.0",
-  "dependencies": {}
+  "dependencies": {
+    "directus": "^9.6.0"
+  },
+  "scripts": {
+    "start": "directus start"
+  }
 }

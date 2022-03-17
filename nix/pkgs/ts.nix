@@ -74,7 +74,20 @@
     '';
     circles-directus = pkgs.writeShellScriptBin "circles-directus" ''
       export NODE_PATH=${workspaces.circles-directus}/libexec/circles-directus/node_modules:${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/node_modules
-      ${pkgs.nodejs}/bin/node ${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/src $@
+      export HOST="0.0.0.0"
+      export PORT=8055
+      export PUBLIC_URL="http://localhost:8055"
+      export LOG_LEVEL="info"
+      export LOG_STYLE="pretty"
+
+      export DB_CLIENT="pg"
+      export DB_HOST="localhost"
+      export DB_PORT=5100
+      export DB_DATABASE="directus"
+      export DB_USER="postgres"
+      export DB_PASSWORD="secret"
+
+      cd ${workspaces.circles-directus}/libexec/circles-directus/node_modules/directus && ./cli.js
     '';
   };
 
