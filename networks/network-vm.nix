@@ -1,4 +1,4 @@
-{ pkgs ? (import ./default.nix).inputs.nixpkgs, ... }:
+{ pkgs ? (import ../default.nix).outputs.packages.x86_64-linux.pkgs, ... }:
 
 {
 

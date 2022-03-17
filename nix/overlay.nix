@@ -104,5 +104,7 @@
         ''
           dot -Tsvg ${purs-moduleDependencyGraphDot} > $out 
         '';
+
+      circles-directus = ts.bins.circles-directus;
     };
 })
