@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext, useEffect } from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../i18n';
 import { control } from 'generated/output/CirclesPink.Garden.TS';
@@ -24,6 +24,8 @@ import {
 } from '../context/theme';
 import chroma from 'chroma-js';
 import { StepIndicator } from '../components/StepIndicator';
+import { stringify } from 'querystring';
+import { AnimProvider, useAnimContext } from '../context/anim';
 
 type Language = 'en' | 'de';
 
@@ -48,6 +50,7 @@ const OnboardingContent = ({
 }: OnboardingProps): ReactElement => {
   const [theme, setColor] = useContext(ThemeContext);
   const [state, act] = useStateMachine(initState || init, control);
+
   i18n.changeLanguage(lang);
 
   useEffect(() => {
@@ -55,16 +58,18 @@ const OnboardingContent = ({
   }, [baseColor]);
 
   return (
-    <I18nextProvider i18n={i18n}>
-      {{
-        infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
-        askUsername: () => <AskUsername state={state.value} act={act} />,
-        askEmail: () => <AskEmail state={state.value} act={act} />,
-        infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
-        magicWords: () => <MagicWords state={state.value} act={act} />,
-        dashboard: () => null,
-        submit: () => null,
-      }[state.type]()}
-    </I18nextProvider>
+    <AnimProvider state={state}>
+      <I18nextProvider i18n={i18n}>
+        {{
+          infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
+          askUsername: () => <AskUsername state={state.value} act={act} />,
+          askEmail: () => <AskEmail state={state.value} act={act} />,
+          infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
+          magicWords: () => <MagicWords state={state.value} act={act} />,
+          dashboard: () => null,
+          submit: () => null,
+        }[state.type]()}
+      </I18nextProvider>
+    </AnimProvider>
   );
 };
