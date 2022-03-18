@@ -97,5 +97,8 @@ vm-remove:
 vm-remove-all:
 	nixops destroy --all; nixops delete --all
 
+vm-start:
+	nixops start -d circles-pink-vm
+
 shell:
 	nix develop
