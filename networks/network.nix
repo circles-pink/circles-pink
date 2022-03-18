@@ -48,21 +48,25 @@ in
         wantedBy = [ "default.target" ];
       };
 
-      # services.postgresql = {
-      #   enable = true;
-      #   port = 5100;
-      #   # package = pkgs.postgresql_10;
-      #   enableTCPIP = true;
-      #   authentication = pkgs.lib.mkOverride 10 ''
-      #     local all all trust
-      #     host all all ::1/128 trust
-      #   '';
-      #   initialScript = pkgs.writeText "backend-initScript" ''
-      #     CREATE ROLE postgres WITH LOGIN PASSWORD 'secret' CREATEDB;
-      #     CREATE DATABASE directus;
-      #     GRANT ALL PRIVILEGES ON DATABASE directus TO postgres;
-      #   '';
-      # };
+      services.postgresql = {
+        enable = true;
+        port = 5100;
+        package = pkgs.postgresql_10;
+        enableTCPIP = true;
+        settings = {
+          listen_addresses = "*";
+        };
+        authentication = pkgs.lib.mkOverride 10 ''
+          local all all trust
+          host all all ::1/128 trust
+          host all all 0.0.0.0/0 md5
+        '';
+        initialScript = pkgs.writeText "backend-initScript" ''
+          CREATE ROLE postgres WITH LOGIN PASSWORD 'secret' SUPERUSER;
+          CREATE DATABASE directus;
+          GRANT ALL PRIVILEGES ON DATABASE directus TO postgres;
+        '';
+      };
 
     };
 }
