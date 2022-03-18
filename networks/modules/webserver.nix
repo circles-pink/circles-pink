@@ -8,7 +8,11 @@ let
 in
 
 {
-  environment.systemPackages = [ pkgs.busybox pkgs.gnumake ];
+  environment.systemPackages = [
+    pkgs.busybox
+    pkgs.gnumake
+    pkgs.circles-pink.circles-directus
+  ];
 
   environment.shellInit = ''cp ${Makefile} /root/Makefile'';
 
@@ -40,7 +44,7 @@ in
     description = "Circles Directus";
     serviceConfig = {
       Type = "forking";
-      ExecStart = "${pkgs.circles-pink.circles-directus}/bin/circles-directus";
+      ExecStart = "${pkgs.circles-pink.circles-directus}/bin/circles-directus start";
       # ExecStop = "pkill ipfs";
       # Restart = "on-failure";
     };
@@ -76,12 +80,12 @@ in
     in
     {
       enable = true;
-      port = 5100;
       package = pkgs.mariadb;
       initialDatabases = [{ name = database; }];
       settings = {
         mysqld = {
           innodb_buffer_pool_size = "10M";
+          port = 5100;
         };
       };
       initialScript = pkgs.writeText "initDB"
