@@ -11,6 +11,8 @@
 
   inputs.nixops.url = github:NixOS/nixops;
 
+  inputs.circles-pink-vendor.url = github:circles-pink/circles-pink-vendor;
+
   inputs.easy-purescript-nix = {
     url = github:justinwoo/easy-purescript-nix;
     flake = false;
@@ -44,6 +46,7 @@
             nix-filter = nix-filter.lib;
             # nodejs = final.nodejs-17_x;
             nixopsLatest = inputs.nixops.defaultPackage.${system};
+            circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
           })
         ];
       };
@@ -73,7 +76,7 @@
                   pkgs.nodePackages.node2nix
                   pkgs.nodePackages.purty
                   pkgs.nodePackages.typescript
-                  pkgs.nodejs-17_x
+                  pkgs.nodejs
                   pkgs.purescript
                   pkgs.spago
                   pkgs.purescript-tsd-gen

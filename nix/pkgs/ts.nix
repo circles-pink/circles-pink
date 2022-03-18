@@ -72,23 +72,35 @@
     depcruise = pkgs.writeShellScriptBin "depcruise" ''
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
     '';
-    circles-directus = pkgs.writeShellScriptBin "circles-directus" ''
-      export NODE_PATH=${workspaces.circles-directus}/libexec/circles-directus/node_modules:${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/node_modules
-      export HOST="0.0.0.0"
-      export PORT=8055
-      export PUBLIC_URL="http://localhost:8055"
-      export LOG_LEVEL="info"
-      export LOG_STYLE="pretty"
 
-      export DB_CLIENT="pg"
-      export DB_HOST="localhost"
-      export DB_PORT=5100
-      export DB_DATABASE="directus"
-      export DB_USER="postgres"
-      export DB_PASSWORD="secret"
+    circles-directus =
+      let
+        dir_patched = pkgs.runCommand "dir_patched" { } ''
+          mkdir $out
+          cp -r ${workspaces.circles-directus}/* -t $out
+          chmod -R +w $out
+          cp -r ${pkgs.circles-pink-vendor.argon2}/* -t $out/libexec/circles-directus/node_modules/argon2
+          cp -r ${pkgs.circles-pink-vendor.sharp}/* -t $out/libexec/circles-directus/node_modules/sharp
+        '';
+      in
+      pkgs.writeShellScriptBin "circles-directus" ''
+        # export NODE_PATH=${workspaces.circles-directus}/libexec/circles-directus/node_modules:${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/node_modules
+        export HOST="0.0.0.0"
+        export PORT=8055
+        export PUBLIC_URL="http://localhost:8055"
+        export LOG_LEVEL="info"
+        export LOG_STYLE="pretty"
 
-      cd ${workspaces.circles-directus}/libexec/circles-directus/node_modules/directus && ./cli.js
-    '';
+        export DB_CLIENT="pg"
+        export DB_HOST="localhost"
+        export DB_PORT=5100
+        export DB_DATABASE="directus"
+        export DB_USER="postgres"
+        export DB_PASSWORD="secret"
+
+        cd ${dir_patched}/libexec/circles-directus/deps/circles-directus
+        yarn start
+      '';
   };
 
   builds = {

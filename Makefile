@@ -93,3 +93,6 @@ vm-ssh:
 
 vm-remove:
 	nixops destroy -d circles-pink-vm; nixops delete -d circles-pink-vm
+
+shell:
+	nix develop
