@@ -94,7 +94,7 @@
         export DB_HOST="localhost"
         export DB_PORT=5100
         export DB_DATABASE="directus"
-        export DB_USER="postgres"
+        export DB_USER="directus"
         export DB_PASSWORD="secret"
 
         cd ${dir_patched}/libexec/circles-directus/node_modules/circles-directus
