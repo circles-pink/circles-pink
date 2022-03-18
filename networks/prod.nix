@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-
+{ pkgs ? (import ../default.nix).outputs.packages.x86_64-linux.pkgs, ... }:
 
 {
 
@@ -7,7 +6,10 @@
     {
       boot.tmpOnTmpfs = false;
 
-      imports = [ ./qemu-guest.nix ];
+      imports = [
+        (import ./modules/qemu-guest.nix)
+        (import ./modules/webserver.nix { inherit pkgs; })
+      ];
 
       boot.loader.grub.device = "/dev/sda";
       boot.initrd.kernelModules = [ "nvme" ];
@@ -26,4 +28,5 @@
         };
       };
     };
+
 }

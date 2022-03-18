@@ -150,11 +150,6 @@
                 storage.memory = { };
               };
 
-              defaults = {
-                imports = [
-                ];
-              };
-
             }
             // (import ./networks/prod.nix { inherit pkgs; });
 
