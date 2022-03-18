@@ -152,13 +152,11 @@
 
               defaults = {
                 imports = [
-                  (import ./networks/network.nix { inherit pkgs; })
-                  (import ./networks/network-prod.nix { inherit pkgs; })
                 ];
               };
 
-
-            };
+            }
+            // (import ./networks/prod.nix { inherit pkgs; });
 
           effects = { src }:
             let
