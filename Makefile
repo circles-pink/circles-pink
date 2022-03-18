@@ -81,3 +81,15 @@ run-garden-nix:
 
 run-garden: yarn-install
 	make spago-build && node inspect -e 'require("./$(PURS_OUTPUT)/CirclesPink.Garden.ApiScript").main()'
+
+vm-create:
+	nixops create -d circles-pink-vm networks/network-vm.nix networks/network.nix
+
+vm-deploy:
+	nixops deploy -d circles-pink-vm
+
+vm-ssh:
+	nixops ssh -d circles-pink-vm webserver
+
+vm-remove:
+	nixops destroy -d circles-pink-vm; nixops delete -d circles-pink-vm
