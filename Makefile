@@ -86,7 +86,7 @@ vm-create:
 	nixops create -d circles-pink-vm networks/vm.nix
 
 vm-deploy:
-	nixops deploy -d circles-pink-vm
+	nixops deploy --allow-reboot -d circles-pink-vm
 
 vm-ssh:
 	nixops ssh -d circles-pink-vm webserver

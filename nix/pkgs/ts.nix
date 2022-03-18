@@ -97,8 +97,16 @@
         export DB_USER="directus"
         export DB_PASSWORD="secret"
 
-        cd ${dir_patched}/libexec/circles-directus/node_modules/circles-directus
-        ${pkgs.yarn}/bin/yarn start
+        export KEY="xxxxxxx-xxxxxx-xxxxxxxx-xxxxxxxxxx"
+        export SECRET="abcdef"
+        export ACCESS_TOKEN_TTL="15m"
+        export REFRESH_TOKEN_TTL="7d"
+        export REFRESH_TOKEN_COOKIE_SECURE="false"
+        export REFRESH_TOKEN_COOKIE_SAME_SITE="lax"
+        export REFRESH_TOKEN_COOKIE_NAME="directus_refresh_token"
+
+        cd ${dir_patched}/libexec/circles-directus/node_modules/directus
+        ./cli.js $@
       '';
   };
 
