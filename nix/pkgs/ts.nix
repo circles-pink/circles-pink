@@ -90,7 +90,7 @@
         export LOG_LEVEL="info"
         export LOG_STYLE="pretty"
 
-        export DB_CLIENT="pg"
+        export DB_CLIENT="mysql"
         export DB_HOST="localhost"
         export DB_PORT=5100
         export DB_DATABASE="directus"

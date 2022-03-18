@@ -47,24 +47,48 @@ in
     wantedBy = [ "default.target" ];
   };
 
-  services.postgresql = {
-    enable = true;
-    port = 5100;
-    package = pkgs.postgresql_10;
-    enableTCPIP = true;
-    settings = {
-      listen_addresses = "*";
+  # services.postgresql = {
+  #   enable = true;
+  #   port = 5100;
+  #   package = pkgs.postgresql_10;
+  #   enableTCPIP = true;
+  #   settings = {
+  #     listen_addresses = "*";
+  #   };
+  #   authentication = pkgs.lib.mkOverride 10 ''
+  #     local all all trust
+  #     host all all ::1/128 trust
+  #     host all all 0.0.0.0/0 md5
+  #   '';
+  #   initialScript = pkgs.writeText "backend-initScript" ''
+  #     CREATE ROLE directus WITH LOGIN PASSWORD 'secret' SUPERUSER;
+  #     CREATE DATABASE directus;
+  #     GRANT ALL PRIVILEGES ON DATABASE directus TO directus;
+  #   '';
+  # };
+
+  services.mysql =
+    let
+      user = "directus";
+      password = "secret";
+      database = "directus";
+      host = "localhost";
+    in
+    {
+      enable = true;
+      port = 5100;
+      package = pkgs.mariadb;
+      initialDatabases = [{ name = database; }];
+      settings = {
+        mysqld = {
+          innodb_buffer_pool_size = "10M";
+        };
+      };
+      initialScript = pkgs.writeText "initDB"
+        ''
+          CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}';
+          GRANT ALL PRIVILEGES ON ${database}. * TO '${user}'@'${host}';
+        '';
     };
-    authentication = pkgs.lib.mkOverride 10 ''
-      local all all trust
-      host all all ::1/128 trust
-      host all all 0.0.0.0/0 md5
-    '';
-    initialScript = pkgs.writeText "backend-initScript" ''
-      CREATE ROLE directus WITH LOGIN PASSWORD 'secret' SUPERUSER;
-      CREATE DATABASE directus;
-      GRANT ALL PRIVILEGES ON DATABASE directus TO directus;
-    '';
-  };
 
 }
