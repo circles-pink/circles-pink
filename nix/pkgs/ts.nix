@@ -98,8 +98,8 @@
         export DB_USER="postgres"
         export DB_PASSWORD="secret"
 
-        cd ${dir_patched}/libexec/circles-directus/deps/circles-directus
-        yarn start
+        cd ${dir_patched}/libexec/circles-directus/node_modules/circles-directus
+        ${pkgs.yarn}/bin/yarn start
       '';
   };
 
