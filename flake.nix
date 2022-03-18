@@ -135,47 +135,27 @@
             effectsArgs = args;
           };
 
-          # nixopsConfigurations.default =
-          #   let
-          #     accessKeyId = "nixops-example";
-          #     region = "us-east-1";
-          #     tags = { };
-          #     name = "default";
-          #   in
-          #   {
-          #     nixpkgs = inputs.nixpkgs;
-          #     network.description = name;
+          nixopsConfigurations.default =
+            let
+              accessKeyId = "nixops-example";
+              region = "us-east-1";
+              tags = { };
+              name = "default";
+            in
+            {
+              nixpkgs = inputs.nixpkgs;
+              network.description = name;
 
-          #     network = {
-          #       storage.memory = { };
-          #     };
-
-          #   } // (import ./networks/network.nix { inherit pkgs; });
-
-          nixopsConfigurations.default = {
-            network.storage.legacy = {
-              databasefile = "~/.nixops/deployments.nixops";
-            };
-
-            #network.description = "My Network";
-
-            defaults = {
-              imports = [ ./networks/network.nix ];
-            };
-
-            webserver =
-              { config, pkgs, ... }:
-              {
-                deployment.targetEnv = "virtualbox";
-                deployment.libvirtd.x = "x";
-                # deployment.virtualbox.memorySize = 1024; # megabytes
-                # deployment.virtualbox.vcpu = 2; # number of cpus
+              network = {
+                storage.memory = { };
               };
 
-            nixpkgs = inputs.nixpkgs;
-          };
+              defaults = {
+                imports = [ ./networks/network.nix ./networks/network-prod.nix ];
+              };
 
-          nixopsConfigurations.default2 = { };
+
+            };
 
           effects = { src }:
             let
