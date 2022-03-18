@@ -84,7 +84,6 @@
         '';
       in
       pkgs.writeShellScriptBin "circles-directus" ''
-        # export NODE_PATH=${workspaces.circles-directus}/libexec/circles-directus/node_modules:${workspaces.circles-directus}/libexec/circles-directus/deps/circles-directus/node_modules
         export HOST="0.0.0.0"
         export PORT=8055
         export PUBLIC_URL="http://localhost:8055"
