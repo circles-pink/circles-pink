@@ -26,7 +26,7 @@ in
     systemd.services.tasks-explorer = {
       description = "Tasks Explorer";
       serviceConfig = {
-        Type = "forking";
+        Type = "simple";
         ExecStart = "${pkgs.circles-pink.tasks-explorer-server}/bin/tasks-explorer-server";
         ExecStop = "pkill tasks-explorer-server";
         Restart = "on-failure";

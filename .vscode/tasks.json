@@ -54,6 +54,24 @@
       }
     },
     {
+      "label": "vm-deploy",
+      "runOptions": {
+        "runOn": "default"
+      },
+      "type": "shell",
+      "command": "nix",
+      "isBackground": true,
+      "args": ["develop", "-c", "make", "vm-deploy"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "dev-browser",
       "runOptions": {
         "runOn": "default"
