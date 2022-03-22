@@ -112,3 +112,6 @@ vm-ip:
 
 shell:
 	nix develop
+
+agent-get-secrets:
+	scp root@hercules.teal.ooo:/secrets.json
