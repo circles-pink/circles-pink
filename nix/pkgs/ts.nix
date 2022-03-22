@@ -9,6 +9,9 @@
     circles-directus = ../../pkgs/ts/circles-directus;
     generated = ../../pkgs/ts/generated;
     assets = ../../pkgs/ts/assets;
+    tasks-explorer = ../../pkgs/ts/tasks-explorer;
+    tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
+
     # cli-playground = ../../pkgs/ts/cli-playground;
   };
 
@@ -108,10 +111,28 @@
         cd ${dir_patched}/libexec/circles-directus/node_modules/directus
         ./cli.js $@
       '';
+
+    tasks-explorer-server =
+      pkgs.writeShellScriptBin "tasks-explorer-server" ''
+        cd ${workspaces.tasks-explorer-server}/libexec/tasks-explorer-server/node_modules/tasks-explorer-server
+        ${pkgs.yarn}/bin/yarn start
+      '';
   };
 
   builds = {
     storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
+      tmp=`mktemp -d`
+      cp -r ${workspaces.storybook} $tmp/build
+      chmod -R +w $tmp
+
+      cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
+      cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
+
+      cd $tmp/build/libexec/storybook/node_modules/storybook
+      OUTPUT_DIR=$out yarn build
+    '';
+
+    storybook_OLD = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
 
   ############ Create clean ts node package in temp dir
 

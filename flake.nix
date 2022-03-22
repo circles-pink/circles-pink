@@ -36,19 +36,21 @@
 
       system = "x86_64-linux";
 
+      overlays = [
+        overlay
+        (prev: final: {
+          purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
+          spago2nix = easy-purescript-nix.spago2nix;
+          nix-filter = nix-filter.lib;
+          # nodejs = final.nodejs-17_x;
+          nixopsLatest = inputs.nixops.defaultPackage.${system};
+          circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
+        })
+      ];
+
       pkgs = import inputs.nixpkgs {
         inherit system;
-        overlays = [
-          overlay
-          (prev: final: {
-            purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
-            spago2nix = easy-purescript-nix.spago2nix;
-            nix-filter = nix-filter.lib;
-            # nodejs = final.nodejs-17_x;
-            nixopsLatest = inputs.nixops.defaultPackage.${system};
-            circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
-          })
-        ];
+        inherit overlays;
       };
       nix-filter = inputs.nix-filter;
       purescript-tsd-gen = inputs.purescript-tsd-gen;
@@ -58,6 +60,7 @@
       perSystem = (inputs.flake-utils.lib.eachSystem [ "x86_64-linux" ]
         (system:
           {
+            inherit overlays;
 
             packages = { inherit pkgs; } // pkgs.circles-pink;
 
