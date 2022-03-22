@@ -3,7 +3,11 @@ PURS_OUTPUT=pkgs/ts/generated/output
 all: dev-storybook build-storybook ci rw-result
 
 dev-storybook: assets
+	export STORYBOOK_TASKS_EXPLORER_SERVER=http://`make -s --no-print-directory vm-ip`:5000; \
 	yarn workspace storybook run storybook
+
+dev-browser:
+	bash -c '${BROWSER} http://localhost:6006'
 
 build-storybook: assets
 	export OUTPUT_DIR=../../../dist; yarn workspace storybook run build
@@ -99,6 +103,12 @@ vm-remove-all:
 
 vm-start:
 	nixops start -d circles-pink-vm
+
+vm-info:
+	nixops info	-d circles-pink-vm
+
+vm-ip:
+	nixops info -d circles-pink-vm --plain 2> /dev/null | awk -F'\t' '$$1 == "webserver" {print $$6}'
 
 shell:
 	nix develop

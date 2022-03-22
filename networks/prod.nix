@@ -1,15 +1,19 @@
-{ pkgs ? (import ../default.nix).outputs.packages.x86_64-linux.pkgs, ... }:
-
 {
 
-  webserver =
+  webserver = { pkgs, config, lib, ... }:
+
+    let
+      secrets = import (builtins.readFile /secrets.json);
+    in
     {
       boot.tmpOnTmpfs = false;
 
       imports = [
-        (import ./modules/qemu-guest.nix)
-        (import ./modules/webserver.nix { inherit pkgs; })
+        ./modules/qemu-guest.nix
+        (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
       ];
+
+      nixpkgs.pkgs = pkgs;
 
       boot.loader.grub.device = "/dev/sda";
       boot.initrd.kernelModules = [ "nvme" ];

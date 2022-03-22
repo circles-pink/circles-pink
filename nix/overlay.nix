@@ -106,5 +106,7 @@
         '';
 
       circles-directus = ts.bins.circles-directus;
+
+      tasks-explorer-server = ts.bins.tasks-explorer-server;
     };
 })

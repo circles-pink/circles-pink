@@ -3,7 +3,9 @@
   "tasks": [
     {
       "label": "dev-storybook",
-      "runOptions": { "runOn": "default" },
+      "runOptions": {
+        "runOn": "default"
+      },
       "type": "shell",
       "command": "nix",
       "isBackground": true,
@@ -14,11 +16,14 @@
         "echo": false,
         "focus": false,
         "panel": "dedicated"
-      }
+      },
+      "problemMatcher": []
     },
     {
       "label": "spago-test-watch",
-      "runOptions": { "runOn": "default" },
+      "runOptions": {
+        "runOn": "default"
+      },
       "type": "shell",
       "command": "nix",
       "isBackground": true,
@@ -33,7 +38,9 @@
     },
     {
       "label": "ci",
-      "runOptions": { "runOn": "default" },
+      "runOptions": {
+        "runOn": "default"
+      },
       "type": "shell",
       "command": "nix",
       "isBackground": true,
@@ -45,6 +52,29 @@
         "focus": false,
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "dev-browser",
+      "runOptions": {
+        "runOn": "default"
+      },
+      "type": "shell",
+      "command": "make",
+      "isBackground": true,
+      "args": ["dev-browser"],
+      "group": "none",
+      "presentation": {
+        "reveal": "never",
+        "echo": false,
+        "focus": false,
+        "panel": "new"
+      },
+      "options": {
+        "shell": {
+          "args": ["-i"]
+        }
+      },
+      "problemMatcher": []
     }
   ]
 }

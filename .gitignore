@@ -8,3 +8,4 @@ output/
 /.spago2nix
 /tmp
 pkgs/ts/assets/src
+secrets.json
