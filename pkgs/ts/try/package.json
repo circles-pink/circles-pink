@@ -1,9 +1,0 @@
-{
-  "name": "notion-sdk",
-  "version": "1.0.0",
-  "scripts": {},
-  "dependencies": {
-    "@notionhq/client": "^1.0.4"
-  },
-  "devDependencies": {}
-}
