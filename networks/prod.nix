@@ -1,9 +1,10 @@
+{ pkgs, ... }:
 {
 
-  webserver = { pkgs, config, lib, ... }:
+  webserver = { config, lib, ... }:
 
     let
-      secrets = import (builtins.readFile /secrets.json);
+      secrets = builtins.fromJSON (builtins.readFile /secrets.json);
     in
     {
       boot.tmpOnTmpfs = false;
