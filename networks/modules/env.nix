@@ -5,8 +5,17 @@ let
 in
 {
   options.env = {
-    domain = mkOption {
-      type = types.string;
+    url = {
+      protocol = mkOption {
+        type = types.string;
+        default = "https";
+      };
+      domain = mkOption {
+        type = types.string;
+      };
+      topLevelDomain = mkOption {
+        type = types.string;
+      };
     };
   };
 
