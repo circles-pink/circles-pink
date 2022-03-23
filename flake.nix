@@ -172,10 +172,12 @@
                       ssh -o "StrictHostKeyChecking no" root@circles.pink whoami
                       mkdir -p ~/.config/nix
                       echo 'experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
+                      readSecretJSON notion . > /secrets.json
                     '';
 
                     secretsMap = {
                       "ssh" = "default-ssh";
+                      "notion" = "notion";
                     };
                     forgetState = true;
 
