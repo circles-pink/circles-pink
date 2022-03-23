@@ -5,11 +5,21 @@ let
   # teal = import ../default.nix;
 
   Makefile = pkgs.writeText "MakeFile" (builtins.readFile ./webserver/Makefile);
+
+  services = {
+    storybook = { domain = "${config.env.domain}"; port = 80; };
+    tasks = { domain = "tasks.${config.env.domain}"; port = 5000; };
+    directus = { domain = "directus.${config.env.domain}"; port = 8055; };
+    mysql = { port = 5100; };
+  };
 in
 
 {
 
-  imports = [ (import ./tasks-explorer.nix { inherit pkgs config lib; }) ];
+  imports = [
+    (import ./tasks-explorer.nix { inherit pkgs config lib; })
+    (import ./env.nix { inherit pkgs config lib; })
+  ];
 
   environment.systemPackages = [
     pkgs.busybox
@@ -29,15 +39,19 @@ in
 
   systemd.mounts = [ ];
 
-  networking.firewall.allowedTCPPorts = [ 80 22 443 4000 8055 ];
+  networking.firewall.allowedTCPPorts = [ 80 22 443 4000 services.directus.port ];
 
   services.nginx = {
     enable = true;
     virtualHosts = {
-      "circles.pink" = {
-        serverAliases = [ "circles.pink" ];
+      "${services.storybook.domain}" = {
         locations."/" = {
-          root = pkgs.circles-pink.publicDir;
+          root = pkgs.circles-pink.publicDir { inherit services; };
+        };
+      };
+      "${services.tasks.domain}" = {
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString services.tasks.port}";
         };
       };
     };
@@ -54,26 +68,6 @@ in
     wantedBy = [ "default.target" ];
   };
 
-  # services.postgresql = {
-  #   enable = true;
-  #   port = 5100;
-  #   package = pkgs.postgresql_10;
-  #   enableTCPIP = true;
-  #   settings = {
-  #     listen_addresses = "*";
-  #   };
-  #   authentication = pkgs.lib.mkOverride 10 ''
-  #     local all all trust
-  #     host all all ::1/128 trust
-  #     host all all 0.0.0.0/0 md5
-  #   '';
-  #   initialScript = pkgs.writeText "backend-initScript" ''
-  #     CREATE ROLE directus WITH LOGIN PASSWORD 'secret' SUPERUSER;
-  #     CREATE DATABASE directus;
-  #     GRANT ALL PRIVILEGES ON DATABASE directus TO directus;
-  #   '';
-  # };
-
   services.mysql =
     let
       user = "directus";
@@ -88,7 +82,7 @@ in
       settings = {
         mysqld = {
           innodb_buffer_pool_size = "10M";
-          port = 5100;
+          port = services.mysql.port;
         };
       };
       initialScript = pkgs.writeText "initDB"
@@ -100,7 +94,7 @@ in
 
   services.tasks-explorer = {
     enable = true;
-    port = 5000;
+    port = services.tasks.port;
     notion-token = secrets.notion-token;
     dev = true;
   };

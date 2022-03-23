@@ -19,8 +19,6 @@ in
   };
 
   config = mkIf cfg.enable {
-    networking.firewall.allowedTCPPorts = [ cfg.port ];
-
     environment.systemPackages = [ pkgs.circles-pink.tasks-explorer-server ];
 
     systemd.services.tasks-explorer = {
