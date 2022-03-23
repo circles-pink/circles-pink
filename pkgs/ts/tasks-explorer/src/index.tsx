@@ -8,6 +8,7 @@ import { Provider as StyletronProvider } from "styletron-react";
 import { LightTheme, BaseProvider, styled } from "baseui";
 import { Checkbox, LABEL_PLACEMENT } from "baseui/checkbox";
 import { Accordion, Panel } from "baseui/accordion";
+import { Button, SIZE } from "baseui/button";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -116,13 +117,19 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
     layout_.run();
   }, [JSON.stringify(data_)]);
 
+  const refreshApi = React.useCallback(
+    () =>
+      fetch(url)
+        .then((response) => response.json())
+        .then((result: ApiResult) => {
+          const tasks = getNotionTasks(database_id)(result).map(toTask);
+          setData(tasks);
+        }),
+    []
+  );
+
   React.useEffect(() => {
-    fetch(url)
-      .then((response) => response.json())
-      .then((result: ApiResult) => {
-        const tasks = getNotionTasks(database_id)(result).map(toTask);
-        setData(tasks);
-      });
+    refreshApi();
   }, [database_id, url]);
 
   const elements = getElements(data_);
@@ -162,30 +169,38 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
   return (
     <StyletronProvider value={engine}>
       <BaseProvider theme={LightTheme}>
-        <Filter filter={filter} setFilter={setFilter} />
-        <CytoscapeComponent
-          cy={(cy_) => {
-            if (!cy) setCy(cy_);
-            cy_.on("tap", "node", function () {
-              try {
-                // your browser may block popups
-                window.open(this.data("href"));
-              } catch (e) {
-                // fall back on url change
-                window.location.href = this.data("href");
-              }
-            });
-          }}
-          elements={elements}
-          style={{
-            width: "100%",
-            height: "600px",
-            backgroundColor: "rgba(249, 249, 245, 0.5)",
-            boxShadow: "0 0 4px 1px rgba(0,0,0,0.05)",
-          }}
-          layout={layout}
-          stylesheet={stylesheets}
-        />
+        <div style={{ display: "flex" }}>
+          <div style={{ width: "50%" }}>
+            <Filter
+              filter={filter}
+              setFilter={setFilter}
+              refreshApi={refreshApi}
+            />
+          </div>
+          <CytoscapeComponent
+            cy={(cy_) => {
+              if (!cy) setCy(cy_);
+              cy_.on("tap", "node", function () {
+                try {
+                  // your browser may block popups
+                  window.open(this.data("href"));
+                } catch (e) {
+                  // fall back on url change
+                  window.location.href = this.data("href");
+                }
+              });
+            }}
+            elements={elements}
+            style={{
+              width: "100%",
+              height: "600px",
+              backgroundColor: "rgba(249, 249, 245, 0.5)",
+              boxShadow: "0 0 4px 1px rgba(0,0,0,0.05)",
+            }}
+            layout={layout}
+            stylesheet={stylesheets}
+          />
+        </div>
       </BaseProvider>
     </StyletronProvider>
   );
@@ -198,31 +213,39 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
 type FilterProps = {
   filter: Filter;
   setFilter: Dispatch<SetStateAction<Filter>>;
+  refreshApi: () => void;
 };
 
-const Filter = ({ filter, setFilter }: FilterProps) => (
-  <>
-    {(Object.entries(filter.status) as [Status, boolean][]).map(
-      ([key, value]) => (
-        <Checkbox
-          key={key}
-          checked={filter.status[key]}
-          onChange={(e) =>
-            setFilter((s) => ({
-              ...s,
-              status: {
-                ...s.status,
-                [key]: !s.status[key],
-              },
-            }))
-          }
-          labelPlacement={LABEL_PLACEMENT.right}
-        >
-          {key}
-        </Checkbox>
-      )
-    )}
-  </>
+const Filter = ({ filter, setFilter, refreshApi }: FilterProps) => (
+  <Accordion>
+    <Panel title="API">
+      <Button onClick={() => refreshApi()} size={SIZE.mini}>
+        Refresh
+      </Button>
+    </Panel>
+    <Panel title="Status">
+      {(Object.entries(filter.status) as [Status, boolean][]).map(
+        ([key, value]) => (
+          <Checkbox
+            key={key}
+            checked={filter.status[key]}
+            onChange={(e) =>
+              setFilter((s) => ({
+                ...s,
+                status: {
+                  ...s.status,
+                  [key]: !s.status[key],
+                },
+              }))
+            }
+            labelPlacement={LABEL_PLACEMENT.right}
+          >
+            {key}
+          </Checkbox>
+        )
+      )}
+    </Panel>
+  </Accordion>
 );
 
 // -----------------------------------------------------------------------------
