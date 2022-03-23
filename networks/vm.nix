@@ -7,14 +7,17 @@
 
       secrets = builtins.fromJSON (builtins.readFile ../secrets.json);
 
-      domain = "circles.local";
     in
     {
       imports = [
-        (import ./modules/webserver.nix { inherit pkgs config lib secrets domain; })
+        (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
       ];
 
-      env.domain = "circles.local";
+      env.url = {
+        domain = "circles";
+        topLevelDomain = "local";
+        protocol = "http";
+      };
 
       deployment.targetEnv = "virtualbox";
       deployment.virtualbox.memorySize = 1024 * 4; # megabytes

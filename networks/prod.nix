@@ -14,7 +14,7 @@
         (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
       ];
 
-      env.domain = "circles.pink";
+      env.url = { domain = "circles"; topLevelDomain = "pink"; };
 
       nixpkgs.pkgs = pkgs;
 
@@ -23,7 +23,6 @@
       fileSystems."/" = { device = "/dev/sda1"; fsType = "ext4"; };
 
       deployment.targetHost = "circles.pink";
-
 
       security.acme.acceptTerms = true;
       security.acme.email = "circles.pink@protonmail.com";

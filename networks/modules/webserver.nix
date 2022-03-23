@@ -6,12 +6,30 @@ let
 
   Makefile = pkgs.writeText "MakeFile" (builtins.readFile ./webserver/Makefile);
 
+  mkUrl = opts@{ protocol }: "${protocol}://${mkDomain opts}";
+  mkDomain = { protocol, subdomain ? null, domain, topLevelDomain }:
+    let
+      sub = if builtins.isString subdomain then "${subdomain}." else "";
+    in
+    "${sub}${domain}.${topLevelDomain}";
+
   services = {
-    storybook = { domain = "${config.env.domain}"; port = 80; };
-    tasks = { domain = "tasks.${config.env.domain}"; port = 5000; };
-    directus = { domain = "directus.${config.env.domain}"; port = 8055; };
+    storybook = {
+      url = config.env.url;
+      port = 80;
+    };
+    tasks = {
+      url = (config.env.url // { subdomain = "tasks"; });
+      port = 5000;
+    };
+    directus = {
+      url = mkUrl (config.env.url // { subdomain = "directus"; });
+      port = 8055;
+    };
     mysql = { port = 5100; };
   };
+
+  serviceUrls = builtins.mapAttrs (name: value: mkUrl value.url) services;
 in
 
 {
@@ -44,12 +62,12 @@ in
   services.nginx = {
     enable = true;
     virtualHosts = {
-      "${services.storybook.domain}" = {
+      "${mkDomain services.storybook.url}" = {
         locations."/" = {
-          root = pkgs.circles-pink.publicDir { inherit services; };
+          root = pkgs.circles-pink.publicDir { inherit serviceUrls; };
         };
       };
-      "${services.tasks.domain}" = {
+      "${mkDomain services.tasks.url}" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString services.tasks.port}";
         };
