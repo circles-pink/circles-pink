@@ -9,6 +9,8 @@
 
   circles-pink =
     rec {
+      lib = import ./pkgs/lib.nix;
+
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
         pursOutput = purs.default;

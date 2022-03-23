@@ -6,14 +6,17 @@ let
 
   Makefile = pkgs.writeText "MakeFile" (builtins.readFile ./webserver/Makefile);
 
-  mkUrl = opts@{ protocol, subdomain ? null, domain, topLevelDomain }: "${protocol}://${mkDomain opts}";
-  mkDomain = { protocol, subdomain ? null, domain, topLevelDomain }:
-    let
-      sub = if builtins.isString subdomain then "${subdomain}." else "";
-    in
-    "${sub}${domain}.${topLevelDomain}";
+  serviceUrls = builtins.mapAttrs (name: value: pkgs.circles-pink.lib.mkUrl value.url) config.env.services;
+in
 
-  services = {
+{
+
+  imports = [
+    (import ./tasks-explorer.nix { inherit pkgs config lib; })
+    (import ./env.nix { inherit pkgs config lib; })
+  ];
+
+  env.services = {
     storybook = {
       url = config.env.url;
       port = 80;
@@ -23,21 +26,15 @@ let
       port = 5000;
     };
     directus = {
-      url = mkUrl (config.env.url // { subdomain = "directus"; });
+      url = (config.env.url // { subdomain = "directus"; });
       port = 8055;
     };
-    mysql = { port = 5100; };
+    mysql = {
+      url = config.env.url; # REMOVE!!
+      port = 5100;
+    };
   };
 
-  serviceUrls = builtins.mapAttrs (name: value: mkUrl value.url) services;
-in
-
-{
-
-  imports = [
-    (import ./tasks-explorer.nix { inherit pkgs config lib; })
-    (import ./env.nix { inherit pkgs config lib; })
-  ];
 
   environment.systemPackages = [
     pkgs.busybox
@@ -57,19 +54,19 @@ in
 
   systemd.mounts = [ ];
 
-  networking.firewall.allowedTCPPorts = [ 80 22 443 4000 services.directus.port ];
+  networking.firewall.allowedTCPPorts = [ 80 22 443 4000 config.env.services.directus.port ];
 
   services.nginx = {
     enable = true;
     virtualHosts = {
-      "${mkDomain services.storybook.url}" = {
+      "${pkgs.circles-pink.lib.mkDomain config.env.services.storybook.url}" = {
         locations."/" = {
           root = pkgs.circles-pink.publicDir { inherit serviceUrls; };
         };
       };
-      "${mkDomain services.tasks.url}" = {
+      "${pkgs.circles-pink.lib.mkDomain config.env.services.tasks.url}" = {
         locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString services.tasks.port}";
+          proxyPass = "http://127.0.0.1:${toString config.env.services.tasks.port}";
         };
       };
     };
@@ -100,7 +97,7 @@ in
       settings = {
         mysqld = {
           innodb_buffer_pool_size = "10M";
-          port = services.mysql.port;
+          port = config.env.services.mysql.port;
         };
       };
       initialScript = pkgs.writeText "initDB"
@@ -112,7 +109,7 @@ in
 
   services.tasks-explorer = {
     enable = true;
-    port = services.tasks.port;
+    port = config.env.services.tasks.port;
     notion-token = secrets.notion-token;
     dev = true;
   };
