@@ -14,6 +14,8 @@
         (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
       ];
 
+      env.domain = "circles.pink";
+
       nixpkgs.pkgs = pkgs;
 
       boot.loader.grub.device = "/dev/sda";

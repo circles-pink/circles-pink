@@ -110,6 +110,9 @@ vm-info:
 vm-ip:
 	nixops info -d circles-pink-vm --plain 2> /dev/null | awk -F'\t' '$$1 == "webserver" {print $$6}'
 
+vm-browser:
+	bash -c '${BROWSER} 'http://`make -s --no-print-directory vm-ip`
+
 shell:
 	nix develop
 

@@ -63,8 +63,8 @@
         cp ${purs-moduleDependencyGraphSvg} $out/purs-moduleDependencyGraph.svg
       '';
 
-      publicDir = final.runCommand "output" { } ''
-        cp -r ${ts.builds.storybook} $out
+      publicDir = { services }: final.runCommand "output" { } ''
+        cp -r ${ts.builds.storybook {inherit services;}} $out
       '';
 
       runGarden = final.writeShellScriptBin "run-garden" ''

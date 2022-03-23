@@ -118,7 +118,7 @@
   };
 
   builds = {
-    storybook = pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
+    storybook = { services }: pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
       tmp=`mktemp -d`
       cp -r ${workspaces.storybook} $tmp/build
       chmod -R +w $tmp
@@ -126,6 +126,7 @@
       cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
       cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
 
+      export STORYBOOK_TASKS_EXPLORER_SERVER="${services.tasks.domain}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
       OUTPUT_DIR=$out yarn build
     '';

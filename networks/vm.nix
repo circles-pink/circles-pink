@@ -6,11 +6,15 @@
       pkgs = (import ../default.nix).outputs.packages.x86_64-linux.pkgs;
 
       secrets = builtins.fromJSON (builtins.readFile ../secrets.json);
+
+      domain = "circles.local";
     in
     {
       imports = [
-        (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
+        (import ./modules/webserver.nix { inherit pkgs config lib secrets domain; })
       ];
+
+      env.domain = "circles.local";
 
       deployment.targetEnv = "virtualbox";
       deployment.virtualbox.memorySize = 1024 * 4; # megabytes
