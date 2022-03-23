@@ -27,12 +27,14 @@
       security.acme.acceptTerms = true;
       security.acme.email = "circles.pink@protonmail.com";
 
-      services.nginx.virtualHosts = {
-        "circles.pink" = {
-          forceSSL = true;
-          enableACME = true;
-        };
-      };
+      services.nginx.virtualHosts = lib.mapAttrs'
+        (_: value: {
+          name = pkgs.circles-pink.lib.mkDomain value.url;
+          value = {
+            forceSSL = true;
+            enableACME = true;
+          };
+        })
+        config.env.services;
     };
-
 }
