@@ -9,3 +9,4 @@ output/
 /tmp
 pkgs/ts/assets/src
 secrets.json
+yarn-error.log
