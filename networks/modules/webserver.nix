@@ -6,7 +6,7 @@ let
 
   Makefile = pkgs.writeText "MakeFile" (builtins.readFile ./webserver/Makefile);
 
-  mkUrl = opts@{ protocol }: "${protocol}://${mkDomain opts}";
+  mkUrl = opts@{ protocol, subdomain ? null, domain, topLevelDomain }: "${protocol}://${mkDomain opts}";
   mkDomain = { protocol, subdomain ? null, domain, topLevelDomain }:
     let
       sub = if builtins.isString subdomain then "${subdomain}." else "";
