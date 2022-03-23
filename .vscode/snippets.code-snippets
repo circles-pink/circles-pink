@@ -1,0 +1,22 @@
+{
+  "SectionPurs": {
+    "prefix": ["---", "section"],
+    "body": [
+      "--------------------------------------------------------------------------------",
+      "-- ${1:element}",
+      "--------------------------------------------------------------------------------"
+    ],
+    "description": "80 column wide section header to organize source files",
+    "scope": "purescript"
+  },
+  "SectionTS": {
+    "prefix": ["// --", "section"],
+    "body": [
+      "// -----------------------------------------------------------------------------",
+      "// ${1:element}",
+      "// -----------------------------------------------------------------------------"
+    ],
+    "description": "80 column wide section header to organize source files",
+    "scope": "typescript,typescriptreact"
+  }
+}

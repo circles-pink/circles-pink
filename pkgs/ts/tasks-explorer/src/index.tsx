@@ -1,12 +1,17 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import dagre from "cytoscape-dagre";
 import Cytoscape from "cytoscape";
 import COSEBilkent from "cytoscape-cose-bilkent";
+import { Client as Styletron } from "styletron-engine-atomic";
+import { Provider as StyletronProvider } from "styletron-react";
+import { LightTheme, BaseProvider, styled } from "baseui";
+import { Checkbox, LABEL_PLACEMENT } from "baseui/checkbox";
+import { Accordion, Panel } from "baseui/accordion";
 
-Cytoscape.use(COSEBilkent);
-
-type TasksExplorerProps = { url: string; database_id: string };
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 
 type NotionTask = {
   id: string;
@@ -28,20 +33,11 @@ type Result =
 
 type ApiResult = { results: Result[] };
 
-const getNotionTasks =
-  (db_id: string) =>
-  (apiResult: ApiResult): NotionTask[] => {
-    const tasks = apiResult.results.filter((item) => {
-      if (!("object" in item)) return false;
-      if (!item.properties.Status.select) return false;
-      if (item.object !== "page") return false;
-      if (!("parent" in item)) return false;
-      if (!("database_id" in item.parent)) return false;
-      return item.parent.database_id === db_id;
-    }) as unknown as NotionTask[];
+type Status = "Backlog" | "To Do" | "Done" | "In Progress";
 
-    return tasks;
-  };
+type Node = { data: Task };
+
+type Edge = { data: { source: string; target: string } };
 
 type Task = {
   id: string;
@@ -51,34 +47,32 @@ type Task = {
   href: string;
 };
 
-type Status = "Backlog" | "To Do" | "Done" | "In Progress";
+// -----------------------------------------------------------------------------
+// Init
+// -----------------------------------------------------------------------------
 
-type Node = { data: Task };
+Cytoscape.use(COSEBilkent);
+const engine = new Styletron();
 
-type Edge = { data: { source: string; target: string } };
+// -----------------------------------------------------------------------------
+// UI / TasksExplorer
+// -----------------------------------------------------------------------------
 
-const toTask = (notionTask: NotionTask): Task => {
-  return {
-    id: notionTask.id,
-    label: notionTask.properties.Name.title.map((x) => x.plain_text).join(""),
-    dependencies: notionTask.properties.dependencies.relation.map((x) => x.id),
-    status: notionTask.properties.Status.select.name as Status,
-    href: notionTask.url,
-  };
+type TasksExplorerProps = { url: string; database_id: string };
+
+type Filter = {
+  status: { [key in Status]: boolean };
 };
 
-export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
-  const [data, setData] = React.useState<Task[]>([]);
+const filterItem =
+  (filter: Filter) =>
+  (task: Task): boolean =>
+    filter.status[task.status];
 
-  React.useEffect(() => {
-    fetch(url)
-      .then((response) => response.json())
-      .then((result: ApiResult) => {
-        const tasks = getNotionTasks(database_id)(result).map(toTask);
-        setData(tasks);
-      });
-  }, [database_id, url]);
+const filterData = (filter: Filter, data: Task[]): Task[] =>
+  data.filter(filterItem(filter));
 
+const getElements = (data: Task[]): (Node | Edge)[] => {
   const nodes: Node[] = data.map((x) => ({
     data: x,
   }));
@@ -89,16 +83,49 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
     }))
   );
 
-  const layout = {
-    name: "cose-bilkent",
-    // other options
-    padding: 50,
-    nodeDimensionsIncludeLabels: true,
-    idealEdgeLength: 100,
-    edgeElasticity: 0.1,
-    //nodeRepulsion: 8500,
-    //randomize: true,
-  };
+  return [...nodes, ...edges];
+};
+
+const layout = {
+  name: "cose-bilkent",
+  // other options
+  padding: 50,
+  nodeDimensionsIncludeLabels: true,
+  idealEdgeLength: 100,
+  edgeElasticity: 0.1,
+  animate: "end",
+  animationDuration: 200,
+  //nodeRepulsion: 8500,
+  //randomize: true,
+};
+
+export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
+  const [data, setData] = React.useState<Task[]>([]);
+
+  const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
+
+  const [filter, setFilter] = React.useState<Filter>({
+    status: { Backlog: true, "To Do": true, Done: true, "In Progress": true },
+  });
+
+  const data_ = filterData(filter, data);
+
+  React.useEffect(() => {
+    if (!cy) return;
+    var layout_ = cy.layout(layout);
+    layout_.run();
+  }, [JSON.stringify(data_)]);
+
+  React.useEffect(() => {
+    fetch(url)
+      .then((response) => response.json())
+      .then((result: ApiResult) => {
+        const tasks = getNotionTasks(database_id)(result).map(toTask);
+        setData(tasks);
+      });
+  }, [database_id, url]);
+
+  const elements = getElements(data_);
 
   const stylesheets = [
     {
@@ -120,7 +147,6 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
         color: "black",
         "text-halign": "center",
         "text-valign": "center",
-        link: "http://www.spiegel.de",
       },
     },
     {
@@ -133,35 +159,83 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
     },
   ];
 
-  const elements = [...nodes, ...edges];
-
-  if (data.length === 0) return null;
-
   return (
-    <CytoscapeComponent
-      cy={(cy) => {
-        cy.on("tap", "node", function () {
-          try {
-            // your browser may block popups
-            window.open(this.data("href"));
-          } catch (e) {
-            // fall back on url change
-            window.location.href = this.data("href");
-          }
-        });
-      }}
-      elements={elements}
-      style={{
-        width: "100%",
-        height: "600px",
-        backgroundColor: "rgba(249, 249, 245, 0.5)",
-        boxShadow: "0 0 4px 1px rgba(0,0,0,0.05)",
-      }}
-      layout={layout}
-      stylesheet={stylesheets}
-    />
+    <StyletronProvider value={engine}>
+      <BaseProvider theme={LightTheme}>
+        <Filter filter={filter} setFilter={setFilter} />
+        <CytoscapeComponent
+          cy={(cy_) => {
+            if (!cy) setCy(cy_);
+            cy_.on("tap", "node", function () {
+              try {
+                // your browser may block popups
+                window.open(this.data("href"));
+              } catch (e) {
+                // fall back on url change
+                window.location.href = this.data("href");
+              }
+            });
+          }}
+          elements={elements}
+          style={{
+            width: "100%",
+            height: "600px",
+            backgroundColor: "rgba(249, 249, 245, 0.5)",
+            boxShadow: "0 0 4px 1px rgba(0,0,0,0.05)",
+          }}
+          layout={layout}
+          stylesheet={stylesheets}
+        />
+      </BaseProvider>
+    </StyletronProvider>
   );
 };
+
+// -----------------------------------------------------------------------------
+// UI / Filter
+// -----------------------------------------------------------------------------
+
+type FilterProps = {
+  filter: Filter;
+  setFilter: Dispatch<SetStateAction<Filter>>;
+};
+
+const Filter = ({ filter, setFilter }: FilterProps) => (
+  <>
+    {(Object.entries(filter.status) as [Status, boolean][]).map(
+      ([key, value]) => (
+        <Checkbox
+          key={key}
+          checked={filter.status[key]}
+          onChange={(e) =>
+            setFilter((s) => ({
+              ...s,
+              status: {
+                ...s.status,
+                [key]: !s.status[key],
+              },
+            }))
+          }
+          labelPlacement={LABEL_PLACEMENT.right}
+        >
+          {key}
+        </Checkbox>
+      )
+    )}
+  </>
+);
+
+// -----------------------------------------------------------------------------
+// UI / Select
+// -----------------------------------------------------------------------------
+
+type SelectMultiProps = { options: { id: string }[] };
+
+const SelectMulti = ({}: SelectMultiProps) => <></>;
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
 
 const statusToColor = (status: Status): string => {
   switch (status) {
@@ -174,4 +248,29 @@ const statusToColor = (status: Status): string => {
     case "Done":
       return "rgb(219, 237, 219)";
   }
+};
+
+const getNotionTasks =
+  (db_id: string) =>
+  (apiResult: ApiResult): NotionTask[] => {
+    const tasks = apiResult.results.filter((item) => {
+      if (!("object" in item)) return false;
+      if (!item.properties.Status.select) return false;
+      if (item.object !== "page") return false;
+      if (!("parent" in item)) return false;
+      if (!("database_id" in item.parent)) return false;
+      return item.parent.database_id === db_id;
+    }) as unknown as NotionTask[];
+
+    return tasks;
+  };
+
+const toTask = (notionTask: NotionTask): Task => {
+  return {
+    id: notionTask.id,
+    label: notionTask.properties.Name.title.map((x) => x.plain_text).join(""),
+    dependencies: notionTask.properties.dependencies.relation.map((x) => x.id),
+    status: notionTask.properties.Status.select.name as Status,
+    href: notionTask.url,
+  };
 };
