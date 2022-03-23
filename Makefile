@@ -89,7 +89,7 @@ run-garden: yarn-install
 vm-create:
 	nixops create -d circles-pink-vm networks/vm.nix
 
-vm-deploy:
+vm-deploy: agent-get-secrets vm-start
 	nixops deploy --allow-reboot -d circles-pink-vm
 
 vm-ssh:
@@ -114,4 +114,4 @@ shell:
 	nix develop
 
 agent-get-secrets:
-	scp root@hercules.teal.ooo:/secrets.json
+	scp root@hercules.teal.ooo:/secrets.json .
