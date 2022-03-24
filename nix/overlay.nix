@@ -16,9 +16,9 @@
       exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;
     in
     prev.writeShellScriptBin name ''
-      export PATH=$PATH:${builtins.concatStringsSep ":" onPath}
-      
       ${builtins.concatStringsSep "\n" exports}
+
+      export PATH=${builtins.concatStringsSep ":" (map (p : "${p}/bin") onPath)}:$PATH
 
       ${script}
     '';

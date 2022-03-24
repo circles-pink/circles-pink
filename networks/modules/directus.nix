@@ -40,6 +40,14 @@ let
       directus database install
       directus database migrate:latest
     '';
+
+  directus = pkgs.writeShellScriptBin' "directus"
+    {
+      onPath = [ pkgs.directus ];
+      env = directusEnv;
+    } ''
+    directus $@
+  '';
 in
 {
   options.services.directus = {
@@ -53,7 +61,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.directus directusInitTables ];
+    environment.systemPackages = [ directusInitTables directus pkgs.mariadb ];
 
 
     systemd.user.services.directus = {
@@ -73,7 +81,15 @@ in
       {
         enable = true;
         package = pkgs.mariadb;
-        initialDatabases = [{ name = constants.dbName; }];
+        ensureDatabases = [ constants.dbName ];
+        ensureUsers = [{
+          name = constants.dbUser;
+          ensurePermissions =
+            {
+              "database.${constants.dbName}" = "ALL PRIVILEGES";
+            };
+        }];
+
         settings = {
           mysqld = {
             innodb_buffer_pool_size = "10M";
