@@ -1,11 +1,13 @@
 {
 
   webserver =
-    { config, lib, ... }:
+    { config, ... }:
     let
       pkgs = (import ../default.nix).outputs.packages.x86_64-linux.pkgs;
 
       secrets = builtins.fromJSON (builtins.readFile ../secrets.json);
+
+      lib = pkgs.lib;
 
     in
     {
