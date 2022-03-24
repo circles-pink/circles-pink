@@ -2,8 +2,8 @@ PURS_OUTPUT=pkgs/ts/generated/output
 
 all: dev-storybook build-storybook ci rw-result
 
-dev-storybook: assets
-	export STORYBOOK_TASKS_EXPLORER_SERVER=http://`make -s --no-print-directory vm-ip`:5000; \
+dev-storybook: vm-deploy assets
+	export STORYBOOK_TASKS_EXPLORER_SERVER="http://tasks.circles.local"; \
 	yarn workspace storybook run storybook
 
 dev-browser:
@@ -114,7 +114,7 @@ vm-browser:
 	bash -c '${BROWSER} 'http://`make -s --no-print-directory vm-ip`
 
 shell:
-	nix develop
+	nix develop -c fish
 
 agent-get-secrets:
 	scp root@hercules.teal.ooo:/secrets.json .

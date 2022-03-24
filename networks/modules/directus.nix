@@ -10,6 +10,36 @@ let
     secret = "abcdef";
     key = "xxxxxxx-xxxxxx-xxxxxxxx-xxxxxxxxxx";
   };
+
+  directusEnv = {
+    PORT = "${toString cfg.port}";
+    PUBLIC_URL = "http://localhost:${toString cfg.port}";
+    LOG_LEVEL = "info";
+    LOG_STYLE = "pretty";
+    DB_CLIENT = "mysql";
+    DB_HOST = constants.dbHost;
+    DB_PORT = toString cfg.mysqlPort;
+    DB_DATABASE = constants.dbName;
+    DB_USER = constants.dbUser;
+    DB_PASSWORD = constants.dbPassword;
+    KEY = constants.key;
+    SECRET = constants.secret;
+    ACCESS_TOKEN_TTL = "15m";
+    REFRESH_TOKEN_TTL = "7d";
+    REFRESH_TOKEN_COOKIE_SECURE = "false";
+    REFRESH_TOKEN_COOKIE_SAME_SITE = "lax";
+    REFRESH_TOKEN_COOKIE_NAME = "directus_refresh_token";
+  };
+
+  directusInitTables = pkgs.writeShellScriptBin' "directus-init-tables"
+    {
+      onPath = [ pkgs.directus ];
+      env = directusEnv;
+    }
+    ''
+      directus database install
+      directus database migrate:latest
+    '';
 in
 {
   options.services.directus = {
@@ -23,7 +53,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = [ pkgs.directus ];
+    environment.systemPackages = [ pkgs.directus directusInitTables ];
 
 
     systemd.user.services.directus = {
@@ -36,25 +66,7 @@ in
         Restart = "on-failure";
       };
       wantedBy = [ "default.target" ];
-      environment = {
-        PORT = "${toString cfg.port}";
-        PUBLIC_URL = "http://localhost:${toString cfg.port}";
-        LOG_LEVEL = "info";
-        LOG_STYLE = "pretty";
-        DB_CLIENT = "mysql";
-        DB_HOST = constants.dbHost;
-        DB_PORT = toString cfg.mysqlPort;
-        DB_DATABASE = constants.dbName;
-        DB_USER = constants.dbUser;
-        DB_PASSWORD = constants.dbPassword;
-        KEY = constants.key;
-        SECRET = constants.secret;
-        ACCESS_TOKEN_TTL = "15m";
-        REFRESH_TOKEN_TTL = "7d";
-        REFRESH_TOKEN_COOKIE_SECURE = "false";
-        REFRESH_TOKEN_COOKIE_SAME_SITE = "lax";
-        REFRESH_TOKEN_COOKIE_NAME = "directus_refresh_token";
-      };
+      environment = directusEnv;
     };
 
     services.mysql =
