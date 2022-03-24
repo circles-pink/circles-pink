@@ -1,9 +1,10 @@
 { pkgs, ... }:
 {
 
-  webserver = { config, lib, ... }:
+  webserver = { config, ... }:
 
     let
+      lib = pkgs.lib;
       secrets = builtins.fromJSON (builtins.readFile /secrets.json);
     in
     {
@@ -29,7 +30,7 @@
 
       services.nginx.virtualHosts = lib.mapAttrs'
         (_: value: {
-          name = pkgs.circles-pink.lib.mkDomain value.url;
+          name = lib.mkDomain value.url;
           value = {
             forceSSL = true;
             enableACME = true;

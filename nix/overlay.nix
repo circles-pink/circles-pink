@@ -7,10 +7,12 @@
 
   depcruise = circles-pink.ts.bins.depcruise;
 
+  directus = circles-pink.ts.bins.circles-directus;
+
+  lib = prev.lib // (import ./pkgs/lib.nix);
+
   circles-pink =
     rec {
-      lib = import ./pkgs/lib.nix;
-
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
         pursOutput = purs.default;
