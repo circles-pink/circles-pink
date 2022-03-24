@@ -96,6 +96,7 @@
                   pkgs.makefile2graph
                   pkgs.depcruise
                   pkgs.nixops
+                  pkgs.fish
                   #pkgs.virtualboxHeadless
                 ];
 

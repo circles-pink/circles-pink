@@ -11,6 +11,18 @@
 
   lib = prev.lib // (import ./pkgs/lib.nix);
 
+  writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
+    let
+      exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;
+    in
+    prev.writeShellScriptBin name ''
+      export PATH=$PATH:${builtins.concatStringsSep ":" onPath}
+      
+      ${builtins.concatStringsSep "\n" exports}
+
+      ${script}
+    '';
+
   circles-pink =
     rec {
       ts = (import ./pkgs/ts.nix {

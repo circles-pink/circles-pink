@@ -36,7 +36,6 @@ in
     };
   };
 
-
   environment.systemPackages = [
     pkgs.busybox
     pkgs.gnumake
@@ -67,6 +66,11 @@ in
       "${lib.mkDomain config.env.services.tasks.url}" = {
         locations."/" = {
           proxyPass = "http://127.0.0.1:${toString config.env.services.tasks.port}";
+        };
+      };
+      "${lib.mkDomain config.env.services.directus.url}" = {
+        locations."/" = {
+          proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
         };
       };
     };
