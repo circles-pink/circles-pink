@@ -6,48 +6,41 @@ type ZEUS_UNIONS = never
 
 export type ValueTypes = {
     ["Query"]: AliasType<{
+names?: [{	filter?:ValueTypes["names_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["names"]],
+names_by_id?: [{	id:string},ValueTypes["names"]],
+names_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes["names_filter"] | null,	limit?:number | null,	search?:string | null,	sort?:(string | undefined | null)[]},ValueTypes["names_aggregated"]],
 views?: [{	filter?:ValueTypes["views_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["views"]],
 views_by_id?: [{	id:string},ValueTypes["views"]],
 views_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes["views_filter"] | null,	limit?:number | null,	search?:string | null,	sort?:(string | undefined | null)[]},ValueTypes["views_aggregated"]],
+views_translations?: [{	filter?:ValueTypes["views_translations_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["views_translations"]],
+views_translations_by_id?: [{	id:string},ValueTypes["views_translations"]],
+views_translations_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes["views_translations_filter"] | null,	limit?:number | null,	search?:string | null,	sort?:(string | undefined | null)[]},ValueTypes["views_translations_aggregated"]],
+languages?: [{	filter?:ValueTypes["languages_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["languages"]],
+languages_by_id?: [{	id:string},ValueTypes["languages"]],
 		__typename?: boolean
 }>;
-	["views"]: AliasType<{
-	user_created?:boolean,
-	user_updated?:boolean,
+	["names"]: AliasType<{
 	id?:boolean,
-	status?:boolean,
-	sort?:boolean,
-	date_created?:boolean,
-	date_created_func?:ValueTypes["datetime_functions"],
-	date_updated?:boolean,
-	date_updated_func?:ValueTypes["datetime_functions"],
+	name?:boolean,
 		__typename?: boolean
 }>;
-	/** ISO8601 Date values */
-["Date"]:unknown;
-	["datetime_functions"]: AliasType<{
-	year?:boolean,
-	month?:boolean,
-	week?:boolean,
-	day?:boolean,
-	weekday?:boolean,
-	hour?:boolean,
-	minute?:boolean,
-	second?:boolean,
-		__typename?: boolean
-}>;
-	["views_filter"]: {
-	user_created?:ValueTypes["string_filter_operators"] | null,
-	user_updated?:ValueTypes["string_filter_operators"] | null,
-	id?:ValueTypes["string_filter_operators"] | null,
-	status?:ValueTypes["string_filter_operators"] | null,
-	sort?:ValueTypes["number_filter_operators"] | null,
-	date_created?:ValueTypes["date_filter_operators"] | null,
-	date_created_func?:ValueTypes["datetime_function_filter_operators"] | null,
-	date_updated?:ValueTypes["date_filter_operators"] | null,
-	date_updated_func?:ValueTypes["datetime_function_filter_operators"] | null,
-	_and?:(ValueTypes["views_filter"] | undefined | null)[],
-	_or?:(ValueTypes["views_filter"] | undefined | null)[]
+	["names_filter"]: {
+	id?:ValueTypes["number_filter_operators"] | null,
+	name?:ValueTypes["string_filter_operators"] | null,
+	_and?:(ValueTypes["names_filter"] | undefined | null)[],
+	_or?:(ValueTypes["names_filter"] | undefined | null)[]
+};
+	["number_filter_operators"]: {
+	_eq?:number | null,
+	_neq?:number | null,
+	_in?:(number | undefined | null)[],
+	_nin?:(number | undefined | null)[],
+	_gt?:number | null,
+	_gte?:number | null,
+	_lt?:number | null,
+	_lte?:number | null,
+	_null?:boolean | null,
+	_nnull?:boolean | null
 };
 	["string_filter_operators"]: {
 	_eq?:string | null,
@@ -65,17 +58,74 @@ views_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes
 	_empty?:boolean | null,
 	_nempty?:boolean | null
 };
-	["number_filter_operators"]: {
-	_eq?:number | null,
-	_neq?:number | null,
-	_in?:(number | undefined | null)[],
-	_nin?:(number | undefined | null)[],
-	_gt?:number | null,
-	_gte?:number | null,
-	_lt?:number | null,
-	_lte?:number | null,
-	_null?:boolean | null,
-	_nnull?:boolean | null
+	["names_aggregated"]: AliasType<{
+	group?:boolean,
+	avg?:ValueTypes["names_aggregated_fields"],
+	sum?:ValueTypes["names_aggregated_fields"],
+	count?:ValueTypes["names_aggregated_fields"],
+	countDistinct?:ValueTypes["names_aggregated_fields"],
+	avgDistinct?:ValueTypes["names_aggregated_fields"],
+	sumDistinct?:ValueTypes["names_aggregated_fields"],
+	min?:ValueTypes["names_aggregated_fields"],
+	max?:ValueTypes["names_aggregated_fields"],
+		__typename?: boolean
+}>;
+	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSON"]:unknown;
+	["names_aggregated_fields"]: AliasType<{
+	id?:boolean,
+		__typename?: boolean
+}>;
+	["views"]: AliasType<{
+	user_created?:boolean,
+	user_updated?:boolean,
+	id?:boolean,
+	status?:boolean,
+	sort?:boolean,
+	date_created?:boolean,
+	date_created_func?:ValueTypes["datetime_functions"],
+	date_updated?:boolean,
+	date_updated_func?:ValueTypes["datetime_functions"],
+	enum?:boolean,
+name?: [{	filter?:ValueTypes["names_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["names"]],
+translations?: [{	filter?:ValueTypes["views_translations_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["views_translations"]],
+		__typename?: boolean
+}>;
+	/** ISO8601 Date values */
+["Date"]:unknown;
+	["datetime_functions"]: AliasType<{
+	year?:boolean,
+	month?:boolean,
+	week?:boolean,
+	day?:boolean,
+	weekday?:boolean,
+	hour?:boolean,
+	minute?:boolean,
+	second?:boolean,
+		__typename?: boolean
+}>;
+	["views_translations"]: AliasType<{
+	id?:boolean,
+views_id?: [{	filter?:ValueTypes["views_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["views"]],
+languages_id?: [{	filter?:ValueTypes["languages_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null},ValueTypes["languages"]],
+	foo?:boolean,
+		__typename?: boolean
+}>;
+	["views_filter"]: {
+	user_created?:ValueTypes["string_filter_operators"] | null,
+	user_updated?:ValueTypes["string_filter_operators"] | null,
+	id?:ValueTypes["string_filter_operators"] | null,
+	status?:ValueTypes["string_filter_operators"] | null,
+	sort?:ValueTypes["number_filter_operators"] | null,
+	date_created?:ValueTypes["date_filter_operators"] | null,
+	date_created_func?:ValueTypes["datetime_function_filter_operators"] | null,
+	date_updated?:ValueTypes["date_filter_operators"] | null,
+	date_updated_func?:ValueTypes["datetime_function_filter_operators"] | null,
+	enum?:ValueTypes["string_filter_operators"] | null,
+	name?:ValueTypes["names_filter"] | null,
+	translations?:ValueTypes["views_translations_filter"] | null,
+	_and?:(ValueTypes["views_filter"] | undefined | null)[],
+	_or?:(ValueTypes["views_filter"] | undefined | null)[]
 };
 	["date_filter_operators"]: {
 	_eq?:string | null,
@@ -97,6 +147,25 @@ views_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes
 	minute?:ValueTypes["number_filter_operators"] | null,
 	second?:ValueTypes["number_filter_operators"] | null
 };
+	["views_translations_filter"]: {
+	id?:ValueTypes["number_filter_operators"] | null,
+	views_id?:ValueTypes["views_filter"] | null,
+	languages_id?:ValueTypes["languages_filter"] | null,
+	foo?:ValueTypes["string_filter_operators"] | null,
+	_and?:(ValueTypes["views_translations_filter"] | undefined | null)[],
+	_or?:(ValueTypes["views_translations_filter"] | undefined | null)[]
+};
+	["languages_filter"]: {
+	code?:ValueTypes["string_filter_operators"] | null,
+	name?:ValueTypes["string_filter_operators"] | null,
+	_and?:(ValueTypes["languages_filter"] | undefined | null)[],
+	_or?:(ValueTypes["languages_filter"] | undefined | null)[]
+};
+	["languages"]: AliasType<{
+	code?:boolean,
+	name?:boolean,
+		__typename?: boolean
+}>;
 	["views_aggregated"]: AliasType<{
 	group?:boolean,
 	avg?:ValueTypes["views_aggregated_fields"],
@@ -109,21 +178,58 @@ views_aggregated?: [{	groupBy?:(string | undefined | null)[],	filter?:ValueTypes
 	max?:ValueTypes["views_aggregated_fields"],
 		__typename?: boolean
 }>;
-	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSON"]:unknown;
 	["views_aggregated_fields"]: AliasType<{
 	sort?:boolean,
+	name?:boolean,
+		__typename?: boolean
+}>;
+	["views_translations_aggregated"]: AliasType<{
+	group?:boolean,
+	avg?:ValueTypes["views_translations_aggregated_fields"],
+	sum?:ValueTypes["views_translations_aggregated_fields"],
+	count?:ValueTypes["views_translations_aggregated_fields"],
+	countDistinct?:ValueTypes["views_translations_aggregated_fields"],
+	avgDistinct?:ValueTypes["views_translations_aggregated_fields"],
+	sumDistinct?:ValueTypes["views_translations_aggregated_fields"],
+	min?:ValueTypes["views_translations_aggregated_fields"],
+	max?:ValueTypes["views_translations_aggregated_fields"],
+		__typename?: boolean
+}>;
+	["views_translations_aggregated_fields"]: AliasType<{
+	id?:boolean,
 		__typename?: boolean
 }>;
 	["Mutation"]: AliasType<{
+create_names_items?: [{	filter?:ValueTypes["names_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	data?:ValueTypes["create_names_input"][]},ValueTypes["names"]],
+create_names_item?: [{	data:ValueTypes["create_names_input"]},ValueTypes["names"]],
 create_views_items?: [{	filter?:ValueTypes["views_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	data?:ValueTypes["create_views_input"][]},ValueTypes["views"]],
 create_views_item?: [{	data:ValueTypes["create_views_input"]},ValueTypes["views"]],
+create_views_translations_items?: [{	filter?:ValueTypes["views_translations_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	data?:ValueTypes["create_views_translations_input"][]},ValueTypes["views_translations"]],
+create_views_translations_item?: [{	data:ValueTypes["create_views_translations_input"]},ValueTypes["views_translations"]],
+create_languages_items?: [{	filter?:ValueTypes["languages_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	data?:ValueTypes["create_languages_input"][]},ValueTypes["languages"]],
+create_languages_item?: [{	data:ValueTypes["create_languages_input"]},ValueTypes["languages"]],
+update_names_items?: [{	filter?:ValueTypes["names_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	ids?:string[],	data:ValueTypes["update_names_input"]},ValueTypes["names"]],
+update_names_item?: [{	id:string,	data:ValueTypes["update_names_input"]},ValueTypes["names"]],
 update_views_items?: [{	filter?:ValueTypes["views_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	ids?:string[],	data:ValueTypes["update_views_input"]},ValueTypes["views"]],
 update_views_item?: [{	id:string,	data:ValueTypes["update_views_input"]},ValueTypes["views"]],
+update_views_translations_items?: [{	filter?:ValueTypes["views_translations_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	ids?:string[],	data:ValueTypes["update_views_translations_input"]},ValueTypes["views_translations"]],
+update_views_translations_item?: [{	id:string,	data:ValueTypes["update_views_translations_input"]},ValueTypes["views_translations"]],
+update_languages_items?: [{	filter?:ValueTypes["languages_filter"] | null,	sort?:(string | undefined | null)[],	limit?:number | null,	offset?:number | null,	page?:number | null,	search?:string | null,	ids?:string[],	data:ValueTypes["update_languages_input"]},ValueTypes["languages"]],
+update_languages_item?: [{	id:string,	data:ValueTypes["update_languages_input"]},ValueTypes["languages"]],
+delete_names_items?: [{	ids?:string[]},ValueTypes["delete_many"]],
+delete_names_item?: [{	id:string},ValueTypes["delete_one"]],
 delete_views_items?: [{	ids?:string[]},ValueTypes["delete_many"]],
 delete_views_item?: [{	id:string},ValueTypes["delete_one"]],
+delete_views_translations_items?: [{	ids?:string[]},ValueTypes["delete_many"]],
+delete_views_translations_item?: [{	id:string},ValueTypes["delete_one"]],
+delete_languages_items?: [{	ids?:string[]},ValueTypes["delete_many"]],
+delete_languages_item?: [{	id:string},ValueTypes["delete_one"]],
 		__typename?: boolean
 }>;
+	["create_names_input"]: {
+	id?:string | null,
+	name:string
+};
 	["create_views_input"]: {
 	user_created?:string | null,
 	user_updated?:string | null,
@@ -133,7 +239,10 @@ delete_views_item?: [{	id:string},ValueTypes["delete_one"]],
 	date_created?:ValueTypes["Date"] | null,
 	date_created_func?:ValueTypes["datetime_functionsInput"] | null,
 	date_updated?:ValueTypes["Date"] | null,
-	date_updated_func?:ValueTypes["datetime_functionsInput"] | null
+	date_updated_func?:ValueTypes["datetime_functionsInput"] | null,
+	enum:string,
+	name?:ValueTypes["create_names_input"] | null,
+	translations?:(ValueTypes["create_views_translations_input"] | undefined | null)[]
 };
 	["datetime_functionsInput"]: {
 	year?:number | null,
@@ -145,6 +254,20 @@ delete_views_item?: [{	id:string},ValueTypes["delete_one"]],
 	minute?:number | null,
 	second?:number | null
 };
+	["create_views_translations_input"]: {
+	id?:string | null,
+	views_id?:ValueTypes["create_views_input"] | null,
+	languages_id?:ValueTypes["create_languages_input"] | null,
+	foo:string
+};
+	["create_languages_input"]: {
+	code?:string | null,
+	name?:string | null
+};
+	["update_names_input"]: {
+	id?:string | null,
+	name?:string | null
+};
 	["update_views_input"]: {
 	user_created?:string | null,
 	user_updated?:string | null,
@@ -154,7 +277,20 @@ delete_views_item?: [{	id:string},ValueTypes["delete_one"]],
 	date_created?:ValueTypes["Date"] | null,
 	date_created_func?:ValueTypes["datetime_functionsInput"] | null,
 	date_updated?:ValueTypes["Date"] | null,
-	date_updated_func?:ValueTypes["datetime_functionsInput"] | null
+	date_updated_func?:ValueTypes["datetime_functionsInput"] | null,
+	enum?:string | null,
+	name?:ValueTypes["update_names_input"] | null,
+	translations?:(ValueTypes["update_views_translations_input"] | undefined | null)[]
+};
+	["update_views_translations_input"]: {
+	id?:string | null,
+	views_id?:ValueTypes["update_views_input"] | null,
+	languages_id?:ValueTypes["update_languages_input"] | null,
+	foo?:string | null
+};
+	["update_languages_input"]: {
+	code?:string | null,
+	name?:string | null
 };
 	["delete_many"]: AliasType<{
 	ids?:boolean,
@@ -168,9 +304,40 @@ delete_views_item?: [{	id:string},ValueTypes["delete_one"]],
 
 export type ModelTypes = {
     ["Query"]: {
-		views?:(ModelTypes["views"] | undefined)[],
+		names?:(ModelTypes["names"] | undefined)[],
+	names_by_id?:ModelTypes["names"],
+	names_aggregated?:(ModelTypes["names_aggregated"] | undefined)[],
+	views?:(ModelTypes["views"] | undefined)[],
 	views_by_id?:ModelTypes["views"],
-	views_aggregated?:(ModelTypes["views_aggregated"] | undefined)[]
+	views_aggregated?:(ModelTypes["views_aggregated"] | undefined)[],
+	views_translations?:(ModelTypes["views_translations"] | undefined)[],
+	views_translations_by_id?:ModelTypes["views_translations"],
+	views_translations_aggregated?:(ModelTypes["views_translations_aggregated"] | undefined)[],
+	languages?:(ModelTypes["languages"] | undefined)[],
+	languages_by_id?:ModelTypes["languages"]
+};
+	["names"]: {
+		id?:string,
+	name:string
+};
+	["names_filter"]: GraphQLTypes["names_filter"];
+	["number_filter_operators"]: GraphQLTypes["number_filter_operators"];
+	["string_filter_operators"]: GraphQLTypes["string_filter_operators"];
+	["names_aggregated"]: {
+		group?:ModelTypes["JSON"],
+	avg?:ModelTypes["names_aggregated_fields"],
+	sum?:ModelTypes["names_aggregated_fields"],
+	count?:ModelTypes["names_aggregated_fields"],
+	countDistinct?:ModelTypes["names_aggregated_fields"],
+	avgDistinct?:ModelTypes["names_aggregated_fields"],
+	sumDistinct?:ModelTypes["names_aggregated_fields"],
+	min?:ModelTypes["names_aggregated_fields"],
+	max?:ModelTypes["names_aggregated_fields"]
+};
+	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSON"]:any;
+	["names_aggregated_fields"]: {
+		id?:number
 };
 	["views"]: {
 		user_created?:string,
@@ -181,7 +348,10 @@ export type ModelTypes = {
 	date_created?:ModelTypes["Date"],
 	date_created_func?:ModelTypes["datetime_functions"],
 	date_updated?:ModelTypes["Date"],
-	date_updated_func?:ModelTypes["datetime_functions"]
+	date_updated_func?:ModelTypes["datetime_functions"],
+	enum:string,
+	name?:ModelTypes["names"],
+	translations?:(ModelTypes["views_translations"] | undefined)[]
 };
 	/** ISO8601 Date values */
 ["Date"]:any;
@@ -195,11 +365,21 @@ export type ModelTypes = {
 	minute?:number,
 	second?:number
 };
+	["views_translations"]: {
+		id?:string,
+	views_id?:ModelTypes["views"],
+	languages_id?:ModelTypes["languages"],
+	foo:string
+};
 	["views_filter"]: GraphQLTypes["views_filter"];
-	["string_filter_operators"]: GraphQLTypes["string_filter_operators"];
-	["number_filter_operators"]: GraphQLTypes["number_filter_operators"];
 	["date_filter_operators"]: GraphQLTypes["date_filter_operators"];
 	["datetime_function_filter_operators"]: GraphQLTypes["datetime_function_filter_operators"];
+	["views_translations_filter"]: GraphQLTypes["views_translations_filter"];
+	["languages_filter"]: GraphQLTypes["languages_filter"];
+	["languages"]: {
+		code?:string,
+	name?:string
+};
 	["views_aggregated"]: {
 		group?:ModelTypes["JSON"],
 	avg?:ModelTypes["views_aggregated_fields"],
@@ -211,22 +391,59 @@ export type ModelTypes = {
 	min?:ModelTypes["views_aggregated_fields"],
 	max?:ModelTypes["views_aggregated_fields"]
 };
-	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSON"]:any;
 	["views_aggregated_fields"]: {
-		sort?:number
+		sort?:number,
+	name?:number
+};
+	["views_translations_aggregated"]: {
+		group?:ModelTypes["JSON"],
+	avg?:ModelTypes["views_translations_aggregated_fields"],
+	sum?:ModelTypes["views_translations_aggregated_fields"],
+	count?:ModelTypes["views_translations_aggregated_fields"],
+	countDistinct?:ModelTypes["views_translations_aggregated_fields"],
+	avgDistinct?:ModelTypes["views_translations_aggregated_fields"],
+	sumDistinct?:ModelTypes["views_translations_aggregated_fields"],
+	min?:ModelTypes["views_translations_aggregated_fields"],
+	max?:ModelTypes["views_translations_aggregated_fields"]
+};
+	["views_translations_aggregated_fields"]: {
+		id?:number
 };
 	["Mutation"]: {
-		create_views_items?:(ModelTypes["views"] | undefined)[],
+		create_names_items?:(ModelTypes["names"] | undefined)[],
+	create_names_item?:ModelTypes["names"],
+	create_views_items?:(ModelTypes["views"] | undefined)[],
 	create_views_item?:ModelTypes["views"],
+	create_views_translations_items?:(ModelTypes["views_translations"] | undefined)[],
+	create_views_translations_item?:ModelTypes["views_translations"],
+	create_languages_items?:(ModelTypes["languages"] | undefined)[],
+	create_languages_item?:ModelTypes["languages"],
+	update_names_items?:(ModelTypes["names"] | undefined)[],
+	update_names_item?:ModelTypes["names"],
 	update_views_items?:(ModelTypes["views"] | undefined)[],
 	update_views_item?:ModelTypes["views"],
+	update_views_translations_items?:(ModelTypes["views_translations"] | undefined)[],
+	update_views_translations_item?:ModelTypes["views_translations"],
+	update_languages_items?:(ModelTypes["languages"] | undefined)[],
+	update_languages_item?:ModelTypes["languages"],
+	delete_names_items?:ModelTypes["delete_many"],
+	delete_names_item?:ModelTypes["delete_one"],
 	delete_views_items?:ModelTypes["delete_many"],
-	delete_views_item?:ModelTypes["delete_one"]
+	delete_views_item?:ModelTypes["delete_one"],
+	delete_views_translations_items?:ModelTypes["delete_many"],
+	delete_views_translations_item?:ModelTypes["delete_one"],
+	delete_languages_items?:ModelTypes["delete_many"],
+	delete_languages_item?:ModelTypes["delete_one"]
 };
+	["create_names_input"]: GraphQLTypes["create_names_input"];
 	["create_views_input"]: GraphQLTypes["create_views_input"];
 	["datetime_functionsInput"]: GraphQLTypes["datetime_functionsInput"];
+	["create_views_translations_input"]: GraphQLTypes["create_views_translations_input"];
+	["create_languages_input"]: GraphQLTypes["create_languages_input"];
+	["update_names_input"]: GraphQLTypes["update_names_input"];
 	["update_views_input"]: GraphQLTypes["update_views_input"];
+	["update_views_translations_input"]: GraphQLTypes["update_views_translations_input"];
+	["update_languages_input"]: GraphQLTypes["update_languages_input"];
 	["delete_many"]: {
 		ids?:string[]
 };
@@ -238,47 +455,40 @@ export type ModelTypes = {
 export type GraphQLTypes = {
     ["Query"]: {
 	__typename: "Query",
+	names?: Array<GraphQLTypes["names"] | undefined>,
+	names_by_id?: GraphQLTypes["names"],
+	names_aggregated?: Array<GraphQLTypes["names_aggregated"] | undefined>,
 	views?: Array<GraphQLTypes["views"] | undefined>,
 	views_by_id?: GraphQLTypes["views"],
-	views_aggregated?: Array<GraphQLTypes["views_aggregated"] | undefined>
+	views_aggregated?: Array<GraphQLTypes["views_aggregated"] | undefined>,
+	views_translations?: Array<GraphQLTypes["views_translations"] | undefined>,
+	views_translations_by_id?: GraphQLTypes["views_translations"],
+	views_translations_aggregated?: Array<GraphQLTypes["views_translations_aggregated"] | undefined>,
+	languages?: Array<GraphQLTypes["languages"] | undefined>,
+	languages_by_id?: GraphQLTypes["languages"]
 };
-	["views"]: {
-	__typename: "views",
-	user_created?: string,
-	user_updated?: string,
+	["names"]: {
+	__typename: "names",
 	id?: string,
-	status: string,
-	sort?: number,
-	date_created?: GraphQLTypes["Date"],
-	date_created_func?: GraphQLTypes["datetime_functions"],
-	date_updated?: GraphQLTypes["Date"],
-	date_updated_func?: GraphQLTypes["datetime_functions"]
+	name: string
 };
-	/** ISO8601 Date values */
-["Date"]:any;
-	["datetime_functions"]: {
-	__typename: "datetime_functions",
-	year?: number,
-	month?: number,
-	week?: number,
-	day?: number,
-	weekday?: number,
-	hour?: number,
-	minute?: number,
-	second?: number
+	["names_filter"]: {
+		id?: GraphQLTypes["number_filter_operators"],
+	name?: GraphQLTypes["string_filter_operators"],
+	_and?: Array<GraphQLTypes["names_filter"] | undefined>,
+	_or?: Array<GraphQLTypes["names_filter"] | undefined>
 };
-	["views_filter"]: {
-		user_created?: GraphQLTypes["string_filter_operators"],
-	user_updated?: GraphQLTypes["string_filter_operators"],
-	id?: GraphQLTypes["string_filter_operators"],
-	status?: GraphQLTypes["string_filter_operators"],
-	sort?: GraphQLTypes["number_filter_operators"],
-	date_created?: GraphQLTypes["date_filter_operators"],
-	date_created_func?: GraphQLTypes["datetime_function_filter_operators"],
-	date_updated?: GraphQLTypes["date_filter_operators"],
-	date_updated_func?: GraphQLTypes["datetime_function_filter_operators"],
-	_and?: Array<GraphQLTypes["views_filter"] | undefined>,
-	_or?: Array<GraphQLTypes["views_filter"] | undefined>
+	["number_filter_operators"]: {
+		_eq?: number,
+	_neq?: number,
+	_in?: Array<number | undefined>,
+	_nin?: Array<number | undefined>,
+	_gt?: number,
+	_gte?: number,
+	_lt?: number,
+	_lte?: number,
+	_null?: boolean,
+	_nnull?: boolean
 };
 	["string_filter_operators"]: {
 		_eq?: string,
@@ -296,17 +506,74 @@ export type GraphQLTypes = {
 	_empty?: boolean,
 	_nempty?: boolean
 };
-	["number_filter_operators"]: {
-		_eq?: number,
-	_neq?: number,
-	_in?: Array<number | undefined>,
-	_nin?: Array<number | undefined>,
-	_gt?: number,
-	_gte?: number,
-	_lt?: number,
-	_lte?: number,
-	_null?: boolean,
-	_nnull?: boolean
+	["names_aggregated"]: {
+	__typename: "names_aggregated",
+	group?: GraphQLTypes["JSON"],
+	avg?: GraphQLTypes["names_aggregated_fields"],
+	sum?: GraphQLTypes["names_aggregated_fields"],
+	count?: GraphQLTypes["names_aggregated_fields"],
+	countDistinct?: GraphQLTypes["names_aggregated_fields"],
+	avgDistinct?: GraphQLTypes["names_aggregated_fields"],
+	sumDistinct?: GraphQLTypes["names_aggregated_fields"],
+	min?: GraphQLTypes["names_aggregated_fields"],
+	max?: GraphQLTypes["names_aggregated_fields"]
+};
+	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+["JSON"]:any;
+	["names_aggregated_fields"]: {
+	__typename: "names_aggregated_fields",
+	id?: number
+};
+	["views"]: {
+	__typename: "views",
+	user_created?: string,
+	user_updated?: string,
+	id?: string,
+	status: string,
+	sort?: number,
+	date_created?: GraphQLTypes["Date"],
+	date_created_func?: GraphQLTypes["datetime_functions"],
+	date_updated?: GraphQLTypes["Date"],
+	date_updated_func?: GraphQLTypes["datetime_functions"],
+	enum: string,
+	name?: GraphQLTypes["names"],
+	translations?: Array<GraphQLTypes["views_translations"] | undefined>
+};
+	/** ISO8601 Date values */
+["Date"]:any;
+	["datetime_functions"]: {
+	__typename: "datetime_functions",
+	year?: number,
+	month?: number,
+	week?: number,
+	day?: number,
+	weekday?: number,
+	hour?: number,
+	minute?: number,
+	second?: number
+};
+	["views_translations"]: {
+	__typename: "views_translations",
+	id?: string,
+	views_id?: GraphQLTypes["views"],
+	languages_id?: GraphQLTypes["languages"],
+	foo: string
+};
+	["views_filter"]: {
+		user_created?: GraphQLTypes["string_filter_operators"],
+	user_updated?: GraphQLTypes["string_filter_operators"],
+	id?: GraphQLTypes["string_filter_operators"],
+	status?: GraphQLTypes["string_filter_operators"],
+	sort?: GraphQLTypes["number_filter_operators"],
+	date_created?: GraphQLTypes["date_filter_operators"],
+	date_created_func?: GraphQLTypes["datetime_function_filter_operators"],
+	date_updated?: GraphQLTypes["date_filter_operators"],
+	date_updated_func?: GraphQLTypes["datetime_function_filter_operators"],
+	enum?: GraphQLTypes["string_filter_operators"],
+	name?: GraphQLTypes["names_filter"],
+	translations?: GraphQLTypes["views_translations_filter"],
+	_and?: Array<GraphQLTypes["views_filter"] | undefined>,
+	_or?: Array<GraphQLTypes["views_filter"] | undefined>
 };
 	["date_filter_operators"]: {
 		_eq?: string,
@@ -328,6 +595,25 @@ export type GraphQLTypes = {
 	minute?: GraphQLTypes["number_filter_operators"],
 	second?: GraphQLTypes["number_filter_operators"]
 };
+	["views_translations_filter"]: {
+		id?: GraphQLTypes["number_filter_operators"],
+	views_id?: GraphQLTypes["views_filter"],
+	languages_id?: GraphQLTypes["languages_filter"],
+	foo?: GraphQLTypes["string_filter_operators"],
+	_and?: Array<GraphQLTypes["views_translations_filter"] | undefined>,
+	_or?: Array<GraphQLTypes["views_translations_filter"] | undefined>
+};
+	["languages_filter"]: {
+		code?: GraphQLTypes["string_filter_operators"],
+	name?: GraphQLTypes["string_filter_operators"],
+	_and?: Array<GraphQLTypes["languages_filter"] | undefined>,
+	_or?: Array<GraphQLTypes["languages_filter"] | undefined>
+};
+	["languages"]: {
+	__typename: "languages",
+	code?: string,
+	name?: string
+};
 	["views_aggregated"]: {
 	__typename: "views_aggregated",
 	group?: GraphQLTypes["JSON"],
@@ -340,20 +626,57 @@ export type GraphQLTypes = {
 	min?: GraphQLTypes["views_aggregated_fields"],
 	max?: GraphQLTypes["views_aggregated_fields"]
 };
-	/** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-["JSON"]:any;
 	["views_aggregated_fields"]: {
 	__typename: "views_aggregated_fields",
-	sort?: number
+	sort?: number,
+	name?: number
+};
+	["views_translations_aggregated"]: {
+	__typename: "views_translations_aggregated",
+	group?: GraphQLTypes["JSON"],
+	avg?: GraphQLTypes["views_translations_aggregated_fields"],
+	sum?: GraphQLTypes["views_translations_aggregated_fields"],
+	count?: GraphQLTypes["views_translations_aggregated_fields"],
+	countDistinct?: GraphQLTypes["views_translations_aggregated_fields"],
+	avgDistinct?: GraphQLTypes["views_translations_aggregated_fields"],
+	sumDistinct?: GraphQLTypes["views_translations_aggregated_fields"],
+	min?: GraphQLTypes["views_translations_aggregated_fields"],
+	max?: GraphQLTypes["views_translations_aggregated_fields"]
+};
+	["views_translations_aggregated_fields"]: {
+	__typename: "views_translations_aggregated_fields",
+	id?: number
 };
 	["Mutation"]: {
 	__typename: "Mutation",
+	create_names_items?: Array<GraphQLTypes["names"] | undefined>,
+	create_names_item?: GraphQLTypes["names"],
 	create_views_items?: Array<GraphQLTypes["views"] | undefined>,
 	create_views_item?: GraphQLTypes["views"],
+	create_views_translations_items?: Array<GraphQLTypes["views_translations"] | undefined>,
+	create_views_translations_item?: GraphQLTypes["views_translations"],
+	create_languages_items?: Array<GraphQLTypes["languages"] | undefined>,
+	create_languages_item?: GraphQLTypes["languages"],
+	update_names_items?: Array<GraphQLTypes["names"] | undefined>,
+	update_names_item?: GraphQLTypes["names"],
 	update_views_items?: Array<GraphQLTypes["views"] | undefined>,
 	update_views_item?: GraphQLTypes["views"],
+	update_views_translations_items?: Array<GraphQLTypes["views_translations"] | undefined>,
+	update_views_translations_item?: GraphQLTypes["views_translations"],
+	update_languages_items?: Array<GraphQLTypes["languages"] | undefined>,
+	update_languages_item?: GraphQLTypes["languages"],
+	delete_names_items?: GraphQLTypes["delete_many"],
+	delete_names_item?: GraphQLTypes["delete_one"],
 	delete_views_items?: GraphQLTypes["delete_many"],
-	delete_views_item?: GraphQLTypes["delete_one"]
+	delete_views_item?: GraphQLTypes["delete_one"],
+	delete_views_translations_items?: GraphQLTypes["delete_many"],
+	delete_views_translations_item?: GraphQLTypes["delete_one"],
+	delete_languages_items?: GraphQLTypes["delete_many"],
+	delete_languages_item?: GraphQLTypes["delete_one"]
+};
+	["create_names_input"]: {
+		id?: string,
+	name: string
 };
 	["create_views_input"]: {
 		user_created?: string,
@@ -364,7 +687,10 @@ export type GraphQLTypes = {
 	date_created?: GraphQLTypes["Date"],
 	date_created_func?: GraphQLTypes["datetime_functionsInput"],
 	date_updated?: GraphQLTypes["Date"],
-	date_updated_func?: GraphQLTypes["datetime_functionsInput"]
+	date_updated_func?: GraphQLTypes["datetime_functionsInput"],
+	enum: string,
+	name?: GraphQLTypes["create_names_input"],
+	translations?: Array<GraphQLTypes["create_views_translations_input"] | undefined>
 };
 	["datetime_functionsInput"]: {
 		year?: number,
@@ -376,6 +702,20 @@ export type GraphQLTypes = {
 	minute?: number,
 	second?: number
 };
+	["create_views_translations_input"]: {
+		id?: string,
+	views_id?: GraphQLTypes["create_views_input"],
+	languages_id?: GraphQLTypes["create_languages_input"],
+	foo: string
+};
+	["create_languages_input"]: {
+		code?: string,
+	name?: string
+};
+	["update_names_input"]: {
+		id?: string,
+	name?: string
+};
 	["update_views_input"]: {
 		user_created?: string,
 	user_updated?: string,
@@ -385,7 +725,20 @@ export type GraphQLTypes = {
 	date_created?: GraphQLTypes["Date"],
 	date_created_func?: GraphQLTypes["datetime_functionsInput"],
 	date_updated?: GraphQLTypes["Date"],
-	date_updated_func?: GraphQLTypes["datetime_functionsInput"]
+	date_updated_func?: GraphQLTypes["datetime_functionsInput"],
+	enum?: string,
+	name?: GraphQLTypes["update_names_input"],
+	translations?: Array<GraphQLTypes["update_views_translations_input"] | undefined>
+};
+	["update_views_translations_input"]: {
+		id?: string,
+	views_id?: GraphQLTypes["update_views_input"],
+	languages_id?: GraphQLTypes["update_languages_input"],
+	foo?: string
+};
+	["update_languages_input"]: {
+		code?: string,
+	name?: string
 };
 	["delete_many"]: {
 	__typename: "delete_many",
