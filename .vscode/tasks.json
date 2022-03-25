@@ -6,10 +6,10 @@
       "runOptions": {
         "runOn": "default"
       },
-      "type": "shell",
-      "command": "nix",
+      "type": "process",
+      "command": "bash",
       "isBackground": true,
-      "args": ["develop", "-c", "make", "dev-storybook"],
+      "args": ["-c", "nix develop -c make dev-storybook"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -24,44 +24,28 @@
       "runOptions": {
         "runOn": "default"
       },
-      "type": "shell",
-      "command": "nix",
+      "type": "process",
+      "command": "bash",
       "isBackground": true,
-      "args": ["develop", "-c", "make", "spago-test-watch"],
+      "args": ["-c", "nix develop -c make spago-test-watch"],
       "group": "none",
       "presentation": {
         "reveal": "always",
         "echo": false,
         "focus": false,
         "panel": "dedicated"
-      }
-    },
-    {
-      "label": "ci",
-      "runOptions": {
-        "runOn": "default"
       },
-      "type": "shell",
-      "command": "nix",
-      "isBackground": true,
-      "args": ["develop", "-c", "make", "ci"],
-      "group": "none",
-      "presentation": {
-        "reveal": "always",
-        "echo": false,
-        "focus": false,
-        "panel": "dedicated"
-      }
+      "problemMatcher": []
     },
     {
       "label": "vm-deploy",
       "runOptions": {
         "runOn": "default"
       },
-      "type": "shell",
-      "command": "nix",
+      "type": "process",
+      "command": "bash",
       "isBackground": true,
-      "args": ["develop", "-c", "make", "vm-deploy"],
+      "args": ["-c", "nix develop -c make vm-deploy"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -76,10 +60,10 @@
       "runOptions": {
         "runOn": "default"
       },
-      "type": "shell",
-      "command": "make",
+      "type": "process",
+      "command": "bash",
       "isBackground": true,
-      "args": ["dev-browser"],
+      "args": ["-c", "make dev-browser"],
       "group": "none",
       "presentation": {
         "reveal": "never",
