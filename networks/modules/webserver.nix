@@ -80,6 +80,7 @@ in
     enable = true;
     port = config.env.services.directus.port;
     mysqlPort = config.env.services.mysql.port;
+    schemaJson = ./webserver/schema.json;
   };
 
   services.tasks-explorer = {

@@ -1,6 +1,6 @@
 PURS_OUTPUT=pkgs/ts/generated/output
 
-all: dev-storybook build-storybook ci rw-result
+all: dev-storybook build-storybook rw-result
 
 dev-storybook: vm-deploy assets
 	export STORYBOOK_TASKS_EXPLORER_SERVER="http://tasks.circles.local"; \
