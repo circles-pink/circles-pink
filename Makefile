@@ -77,8 +77,6 @@ generate: materialize clean-generate
 	make purs-tsd-gen
 	make patchTsTypes
 
-ci: materialize
-	nix -L build .#publicDir
 
 run-garden-nix:
 	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden
@@ -114,7 +112,7 @@ vm-browser:
 	bash -c '${BROWSER} 'http://`make -s --no-print-directory vm-ip`
 
 shell:
-	nix develop -c fish
+	nix develop
 
 agent-get-secrets:
 	scp root@hercules.teal.ooo:/secrets.json .
