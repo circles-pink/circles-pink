@@ -94,6 +94,12 @@
         cd ${workspaces.tasks-explorer-server}/libexec/tasks-explorer-server/node_modules/tasks-explorer-server
         ${pkgs.yarn}/bin/yarn start
       '';
+
+    patch-hosts =
+      pkgs.writeShellScriptBin "patch-hosts" ''
+        cd ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dev-utils
+        ${pkgs.yarn}/bin/yarn --silent ts-node src/patchHosts.ts $@
+      '';
   };
 
   builds = {
