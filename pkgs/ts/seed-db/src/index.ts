@@ -8,27 +8,61 @@ const main = async () => {
   //     { id: "hello" },
   //     {
   //       id: true,
-  //       translations: [{}, { foo: true, languages_id: [{}, { name: true }] }],
+  //       translations: [
+  //         {},
+  //         { foo: true, languages_id: [{}, { name: true, code: true }] },
+  //       ],
   //     },
   //   ],
   // }).catch((e) => console.log(JSON.stringify(e, null, 2)));
 
   const result = await chain("mutation")({
-    create_views_item: [
+    create_views_items: [
       {
-        data: {
-          id: "hello3",
-          status: "oops",
-          enum: "oops",
-          translations: [
-            {
-              foo: "123",
-            },
-            {
-              foo: "456",
-            },
-          ],
-        },
+        data: [
+          {
+            id: "hello4",
+            status: "oops",
+            enum: "oops",
+            translations: [
+              {
+                foo: "123",
+                languages_id: {
+                  code: "us",
+                  name: "usa",
+                },
+              },
+              {
+                foo: "123111",
+                languages_id: {
+                  code: "de",
+                  name: "deut",
+                },
+              },
+            ],
+          },
+          {
+            id: "hello5",
+            status: "oops",
+            enum: "oops",
+            translations: [
+              {
+                foo: "123",
+                languages_id: {
+                  code: "us",
+                  name: "usa",
+                },
+              },
+              {
+                foo: "123111",
+                languages_id: {
+                  code: "de",
+                  name: "deut",
+                },
+              },
+            ],
+          },
+        ],
       },
       { id: true },
     ],
