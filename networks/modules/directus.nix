@@ -9,6 +9,8 @@ let
     dbPassword = "secret";
     secret = "abcdef";
     key = "xxxxxxx-xxxxxx-xxxxxxxx-xxxxxxxxxx";
+    initialAdminEmail = "admin@admin.com";
+    initialAdminPassword = "admin";
   };
 
   directusEnv = {
@@ -33,12 +35,18 @@ let
 
   directusInitTables = pkgs.writeShellScriptBin' "directus-init-tables"
     {
-      onPath = [ pkgs.directus ];
+      onPath = [ pkgs.directus pkgs.mariadb ];
       env = directusEnv;
     }
     ''
-      directus database install
-      directus database migrate:latest
+      mysql -e "DROP DATABASE IF EXISTS ${constants.dbName};"
+      mysql -e "CREATE DATABASE ${constants.dbName};"
+      mysql -e "GRANT ALL PRIVILEGES ON ${constants.dbName}. * TO '${constants.dbUser}'@'${constants.dbHost}';"
+      
+      export ADMIN_EMAIL="${constants.initialAdminEmail}";
+      export ADMIN_PASSWORD="${constants.initialAdminPassword}";
+      directus bootstrap
+      directus schema apply --yes ${cfg.schemaJson}
     '';
 
   directus = pkgs.writeShellScriptBin' "directus"
@@ -57,6 +65,9 @@ in
     };
     mysqlPort = mkOption {
       type = types.int;
+    };
+    schemaJson = mkOption {
+      type = types.path;
     };
   };
 
