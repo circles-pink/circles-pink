@@ -1,0 +1,615 @@
+type Query {
+  names(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [names]
+  names_by_id(id: ID!): names
+  names_aggregated(groupBy: [String], filter: names_filter, limit: Int, search: String, sort: [String]): [names_aggregated]
+  views(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views]
+  views_by_id(id: ID!): views
+  views_aggregated(groupBy: [String], filter: views_filter, limit: Int, search: String, sort: [String]): [views_aggregated]
+  views_translations(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views_translations]
+  views_translations_by_id(id: ID!): views_translations
+  views_translations_aggregated(groupBy: [String], filter: views_translations_filter, limit: Int, search: String, sort: [String]): [views_translations_aggregated]
+  languages(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [languages]
+  languages_by_id(id: ID!): languages
+}
+
+type names {
+  id: ID
+  name: String!
+}
+
+input names_filter {
+  id: number_filter_operators
+  name: string_filter_operators
+  _and: [names_filter]
+  _or: [names_filter]
+}
+
+input number_filter_operators {
+  _eq: Float
+  _neq: Float
+  _in: [Float]
+  _nin: [Float]
+  _gt: Float
+  _gte: Float
+  _lt: Float
+  _lte: Float
+  _null: Boolean
+  _nnull: Boolean
+}
+
+input string_filter_operators {
+  _eq: String
+  _neq: String
+  _contains: String
+  _ncontains: String
+  _starts_with: String
+  _nstarts_with: String
+  _ends_with: String
+  _nends_with: String
+  _in: [String]
+  _nin: [String]
+  _null: Boolean
+  _nnull: Boolean
+  _empty: Boolean
+  _nempty: Boolean
+}
+
+type names_aggregated {
+  group: JSON
+  avg: names_aggregated_fields
+  sum: names_aggregated_fields
+  count: names_aggregated_fields
+  countDistinct: names_aggregated_fields
+  avgDistinct: names_aggregated_fields
+  sumDistinct: names_aggregated_fields
+  min: names_aggregated_fields
+  max: names_aggregated_fields
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type names_aggregated_fields {
+  id: Float
+}
+
+type views {
+  user_created(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  user_updated(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  id: ID
+  status: String!
+  sort: Int
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  enum: String!
+  name(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): names
+  translations(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views_translations]
+}
+
+type directus_users {
+  id: ID
+  first_name: String
+  last_name: String
+  email: String
+  password: String
+  location: String
+  title: String
+  description: String
+  tags: JSON
+  avatar(filter: directus_files_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_files
+  language: String
+  theme: String
+  tfa_secret: String
+  status: String!
+  role(filter: directus_roles_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_roles
+  token: String
+  last_access: Date!
+  last_access_func: datetime_functions
+  last_page: String
+  provider: String!
+  external_identifier: String
+  auth_data: String
+  email_notifications: Boolean
+}
+
+type directus_files {
+  id: ID
+  storage: String!
+  filename_disk: String
+  filename_download: String!
+  title: String
+  type: String
+  folder(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_folders
+  uploaded_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  uploaded_on: Date!
+  uploaded_on_func: datetime_functions
+  modified_by(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_users
+  modified_on: Date!
+  modified_on_func: datetime_functions
+  charset: String
+  filesize: Int
+  width: Int
+  height: Int
+  duration: Int
+  embed: String
+  description: String
+  location: String
+  tags: JSON
+  metadata: JSON
+}
+
+type directus_folders {
+  id: ID
+  name: String!
+  parent(filter: directus_folders_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): directus_folders
+}
+
+input directus_folders_filter {
+  id: string_filter_operators
+  name: string_filter_operators
+  parent: directus_folders_filter
+  _and: [directus_folders_filter]
+  _or: [directus_folders_filter]
+}
+
+input directus_users_filter {
+  id: string_filter_operators
+  first_name: string_filter_operators
+  last_name: string_filter_operators
+  email: string_filter_operators
+  password: string_filter_operators
+  location: string_filter_operators
+  title: string_filter_operators
+  description: string_filter_operators
+  tags: string_filter_operators
+  avatar: directus_files_filter
+  language: string_filter_operators
+  theme: string_filter_operators
+  tfa_secret: string_filter_operators
+  status: string_filter_operators
+  role: directus_roles_filter
+  token: string_filter_operators
+  last_access: date_filter_operators
+  last_access_func: datetime_function_filter_operators
+  last_page: string_filter_operators
+  provider: string_filter_operators
+  external_identifier: string_filter_operators
+  auth_data: string_filter_operators
+  email_notifications: boolean_filter_operators
+  _and: [directus_users_filter]
+  _or: [directus_users_filter]
+}
+
+input directus_files_filter {
+  id: string_filter_operators
+  storage: string_filter_operators
+  filename_disk: string_filter_operators
+  filename_download: string_filter_operators
+  title: string_filter_operators
+  type: string_filter_operators
+  folder: directus_folders_filter
+  uploaded_by: directus_users_filter
+  uploaded_on: date_filter_operators
+  uploaded_on_func: datetime_function_filter_operators
+  modified_by: directus_users_filter
+  modified_on: date_filter_operators
+  modified_on_func: datetime_function_filter_operators
+  charset: string_filter_operators
+  filesize: number_filter_operators
+  width: number_filter_operators
+  height: number_filter_operators
+  duration: number_filter_operators
+  embed: string_filter_operators
+  description: string_filter_operators
+  location: string_filter_operators
+  tags: string_filter_operators
+  metadata: string_filter_operators
+  _and: [directus_files_filter]
+  _or: [directus_files_filter]
+}
+
+input date_filter_operators {
+  _eq: String
+  _neq: String
+  _gt: String
+  _gte: String
+  _lt: String
+  _lte: String
+  _null: Boolean
+  _nnull: Boolean
+}
+
+input datetime_function_filter_operators {
+  year: number_filter_operators
+  month: number_filter_operators
+  week: number_filter_operators
+  day: number_filter_operators
+  weekday: number_filter_operators
+  hour: number_filter_operators
+  minute: number_filter_operators
+  second: number_filter_operators
+}
+
+input directus_roles_filter {
+  id: string_filter_operators
+  name: string_filter_operators
+  icon: string_filter_operators
+  description: string_filter_operators
+  ip_access: string_filter_operators
+  enforce_tfa: boolean_filter_operators
+  admin_access: boolean_filter_operators
+  app_access: boolean_filter_operators
+  users: directus_users_filter
+  _and: [directus_roles_filter]
+  _or: [directus_roles_filter]
+}
+
+input boolean_filter_operators {
+  _eq: Boolean
+  _neq: Boolean
+  _null: Boolean
+  _nnull: Boolean
+}
+
+"""ISO8601 Date values"""
+scalar Date
+
+type datetime_functions {
+  year: Int
+  month: Int
+  week: Int
+  day: Int
+  weekday: Int
+  hour: Int
+  minute: Int
+  second: Int
+}
+
+type directus_roles {
+  id: ID
+  name: String!
+  icon: String!
+  description: String
+  ip_access: [String]
+  enforce_tfa: Boolean!
+  admin_access: Boolean!
+  app_access: Boolean!
+  users(filter: directus_users_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [directus_users]
+}
+
+type views_translations {
+  id: ID
+  views_id(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): views
+  languages_id(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): languages
+  foo: String!
+}
+
+input views_filter {
+  user_created: directus_users_filter
+  user_updated: directus_users_filter
+  id: string_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  enum: string_filter_operators
+  name: names_filter
+  translations: views_translations_filter
+  _and: [views_filter]
+  _or: [views_filter]
+}
+
+input views_translations_filter {
+  id: number_filter_operators
+  views_id: views_filter
+  languages_id: languages_filter
+  foo: string_filter_operators
+  _and: [views_translations_filter]
+  _or: [views_translations_filter]
+}
+
+input languages_filter {
+  code: string_filter_operators
+  name: string_filter_operators
+  _and: [languages_filter]
+  _or: [languages_filter]
+}
+
+type languages {
+  code: ID
+  name: String
+}
+
+type views_aggregated {
+  group: JSON
+  avg: views_aggregated_fields
+  sum: views_aggregated_fields
+  count: views_aggregated_fields
+  countDistinct: views_aggregated_fields
+  avgDistinct: views_aggregated_fields
+  sumDistinct: views_aggregated_fields
+  min: views_aggregated_fields
+  max: views_aggregated_fields
+}
+
+type views_aggregated_fields {
+  sort: Float
+  name: Float
+}
+
+type views_translations_aggregated {
+  group: JSON
+  avg: views_translations_aggregated_fields
+  sum: views_translations_aggregated_fields
+  count: views_translations_aggregated_fields
+  countDistinct: views_translations_aggregated_fields
+  avgDistinct: views_translations_aggregated_fields
+  sumDistinct: views_translations_aggregated_fields
+  min: views_translations_aggregated_fields
+  max: views_translations_aggregated_fields
+}
+
+type views_translations_aggregated_fields {
+  id: Float
+}
+
+type Mutation {
+  create_names_items(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_names_input!]): [names]
+  create_names_item(data: create_names_input!): names
+  create_views_items(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_views_input!]): [views]
+  create_views_item(data: create_views_input!): views
+  create_views_translations_items(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_views_translations_input!]): [views_translations]
+  create_views_translations_item(data: create_views_translations_input!): views_translations
+  create_languages_items(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, data: [create_languages_input!]): [languages]
+  create_languages_item(data: create_languages_input!): languages
+  update_names_items(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_names_input!): [names]
+  update_names_item(id: ID!, data: update_names_input!): names
+  update_views_items(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_views_input!): [views]
+  update_views_item(id: ID!, data: update_views_input!): views
+  update_views_translations_items(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_views_translations_input!): [views_translations]
+  update_views_translations_item(id: ID!, data: update_views_translations_input!): views_translations
+  update_languages_items(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String, ids: [ID]!, data: update_languages_input!): [languages]
+  update_languages_item(id: ID!, data: update_languages_input!): languages
+  delete_names_items(ids: [ID]!): delete_many
+  delete_names_item(id: ID!): delete_one
+  delete_views_items(ids: [ID]!): delete_many
+  delete_views_item(id: ID!): delete_one
+  delete_views_translations_items(ids: [ID]!): delete_many
+  delete_views_translations_item(id: ID!): delete_one
+  delete_languages_items(ids: [ID]!): delete_many
+  delete_languages_item(id: ID!): delete_one
+}
+
+input create_names_input {
+  id: ID
+  name: String!
+}
+
+input create_views_input {
+  user_created: create_directus_users_input
+  user_updated: create_directus_users_input
+  id: ID
+  status: String!
+  sort: Int
+  date_created: Date
+  date_created_func: datetime_functionsInput
+  date_updated: Date
+  date_updated_func: datetime_functionsInput
+  enum: String!
+  name: create_names_input
+  translations: [create_views_translations_input]
+}
+
+input create_directus_users_input {
+  id: ID
+  first_name: String
+  last_name: String
+  email: String
+  password: String
+  location: String
+  title: String
+  description: String
+  tags: JSON
+  avatar: create_directus_files_input
+  language: String
+  theme: String
+  tfa_secret: String
+  status: String!
+  role: create_directus_roles_input
+  token: String
+  last_access: Date!
+  last_access_func: datetime_functionsInput
+  last_page: String
+  provider: String!
+  external_identifier: String
+  auth_data: String
+  email_notifications: Boolean
+}
+
+input create_directus_files_input {
+  id: ID
+  storage: String!
+  filename_disk: String
+  filename_download: String!
+  title: String
+  type: String
+  folder: create_directus_folders_input
+  uploaded_by: create_directus_users_input
+  uploaded_on: Date!
+  uploaded_on_func: datetime_functionsInput
+  modified_by: create_directus_users_input
+  modified_on: Date!
+  modified_on_func: datetime_functionsInput
+  charset: String
+  filesize: Int
+  width: Int
+  height: Int
+  duration: Int
+  embed: String
+  description: String
+  location: String
+  tags: JSON
+  metadata: JSON
+}
+
+input create_directus_folders_input {
+  id: ID
+  name: String!
+  parent: create_directus_folders_input
+}
+
+input datetime_functionsInput {
+  year: Int
+  month: Int
+  week: Int
+  day: Int
+  weekday: Int
+  hour: Int
+  minute: Int
+  second: Int
+}
+
+input create_directus_roles_input {
+  id: ID
+  name: String!
+  icon: String!
+  description: String
+  ip_access: [String]
+  enforce_tfa: Boolean!
+  admin_access: Boolean!
+  app_access: Boolean!
+  users: [create_directus_users_input]
+}
+
+input create_views_translations_input {
+  id: ID
+  views_id: create_views_input
+  languages_id: create_languages_input
+  foo: String!
+}
+
+input create_languages_input {
+  code: ID
+  name: String
+}
+
+input update_names_input {
+  id: ID
+  name: String
+}
+
+input update_views_input {
+  user_created: update_directus_users_input
+  user_updated: update_directus_users_input
+  id: ID
+  status: String
+  sort: Int
+  date_created: Date
+  date_created_func: datetime_functionsInput
+  date_updated: Date
+  date_updated_func: datetime_functionsInput
+  enum: String
+  name: update_names_input
+  translations: [update_views_translations_input]
+}
+
+input update_directus_users_input {
+  id: ID
+  first_name: String
+  last_name: String
+  email: String
+  password: String
+  location: String
+  title: String
+  description: String
+  tags: JSON
+  avatar: update_directus_files_input
+  language: String
+  theme: String
+  tfa_secret: String
+  status: String
+  role: update_directus_roles_input
+  token: String
+  last_access: Date
+  last_access_func: datetime_functionsInput
+  last_page: String
+  provider: String
+  external_identifier: String
+  auth_data: String
+  email_notifications: Boolean
+}
+
+input update_directus_files_input {
+  id: ID
+  storage: String
+  filename_disk: String
+  filename_download: String
+  title: String
+  type: String
+  folder: update_directus_folders_input
+  uploaded_by: update_directus_users_input
+  uploaded_on: Date
+  uploaded_on_func: datetime_functionsInput
+  modified_by: update_directus_users_input
+  modified_on: Date
+  modified_on_func: datetime_functionsInput
+  charset: String
+  filesize: Int
+  width: Int
+  height: Int
+  duration: Int
+  embed: String
+  description: String
+  location: String
+  tags: JSON
+  metadata: JSON
+}
+
+input update_directus_folders_input {
+  id: ID
+  name: String
+  parent: update_directus_folders_input
+}
+
+input update_directus_roles_input {
+  id: ID
+  name: String
+  icon: String
+  description: String
+  ip_access: [String]
+  enforce_tfa: Boolean
+  admin_access: Boolean
+  app_access: Boolean
+  users: [update_directus_users_input]
+}
+
+input update_views_translations_input {
+  id: ID
+  views_id: update_views_input
+  languages_id: update_languages_input
+  foo: String
+}
+
+input update_languages_input {
+  code: ID
+  name: String
+}
+
+type delete_many {
+  ids: [ID]!
+}
+
+type delete_one {
+  id: ID!
+}
+
+schema{
+	query: Query,
+	mutation: Mutation
+}

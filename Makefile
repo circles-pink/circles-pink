@@ -115,4 +115,13 @@ shell:
 	nix develop
 
 agent-get-secrets:
-	scp root@hercules.teal.ooo:/secrets.json .
+	scp root@hercules.teal.ooo:/var/lib/hercules-ci-agent/secrets/secrets.json .
+
+agent-push-secrets:
+	scp ./secrets.json root@hercules.teal.ooo:/var/lib/hercules-ci-agent/secrets/secrets.json
+
+directus-dump-schema:
+	nixops ssh -d circles-pink-vm webserver \
+	"rm -rf /tmp/directus-dump; mkdir /tmp/directus-dump; cd /tmp/directus-dump; directus-dump-schema"
+	rm -rf ./materialized/directus-dump
+	nixops scp -d circles-pink-vm --from webserver /tmp/directus-dump ./materialized
