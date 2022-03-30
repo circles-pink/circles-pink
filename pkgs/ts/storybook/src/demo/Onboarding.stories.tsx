@@ -1,7 +1,8 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
 import { Onboarding } from "circles/src/onboarding";
 import { onboardingArgs } from "./onboardingArgs";
+import { getContent } from "@circles-pink/content/src";
 
 export default {
   title: "Components/Onboarding",
@@ -14,4 +15,16 @@ export default {
   },
 } as ComponentMeta<typeof Onboarding>;
 
-export const GardenAPI = (args): ReactElement => <Onboarding {...args} />;
+export const GardenAPI = (args): ReactElement => {
+  const [content, setContent] = useState<{}>();
+
+  useEffect(() => {
+    getContent().then(setContent);
+  });
+
+  return (
+    <>
+      <Onboarding content={content} {...args} />
+    </>
+  );
+};

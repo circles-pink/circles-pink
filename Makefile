@@ -2,7 +2,9 @@ PURS_OUTPUT=pkgs/ts/generated/output
 
 all: dev-storybook build-storybook rw-result
 
-dev-storybook: vm-deploy assets
+dev-storybook: vm-deploy assets dev-storybook_
+
+dev-storybook_:
 	export STORYBOOK_TASKS_EXPLORER_SERVER="http://tasks.circles.local"; \
 	yarn workspace storybook run storybook
 
@@ -76,6 +78,7 @@ generate: materialize clean-generate
 	make spago-build 
 	make purs-tsd-gen
 	make patchTsTypes
+	make generate-zeus
 
 generate-zeus:
 	nix build .#zeus-client --out-link result-zeus-client
