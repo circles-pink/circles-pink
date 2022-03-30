@@ -97,6 +97,8 @@
                   pkgs.depcruise
                   pkgs.nixops
                   pkgs.fish
+                  pkgs.graphql-zeus
+                  pkgs.signal-desktop
                   #pkgs.virtualboxHeadless
                 ];
 

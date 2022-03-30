@@ -31,6 +31,7 @@
         pkgs = final;
         pursOutput = purs.default;
         inherit assets;
+        inherit zeus-client;
       });
 
       patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
@@ -126,5 +127,15 @@
       circles-directus = ts.bins.circles-directus;
 
       tasks-explorer-server = ts.bins.tasks-explorer-server;
+
+      zeus-client = final.runCommand "zeus-client"
+        {
+          buildInputs = [ final.graphql-zeus ];
+        }
+        ''
+          mkdir $out
+          zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin
+          zeus ${../materialized/directus-dump/directus-api-public.graphql} $out/public
+        '';
     };
 })
