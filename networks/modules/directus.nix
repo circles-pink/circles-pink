@@ -65,8 +65,8 @@ let
     ''
       set -e
       directus schema snapshot --yes --format json $PWD/directus-schema.json;
-      zeus http://localhost:${toString cfg.port}/graphql . --graphql directus-public.graphql; rm -rf zeus;
-      zeus http://localhost:${toString cfg.port}/graphql/?access_token=${cfg.directusAdminToken} . --graphql directus-schema-admin.graphql; rm -rf zeus;
+      zeus http://localhost:${toString cfg.port}/graphql . --graphql directus-api-public.graphql; rm -rf zeus;
+      zeus http://localhost:${toString cfg.port}/graphql/?access_token=${cfg.directusAdminToken} . --graphql directus-api-admin.graphql; rm -rf zeus;
     '';
 in
 {

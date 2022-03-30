@@ -1,4 +1,4 @@
-{ pkgs, pursOutput, assets, ... }: rec {
+{ pkgs, pursOutput, assets, zeus-client, ... }: rec {
 
   localPackages = {
     dev-utils = ../../pkgs/ts/dev-utils;
@@ -11,6 +11,7 @@
     assets = ../../pkgs/ts/assets;
     tasks-explorer = ../../pkgs/ts/tasks-explorer;
     tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
+    zeus-client = ../../pkgs/ts/${"@"}circles-pink/zeus-client;
   };
 
   src = pkgs.nix-filter.filter {
@@ -108,6 +109,7 @@
 
       cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
       cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
+      cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
 
       export STORYBOOK_TASKS_EXPLORER_SERVER="${serviceUrls.tasks}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
