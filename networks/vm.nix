@@ -5,7 +5,7 @@
     let
       pkgs = (import ../default.nix).outputs.packages.x86_64-linux.pkgs;
 
-      secrets = builtins.fromJSON (builtins.readFile ../secrets.json);
+      secrets = (builtins.fromJSON (builtins.readFile ../secrets.json)).secrets.data;
 
       lib = pkgs.lib;
 

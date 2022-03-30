@@ -81,6 +81,7 @@ in
     port = config.env.services.directus.port;
     mysqlPort = config.env.services.mysql.port;
     schemaJson = ./webserver/schema.json;
+    directusAdminToken = secrets.directus-admin-token;
   };
 
   services.tasks-explorer = {

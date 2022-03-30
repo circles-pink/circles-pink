@@ -1,0 +1,209 @@
+type Query {
+  names(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [names]
+  names_by_id(id: ID!): names
+  names_aggregated(groupBy: [String], filter: names_filter, limit: Int, search: String, sort: [String]): [names_aggregated]
+  views(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views]
+  views_by_id(id: ID!): views
+  views_aggregated(groupBy: [String], filter: views_filter, limit: Int, search: String, sort: [String]): [views_aggregated]
+  views_translations(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views_translations]
+  views_translations_by_id(id: ID!): views_translations
+  views_translations_aggregated(groupBy: [String], filter: views_translations_filter, limit: Int, search: String, sort: [String]): [views_translations_aggregated]
+  languages(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [languages]
+  languages_by_id(id: ID!): languages
+}
+
+type names {
+  id: ID
+  name: String!
+}
+
+input names_filter {
+  id: number_filter_operators
+  name: string_filter_operators
+  _and: [names_filter]
+  _or: [names_filter]
+}
+
+input number_filter_operators {
+  _eq: Float
+  _neq: Float
+  _in: [Float]
+  _nin: [Float]
+  _gt: Float
+  _gte: Float
+  _lt: Float
+  _lte: Float
+  _null: Boolean
+  _nnull: Boolean
+}
+
+input string_filter_operators {
+  _eq: String
+  _neq: String
+  _contains: String
+  _ncontains: String
+  _starts_with: String
+  _nstarts_with: String
+  _ends_with: String
+  _nends_with: String
+  _in: [String]
+  _nin: [String]
+  _null: Boolean
+  _nnull: Boolean
+  _empty: Boolean
+  _nempty: Boolean
+}
+
+type names_aggregated {
+  group: JSON
+  avg: names_aggregated_fields
+  sum: names_aggregated_fields
+  count: names_aggregated_fields
+  countDistinct: names_aggregated_fields
+  avgDistinct: names_aggregated_fields
+  sumDistinct: names_aggregated_fields
+  min: names_aggregated_fields
+  max: names_aggregated_fields
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type names_aggregated_fields {
+  id: Float
+}
+
+type views {
+  user_created: String
+  user_updated: String
+  id: ID
+  status: String!
+  sort: Int
+  date_created: Date
+  date_created_func: datetime_functions
+  date_updated: Date
+  date_updated_func: datetime_functions
+  enum: String!
+  name(filter: names_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): names
+  translations(filter: views_translations_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): [views_translations]
+}
+
+"""ISO8601 Date values"""
+scalar Date
+
+type datetime_functions {
+  year: Int
+  month: Int
+  week: Int
+  day: Int
+  weekday: Int
+  hour: Int
+  minute: Int
+  second: Int
+}
+
+type views_translations {
+  id: ID
+  views_id(filter: views_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): views
+  languages_id(filter: languages_filter, sort: [String], limit: Int, offset: Int, page: Int, search: String): languages
+  foo: String!
+}
+
+input views_filter {
+  user_created: string_filter_operators
+  user_updated: string_filter_operators
+  id: string_filter_operators
+  status: string_filter_operators
+  sort: number_filter_operators
+  date_created: date_filter_operators
+  date_created_func: datetime_function_filter_operators
+  date_updated: date_filter_operators
+  date_updated_func: datetime_function_filter_operators
+  enum: string_filter_operators
+  name: names_filter
+  translations: views_translations_filter
+  _and: [views_filter]
+  _or: [views_filter]
+}
+
+input date_filter_operators {
+  _eq: String
+  _neq: String
+  _gt: String
+  _gte: String
+  _lt: String
+  _lte: String
+  _null: Boolean
+  _nnull: Boolean
+}
+
+input datetime_function_filter_operators {
+  year: number_filter_operators
+  month: number_filter_operators
+  week: number_filter_operators
+  day: number_filter_operators
+  weekday: number_filter_operators
+  hour: number_filter_operators
+  minute: number_filter_operators
+  second: number_filter_operators
+}
+
+input views_translations_filter {
+  id: number_filter_operators
+  views_id: views_filter
+  languages_id: languages_filter
+  foo: string_filter_operators
+  _and: [views_translations_filter]
+  _or: [views_translations_filter]
+}
+
+input languages_filter {
+  code: string_filter_operators
+  name: string_filter_operators
+  _and: [languages_filter]
+  _or: [languages_filter]
+}
+
+type languages {
+  code: ID
+  name: String
+}
+
+type views_aggregated {
+  group: JSON
+  avg: views_aggregated_fields
+  sum: views_aggregated_fields
+  count: views_aggregated_fields
+  countDistinct: views_aggregated_fields
+  avgDistinct: views_aggregated_fields
+  sumDistinct: views_aggregated_fields
+  min: views_aggregated_fields
+  max: views_aggregated_fields
+}
+
+type views_aggregated_fields {
+  sort: Float
+  name: Float
+}
+
+type views_translations_aggregated {
+  group: JSON
+  avg: views_translations_aggregated_fields
+  sum: views_translations_aggregated_fields
+  count: views_translations_aggregated_fields
+  countDistinct: views_translations_aggregated_fields
+  avgDistinct: views_translations_aggregated_fields
+  sumDistinct: views_translations_aggregated_fields
+  min: views_translations_aggregated_fields
+  max: views_translations_aggregated_fields
+}
+
+type views_translations_aggregated_fields {
+  id: Float
+}
+
+schema{
+	query: Query
+}

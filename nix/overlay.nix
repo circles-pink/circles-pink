@@ -9,6 +9,8 @@
 
   directus = circles-pink.ts.bins.circles-directus;
 
+  graphql-zeus = circles-pink.ts.bins.graphql-zeus;
+
   lib = prev.lib // (import ./pkgs/lib.nix);
 
   writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:

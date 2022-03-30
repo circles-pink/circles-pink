@@ -94,6 +94,10 @@
         cd ${workspaces.tasks-explorer-server}/libexec/tasks-explorer-server/node_modules/tasks-explorer-server
         ${pkgs.yarn}/bin/yarn start
       '';
+
+    graphql-zeus = pkgs.writeShellScriptBin "zeus" ''
+      ${workspaces.dev-utils}/libexec/dev-utils/node_modules/graphql-zeus/lib/CLI/index.js $@
+    '';
   };
 
   builds = {

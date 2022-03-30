@@ -7,8 +7,5 @@
     "graphql-zeus": "^4.0.4",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
-  },
-  "devDependencies": {
-    "get-graphql-schema": "^2.1.2"
   }
 }

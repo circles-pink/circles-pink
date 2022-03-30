@@ -56,6 +56,18 @@ let
     } ''
     directus $@
   '';
+
+  directusDumpSchema = pkgs.writeShellScriptBin' "directus-dump-schema"
+    {
+      onPath = [ pkgs.directus pkgs.mariadb pkgs.graphql-zeus ];
+      env = directusEnv;
+    }
+    ''
+      set -e
+      directus schema snapshot --yes --format json $PWD/directus-schema.json;
+      zeus http://localhost:${toString cfg.port}/graphql . --graphql directus-public.graphql; rm -rf zeus;
+      zeus http://localhost:${toString cfg.port}/graphql/?access_token=${cfg.directusAdminToken} . --graphql directus-schema-admin.graphql; rm -rf zeus;
+    '';
 in
 {
   options.services.directus = {
@@ -69,10 +81,19 @@ in
     schemaJson = mkOption {
       type = types.path;
     };
+    directusAdminToken = mkOption {
+      type = types.str;
+    };
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = [ directusInitTables directus pkgs.mariadb ];
+    environment.systemPackages = [
+      directusInitTables
+      directusDumpSchema
+      directus
+      pkgs.mariadb
+      pkgs.graphql-zeus
+    ];
 
 
     systemd.user.services.directus = {
