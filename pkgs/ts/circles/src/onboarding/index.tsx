@@ -29,10 +29,13 @@ import { AnimProvider, useAnimContext } from '../context/anim';
 
 type Language = 'en' | 'de';
 
+type Content = {};
+
 type OnboardingProps = {
   initState?: CirclesState;
   lang?: Language;
   baseColor?: string;
+  content?: Content;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -47,6 +50,7 @@ const OnboardingContent = ({
   initState,
   lang = 'en',
   baseColor,
+  content = {},
 }: OnboardingProps): ReactElement => {
   const [theme, setColor] = useContext(ThemeContext);
   const [state, act] = useStateMachine(initState || init, control);

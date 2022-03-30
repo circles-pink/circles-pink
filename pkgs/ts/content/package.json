@@ -1,0 +1,9 @@
+{
+  "name": "@circles-pink/content",
+  "version": "1.0.0",
+  "scripts": {},
+  "dependencies": {
+    "@circles-pink/zeus-client": "*"
+  },
+  "devDependencies": {}
+}

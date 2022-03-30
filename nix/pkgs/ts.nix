@@ -11,7 +11,8 @@
     assets = ../../pkgs/ts/assets;
     tasks-explorer = ../../pkgs/ts/tasks-explorer;
     tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-    zeus-client = ../../pkgs/ts/${"@"}circles-pink/zeus-client;
+    "zeus-client" = ../../pkgs/ts/zeus-client;
+    "content" = ../../pkgs/ts/content;
   };
 
   src = pkgs.nix-filter.filter {

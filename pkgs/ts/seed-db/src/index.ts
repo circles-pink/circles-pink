@@ -1,4 +1,4 @@
-import { Chain } from "../zeus";
+import { Chain } from "@circles-pink/zeus-client/src/admin/zeus";
 
 const chain = Chain("http://directus.circles.local/graphql");
 

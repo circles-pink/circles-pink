@@ -20,6 +20,24 @@
       "problemMatcher": []
     },
     {
+      "label": "dev-storybook_",
+      "runOptions": {
+        "runOn": "default"
+      },
+      "type": "process",
+      "command": "bash",
+      "isBackground": true,
+      "args": ["-c", "nix develop -c make dev-storybook_"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "spago-test-watch",
       "runOptions": {
         "runOn": "default"
