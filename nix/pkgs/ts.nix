@@ -16,7 +16,7 @@
   };
 
   src = pkgs.nix-filter.filter {
-    root = ../../.;
+    root = /*pkgs.lib.cleanSource*/ ../../.;
     include = [
       "package.json"
       "yarn.lock"
@@ -34,27 +34,43 @@
   };
 
   replaceEmptyLocalDep = pkgName: pkgs.lib.pipe localPackages [
-    (pkgs.lib.mapAttrsToList (depName: drv: ''
-      dir="$tmp/libexec/${pkgName}/deps/${depName}"
-      if [ -d $dir ];
-      then
-        tmpNodeModules=`mktemp -d`
+    (pkgs.lib.mapAttrsToList (depName: drv:
+      let
+
+        depName' = pkgs.lib.pipe "${drv}/package.json" [
+          builtins.readFile
+          builtins.fromJSON
+          (x: x.name)
+        ];
+
+        extraLevel =
+          if builtins.length (builtins.split "/" depName') == 1 then
+            ""
+          else
+            "../";
+
+      in
+      ''
+        dir="$tmp/libexec/${pkgName}/deps/${depName'}"
+        if [ -d $dir ];
+        then
+          tmpNodeModules=`mktemp -d`
         
-        if [ -d "$dir/node_modules/" ];
-          then cp -r $dir/node_modules/ $tmpNodeModules/node_modules
+          if [ -d "$dir/node_modules/" ];
+            then cp -r $dir/node_modules/ $tmpNodeModules/node_modules
+          fi
+        
+          rm -rf $dir
+          cp -r ${drv} $dir
+          chmod +w $dir
+          rm -rf $dir/node_modules
+        
+          if [ -d "$tmpNodeModules/node_modules" ];
+            then cp -r $tmpNodeModules/node_modules $dir/node_modules
+            else cp -rf $dir/../../${extraLevel}node_modules $dir/node_modules
+          fi
         fi
-        
-        rm -rf $dir
-        cp -r ${drv} $dir
-        chmod +w $dir
-        rm -rf $dir/node_modules
-        
-        if [ -d "$tmpNodeModules/node_modules" ];
-          then cp -r $tmpNodeModules/node_modules $dir/node_modules
-          else cp -rf $dir/../../node_modules $dir/node_modules
-        fi
-      fi
-    ''))
+      ''))
     (builtins.concatStringsSep "\n")
   ];
 
