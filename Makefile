@@ -139,7 +139,7 @@ directus-dump-schema:
 directus-init-db:
 	nixops ssh -d circles-pink-vm webserver directus-init-tables
 
+directus-seed-db: directus-init-db directus-seed-db_
 
-
-directus-seed-db: directus-init-db
-	export $$DIRECTUS_ADMIN_TOKEN=`cat ./secrets.json | jq .secrets.data.directus-admin-token`; ts-node ./pkgs/ts/seed-db/src/index.ts
+directus-seed-db_:
+	export DIRECTUS_ADMIN_TOKEN=$$(cat ./secrets.json | jq '.secrets.data."directus-admin-token"'); ts-node ./pkgs/ts/seed-db/src/index.ts
