@@ -14,6 +14,6 @@ export const getContent = async ({
   });
 
   return chain("query")({
-    views: [{}, {}],
+    views: [{}, { id: true, enum: true }],
   });
 };

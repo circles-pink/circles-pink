@@ -31,6 +31,8 @@ let
     REFRESH_TOKEN_COOKIE_SECURE = "false";
     REFRESH_TOKEN_COOKIE_SAME_SITE = "lax";
     REFRESH_TOKEN_COOKIE_NAME = "directus_refresh_token";
+    CORS_ENABLED = "true";
+    CORS_ORIGIN = "true";
   };
 
   directusInitTables = pkgs.writeShellScriptBin' "directus-init-tables"
