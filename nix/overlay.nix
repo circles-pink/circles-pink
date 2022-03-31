@@ -146,7 +146,7 @@
         }
         ''
           mkdir $out
-          zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin
+          zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin --node
           zeus ${../materialized/directus-dump/directus-api-public.graphql} $out/public
         '';
     };

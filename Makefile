@@ -82,10 +82,10 @@ generate: materialize clean-generate
 
 generate-zeus:
 	nix build .#zeus-client --out-link result-zeus-client
-	rm -rf ./pkgs/ts/@circles-pink/zeus-client/src
-	mkdir -p ./pkgs/ts/@circles-pink/zeus-client/src
-	cp -r result-zeus-client/* -t ./pkgs/ts/@circles-pink/zeus-client/src
-	chmod -R u+w ./pkgs/ts/@circles-pink/zeus-client/src
+	rm -rf ./pkgs/ts/zeus-client/src
+	mkdir -p ./pkgs/ts/zeus-client/src
+	cp -r result-zeus-client/* -t ./pkgs/ts/zeus-client/src
+	chmod -R u+w ./pkgs/ts/zeus-client/src
 	rm result-zeus-client
 
 run-garden-nix:
@@ -135,3 +135,11 @@ directus-dump-schema:
 	"rm -rf /tmp/directus-dump; mkdir /tmp/directus-dump; cd /tmp/directus-dump; directus-dump-schema"
 	rm -rf ./materialized/directus-dump
 	nixops scp -d circles-pink-vm --from webserver /tmp/directus-dump ./materialized
+
+directus-init-db:
+	nixops ssh -d circles-pink-vm webserver directus-init-tables
+
+
+
+directus-seed-db: directus-init-db
+	export $$DIRECTUS_ADMIN_TOKEN=`cat ./secrets.json | jq .secrets.data.directus-admin-token`; ts-node ./pkgs/ts/seed-db/src/index.ts

@@ -100,6 +100,7 @@
                   pkgs.graphql-zeus
                   pkgs.signal-desktop
                   pkgs.yarn2nix
+                  pkgs.jq
                   #pkgs.virtualboxHeadless
                 ];
 

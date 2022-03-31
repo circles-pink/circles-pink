@@ -16,7 +16,7 @@
   };
 
   src = pkgs.nix-filter.filter {
-    root = /*pkgs.lib.cleanSource*/ ../../.;
+    root = pkgs.lib.cleanSource ../../.;
     include = [
       "package.json"
       "yarn.lock"
