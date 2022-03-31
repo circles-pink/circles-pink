@@ -64,6 +64,7 @@ const OnboardingContent = ({
   return (
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
+        <pre>{JSON.stringify(content, null, 2)}</pre>
         {{
           infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
           askUsername: () => <AskUsername state={state.value} act={act} />,

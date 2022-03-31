@@ -129,6 +129,7 @@
       cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
 
       export STORYBOOK_TASKS_EXPLORER_SERVER="${serviceUrls.tasks}"
+      export STORYBOOK_DIRECTUS_URL="${serviceUrls.directus}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
       OUTPUT_DIR=$out yarn build
     '';

@@ -19,7 +19,9 @@ export const GardenAPI = (args): ReactElement => {
   const [content, setContent] = useState<{}>();
 
   useEffect(() => {
-    getContent().then(setContent);
+    getContent({ endpoint: process.env.STORYBOOK_DIRECTUS_URL }).then(
+      setContent
+    );
   });
 
   return (
