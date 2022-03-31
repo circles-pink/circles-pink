@@ -69,8 +69,40 @@ in
         };
       };
       "${lib.mkDomain config.env.services.directus.url}" = {
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
+        # locations."/" = {
+        #   proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
+
+        # };
+        locations."/graphql/" = {
+          proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}/graphql";
+          extraConfig = ''
+              if ($request_method = 'OPTIONS') {
+                add_header 'Access-Control-Allow-Origin' '*';
+
+                add_header 'Access-Control-Allow-Credentials' 'true';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+
+                add_header 'Access-Control-Max-Age' 86400;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204; break;
+              }
+
+              if ($request_method = 'POST') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Allow-Credentials' 'true';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+              }
+              if ($request_method = 'GET') {
+                add_header 'Access-Control-Allow-Origin' '*';
+                add_header 'Access-Control-Allow-Credentials' 'true';
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type';
+            } 
+          '';
         };
       };
     };

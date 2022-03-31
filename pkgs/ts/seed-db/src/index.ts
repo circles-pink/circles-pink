@@ -1,13 +1,9 @@
 import { Chain } from "@circles-pink/zeus-client/src/admin/zeus";
-import * as querystring from "querystring";
-console.log(process.env.DIRECTUS_ADMIN_TOKEN);
+
+
 if (!process.env.DIRECTUS_ADMIN_TOKEN) {
   throw new Error();
 }
-
-const qs = querystring.escape(
-  `access_token=${process.env.DIRECTUS_ADMIN_TOKEN}`
-);
 
 const chain = Chain(`http://directus.circles.local/graphql`, {
   headers: {
