@@ -47,6 +47,8 @@ let
       export ADMIN_PASSWORD="${constants.initialAdminPassword}";
       directus bootstrap
       directus schema apply --yes ${cfg.schemaJson}
+
+      mysql -e 'USE directus; UPDATE directus_users SET token = "${cfg.directusAdminToken}" WHERE first_name = "Admin";'
     '';
 
   directus = pkgs.writeShellScriptBin' "directus"
