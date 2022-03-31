@@ -1,6 +1,8 @@
 import { Chain } from "@circles-pink/zeus-client/src/admin/zeus";
 
-const chain = Chain("http://directus.circles.local/graphql");
+const chain = Chain(
+  `http://directus.circles.local/graphql/?access_token=${process.env.DIRECTUS_ADMIN_TOKEN}`
+);
 
 const main = async () => {
   // const result = await chain("query")({
