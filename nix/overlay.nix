@@ -25,9 +25,21 @@
       ${script}
     '';
 
+  yarnLockToJson = final.writeShellScriptBin "yarn-lock-to-json" ''
+    cd ${circles-pink.ts.workspaces.dev-utils}/libexec/dev-utils/node_modules/dev-utils
+    ${final.nodejs}/bin/node src/yarnLockToJson.js $@
+  '';
+
   circles-pink =
     rec {
       ts = (import ./pkgs/ts.nix {
+        pkgs = final;
+        pursOutput = purs.default;
+        inherit assets;
+        inherit zeus-client;
+      });
+
+      ts2 = (import ./pkgs/ts2.nix {
         pkgs = final;
         pursOutput = purs.default;
         inherit assets;

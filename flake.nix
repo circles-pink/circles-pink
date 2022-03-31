@@ -99,6 +99,7 @@
                   pkgs.fish
                   pkgs.graphql-zeus
                   pkgs.signal-desktop
+                  pkgs.yarn2nix
                   #pkgs.virtualboxHeadless
                 ];
 
