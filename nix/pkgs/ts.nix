@@ -89,6 +89,9 @@
         ${replaceEmptyLocalDep name}
 
         cp -r $tmp $out
+
+        chmod -R +w $tmp
+        rm -rf $tmp
       '')
       emptyWorkspaces;
 
