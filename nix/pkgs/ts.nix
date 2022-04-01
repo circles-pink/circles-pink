@@ -72,6 +72,7 @@
             else cp -rf $dir/../../${extraLevel}node_modules $dir/node_modules
           fi
 
+          chmod -R +w $tmpNodeModules
           rm -rf $tmpNodeModules
         fi
       ''))
