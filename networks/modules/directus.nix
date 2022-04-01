@@ -113,7 +113,6 @@ with types;
       pkgs.graphql-zeus
     ];
 
-
     systemd.user.services.directus = {
       after = [ "mysql.service" ];
       description = "Circles Directus";
