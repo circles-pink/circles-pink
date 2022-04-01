@@ -50,7 +50,7 @@ let
       directus bootstrap
       directus schema apply --yes ${cfg.schemaJson}
 
-      mysql -e 'USE directus; UPDATE directus_users SET token = "${cfg.directusAdminToken}" WHERE first_name = "Admin";'
+      mysql -e 'USE directus; UPDATE directus_users SET token = "${cfg.directusSecrets.adminToken}" WHERE first_name = "Admin";'
     '';
 
   directus = pkgs.writeShellScriptBin' "directus"
@@ -70,23 +70,37 @@ let
       set -e
       directus schema snapshot --yes --format json $PWD/directus-schema.json;
       zeus http://localhost:${toString cfg.port}/graphql . --graphql directus-api-public.graphql; rm -rf zeus;
-      zeus http://localhost:${toString cfg.port}/graphql/?access_token=${cfg.directusAdminToken} . --graphql directus-api-admin.graphql; rm -rf zeus;
+      zeus http://localhost:${toString cfg.port}/graphql/?access_token=${cfg.directusSecrets.adminToken} . --graphql directus-api-admin.graphql; rm -rf zeus;
     '';
 in
+with types;
 {
   options.services.directus = {
     enable = mkEnableOption "directus service";
     port = mkOption {
-      type = types.int;
+      type = int;
     };
     mysqlPort = mkOption {
-      type = types.int;
+      type = int;
     };
     schemaJson = mkOption {
-      type = types.path;
+      type = path;
     };
-    directusAdminToken = mkOption {
-      type = types.str;
+    directusSecrets = mkOption {
+      type = submodule
+        {
+          options = {
+            adminToken = mkOption { type = str; };
+            dbHost = mkOption { type = str; };
+            dbUser = mkOption { type = str; };
+            dbName = mkOption { type = str; };
+            dbPassword = mkOption { type = str; };
+            secret = mkOption { type = str; };
+            key = mkOption { type = str; };
+            initialAdminEmail = mkOption { type = str; };
+            initialAdminPassword = mkOption { type = str; };
+          };
+        };
     };
   };
 
