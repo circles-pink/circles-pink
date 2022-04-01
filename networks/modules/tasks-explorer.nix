@@ -10,7 +10,7 @@ in
       type = types.int;
     };
     notion-token = mkOption {
-      type = types.string;
+      type = types.str;
     };
     dev = mkOption {
       type = types.bool;

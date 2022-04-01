@@ -38,6 +38,10 @@ in
               };
             };
             port = mkOption { type = int; };
+            locations = mkOption {
+              type = nullOr (attrsOf str);
+              default = null;
+            };
           };
         });
     };

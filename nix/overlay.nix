@@ -32,11 +32,12 @@
 
   notify-done = final.writeShellScriptBin "notify-done" ''
     ${final.pkgs.bash}/bin/bash -c "$*"
-    if [ $? == 0 ];
+    EXIT_CODE="$?"
+    if [ $EXIT_CODE == 0 ];
       then URGENCY=low;
       else URGENCY=critical;
     fi
-    ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$?" > /dev/null
+    ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
   '';
 
   circles-pink =
