@@ -13,8 +13,8 @@
       tasks-explorer = ../../pkgs/ts/tasks-explorer;
       seed-db = ../../pkgs/ts/seed-db;
       tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-      "zeus-client" = ../../pkgs/ts/zeus-client;
-      "content" = ../../pkgs/ts/content;
+      zeus-client = ../../pkgs/ts/zeus-client;
+      content = ../../pkgs/ts/content;
     };
 
   src = pkgs.nix-filter.filter {
