@@ -30,6 +30,15 @@
     ${final.nodejs}/bin/node src/yarnLockToJson.js $@
   '';
 
+  notify-done = final.writeShellScriptBin "notify-done" ''
+    ${final.pkgs.bash}/bin/bash -c "$*"
+    if [ $? == 0 ];
+      then URGENCY=low;
+      else URGENCY=critical;
+    fi
+    ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$?" > /dev/null
+  '';
+
   circles-pink =
     rec {
       ts = (import ./pkgs/ts.nix {

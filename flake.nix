@@ -102,6 +102,7 @@
                   pkgs.yarn2nix
                   pkgs.jq
                   #pkgs.virtualboxHeadless
+                  pkgs.notify-done
                 ];
 
                 # Change the prompt to show that you are in a devShell

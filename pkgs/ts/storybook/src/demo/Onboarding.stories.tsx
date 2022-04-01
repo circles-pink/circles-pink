@@ -22,7 +22,7 @@ export const GardenAPI = (args): ReactElement => {
     getContent({ endpoint: process.env.STORYBOOK_DIRECTUS_URL }).then(
       setContent
     );
-  });
+  }, []);
 
   return (
     <>
