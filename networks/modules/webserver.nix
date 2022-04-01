@@ -17,7 +17,7 @@ let
 
   seed-with-credentials = pkgs.writeShellScriptBin' "seed-with-credentials"
     {
-      onPath = [ pkgs.seed-db ];
+      onPath = [ pkgs.circles-pink.seed-db ];
       env = {
         DIRECTUS_ADMIN_TOKEN = secrets.directus.adminToken;
       };
@@ -60,7 +60,7 @@ in
   environment.systemPackages = [
     pkgs.busybox
     pkgs.gnumake
-    pkgs.circles-pink.seed-db
+    seed-with-credentials
   ];
 
   environment.shellInit = ''cp ${Makefile} /root/Makefile'';
