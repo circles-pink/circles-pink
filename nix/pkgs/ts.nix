@@ -10,6 +10,7 @@
     generated = ../../pkgs/ts/generated;
     assets = ../../pkgs/ts/assets;
     tasks-explorer = ../../pkgs/ts/tasks-explorer;
+    seed-db = ../../pkgs/ts/seed-db;
     tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
     "zeus-client" = ../../pkgs/ts/zeus-client;
     "content" = ../../pkgs/ts/content;
@@ -116,6 +117,12 @@
     graphql-zeus = pkgs.writeShellScriptBin "zeus" ''
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/graphql-zeus/lib/CLI/index.js $@
     '';
+
+    seed-db =
+      pkgs.writeShellScriptBin "seed-db" ''
+        cd ${workspaces.seed-db}/libexec/seed-db/node_modules/seed-db
+        ${pkgs.yarn}/bin/yarn run ts-node ./pkgs/ts/seed-db/src/index.ts
+      '';
   };
 
   builds = {

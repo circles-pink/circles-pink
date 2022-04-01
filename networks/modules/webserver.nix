@@ -14,6 +14,16 @@ let
     else builtins.mapAttrs (_: r: url + r) value.locations;
 
   serviceUrls = builtins.mapAttrs mkServiceUrl config.env.services;
+
+  seed-with-credentials = pkgs.writeShellScriptBin' "seed-with-credentials"
+    {
+      onPath = [ pkgs.seed-db ];
+      env = {
+        DIRECTUS_ADMIN_TOKEN = secrets.directus.adminToken;
+      };
+    } ''
+    seed-db $@
+  '';
 in
 
 {
@@ -50,6 +60,7 @@ in
   environment.systemPackages = [
     pkgs.busybox
     pkgs.gnumake
+    pkgs.circles-pink.seed-db
   ];
 
   environment.shellInit = ''cp ${Makefile} /root/Makefile'';
