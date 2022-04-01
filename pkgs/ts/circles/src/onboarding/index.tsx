@@ -39,18 +39,31 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
-const control = mkControl({
-  gardenApi: process.env.STORYBOOK_GARDEN_API || '',
-  gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS || '',
-  gardenGraphApi: process.env.STORYBOOK_GRAPH_API || '',
-  gardenSubgraphName: process.env.STORYBOOK_GARDEN_SUBGRAPH_NAME || '',
-  gardenRelay: process.env.STORYBOOK_GARDEN_RELAY || '',
-  gardenHubAddress: process.env.STORYBOOK_GARDEN_HUB_ADDRESS || '',
-  gardenProxyFactoryAddress:
-    process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS || '',
-  gardenSafeMasterAddress:
-    process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS || '',
-});
+const control = mkControl(
+  process.env.STORYBOOK_GARDEN_API !== undefined &&
+    process.env.STORYBOOK_GARDEN_API_USERS !== undefined &&
+    process.env.STORYBOOK_GRAPH_API !== undefined &&
+    process.env.STORYBOOK_GARDEN_SUBGRAPH_NAME !== undefined &&
+    process.env.STORYBOOK_GARDEN_RELAY !== undefined &&
+    process.env.STORYBOOK_GARDEN_HUB_ADDRESS !== undefined &&
+    process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS !== undefined &&
+    process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS !== undefined
+    ? {
+        gardenApi: process.env.STORYBOOK_GARDEN_API,
+        gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS,
+        gardenGraphApi: process.env.STORYBOOK_GRAPH_API,
+        gardenSubgraphName: process.env.STORYBOOK_GARDEN_SUBGRAPH_NAME,
+        gardenRelay: process.env.STORYBOOK_GARDEN_RELAY,
+        gardenHubAddress: process.env.STORYBOOK_GARDEN_HUB_ADDRESS,
+        gardenProxyFactoryAddress:
+          process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS,
+        gardenSafeMasterAddress:
+          process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS,
+      }
+    : (() => {
+        throw new Error();
+      })()
+) as never;
 
 const OnboardingContent = ({
   initState,
