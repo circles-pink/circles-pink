@@ -5,7 +5,7 @@
 
     let
       lib = pkgs.lib;
-      secrets = builtins.fromJSON (builtins.readFile /secrets.json);
+      secrets = builtins.fromJSON (builtins.readFile /secrets.json).secrets.data;
     in
     {
       boot.tmpOnTmpfs = false;
