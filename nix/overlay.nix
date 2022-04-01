@@ -148,6 +148,8 @@
 
       circles-directus = ts.bins.circles-directus;
 
+      seed-db = ts.bins.seed-db;
+
       tasks-explorer-server = ts.bins.tasks-explorer-server;
 
       zeus-client = final.runCommand "zeus-client"
