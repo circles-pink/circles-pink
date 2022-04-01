@@ -1025,6 +1025,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "typelevel" = pkgs.stdenv.mkDerivation {
+        name = "typelevel";
+        version = "v6.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/bodil/purescript-typelevel.git";
+          rev = "c7917aa6d43440608e6e04332e4c916a45976313";
+          sha256 = "0gxj926ppx6d8inir589x0a30iv29hqc2y6vsa1n1c2vlcqv2zgd";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "typelevel-lists" = pkgs.stdenv.mkDerivation {
         name = "typelevel-lists";
         version = "v2.1.0";

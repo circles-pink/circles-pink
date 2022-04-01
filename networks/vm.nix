@@ -21,6 +21,15 @@
         protocol = "http";
       };
 
+      env.services = {
+        gardenApi = {
+          url = { protocol = "http"; subdomain = "api"; domain = "circles"; topLevelDomain = "local"; };
+          locations = {
+            users = "/api/users";
+          };
+        };
+      };
+
       deployment.targetEnv = "virtualbox";
       deployment.virtualbox.memorySize = 1024 * 4; # megabytes
       deployment.virtualbox.vcpu = 2; # number of cpus

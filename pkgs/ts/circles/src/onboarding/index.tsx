@@ -1,7 +1,7 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../i18n';
-import { control } from 'generated/output/CirclesPink.Garden.TS';
+import { mkControl } from 'generated/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
   init,
@@ -45,6 +45,10 @@ export const Onboarding = (props: OnboardingProps) => {
     </ThemeProvider>
   );
 };
+
+const control = mkControl({
+  gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS,
+});
 
 const OnboardingContent = ({
   initState,
