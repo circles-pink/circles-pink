@@ -5,7 +5,27 @@
 
     let
       lib = pkgs.lib;
-      secrets = (builtins.fromJSON (builtins.readFile /secrets.json)).secrets.data;
+
+      mockSecrets = {
+        "notion-token" = "";
+        "directus" = {
+          "adminToken" = "";
+          "dbHost" = "";
+          "dbUser" = "";
+          "dbName" = "";
+          "dbPassword" = "";
+          "secret" = "";
+          "key" = "";
+          "initialAdminEmail" = "";
+          "initialAdminPassword" = "";
+        };
+      };
+
+      secretsFile = builtins.fromJSON (builtins.readFile /secrets.json);
+      secrets =
+        if secretsFile ? "secrets"
+        then secretsFile.secrets.data
+        else mockSecrets;
     in
     {
       boot.tmpOnTmpfs = false;
