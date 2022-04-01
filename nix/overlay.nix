@@ -104,13 +104,20 @@
         cp ${purs-moduleDependencyGraphSvg} $out/purs-moduleDependencyGraph.svg
       '';
 
-      publicDir = { serviceUrls }: final.runCommand "output" { } ''
-        cp -r ${ts.builds.storybook {inherit serviceUrls;}} $out
+      publicDir = { envVars }: final.runCommand "output" { } ''
+        cp -r ${ts.builds.storybook {inherit envVars;}} $out
       '';
 
-      runGarden = { serviceUrls }: final.writeShellScriptBin "run-garden" ''
+      runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
         export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
-        export GARDEN_API_USERS=${serviceUrls.gardenApi.users}
+        export GARDEN_API=${envVars.gardenApi}
+        export GARDEN_API_USERS=${envVars.gardenApiUsers}
+        export GARDEN_GRAPH_API=${envVars.gardenGraphApi}
+        export GARDEN_SUBGRAPH_NAME="${envVars.gardenSubgraphName}"
+        export GARDEN_RELAY="${envVars.gardenRelay}"
+        export GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
+        export GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
+        export GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 

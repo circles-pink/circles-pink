@@ -13,7 +13,9 @@ let
     then url
     else builtins.mapAttrs (_: r: url + r) value.locations;
 
-  serviceUrls = builtins.mapAttrs mkServiceUrl config.env.services;
+  internalServiceUrls = builtins.mapAttrs mkServiceUrl config.env.services;
+
+  envVars = internalServiceUrls // config.env.envVars;
 
   seed-with-credentials = pkgs.writeShellScriptBin' "seed-with-credentials"
     {
@@ -82,7 +84,7 @@ in
     virtualHosts = {
       "${lib.mkDomain config.env.services.storybook.url}" = {
         locations."/" = {
-          root = pkgs.circles-pink.publicDir { inherit serviceUrls; };
+          root = pkgs.circles-pink.publicDir { inherit envVars; };
         };
       };
       "${lib.mkDomain config.env.services.tasks.url}" = {

@@ -1,35 +1,35 @@
 module CirclesPink.Garden.ApiScript where
 
 import Prelude
-import CirclesPink.Garden.Env (Endpoints, env)
+import CirclesPink.Garden.Env (EnvVars, env)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
-import Control.Monad.State (StateT, execStateT, get, lift)
+import Control.Monad.State (StateT, execStateT, get)
 import Data.Typelevel.Undefined (undefined)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class.Console (log, logShow)
+import Effect.Class.Console (log)
 import HTTP (addLogging)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Stadium.Control (toStateT)
 
 control ::
-  Endpoints ->
+  EnvVars ->
   ((CirclesState -> CirclesState) -> StateT CirclesState Aff Unit) ->
   CirclesState -> CirclesAction -> StateT CirclesState Aff Unit
-control endpoints =
+control envVars =
   milkisRequest nodeFetch
     # addLogging
-    # (\request -> env { request, endpoints })
+    # (\request -> env { request, envVars })
     # circlesControl
 
-act :: Endpoints -> CirclesAction -> StateT CirclesState Aff Unit
-act endpoints ac = do
+act :: EnvVars -> CirclesAction -> StateT CirclesState Aff Unit
+act envVars ac = do
   log ("ACTION: " <> show ac)
-  toStateT (control endpoints) ac
+  toStateT (control envVars) ac
   st <- get
   log ("STATE: " <> show st)
   log ""
@@ -39,7 +39,7 @@ type Options
     , email :: String
     }
 
-script :: Endpoints -> Options -> StateT CirclesState Aff Unit
+script :: EnvVars -> Options -> StateT CirclesState Aff Unit
 script ep opts = do
   act ep $ A._infoGeneral $ A._next unit
   act ep $ A._askUsername $ A._setUsername opts.username
@@ -52,18 +52,18 @@ script ep opts = do
   act ep $ A._magicWords $ A._next unit
   act ep $ A._submit $ A._submit unit
 
-result :: Endpoints -> Aff CirclesState
-result endpoints = execStateT (script endpoints opts) init
+result :: EnvVars -> Aff CirclesState
+result envVars = execStateT (script envVars opts) init
   where
   opts =
     { username: "pinkie001"
     , email: "pinkie001@pinkie001.net"
     }
 
-getEndpoints :: Effect Endpoints
-getEndpoints = undefined
+getEnvVars :: Effect EnvVars
+getEnvVars = undefined
 
 main :: Effect Unit
 main = do
-  endpoints <- getEndpoints
-  runAff_ (\_ -> pure unit) (result endpoints)
+  envVars <- getEnvVars
+  runAff_ (\_ -> pure unit) (result envVars)
