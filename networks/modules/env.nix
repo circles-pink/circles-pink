@@ -6,20 +6,24 @@ let
 
   typeUrl = {
     protocol = mkOption {
-      type = string;
+      type = str;
       default = "https";
     };
     domain = mkOption {
-      type = string;
+      type = str;
     };
     topLevelDomain = mkOption {
-      type = string;
+      type = str;
     };
   };
 
   typeUrl' = {
     subdomain = mkOption {
-      type = nullOr string;
+      type = nullOr str;
+      default = null;
+    };
+    path = mkOption {
+      type = nullOr str;
       default = null;
     };
   };
@@ -44,6 +48,10 @@ in
             };
           };
         });
+    };
+
+    envVars = mkOption {
+      type = attrsOf str;
     };
 
   };

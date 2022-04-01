@@ -1,5 +1,5 @@
 module CirclesPink.Garden.Env
-  ( env, testEnv, Endpoints
+  ( env, testEnv, EnvVars
   ) where
 
 import Prelude
@@ -13,17 +13,22 @@ import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Variant (inj)
-import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
-import Undefined (undefined)
 import Wallet.PrivateKey (sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
-type Endpoints
-  = { gardenApiUsers :: String
+type EnvVars
+  = { gardenApi :: String
+    , gardenApiUsers :: String
+    , gardenGraphApi :: String
+    , gardenSubgraphName :: String
+    , gardenRelay :: String
+    , gardenHubAddress :: String
+    , gardenProxyFactoryAddress :: String
+    , gardenSafeMasterAddress :: String
     }
 
 _errService :: CirclesError
@@ -32,15 +37,15 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env :: { request :: ReqFn (CirclesError' ()), endpoints :: Endpoints } -> C.Env Aff
-env { request, endpoints } =
+env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> C.Env Aff
+env { request, envVars } =
   { apiCheckUserName:
       \username ->
         if username == "" then
           pure { isValid: false }
         else
           request
-            { url: endpoints.gardenApiUsers
+            { url: envVars.gardenApiUsers
             , method: POST
             , body: encodeJson { username }
             }
@@ -68,7 +73,7 @@ env { request, endpoints } =
           pure { isValid: false }
         else
           request
-            { url: "https://api.circles.garden/api/users/"
+            { url: envVars.gardenApiUsers
             , method: POST
             , body: encodeJson { email }
             }
@@ -94,13 +99,13 @@ env { request, endpoints } =
   , userRegister:
       \privKey options -> do
         web3 <- mapExceptT liftEffect $ getWeb3
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         CC.userRegister circlesCore account options
   , getSafeAddress:
       \{ nonce, privKey } -> do
         web3 <- mapExceptT liftEffect getWeb3
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         address <- CC.safePredictAddress circlesCore account { nonce: nonce }
         pure address
@@ -111,15 +116,15 @@ getWeb3 = do
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
-getCirclesCore web3 =
+getCirclesCore web3 ev =
   CC.newCirclesCore web3
-    { apiServiceEndpoint: "https://api.circles.garden"
-    , graphNodeEndpoint: "https://api.thegraph.com"
-    , hubAddress: "0xCfEB869F69431e42cdB54A4F4f105C19C080A601"
-    , proxyFactoryAddress: "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"
-    , relayServiceEndpoint: "https://relay.circles.garden"
-    , safeMasterAddress: "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"
-    , subgraphName: "CirclesUBI/circles-subgraph"
+    { apiServiceEndpoint: ev.gardenApi
+    , graphNodeEndpoint: ev.gardenGraphApi
+    , hubAddress: ev.gardenHubAddress
+    , proxyFactoryAddress: ev.gardenProxyFactoryAddress
+    , relayServiceEndpoint: ev.gardenRelay
+    , safeMasterAddress: ev.gardenSafeMasterAddress
+    , subgraphName: ev.gardenSubgraphName
     }
 
 testEnv :: C.Env Identity

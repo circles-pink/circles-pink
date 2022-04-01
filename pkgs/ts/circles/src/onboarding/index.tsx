@@ -17,15 +17,8 @@ import {
 
 // Style
 import '../styles/global.css';
-import {
-  ThemeProvider,
-  ThemeContext,
-  ThemeContextType,
-} from '../context/theme';
-import chroma from 'chroma-js';
-import { StepIndicator } from '../components/StepIndicator';
-import { stringify } from 'querystring';
-import { AnimProvider, useAnimContext } from '../context/anim';
+import { ThemeProvider, ThemeContext } from '../context/theme';
+import { AnimProvider } from '../context/anim';
 
 type Language = 'en' | 'de';
 
@@ -47,7 +40,16 @@ export const Onboarding = (props: OnboardingProps) => {
 };
 
 const control = mkControl({
-  gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS,
+  gardenApi: process.env.STORYBOOK_GARDEN_API || '',
+  gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS || '',
+  gardenGraphApi: process.env.STORYBOOK_GRAPH_API || '',
+  gardenSubgraphName: process.env.STORYBOOK_GARDEN_SUBGRAPH_NAME || '',
+  gardenRelay: process.env.STORYBOOK_GARDEN_RELAY || '',
+  gardenHubAddress: process.env.STORYBOOK_GARDEN_HUB_ADDRESS || '',
+  gardenProxyFactoryAddress:
+    process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS || '',
+  gardenSafeMasterAddress:
+    process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS || '',
 });
 
 const OnboardingContent = ({

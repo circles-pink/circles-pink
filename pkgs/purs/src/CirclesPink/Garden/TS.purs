@@ -18,8 +18,8 @@ circlesControlEff e f s a =
     # runIdentityT
     # launchAff_
 
-mkControl :: Garden.Endpoints -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
-mkControl endpoints =
+mkControl :: Garden.EnvVars -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+mkControl envVars =
   milkisRequest windowFetch
-    # (\request -> Garden.env { request, endpoints })
+    # (\request -> Garden.env { request, envVars })
     # circlesControlEff
