@@ -1,20 +1,21 @@
 { pkgs, pursOutput, assets, zeus-client, ... }: rec {
 
-  localPackages = {
-    dev-utils = ../../pkgs/ts/dev-utils;
-    common = ../../pkgs/ts/common;
-    storybook = ../../pkgs/ts/storybook;
-    cli = ../../pkgs/ts/cli;
-    circles = ../../pkgs/ts/circles;
-    circles-directus = ../../pkgs/ts/circles-directus;
-    generated = ../../pkgs/ts/generated;
-    assets = ../../pkgs/ts/assets;
-    tasks-explorer = ../../pkgs/ts/tasks-explorer;
-    seed-db = ../../pkgs/ts/seed-db;
-    tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-    "zeus-client" = ../../pkgs/ts/zeus-client;
-    "content" = ../../pkgs/ts/content;
-  };
+  localPackages = builtins.mapAttrs (_: pkgs.lib.cleanSource)
+    {
+      dev-utils = ../../pkgs/ts/dev-utils;
+      common = ../../pkgs/ts/common;
+      storybook = ../../pkgs/ts/storybook;
+      cli = ../../pkgs/ts/cli;
+      circles = ../../pkgs/ts/circles;
+      circles-directus = ../../pkgs/ts/circles-directus;
+      generated = ../../pkgs/ts/generated;
+      assets = ../../pkgs/ts/assets;
+      tasks-explorer = ../../pkgs/ts/tasks-explorer;
+      seed-db = ../../pkgs/ts/seed-db;
+      tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
+      "zeus-client" = ../../pkgs/ts/zeus-client;
+      "content" = ../../pkgs/ts/content;
+    };
 
   src = pkgs.nix-filter.filter {
     root = pkgs.lib.cleanSource ../../.;
