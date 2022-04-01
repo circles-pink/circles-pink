@@ -71,6 +71,8 @@
             then cp -r $tmpNodeModules/node_modules $dir/node_modules
             else cp -rf $dir/../../${extraLevel}node_modules $dir/node_modules
           fi
+
+          rm -rf $tmpNodeModules
         fi
       ''))
     (builtins.concatStringsSep "\n")
@@ -122,7 +124,7 @@
     seed-db =
       pkgs.writeShellScriptBin "seed-db" ''
         cd ${workspaces.seed-db}/libexec/seed-db/node_modules/seed-db
-        ${pkgs.yarn}/bin/yarn run ts-node ./pkgs/ts/seed-db/src/index.ts
+        ${pkgs.yarn}/bin/yarn run ts-node src/index.ts
       '';
   };
 
