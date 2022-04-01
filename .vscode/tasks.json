@@ -63,7 +63,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make vm-deploy"],
+      "args": ["-c", "nix develop -c notify-done make vm-deploy"],
       "group": "none",
       "presentation": {
         "reveal": "always",
