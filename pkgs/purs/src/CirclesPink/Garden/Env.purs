@@ -1,5 +1,5 @@
 module CirclesPink.Garden.Env
-  ( env, testEnv
+  ( env, testEnv, Endpoints
   ) where
 
 import Prelude
@@ -22,21 +22,25 @@ import Undefined (undefined)
 import Wallet.PrivateKey (sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
+type Endpoints
+  = { gardenApiUsers :: String
+    }
+
 _errService :: CirclesError
 _errService = inj (Proxy :: _ "errService") unit
 
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env :: { request :: ReqFn (CirclesError' ()) } -> C.Env Aff
-env { request } =
+env :: { request :: ReqFn (CirclesError' ()), endpoints :: Endpoints } -> C.Env Aff
+env { request, endpoints } =
   { apiCheckUserName:
       \username ->
         if username == "" then
           pure { isValid: false }
         else
           request
-            { url: "https://api.circles.garden/api/users/"
+            { url: endpoints.gardenApiUsers
             , method: POST
             , body: encodeJson { username }
             }

@@ -48,6 +48,15 @@
       security.acme.acceptTerms = true;
       security.acme.email = "circles.pink@protonmail.com";
 
+      env.services = {
+        gardenApi = {
+          url = { subdomain = "api"; domain = "circles"; topLevelDomain = "garden"; };
+          locations = {
+            users = "/api/users";
+          };
+        };
+      };
+
       services.nginx.virtualHosts = lib.mapAttrs'
         (_: value: {
           name = lib.mkDomain value.url;

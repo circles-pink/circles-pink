@@ -7,6 +7,7 @@ dev-storybook: vm-deploy assets dev-storybook_
 dev-storybook_:
 	export STORYBOOK_TASKS_EXPLORER_SERVER="http://tasks.circles.local"; \
 	export STORYBOOK_DIRECTUS_URL="http://directus.circles.local/graphql"; \
+	export STORYBOOK_GARDEN_API_USERS="https://api.circles.garden/api/users/"; \
 	yarn workspace storybook run storybook
 
 dev-browser:
