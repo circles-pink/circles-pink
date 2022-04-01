@@ -21,7 +21,7 @@ rec {
     build-spago-style
   '';
 
-  sources = ../../pkgs/purs/src;
+  sources = pkgs.lib.cleanSource ../../pkgs/purs/src;
 
   pursOutput = pkgs.runCommand "pursOutput"
     {

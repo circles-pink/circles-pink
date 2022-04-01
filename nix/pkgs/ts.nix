@@ -146,6 +146,9 @@
       export STORYBOOK_DIRECTUS_URL="${serviceUrls.directus."/graphql"}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
       OUTPUT_DIR=$out yarn build
+
+      chmod -R +w $tmp
+      rm -rf $tmp
     '';
   };
 
