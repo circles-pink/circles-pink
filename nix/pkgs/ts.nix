@@ -133,7 +133,7 @@
   };
 
   builds = {
-    storybook = { serviceUrls }: pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
+    storybook = { envVars }: pkgs.runCommand "storybook" { buildInputs = [ pkgs.yarn ]; } ''
       tmp=`mktemp -d`
       cp -r ${workspaces.storybook} $tmp/build
       chmod -R +w $tmp
@@ -142,9 +142,16 @@
       cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
       cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
 
-      export STORYBOOK_TASKS_EXPLORER_SERVER="${serviceUrls.tasks}"
-      export STORYBOOK_DIRECTUS_URL="${serviceUrls.directus."/graphql"}"
-      export STORYBOOK_GARDEN_API_USERS="${serviceUrls.gardenApi.users}"
+      export STORYBOOK_TASKS_EXPLORER_SERVER="${envVars.tasks}"
+      export STORYBOOK_DIRECTUS_URL="${envVars.directus."/graphql"}"
+      export STORYBOOK_GARDEN_API="${envVars.gardenApi}"
+      export STORYBOOK_GARDEN_API_USERS="${envVars.gardenApiUsers}"
+      export STORYBOOK_GARDEN_GRAPH_API="${envVars.gardenGraphApi}"
+      export STORYBOOK_GARDEN_SUBGRAPH_NAME="${envVars.gardenSubgraphName}"
+      export STORYBOOK_GARDEN_RELAY="${envVars.gardenRelay}"
+      export STORYBOOK_GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
+      export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
+      export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
       OUTPUT_DIR=$out yarn build
 
