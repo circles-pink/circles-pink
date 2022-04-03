@@ -1,173 +1,179 @@
-(final: prev: rec {
-  vscode = (import ./pkgs/vscode.nix { pkgs = final; });
+(final: prev:
+  rec {
+    chokidar-cli = circles-pink.pkgs.yarn2nix.bins.chokidar-cli;
 
-  cspell = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.cspell;
+    vscode = (import ./pkgs/vscode.nix { pkgs = final; });
 
-  ts-node = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.ts-node;
+    cspell = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.cspell;
 
-  depcruise = circles-pink.ts.bins.depcruise;
+    ts-node = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.ts-node;
 
-  directus = circles-pink.ts.bins.circles-directus;
+    depcruise = circles-pink.ts.bins.depcruise;
 
-  graphql-zeus = circles-pink.ts.bins.graphql-zeus;
+    directus = circles-pink.ts.bins.circles-directus;
 
-  lib = prev.lib // (import ./pkgs/lib.nix);
+    graphql-zeus = circles-pink.ts.bins.graphql-zeus;
 
-  writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
-    let
-      exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;
-    in
-    prev.writeShellScriptBin name ''
-      ${builtins.concatStringsSep "\n" exports}
+    lib = prev.lib // (import ./pkgs/lib.nix);
 
-      export PATH=${builtins.concatStringsSep ":" (map (p : "${p}/bin") onPath)}:$PATH
+    writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
+      let
+        exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;
+      in
+      prev.writeShellScriptBin name ''
+        ${builtins.concatStringsSep "\n" exports}
 
-      ${script}
+        export PATH=${builtins.concatStringsSep ":" (map (p : "${p}/bin") onPath)}:$PATH
+
+        ${script}
+      '';
+
+    yarnLockToJson = final.writeShellScriptBin "yarn-lock-to-json" ''
+      cd ${circles-pink.ts.workspaces.dev-utils}/libexec/dev-utils/node_modules/dev-utils
+      ${final.nodejs}/bin/node src/yarnLockToJson.js $@
     '';
 
-  yarnLockToJson = final.writeShellScriptBin "yarn-lock-to-json" ''
-    cd ${circles-pink.ts.workspaces.dev-utils}/libexec/dev-utils/node_modules/dev-utils
-    ${final.nodejs}/bin/node src/yarnLockToJson.js $@
-  '';
+    notify-done = final.writeShellScriptBin "notify-done" ''
+      ${final.pkgs.bash}/bin/bash -c "$*"
+      EXIT_CODE="$?"
+      if [ $EXIT_CODE == 0 ];
+        then URGENCY=low;
+        else URGENCY=critical;
+      fi
+      ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
+    '';
 
-  notify-done = final.writeShellScriptBin "notify-done" ''
-    ${final.pkgs.bash}/bin/bash -c "$*"
-    EXIT_CODE="$?"
-    if [ $EXIT_CODE == 0 ];
-      then URGENCY=low;
-      else URGENCY=critical;
-    fi
-    ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
-  '';
 
-  circles-pink =
-    rec {
-      ts = (import ./pkgs/ts.nix {
-        pkgs = final;
-        pursOutput = purs.default;
-        inherit assets;
-        inherit zeus-client;
-      });
+    circles-pink =
+      rec {
+        pkgs = import ./pkgs/default.nix { pkgs = final; };
 
-      ts2 = (import ./pkgs/ts2.nix {
-        pkgs = final;
-        pursOutput = purs.default;
-        inherit assets;
-        inherit zeus-client;
-      });
+        ts = (import ./pkgs/ts.nix {
+          pkgs = final;
+          pursOutput = purs.default;
+          inherit assets;
+          inherit zeus-client;
+        });
 
-      patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
-        cd ${ts.workspaces.dev-utils}/libexec/dev-utils/deps/dev-utils/
-        ${final.ts-node}/bin/ts-node ./src/patchTsTypes.ts $@
-      '';
+        ts2 = (import ./pkgs/ts2.nix {
+          pkgs = final;
+          pursOutput = purs.default;
+          inherit assets;
+          inherit zeus-client;
+        });
 
-      purs = (import ./pkgs/purs.nix { pkgs = final; });
-
-      stateMachineGraphDot = final.runCommand "stateMachineGraph"
-        { buildInputs = [ final.nodejs ]; }
-        ''
-          node -e 'require("${purs.default}/CirclesPink.Garden.GenGraph").main()' $out
+        patchTsTypes = final.writeShellScriptBin "patchTsTypes" ''
+          cd ${ts.workspaces.dev-utils}/libexec/dev-utils/deps/dev-utils/
+          ${final.ts-node}/bin/ts-node ./src/patchTsTypes.ts $@
         '';
 
-      stateMachineGraphSvg = final.runCommand "stateMachineGraph"
-        { buildInputs = [ final.graphviz ]; }
-        ''
-          dot -Tsvg ${stateMachineGraphDot} > $out
-        '';
+        purs = (import ./pkgs/purs.nix { pkgs = final; });
 
-      makefileGraphSvg = final.runCommand "makefileGraphSvg"
-        { buildInputs = [ final.graphviz final.makefile2graph final.gnumake ]; }
-        ''
-          make -Bnd -f ${../Makefile} | make2graph | dot -Tsvg -o $out
-        '';
-
-      moduleDependencyGraph = final.runCommand "moduleDependencyGraph"
-        {
-          buildInputs = [
-            final.graphviz
-            final.depcruise
-            final.nodePackages.typescript
-            final.nodejs
-          ];
-        }
-        ''
-          cd ${../pkgs/ts}
-          depcruise --include-only '^.*/src' --output-type dot */src | dot -T svg > $out
-        '';
-
-      assets = final.runCommand "assets" { } ''
-        mkdir $out
-        cp ${stateMachineGraphDot} $out/circles-state-machine.dot
-        cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
-        cp ${makefileGraphSvg} $out/circles-makefile.svg
-        cp ${moduleDependencyGraph} $out/module-dep-graph.svg
-        cp ${purs-moduleDependencyGraphSvg} $out/purs-moduleDependencyGraph.svg
-      '';
-
-      publicDir = { envVars }: final.runCommand "output" { } ''
-        cp -r ${ts.builds.storybook {inherit envVars;}} $out
-      '';
-
-      runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
-        export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
-        export GARDEN_API=${envVars.gardenApi}
-        export GARDEN_API_USERS=${envVars.gardenApiUsers}
-        export GARDEN_GRAPH_API=${envVars.gardenGraphApi}
-        export GARDEN_SUBGRAPH_NAME="${envVars.gardenSubgraphName}"
-        export GARDEN_RELAY="${envVars.gardenRelay}"
-        export GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
-        export GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
-        export GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
-        ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
-      '';
-
-      purs-deps-json = final.runCommand "purs-deps.json"
-        { buildInputs = [ final.purescript final.jq ]; }
-        ''
-          shopt -s globstar
-          purs graph  ${purs.sources}/**/*.purs ${purs.dependencies}/.spago/*/*/src/**/*.purs | jq > $out
-        '';
-
-      purs-deps = final.runCommand "purs-deps" { } (
-        let
-          src = final.writeText "purs-deps" ''
-            #!${final.nodejs}/bin/node
-            require("${purs.pursOutput}/PursDeps").main()
+        stateMachineGraphDot = final.runCommand "stateMachineGraph"
+          { buildInputs = [ final.nodejs ]; }
+          ''
+            node -e 'require("${purs.default}/CirclesPink.Garden.GenGraph").main()' $out
           '';
-        in
-        ''
-          mkdir -p $out/bin
-          cp ${src} $out/bin/purs-deps
-          chmod +x $out/bin/purs-deps
-        ''
-      );
 
-      purs-moduleDependencyGraphDot = final.runCommand "purs-moduleDependencyGraph.dot"
-        { buildInputs = [ purs-deps ]; }
-        ''
-          purs-deps --depsJsonPath ${purs-deps-json} > $out
-        '';
+        stateMachineGraphSvg = final.runCommand "stateMachineGraph"
+          { buildInputs = [ final.graphviz ]; }
+          ''
+            dot -Tsvg ${stateMachineGraphDot} > $out
+          '';
 
-      purs-moduleDependencyGraphSvg = final.runCommand "purs-moduleDependencyGraph.svg"
-        { buildInputs = [ final.graphviz ]; }
-        ''
-          dot -Tsvg ${purs-moduleDependencyGraphDot} > $out 
-        '';
+        makefileGraphSvg = final.runCommand "makefileGraphSvg"
+          { buildInputs = [ final.graphviz final.makefile2graph final.gnumake ]; }
+          ''
+            make -Bnd -f ${../Makefile} | make2graph | dot -Tsvg -o $out
+          '';
 
-      circles-directus = ts.bins.circles-directus;
+        moduleDependencyGraph = final.runCommand "moduleDependencyGraph"
+          {
+            buildInputs = [
+              final.graphviz
+              final.depcruise
+              final.nodePackages.typescript
+              final.nodejs
+            ];
+          }
+          ''
+            cd ${../pkgs/ts}
+            depcruise --include-only '^.*/src' --output-type dot */src | dot -T svg > $out
+          '';
 
-      seed-db = ts.bins.seed-db;
-
-      tasks-explorer-server = ts.bins.tasks-explorer-server;
-
-      zeus-client = final.runCommand "zeus-client"
-        {
-          buildInputs = [ final.graphql-zeus ];
-        }
-        ''
+        assets = final.runCommand "assets" { } ''
           mkdir $out
-          zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin --node
-          zeus ${../materialized/directus-dump/directus-api-public.graphql} $out/public
+          cp ${stateMachineGraphDot} $out/circles-state-machine.dot
+          cp ${stateMachineGraphSvg} $out/circles-state-machine.svg
+          cp ${makefileGraphSvg} $out/circles-makefile.svg
+          cp ${moduleDependencyGraph} $out/module-dep-graph.svg
+          cp ${purs-moduleDependencyGraphSvg} $out/purs-moduleDependencyGraph.svg
         '';
-    };
-})
+
+        publicDir = { envVars }: final.runCommand "output" { } ''
+          cp -r ${ts.builds.storybook {inherit envVars;}} $out
+        '';
+
+        runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
+          export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
+          export GARDEN_API=${envVars.gardenApi}
+          export GARDEN_API_USERS=${envVars.gardenApiUsers}
+          export GARDEN_GRAPH_API=${envVars.gardenGraphApi}
+          export GARDEN_SUBGRAPH_NAME="${envVars.gardenSubgraphName}"
+          export GARDEN_RELAY="${envVars.gardenRelay}"
+          export GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
+          export GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
+          export GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
+          ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
+        '';
+
+        purs-deps-json = final.runCommand "purs-deps.json"
+          { buildInputs = [ final.purescript final.jq ]; }
+          ''
+            shopt -s globstar
+            purs graph  ${purs.sources}/**/*.purs ${purs.dependencies}/.spago/*/*/src/**/*.purs | jq > $out
+          '';
+
+        purs-deps = final.runCommand "purs-deps" { } (
+          let
+            src = final.writeText "purs-deps" ''
+              #!${final.nodejs}/bin/node
+              require("${purs.pursOutput}/PursDeps").main()
+            '';
+          in
+          ''
+            mkdir -p $out/bin
+            cp ${src} $out/bin/purs-deps
+            chmod +x $out/bin/purs-deps
+          ''
+        );
+
+        purs-moduleDependencyGraphDot = final.runCommand "purs-moduleDependencyGraph.dot"
+          { buildInputs = [ purs-deps ]; }
+          ''
+            purs-deps --depsJsonPath ${purs-deps-json} > $out
+          '';
+
+        purs-moduleDependencyGraphSvg = final.runCommand "purs-moduleDependencyGraph.svg"
+          { buildInputs = [ final.graphviz ]; }
+          ''
+            dot -Tsvg ${purs-moduleDependencyGraphDot} > $out 
+          '';
+
+        circles-directus = ts.bins.circles-directus;
+
+        seed-db = ts.bins.seed-db;
+
+        tasks-explorer-server = ts.bins.tasks-explorer-server;
+
+        zeus-client = final.runCommand "zeus-client"
+          {
+            buildInputs = [ final.graphql-zeus ];
+          }
+          ''
+            mkdir $out
+            zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin --node
+            zeus ${../materialized/directus-dump/directus-api-public.graphql} $out/public
+          '';
+      };
+  })
