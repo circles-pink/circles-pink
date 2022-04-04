@@ -74,6 +74,24 @@
       "problemMatcher": []
     },
     {
+      "label": "vm-deploy-dry-watch",
+      "runOptions": {
+        "runOn": "default"
+      },
+      "type": "process",
+      "command": "bash",
+      "isBackground": true,
+      "args": ["-c", "nix develop -c make vm-deploy-dry-watch"],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "echo": false,
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "dev-browser",
       "runOptions": {
         "runOn": "default"

@@ -103,6 +103,8 @@
                   pkgs.jq
                   #pkgs.virtualboxHeadless
                   pkgs.notify-done
+                  pkgs.chokidar-cli
+                  pkgs.log-result
                 ];
 
                 # Change the prompt to show that you are in a devShell

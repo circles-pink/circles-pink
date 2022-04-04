@@ -1,6 +1,6 @@
 (final: prev:
   rec {
-    chokidar-cli = circles-pink.pkgs.yarn2nix.bins.chokidar-cli;
+    chokidar-cli = circles-pink.yarn2nix.bins.chokidar-cli;
 
     vscode = (import ./pkgs/vscode.nix { pkgs = final; });
 
@@ -43,10 +43,26 @@
       ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
     '';
 
+    log-result = final.writeShellScriptBin "log-result" ''
+      UUID=`uuidgen`
+      date
+      echo START $UUID
+      ${final.pkgs.bash}/bin/bash -c "$*"
+      EXIT_CODE="$?"
+      CMD="$*"
+      echo
+      date
+      echo FINISH $UUID
+      echo $CMD
+      if [ $EXIT_CODE == 0 ];
+        then echo -e "\e[32mSUCCESS\e[0m";
+        else echo -e "\e[31mFAILURE ($EXIT_CODE)\e[0m";
+      fi
+      echo
+    '';
 
-    circles-pink =
+    circles-pink = import ./pkgs { pkgs = final; } //
       rec {
-        pkgs = import ./pkgs/default.nix { pkgs = final; };
 
         ts = (import ./pkgs/ts.nix {
           pkgs = final;
