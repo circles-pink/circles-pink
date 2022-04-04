@@ -1,9 +1,12 @@
 {
-  "name": "yarn2nix-chokidar-cli",
+  "name": "@circles-pink/chokidar-cli",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "chokidar-cli": "^3.0.0"
+  },
+  "bin": {
+    "chokidar": "./node_modules/chokidar-cli/index.js"
   }
 }
