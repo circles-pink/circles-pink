@@ -46,6 +46,7 @@ type Options
     , relayServiceEndpoint :: String
     , safeMasterAddress :: String
     , subgraphName :: String
+    , databaseSource :: String
     }
 
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore

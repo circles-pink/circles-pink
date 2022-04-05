@@ -13,6 +13,7 @@ import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Variant (inj)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import HTTP (ReqFn)
@@ -29,6 +30,7 @@ type EnvVars
     , gardenHubAddress :: String
     , gardenProxyFactoryAddress :: String
     , gardenSafeMasterAddress :: String
+    , gardenEthereumNodeWebSocket :: String
     }
 
 _errService :: CirclesError
@@ -98,21 +100,35 @@ env { request, envVars } =
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
       \privKey options -> do
-        web3 <- mapExceptT liftEffect $ getWeb3
+        web3 <- mapExceptT liftEffect $ getWeb3 envVars
+        let
+          x = spy "web3" web3
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        let
+          y = spy "circlesCore" circlesCore
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        let
+          z = spy "account" account
         CC.userRegister circlesCore account options
   , getSafeAddress:
       \{ nonce, privKey } -> do
-        web3 <- mapExceptT liftEffect getWeb3
+        web3 <- mapExceptT liftEffect $ getWeb3 envVars
+        let
+          x = spy "web3" web3
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        let
+          y = spy "circlesCore" circlesCore
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        let
+          z = spy "account" account
         address <- CC.safePredictAddress circlesCore account { nonce: nonce }
+        let
+          a = spy "address" address
         pure address
   }
 
-getWeb3 = do
-  provider <- CC.newWebSocketProvider "wss://dark-frosty-field.xdai.quiknode.pro"
+getWeb3 ev = do
+  provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
@@ -125,6 +141,7 @@ getCirclesCore web3 ev =
     , relayServiceEndpoint: ev.gardenRelay
     , safeMasterAddress: ev.gardenSafeMasterAddress
     , subgraphName: ev.gardenSubgraphName
+    , databaseSource: "graph"
     }
 
 testEnv :: C.Env Identity

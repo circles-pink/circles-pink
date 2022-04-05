@@ -48,7 +48,8 @@ const control = mkControl(
     process.env.STORYBOOK_GARDEN_RELAY !== undefined &&
     process.env.STORYBOOK_GARDEN_HUB_ADDRESS !== undefined &&
     process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS !== undefined &&
-    process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS !== undefined
+    process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS !== undefined &&
+    process.env.STORYBOOK_GARDEN_ETHEREUM_NODE_WS !== undefined
     ? {
         gardenApi: process.env.STORYBOOK_GARDEN_API,
         gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS,
@@ -60,6 +61,8 @@ const control = mkControl(
           process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS,
         gardenSafeMasterAddress:
           process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS,
+        gardenEthereumNodeWebSocket:
+          process.env.STORYBOOK_GARDEN_ETHEREUM_NODE_WS,
       }
     : (() => {
         throw new Error();
