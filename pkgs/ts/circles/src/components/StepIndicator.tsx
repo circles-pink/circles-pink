@@ -191,7 +191,7 @@ const StepIndicator_ = (props: StepIndicator_Props) => {
   return (
     <>
       {steps.map((step, i) => (
-        <svg x={i * stepWidth} overflow="visible">
+        <svg key={i} x={i * stepWidth} overflow="visible">
           <Step {...props_} step={step} index={i} />
         </svg>
       ))}
