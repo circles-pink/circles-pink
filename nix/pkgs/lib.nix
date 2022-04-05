@@ -9,10 +9,10 @@
     "${sub}${domain}.${topLevelDomain}${path'}";
 
   changeCase.constantCase = str:
-    builtins.readFile (pkgs.runYarnJS "camelCase"
+    builtins.readFile (pkgs.runJS "constantCase"
       {
         libraries = [
-          pkgs.circles-pink.yarn2nix.yarnPkgs."@circles-pink/change-case"
+          (pkgs.yarn2nix-to-node2nix pkgs.circles-pink.yarn2nix.yarnPkgs."@circles-pink/change-case")
         ];
       } ''
       const { constantCase } = require("change-case");
