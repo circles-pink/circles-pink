@@ -9,7 +9,7 @@ dev-storybook_:
 	export STORYBOOK_DIRECTUS_URL="http://directus.circles.local/graphql"; \
 	export STORYBOOK_GARDEN_API="http://api.circles.local"; \
 	export STORYBOOK_GARDEN_API_USERS="http://api.circles.local/api/users"; \
-	export STORYBOOK_GRAPH_API="http://graph.circles.local"; \
+	export STORYBOOK_GARDEN_GRAPH_API="http://graph.circles.local"; \
 	export STORYBOOK_GARDEN_SUBGRAPH_NAME="CirclesUBI/circles-subgraph"; \
 	export STORYBOOK_GARDEN_RELAY="http://relay.circles.local"; \
 	export STORYBOOK_GARDEN_HUB_ADDRESS="0xCfEB869F69431e42cdB54A4F4f105C19C080A601"; \
