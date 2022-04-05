@@ -28,19 +28,22 @@
         ${script}
       '';
 
-    writeYarnJS = name: { libraries ? [ ] }: content:
-      final.writeShellScriptBin name ''
-        PATHS=(${builtins.concatStringsSep " " (map (lib: "${lib}/libexec/*/*/node_modules ${lib}/libexec/*/node_modules") libraries)})
-        export NODE_PATH=$(IFS=: ; echo "${"$"}{PATHS[*]}")      
-        ${final.nodejs}/bin/node ${final.writeText "js" content}
-      '';
+    yarn2nix-to-node2nix = yarnPkg: final.runCommand "" { } ''
+      mkdir -p $out/lib
 
-    runYarnJS = name: { libraries ? [ ] }: content:
-      final.runCommand name { } ''
-        PATHS=(${builtins.concatStringsSep " " (map (lib: "${lib}/libexec/*/*/node_modules ${lib}/libexec/*/node_modules") libraries)})
-        export NODE_PATH=$(IFS=: ; echo "${"$"}{PATHS[*]}")
-        ${final.nodejs}/bin/node ${final.writeText "js" content}
-      '';
+      if ls ${yarnPkg}/libexec/*/*/node_modules/ 1> /dev/null 2>&1; then
+        echo 1 > $out/b
+        ln -s ${yarnPkg}/libexec/*/*/node_modules $out/lib/node_modules
+      fi
+
+      if ls ${yarnPkg}/libexec/*/node_modules/ 1> /dev/null 2>&1; then
+        echo ${yarnPkg}/libexec/*/node_modules/ > $out/a
+        ln -s ${yarnPkg}/libexec/*/node_modules $out/lib/node_modules
+      fi
+    '';
+
+    runJS = name: opts: content:
+      final.runCommand name { buildInputs = [ (final.writers.writeJS name opts content) ]; } name;
 
     yarnLockToJson = final.writeShellScriptBin "yarn-lock-to-json" ''
       cd ${circles-pink.ts.workspaces.dev-utils}/libexec/dev-utils/node_modules/dev-utils
@@ -49,28 +52,30 @@
 
     notify-done = final.writeShellScriptBin "notify-done" ''
       ${final.pkgs.bash}/bin/bash -c "$*"
-      EXIT_CODE="$?"
-      if [ $EXIT_CODE == 0 ];
-        then URGENCY=low;
-        else URGENCY=critical;
+      EXIT_CODE = "$?"
+        if [ $EXIT_CODE == 0 ];
+      then URGENCY = low;
+      else URGENCY = critical;
       fi
-      ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
+        ${final.pkgs.notify-desktop}/bin/notify-desktop -t 5000 -u $URGENCY "$*" "$EXIT_CODE" > /dev/null
     '';
 
     log-result = final.writeShellScriptBin "log-result" ''
-      UUID=`uuidgen`
-      date
-      echo START $UUID
-      ${final.pkgs.bash}/bin/bash -c "$*"
-      EXIT_CODE="$?"
-      CMD="$*"
-      echo
-      date
-      echo FINISH $UUID
-      echo $CMD
-      if [ $EXIT_CODE == 0 ];
-        then echo -e "\e[32mSUCCESS\e[0m";
-        else echo -e "\e[31mFAILURE ($EXIT_CODE)\e[0m";
+        UUID = `uuidgen`
+        date
+        echo
+        START $
+        UUID
+        ${final.pkgs.bash}/bin/bash -c "$*"
+        EXIT_CODE="$?"
+        CMD="$*"
+        echo
+        date
+        echo FINISH $UUID
+        echo $CMD
+        if [ $EXIT_CODE == 0 ];
+      then echo -e "\e[32mSUCCESS\e[0m";
+      else echo -e "\e[31mFAILURE ($EXIT_CODE)\e[0m";
       fi
       echo
     '';
@@ -145,7 +150,7 @@
         '';
 
         runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
-          export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
+          export NODE_PATH = ${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
           export GARDEN_API=${envVars.gardenApi}
           export GARDEN_API_USERS=${envVars.gardenApiUsers}
           export GARDEN_GRAPH_API=${envVars.gardenGraphApi}
@@ -187,7 +192,7 @@
         purs-moduleDependencyGraphSvg = final.runCommand "purs-moduleDependencyGraph.svg"
           { buildInputs = [ final.graphviz ]; }
           ''
-            dot -Tsvg ${purs-moduleDependencyGraphDot} > $out 
+            dot -Tsvg ${purs-moduleDependencyGraphDot} > $out
           '';
 
         circles-directus = ts.bins.circles-directus;
@@ -207,3 +212,4 @@
           '';
       };
   })
+
