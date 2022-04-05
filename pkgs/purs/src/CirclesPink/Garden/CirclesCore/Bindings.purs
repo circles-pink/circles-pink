@@ -10,6 +10,7 @@ module CirclesPink.Garden.CirclesCore.Bindings
   , newWebSocketProvider
   , privKeyToAccount
   , safePredictAddress
+  , safePrepareDeploy
   , userRegister
   ) where
 
@@ -17,7 +18,7 @@ import Prelude
 import Data.BigInt (BigInt)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Aff.Compat (EffectFnAff(..), fromEffectFnAff)
+import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
 
 foreign import data Provider :: Type
 
@@ -35,8 +36,13 @@ foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
 foreign import safePredictAddressImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
 
+foreign import safePrepareDeployImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
+
 safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
 safePredictAddress x1 x2 x3 = fromEffectFnAff $ safePredictAddressImpl x1 x2 x3
+
+safePrepareDeploy :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
+safePrepareDeploy x1 x2 x3 = fromEffectFnAff $ safePrepareDeployImpl x1 x2 x3
 
 type Options
   = { apiServiceEndpoint :: String

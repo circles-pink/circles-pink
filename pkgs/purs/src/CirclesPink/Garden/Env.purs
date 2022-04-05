@@ -125,6 +125,12 @@ env { request, envVars } =
         let
           a = spy "address" address
         pure address
+  , safePrepareDeploy:
+      \{ nonce, privKey } -> do
+        web3 <- mapExceptT liftEffect $ getWeb3 envVars
+        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        CC.safePrepareDeploy circlesCore account { nonce: nonce }
   }
 
 getWeb3 ev = do
@@ -151,4 +157,5 @@ testEnv =
   , generatePrivateKey: pure zeroKey
   , userRegister: \_ _ -> pure unit
   , getSafeAddress: \_ -> pure sampleAddress
+  , safePrepareDeploy: \_ -> pure sampleAddress
   }

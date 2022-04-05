@@ -10,6 +10,7 @@ module CirclesPink.Garden.CirclesCore
   , printErr
   , privKeyToAccount
   , safePredictAddress
+  , safePrepareDeploy
   , userRegister
   ) where
 
@@ -56,6 +57,14 @@ privKeyToAccount w3 pk =
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
 safePredictAddress cc ac opts =
   B.safePredictAddress cc ac { nonce: P.nonceToBigInt opts.nonce }
+    <#> P.unsafeAddrFromString
+    # attempt
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
+
+safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
+safePrepareDeploy cc ac opts =
+  B.safePrepareDeploy cc ac { nonce: P.nonceToBigInt opts.nonce }
     <#> P.unsafeAddrFromString
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
