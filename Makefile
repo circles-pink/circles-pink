@@ -116,6 +116,13 @@ vm-deploy-dry-watch: agent-get-secrets vm-start
 	  --ignore '.git/**' \
 	  '**/*.nix' -c "pkill nixops; log-result 'nixops deploy --dry-run --allow-reboot -d circles-pink-vm'"
 
+vm-deploy-build-watch: agent-get-secrets vm-start
+	chokidar \
+	  --ignore '**/node_modules/**' \
+	  --ignore '.spago/**' \
+	  --ignore '.git/**' \
+	  '**/*.nix' -c "pkill nixops; log-result 'nixops deploy --build-only --allow-reboot -d circles-pink-vm'"
+
 vm-ssh:
 	nixops ssh -d circles-pink-vm webserver
 
