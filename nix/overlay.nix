@@ -62,12 +62,10 @@
     '';
 
     log-result = final.writeShellScriptBin "log-result" ''
-      UUID = `uuidgen`
+      UUID=`uuidgen`
       date
-      echo
-      START $
-      UUID
-      ${final.pkgs.bash}/bin/bash -c "$*"
+      echo START $UUID
+      ${final.bash}/bin/bash -c "$*"
       EXIT_CODE="$?"
       CMD="$*"
       echo
