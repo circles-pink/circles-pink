@@ -12,12 +12,12 @@ import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 
-type InfoSecurityProps = {
+type SubmitProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
 };
 
-export const Submit = ({ state, act }: InfoSecurityProps): ReactElement => {
+export const Submit = ({ state, act }: SubmitProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
@@ -32,6 +32,14 @@ export const Submit = ({ state, act }: InfoSecurityProps): ReactElement => {
 
           <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('submit.subClaim')}</SubClaim>
+          </FadeIn>
+
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <SubClaim>
+              Username: {state.username}
+              <br />
+              Email: {state.email}
+            </SubClaim>
           </FadeIn>
         </Text>
       }

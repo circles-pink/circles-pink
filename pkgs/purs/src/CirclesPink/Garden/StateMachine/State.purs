@@ -1,6 +1,5 @@
 module CirclesPink.Garden.StateMachine.State where
 
-import Prelude
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Variant (Variant, inj)

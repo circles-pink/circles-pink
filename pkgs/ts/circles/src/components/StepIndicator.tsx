@@ -17,13 +17,18 @@ type StepExtra = { position: number };
 
 type Step = { label: string };
 
+type StepIndicatorTheme = {
+  active: string;
+  inActive: string;
+};
+
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
 
 const colors = {
-  green: 'hotpink',
-  grey: '#ebebeb',
+  active: 'hotpink',
+  inActive: '#ebebeb',
 };
 
 // -----------------------------------------------------------------------------
@@ -90,6 +95,7 @@ export type StepIndicatorProps = {
   selected?: number;
   prevSelected?: number;
   lastAction?: number;
+  theme?: StepIndicatorTheme;
 };
 
 export const StepIndicator = ({
@@ -101,6 +107,10 @@ export const StepIndicator = ({
   selected = 0,
   prevSelected = 0,
   lastAction = 0,
+  theme = {
+    active: colors.active,
+    inActive: colors.inActive,
+  },
 }: StepIndicatorProps): ReactElement => {
   // Hooks
   const countDots = steps.length;
@@ -119,6 +129,7 @@ export const StepIndicator = ({
     debug,
     circleRadius,
     speed: speed,
+    theme,
   };
 
   return (
@@ -152,6 +163,7 @@ interface StepIndicator_Props
         | 'debug'
         | 'circleRadius'
         | 'speed'
+        | 'theme'
       >
     > {
   width: number;
@@ -215,6 +227,7 @@ export const Step = (props: StepProps): ReactElement => {
     relTime,
     prevSelected,
     speed,
+    theme,
   } = props;
 
   const y = getPos(step.position, time, height, speed);
@@ -224,8 +237,8 @@ export const Step = (props: StepProps): ReactElement => {
     index < selected ||
     (dir == 0 && index == selected && relTime > 900) ||
     (dir == -1 && index == selected)
-      ? colors.green
-      : colors.grey;
+      ? theme.active
+      : theme.inActive;
   return (
     <>
       {index < countPanels ? <Panel {...props} /> : null}
@@ -308,7 +321,7 @@ interface LineProps extends PanelProps {
   m: number;
 }
 
-const Line = ({ x1, y1, x2, y2, m, circleRadius }: LineProps) => {
+const Line = ({ x1, y1, x2, y2, m, circleRadius, theme }: LineProps) => {
   const xm = x1 + (x2 - x1) * m;
   const ym = y1 + (y2 - y1) * m;
 
@@ -319,7 +332,7 @@ const Line = ({ x1, y1, x2, y2, m, circleRadius }: LineProps) => {
         y1={y1}
         x2={xm}
         y2={ym}
-        stroke={colors.green}
+        stroke={theme.active}
         style={{ strokeWidth: circleRadius / 2.5 }}
       />
       <line
@@ -327,7 +340,7 @@ const Line = ({ x1, y1, x2, y2, m, circleRadius }: LineProps) => {
         y1={ym}
         x2={x2}
         y2={y2}
-        stroke={colors.grey}
+        stroke={theme.inActive}
         style={{ strokeWidth: circleRadius / 2.5 }}
       />
     </>

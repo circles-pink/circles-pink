@@ -52,6 +52,7 @@ export const DialogCard = ({
             selected={stateToIndex(anim.selected)}
             prevSelected={stateToIndex(anim.prevSelected)}
             lastAction={anim.lastAction}
+            theme={{ active: theme.baseColor, inActive: '#ebebeb' }}
             steps={[
               { label: '1' },
               { label: '2' },

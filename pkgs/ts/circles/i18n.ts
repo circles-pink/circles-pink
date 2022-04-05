@@ -40,7 +40,8 @@ export const resources = {
       },
       submit: {
         claim: 'This is your data',
-        subClaim: 'If everything is correct you can submit them',
+        subClaim:
+          'If everything is correct you can hit submit and create your Wallet',
       },
     },
   },
@@ -66,15 +67,15 @@ export const resources = {
         privacyLabel: 'Akzeptiere die Datenschutzbestimmungen',
       },
       infoSecurity: {
-        claim: 'Lass uns über Datensicherheit reden!',
-        subClaim: 'Am wichtigsten ist, deinen Schlüssel gut aufzuheben.',
+        claim: 'Gleich erhälst du deinen persönlichen Schlüssel',
+        subClaim:
+          'Damit hast du Zugang zum Circles Vertrauensnetzwerk und kannst als einer der ersten das Grundeinkommen auf der Blockchain testen!',
       },
       magicWords: {
         claim: 'Der eine Schlüssel...',
         subClaim1:
-          'Wer diesen Schlüssel hat, hat volle Kontrolle über Dein Netzwerk und kann Deine $CRC ausgeben!',
-        subClaim2:
-          'Am besten schreibst Du diese Worte auf ein Stück Papier und hebst sie an einem sicheren Ort auf:',
+          'Schreibe dir diese Worte am besten auf ein Blatt Papier, oder speichere sie an einem sicheren Ort.',
+        subClaim2: 'Damit kannst du deine Wallet immer wiederherstellen.',
         copyBtn: 'In die Zwischenablage kopieren',
         copiedInfo: 'Kopiert!',
         newPhraseBtn: 'Neuen Schlüssel generieren',

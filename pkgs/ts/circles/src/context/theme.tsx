@@ -30,11 +30,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
   const setColor = (color: string) => {
-    console.log(color);
     setThemeState({
       baseColor: chroma(color).hex(),
     });
-    console.log(theme);
   };
 
   return (

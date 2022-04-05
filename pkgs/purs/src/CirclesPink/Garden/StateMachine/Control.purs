@@ -17,6 +17,7 @@ import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, default, on, onMatch)
 import Debug (spy)
 import Effect.Class.Console (logShow)
@@ -127,7 +128,12 @@ circlesControl env =
         , next:
             \set _ _ -> do
               pk <- lift $ env.generatePrivateKey
-              set $ \st -> S._magicWords st { privateKey = pk, direction = D._forwards }
+              set
+                $ \st ->
+                    if P.zeroKey == st.privateKey then
+                      S._magicWords st { privateKey = pk, direction = D._forwards }
+                    else
+                      S._magicWords st { direction = D._forwards }
         }
     , magicWords:
         { prev:
