@@ -14,7 +14,7 @@
 
     graphql-zeus = circles-pink.ts.bins.graphql-zeus;
 
-    lib = prev.lib // (import ./pkgs/lib.nix);
+    lib = prev.lib // (import ./pkgs/lib.nix { pkgs = final; });
 
     writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
       let
@@ -26,6 +26,20 @@
         export PATH=${builtins.concatStringsSep ":" (map (p : "${p}/bin") onPath)}:$PATH
 
         ${script}
+      '';
+
+    writeYarnJS = name: { libraries ? [ ] }: content:
+      final.writeShellScriptBin name ''
+        PATHS=(${builtins.concatStringsSep " " (map (lib: "${lib}/libexec/*/*/node_modules ${lib}/libexec/*/node_modules") libraries)})
+        export NODE_PATH=$(IFS=: ; echo "${"$"}{PATHS[*]}")      
+        ${final.nodejs}/bin/node ${final.writeText "js" content}
+      '';
+
+    runYarnJS = name: { libraries ? [ ] }: content:
+      final.runCommand name { } ''
+        PATHS=(${builtins.concatStringsSep " " (map (lib: "${lib}/libexec/*/*/node_modules ${lib}/libexec/*/node_modules") libraries)})
+        export NODE_PATH=$(IFS=: ; echo "${"$"}{PATHS[*]}")
+        ${final.nodejs}/bin/node ${final.writeText "js" content}
       '';
 
     yarnLockToJson = final.writeShellScriptBin "yarn-lock-to-json" ''
