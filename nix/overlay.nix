@@ -118,7 +118,7 @@
         export GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
         export GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
         export GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
-        export GARDEN_GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
+        export GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 
