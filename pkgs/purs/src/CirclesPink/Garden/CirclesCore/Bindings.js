@@ -22,3 +22,8 @@ exports.safePredictAddressImpl =
   (circlesCore) => (account) => (options) => (onErr, onSucc) => {
     circlesCore.safe.predictAddress(account, options).then(onSucc).catch(onErr);
   };
+
+exports.safePrepareDeployImpl =
+  (circlesCore) => (account) => (options) => (onErr, onSucc) => {
+    circlesCore.safe.prepareDeploy(account, options).then(onSucc).catch(onErr);
+  };

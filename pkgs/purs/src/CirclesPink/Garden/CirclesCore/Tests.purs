@@ -27,6 +27,7 @@ tests =
               , relayServiceEndpoint: ""
               , safeMasterAddress: "0x0000000000000000000000000000000000000000"
               , subgraphName: ""
+              , databaseSource: ""
               }
           pure circlesCore
       case result of

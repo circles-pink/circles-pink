@@ -1,6 +1,7 @@
 module CirclesPink.Garden.StateMachine.Control
   ( Env
   , GetSafeAddressError
+  , PrepareSafeDeployError
   , RegisterError
   , circlesControl
   ) where
@@ -34,12 +35,16 @@ type RegisterError r
 type GetSafeAddressError r
   = ( errNative :: Error | r )
 
+type PrepareSafeDeployError r
+  = ( errNative :: Error | r )
+
 type Env m
   = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
     , generatePrivateKey :: m PrivateKey
     , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
     , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
+    , safePrepareDeploy :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (PrepareSafeDeployError + r) m Address
     }
 
 circlesControl ::
@@ -155,6 +160,11 @@ circlesControl env =
               result :: Either (Variant (GetSafeAddressError + RegisterError + ())) Unit <-
                 (lift <<< runExceptT) do
                   safeAddress <- env.getSafeAddress { nonce, privKey: st.privateKey }
+                  let
+                    x = spy "safeAddress" safeAddress
+                  _ <- env.safePrepareDeploy { nonce, privKey: st.privateKey }
+                  let
+                    y = spy "safePrepareDeploy" ""
                   env.userRegister
                     st.privateKey
                     { email: st.email
