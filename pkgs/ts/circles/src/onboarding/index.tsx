@@ -65,7 +65,7 @@ const control = mkControl(
           process.env.STORYBOOK_GARDEN_ETHEREUM_NODE_WS,
       }
     : (() => {
-        throw new Error();
+        throw new Error('Env vars missing');
       })()
 ) as never;
 
