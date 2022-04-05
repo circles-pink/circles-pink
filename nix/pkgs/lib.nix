@@ -11,8 +11,8 @@
   changeCase.constantCase = str:
     builtins.readFile (pkgs.runJS "constantCase"
       {
-        libraries = [
-          (pkgs.yarn2nix-to-node2nix pkgs.circles-pink.yarn2nix.yarnPkgs."@circles-pink/change-case")
+        libraries = map pkgs.yarn2nix-to-node2nix [
+          pkgs.circles-pink.yarn2nix.yarnPkgs."@circles-pink/change-case"
         ];
       } ''
       const { constantCase } = require("change-case");
