@@ -15,6 +15,8 @@
         (import ./modules/webserver.nix { inherit pkgs config lib secrets; })
       ];
 
+      network-config.webserver.services.storybook.enable = true;
+
       env.url = {
         domain = "circles";
         topLevelDomain = "local";

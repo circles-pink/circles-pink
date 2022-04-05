@@ -34,6 +34,7 @@ in
     (import ./tasks-explorer.nix { inherit pkgs config lib; })
     (import ./directus.nix { inherit pkgs config lib; })
     (import ./env.nix { inherit pkgs config lib; })
+    (import ./network-config.nix { inherit pkgs config lib; })
   ];
 
   env.services = {
@@ -81,33 +82,42 @@ in
 
   services.nginx = {
     enable = true;
-    virtualHosts = {
-      "${lib.mkDomain config.env.services.storybook.url}" = {
-        locations."/" = {
-          root = pkgs.circles-pink.publicDir { inherit envVars; };
+    virtualHosts =
+      # if config.network-config.webserver.services.storybook.enable then {
+      #   "${lib.mkDomain config.env.services.storybook.url}" = {
+      #     locations."/" = {
+      #       root = pkgs.circles-pink.publicDir { inherit envVars; };
+      #     };
+      #   };
+      # } else { }
+      #   //
+      {
+        "${lib.mkDomain config.env.services.storybook.url}" = pkgs.lib.mkIf config.network-config.webserver.services.storybook.enable {
+          locations."/" = {
+            root = pkgs.circles-pink.publicDir { inherit envVars; };
+          };
+        };
+        "${lib.mkDomain config.env.services.tasks.url}" = {
+          locations."/" = {
+            proxyPass = "http://127.0.0.1:${toString config.env.services.tasks.port}";
+          };
+        };
+        "${lib.mkDomain config.env.services.directus.url}" = {
+          # locations."/" = {
+          #   proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
+          # };
+          locations."/" = {
+            proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
+            extraConfig = ''
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection 'upgrade';
+              proxy_set_header Host $host;
+              proxy_cache_bypass $http_upgrade;
+            '';
+          };
         };
       };
-      "${lib.mkDomain config.env.services.tasks.url}" = {
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString config.env.services.tasks.port}";
-        };
-      };
-      "${lib.mkDomain config.env.services.directus.url}" = {
-        # locations."/" = {
-        #   proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
-        # };
-        locations."/" = {
-          proxyPass = "http://127.0.0.1:${toString config.env.services.directus.port}";
-          extraConfig = ''
-            proxy_http_version 1.1;
-            proxy_set_header Upgrade $http_upgrade;
-            proxy_set_header Connection 'upgrade';
-            proxy_set_header Host $host;
-            proxy_cache_bypass $http_upgrade;
-          '';
-        };
-      };
-    };
   };
 
   services.directus = {
