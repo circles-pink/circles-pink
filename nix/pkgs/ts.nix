@@ -152,6 +152,7 @@
       export STORYBOOK_GARDEN_HUB_ADDRESS="${envVars.gardenHubAddress}"
       export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
       export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
+      export STORYBOOK_GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
       OUTPUT_DIR=$out yarn build
 
