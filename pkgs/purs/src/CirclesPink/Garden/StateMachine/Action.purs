@@ -83,6 +83,9 @@ _submit = inj (Proxy :: _ "submit")
 _dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
 _dashboard = inj (Proxy :: _ "dashboard")
 
+_landing :: forall a v. a -> Variant ( landing :: a | v )
+_landing = inj (Proxy :: _ "landing")
+
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )
 _next = inj (Proxy :: _ "next")
@@ -104,3 +107,9 @@ _setPrivacy = inj (Proxy :: _ "setPrivacy")
 
 _newPrivKey :: forall a v. a -> Variant ( newPrivKey :: a | v )
 _newPrivKey = inj (Proxy :: _ "newPrivKey")
+
+_signIn :: forall a v. a -> Variant ( signIn :: a | v )
+_signIn = inj (Proxy :: _ "signIn")
+
+_signUp :: forall a v. a -> Variant ( signUp :: a | v )
+_signUp = inj (Proxy :: _ "signUp")

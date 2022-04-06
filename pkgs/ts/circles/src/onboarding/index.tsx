@@ -27,6 +27,7 @@ import '../styles/global.css';
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from 'generated/output/CirclesPink.Garden.StateMachine.Action';
+import { Landing } from './views/Landing';
 
 type Language = 'en' | 'de';
 
@@ -85,7 +86,7 @@ type ViewProps = {
 const View = ({ state, act }: ViewProps): ReactElement | null => {
   switch (state.type) {
     case 'landing':
-      return null;
+      return <Landing state={state.value} act={act} />;
     case 'infoGeneral':
       return <InfoGeneral state={state.value} act={act} />;
     case 'askUsername':
