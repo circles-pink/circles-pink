@@ -638,11 +638,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1643803373,
-        "narHash": "sha256-scc7v/0AKVwLitm/v0/OIIuiUil4cJ7Z5DZ8aG0Puzw=",
+        "lastModified": 1649246075,
+        "narHash": "sha256-lsffIIRtI7vfRlBcK7HucmHauIrASWuHib3q1wVvGk0=",
         "owner": "thought2",
         "repo": "purescript-tsd-gen",
-        "rev": "9a965a117d143cd2ff87ac949c032381710ed780",
+        "rev": "e68e3c37e70d1aeb91317fa516eac3d52b159b30",
         "type": "github"
       },
       "original": {
