@@ -1,4 +1,10 @@
-import React, { ReactElement, useContext, useEffect, useState } from 'react';
+import React, {
+  ReactElement,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../../i18n';
 import { mkControl } from 'generated/output/CirclesPink.Garden.TS';
@@ -20,6 +26,7 @@ import {
 import '../styles/global.css';
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
+import { CirclesAction } from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 
 type Language = 'en' | 'de';
 
@@ -70,14 +77,46 @@ const env = parseEnv(envRaw);
 
 const control = mkControl(env);
 
+type ViewProps = {
+  state: CirclesState;
+  act: (m: CirclesAction) => void;
+};
+
+const View = ({ state, act }: ViewProps): ReactElement | null => {
+  switch (state.type) {
+    case 'landing':
+      return null;
+    case 'infoGeneral':
+      return <InfoGeneral state={state.value} act={act} />;
+    case 'askUsername':
+      return <AskUsername state={state.value} act={act} />;
+    case 'askEmail':
+      return <AskEmail state={state.value} act={act} />;
+    case 'infoSecurity':
+      return <InfoSecurity state={state.value} act={act} />;
+    case 'magicWords':
+      return <MagicWords state={state.value} act={act} />;
+    case 'submit':
+      return <Submit state={state.value} act={act} />;
+    case 'dashboard':
+      return null;
+    case 'trusts':
+      return null;
+    case 'login':
+      return null;
+    default:
+      return null;
+  }
+};
+
 const OnboardingContent = ({
   initState,
   lang = 'en',
   baseColor,
   content = {},
 }: OnboardingProps): ReactElement => {
-  const [theme, setColor] = useContext(ThemeContext);
   const [state, act] = useStateMachine(initState || init, control);
+  const [theme, setColor] = useContext(ThemeContext);
 
   i18n.changeLanguage(lang);
 
@@ -88,15 +127,7 @@ const OnboardingContent = ({
   return (
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
-        {{
-          infoGeneral: () => <InfoGeneral state={state.value} act={act} />,
-          askUsername: () => <AskUsername state={state.value} act={act} />,
-          askEmail: () => <AskEmail state={state.value} act={act} />,
-          infoSecurity: () => <InfoSecurity state={state.value} act={act} />,
-          magicWords: () => <MagicWords state={state.value} act={act} />,
-          submit: () => <Submit state={state.value} act={act} />,
-          dashboard: () => null,
-        }[state.type]()}
+        <View state={state} act={act} />
       </I18nextProvider>
     </AnimProvider>
   );
