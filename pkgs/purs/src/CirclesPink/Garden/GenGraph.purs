@@ -19,6 +19,6 @@ main = do
     filePath = maybe "circles-pink-graph.dot" identity $ args !! 1
   R.reflectStateMachine _circlesStateMachine
     # G.fromStateMachineData "Circles StateMachine"
-    # G.graphToDot { entryPoint: Just "infoGeneral" }
+    # G.graphToDot { entryPoint: Just "landing" }
     # D.printGraph
     # writeTextFile UTF8 filePath

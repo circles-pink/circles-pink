@@ -6,7 +6,12 @@ import Type.Proxy (Proxy(..))
 
 type CirclesAction
   = Variant
-      ( infoGeneral ::
+      ( landing ::
+          Variant
+            ( signIn :: Unit
+            , signUp :: Unit
+            )
+      , infoGeneral ::
           Variant
             ( next :: Unit
             )
@@ -40,7 +45,20 @@ type CirclesAction
             ( prev :: Unit
             , submit :: Unit
             )
-      , dashboard :: Variant ()
+      , dashboard ::
+          Variant
+            ( logout :: Unit
+            )
+      , login ::
+          Variant
+            ( login :: Unit
+            , back :: Unit
+            , setMagicWords :: String
+            )
+      , trusts ::
+          Variant
+            ( continue :: Unit
+            )
       )
 
 ----
