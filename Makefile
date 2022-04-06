@@ -110,7 +110,7 @@ vm-create:
 vm-deploy: agent-get-secrets vm-start
 	nixops deploy --allow-reboot -d circles-pink-vm
 
-vm-deploy-dry-watch: agent-get-secrets vm-start
+vm-deploy-dry-watch: agent-get-secrets
 	chokidar \
 	  --ignore '**/node_modules/**' \
 	  --ignore '.spago/**' \
