@@ -148,7 +148,7 @@
       '';
 
       runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
-        export NODE_PATH = ${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
+        export NODE_PATH=${ts.workspaces.generated}/libexec/generated/node_modules:${ts.workspaces.generated}/libexec/generated/deps/generated/node_modules
         export GARDEN_API=${envVars.gardenApi}
         export GARDEN_API_USERS=${envVars.gardenApiUsers}
         export GARDEN_GRAPH_API=${envVars.gardenGraphApi}
