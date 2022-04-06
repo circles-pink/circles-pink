@@ -56,7 +56,13 @@ circlesControl ::
 circlesControl env =
   C.mkControl
     _circlesStateMachine
-    { infoGeneral:
+    { landing:
+        { signUp:
+            \set _ _ -> pure unit -- TODO
+        , signIn:
+            \set _ _ -> pure unit -- TODO
+        }
+    , infoGeneral:
         { next:
             \set _ _ -> set $ \st -> S._askUsername st { direction = D._forwards }
         }
@@ -177,5 +183,19 @@ circlesControl env =
               pure unit
         }
     , dashboard:
-        {}
+        { logout:
+            \set _ _ -> pure unit
+        }
+    , login:
+        { login:
+            \set _ _ -> pure unit
+        , back:
+            \set _ _ -> pure unit
+        , setMagicWords:
+            \set _ _ -> pure unit
+        }
+    , trusts:
+        { continue:
+            \set _ _ -> pure unit
+        }
     }
