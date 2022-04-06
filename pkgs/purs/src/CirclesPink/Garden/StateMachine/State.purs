@@ -20,6 +20,7 @@ module CirclesPink.Garden.StateMachine.State
   , _submit
   , _trusts
   , init
+  , initLanding
   ) where
 
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -98,6 +99,11 @@ init =
     , privacy: false
     , privateKey: P.zeroKey
     }
+
+initLanding :: CirclesState
+initLanding =
+  _landing
+    {}
 
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")

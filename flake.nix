@@ -62,11 +62,9 @@
           {
             # inherit overlays;
 
-            # packages = { inherit pkgs; } // pkgs.circles-pink;
+            legacyPackages = { inherit pkgs; } // pkgs.circles-pink;
 
             packages = { };
-
-            packages' = { inherit pkgs; } // pkgs.circles-pink;
 
             checks = self.packages;
 
