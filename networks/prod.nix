@@ -21,11 +21,13 @@
         };
       };
 
-      secretsFile = builtins.fromJSON (builtins.readFile /secrets.json);
+      secretsFile = /secrets.json;
+
       secrets =
-        if secretsFile ? "secrets"
-        then secretsFile.secrets.data
+        if builtins.pathExists secretsFile
+        then (builtins.fromJSON (builtins.readFile secretsFile)).secrets.data
         else mockSecrets;
+
     in
     {
       boot.tmpOnTmpfs = false;
@@ -38,6 +40,7 @@
       env.url = { domain = "circles"; topLevelDomain = "pink"; };
 
       nixpkgs.pkgs = pkgs;
+      nixpkgs.system = "x86_64-linux";
 
       boot.loader.grub.device = "/dev/sda";
       boot.initrd.kernelModules = [ "nvme" ];

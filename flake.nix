@@ -60,9 +60,13 @@
       perSystem = (inputs.flake-utils.lib.eachSystem [ "x86_64-linux" ]
         (system:
           {
-            inherit overlays;
+            # inherit overlays;
 
-            packages = { inherit pkgs; } // pkgs.circles-pink;
+            # packages = { inherit pkgs; } // pkgs.circles-pink;
+
+            packages = { };
+
+            packages' = { inherit pkgs; } // pkgs.circles-pink;
 
             checks = self.packages;
 
