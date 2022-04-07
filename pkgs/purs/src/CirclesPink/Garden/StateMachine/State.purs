@@ -21,6 +21,7 @@ module CirclesPink.Garden.StateMachine.State
   , _trusts
   , init
   , initLanding
+  , initLogin
   ) where
 
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -101,10 +102,15 @@ init =
     , privateKey: P.zeroKey
     }
 
-initLanding :: CirclesState
+initLanding :: forall v. Variant ( landing :: LandingState | v )
 initLanding =
   _landing
     {}
+
+initLogin :: forall v. Variant ( login :: LoginState | v )
+initLogin =
+  _login
+    { magicWords: "" }
 
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
