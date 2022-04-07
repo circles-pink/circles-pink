@@ -87,7 +87,8 @@ type CirclesState
       , trusts :: TrustState
       )
 
-init :: CirclesState
+-- init :: CirclesState
+init ∷ forall v. Variant ( infoGeneral :: UserData | v )
 init =
   _infoGeneral
     { direction: D._forwards

@@ -14,6 +14,7 @@ import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
+import { OnboardingStepIndicator } from '../../components/layout';
 
 type MagicWordsProps = {
   state: UserData;
@@ -40,6 +41,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 
   return (
     <DialogCard
+      header={<OnboardingStepIndicator />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

@@ -1,7 +1,6 @@
 import { cons } from 'fp-ts/lib/ReadonlyNonEmptyArray';
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
-import { stateToIndex, useAnimContext } from '../context/anim';
 import { ThemeContext } from '../context/theme';
 import { StepIndicator } from './StepIndicator';
 
@@ -16,7 +15,7 @@ const Frame = styled.div((props: FrameProps) => [
   `,
 ]);
 
-const StepIndicatorContainer = tw.div`p-4`;
+const Header = tw.div``;
 const CardHead = tw.div`max-w-7xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-4 lg:px-8 lg:flex lg:justify-between`;
 const CardBody = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8`;
 const IntroContent = tw.div`lg:w-1/2`;
@@ -25,6 +24,7 @@ const Control = tw.div`mt-8 flex lg:mt-0 lg:flex-shrink-0 lg:mt-8`;
 const Debug = tw.div`p-8`;
 
 type DemoCardProps = {
+  header?: ReactElement;
   text: ReactElement;
   interaction?: ReactElement;
   control: ReactElement;
@@ -33,6 +33,7 @@ type DemoCardProps = {
 };
 
 export const DialogCard = ({
+  header,
   text,
   interaction,
   control,
@@ -40,29 +41,11 @@ export const DialogCard = ({
   debug,
 }: DemoCardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
-  const anim = useAnimContext();
 
   return (
     <>
       <Frame borderColor={theme.baseColor}>
-        <StepIndicatorContainer>
-          <StepIndicator
-            height={24}
-            speed={0.0004}
-            selected={stateToIndex(anim.selected)}
-            prevSelected={stateToIndex(anim.prevSelected)}
-            lastAction={anim.lastAction}
-            theme={{ active: theme.baseColor, inActive: '#ebebeb' }}
-            steps={[
-              { label: '1' },
-              { label: '2' },
-              { label: '3' },
-              { label: '4' },
-              { label: '5' },
-              { label: '6' },
-            ]}
-          />
-        </StepIndicatorContainer>
+        <Header>{header}</Header>
         <CardHead>
           <IntroContent>
             {text}

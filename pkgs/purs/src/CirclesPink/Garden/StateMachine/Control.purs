@@ -58,7 +58,7 @@ circlesControl env =
     _circlesStateMachine
     { landing:
         { signUp:
-            \set _ _ -> pure unit -- TODO
+            \set _ _ -> set $ \_ -> S.init
         , signIn:
             \set _ _ -> pure unit -- TODO
         }
