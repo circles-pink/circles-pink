@@ -2,6 +2,7 @@ module CirclesPink.Garden.CirclesCore
   ( Err
   , ErrNative
   , ErrService
+  , User
   , UserOptions
   , module Exp
   , newCirclesCore
@@ -12,6 +13,7 @@ module CirclesPink.Garden.CirclesCore
   , safePredictAddress
   , safePrepareDeploy
   , userRegister
+  , userResolve
   ) where
 
 import Prelude
@@ -103,4 +105,37 @@ userRegister cc ac opts =
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
     <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
+    # ExceptT
+
+--------------------------------------------------------------------------------
+-- userResolve
+--------------------------------------------------------------------------------
+type ResolveOptions
+  = { addresses :: Array Address
+    , userNames :: Array String
+    }
+
+type User
+  = { id :: Int
+    , username :: String
+    , safeAddress :: Address
+    , avatarUrl :: String
+    }
+
+userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> ExceptV (ErrNative + r) Aff (Array User)
+userResolve cc ac opts =
+  B.userResolve cc ac
+    { addresses: map addrToString opts.addresses
+    , userNames: opts.userNames
+    }
+    <#> map
+        ( \u ->
+            { id: u.id
+            , username: u.username
+            , safeAddress: P.unsafeAddrFromString u.safeAddress
+            , avatarUrl: u.avatarUrl
+            }
+        )
+    # attempt
+    <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
