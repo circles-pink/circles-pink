@@ -12,6 +12,7 @@ module CirclesPink.Garden.CirclesCore.Bindings
   , safePredictAddress
   , safePrepareDeploy
   , userRegister
+  , userResolve
   ) where
 
 import Prelude
@@ -64,7 +65,30 @@ type UserOptions
     , email :: String
     }
 
+--------------------------------------------------------------------------------
+-- userRegister
+--------------------------------------------------------------------------------
 foreign import userRegisterImpl :: CirclesCore -> Account -> UserOptions -> EffectFnAff Boolean
 
 userRegister :: CirclesCore -> Account -> UserOptions -> Aff Boolean
 userRegister x1 x2 x3 = fromEffectFnAff $ userRegisterImpl x1 x2 x3
+
+--------------------------------------------------------------------------------
+-- userResolve
+--------------------------------------------------------------------------------
+type ResolveOptions
+  = { addresses :: Array String
+    , userNames :: Array String
+    }
+
+type User
+  = { id :: Int
+    , username :: String
+    , safeAddress :: String
+    , avatarUrl :: String
+    }
+
+foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff (Array User)
+
+userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (Array User)
+userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3

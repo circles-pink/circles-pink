@@ -3,11 +3,13 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
+import CirclesPink.Garden.CirclesCore (userResolve)
 import CirclesPink.Garden.CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control as C
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT)
 import Data.Argonaut (decodeJson, encodeJson)
+import Data.Array ((!!))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
@@ -97,33 +99,6 @@ env { request, envVars } =
                     Right { isValid: false }
               )
             # ExceptT
-  -- , requestUserData:
-  --     \address ->
-  --       if address == "" then
-  --         pure { isValid: false }
-  --       else
-  --         request
-  --           { url: envVars.gardenApiUsers
-  --           , method: POST
-  --           , body: encodeJson { email }
-  --           }
-  --           # runExceptT
-  --           -- <#> (spy "log")
-  --           <#> ( \result -> case result of
-  --                 Left e -> Left e
-  --                 Right x
-  --                   | x.status /= 200 && x.status /= 409 -> Left $ _errService
-  --                   | otherwise -> Right x
-  --             )
-  --           <#> ( \result -> do
-  --                 res <- result
-  --                 body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
-  --                 if body'.status == "ok" then
-  --                   Right { isValid: true }
-  --                 else
-  --                   Right { isValid: false }
-  --             )
-  --           # ExceptT
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
       \privKey options -> do
@@ -158,6 +133,15 @@ env { request, envVars } =
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         CC.safePrepareDeploy circlesCore account { nonce: nonce }
+  , userResolve:
+      \{ privKey } -> do
+        let
+          address = P.privKeyToAddress privKey
+        web3 <- mapExceptT liftEffect $ getWeb3 envVars
+        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        users <- userResolve circlesCore account { userNames: [], addresses: [ address ] }
+        pure $ users !! 0
   }
 
 getWeb3 ev = do
@@ -185,4 +169,13 @@ testEnv =
   , userRegister: \_ _ -> pure unit
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
+  , userResolve:
+      \_ ->
+        pure
+          $ pure
+              { id: 0
+              , username: ""
+              , safeAddress: sampleAddress
+              , avatarUrl: ""
+              }
   }

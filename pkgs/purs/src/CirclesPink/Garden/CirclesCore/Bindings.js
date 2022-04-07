@@ -15,6 +15,10 @@ exports.userRegisterImpl =
   (circlesCore) => (account) => (options) => (onErr, onSucc) =>
     circlesCore.user.register(account, options).then(onSucc).catch(onErr);
 
+exports.userResolveImpl =
+  (circlesCore) => (account) => (options) => (onErr, onSucc) =>
+    circlesCore.user.resolve(account, options).then(onSucc).catch(onErr);
+
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
