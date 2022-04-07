@@ -25,7 +25,11 @@
 
       secrets =
         if builtins.pathExists secretsFile
-        then (builtins.fromJSON (builtins.readFile secretsFile)).secrets.data
+        then
+          let
+            json = builtins.fromJSON (builtins.readFile secretsFile);
+          in
+          if json ? "secrets" then json.secrets.data else mockSecrets
         else mockSecrets;
 
     in
