@@ -6,6 +6,7 @@ module Wallet.PrivateKey
   , addrToString
   , addressToNonce
   , genPrivateKey
+  , getMnemonicFromString
   , getWords
   , keyToMnemonic
   , mnemonicToKey
@@ -25,6 +26,10 @@ import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.String (Pattern(..))
 import Data.String as S
+import Data.String.Regex (Regex)
+import Data.String.Regex as R
+import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Unsafe (unsafeRegex)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -59,6 +64,9 @@ derive instance mnemonicEq :: Eq Mnemonic
 --------------------------------------------------------------------------------
 getWords :: Mnemonic -> Array String
 getWords (Mnemonic ws) = ws
+
+getMnemonicFromString :: String -> Mnemonic
+getMnemonicFromString s = Mnemonic $ R.split (unsafeRegex " +" noFlags) $ S.trim s
 
 toString :: PrivateKey -> String
 toString (PrivateKey k) = "0x" <> k

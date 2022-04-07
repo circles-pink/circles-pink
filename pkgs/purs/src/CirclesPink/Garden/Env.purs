@@ -97,6 +97,33 @@ env { request, envVars } =
                     Right { isValid: false }
               )
             # ExceptT
+  -- , requestUserData:
+  --     \address ->
+  --       if address == "" then
+  --         pure { isValid: false }
+  --       else
+  --         request
+  --           { url: envVars.gardenApiUsers
+  --           , method: POST
+  --           , body: encodeJson { email }
+  --           }
+  --           # runExceptT
+  --           -- <#> (spy "log")
+  --           <#> ( \result -> case result of
+  --                 Left e -> Left e
+  --                 Right x
+  --                   | x.status /= 200 && x.status /= 409 -> Left $ _errService
+  --                   | otherwise -> Right x
+  --             )
+  --           <#> ( \result -> do
+  --                 res <- result
+  --                 body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
+  --                 if body'.status == "ok" then
+  --                   Right { isValid: true }
+  --                 else
+  --                   Right { isValid: false }
+  --             )
+  --           # ExceptT
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
       \privKey options -> do

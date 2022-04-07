@@ -12,7 +12,7 @@ import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
-import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.State (CirclesState, User)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -45,8 +45,10 @@ type Env m
     , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
     , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
     , safePrepareDeploy :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (PrepareSafeDeployError + r) m Address
+    , requestUserData :: Address -> ExceptT CirclesError m User
     }
 
+-- {"id":1,"username":"pink3","safeAddress":"0xE853AF934C6c05D4262F6F868C304036014b040C","avatarUrl":null}
 circlesControl ::
   forall t m.
   Monad m =>
@@ -60,7 +62,7 @@ circlesControl env =
         { signUp:
             \set _ _ -> set $ \_ -> S.init
         , signIn:
-            \set _ _ -> pure unit -- TODO
+            \set _ _ -> set $ \_ -> S.initLogin
         }
     , infoGeneral:
         { next:
@@ -188,11 +190,21 @@ circlesControl env =
         }
     , login:
         { login:
-            \set _ _ -> pure unit
+            \set st _ -> do
+              let
+                mnemonic = P.getMnemonicFromString st.magicWords
+
+                privKey = P.mnemonicToKey mnemonic
+
+                address = P.privKeyToAddress privKey
+
+                nonce = P.addressToNonce address
+              safeAddress <- lift $ runExceptT $ env.getSafeAddress { nonce, privKey }
+              pure unit
         , back:
             \set _ _ -> pure unit
         , setMagicWords:
-            \set _ _ -> pure unit
+            \set _ words -> set $ \st -> S._login st { magicWords = words }
         }
     , trusts:
         { continue:

@@ -20,6 +20,8 @@ import {
   InfoSecurity,
   MagicWords,
   Submit,
+  Landing,
+  Login,
 } from './views';
 
 // Style
@@ -27,7 +29,6 @@ import '../styles/global.css';
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from 'generated/output/CirclesPink.Garden.StateMachine.Action';
-import { Landing } from './views/Landing';
 
 type Language = 'en' | 'de';
 
@@ -104,7 +105,7 @@ const View = ({ state, act }: ViewProps): ReactElement | null => {
     case 'trusts':
       return null;
     case 'login':
-      return null;
+      return <Login state={state.value} act={act} />;
     default:
       return null;
   }
