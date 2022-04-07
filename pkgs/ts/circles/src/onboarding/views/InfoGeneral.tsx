@@ -11,6 +11,7 @@ import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import { OnboardingStepIndicator } from '../../components/layout';
 
 type InfoGeneralProps = {
   state: UserData;
@@ -24,6 +25,7 @@ export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
 
   return (
     <DialogCard
+      header={<OnboardingStepIndicator />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

@@ -13,6 +13,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
+import { OnboardingStepIndicator } from '../../components/layout';
 
 type AskEmailProps = {
   state: UserData;
@@ -26,6 +27,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
 
   return (
     <DialogCard
+      header={<OnboardingStepIndicator />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
