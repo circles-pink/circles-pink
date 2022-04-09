@@ -72,23 +72,30 @@ purs-tsd-gen:
 patchTsTypes: yarn-install 
 	patchTsTypes $(PWD)/$(PURS_OUTPUT)
 
-assets: generate
+assets: generate assets_
+
+assets_:
 	nix build .#assets -o result-assets
 	mkdir -p ./pkgs/ts/assets/src
 	rm -rf ./pkgs/ts/assets/src/*
 	cp -r result-assets/* -t ./pkgs/ts/assets/src
 	rm result-assets
 
+
 rw-result:
 	rm -rf rw-result
 	cp -r -H --dereference result/ rw-result
 	chmod -R 777 rw-result
 
-generate: materialize clean-generate
-	make spago-build 
+generate: materialize clean-generate spago-build generate_
+
+generate_:
 	make purs-tsd-gen
 	make patchTsTypes
 	make generate-zeus
+
+generate-watch:
+	chokidar '$(PURS_OUTPUT)/*/*.js' -c "make generate_"
 
 generate-zeus:
 	nix build .#zeus-client --out-link result-zeus-client
