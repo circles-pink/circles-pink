@@ -49,7 +49,7 @@ type Env m
     , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
     , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
     , safePrepareDeploy :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (PrepareSafeDeployError + r) m Address
-    , userResolve :: forall r. { privKey :: PrivateKey } -> ExceptV (UserResolveError + r) m (Maybe User)
+    , userResolve :: forall r. { privKey :: PrivateKey, safeAddress :: Address } -> ExceptV (UserResolveError + r) m (Maybe User)
     }
 
 circlesControl ::
@@ -198,7 +198,12 @@ circlesControl env =
                 mnemonic = P.getMnemonicFromString st.magicWords
 
                 privKey = P.mnemonicToKey mnemonic
-              maybeUser <- lift $ runExceptT $ env.userResolve { privKey }
+              maybeUser <-
+                lift $ runExceptT
+                  $ env.userResolve
+                      { privKey
+                      , safeAddress: P.unsafeAddrFromString "0x95677422F1B4051968cbD30fF2d7dFaA27d95bA8"
+                      }
               let
                 x = spy "maybeUser" maybeUser
               pure unit

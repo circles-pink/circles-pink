@@ -88,7 +88,12 @@ type User
     , avatarUrl :: String
     }
 
-foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff (Array User)
+type UserResolveResponse
+  = { status :: String
+    , data :: Array User
+    }
 
-userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (Array User)
+foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff UserResolveResponse
+
+userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff UserResolveResponse
 userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3
