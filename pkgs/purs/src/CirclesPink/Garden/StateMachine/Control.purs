@@ -1,11 +1,12 @@
 module CirclesPink.Garden.StateMachine.Control
   ( Env
+  , EnvApiCheckEmail
+  , EnvApiCheckUserName
   , GetSafeAddressError
   , PrepareSafeDeployError
   , RegisterError
+  , UserNotFoundError
   , UserResolveError
-  , EnvApiCheckUserName
-  , EnvApiCheckEmail
   , circlesControl
   ) where
 
@@ -41,9 +42,14 @@ type GetSafeAddressError r
 type PrepareSafeDeployError r
   = ( errNative :: Error | r )
 
+type UserNotFoundError
+  = { address :: Address
+    }
+
 type UserResolveError r
   = ( errNative :: Error
     , errApi :: ApiError
+    , errUserNotFound :: UserNotFoundError
     | r
     )
 
@@ -60,7 +66,7 @@ type Env m
     , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
     , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
     , safePrepareDeploy :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (PrepareSafeDeployError + r) m Address
-    , userResolve :: forall r. { privKey :: PrivateKey, safeAddress :: Address } -> ExceptV (UserResolveError + r) m (Maybe User)
+    , userResolve :: forall r. { privKey :: PrivateKey, safeAddress :: Address } -> ExceptV (UserResolveError + r) m User
     }
 
 circlesControl ::
@@ -167,11 +173,7 @@ circlesControl env =
               result :: Either (Variant (GetSafeAddressError + RegisterError + ())) Unit <-
                 (lift <<< runExceptT) do
                   safeAddress <- env.getSafeAddress { nonce, privKey: st.privateKey }
-                  let
-                    x = spy "safeAddress" safeAddress
                   _ <- env.safePrepareDeploy { nonce, privKey: st.privateKey }
-                  let
-                    y = spy "safePrepareDeploy" ""
                   env.userRegister
                     st.privateKey
                     { email: st.email
@@ -179,8 +181,6 @@ circlesControl env =
                     , safeAddress
                     , username: st.username
                     }
-              let
-                x = spy "result" result
               pure unit
         }
     , dashboard:
@@ -198,12 +198,12 @@ circlesControl env =
                 address = P.privKeyToAddress privKey
 
                 nonce = P.addressToNonce address
-              maybeUser <-
+              eitherMaybeUser <-
                 (lift <<< runExceptT) do
                   safeAddress <- env.getSafeAddress { nonce, privKey }
                   env.userResolve { privKey, safeAddress }
               let
-                x = spy "maybeUser" maybeUser
+                x = spy "eitherMaybeUser" eitherMaybeUser
               pure unit
         , signUp:
             \set _ _ -> set $ \_ -> S.init

@@ -7,17 +7,16 @@ import CirclesPink.Garden.CirclesCore (CirclesCore, Web3, userResolve)
 import CirclesPink.Garden.CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control as C
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT)
+import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (decodeJson, encodeJson)
-import Data.Array (head, (!!))
+import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
-import Data.Typelevel.Undefined (undefined)
+import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, Error)
 import Effect.Class (liftEffect)
@@ -58,17 +57,9 @@ env { request, envVars } =
   , getSafeAddress:
       \{ nonce, privKey } -> do
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        let
-          x = spy "web3" web3
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        let
-          y = spy "circlesCore" circlesCore
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        let
-          z = spy "account" account
         address <- CC.safePredictAddress circlesCore account { nonce: nonce }
-        let
-          a = spy "address" address
         pure address
   , safePrepareDeploy:
       \{ nonce, privKey } -> do
@@ -82,7 +73,9 @@ env { request, envVars } =
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         users <- userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
-        pure $ head users
+        case head users of
+          Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { address: safeAddress })
+          Just u -> pure u
   }
   where
   apiCheckUserName :: C.EnvApiCheckUserName Aff
@@ -173,10 +166,9 @@ testEnv =
   , userResolve:
       \_ ->
         pure
-          $ pure
-              { id: 0
-              , username: ""
-              , safeAddress: sampleAddress
-              , avatarUrl: ""
-              }
+          { id: 0
+          , username: ""
+          , safeAddress: sampleAddress
+          , avatarUrl: ""
+          }
   }
