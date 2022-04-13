@@ -1,10 +1,15 @@
 module CirclesPink.Garden.CirclesCore.Bindings
   ( Account
+  , ApiError
+  , ApiResult
   , CirclesCore
   , Options
   , Provider
+  , ResolveOptions
+  , User
   , UserOptions
   , Web3
+  , apiResultToEither
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
@@ -13,13 +18,18 @@ module CirclesPink.Garden.CirclesCore.Bindings
   , safePrepareDeploy
   , userRegister
   , userResolve
+  , userResolveImpl
   ) where
 
 import Prelude
 import Data.BigInt (BigInt)
+import Data.Either (Either(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Foreign (Foreign, unsafeFromForeign)
+import Foreign.Object (Object)
+import Foreign.Object.Unsafe (unsafeIndex)
 
 foreign import data Provider :: Type
 
@@ -88,12 +98,34 @@ type User
     , avatarUrl :: String
     }
 
-type UserResolveResponse
-  = { status :: String
-    , data :: Array User
-    }
+newtype ApiResult a
+  = ApiResult (Object Foreign)
 
-foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff UserResolveResponse
+type ApiError
+  = { message :: String, code :: Int }
 
-userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff UserResolveResponse
+foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff (ApiResult (Array User))
+
+userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (ApiResult (Array User))
 userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3
+
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
+apiResultToEither :: forall a. ApiResult a -> Either ApiError a
+apiResultToEither (ApiResult fo) =
+  let
+    status = unsafeIndex fo "status" # unsafeFromForeign
+  in
+    if status == "ok" then
+      let
+        data_ = unsafeIndex fo "data" # unsafeFromForeign
+      in
+        Right data_
+    else
+      let
+        code = unsafeIndex fo "code" # unsafeFromForeign
+
+        message = unsafeIndex fo "message" # unsafeFromForeign
+      in
+        Left { code, message }
