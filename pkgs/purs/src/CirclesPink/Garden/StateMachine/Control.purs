@@ -4,6 +4,8 @@ module CirclesPink.Garden.StateMachine.Control
   , PrepareSafeDeployError
   , RegisterError
   , UserResolveError
+  , EnvApiCheckUserName
+  , EnvApiCheckEmail
   , circlesControl
   ) where
 
@@ -12,6 +14,7 @@ import CirclesPink.Garden.CirclesCore (UserOptions, User)
 import CirclesPink.Garden.CirclesCore.Bindings (ApiError)
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
@@ -44,9 +47,15 @@ type UserResolveError r
     | r
     )
 
+type EnvApiCheckUserName m
+  = String -> ExceptT CirclesError m { isValid :: Boolean }
+
+type EnvApiCheckEmail m
+  = String -> ExceptT CirclesError m { isValid :: Boolean }
+
 type Env m
-  = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
-    , apiCheckEmail :: String -> ExceptT CirclesError m { isValid :: Boolean }
+  = { apiCheckUserName :: EnvApiCheckUserName m
+    , apiCheckEmail :: EnvApiCheckEmail m
     , generatePrivateKey :: m PrivateKey
     , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
     , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
@@ -64,10 +73,8 @@ circlesControl env =
   C.mkControl
     _circlesStateMachine
     { landing:
-        { signUp:
-            \set _ _ -> set $ \_ -> S.init
-        , signIn:
-            \set _ _ -> set $ \_ -> S.initLogin
+        { signUp: \set _ _ -> set $ \_ -> S.init
+        , signIn: \set _ _ -> set $ \_ -> S.initLogin
         }
     , infoGeneral:
         { next:
@@ -125,20 +132,7 @@ circlesControl env =
               pure unit
         , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
         , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
-        , next:
-            \set _ _ ->
-              set
-                $ \st ->
-                    let
-                      emailValid =
-                        default false
-                          # onMatch
-                              { success: (\r -> r.isValid) }
-                    in
-                      if (emailValid st.emailApiResult) && st.terms && st.privacy then
-                        S._infoSecurity st { direction = D._forwards }
-                      else
-                        S._askEmail st { direction = D._forwards }
+        , next: askEmailNext
         }
     , infoSecurity:
         { prev:
@@ -221,3 +215,21 @@ circlesControl env =
             \set _ _ -> pure unit
         }
     }
+  where
+  askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
+  askEmailNext set _ _ =
+    set
+      $ \st ->
+          let
+            emailValid =
+              default false
+                # onMatch
+                    { success: (\r -> r.isValid) }
+          in
+            if (emailValid st.emailApiResult) && st.terms && st.privacy then
+              S._infoSecurity st { direction = D._forwards }
+            else
+              S._askEmail st { direction = D._forwards }
+
+type ActionHandler t m a s v
+  = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit

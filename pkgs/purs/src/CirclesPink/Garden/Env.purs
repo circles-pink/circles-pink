@@ -46,62 +46,8 @@ _errParse = inj (Proxy :: _ "errParse") unit
 
 env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> C.Env Aff
 env { request, envVars } =
-  { apiCheckUserName:
-      \username ->
-        if username == "" then
-          pure { isValid: false }
-        else
-          request
-            { url: envVars.gardenApiUsers
-            , method: POST
-            , body: encodeJson { username }
-            }
-            # runExceptT
-            -- <#> (spy "log")
-            
-            <#> ( \result -> case result of
-                  Left e -> Left e
-                  Right x
-                    | x.status /= 200 && x.status /= 409 -> Left $ _errService
-                    | otherwise -> Right x
-              )
-            <#> ( \result -> do
-                  res <- result
-                  body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
-                  if body'.status == "ok" then
-                    Right { isValid: true }
-                  else
-                    Right { isValid: false }
-              )
-            # ExceptT
-  , apiCheckEmail:
-      \email ->
-        if email == "" then
-          pure { isValid: false }
-        else
-          request
-            { url: envVars.gardenApiUsers
-            , method: POST
-            , body: encodeJson { email }
-            }
-            # runExceptT
-            -- <#> (spy "log")
-            
-            <#> ( \result -> case result of
-                  Left e -> Left e
-                  Right x
-                    | x.status /= 200 && x.status /= 409 -> Left $ _errService
-                    | otherwise -> Right x
-              )
-            <#> ( \result -> do
-                  res <- result
-                  body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
-                  if body'.status == "ok" then
-                    Right { isValid: true }
-                  else
-                    Right { isValid: false }
-              )
-            # ExceptT
+  { apiCheckUserName
+  , apiCheckEmail
   , generatePrivateKey: P.genPrivateKey
   , userRegister:
       \privKey options -> do
@@ -138,6 +84,64 @@ env { request, envVars } =
         users <- userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
         pure $ head users
   }
+  where
+  apiCheckUserName :: C.EnvApiCheckUserName Aff
+  apiCheckUserName username =
+    if username == "" then
+      pure { isValid: false }
+    else
+      request
+        { url: envVars.gardenApiUsers
+        , method: POST
+        , body: encodeJson { username }
+        }
+        # runExceptT
+        -- <#> (spy "log")
+        
+        <#> ( \result -> case result of
+              Left e -> Left e
+              Right x
+                | x.status /= 200 && x.status /= 409 -> Left $ _errService
+                | otherwise -> Right x
+          )
+        <#> ( \result -> do
+              res <- result
+              body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
+              if body'.status == "ok" then
+                Right { isValid: true }
+              else
+                Right { isValid: false }
+          )
+        # ExceptT
+
+  apiCheckEmail :: C.EnvApiCheckEmail Aff
+  apiCheckEmail email =
+    if email == "" then
+      pure { isValid: false }
+    else
+      request
+        { url: envVars.gardenApiUsers
+        , method: POST
+        , body: encodeJson { email }
+        }
+        # runExceptT
+        -- <#> (spy "log")
+        
+        <#> ( \result -> case result of
+              Left e -> Left e
+              Right x
+                | x.status /= 200 && x.status /= 409 -> Left $ _errService
+                | otherwise -> Right x
+          )
+        <#> ( \result -> do
+              res <- result
+              body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
+              if body'.status == "ok" then
+                Right { isValid: true }
+              else
+                Right { isValid: false }
+          )
+        # ExceptT
 
 getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
 getWeb3 ev = do
