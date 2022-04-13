@@ -8,8 +8,20 @@ export const resources = {
       nextButton: 'Next',
       prevButton: 'Back',
       submitButton: 'Submit',
-      infoGeneral: {
+      signUpButton: 'Sign Up',
+      signInButton: 'Sign In',
+      signUpInsteadButton: 'SignUp instead',
+      landing: {
         claim: 'Welcome to Circles',
+        subClaim: 'Create a new Wallet or restore your existing one.',
+      },
+      login: {
+        claim: 'Welcome back',
+        subClaim: 'Enter your seedphrase to restore your Circles Wallet!',
+        magicWordsPlaceholder: 'Your 24 secret words go here...',
+      },
+      infoGeneral: {
+        claim: 'Happy to have you here!',
         subClaim: "Let's get you a circles Wallet!",
       },
       askUsername: {
@@ -50,8 +62,22 @@ export const resources = {
       nextButton: 'Weiter',
       prevButton: 'Zurück',
       submitButton: 'Abschicken',
-      infoGeneral: {
+      signUpButton: 'Wallet erstellen',
+      signInButton: 'Anmelden',
+      signUpInsteadButton: 'Neue Wallet erstellen',
+      landing: {
         claim: 'Willkommen bei Circles',
+        subClaim:
+          'Erstelle eine neue Wallet oder stelle eine bestehende wieder her.',
+      },
+      login: {
+        claim: 'Willkommen zurück!',
+        subClaim:
+          'Gib hier deinen privaten Schlüssel ein, um deine Circles Wallet wiederherzustellen.',
+        magicWordsPlaceholder: 'Deine 24 geheimen Worte...',
+      },
+      infoGeneral: {
+        claim: 'Schön, dass du dabei bist!',
         subClaim: 'Lege eine Wallet an und werde Teil des Vertrauensnetzwerks!',
       },
       askUsername: {

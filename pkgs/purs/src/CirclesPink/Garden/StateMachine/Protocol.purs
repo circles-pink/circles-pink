@@ -53,7 +53,7 @@ type CirclesProtocol
       , login ::
           P.State
             ( login :: P.Action ("dashboard" :> "trusts" :> Nil')
-            , back :: P.Action ("landing" :> Nil')
+            , signUp :: P.Action ("infoGeneral" :> Nil')
             , setMagicWords :: P.Action ("login" :> Nil')
             )
       , trusts ::
