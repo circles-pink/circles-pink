@@ -19,11 +19,9 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
-import Data.Typelevel.Undefined (undefined)
-import Data.Variant (Variant, case_, default, on, onMatch)
+import Data.Maybe (Maybe)
+import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
-import Effect.Class.Console (logShow)
 import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -41,7 +39,10 @@ type PrepareSafeDeployError r
   = ( errNative :: Error | r )
 
 type UserResolveError r
-  = ( errNative :: Error, errApi :: ApiError | r )
+  = ( errNative :: Error
+    , errApi :: ApiError
+    | r
+    )
 
 type Env m
   = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
@@ -203,13 +204,10 @@ circlesControl env =
                 address = P.privKeyToAddress privKey
 
                 nonce = P.addressToNonce address
-              safeAddress <- env.getSafeAddress { nonce, privKey }
               maybeUser <-
-                lift $ runExceptT
-                  $ env.userResolve
-                      { privKey
-                      , safeAddress
-                      }
+                (lift <<< runExceptT) do
+                  safeAddress <- env.getSafeAddress { nonce, privKey }
+                  env.userResolve { privKey, safeAddress }
               let
                 x = spy "maybeUser" maybeUser
               pure unit

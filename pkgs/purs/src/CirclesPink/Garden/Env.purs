@@ -3,20 +3,23 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore (userResolve)
+import CirclesPink.Garden.CirclesCore (CirclesCore, Web3, userResolve)
 import CirclesPink.Garden.CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control as C
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head, (!!))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (inj)
 import Debug (spy)
-import Effect.Aff (Aff)
+import Effect (Effect)
+import Effect.Aff (Aff, Error)
 import Effect.Class (liftEffect)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
@@ -136,11 +139,13 @@ env { request, envVars } =
         pure $ head users
   }
 
+getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
+getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV ( errNative :: Error | r ) Effect CirclesCore
 getCirclesCore web3 ev =
   CC.newCirclesCore web3
     { apiServiceEndpoint: ev.gardenApi
