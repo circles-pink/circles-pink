@@ -9,6 +9,7 @@ module CirclesPink.Garden.StateMachine.Control
 
 import Prelude
 import CirclesPink.Garden.CirclesCore (UserOptions, User)
+import CirclesPink.Garden.CirclesCore.Bindings (ApiError)
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -40,7 +41,7 @@ type PrepareSafeDeployError r
   = ( errNative :: Error | r )
 
 type UserResolveError r
-  = ( errNative :: Error | r )
+  = ( errNative :: Error, errApi :: ApiError | r )
 
 type Env m
   = { apiCheckUserName :: String -> ExceptT CirclesError m { isValid :: Boolean }
@@ -198,11 +199,16 @@ circlesControl env =
                 mnemonic = P.getMnemonicFromString st.magicWords
 
                 privKey = P.mnemonicToKey mnemonic
+
+                address = P.privKeyToAddress privKey
+
+                nonce = P.addressToNonce address
+              safeAddress <- env.getSafeAddress { nonce, privKey }
               maybeUser <-
                 lift $ runExceptT
                   $ env.userResolve
                       { privKey
-                      , safeAddress: P.unsafeAddrFromString "0x95677422F1B4051968cbD30fF2d7dFaA27d95bA8"
+                      , safeAddress
                       }
               let
                 x = spy "maybeUser" maybeUser

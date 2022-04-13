@@ -103,14 +103,8 @@ env { request, envVars } =
   , userRegister:
       \privKey options -> do
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        let
-          x = spy "web3" web3
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        let
-          y = spy "circlesCore" circlesCore
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        let
-          z = spy "account" account
         CC.userRegister circlesCore account options
   , getSafeAddress:
       \{ nonce, privKey } -> do
@@ -135,18 +129,10 @@ env { request, envVars } =
         CC.safePrepareDeploy circlesCore account { nonce: nonce }
   , userResolve:
       \{ privKey, safeAddress } -> do
-        let
-          address = P.privKeyToAddress privKey
-        let
-          a = spy "address" address
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         users <- userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
-        let
-          b = spy "users" users
-        let
-          c = spy "user" head users
         pure $ head users
   }
 
