@@ -202,8 +202,8 @@ circlesControl env =
               let
                 x = spy "maybeUser" maybeUser
               pure unit
-        , back:
-            \set _ _ -> pure unit
+        , signUp:
+            \set _ _ -> set $ \_ -> S.init
         , setMagicWords:
             \set _ words -> set $ \st -> S._login st { magicWords = words }
         }

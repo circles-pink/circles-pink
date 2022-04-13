@@ -52,7 +52,7 @@ type CirclesAction
       , login ::
           Variant
             ( login :: Unit
-            , back :: Unit
+            , signUp :: Unit
             , setMagicWords :: String
             )
       , trusts ::
@@ -85,6 +85,12 @@ _dashboard = inj (Proxy :: _ "dashboard")
 
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
+
+_login :: forall a v. a -> Variant ( login :: a | v )
+_login = inj (Proxy :: _ "login")
+
+_setMagicWords :: forall a v. a -> Variant ( setMagicWords :: a | v )
+_setMagicWords = inj (Proxy :: _ "setMagicWords")
 
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )
