@@ -1,80 +1,28 @@
 module CirclesPink.Garden.StateMachine.Control
-  ( Env
-  , EnvApiCheckEmail
-  , EnvApiCheckUserName
-  , GetSafeAddressError
-  , PrepareSafeDeployError
-  , RegisterError
-  , UserNotFoundError
-  , UserResolveError
-  , circlesControl
+  ( circlesControl
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore (UserOptions, User)
-import CirclesPink.Garden.CirclesCore.Bindings (ApiError)
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
-import CirclesPink.Garden.StateMachine.Action as A
+import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
-import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
-import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.Except (class MonadTrans, lift, runExceptT)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe)
 import Data.Variant (Variant, default, onMatch)
-import Debug (spy)
-import Effect.Exception (Error)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, Nonce, PrivateKey)
 import Wallet.PrivateKey as P
-
-type RegisterError r
-  = ( errService :: Unit, errNative :: Error | r )
-
-type GetSafeAddressError r
-  = ( errNative :: Error | r )
-
-type PrepareSafeDeployError r
-  = ( errNative :: Error | r )
-
-type UserNotFoundError
-  = { address :: Address
-    }
-
-type UserResolveError r
-  = ( errNative :: Error
-    , errApi :: ApiError
-    , errUserNotFound :: UserNotFoundError
-    | r
-    )
-
-type EnvApiCheckUserName m
-  = String -> ExceptT CirclesError m { isValid :: Boolean }
-
-type EnvApiCheckEmail m
-  = String -> ExceptT CirclesError m { isValid :: Boolean }
-
-type Env m
-  = { apiCheckUserName :: EnvApiCheckUserName m
-    , apiCheckEmail :: EnvApiCheckEmail m
-    , generatePrivateKey :: m PrivateKey
-    , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
-    , getSafeAddress :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (GetSafeAddressError + r) m Address
-    , safePrepareDeploy :: forall r. { nonce :: Nonce, privKey :: PrivateKey } -> ExceptV (PrepareSafeDeployError + r) m Address
-    , userResolve :: forall r. { privKey :: PrivateKey, safeAddress :: Address } -> ExceptV (UserResolveError + r) m User
-    }
 
 circlesControl ::
   forall t m.
   Monad m =>
   MonadTrans t =>
   Monad (t m) =>
-  Env m -> ((CirclesState -> CirclesState) -> t m Unit) -> CirclesState -> CirclesAction -> t m Unit
+  E.Env m -> ((S.CirclesState -> S.CirclesState) -> t m Unit) -> S.CirclesState -> CirclesAction -> t m Unit
 circlesControl env =
   C.mkControl
     _circlesStateMachine
@@ -170,10 +118,10 @@ circlesControl env =
                 address = P.privKeyToAddress st.privateKey
 
                 nonce = P.addressToNonce address
-              result :: Either (Variant (GetSafeAddressError + RegisterError + ())) Unit <-
+              result :: Either (Variant (E.GetSafeAddressError + E.RegisterError + ())) Unit <-
                 (lift <<< runExceptT) do
-                  safeAddress <- env.getSafeAddress { nonce, privKey: st.privateKey }
-                  _ <- env.safePrepareDeploy { nonce, privKey: st.privateKey }
+                  safeAddress <- env.getSafeAddress st.privateKey
+                  _ <- env.safePrepareDeploy st.privateKey
                   env.userRegister
                     st.privateKey
                     { email: st.email
@@ -188,23 +136,7 @@ circlesControl env =
             \set _ _ -> pure unit
         }
     , login:
-        { login:
-            \set st _ -> do
-              let
-                mnemonic = P.getMnemonicFromString st.magicWords
-
-                privKey = P.mnemonicToKey mnemonic
-
-                address = P.privKeyToAddress privKey
-
-                nonce = P.addressToNonce address
-              eitherMaybeUser <-
-                (lift <<< runExceptT) do
-                  safeAddress <- env.getSafeAddress { nonce, privKey }
-                  env.userResolve { privKey, safeAddress }
-              let
-                x = spy "eitherMaybeUser" eitherMaybeUser
-              pure unit
+        { login: loginLogin
         , signUp:
             \set _ _ -> set $ \_ -> S.init
         , setMagicWords:
@@ -231,5 +163,17 @@ circlesControl env =
             else
               S._askEmail st { direction = D._forwards }
 
+  loginLogin :: ActionHandler t m Unit S.LoginState ( "login" :: S.LoginState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
+  loginLogin set st _ = do
+    let
+      mnemonic = P.getMnemonicFromString st.magicWords
+
+      privKey = P.mnemonicToKey mnemonic
+    eitherUser <- (lift <<< runExceptT) $ env.userResolve privKey
+    case eitherUser of
+      Left e -> set $ \st' -> S._login st' { error = pure e }
+      Right u -> set $ \_ -> S._trusts { user: u, trusts: [], privKey }
+
+type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit

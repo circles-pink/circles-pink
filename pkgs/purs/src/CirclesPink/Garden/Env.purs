@@ -5,7 +5,7 @@ module CirclesPink.Garden.Env
 import Prelude
 import CirclesPink.Garden.CirclesCore (CirclesCore, Web3, userResolve)
 import CirclesPink.Garden.CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control as C
+import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
@@ -43,7 +43,7 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> C.Env Aff
+env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> E.Env Aff
 env { request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
@@ -54,31 +54,30 @@ env { request, envVars } =
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         CC.userRegister circlesCore account options
-  , getSafeAddress:
-      \{ nonce, privKey } -> do
-        web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        address <- CC.safePredictAddress circlesCore account { nonce: nonce }
-        pure address
+  , getSafeAddress
   , safePrepareDeploy:
-      \{ nonce, privKey } -> do
+      \privKey -> do
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        let
+          address = P.privKeyToAddress privKey
+        let
+          nonce = P.addressToNonce address
         CC.safePrepareDeploy circlesCore account { nonce: nonce }
   , userResolve:
-      \{ privKey, safeAddress } -> do
+      \privKey -> do
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+        safeAddress <- getSafeAddress privKey
         users <- userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
         case head users of
-          Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { address: safeAddress })
+          Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
           Just u -> pure u
   }
   where
-  apiCheckUserName :: C.EnvApiCheckUserName Aff
+  apiCheckUserName :: E.EnvApiCheckUserName Aff
   apiCheckUserName username =
     if username == "" then
       pure { isValid: false }
@@ -107,7 +106,7 @@ env { request, envVars } =
           )
         # ExceptT
 
-  apiCheckEmail :: C.EnvApiCheckEmail Aff
+  apiCheckEmail :: E.EnvApiCheckEmail Aff
   apiCheckEmail email =
     if email == "" then
       pure { isValid: false }
@@ -136,6 +135,18 @@ env { request, envVars } =
           )
         # ExceptT
 
+  getSafeAddress :: E.EnvGetSafeAddress Aff
+  getSafeAddress privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    pure safeAddress
+
 getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -155,7 +166,7 @@ getCirclesCore web3 ev =
     , databaseSource: "graph"
     }
 
-testEnv :: C.Env Identity
+testEnv :: E.Env Identity
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
