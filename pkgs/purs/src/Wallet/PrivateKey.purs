@@ -26,7 +26,6 @@ import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.String (Pattern(..))
 import Data.String as S
-import Data.String.Regex (Regex)
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
@@ -42,6 +41,8 @@ type Entropy
 
 newtype Address
   = Address String
+
+derive newtype instance showAddress :: Show Address
 
 newtype Nonce
   = Nonce BigInt

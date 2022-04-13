@@ -3,7 +3,8 @@ module CirclesPink.Garden.TS where
 import Prelude
 import CirclesPink.Garden.Env as Garden
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
-import CirclesPink.Garden.StateMachine.Control (Env, circlesControl)
+import CirclesPink.Garden.StateMachine.Control (circlesControl)
+import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.Identity.Trans (IdentityT, runIdentityT)
 import Effect (Effect)

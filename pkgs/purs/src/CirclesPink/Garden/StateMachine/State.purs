@@ -6,7 +6,6 @@ module CirclesPink.Garden.StateMachine.State
   , LoginState
   , Trust
   , TrustState
-  , User
   , UserData
   , UsernameApiResult
   , _askEmail
@@ -24,13 +23,16 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
+import CirclesPink.Garden.StateMachine.Control.Env (UserResolveError)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
+import CirclesPink.Garden.CirclesCore as CC
 
 type UsernameApiResult
   = RemoteData CirclesError { isValid :: Boolean }
@@ -54,21 +56,17 @@ type UserData
 
 type LoginState
   = { magicWords :: String
+    , error :: Maybe (Variant (UserResolveError ()))
     }
 
 type DashboardState
-  = { user :: User
+  = { user :: CC.User
     }
 
 type TrustState
-  = { user :: User
+  = { user :: CC.User
+    , privKey :: PrivateKey
     , trusts :: Array Trust
-    }
-
-type User
-  = { username :: String
-    , email :: String
-    , privateKey :: PrivateKey
     }
 
 type Trust
@@ -110,7 +108,9 @@ initLanding =
 initLogin :: forall v. Variant ( login :: LoginState | v )
 initLogin =
   _login
-    { magicWords: "" }
+    { magicWords: ""
+    , error: Nothing
+    }
 
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
