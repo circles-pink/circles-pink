@@ -17,12 +17,14 @@ module CirclesPink.Garden.CirclesCore
   ) where
 
 import Prelude
+import CirclesPink.Garden.CirclesCore.Bindings (ApiError, apiResultToEither)
 import CirclesPink.Garden.CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account) as Exp
 import CirclesPink.Garden.CirclesCore.Bindings as B
-import Control.Monad.Except (ExceptT(..))
+import Control.Monad.Except (ExceptT(..), mapExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
@@ -75,6 +77,9 @@ safePrepareDeploy cc ac opts =
 type ErrNative r
   = ( errNative :: Error | r )
 
+type ErrApi r
+  = ( errApi :: ApiError | r )
+
 type ErrService r
   = ( errService :: Unit | r )
 
@@ -122,20 +127,24 @@ type User
     , avatarUrl :: String
     }
 
-userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> ExceptV (ErrNative + r) Aff (Array User)
+userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> ExceptV (ErrNative + ErrApi + r) Aff (Array User)
 userResolve cc ac opts =
   B.userResolve cc ac
     { addresses: map addrToString opts.addresses
     , userNames: opts.userNames
     }
-    <#> map
-        ( \u ->
-            { id: u.id
-            , username: u.username
-            , safeAddress: P.unsafeAddrFromString u.safeAddress
-            , avatarUrl: u.avatarUrl
-            }
-        )
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
+    # map (\x -> x >>= handleApiResult)
     # ExceptT
+  where
+  handleApiResult apiResult = case apiResultToEither apiResult of
+    Left apiError -> Left $ inj (Proxy :: _ "errApi") apiError
+    Right data_ -> pure $ map userToUser data_
+
+  userToUser u =
+    { id: u.id
+    , username: u.username
+    , safeAddress: P.unsafeAddrFromString u.safeAddress
+    , avatarUrl: u.avatarUrl
+    }
