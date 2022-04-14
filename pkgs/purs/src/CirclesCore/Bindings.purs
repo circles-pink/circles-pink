@@ -6,6 +6,7 @@ module CirclesCore.Bindings
   , Options
   , Provider
   , ResolveOptions
+  , TrustNode
   , User
   , UserOptions
   , Web3
@@ -34,6 +35,9 @@ import Foreign (Foreign, unsafeFromForeign)
 import Foreign.Object (Object)
 import Foreign.Object.Unsafe (unsafeIndex)
 
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
 foreign import data Provider :: Type
 
 foreign import data Web3 :: Type
@@ -42,6 +46,16 @@ foreign import data CirclesCore :: Type
 
 foreign import data Account :: Type
 
+type User
+  = { id :: Int
+    , username :: String
+    , safeAddress :: String
+    , avatarUrl :: String
+    }
+
+--------------------------------------------------------------------------------
+-- FFI
+--------------------------------------------------------------------------------
 foreign import newWebSocketProvider :: String -> Effect Provider
 
 foreign import newWeb3 :: Provider -> Effect Web3
@@ -50,11 +64,17 @@ foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
 foreign import safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
 
+--------------------------------------------------------------------------------
+-- FFI / safePrepareDeploy
+--------------------------------------------------------------------------------
 foreign import safePrepareDeployImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
 
 safePrepareDeploy :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
 safePrepareDeploy x1 x2 x3 = fromEffectFnAff $ safePrepareDeployImpl x1 x2 x3
 
+--------------------------------------------------------------------------------
+-- FFI / newCirclesCore
+--------------------------------------------------------------------------------
 type Options
   = { apiServiceEndpoint :: String
     , graphNodeEndpoint :: String
@@ -68,6 +88,9 @@ type Options
 
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
 
+--------------------------------------------------------------------------------
+-- FFI / userRegister
+--------------------------------------------------------------------------------
 type UserOptions
   = { nonce :: BigInt
     , safeAddress :: String
@@ -75,9 +98,6 @@ type UserOptions
     , email :: String
     }
 
---------------------------------------------------------------------------------
--- userRegister
---------------------------------------------------------------------------------
 foreign import userRegisterImpl :: CirclesCore -> Account -> UserOptions -> EffectFnAff Boolean
 
 userRegister :: CirclesCore -> Account -> UserOptions -> Aff Boolean
@@ -91,32 +111,35 @@ type ResolveOptions
     , userNames :: Array String
     }
 
-type User
-  = { id :: Int
-    , username :: String
-    , safeAddress :: String
-    , avatarUrl :: String
-    }
-
-newtype ApiResult a
-  = ApiResult (Object Foreign)
-
-type ApiError
-  = { message :: String, code :: Int }
-
 foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff (ApiResult (Array User))
 
 userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (ApiResult (Array User))
 userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3
 
 --------------------------------------------------------------------------------
--- Trust
+-- trustGetNetwork
 --------------------------------------------------------------------------------
-foreign import trustGetNetwork :: CirclesCore -> Account -> { safeAddress :: String } -> EffectFnAff String
+type TrustNode
+  = { isIncoming :: Boolean
+    , isOutgoing :: Boolean
+    , limitPercentageIn :: Int
+    , limitPercentageOut :: Int
+    , mutualConnections :: Array Foreign
+    , safeAddress :: String
+    }
+
+foreign import trustGetNetwork :: CirclesCore -> Account -> { safeAddress :: String } -> EffectFnAff (Array TrustNode)
 
 --------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
+type ApiError
+  = { message :: String, code :: Int }
+
+newtype ApiResult :: forall k. k -> Type
+newtype ApiResult a
+  = ApiResult (Object Foreign)
+
 apiResultToEither :: forall a. ApiResult a -> Either ApiError a
 apiResultToEither (ApiResult fo) =
   let

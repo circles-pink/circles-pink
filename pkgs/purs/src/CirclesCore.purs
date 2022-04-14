@@ -12,6 +12,7 @@ module CirclesCore
   , privKeyToAccount
   , safePredictAddress
   , safePrepareDeploy
+  , trustGetNetwork
   , unsafeSampleCore
   , userRegister
   , userResolve
@@ -21,21 +22,24 @@ import Prelude
 import CirclesCore.Bindings (ApiError, apiResultToEither)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError) as Exp
 import CirclesCore.Bindings as B
-import Control.Monad.Except (ExceptT(..), mapExceptT, throwError)
+import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, try)
+import Foreign (Foreign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigInt)
 import Wallet.PrivateKey as P
 
+--------------------------------------------------------------------------------
+-- API
+--------------------------------------------------------------------------------
 newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + r) Effect B.Provider
 newWebSocketProvider x1 =
   B.newWebSocketProvider x1
@@ -77,33 +81,33 @@ safePrepareDeploy cc ac opts =
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
 
-unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> ExceptV (ErrNative + r) Aff Unit
-unsafeSampleCore x1 x2 =
-  B.unsafeSampleCore x1 x2
+--------------------------------------------------------------------------------
+-- API / trustGetNetwork
+--------------------------------------------------------------------------------
+type TrustNode
+  = { isIncoming :: Boolean
+    , isOutgoing :: Boolean
+    , limitPercentageIn :: Int
+    , limitPercentageOut :: Int
+    , mutualConnections :: Array Foreign
+    , safeAddress :: Address
+    }
+
+trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> ExceptV (ErrNative + r) Aff (Array TrustNode)
+trustGetNetwork cc ac opts =
+  B.trustGetNetwork cc ac { safeAddress: P.addrToString opts.safeAddress }
     # fromEffectFnAff
+    <#> map conformTrustNode
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
+  where
+  conformTrustNode :: B.TrustNode -> TrustNode
+  conformTrustNode tn = tn { safeAddress = P.unsafeAddrFromString tn.safeAddress }
 
--- trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
-type ErrNative r
-  = ( errNative :: Error | r )
-
-type ErrApi r
-  = ( errApi :: ApiError | r )
-
-type ErrService r
-  = ( errService :: Unit | r )
-
-type Err r
-  = ErrNative + ErrService + r
-
-printErr :: Variant (Err ()) -> String
-printErr =
-  case_
-    # on (Proxy :: _ "errNative") (\e -> "Native Error: " <> message e)
-    # on (Proxy :: _ "errService") (\_ -> "service error")
-
+--------------------------------------------------------------------------------
+-- API / userRegister
+--------------------------------------------------------------------------------
 type UserOptions
   = { nonce :: Nonce
     , safeAddress :: Address
@@ -125,7 +129,7 @@ userRegister cc ac opts =
     # ExceptT
 
 --------------------------------------------------------------------------------
--- userResolve
+-- API / userResolve
 --------------------------------------------------------------------------------
 type ResolveOptions
   = { addresses :: Array Address
@@ -160,3 +164,35 @@ userResolve cc ac opts =
     , safeAddress: P.unsafeAddrFromString u.safeAddress
     , avatarUrl: u.avatarUrl
     }
+
+--------------------------------------------------------------------------------
+-- Error
+--------------------------------------------------------------------------------
+type ErrNative r
+  = ( errNative :: Error | r )
+
+type ErrApi r
+  = ( errApi :: ApiError | r )
+
+type ErrService r
+  = ( errService :: Unit | r )
+
+type Err r
+  = ErrNative + ErrService + r
+
+printErr :: Variant (Err ()) -> String
+printErr =
+  case_
+    # on (Proxy :: _ "errNative") (\e -> "Native Error: " <> message e)
+    # on (Proxy :: _ "errService") (\_ -> "service error")
+
+--------------------------------------------------------------------------------
+-- Util
+--------------------------------------------------------------------------------
+unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> ExceptV (ErrNative + r) Aff Unit
+unsafeSampleCore x1 x2 =
+  B.unsafeSampleCore x1 x2
+    # fromEffectFnAff
+    # attempt
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
