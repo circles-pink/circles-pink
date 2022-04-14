@@ -86,11 +86,11 @@ _dashboard = inj (Proxy :: _ "dashboard")
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
 
+_trusts :: forall a v. a -> Variant ( trusts :: a | v )
+_trusts = inj (Proxy :: _ "trusts")
+
 _login :: forall a v. a -> Variant ( login :: a | v )
 _login = inj (Proxy :: _ "login")
-
-_setMagicWords :: forall a v. a -> Variant ( setMagicWords :: a | v )
-_setMagicWords = inj (Proxy :: _ "setMagicWords")
 
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )
@@ -119,3 +119,9 @@ _signIn = inj (Proxy :: _ "signIn")
 
 _signUp :: forall a v. a -> Variant ( signUp :: a | v )
 _signUp = inj (Proxy :: _ "signUp")
+
+_setMagicWords :: forall a v. a -> Variant ( setMagicWords :: a | v )
+_setMagicWords = inj (Proxy :: _ "setMagicWords")
+
+_continue :: forall a v. a -> Variant ( continue :: a | v )
+_continue = inj (Proxy :: _ "continue")

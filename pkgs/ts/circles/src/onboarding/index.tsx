@@ -22,6 +22,7 @@ import {
   Submit,
   Landing,
   Login,
+  Trusts,
 } from './views';
 
 // Style
@@ -100,12 +101,12 @@ const View = ({ state, act }: ViewProps): ReactElement | null => {
       return <MagicWords state={state.value} act={act} />;
     case 'submit':
       return <Submit state={state.value} act={act} />;
-    case 'dashboard':
-      return null;
-    case 'trusts':
-      return null;
     case 'login':
       return <Login state={state.value} act={act} />;
+    case 'trusts':
+      return <Trusts state={state.value} act={act} />;
+    case 'dashboard':
+      return null;
     default:
       return null;
   }
