@@ -77,6 +77,8 @@ env { request, envVars } =
           Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
           Just u -> pure u
   , coreToWindow
+  , isTrusted
+  , trustGetNetwork
   }
   where
   apiCheckUserName :: E.EnvApiCheckUserName Aff
@@ -90,8 +92,6 @@ env { request, envVars } =
         , body: encodeJson { username }
         }
         # runExceptT
-        -- <#> (spy "log")
-        
         <#> ( \result -> case result of
               Left e -> Left e
               Right x
@@ -119,8 +119,6 @@ env { request, envVars } =
         , body: encodeJson { email }
         }
         # runExceptT
-        -- <#> (spy "log")
-        
         <#> ( \result -> case result of
               Left e -> Left e
               Right x
@@ -158,6 +156,30 @@ env { request, envVars } =
     log "Debug: sampleCore and sampleAccount written to global window object"
     pure unit
 
+  isTrusted :: E.EnvIsTrusted Aff
+  isTrusted privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.trustIsTrusted circlesCore account { safeAddress, limit: 3 }
+
+  trustGetNetwork :: E.EnvTrustGetNetwork Aff
+  trustGetNetwork privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.trustGetNetwork circlesCore account { safeAddress }
+
 getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -194,4 +216,6 @@ testEnv =
           , avatarUrl: ""
           }
   , coreToWindow: \_ -> pure unit
+  , isTrusted: \_ -> pure { isTrusted: false, trustConnections: 0 }
+  , trustGetNetwork: \_ -> pure []
   }
