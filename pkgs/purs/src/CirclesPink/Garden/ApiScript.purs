@@ -31,7 +31,7 @@ act envVars ac = do
   log ("ACTION: " <> show ac)
   toStateT (control envVars) ac
   st <- get
-  log ("STATE: " <> show st)
+  --log ("STATE: " <> show st)
   log ""
 
 type Options

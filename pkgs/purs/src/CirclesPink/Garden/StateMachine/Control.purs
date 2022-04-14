@@ -11,6 +11,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, lift, runExceptT)
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, default, onMatch)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -172,10 +173,21 @@ circlesControl env =
       mnemonic = P.getMnemonicFromString st.magicWords
 
       privKey = P.mnemonicToKey mnemonic
-    eitherUser <- (lift <<< runExceptT) $ env.userResolve privKey
-    case eitherUser of
+    results <-
+      (lift <<< runExceptT) do
+        user <- env.userResolve privKey
+        isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
+        trusts <-
+          if isTrusted then
+            pure []
+          else
+            env.trustGetNetwork privKey
+        pure { user, isTrusted, trusts }
+    case results of
       Left e -> set $ \st' -> S._login st' { error = pure e }
-      Right u -> set $ \_ -> S._trusts { user: u, trusts: [], privKey }
+      Right { user, isTrusted }
+        | isTrusted -> set $ \_ -> S._dashboard { user }
+      Right { user, trusts } -> set $ \_ -> S._trusts { user, trusts, privKey }
 
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
   debugCoreToWindow _ st _ = do

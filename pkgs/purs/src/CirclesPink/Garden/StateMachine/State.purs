@@ -5,7 +5,6 @@ module CirclesPink.Garden.StateMachine.State
   , EmailApiResult
   , LandingState
   , LoginState
-  , Trust
   , TrustState
   , UserData
   , UsernameApiResult
@@ -26,8 +25,8 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
+import CirclesCore (ApiError, TrustNode)
 import CirclesCore as CC
-import CirclesCore (ApiError)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
@@ -78,11 +77,8 @@ type DashboardState
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
-    , trusts :: Array Trust
+    , trusts :: Array TrustNode
     }
-
-type Trust
-  = {}
 
 type CirclesState
   = Variant

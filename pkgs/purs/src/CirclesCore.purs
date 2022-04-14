@@ -4,6 +4,7 @@ module CirclesCore
   , ErrService
   , User
   , UserOptions
+  , TrustNode
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -21,13 +22,21 @@ module CirclesCore
 
 import Prelude
 import CirclesCore.Bindings (ApiError, apiResultToEither)
-import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError) as Exp
+import CirclesCore.Bindings
+  ( Options
+  , Provider
+  , Web3
+  , CirclesCore
+  , Account
+  , ApiError
+  , TrustIsTrustedResult
+  )
+  as Exp
 import CirclesCore.Bindings as B
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
