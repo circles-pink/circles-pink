@@ -1,4 +1,4 @@
-module CirclesPink.Garden.CirclesCore.Bindings
+module CirclesCore.Bindings
   ( Account
   , ApiError
   , ApiResult

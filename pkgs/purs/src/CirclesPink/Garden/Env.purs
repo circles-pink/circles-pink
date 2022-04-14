@@ -3,8 +3,8 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore (CirclesCore, Web3, userResolve)
-import CirclesPink.Garden.CirclesCore as CC
+import CirclesCore (CirclesCore, Web3, userResolve)
+import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError)
