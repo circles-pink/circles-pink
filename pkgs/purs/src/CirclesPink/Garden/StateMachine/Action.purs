@@ -48,6 +48,7 @@ type CirclesAction
       , dashboard ::
           Variant
             ( logout :: Unit
+            , getTrusts :: Unit
             )
       , login ::
           Variant
@@ -135,3 +136,6 @@ _continue = inj (Proxy :: _ "continue")
 
 _coreToWindow :: forall a v. a -> Variant ( coreToWindow :: a | v )
 _coreToWindow = inj (Proxy :: _ "coreToWindow")
+
+_getTrusts :: forall a v. a -> Variant ( getTrusts :: a | v )
+_getTrusts = inj (Proxy :: _ "getTrusts")
