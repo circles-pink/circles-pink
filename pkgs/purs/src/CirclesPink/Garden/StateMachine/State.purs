@@ -1,6 +1,7 @@
 module CirclesPink.Garden.StateMachine.State
   ( CirclesState
   , DashboardState
+  , DebugState
   , EmailApiResult
   , LandingState
   , LoginState
@@ -11,6 +12,7 @@ module CirclesPink.Garden.StateMachine.State
   , _askEmail
   , _askUsername
   , _dashboard
+  , _debug
   , _infoGeneral
   , _infoSecurity
   , _landing
@@ -19,6 +21,7 @@ module CirclesPink.Garden.StateMachine.State
   , _submit
   , _trusts
   , init
+  , initDebug
   , initLanding
   , initLogin
   ) where
@@ -93,7 +96,12 @@ type CirclesState
       , dashboard :: DashboardState
       , login :: LoginState
       , trusts :: TrustState
+      , debug :: DebugState
       )
+
+type DebugState
+  = { magicWords :: String
+    }
 
 -- init :: CirclesState
 init ∷ forall v. Variant ( infoGeneral :: UserData | v )
@@ -119,6 +127,12 @@ initLogin =
   _login
     { magicWords: ""
     , error: Nothing
+    }
+
+initDebug :: forall v. Variant ( debug :: DebugState | v )
+initDebug =
+  _debug
+    { magicWords: "hockey middle idea enable forget case mountain sugar chronic income crouch critic venue giant tell marble rose scene prefer shoe cheap run print pigeon"
     }
 
 _landing :: forall a v. a -> Variant ( landing :: a | v )
@@ -150,3 +164,6 @@ _login = inj (Proxy :: _ "login")
 
 _trusts :: forall a v. a -> Variant ( trusts :: a | v )
 _trusts = inj (Proxy :: _ "trusts")
+
+_debug :: forall a v. a -> Variant ( debug :: a | v )
+_debug = inj (Proxy :: _ "debug")

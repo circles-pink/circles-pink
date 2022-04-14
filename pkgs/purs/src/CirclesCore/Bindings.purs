@@ -16,6 +16,9 @@ module CirclesCore.Bindings
   , privKeyToAccount
   , safePredictAddress
   , safePrepareDeploy
+  , safePrepareDeployImpl
+  , trustGetNetwork
+  , unsafeSampleCore
   , userRegister
   , userResolve
   , userResolveImpl
@@ -107,6 +110,11 @@ userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (ApiResult (Array
 userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3
 
 --------------------------------------------------------------------------------
+-- Trust
+--------------------------------------------------------------------------------
+foreign import trustGetNetwork :: CirclesCore -> Account -> { safeAddress :: String } -> EffectFnAff String
+
+--------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
 apiResultToEither :: forall a. ApiResult a -> Either ApiError a
@@ -126,3 +134,5 @@ apiResultToEither (ApiResult fo) =
         message = unsafeIndex fo "message" # unsafeFromForeign
       in
         Left { code, message }
+
+foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit

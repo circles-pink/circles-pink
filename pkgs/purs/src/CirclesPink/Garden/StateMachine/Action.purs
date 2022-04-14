@@ -59,6 +59,10 @@ type CirclesAction
           Variant
             ( continue :: Unit
             )
+      , debug ::
+          Variant
+            ( coreToWindow :: Unit
+            )
       )
 
 ----
@@ -91,6 +95,9 @@ _trusts = inj (Proxy :: _ "trusts")
 
 _login :: forall a v. a -> Variant ( login :: a | v )
 _login = inj (Proxy :: _ "login")
+
+_debug :: forall a v. a -> Variant ( debug :: a | v )
+_debug = inj (Proxy :: _ "debug")
 
 ----
 _next :: forall a v. a -> Variant ( next :: a | v )
@@ -125,3 +132,6 @@ _setMagicWords = inj (Proxy :: _ "setMagicWords")
 
 _continue :: forall a v. a -> Variant ( continue :: a | v )
 _continue = inj (Proxy :: _ "continue")
+
+_coreToWindow :: forall a v. a -> Variant ( coreToWindow :: a | v )
+_coreToWindow = inj (Proxy :: _ "coreToWindow")

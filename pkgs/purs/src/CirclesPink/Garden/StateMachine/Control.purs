@@ -146,6 +146,9 @@ circlesControl env =
         { continue:
             \set _ _ -> pure unit
         }
+    , debug:
+        { coreToWindow: debugCoreToWindow
+        }
     }
   where
   askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
@@ -173,6 +176,15 @@ circlesControl env =
     case eitherUser of
       Left e -> set $ \st' -> S._login st' { error = pure e }
       Right u -> set $ \_ -> S._trusts { user: u, trusts: [], privKey }
+
+  debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
+  debugCoreToWindow _ st _ = do
+    let
+      mnemonic = P.getMnemonicFromString st.magicWords
+    let
+      privKey = P.mnemonicToKey mnemonic
+    _ <- lift $ runExceptT $ env.coreToWindow privKey
+    pure unit
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v

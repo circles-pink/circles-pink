@@ -1,7 +1,9 @@
 module CirclesPink.Garden.StateMachine.Control.Env
-  ( Env
+  ( CoreToWindowError
+  , Env
   , EnvApiCheckEmail
   , EnvApiCheckUserName
+  , EnvCoreToWindow
   , EnvGetSafeAddress
   , GetSafeAddressError
   , PrepareSafeDeployError
@@ -28,6 +30,9 @@ type GetSafeAddressError r
 type PrepareSafeDeployError r
   = ( errNative :: Error | r )
 
+type CoreToWindowError r
+  = ( errNative :: Error | r )
+
 type UserNotFoundError
   = { safeAddress :: Address
     }
@@ -48,6 +53,9 @@ type EnvApiCheckEmail m
 type EnvGetSafeAddress m
   = forall r. PrivateKey -> ExceptV (GetSafeAddressError + r) m Address
 
+type EnvCoreToWindow m
+  = forall r. PrivateKey -> ExceptV (CoreToWindowError + r) m Unit
+
 type Env m
   = { apiCheckUserName :: EnvApiCheckUserName m
     , apiCheckEmail :: EnvApiCheckEmail m
@@ -56,4 +64,5 @@ type Env m
     , getSafeAddress :: EnvGetSafeAddress m
     , safePrepareDeploy :: forall r. PrivateKey -> ExceptV (PrepareSafeDeployError + r) m Address
     , userResolve :: forall r. PrivateKey -> ExceptV (UserResolveError + r) m User
+    , coreToWindow :: EnvCoreToWindow m
     }

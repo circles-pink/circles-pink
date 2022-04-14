@@ -20,6 +20,7 @@ import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Error)
 import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (sampleAddress, zeroKey)
@@ -75,6 +76,7 @@ env { request, envVars } =
         case head users of
           Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
           Just u -> pure u
+  , coreToWindow
   }
   where
   apiCheckUserName :: E.EnvApiCheckUserName Aff
@@ -147,6 +149,15 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
+  coreToWindow :: E.EnvCoreToWindow Aff
+  coreToWindow privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    CC.unsafeSampleCore circlesCore account
+    log "Debug: sampleCore and sampleAccount written to global window object"
+    pure unit
+
 getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -182,4 +193,5 @@ testEnv =
           , safeAddress: sampleAddress
           , avatarUrl: ""
           }
+  , coreToWindow: \_ -> pure unit
   }
