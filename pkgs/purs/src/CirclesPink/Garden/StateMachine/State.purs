@@ -23,16 +23,18 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
-import CirclesPink.Garden.StateMachine.Control.Env (UserResolveError)
+import CirclesPink.Garden.CirclesCore as CC
+import CirclesPink.Garden.CirclesCore.Bindings (ApiError)
+import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
+import Effect.Exception (Error)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
-import CirclesPink.Garden.CirclesCore as CC
 
 type UsernameApiResult
   = RemoteData CirclesError { isValid :: Boolean }
@@ -56,7 +58,14 @@ type UserData
 
 type LoginState
   = { magicWords :: String
-    , error :: Maybe (Variant (UserResolveError ()))
+    , error ::
+        Maybe
+          ( Variant
+              ( errApi ∷ ApiError
+              , errNative ∷ Error
+              , errUserNotFound ∷ UserNotFoundError
+              )
+          )
     }
 
 type DashboardState
