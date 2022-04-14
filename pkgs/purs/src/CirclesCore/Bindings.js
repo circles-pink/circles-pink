@@ -22,6 +22,8 @@ exports.userResolveImpl =
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
+// CirclesCore - Safe
+
 exports.safePredictAddress =
   (circlesCore) => (account) => (options) => (onErr, onSucc) => {
     circlesCore.safe.predictAddress(account, options).then(onSucc).catch(onErr);
@@ -31,3 +33,18 @@ exports.safePrepareDeployImpl =
   (circlesCore) => (account) => (options) => (onErr, onSucc) => {
     circlesCore.safe.prepareDeploy(account, options).then(onSucc).catch(onErr);
   };
+
+// CirclesCore - Trust
+
+exports.trustGetNetwork =
+  (circlesCore) => (account) => (options) => (onErr, onSucc) => {
+    circlesCore.trust.getNetwork(account, options).then(onSucc).catch(onErr);
+  };
+
+// CirclesCore - unsafe debug
+
+exports.unsafeSampleCore = (circlesCore) => (account) => (_, onSucc) => {
+  window.sampleCore = circlesCore;
+  window.sampleAccount = account;
+  onSucc(null);
+};

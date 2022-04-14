@@ -12,6 +12,7 @@ module CirclesCore
   , privKeyToAccount
   , safePredictAddress
   , safePrepareDeploy
+  , unsafeSampleCore
   , userRegister
   , userResolve
   ) where
@@ -76,6 +77,15 @@ safePrepareDeploy cc ac opts =
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
 
+unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> ExceptV (ErrNative + r) Aff Unit
+unsafeSampleCore x1 x2 =
+  B.unsafeSampleCore x1 x2
+    # fromEffectFnAff
+    # attempt
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
+
+-- trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
 type ErrNative r
   = ( errNative :: Error | r )
 

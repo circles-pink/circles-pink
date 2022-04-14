@@ -60,4 +60,8 @@ type CirclesProtocol
           P.State
             ( continue :: P.Action ("dashboard" :> "trusts" :> Nil')
             )
+      , debug ::
+          P.State
+            ( coreToWindow :: P.Action ("debug" :> Nil')
+            )
       )
