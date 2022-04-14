@@ -12,7 +12,9 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, lift, runExceptT)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
+import Effect.Class.Console (logShow)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
@@ -133,8 +135,8 @@ circlesControl env =
               pure unit
         }
     , dashboard:
-        { logout:
-            \set _ _ -> pure unit
+        { logout: \set _ _ -> pure unit
+        , getTrusts: dashboardGetTrusts
         }
     , login:
         { login: loginLogin
@@ -185,8 +187,8 @@ circlesControl env =
         pure { user, isTrusted, trusts }
     case results of
       Left e -> set $ \st' -> S._login st' { error = pure e }
-      Right { user, isTrusted }
-        | isTrusted -> set $ \_ -> S._dashboard { user }
+      Right { user, trusts, isTrusted }
+        | isTrusted -> set $ \_ -> S._dashboard { user, trusts, privKey }
       Right { user, trusts } -> set $ \_ -> S._trusts { user, trusts, privKey }
 
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
@@ -197,6 +199,13 @@ circlesControl env =
       privKey = P.mnemonicToKey mnemonic
     _ <- lift $ runExceptT $ env.coreToWindow privKey
     pure unit
+
+  dashboardGetTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
+  dashboardGetTrusts set st _ = do
+    result <- lift $ runExceptT $ env.trustGetNetwork st.privKey
+    case result of
+      Left e -> undefined
+      Right t -> set $ \st' -> S._dashboard st' { trusts = t }
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v

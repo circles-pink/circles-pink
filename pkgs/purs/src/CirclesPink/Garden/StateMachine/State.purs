@@ -72,6 +72,8 @@ type LoginState
 
 type DashboardState
   = { user :: CC.User
+    , privKey :: PrivateKey
+    , trusts :: Array TrustNode
     }
 
 type TrustState

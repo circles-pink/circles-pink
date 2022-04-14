@@ -23,6 +23,7 @@ import {
   Landing,
   Login,
   Trusts,
+  Dashboard,
 } from './views';
 
 // Style
@@ -79,7 +80,7 @@ const View = ({ state, act }: ViewProps): ReactElement | null => {
     case 'trusts':
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
-      return null;
+      return <Dashboard state={state.value} act={act} />;
     default:
       return null;
   }

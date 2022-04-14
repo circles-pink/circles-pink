@@ -38,7 +38,14 @@ exports.safePrepareDeployImpl =
 
 exports.trustGetNetwork =
   (circlesCore) => (account) => (options) => (onErr, onSucc) => {
-    circlesCore.trust.getNetwork(account, options).then(onSucc).catch(onErr);
+    circlesCore.trust
+      .getNetwork(account, options)
+      .then((x) => {
+        console.log(options);
+        console.log(x);
+        onSucc(x);
+      })
+      .catch(onErr);
   };
 
 exports.trustIsTrusted =
