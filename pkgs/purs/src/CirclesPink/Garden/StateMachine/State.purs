@@ -24,7 +24,7 @@ module CirclesPink.Garden.StateMachine.State
   ) where
 
 import CirclesCore as CC
-import CirclesCore.Bindings (ApiError)
+import CirclesCore (ApiError)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
