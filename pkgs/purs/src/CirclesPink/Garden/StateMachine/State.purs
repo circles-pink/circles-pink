@@ -23,8 +23,8 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
-import CirclesPink.Garden.CirclesCore as CC
-import CirclesPink.Garden.CirclesCore.Bindings (ApiError)
+import CirclesCore as CC
+import CirclesCore.Bindings (ApiError)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)

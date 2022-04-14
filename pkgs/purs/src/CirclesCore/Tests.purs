@@ -1,7 +1,7 @@
-module CirclesPink.Garden.CirclesCore.Tests where
+module CirclesCore.Tests where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore as CC
+import CirclesCore as CC
 import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), isRight)
 import Data.Variant (Variant)
@@ -12,7 +12,7 @@ import Test.Unit.Assert as A
 
 tests :: T.TestSuite
 tests =
-  T.suite "CirclesPink.Garden.CirclesCore" do
+  T.suite "CirclesCore" do
     T.test "newCirclesCore" do
       result :: Either (Variant (CC.Err ())) CC.CirclesCore <-
         (liftEffect <<< runExceptT) do

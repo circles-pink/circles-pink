@@ -1,4 +1,4 @@
-module CirclesPink.Garden.CirclesCore
+module CirclesCore
   ( Err
   , ErrNative
   , ErrService
@@ -17,9 +17,9 @@ module CirclesPink.Garden.CirclesCore
   ) where
 
 import Prelude
-import CirclesPink.Garden.CirclesCore.Bindings (ApiError, apiResultToEither)
-import CirclesPink.Garden.CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account) as Exp
-import CirclesPink.Garden.CirclesCore.Bindings as B
+import CirclesCore.Bindings (ApiError, apiResultToEither)
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account) as Exp
+import CirclesCore.Bindings as B
 import Control.Monad.Except (ExceptT(..), mapExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
