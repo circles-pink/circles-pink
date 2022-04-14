@@ -13,6 +13,7 @@ module CirclesCore
   , safePredictAddress
   , safePrepareDeploy
   , trustGetNetwork
+  , trustIsTrusted
   , unsafeSampleCore
   , userRegister
   , userResolve
@@ -26,6 +27,7 @@ import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
@@ -80,6 +82,25 @@ safePrepareDeploy cc ac opts =
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
     # ExceptT
+
+--------------------------------------------------------------------------------
+-- API / trustIsTrusted
+--------------------------------------------------------------------------------
+type TrustIsTrustedOptions
+  = { safeAddress :: Address
+    , limit :: Int
+    }
+
+trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> ExceptV (ErrNative + r) Aff B.TrustIsTrustedResult
+trustIsTrusted cc ac opts =
+  B.trustIsTrusted cc ac conformedOptions
+    # fromEffectFnAff
+    # attempt
+    <#> lmap (inj (Proxy :: _ "errNative"))
+    # ExceptT
+  where
+  conformedOptions :: B.TrustIsTrustedOptions
+  conformedOptions = opts { safeAddress = P.addrToString opts.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / trustGetNetwork

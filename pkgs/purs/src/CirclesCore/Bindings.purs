@@ -7,6 +7,8 @@ module CirclesCore.Bindings
   , Provider
   , ResolveOptions
   , TrustNode
+  , TrustIsTrustedOptions
+  , TrustIsTrustedResult
   , User
   , UserOptions
   , Web3
@@ -19,6 +21,7 @@ module CirclesCore.Bindings
   , safePrepareDeploy
   , safePrepareDeployImpl
   , trustGetNetwork
+  , trustIsTrusted
   , unsafeSampleCore
   , userRegister
   , userResolve
@@ -129,6 +132,21 @@ type TrustNode
     }
 
 foreign import trustGetNetwork :: CirclesCore -> Account -> { safeAddress :: String } -> EffectFnAff (Array TrustNode)
+
+--------------------------------------------------------------------------------
+-- trustIsTrusted
+--------------------------------------------------------------------------------
+type TrustIsTrustedOptions
+  = { safeAddress :: String
+    , limit :: Int
+    }
+
+type TrustIsTrustedResult
+  = { trustConnections :: Int
+    , isTrusted :: Boolean
+    }
+
+foreign import trustIsTrusted :: CirclesCore -> Account -> TrustIsTrustedOptions -> EffectFnAff TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
 -- Utils
