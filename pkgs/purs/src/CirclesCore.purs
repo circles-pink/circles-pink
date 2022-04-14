@@ -18,7 +18,7 @@ module CirclesCore
 
 import Prelude
 import CirclesCore.Bindings (ApiError, apiResultToEither)
-import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account) as Exp
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError) as Exp
 import CirclesCore.Bindings as B
 import Control.Monad.Except (ExceptT(..), mapExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)

@@ -11,8 +11,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ) where
 
 import Prelude
-import CirclesCore (UserOptions, User)
-import CirclesCore.Bindings (ApiError)
+import CirclesCore (UserOptions, User, ApiError)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
