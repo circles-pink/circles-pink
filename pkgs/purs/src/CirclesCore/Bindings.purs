@@ -45,12 +45,9 @@ foreign import newWeb3 :: Provider -> Effect Web3
 
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
-foreign import safePredictAddressImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
+foreign import safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
 
 foreign import safePrepareDeployImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
-
-safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
-safePredictAddress x1 x2 x3 = fromEffectFnAff $ safePredictAddressImpl x1 x2 x3
 
 safePrepareDeploy :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
 safePrepareDeploy x1 x2 x3 = fromEffectFnAff $ safePrepareDeployImpl x1 x2 x3

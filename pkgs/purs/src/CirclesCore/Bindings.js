@@ -22,7 +22,7 @@ exports.userResolveImpl =
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
-exports.safePredictAddressImpl =
+exports.safePredictAddress =
   (circlesCore) => (account) => (options) => (onErr, onSucc) => {
     circlesCore.safe.predictAddress(account, options).then(onSucc).catch(onErr);
   };

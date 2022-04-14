@@ -28,6 +28,7 @@ import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
+import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, try)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -61,6 +62,7 @@ privKeyToAccount w3 pk =
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
 safePredictAddress cc ac opts =
   B.safePredictAddress cc ac { nonce: P.nonceToBigInt opts.nonce }
+    # fromEffectFnAff
     <#> P.unsafeAddrFromString
     # attempt
     <#> lmap (inj (Proxy :: _ "errNative"))
