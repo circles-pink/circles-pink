@@ -3,7 +3,7 @@
   webserver =
     { config, ... }:
     let
-      pkgs = (import ../default.nix).outputs.packages'.x86_64-linux.pkgs;
+      pkgs = (import ../default.nix).outputs.legacyPackages.x86_64-linux.pkgs;
 
       secrets = (builtins.fromJSON (builtins.readFile ../secrets.json)).secrets.data;
 
