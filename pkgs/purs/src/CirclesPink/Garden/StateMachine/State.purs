@@ -25,7 +25,7 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
-import CirclesCore (ApiError, TrustNode)
+import CirclesCore (ApiError, TrustNode, NativeError)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -64,8 +64,9 @@ type LoginState
         Maybe
           ( Variant
               ( errApi ∷ ApiError
-              , errNative ∷ Error
+              , errNative ∷ NativeError
               , errUserNotFound ∷ UserNotFoundError
+              , errInvalidUrl :: String
               )
           )
     }

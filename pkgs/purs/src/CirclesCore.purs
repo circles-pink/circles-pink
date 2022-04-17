@@ -1,10 +1,12 @@
 module CirclesCore
   ( Err
+  , ErrInvalidUrl
   , ErrNative
   , ErrService
+  , NativeError
+  , TrustNode
   , User
   , UserOptions
-  , TrustNode
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -22,16 +24,7 @@ module CirclesCore
 
 import Prelude
 import CirclesCore.Bindings (ApiError, apiResultToEither)
-import CirclesCore.Bindings
-  ( Options
-  , Provider
-  , Web3
-  , CirclesCore
-  , Account
-  , ApiError
-  , TrustIsTrustedResult
-  )
-  as Exp
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings as B
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
@@ -41,7 +34,7 @@ import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
-import Effect.Exception (Error, message, try)
+import Effect.Exception (Error, message, name, try)
 import Foreign (Foreign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -51,12 +44,16 @@ import Wallet.PrivateKey as P
 --------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------
-newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + r) Effect B.Provider
+newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect B.Provider
 newWebSocketProvider x1 =
   B.newWebSocketProvider x1
     # try
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap evalError
     # ExceptT
+  where
+  evalError e = case name e, message e of
+    "TypeError", "Invalid URL" -> inj (Proxy :: _ "errInvalidUrl") x1
+    _, _ -> mkErrorNative e
 
 newWeb3 :: B.Provider -> Effect B.Web3
 newWeb3 = B.newWeb3
@@ -65,14 +62,14 @@ newCirclesCore :: forall r. B.Web3 -> B.Options -> ExceptV (ErrNative + r) Effec
 newCirclesCore x1 x2 =
   B.newCirclesCore x1 x2
     # try
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
 
 privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrNative + r) Effect B.Account
 privKeyToAccount w3 pk =
   B.privKeyToAccount w3 (P.toString pk)
     # try
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
 
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
@@ -81,7 +78,7 @@ safePredictAddress cc ac opts =
     # fromEffectFnAff
     <#> P.unsafeAddrFromString
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
 
 safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
@@ -89,7 +86,7 @@ safePrepareDeploy cc ac opts =
   B.safePrepareDeploy cc ac { nonce: P.nonceToBigInt opts.nonce }
     <#> P.unsafeAddrFromString
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
 
 --------------------------------------------------------------------------------
@@ -105,7 +102,7 @@ trustIsTrusted cc ac opts =
   B.trustIsTrusted cc ac conformedOptions
     # fromEffectFnAff
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
   where
   conformedOptions :: B.TrustIsTrustedOptions
@@ -129,7 +126,7 @@ trustGetNetwork cc ac opts =
     # fromEffectFnAff
     <#> map conformTrustNode
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
   where
   conformTrustNode :: B.TrustNode -> TrustNode
@@ -154,7 +151,7 @@ userRegister cc ac opts =
     , email: opts.email
     }
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
     # ExceptT
 
@@ -180,7 +177,7 @@ userResolve cc ac opts =
     , userNames: opts.userNames
     }
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # map (\x -> x >>= handleApiResult)
     # ExceptT
   where
@@ -199,7 +196,10 @@ userResolve cc ac opts =
 -- Error
 --------------------------------------------------------------------------------
 type ErrNative r
-  = ( errNative :: Error | r )
+  = ( errNative :: NativeError | r )
+
+type ErrInvalidUrl r
+  = ( errInvalidUrl :: String | r )
 
 type ErrApi r
   = ( errApi :: ApiError | r )
@@ -208,13 +208,19 @@ type ErrService r
   = ( errService :: Unit | r )
 
 type Err r
-  = ErrNative + ErrService + r
+  = ErrNative + ErrService + ErrInvalidUrl + r
+
+type NativeError
+  = { message :: String
+    , name :: String
+    }
 
 printErr :: Variant (Err ()) -> String
 printErr =
   case_
-    # on (Proxy :: _ "errNative") (\e -> "Native Error: " <> message e)
+    # on (Proxy :: _ "errNative") (\e -> "Native: " <> e.name <> ": " <> e.message)
     # on (Proxy :: _ "errService") (\_ -> "service error")
+    # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
 
 --------------------------------------------------------------------------------
 -- Util
@@ -224,5 +230,8 @@ unsafeSampleCore x1 x2 =
   B.unsafeSampleCore x1 x2
     # fromEffectFnAff
     # attempt
-    <#> lmap (inj (Proxy :: _ "errNative"))
+    <#> lmap mkErrorNative
     # ExceptT
+
+mkErrorNative :: forall r. Error -> Variant (ErrNative + r)
+mkErrorNative e = inj (Proxy :: _ "errNative") { message: message e, name: name e }

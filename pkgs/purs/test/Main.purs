@@ -30,5 +30,5 @@ mainTestSpec =
 
 main :: Effect Unit
 main = do
-  mainTestUnit
   mainTestSpec
+  mainTestUnit

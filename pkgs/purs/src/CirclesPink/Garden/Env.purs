@@ -3,7 +3,7 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
-import CirclesCore (CirclesCore, Web3, userResolve)
+import CirclesCore (CirclesCore, ErrNative, Web3, ErrInvalidUrl, userResolve)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
@@ -23,6 +23,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
 import Wallet.PrivateKey (sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
@@ -180,13 +181,13 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustGetNetwork circlesCore account { safeAddress }
 
-getWeb3 :: forall r. EnvVars -> ExceptV ( errNative :: Error | r ) Effect Web3
+getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
-getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV ( errNative :: Error | r ) Effect CirclesCore
+getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV (ErrNative + r) Effect CirclesCore
 getCirclesCore web3 ev =
   CC.newCirclesCore web3
     { apiServiceEndpoint: ev.gardenApi

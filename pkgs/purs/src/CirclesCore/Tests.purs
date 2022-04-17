@@ -2,15 +2,20 @@ module CirclesCore.Tests where
 
 import Prelude
 import CirclesCore as CC
-import Control.Monad.Except (lift, runExceptT)
+import Control.Monad.Except (lift, runExceptT, withExceptT)
+import Control.Monad.Except.Checked (ExceptV)
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..), isRight)
-import Data.Variant (Variant)
+import Data.Variant (Variant, inj)
+import Effect (Effect)
+import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual)
+import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
 import Test.Unit as T
 import Test.Unit.Assert as A
+import Type.Proxy (Proxy(..))
 
 tests :: T.TestSuite
 tests =
@@ -48,5 +53,12 @@ spec :: Spec Unit
 spec =
   describe "CirclesCore" do
     describe "newWebSocketProvider" do
-      it "awesome" do
-        1 `shouldEqual` 1
+      it "Invalid URL" do
+        result <- evalEffect_ $ CC.newWebSocketProvider ""
+        result `shouldEqual` (Left $ inj (Proxy :: _ "errInvalidUrl") "")
+
+evalEffect :: forall a. ExceptV (CC.Err ()) Effect a -> Aff (Either (Variant (CC.Err ())) a)
+evalEffect ev = liftEffect $ runExceptT $ ev
+
+evalEffect_ :: forall a. ExceptV (CC.Err ()) Effect a -> Aff (Either (Variant (CC.Err ())) Unit)
+evalEffect_ ev = evalEffect $ const unit <$> ev
