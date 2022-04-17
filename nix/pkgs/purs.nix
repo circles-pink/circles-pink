@@ -1,27 +1,18 @@
-{ pkgs }:
+{ pkgs, nodeModules }:
 
 let
   spagoPkgs = import ../../materialized/spago-packages.nix { inherit pkgs; };
+  spago2nix-extra = import ./spago2nix-extra.nix { inherit pkgs; };
 in
 rec {
-  dependencies = pkgs.runCommand "dependencies"
-    {
-      buildInputs = [
-        spagoPkgs.buildSpagoStyle
-        spagoPkgs.installSpagoStyle
-      ];
-      nativeBuildInputs = [
-        pkgs.purescript
-        pkgs.spago
-      ];
-    } ''
-    mkdir $out    
-    cd $out
-    install-spago-style
-    build-spago-style
-  '';
+  dependencies = spago2nix-extra.buildDependencies "circles" spagoPkgs;
+  projectDir = spago2nix-extra.mkProjectDir "circles" { inherit dependencies sources testSources; };
+  projectOut = spago2nix-extra.buildProject "circles" { inherit projectDir spagoPkgs; };
+  t = spago2nix-extra.testProject "circles" { inherit projectOut spagoPkgs nodeModules; };
 
-  sources = pkgs.lib.cleanSource ../../pkgs/purs/src;
+
+  sources = ../../pkgs/purs/src;
+  testSources = ../../pkgs/purs/test;
 
   pursOutput = pkgs.runCommand "pursOutput"
     {
@@ -43,14 +34,13 @@ rec {
       mkdir -p $tmp/pkgs/purs
       cp -r ${sources} $tmp/pkgs/purs/src
       
-      chmod -R +w $tmp
+      chmod +w $tmp/output
       
       cd $tmp
       build-spago-style "./pkgs/purs/src/**/*.purs"
       
       cp -r $tmp/output $out
     '';
-
 
   pursOutputWithTS = pkgs.runCommand "pursOutputWithTS"
     {
@@ -85,3 +75,5 @@ rec {
 
   default = pursOutputWithTSPatched;
 }
+
+
