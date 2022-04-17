@@ -1,4 +1,8 @@
-module CirclesCore.Tests where
+module CirclesCore.Tests
+  ( evalEffect_
+  , spec
+  , tests
+  ) where
 
 import Prelude
 import CirclesCore as CC
@@ -54,9 +58,39 @@ spec =
   describe "CirclesCore" do
     describe "newWebSocketProvider" do
       it "Invalid URL" do
-        result <- evalEffect_ $ CC.newWebSocketProvider ""
-        result `shouldEqual` (Left $ inj (Proxy :: _ "errInvalidUrl") "")
+        (evalEffect_ $ CC.newWebSocketProvider "")
+          >>= shouldEqual (Left $ CC._errInvalidUrl "")
+      it "Valid URL" do
+        (evalEffect_ $ CC.newWebSocketProvider "ws://localhost:8545")
+          >>= shouldEqual (Right unit)
+    describe "newWeb3" do
+      it "Works" do
+        ( evalEffect_ do
+            provider <- CC.newWebSocketProvider "ws://localhost:8545"
+            lift $ CC.newWeb3 provider
+        )
+          >>= shouldEqual (Right unit)
+    describe "newCirclesCore" do
+      it "Works" do
+        ( evalEffect_ do
+            provider <- CC.newWebSocketProvider "ws://localhost:8545"
+            web3 <- lift $ CC.newWeb3 provider
+            CC.newCirclesCore web3
+              { apiServiceEndpoint: ""
+              , graphNodeEndpoint: ""
+              , hubAddress: "0x0000000000000000000000000000000000000000"
+              , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
+              , relayServiceEndpoint: ""
+              , safeMasterAddress: "0x0000000000000000000000000000000000000000"
+              , subgraphName: ""
+              , databaseSource: ""
+              }
+        )
+          >>= shouldEqual (Right unit)
 
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
 evalEffect :: forall a. ExceptV (CC.Err ()) Effect a -> Aff (Either (Variant (CC.Err ())) a)
 evalEffect ev = liftEffect $ runExceptT $ ev
 

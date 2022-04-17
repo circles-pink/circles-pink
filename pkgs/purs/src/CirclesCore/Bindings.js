@@ -4,7 +4,7 @@ var CirclesCore = require("@circles/core");
 var Web3 = require("web3");
 
 exports.newWebSocketProvider = (url) => () =>
-  new Web3.providers.WebsocketProvider("");
+  new Web3.providers.WebsocketProvider(url);
 
 exports.newWeb3 = (provider) => () => new Web3(provider);
 
