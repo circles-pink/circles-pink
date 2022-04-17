@@ -103,8 +103,8 @@
       purs = (import ./pkgs/purs.nix {
         pkgs = final;
         nodeModules = [
-          "${ts.workspaces.generated}/libexec/generated/node_modules/generated/node_modules"
-          "${ts.workspaces.generated}/libexec/generated/node_modules"
+          "${ts.emptyWorkspaces.generated}/libexec/generated/node_modules/generated/node_modules"
+          "${ts.emptyWorkspaces.generated}/libexec/generated/node_modules"
         ];
       });
 
