@@ -17,7 +17,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ) where
 
 import Prelude
-import CirclesCore (TrustNode, ApiError, User, UserOptions, TrustIsTrustedResult)
+import CirclesCore (ApiError, ErrNative, ErrService, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrInvalidUrl)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -29,33 +29,33 @@ import Wallet.PrivateKey (Address, PrivateKey)
 -- Error
 --------------------------------------------------------------------------------
 type RegisterError r
-  = ( errService :: Unit, errNative :: Error | r )
+  = ErrService + ErrNative + ErrInvalidUrl + r
 
 type GetSafeAddressError r
-  = ( errNative :: Error | r )
+  = ErrNative + ErrInvalidUrl + r
 
 type PrepareSafeDeployError r
-  = ( errNative :: Error | r )
+  = ErrNative + ErrInvalidUrl + r
 
 type CoreToWindowError r
-  = ( errNative :: Error | r )
+  = ErrNative + ErrInvalidUrl + r
 
 type EnvIsTrustedError r
-  = ( errNative :: Error | r )
+  = ErrNative + ErrInvalidUrl + r
 
 type EnvTrustGetNetworkError r
-  = ( errNative :: Error | r )
+  = ErrNative + ErrInvalidUrl + r
 
 type UserNotFoundError
   = { safeAddress :: Address
     }
 
 type UserResolveError r
-  = ( errNative :: Error
-    , errApi :: ApiError
-    , errUserNotFound :: UserNotFoundError
-    | r
-    )
+  = ErrNative + ErrInvalidUrl
+      + ( errApi :: ApiError
+      , errUserNotFound :: UserNotFoundError
+      | r
+      )
 
 --------------------------------------------------------------------------------
 -- Env
