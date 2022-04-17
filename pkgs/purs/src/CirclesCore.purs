@@ -7,6 +7,7 @@ module CirclesCore
   , TrustNode
   , User
   , UserOptions
+  , _errInvalidUrl
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -200,6 +201,9 @@ type ErrNative r
 
 type ErrInvalidUrl r
   = ( errInvalidUrl :: String | r )
+
+_errInvalidUrl :: forall r. String -> Variant (ErrInvalidUrl r)
+_errInvalidUrl = inj (Proxy :: _ "errInvalidUrl")
 
 type ErrApi r
   = ( errApi :: ApiError | r )
