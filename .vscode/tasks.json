@@ -45,7 +45,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make dev-storybook_"],
+      "args": ["-c", "make dev-storybook_"],
       "group": "none",
       "presentation": {
         "reveal": "always",
