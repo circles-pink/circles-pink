@@ -66,8 +66,7 @@
 
             packages = { };
 
-            checks = self.packages;
-            // gets overwritten below. todo: change!
+            checks = self.packages; # gets overwritten below. todo: change!
 
             devShell =
               pkgs.mkShell {
