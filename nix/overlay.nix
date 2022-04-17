@@ -100,7 +100,13 @@
         ${final.ts-node}/bin/ts-node ./src/patchTsTypes.ts $@
       '';
 
-      purs = (import ./pkgs/purs.nix { pkgs = final; });
+      purs = (import ./pkgs/purs.nix {
+        pkgs = final;
+        nodeModules = [
+          "${ts.workspaces.generated}/libexec/generated/node_modules/generated/node_modules"
+          "${ts.workspaces.generated}/libexec/generated/node_modules"
+        ];
+      });
 
       stateMachineGraphDot = final.runCommand "stateMachineGraph"
         { buildInputs = [ final.nodejs ]; }
