@@ -61,12 +61,6 @@ let
       export NODE_PATH=${builtins.concatStringsSep ":" nodeModules}
       node -e 'require("${projectOut}/Test.Main").main()' > $out
     '';
-
-  #   buildProject = name: { sources, spagoPkgs }:
-  #     let
-  #       dependencies = buildDependenciesOnly name spagoPkgs;
-  #     in
-  #     buildProjectFromDeps name { inherit spagoPkgs, dependencies, sources; };
 in
 {
   inherit buildDependencies mkProjectDir buildProject testProject;
