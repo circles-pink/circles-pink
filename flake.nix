@@ -67,6 +67,7 @@
             packages = { };
 
             checks = self.packages;
+            // gets overwritten below. todo: change!
 
             devShell =
               pkgs.mkShell {
@@ -139,6 +140,7 @@
               {
                 deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
+                pursTests = pkgs.circles-pink.purs.projectTests;
               };
           };
 
