@@ -37,7 +37,9 @@ const layout = {
 const getNode = (
   key: Address,
   value: Array<TrustNode>
-): Cytoscape.ElementDefinition => ({ data: {} });
+): Cytoscape.ElementDefinition => ({
+  data: { id: key as unknown as string, label: key },
+});
 
 const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
   Array.from(data_.entries()).map(([k, v]) => getNode(k, v));
@@ -67,6 +69,8 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
   }, [JSON.stringify(graph)]);
 
   const elements = getElementsFromData(graph);
+
+  console.log(elements);
 
   const stylesheets = [
     {
