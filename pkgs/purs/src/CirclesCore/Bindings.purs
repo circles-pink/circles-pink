@@ -3,12 +3,13 @@ module CirclesCore.Bindings
   , ApiError
   , ApiResult
   , CirclesCore
+  , CirclesCore_
   , Options
   , Provider
   , ResolveOptions
-  , TrustNode
   , TrustIsTrustedOptions
   , TrustIsTrustedResult
+  , TrustNode
   , User
   , UserOptions
   , Web3
@@ -29,8 +30,10 @@ module CirclesCore.Bindings
   ) where
 
 import Prelude
+import Control.Promise (Promise)
 import Data.BigInt (BigInt)
 import Data.Either (Either(..))
+import Data.Function.Uncurried (Fn2)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
@@ -90,6 +93,27 @@ type Options
     }
 
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
+
+type CirclesCore_
+  = { user ::
+        { register ::
+            Fn2 Account
+              { nonce :: BigInt
+              , safeAddress :: String
+              , username :: String
+              , email :: String
+              }
+              (Promise Boolean)
+        , resolve ::
+            Fn2 Account
+              { addresses :: Array String
+              , userNames :: Array String
+              }
+              (Promise (ApiResult (Array User)))
+        }
+    }
+
+foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_
 
 --------------------------------------------------------------------------------
 -- FFI / userRegister

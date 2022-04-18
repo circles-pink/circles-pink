@@ -11,6 +11,9 @@ exports.newWeb3 = (provider) => () => new Web3(provider);
 exports.newCirclesCore = (web3) => (options) => () =>
   new CirclesCore(web3, options);
 
+exports.mkCirclesCore = (web3) => (options) => () =>
+  new CirclesCore(web3, options);
+
 exports.userRegisterImpl =
   (circlesCore) => (account) => (options) => (onErr, onSucc) =>
     circlesCore.user.register(account, options).then(onSucc).catch(onErr);
