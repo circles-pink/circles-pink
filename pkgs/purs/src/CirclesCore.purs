@@ -28,13 +28,11 @@ import Prelude
 import CirclesCore.Bindings (ApiError, apiResultToEither)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings as B
-import Control.Monad.Except (ExceptT(..), except)
+import CirclesCore.FfiUtils (mapFn2)
+import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Promise (Promise, toAff)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Function.Uncurried (Fn1, Fn2, Fn3, runFn1, runFn2, runFn3)
-import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
@@ -161,18 +159,17 @@ userRegister cc ac opts =
     # ExceptT
 
 userRegister' :: forall r. B.CirclesCore_ -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-userRegister' cc = mapFn2 cc.user.register pure mapArg2 mkErrorNative mapResult
+userRegister' cc = mapFn2 cc.user.register pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  mapArg2 opts =
-    pure
-      opts
-        { nonce = nonceToBigInt opts.nonce
-        , safeAddress = addrToString opts.safeAddress
-        }
+  mapArg2 x =
+    x
+      { nonce = nonceToBigInt x.nonce
+      , safeAddress = addrToString x.safeAddress
+      }
 
-  mapResult true = Right unit
+  mapOk true = Right unit
 
-  mapResult false = Left $ inj (Proxy :: _ "errService") unit
+  mapOk false = Left $ inj (Proxy :: _ "errService") unit
 
 --------------------------------------------------------------------------------
 -- API / userResolve
@@ -257,39 +254,3 @@ unsafeSampleCore x1 x2 =
 
 mkErrorNative :: forall r. Error -> Variant (ErrNative + r)
 mkErrorNative e = inj (Proxy :: _ "errNative") { message: message e, name: name e }
-
---------------------------------------------------------------------------------
--- Util / FFI
---------------------------------------------------------------------------------
-type MapArg h e l
-  = h -> Either (Variant e) l
-
-type MapError e
-  = Error -> Variant e
-
-type MapReturn l e h
-  = l -> Either (Variant e) h
-
-mapFn3 ::
-  forall h1 h2 h3 l1 l2 l3 h l e.
-  Fn3 l1 l2 l3 (Promise l) -> MapArg h1 e l1 -> MapArg h2 e l2 -> MapArg h3 e l3 -> MapError e -> MapReturn l e h -> h1 -> h2 -> h3 -> ExceptV e Aff h
-mapFn3 f ma1 ma2 ma3 me mr h1 h2 h3 = do
-  l1 <- except $ ma1 h1
-  l2 <- except $ ma2 h2
-  l3 <- except $ ma3 h3
-  runFn3 f l1 l2 l3 # toAff # attempt <#> lmap me # ExceptT >>= (mr >>> except)
-
-mapFn2 ::
-  forall h1 h2 l1 l2 h l e.
-  Fn2 l1 l2 (Promise l) -> MapArg h1 e l1 -> MapArg h2 e l2 -> MapError e -> MapReturn l e h -> h1 -> h2 -> ExceptV e Aff h
-mapFn2 f ma1 ma2 me mr h1 h2 = do
-  l1 <- except $ ma1 h1
-  l2 <- except $ ma2 h2
-  runFn2 f l1 l2 # toAff # attempt <#> lmap me # ExceptT >>= (mr >>> except)
-
-mapFn1 ::
-  forall h1 l1 h l e.
-  Fn1 l1 (Promise l) -> MapArg h1 e l1 -> MapError e -> MapReturn l e h -> h1 -> ExceptV e Aff h
-mapFn1 f ma1 me mr h1 = do
-  l1 <- except $ ma1 h1
-  runFn1 f l1 # toAff # attempt <#> lmap me # ExceptT >>= (mr >>> except)
