@@ -21,7 +21,9 @@ dev-storybook_:
 dev-browser:
 	bash -c '${BROWSER} http://localhost:6006'
 
-build-storybook: assets
+build-storybook: assets build-storybook_
+
+build-storybook_:
 	export OUTPUT_DIR=../../../dist; yarn workspace storybook run build
 
 spago2nix:

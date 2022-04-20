@@ -1,17 +1,13 @@
 import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import Cytoscape from 'cytoscape';
+import Cytoscape, { LayoutOptions } from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 // @ts-ignore
 import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Address } from 'generated/output/Wallet.PrivateKey';
 
-// -----------------------------------------------------------------------------
-// Init
-// -----------------------------------------------------------------------------
-
-Cytoscape.use(COSEBilkent);
+const x: string = 1;
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -64,6 +60,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
 
   React.useEffect(() => {
     if (!cy) return;
+    Cytoscape.use(COSEBilkent);
     var layout_ = cy.layout(layout);
     layout_.run();
   }, [JSON.stringify(graph)]);
