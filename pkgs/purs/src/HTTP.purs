@@ -40,5 +40,3 @@ addLogging reqFn req = do
   res <- reqFn req
   log ("HTTP RESPONSE: " <> show res.status <> " " <> (stringify req.body))
   pure res
-
--- 1234567891234567

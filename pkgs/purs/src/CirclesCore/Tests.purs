@@ -17,7 +17,7 @@ tests =
   T.suite "CirclesCore" do
     T.test "newWebSocketProvider" do
       result <-
-        liftEffect $ runExceptT $ CC.newWebSocketProvider ""
+        liftEffect $ runExceptT $ CC.newWebSocketProvider "ws://localhost:8545"
       case result of
         Left e -> log $ CC.printErr e
         Right _ -> pure unit
