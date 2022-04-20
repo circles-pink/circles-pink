@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "include": [],
+  "references": [
+    { "path": "./pkgs/ts/circles" },
+    { "path": "./pkgs/ts/storybook" }
+  ]
+}

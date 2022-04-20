@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import dagre from "cytoscape-dagre";
 import Cytoscape from "cytoscape";
+// @ts-ignore
 import COSEBilkent from "cytoscape-cose-bilkent";
 import { Client as Styletron } from "styletron-engine-atomic";
 import { Provider as StyletronProvider } from "styletron-react";
