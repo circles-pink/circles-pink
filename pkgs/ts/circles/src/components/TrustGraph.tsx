@@ -1,122 +1,124 @@
-import React from 'react';
+import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
+import CytoscapeComponent from 'react-cytoscapejs';
+import Cytoscape, { LayoutOptions } from 'cytoscape';
+import COSEBilkent from 'cytoscape-cose-bilkent';
+import { TrustNode } from 'generated/output/CirclesCore';
+import { Address } from 'generated/output/Wallet.PrivateKey';
 
-export const TrustGraph = () => {
-  return <h2>Hello!</h2>;
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+const layout = {
+  name: 'cose-bilkent',
+  // other options
+  padding: 50,
+  nodeDimensionsIncludeLabels: true,
+  idealEdgeLength: 100,
+  edgeElasticity: 0.1,
+  animate: 'end',
+  animationDuration: 200,
+  //nodeRepulsion: 8500,
+  //randomize: true,
 };
 
-// import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
-// import CytoscapeComponent from 'react-cytoscapejs';
-// import Cytoscape, { LayoutOptions } from 'cytoscape';
-// // @ts-ignore
-// import COSEBilkent from 'cytoscape-cose-bilkent';
-// import { TrustNode } from 'generated/output/CirclesCore';
-// import { Address } from 'generated/output/Wallet.PrivateKey';
+// -----------------------------------------------------------------------------
+// Utils
+// -----------------------------------------------------------------------------
 
-// // -----------------------------------------------------------------------------
-// // Constants
-// // -----------------------------------------------------------------------------
+const getNode = (
+  key: Address,
+  value: Array<TrustNode>
+): Cytoscape.ElementDefinition => ({
+  data: { id: key as unknown as string, label: key },
+});
 
-// const layout = {
-//   name: 'cose-bilkent',
-//   // other options
-//   padding: 50,
-//   nodeDimensionsIncludeLabels: true,
-//   idealEdgeLength: 100,
-//   edgeElasticity: 0.1,
-//   animate: 'end',
-//   animationDuration: 200,
-//   //nodeRepulsion: 8500,
-//   //randomize: true,
-// };
+const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
+  Array.from(data_.entries()).map(([k, v]) => getNode(k, v));
 
-// // -----------------------------------------------------------------------------
-// // Utils
-// // -----------------------------------------------------------------------------
+const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] => [];
 
-// const getNode = (
-//   key: Address,
-//   value: Array<TrustNode>
-// ): Cytoscape.ElementDefinition => ({
-//   data: { id: key as unknown as string, label: key },
-// });
+const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
+  ...getNodes(data_),
+  ...getEdges(data_),
+];
 
-// const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
-//   Array.from(data_.entries()).map(([k, v]) => getNode(k, v));
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
 
-// const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] => [];
+export type Graph = Map<Address, Array<TrustNode>>;
 
-// const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
-//   ...getNodes(data_),
-//   ...getEdges(data_),
-// ];
+type TrustGraphProps = { graph: Graph };
 
-// // -----------------------------------------------------------------------------
-// // UI
-// // -----------------------------------------------------------------------------
+export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
+  const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
+  const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
 
-// export type Graph = Map<Address, Array<TrustNode>>;
+  React.useEffect(() => {
+    if (!cy) return;
+    var layout_ = cy.layout(layout);
+    layout_.run();
+  }, [JSON.stringify(graph)]);
 
-// type TrustGraphProps = { graph: Graph };
+  React.useEffect(() => {
+    console.log(COSEBilkent);
+    Cytoscape.use(COSEBilkent);
+    setCyInitialized(true);
+  }, []);
 
-// export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
-//   const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
+  const elements = getElementsFromData(graph);
 
-//   React.useEffect(() => {
-//     if (!cy) return;
-//     Cytoscape.use(COSEBilkent);
-//     var layout_ = cy.layout(layout);
-//     layout_.run();
-//   }, [JSON.stringify(graph)]);
+  console.log(elements);
 
-//   const elements = getElementsFromData(graph);
+  const stylesheets = [
+    {
+      selector: 'node',
+      style: {
+        width: 'label',
+        height: 'label',
+        padding: '8px',
+        shape: 'round-rectangle',
+        'background-color': 'red',
+        label: 'data(label)', // here you can label the nodes
+      } as any,
+    },
+    {
+      selector: 'node[label]',
+      style: {
+        label: 'data(label)',
+        'font-size': '20',
+        color: 'black',
+        'text-halign': 'center',
+        'text-valign': 'center',
+      },
+    },
+    {
+      selector: 'edge',
+      style: {
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'triangle',
+        width: 1.5,
+      },
+    },
+  ];
 
-//   console.log(elements);
+  if (!cyInitialized) return <></>;
 
-//   const stylesheets = [
-//     {
-//       selector: 'node',
-//       style: {
-//         width: 'label',
-//         height: 'label',
-//         padding: '8px',
-//         shape: 'round-rectangle',
-//         'background-color': 'red',
-//         label: 'data(label)', // here you can label the nodes
-//       } as any,
-//     },
-//     {
-//       selector: 'node[label]',
-//       style: {
-//         label: 'data(label)',
-//         'font-size': '20',
-//         color: 'black',
-//         'text-halign': 'center',
-//         'text-valign': 'center',
-//       },
-//     },
-//     {
-//       selector: 'edge',
-//       style: {
-//         'curve-style': 'bezier',
-//         'target-arrow-shape': 'triangle',
-//         width: 1.5,
-//       },
-//     },
-//   ];
-//   return (
-//     <CytoscapeComponent
-//       cy={cy_ => {
-//         if (!cy) setCy(cy_);
-//       }}
-//       elements={elements}
-//       style={{
-//         width: '100%',
-//         height: '600px',
-//         backgroundColor: 'rgba(249, 249, 245, 0.5)',
-//         boxShadow: '0 0 4px 1px rgba(0,0,0,0.05)',
-//       }}
-//       layout={layout}
-//       stylesheet={stylesheets}
-//     />
-//   );
-// };
+  return (
+    <CytoscapeComponent
+      cy={cy_ => {
+        if (!cy) setCy(cy_);
+      }}
+      elements={elements}
+      style={{
+        width: '100%',
+        height: '600px',
+        backgroundColor: 'rgba(249, 249, 245, 0.5)',
+        boxShadow: '0 0 4px 1px rgba(0,0,0,0.05)',
+      }}
+      layout={layout}
+      stylesheet={stylesheets}
+    />
+  );
+};
