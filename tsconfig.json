@@ -12,18 +12,9 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    // "noEmit": true,
     "outDir": "ts-dist",
     "jsx": "react",
-    //"jsxImportSource": "@emotion/react"
     "noImplicitAny": false
   },
-  "exclude": ["node_modules"],
-  "files": [],
-  "include": []
-  // "references": [
-  //   { "path": "./pkgs/ts/circles" },
-  //   { "path": "./pkgs/ts/storybook" },
-  //   { "path": "./pkgs/ts/generated" }
-  // ]
+  "exclude": ["node_modules"]
 }
