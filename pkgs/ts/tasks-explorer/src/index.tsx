@@ -53,7 +53,6 @@ type Task = {
 // Init
 // -----------------------------------------------------------------------------
 
-Cytoscape.use(COSEBilkent);
 const engine = new Styletron();
 
 // -----------------------------------------------------------------------------
@@ -103,6 +102,7 @@ const layout = {
 
 export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
   const [data, setData] = React.useState<Task[]>([]);
+  const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
 
   const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
 
@@ -111,6 +111,11 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
   });
 
   const data_ = filterData(filter, data);
+
+  React.useEffect(() => {
+    Cytoscape.use(COSEBilkent);
+    setCyInitialized(true);
+  }, []);
 
   React.useEffect(() => {
     if (!cy) return;
@@ -166,6 +171,8 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
       },
     },
   ];
+
+  if (!cyInitialized) return null;
 
   return (
     <StyletronProvider value={engine}>
