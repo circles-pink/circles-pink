@@ -1,6 +1,6 @@
 import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import Cytoscape, { LayoutOptions } from 'cytoscape';
+import Cytoscape, { CoseLayoutOptions, LayoutOptions } from 'cytoscape';
 // import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Address } from 'generated/output/Wallet.PrivateKey';
@@ -9,17 +9,20 @@ import { Address } from 'generated/output/Wallet.PrivateKey';
 // Constants
 // -----------------------------------------------------------------------------
 
-const layout = {
+const layout: Partial<CoseLayoutOptions> & Pick<CoseLayoutOptions, 'name'> = {
   name: 'cose',
+  animate: false,
   // other options
-  padding: 50,
-  nodeDimensionsIncludeLabels: true,
-  idealEdgeLength: 100,
-  edgeElasticity: 0.1,
-  animate: 'end',
-  animationDuration: 200,
-  //nodeRepulsion: 8500,
-  //randomize: true,
+  // padding: 75,
+  // nodeDimensionsIncludeLabels: true,
+  // idealEdgeLength: 100,
+  // edgeElasticity: 0.1,
+  // animate: 'end',
+  // animationDuration: 200,
+  // refresh: 1,
+  // randomize: false,
+  // componentSpacing: 25,
+  // nodeRepulsion: () => 8500,
 };
 
 // -----------------------------------------------------------------------------
@@ -30,13 +33,28 @@ const getNode = (
   key: Address,
   value: Array<TrustNode>
 ): Cytoscape.ElementDefinition => ({
-  data: { id: key as unknown as string, label: key },
+  data: {
+    id: key as unknown as string,
+    label: (key as unknown as string).substring(0, 4),
+  },
 });
+
+const getEdge = (
+  source: Address,
+  value: TrustNode[]
+): Cytoscape.ElementDefinition[] =>
+  value.map(target => ({
+    data: {
+      source,
+      target: target.safeAddress,
+    },
+  }));
 
 const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
   Array.from(data_.entries()).map(([k, v]) => getNode(k, v));
 
-const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] => [];
+const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] =>
+  Array.from(data_.entries()).flatMap(([k, v]) => getEdge(k, v));
 
 const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
   ...getNodes(data_),
@@ -77,7 +95,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
       style: {
         width: 'label',
         height: 'label',
-        padding: '8px',
+        padding: '4px',
         shape: 'round-rectangle',
         'background-color': 'red',
         label: 'data(label)', // here you can label the nodes
@@ -98,7 +116,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
       style: {
         'curve-style': 'bezier',
         'target-arrow-shape': 'triangle',
-        width: 1.5,
+        width: 1,
       },
     },
   ];
