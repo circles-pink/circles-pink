@@ -2,7 +2,6 @@ import React, { Dispatch, SetStateAction } from "react";
 import CytoscapeComponent from "react-cytoscapejs";
 import dagre from "cytoscape-dagre";
 import Cytoscape from "cytoscape";
-// @ts-ignore
 import COSEBilkent from "cytoscape-cose-bilkent";
 import { Client as Styletron } from "styletron-engine-atomic";
 import { Provider as StyletronProvider } from "styletron-react";
@@ -113,15 +112,16 @@ export const TasksExplorer = ({ url, database_id }: TasksExplorerProps) => {
   const data_ = filterData(filter, data);
 
   React.useEffect(() => {
-    Cytoscape.use(COSEBilkent);
-    setCyInitialized(true);
-  }, []);
-
-  React.useEffect(() => {
     if (!cy) return;
     var layout_ = cy.layout(layout);
     layout_.run();
   }, [JSON.stringify(data_)]);
+
+  React.useEffect(() => {
+    console.log(COSEBilkent);
+    Cytoscape.use(COSEBilkent);
+    setCyInitialized(true);
+  }, []);
 
   const refreshApi = React.useCallback(
     () =>
