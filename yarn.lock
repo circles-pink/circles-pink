@@ -8080,17 +8080,6 @@ cytoscape@^3.2.19, cytoscape@^3.21.0:
     lodash.set "^4.3.2"
     lodash.topath "^4.5.2"
 
-cytoscape@^3.21.1:
-  version "3.21.1"
-  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.21.1.tgz#2d3a8b8ade8661c9efab2e9bf7a354b374d6cf0e"
-  integrity sha512-mxdxCzuGHOMSWHUFO+/ZQPeMNtJAm81LGzdwP02LhT592ZRfHWCvHUY++HpnSjg/SgrKg1CMqegY/HvYLUS1qg==
-  dependencies:
-    heap "^0.2.6"
-    lodash.debounce "^4.0.8"
-    lodash.get "^4.4.2"
-    lodash.set "^4.3.2"
-    lodash.topath "^4.5.2"
-
 d3-array@2, d3-array@^2.3.0, d3-array@^2.5.0:
   version "2.12.1"
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.12.1.tgz#e20b41aafcdffdf5d50928004ececf815a465e81"
