@@ -147,6 +147,9 @@ vm-remove-all:
 vm-start:
 	nixops start -d circles-pink-vm
 
+vm-stop:
+	nixops stop -d circles-pink-vm
+
 vm-info:
 	nixops info	-d circles-pink-vm
 
