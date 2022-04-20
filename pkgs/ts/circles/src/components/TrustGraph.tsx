@@ -7,8 +7,6 @@ import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Address } from 'generated/output/Wallet.PrivateKey';
 
-const x: string = 1;
-
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------

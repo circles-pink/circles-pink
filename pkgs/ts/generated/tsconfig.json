@@ -1,4 +1,5 @@
 {
+  "compilerOptions": { "composite": true },
   "extends": "../../../tsconfig.json",
   "exclude": ["output"]
 }
