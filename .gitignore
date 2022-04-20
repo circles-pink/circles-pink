@@ -10,3 +10,5 @@ output/
 pkgs/ts/assets/src
 secrets.json
 yarn-error.log
+*.buildinfo
+ts-dist/

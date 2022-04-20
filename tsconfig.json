@@ -13,8 +13,10 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     // "noEmit": true,
-    "jsx": "preserve",
-    "jsxImportSource": "@emotion/react"
+    "outDir": "ts-dist",
+    "jsx": "react",
+    //"jsxImportSource": "@emotion/react"
+    "noImplicitAny": false
   },
   "exclude": ["node_modules"],
   "files": [],

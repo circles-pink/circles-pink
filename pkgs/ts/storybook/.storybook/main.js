@@ -51,7 +51,8 @@ module.exports = {
   typescript: {
     check: true,
     checkOptions: {
-      tsconfig: path.resolve(__dirname, "../../../../tsconfig.json"),
+      tsconfig: path.resolve(__dirname, "../tsconfig.json"),
+      compilerOptions: { buikd: true },
     },
     reactDocgen: "react-docgen-typescript",
     reactDocgenTypescriptOptions: {

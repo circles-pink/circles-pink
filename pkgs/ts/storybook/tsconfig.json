@@ -1,6 +1,7 @@
 {
+  "compilerOptions": {},
   "extends": "../../../tsconfig.json",
   "include": ["src"],
   "exclude": ["node_modules"],
-  "references": [{ "path": "../circles" }]
+  "references": [{ "path": "../circles" }, { "path": "../generated" }]
 }
