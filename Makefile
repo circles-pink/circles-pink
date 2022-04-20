@@ -181,3 +181,6 @@ directus-seed-db: directus-init-db directus-seed-db_
 
 directus-seed-db_:
 	export DIRECTUS_ADMIN_TOKEN=$$(cat ./secrets.json | jq -r '.secrets.data."directus-admin-token"'); ts-node ./pkgs/ts/seed-db/src/index.ts
+
+ci:
+	nix flake check

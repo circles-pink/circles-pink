@@ -17,8 +17,6 @@ mainTestUnit :: Effect Unit
 mainTestUnit =
   runTest do
     Test.Wallet.PrivateKey.tests
-    CirclesCore.Tests.tests
-    CirclesCore.Tests.tests
     Test.Data.BigInt.tests
     PursDeps.Tests.tests
 
