@@ -1,7 +1,7 @@
 import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, { LayoutOptions } from 'cytoscape';
-import COSEBilkent from 'cytoscape-cose-bilkent';
+// import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Address } from 'generated/output/Wallet.PrivateKey';
 
@@ -10,7 +10,7 @@ import { Address } from 'generated/output/Wallet.PrivateKey';
 // -----------------------------------------------------------------------------
 
 const layout = {
-  name: 'cose-bilkent',
+  name: 'cose',
   // other options
   padding: 50,
   nodeDimensionsIncludeLabels: true,
@@ -53,7 +53,7 @@ type TrustGraphProps = { graph: Graph };
 
 export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
-  const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
+  // const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (!cy) return;
@@ -61,11 +61,11 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
     layout_.run();
   }, [JSON.stringify(graph)]);
 
-  React.useEffect(() => {
-    console.log(COSEBilkent);
-    Cytoscape.use(COSEBilkent);
-    setCyInitialized(true);
-  }, []);
+  // React.useEffect(() => {
+  //   console.log(COSEBilkent);
+  //   Cytoscape.use(COSEBilkent);
+  //   setCyInitialized(true);
+  // }, []);
 
   const elements = getElementsFromData(graph);
 
@@ -103,7 +103,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
     },
   ];
 
-  if (!cyInitialized) return <></>;
+  // if (!cyInitialized) return <></>;
 
   return (
     <CytoscapeComponent

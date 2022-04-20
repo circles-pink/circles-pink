@@ -3,6 +3,10 @@ import { ComponentMeta } from "@storybook/react";
 import { TrustGraph, Graph } from "circles/src/components/TrustGraph";
 import { TrustNode } from "generated/output/CirclesCore";
 import { unsafeAddrFromString } from "generated/output/Wallet.PrivateKey";
+// import Cytoscape from "cytoscape";
+// import COSEBilkent from "cytoscape-cose-bilkent";
+
+// Cytoscape.use(COSEBilkent);
 
 export default {
   title: "Components/TrustGraph",
