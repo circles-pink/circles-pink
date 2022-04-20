@@ -7,7 +7,6 @@ export const TrustGraph = () => {
 // import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 // import CytoscapeComponent from 'react-cytoscapejs';
 // import Cytoscape, { LayoutOptions } from 'cytoscape';
-// import dagre from 'cytoscape-dagre';
 // // @ts-ignore
 // import COSEBilkent from 'cytoscape-cose-bilkent';
 // import { TrustNode } from 'generated/output/CirclesCore';
