@@ -10,6 +10,7 @@ import Control.Monad.Identity.Trans (IdentityT, runIdentityT)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Class (liftEffect)
+import HTTP (addLogging)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Window (windowFetch)
 
@@ -22,5 +23,6 @@ circlesControlEff e f s a =
 mkControl :: Garden.EnvVars -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControl envVars =
   milkisRequest windowFetch
+    # addLogging
     # (\request -> Garden.env { request, envVars })
     # circlesControlEff
