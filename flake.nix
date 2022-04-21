@@ -64,7 +64,14 @@
 
             legacyPackages = { inherit pkgs; } // pkgs.circles-pink;
 
-            packages = { };
+            packages = {
+              ci = pkgs.runCommand "ci" { } ''
+                mkdir $out
+                # TODO: make generic with a map for all checks
+                ln -s ${self.checks.${system}.deploy-nixops-example-prebuilt} $out/deploy-nixops-example-prebuilt
+                ln -s ${self.checks.${system}.pursTests} $out/pursTests
+              '';
+            };
 
             checks = self.packages; # gets overwritten below. todo: change!
 
