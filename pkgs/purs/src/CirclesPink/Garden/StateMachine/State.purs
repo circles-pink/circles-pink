@@ -91,6 +91,7 @@ type TrustState
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
+    , isReady :: Boolean
     , error ::
         Maybe
           ( Variant

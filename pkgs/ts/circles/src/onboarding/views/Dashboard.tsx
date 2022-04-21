@@ -46,6 +46,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           </>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

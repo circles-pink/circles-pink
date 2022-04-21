@@ -244,10 +244,11 @@ circlesControl env =
         safeStatus <- env.getSafeStatus st.privateKey
         user <- env.userResolve st.privateKey
         trusts <- env.trustGetNetwork st.privateKey
-        pure { safeStatus, user, trusts }
+        isReady <- env.isTrusted st.privateKey
+        pure { safeStatus, user, trusts, isReady }
     case result of
       Left e -> set \st' -> let _ = spy "e" e in S._submit st'
-      Right { safeStatus, user, trusts } ->
+      Right { safeStatus, user, trusts, isReady } ->
         set \_ ->
           S._trusts
             { user
@@ -255,6 +256,7 @@ circlesControl env =
             , privKey: st.privateKey
             , safeStatus
             , error: Nothing
+            , isReady
             }
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type

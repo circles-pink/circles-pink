@@ -61,6 +61,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
           </>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

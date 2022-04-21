@@ -43,9 +43,24 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
             >
               {t('continueButton')}
             </Button>
+            <Button
+              color={theme.baseColor}
+              onClick={() => act(A._trusts(A._getSafeStatus(unit)))}
+            >
+              {t('safeStateButton')}
+            </Button>
+            {state.safeStatus.isCreated || state.safeStatus.isDeployed ? (
+              <Button
+                color={theme.baseColor}
+                onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
+              >
+                {t('finalizeButton')}
+              </Button>
+            ) : null}
           </>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
