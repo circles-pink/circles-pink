@@ -32,7 +32,7 @@
         gardenHubAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
         gardenProxyFactoryAddress = "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb";
         gardenSafeMasterAddress = "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550";
-        gardenEthereumNodeWebSocket = "ws://ganache:8545";
+        gardenEthereumNodeWebSocket = "ws://localhost:8545";
       };
 
       deployment.targetEnv = "virtualbox";
