@@ -214,8 +214,8 @@ type SafeIsFundedOptions
   = { safeAddress :: Address
     }
 
-safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-safeIsFunded cc = mapFn2 (convertCore cc).safe.isFunded pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> ExceptV (ErrNative + r) Aff Boolean
+safeIsFunded cc = mapFn2 (convertCore cc).safe.isFunded pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
     x
