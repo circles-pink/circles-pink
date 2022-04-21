@@ -1,6 +1,10 @@
 import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import Cytoscape, { CoseLayoutOptions, LayoutOptions } from 'cytoscape';
+import Cytoscape, {
+  CircleLayoutOptions,
+  CoseLayoutOptions,
+  LayoutOptions,
+} from 'cytoscape';
 // import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Address } from 'generated/output/Wallet.PrivateKey';
@@ -9,21 +13,21 @@ import { Address } from 'generated/output/Wallet.PrivateKey';
 // Constants
 // -----------------------------------------------------------------------------
 
-const layout: Partial<CoseLayoutOptions> & Pick<CoseLayoutOptions, 'name'> = {
-  name: 'cose',
-  animate: false,
-  // other options
-  // padding: 75,
-  // nodeDimensionsIncludeLabels: true,
-  // idealEdgeLength: 100,
-  // edgeElasticity: 0.1,
-  // animate: 'end',
-  // animationDuration: 200,
-  // refresh: 1,
-  // randomize: false,
-  // componentSpacing: 25,
-  // nodeRepulsion: () => 8500,
-};
+const layout: Partial<CircleLayoutOptions> & Pick<CircleLayoutOptions, 'name'> =
+  {
+    name: 'circle',
+    animate: true,
+    // other options
+    // padding: 75,
+    // nodeDimensionsIncludeLabels: true,
+    // idealEdgeLength: n => 100,
+    // edgeElasticity: 0.1,
+    animationDuration: 550,
+    // refresh: 1,
+    // randomize: false,
+    // componentSpacing: 7000,
+    // nodeRepulsion: () => 2000,
+  };
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -35,7 +39,7 @@ const getNode = (
 ): Cytoscape.ElementDefinition => ({
   data: {
     id: key as unknown as string,
-    label: (key as unknown as string).substring(0, 4),
+    label: (key as unknown as string).substring(0, 6),
   },
 });
 
