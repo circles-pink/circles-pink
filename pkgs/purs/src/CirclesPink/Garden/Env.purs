@@ -18,7 +18,7 @@ import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
 import Effect (Effect)
-import Effect.Aff (Aff, Error)
+import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import HTTP (ReqFn)
@@ -80,6 +80,9 @@ env { request, envVars } =
   , coreToWindow
   , isTrusted
   , trustGetNetwork
+  , getSafeStatus
+  , deploySafe
+  , deployToken
   }
   where
   apiCheckUserName :: E.EnvApiCheckUserName Aff
@@ -181,6 +184,42 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustGetNetwork circlesCore account { safeAddress }
 
+  getSafeStatus :: E.EnvGetSafeStatus Aff
+  getSafeStatus privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.safeGetSafeStatus circlesCore account { safeAddress }
+
+  deploySafe :: E.EnvDeploySafe Aff
+  deploySafe privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.safeDeploy circlesCore account { safeAddress }
+
+  deployToken :: E.EnvDeployToken Aff
+  deployToken privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.tokenDeploy circlesCore account { safeAddress }
+
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -219,4 +258,16 @@ testEnv =
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure { isTrusted: false, trustConnections: 0 }
   , trustGetNetwork: \_ -> pure []
+  , getSafeStatus:
+      \_ ->
+        pure
+          { isCreated: false
+          , isDeployed: false
+          }
+  , deploySafe:
+      \_ ->
+        pure unit
+  , deployToken:
+      \_ ->
+        pure ""
   }

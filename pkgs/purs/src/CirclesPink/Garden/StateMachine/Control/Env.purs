@@ -4,7 +4,13 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , EnvApiCheckEmail
   , EnvApiCheckUserName
   , EnvCoreToWindow
+  , EnvDeploySafe
+  , EnvDeploySafeError
+  , EnvDeployToken
+  , EnvDeployTokenError
   , EnvGetSafeAddress
+  , EnvGetSafeStatus
+  , EnvGetSafeStatusError
   , EnvIsTrusted
   , EnvIsTrustedError
   , EnvTrustGetNetwork
@@ -17,11 +23,10 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ) where
 
 import Prelude
-import CirclesCore (ApiError, ErrNative, ErrService, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrInvalidUrl)
+import CirclesCore (ApiError, ErrInvalidUrl, ErrNative, ErrService, TrustIsTrustedResult, TrustNode, User, UserOptions, SafeStatus)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Effect.Exception (Error)
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, PrivateKey)
 
@@ -46,6 +51,9 @@ type EnvIsTrustedError r
 type EnvTrustGetNetworkError r
   = ErrNative + ErrInvalidUrl + r
 
+type EnvGetSafeStatusError r
+  = ErrNative + ErrInvalidUrl + r
+
 type UserNotFoundError
   = { safeAddress :: Address
     }
@@ -56,6 +64,12 @@ type UserResolveError r
       , errUserNotFound :: UserNotFoundError
       | r
       )
+
+type EnvDeploySafeError r
+  = ErrService + ErrInvalidUrl + ErrNative + r
+
+type EnvDeployTokenError r
+  = ErrService + ErrInvalidUrl + ErrNative + r
 
 --------------------------------------------------------------------------------
 -- Env
@@ -78,6 +92,15 @@ type EnvIsTrusted m
 type EnvTrustGetNetwork m
   = forall r. PrivateKey -> ExceptV (EnvTrustGetNetworkError + r) m (Array TrustNode)
 
+type EnvGetSafeStatus m
+  = forall r. PrivateKey -> ExceptV (EnvGetSafeStatusError + r) m SafeStatus
+
+type EnvDeploySafe m
+  = forall r. PrivateKey -> ExceptV (EnvDeploySafeError + r) m Unit
+
+type EnvDeployToken m
+  = forall r. PrivateKey -> ExceptV (EnvDeployTokenError + r) m String
+
 type Env m
   = { apiCheckUserName :: EnvApiCheckUserName m
     , apiCheckEmail :: EnvApiCheckEmail m
@@ -89,4 +112,7 @@ type Env m
     , coreToWindow :: EnvCoreToWindow m
     , isTrusted :: EnvIsTrusted m
     , trustGetNetwork :: EnvTrustGetNetwork m
+    , getSafeStatus :: EnvGetSafeStatus m
+    , deploySafe :: EnvDeploySafe m
+    , deployToken :: EnvDeployToken m
     }

@@ -122,12 +122,20 @@ type CirclesCore_
             Fn2 Account
               { safeAddress :: String }
               (Promise Boolean)
+        , getSafeStatus ::
+            Fn2 Account
+              { safeAddress :: String }
+              ( Promise
+                  { isCreated :: Boolean
+                  , isDeployed :: Boolean
+                  }
+              )
         }
     , token ::
         { deploy ::
             Fn2 Account
               { safeAddress :: String }
-              (Promise Boolean)
+              (Promise String)
         }
     }
 

@@ -4,6 +4,7 @@ module CirclesCore
   , ErrNative
   , ErrService
   , NativeError
+  , SafeStatus
   , TrustNode
   , User
   , UserOptions
@@ -15,6 +16,7 @@ module CirclesCore
   , printErr
   , privKeyToAccount
   , safeDeploy
+  , safeGetSafeStatus
   , safeIsFunded
   , safePredictAddress
   , safePrepareDeploy
@@ -238,14 +240,34 @@ safeIsFunded cc = mapFn2 (convertCore cc).safe.isFunded pure (mapArg2 >>> pure) 
       }
 
 --------------------------------------------------------------------------------
+-- API / safeGetSafeStatus
+--------------------------------------------------------------------------------
+type SafeGetSafeStatusOptions
+  = { safeAddress :: Address
+    }
+
+type SafeStatus
+  = { isCreated :: Boolean
+    , isDeployed :: Boolean
+    }
+
+safeGetSafeStatus :: forall r. B.CirclesCore -> B.Account -> SafeGetSafeStatusOptions -> ExceptV (ErrNative + r) Aff SafeStatus
+safeGetSafeStatus cc = mapFn2 (convertCore cc).safe.getSafeStatus pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
+
+--------------------------------------------------------------------------------
 -- API / tokenDeploy
 --------------------------------------------------------------------------------
 type TokenDeployOptions
   = { safeAddress :: Address
     }
 
-tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff String
+tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
     x
