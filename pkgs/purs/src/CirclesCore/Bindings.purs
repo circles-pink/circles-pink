@@ -118,6 +118,16 @@ type CirclesCore_
             Fn2 Account
               { safeAddress :: String }
               (Promise Boolean)
+        , isFunded ::
+            Fn2 Account
+              { safeAddress :: String }
+              (Promise Boolean)
+        }
+    , token ::
+        { deploy ::
+            Fn2 Account
+              { safeAddress :: String }
+              (Promise Boolean)
         }
     }
 

@@ -15,8 +15,10 @@ module CirclesCore
   , printErr
   , privKeyToAccount
   , safeDeploy
+  , safeIsFunded
   , safePredictAddress
   , safePrepareDeploy
+  , tokenDeploy
   , trustGetNetwork
   , trustIsTrusted
   , unsafeSampleCore
@@ -214,6 +216,36 @@ type SafeDeployOptions
 
 safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
 safeDeploy cc = mapFn2 (convertCore cc).safe.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+  where
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
+
+--------------------------------------------------------------------------------
+-- API / safeIsFunded
+--------------------------------------------------------------------------------
+type SafeIsFundedOptions
+  = { safeAddress :: Address
+    }
+
+safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+safeIsFunded cc = mapFn2 (convertCore cc).safe.isFunded pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+  where
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
+
+--------------------------------------------------------------------------------
+-- API / tokenDeploy
+--------------------------------------------------------------------------------
+type TokenDeployOptions
+  = { safeAddress :: Address
+    }
+
+tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
     x
