@@ -5,11 +5,12 @@ module CirclesPink.Garden.StateMachine.Control
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Control.Env (EnvIsFundedError, EnvIsTrustedError)
 import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, lift, mapExceptT, runExceptT)
+import Control.Monad.Except (class MonadTrans, catchError, lift, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -23,6 +24,7 @@ import Effect.Class.Console (logShow)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
+import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 circlesControl ::
@@ -174,12 +176,29 @@ circlesControl env =
             pure []
           else
             env.trustGetNetwork privKey
-        pure { user, isTrusted, trusts, safeStatus }
+        isReady' <- isReady env privKey
+        pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
     case results of
       Left e -> set $ \st' -> S._login st' { error = pure e }
       Right { user, trusts, safeStatus }
-        | safeStatus.isCreated && safeStatus.isDeployed -> set \_ -> S._dashboard { user, trusts, privKey, error: Nothing }
-      Right { user, trusts, safeStatus } -> set \_ -> S._trusts { user, trusts, privKey, safeStatus, error: Nothing }
+        | safeStatus.isCreated && safeStatus.isDeployed ->
+          set \_ ->
+            S._dashboard
+              { user
+              , trusts
+              , privKey
+              , error: Nothing
+              }
+      Right { user, trusts, safeStatus, isReady } ->
+        set \_ ->
+          S._trusts
+            { user
+            , trusts
+            , privKey
+            , safeStatus
+            , error: Nothing
+            , isReady
+            }
 
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
   debugCoreToWindow _ st _ = do
@@ -244,8 +263,8 @@ circlesControl env =
         safeStatus <- env.getSafeStatus st.privateKey
         user <- env.userResolve st.privateKey
         trusts <- env.trustGetNetwork st.privateKey
-        isReady <- env.isTrusted st.privateKey
-        pure { safeStatus, user, trusts, isReady }
+        isReady' <- isReady env st.privateKey
+        pure { safeStatus, user, trusts, isReady: isReady' }
     case result of
       Left e -> set \st' -> let _ = spy "e" e in S._submit st'
       Right { safeStatus, user, trusts, isReady } ->
@@ -265,3 +284,9 @@ type ActionHandler t m a s v
 
 effToAff :: forall e a. ExceptV e Effect a -> ExceptV e Aff a
 effToAff = mapExceptT liftEffect
+
+isReady :: forall m r. Monad m => E.Env m -> PrivateKey -> ExceptV (EnvIsTrustedError + EnvIsFundedError + r) m Boolean
+isReady { isTrusted, isFunded } privKey = do
+  isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
+  isFunded' <- isFunded privKey
+  pure (isTrusted' || isFunded')

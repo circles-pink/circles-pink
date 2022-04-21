@@ -11,6 +11,8 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , EnvGetSafeAddress
   , EnvGetSafeStatus
   , EnvGetSafeStatusError
+  , EnvIsFunded
+  , EnvIsFundedError
   , EnvIsTrusted
   , EnvIsTrustedError
   , EnvTrustGetNetwork
@@ -47,6 +49,9 @@ type CoreToWindowError r
 
 type EnvIsTrustedError r
   = ErrNative + ErrInvalidUrl + r
+
+type EnvIsFundedError r
+  = ErrNative + r
 
 type EnvTrustGetNetworkError r
   = ErrNative + ErrInvalidUrl + r
@@ -89,6 +94,9 @@ type EnvCoreToWindow m
 type EnvIsTrusted m
   = forall r. PrivateKey -> ExceptV (EnvIsTrustedError + r) m TrustIsTrustedResult
 
+type EnvIsFunded m
+  = forall r. PrivateKey -> ExceptV (EnvIsFundedError + r) m Boolean
+
 type EnvTrustGetNetwork m
   = forall r. PrivateKey -> ExceptV (EnvTrustGetNetworkError + r) m (Array TrustNode)
 
@@ -111,6 +119,7 @@ type Env m
     , userResolve :: forall r. PrivateKey -> ExceptV (UserResolveError + r) m User
     , coreToWindow :: EnvCoreToWindow m
     , isTrusted :: EnvIsTrusted m
+    , isFunded :: EnvIsFunded m
     , trustGetNetwork :: EnvTrustGetNetwork m
     , getSafeStatus :: EnvGetSafeStatus m
     , deploySafe :: EnvDeploySafe m
