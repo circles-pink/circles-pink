@@ -25,7 +25,8 @@ module CirclesCore
   ) where
 
 import Prelude
-import CirclesCore.Bindings (ApiError, apiResultToEither)
+
+import CirclesCore.Bindings (ApiError, apiResultToEither, convertCore)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
@@ -158,8 +159,8 @@ userRegister cc ac opts =
     <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
     # ExceptT
 
-userRegister' :: forall r. B.CirclesCore_ -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-userRegister' cc = mapFn2 cc.user.register pure (mapArg2 >>> pure) mkErrorNative mapOk
+userRegister' :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+userRegister' cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   mapArg2 x =
     x

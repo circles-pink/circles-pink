@@ -14,6 +14,7 @@ module CirclesCore.Bindings
   , UserOptions
   , Web3
   , apiResultToEither
+  , convertCore
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
@@ -40,6 +41,7 @@ import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
 import Foreign (Foreign, unsafeFromForeign)
 import Foreign.Object (Object)
 import Foreign.Object.Unsafe (unsafeIndex)
+import Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -201,3 +203,6 @@ apiResultToEither (ApiResult fo) =
         Left { code, message }
 
 foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit
+
+convertCore :: CirclesCore -> CirclesCore_
+convertCore = unsafeCoerce
