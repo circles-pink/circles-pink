@@ -25,7 +25,8 @@ module CirclesPink.Garden.StateMachine.State
   , initLogin
   ) where
 
-import CirclesCore (ApiError, TrustNode, NativeError)
+import Prelude
+import CirclesCore (ApiError, NativeError, TrustNode, SafeStatus)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -75,12 +76,29 @@ type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
+    , error ::
+        Maybe
+          ( Variant
+              ( errService ∷ Unit
+              , errNative ∷ NativeError
+              , errInvalidUrl :: String
+              )
+          )
     }
 
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
+    , safeStatus :: SafeStatus
+    , error ::
+        Maybe
+          ( Variant
+              ( errService ∷ Unit
+              , errNative ∷ NativeError
+              , errInvalidUrl :: String
+              )
+          )
     }
 
 type CirclesState

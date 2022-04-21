@@ -44,7 +44,7 @@ type CirclesProtocol
       , submit ::
           P.State
             ( prev :: P.Action ("magicWords" :> Nil')
-            , submit :: P.Action ("submit" :> "dashboard" :> Nil')
+            , submit :: P.Action ("submit" :> "trusts" :> Nil')
             )
       , dashboard ::
           P.State
@@ -60,6 +60,8 @@ type CirclesProtocol
       , trusts ::
           P.State
             ( continue :: P.Action ("dashboard" :> "trusts" :> Nil')
+            , getSafeStatus :: P.Action ("trusts" :> Nil')
+            , finalizeRegisterUser :: P.Action ("dashboard" :> "trusts" :> Nil')
             )
       , debug ::
           P.State

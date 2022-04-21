@@ -9,11 +9,15 @@ import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, lift, runExceptT)
+import Control.Monad.Except (class MonadTrans, lift, mapExceptT, runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
+import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (logShow)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -146,8 +150,9 @@ circlesControl env =
             \set _ words -> set $ \st -> S._login st { magicWords = words }
         }
     , trusts:
-        { continue:
-            \set _ _ -> pure unit
+        { continue: \set _ _ -> pure unit
+        , getSafeStatus: trustsGetSafeStatus
+        , finalizeRegisterUser: trustsFinalizeRegisterUser
         }
     , debug:
         { coreToWindow: debugCoreToWindow
@@ -178,18 +183,19 @@ circlesControl env =
     results <-
       (lift <<< runExceptT) do
         user <- env.userResolve privKey
+        safeStatus <- env.getSafeStatus privKey
         isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
         trusts <-
           if isTrusted then
             pure []
           else
             env.trustGetNetwork privKey
-        pure { user, isTrusted, trusts }
+        pure { user, isTrusted, trusts, safeStatus }
     case results of
       Left e -> set $ \st' -> S._login st' { error = pure e }
-      Right { user, trusts, isTrusted }
-        | isTrusted -> set $ \_ -> S._dashboard { user, trusts, privKey }
-      Right { user, trusts } -> set $ \_ -> S._trusts { user, trusts, privKey }
+      Right { user, trusts, safeStatus }
+        | safeStatus.isCreated || safeStatus.isDeployed -> set $ \_ -> S._dashboard { user, trusts, privKey, error: Nothing }
+      Right { user, trusts, safeStatus } -> set $ \_ -> S._trusts { user, trusts, privKey, safeStatus, error: Nothing }
 
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
   debugCoreToWindow _ st _ = do
@@ -204,9 +210,39 @@ circlesControl env =
   dashboardGetTrusts set st _ = do
     result <- lift $ runExceptT $ env.trustGetNetwork st.privKey
     case result of
-      Left e -> undefined
-      Right t -> set $ \st' -> S._dashboard st' { trusts = t }
+      Left e -> set \st' -> S._dashboard st' { error = pure e }
+      Right t -> set \st' -> S._dashboard st' { trusts = t }
+
+  trustsGetSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
+  trustsGetSafeStatus set st _ = do
+    result <- lift $ runExceptT $ env.getSafeStatus st.privKey
+    case result of
+      Left e -> set \st' -> S._trusts st' { error = pure e }
+      Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
+
+  trustsFinalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
+  trustsFinalizeRegisterUser set st _ = do
+    results <-
+      lift
+        $ runExceptT do
+            _ <- env.deploySafe st.privKey
+            _ <- env.deployToken st.privKey
+            pure unit
+    case results of
+      Left e -> set \st' -> S._trusts st' { error = pure e }
+      Right _ ->
+        set
+          $ \_ ->
+              S._dashboard
+                { user: st.user
+                , trusts: st.trusts
+                , privKey: st.privKey
+                , error: Nothing
+                }
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
+
+effToAff :: forall e a. ExceptV e Effect a -> ExceptV e Aff a
+effToAff = mapExceptT liftEffect

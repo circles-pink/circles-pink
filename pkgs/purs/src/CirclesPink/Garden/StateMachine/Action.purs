@@ -59,6 +59,8 @@ type CirclesAction
       , trusts ::
           Variant
             ( continue :: Unit
+            , getSafeStatus :: Unit
+            , finalizeRegisterUser :: Unit
             )
       , debug ::
           Variant
@@ -139,3 +141,9 @@ _coreToWindow = inj (Proxy :: _ "coreToWindow")
 
 _getTrusts :: forall a v. a -> Variant ( getTrusts :: a | v )
 _getTrusts = inj (Proxy :: _ "getTrusts")
+
+_getSafeStatus :: forall a v. a -> Variant ( getSafeStatus :: a | v )
+_getSafeStatus = inj (Proxy :: _ "getSafeStatus")
+
+_finalizeRegisterUser :: forall a v. a -> Variant ( finalizeRegisterUser :: a | v )
+_finalizeRegisterUser = inj (Proxy :: _ "finalizeRegisterUser")
