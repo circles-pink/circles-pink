@@ -22,13 +22,20 @@ export default {
   },
 } as ComponentMeta<typeof TrustGraph>;
 
+const A = "0x984501180D63335928eA7fb59c17d33e0398Ed39";
+const B = "0x23dfED77bAEC40b0fd64f74e14974681e7dD2498";
+const C = "0x74e14974681e7dD249823dfED77bAEC40b0fd64f";
+const D = "0xD63335928eA7fb59c17d33e0398Ed39984501180";
+const E = "0xAEC40b0fd64f74e14974681e7dD249823dfED77b";
+const F = "0x81e7dD249823dfED77bAEC40b0fd64f74e149746";
+
 const nodeB: TrustNode = {
   isIncoming: true,
   isOutgoing: true,
   limitPercentageIn: 50,
   limitPercentageOut: 50,
   mutualConnections: [],
-  safeAddress: unsafeAddrFromString("B"),
+  safeAddress: unsafeAddrFromString(B),
 };
 
 const nodeA: TrustNode = {
@@ -37,13 +44,34 @@ const nodeA: TrustNode = {
   limitPercentageIn: 50,
   limitPercentageOut: 50,
   mutualConnections: [],
-  safeAddress: unsafeAddrFromString("A"),
+  safeAddress: unsafeAddrFromString(A),
+};
+
+const nodeD: TrustNode = {
+  isIncoming: true,
+  isOutgoing: true,
+  limitPercentageIn: 50,
+  limitPercentageOut: 50,
+  mutualConnections: [],
+  safeAddress: unsafeAddrFromString(D),
+};
+
+const nodeE: TrustNode = {
+  isIncoming: true,
+  isOutgoing: true,
+  limitPercentageIn: 50,
+  limitPercentageOut: 50,
+  mutualConnections: [],
+  safeAddress: unsafeAddrFromString(E),
 };
 
 const graph: Graph = new Map([
-  [unsafeAddrFromString("A"), [nodeB]],
-  [unsafeAddrFromString("B"), [nodeA]],
-  [unsafeAddrFromString("C"), [nodeA, nodeB] as TrustNode[]],
+  [unsafeAddrFromString(A), [nodeB, nodeE]],
+  [unsafeAddrFromString(B), [nodeA]],
+  [unsafeAddrFromString(C), [nodeA, nodeB] as TrustNode[]],
+  [unsafeAddrFromString(E), [nodeD]],
+  [unsafeAddrFromString(D), [nodeE]],
+  [unsafeAddrFromString(F), [nodeA, nodeB, nodeD, nodeE] as TrustNode[]],
 ]);
 
 export const Default = (args): ReactElement => <TrustGraph graph={graph} />;
