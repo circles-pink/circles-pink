@@ -51,11 +51,6 @@ exports.trustGetNetwork =
       .catch(onErr);
   };
 
-exports.trustIsTrusted =
-  (circlesCore) => (account) => (options) => (onErr, onSucc) => {
-    circlesCore.trust.isTrusted(account, options).then(onSucc).catch(onErr);
-  };
-
 // CirclesCore - unsafe debug
 
 exports.unsafeSampleCore = (circlesCore) => (account) => (_, onSucc) => {

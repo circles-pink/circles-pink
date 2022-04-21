@@ -25,7 +25,6 @@ module CirclesCore
   , trustIsTrusted
   , unsafeSampleCore
   , userRegister
-  , userRegister'
   , userResolve
   ) where
 
@@ -106,15 +105,12 @@ type TrustIsTrustedOptions
     }
 
 trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> ExceptV (ErrNative + r) Aff B.TrustIsTrustedResult
-trustIsTrusted cc ac opts =
-  B.trustIsTrusted cc ac conformedOptions
-    # fromEffectFnAff
-    # attempt
-    <#> lmap mkErrorNative
-    # ExceptT
+trustIsTrusted cc = mapFn2 (convertCore cc).trust.isTrusted pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  conformedOptions :: B.TrustIsTrustedOptions
-  conformedOptions = opts { safeAddress = P.addrToString opts.safeAddress }
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
 
 --------------------------------------------------------------------------------
 -- API / trustGetNetwork
@@ -151,20 +147,7 @@ type UserOptions
     }
 
 userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-userRegister cc ac opts =
-  B.userRegister cc ac
-    { nonce: nonceToBigInt opts.nonce
-    , safeAddress: addrToString opts.safeAddress
-    , username: opts.username
-    , email: opts.email
-    }
-    # attempt
-    <#> lmap mkErrorNative
-    <#> (\e -> e >>= \b -> if b then Right unit else Left $ inj (Proxy :: _ "errService") unit)
-    # ExceptT
-
-userRegister' :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-userRegister' cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+userRegister cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
     x
