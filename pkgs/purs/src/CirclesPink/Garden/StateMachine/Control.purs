@@ -178,8 +178,8 @@ circlesControl env =
     case results of
       Left e -> set $ \st' -> S._login st' { error = pure e }
       Right { user, trusts, safeStatus }
-        | safeStatus.isCreated || safeStatus.isDeployed -> set $ \_ -> S._dashboard { user, trusts, privKey, error: Nothing }
-      Right { user, trusts, safeStatus } -> set $ \_ -> S._trusts { user, trusts, privKey, safeStatus, error: Nothing }
+        | safeStatus.isCreated && safeStatus.isDeployed -> set \_ -> S._dashboard { user, trusts, privKey, error: Nothing }
+      Right { user, trusts, safeStatus } -> set \_ -> S._trusts { user, trusts, privKey, safeStatus, error: Nothing }
 
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
   debugCoreToWindow _ st _ = do
