@@ -14,6 +14,7 @@ module CirclesCore
   , newWebSocketProvider
   , printErr
   , privKeyToAccount
+  , safeDeploy
   , safePredictAddress
   , safePrepareDeploy
   , trustGetNetwork
@@ -25,7 +26,6 @@ module CirclesCore
   ) where
 
 import Prelude
-
 import CirclesCore.Bindings (ApiError, apiResultToEither, convertCore)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings as B
@@ -160,17 +160,13 @@ userRegister cc ac opts =
     # ExceptT
 
 userRegister' :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
-userRegister' cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapOk
+userRegister' cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
     x
       { nonce = nonceToBigInt x.nonce
       , safeAddress = addrToString x.safeAddress
       }
-
-  mapOk true = Right unit
-
-  mapOk false = Left $ inj (Proxy :: _ "errService") unit
 
 --------------------------------------------------------------------------------
 -- API / userResolve
@@ -208,6 +204,21 @@ userResolve cc ac opts =
     , safeAddress: P.unsafeAddrFromString u.safeAddress
     , avatarUrl: u.avatarUrl
     }
+
+--------------------------------------------------------------------------------
+-- API / safeDeploy
+--------------------------------------------------------------------------------
+type SafeDeployOptions
+  = { safeAddress :: Address
+    }
+
+safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+safeDeploy cc = mapFn2 (convertCore cc).safe.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
+  where
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
 
 --------------------------------------------------------------------------------
 -- Error
@@ -255,3 +266,8 @@ unsafeSampleCore x1 x2 =
 
 mkErrorNative :: forall r. Error -> Variant (ErrNative + r)
 mkErrorNative e = inj (Proxy :: _ "errNative") { message: message e, name: name e }
+
+mapBoolean :: forall r. Boolean -> Either (Variant (ErrService + r)) Unit
+mapBoolean true = Right unit
+
+mapBoolean false = Left $ inj (Proxy :: _ "errService") unit
