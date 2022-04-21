@@ -15,6 +15,7 @@ module Wallet.PrivateKey
   , privKeyToAddress
   , sampleAddress
   , sampleKey
+  , sampleSafeAddress
   , toEntropy
   , toString
   , unsafeAddrFromString
@@ -111,6 +112,9 @@ sampleKey = PrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b7
 
 sampleAddress :: Address
 sampleAddress = Address "0xfb7dc4d8f841af32d777e698d6c71409e85955d9"
+
+sampleSafeAddress :: Address
+sampleSafeAddress = Address "0x984501180D63335928eA7fb59c17d33e0398Ed39"
 
 privKeyToAddress :: PrivateKey -> Address
 privKeyToAddress pk = Address $ privKeyToAddressImpl $ toString pk

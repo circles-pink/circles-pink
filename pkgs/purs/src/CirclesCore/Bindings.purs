@@ -113,6 +113,12 @@ type CirclesCore_
               }
               (Promise (ApiResult (Array User)))
         }
+    , safe ::
+        { deploy ::
+            Fn2 Account
+              { safeAddress :: String }
+              (Promise Boolean)
+        }
     }
 
 foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_
