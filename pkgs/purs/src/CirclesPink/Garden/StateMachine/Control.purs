@@ -15,6 +15,7 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -119,24 +120,7 @@ circlesControl env =
         }
     , submit:
         { prev: \set _ _ -> set $ \st -> S._magicWords st { direction = D._backwards }
-        , submit:
-            \_ st _ -> do
-              let
-                address = P.privKeyToAddress st.privateKey
-
-                nonce = P.addressToNonce address
-              result :: Either (Variant (E.GetSafeAddressError + E.RegisterError + ())) Unit <-
-                (lift <<< runExceptT) do
-                  safeAddress <- env.getSafeAddress st.privateKey
-                  _ <- env.safePrepareDeploy st.privateKey
-                  env.userRegister
-                    st.privateKey
-                    { email: st.email
-                    , nonce
-                    , safeAddress
-                    , username: st.username
-                    }
-              pure unit
+        , submit: submitSubmit
         }
     , dashboard:
         { logout: \set _ _ -> pure unit
@@ -239,6 +223,39 @@ circlesControl env =
                 , privKey: st.privKey
                 , error: Nothing
                 }
+
+  submitSubmit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
+  submitSubmit set st _ = do
+    let
+      address = P.privKeyToAddress st.privateKey
+
+      nonce = P.addressToNonce address
+    result <-
+      (lift <<< runExceptT) do
+        safeAddress <- env.getSafeAddress st.privateKey
+        _ <- env.safePrepareDeploy st.privateKey
+        env.userRegister
+          st.privateKey
+          { email: st.email
+          , nonce
+          , safeAddress
+          , username: st.username
+          }
+        safeStatus <- env.getSafeStatus st.privateKey
+        user <- env.userResolve st.privateKey
+        trusts <- env.trustGetNetwork st.privateKey
+        pure { safeStatus, user, trusts }
+    case result of
+      Left e -> set \st' -> let _ = spy "e" e in S._submit st'
+      Right { safeStatus, user, trusts } ->
+        set \_ ->
+          S._trusts
+            { user
+            , trusts
+            , privKey: st.privateKey
+            , safeStatus
+            , error: Nothing
+            }
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v
