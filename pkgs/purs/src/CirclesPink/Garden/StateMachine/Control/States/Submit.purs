@@ -6,11 +6,9 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
-import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Debug (spy)
-import Type.Row (type (+))
 import Wallet.PrivateKey as P
 
 submit ::
@@ -20,15 +18,14 @@ submit ::
   Monad (t m) =>
   Env.Env m ->
   { prev :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  , submit :: ActionHandler t m Unit S.LoginState ( "submit" :: S.UserData, "trusts" :: S.TrustState )
+  , submit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
   }
 submit env =
   { prev: \set _ _ -> set \st -> S._magicWords st { direction = D._backwards }
-  , submit
+  , submit: submit'
   }
   where
-  submit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
-  submit set st _ = do
+  submit' set st _ = do
     let
       address = P.privKeyToAddress st.privateKey
 
