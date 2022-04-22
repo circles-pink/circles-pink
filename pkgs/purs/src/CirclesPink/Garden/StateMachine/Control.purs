@@ -15,6 +15,7 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
+import Debug.Extra (todo)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
@@ -36,24 +37,10 @@ circlesControl env =
     , infoGeneral:
         { next: \set _ _ -> set \st -> S._askUsername st { direction = D._forwards }
         }
-    , askUsername:
-        { prev: \set _ _ -> set \st -> S._infoGeneral st { direction = D._backwards }
-        , setUsername: askUsernameSetUsername
-        , next: askUsernameNext
-        }
-    , askEmail:
-        { prev: \set _ _ -> set \st -> S._askUsername st { direction = D._backwards }
-        , setEmail: askEmailSetEmail
-        , setTerms: \set _ _ -> set \st -> S._askEmail st { terms = not st.terms }
-        , setPrivacy: \set _ _ -> set \st -> S._askEmail st { privacy = not st.privacy }
-        , next: askEmailNext
-        }
+    , askUsername: States.askUsername env
+    , askEmail: States.askEmail env
     , infoSecurity: States.infoSecurity env
-    , magicWords:
-        { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D._backwards }
-        , newPrivKey: magicWordsNewPrivateKey
-        , next: \set _ _ -> set \st -> S._submit st { direction = D._forwards }
-        }
+    , magicWords: States.magicWords env
     , submit: States.submit env
     , dashboard:
         { logout: \_ _ _ -> pure unit
@@ -66,75 +53,6 @@ circlesControl env =
         }
     }
   where
-  --------------------------------------------------------------------------------
-  -- AskUsername
-  --------------------------------------------------------------------------------
-  askUsernameSetUsername :: ActionHandler t m String S.UserData ( "askUsername" :: S.UserData )
-  askUsernameSetUsername set _ username = do
-    set \st -> S._askUsername st { username = username }
-    set \st -> S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-    result <- run $ env.apiCheckUserName username
-    set \st ->
-      if username == st.username then case result of
-        Left e -> S._askUsername st { usernameApiResult = _failure e }
-        Right x -> S._askUsername st { usernameApiResult = _success x }
-      else
-        S._askUsername st
-
-  askUsernameNext :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData, "askEmail" :: S.UserData )
-  askUsernameNext set _ _ =
-    set \st ->
-      let
-        usernameValid =
-          default false
-            # onMatch
-                { success: (\r -> r.isValid) }
-      in
-        if usernameValid st.usernameApiResult then
-          S._askEmail st { direction = D._forwards }
-        else
-          S._askUsername st { direction = D._forwards }
-
-  --------------------------------------------------------------------------------
-  -- AskEmail
-  --------------------------------------------------------------------------------
-  askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
-  askEmailNext set _ _ =
-    set \st ->
-      let
-        emailValid =
-          default false
-            # onMatch
-                { success: (\r -> r.isValid) }
-      in
-        if emailValid st.emailApiResult && st.terms && st.privacy then
-          S._infoSecurity st { direction = D._forwards }
-        else
-          S._askEmail st { direction = D._forwards }
-
-  askEmailSetEmail :: ActionHandler t m String S.UserData ( "askEmail" :: S.UserData )
-  askEmailSetEmail set _ email = do
-    set \st -> S._askEmail st { email = email }
-    set \st -> S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-    result <- run $ env.apiCheckEmail email
-    set \st ->
-      if email == st.email then case result of
-        Left e -> S._askEmail st { emailApiResult = _failure e }
-        Right x -> S._askEmail st { emailApiResult = _success x }
-      else
-        S._askEmail st
-    pure unit
-
-  --------------------------------------------------------------------------------
-  -- MagicWords
-  --------------------------------------------------------------------------------
-  magicWordsNewPrivateKey :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  magicWordsNewPrivateKey set _ _ = do
-    result <- run $ env.generatePrivateKey
-    case result of
-      Right pk -> set \st -> S._magicWords st { privateKey = pk }
-      Left _ -> pure unit
-
   --------------------------------------------------------------------------------
   -- Debug
   --------------------------------------------------------------------------------

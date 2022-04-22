@@ -26,14 +26,12 @@ trusts env =
   , finalizeRegisterUser: finalizeRegisterUser
   }
   where
-  getSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
   getSafeStatus set st _ = do
     result <- run $ env.getSafeStatus st.privKey
     case result of
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
 
-  finalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   finalizeRegisterUser set st _ = do
     let
       task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _

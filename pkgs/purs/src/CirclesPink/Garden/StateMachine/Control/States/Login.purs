@@ -27,7 +27,6 @@ login env =
   , setMagicWords: \set _ words -> set \st -> S._login st { magicWords = words }
   }
   where
-  login' :: ActionHandler t m Unit S.LoginState ( "login" :: S.LoginState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   login' set st _ = do
     let
       mnemonic = P.getMnemonicFromString st.magicWords
