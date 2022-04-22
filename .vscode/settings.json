@@ -1,7 +1,6 @@
 {
   "purescript.outputDirectory": "pkgs/ts/generated/output/",
   "purescript.buildCommand": "spago build --purs-args '--json-errors --output pkgs/ts/generated/output'",
-  "purescript.buildOpenedFiles": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "[nix]": {

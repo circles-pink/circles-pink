@@ -2,11 +2,11 @@ module CirclesCore.Bindings
   ( Account
   , CirclesCore
   , CirclesCore_
+  , Fn2Promise
+  , Fn3Promise
   , Options
   , Provider
-  , ResolveOptions
   , TrustIsTrustedResult
-  , TrustNode
   , User
   , UserOptions
   , Web3
@@ -18,23 +18,20 @@ module CirclesCore.Bindings
   , safePredictAddress
   , safePrepareDeploy
   , safePrepareDeployImpl
-  , trustGetNetwork
   , unsafeSampleCore
   , userRegister
-  , userResolve
-  , userResolveImpl
   ) where
 
 import Prelude
+import CirclesCore.ApiResult (ApiResult)
 import Control.Promise (Promise)
 import Data.BigInt (BigInt)
-import Data.Function.Uncurried (Fn2)
+import Data.Function.Uncurried (Fn2, Fn3)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
 import Foreign (Foreign)
 import Unsafe.Coerce (unsafeCoerce)
-import CirclesCore.ApiResult (ApiResult)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -92,51 +89,50 @@ foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
 type CirclesCore_
   = { user ::
         { register ::
-            Fn2 Account
+            Fn2Promise Account
               { nonce :: BigInt
               , safeAddress :: String
               , username :: String
               , email :: String
               }
-              (Promise Boolean)
+              Boolean
         , resolve ::
-            Fn2 Account
+            Fn2Promise Account
               { addresses :: Array String
               , userNames :: Array String
               }
-              (Promise (ApiResult (Array User)))
+              (ApiResult (Array User))
         }
     , safe ::
-        { deploy ::
-            Fn2 Account
-              { safeAddress :: String }
-              (Promise Boolean)
-        , isFunded ::
-            Fn2 Account
-              { safeAddress :: String }
-              (Promise Boolean)
+        { deploy :: Fn2Promise Account { safeAddress :: String } Boolean
+        , isFunded :: Fn2Promise Account { safeAddress :: String } Boolean
         , getSafeStatus ::
-            Fn2 Account
-              { safeAddress :: String }
-              ( Promise
-                  { isCreated :: Boolean
-                  , isDeployed :: Boolean
-                  }
-              )
+            Fn2Promise Account { safeAddress :: String }
+              { isCreated :: Boolean
+              , isDeployed :: Boolean
+              }
         }
     , token ::
-        { deploy ::
-            Fn2 Account
-              { safeAddress :: String }
-              (Promise String)
+        { deploy :: Fn2Promise Account { safeAddress :: String } String
         }
     , trust ::
         { isTrusted ::
-            Fn2 Account
+            Fn2Promise Account
               { safeAddress :: String
               , limit :: Int
               }
-              (Promise TrustIsTrustedResult)
+              TrustIsTrustedResult
+        , getNetwork ::
+            Fn2Promise Account { safeAddress :: String }
+              ( Array
+                  { isIncoming :: Boolean
+                  , isOutgoing :: Boolean
+                  , limitPercentageIn :: Int
+                  , limitPercentageOut :: Int
+                  , mutualConnections :: Array Foreign
+                  , safeAddress :: String
+                  }
+              )
         }
     }
 
@@ -158,33 +154,6 @@ userRegister :: CirclesCore -> Account -> UserOptions -> Aff Boolean
 userRegister x1 x2 x3 = fromEffectFnAff $ userRegisterImpl x1 x2 x3
 
 --------------------------------------------------------------------------------
--- userResolve
---------------------------------------------------------------------------------
-type ResolveOptions
-  = { addresses :: Array String
-    , userNames :: Array String
-    }
-
-foreign import userResolveImpl :: CirclesCore -> Account -> ResolveOptions -> EffectFnAff (ApiResult (Array User))
-
-userResolve :: CirclesCore -> Account -> ResolveOptions -> Aff (ApiResult (Array User))
-userResolve x1 x2 x3 = fromEffectFnAff $ userResolveImpl x1 x2 x3
-
---------------------------------------------------------------------------------
--- trustGetNetwork
---------------------------------------------------------------------------------
-type TrustNode
-  = { isIncoming :: Boolean
-    , isOutgoing :: Boolean
-    , limitPercentageIn :: Int
-    , limitPercentageOut :: Int
-    , mutualConnections :: Array Foreign
-    , safeAddress :: String
-    }
-
-foreign import trustGetNetwork :: CirclesCore -> Account -> { safeAddress :: String } -> EffectFnAff (Array TrustNode)
-
---------------------------------------------------------------------------------
 -- trustIsTrusted
 -------------------------------------------------------------------------------
 type TrustIsTrustedResult
@@ -199,3 +168,9 @@ foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit
 
 convertCore :: CirclesCore -> CirclesCore_
 convertCore = unsafeCoerce
+
+type Fn2Promise a1 a2 b
+  = Fn2 a1 a2 (Promise b)
+
+type Fn3Promise a1 a2 a3 b
+  = Fn3 a1 a2 a3 (Promise b)

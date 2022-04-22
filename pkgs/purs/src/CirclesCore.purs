@@ -5,6 +5,7 @@ module CirclesCore
   , ErrNative
   , ErrService
   , NativeError
+  , ResolveOptions
   , SafeStatus
   , TrustNode
   , User
@@ -31,8 +32,8 @@ module CirclesCore
   ) where
 
 import Prelude
-import CirclesCore.ApiResult (apiResultToEither, ApiError)
 import CirclesCore.ApiResult (ApiError) as Exp
+import CirclesCore.ApiResult (apiResultToEither, ApiError)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
@@ -42,6 +43,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Variant (Variant, case_, inj, on)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
@@ -132,16 +134,16 @@ type TrustNode
     }
 
 trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrNative + r) (Array TrustNode)
-trustGetNetwork cc ac opts =
-  B.trustGetNetwork cc ac { safeAddress: P.addrToString opts.safeAddress }
-    # fromEffectFnAff
-    <#> map conformTrustNode
-    # attempt
-    <#> lmap mkErrorNative
-    # ExceptT
+trustGetNetwork cc = mapFn2 (convertCore cc).trust.getNetwork pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
   where
-  conformTrustNode :: B.TrustNode -> TrustNode
-  conformTrustNode tn = tn { safeAddress = P.unsafeAddrFromString tn.safeAddress }
+  mapArg2 x =
+    x
+      { safeAddress = addrToString x.safeAddress
+      }
+
+  mapOk = map mapTrustNode
+
+  mapTrustNode tn = tn { safeAddress = P.unsafeAddrFromString tn.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / userRegister
@@ -178,27 +180,43 @@ type User
     }
 
 userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrNative + ErrApi + r) (Array User)
-userResolve cc ac opts =
-  B.userResolve cc ac
-    { addresses: map addrToString opts.addresses
-    , userNames: opts.userNames
-    }
-    # attempt
-    <#> lmap mkErrorNative
-    # map (\x -> x >>= handleApiResult)
-    # ExceptT
+userResolve cc = mapFn2 (convertCore cc).user.resolve pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  handleApiResult apiResult = case apiResultToEither apiResult of
+  mapArg2 x =
+    x
+      { addresses = map addrToString x.addresses
+      , userNames = x.userNames
+      }
+
+  mapOk x = case apiResultToEither x of
     Left apiError -> Left $ inj (Proxy :: _ "errApi") apiError
     Right data_ -> pure $ map userToUser data_
 
-  userToUser u =
-    { id: u.id
-    , username: u.username
-    , safeAddress: P.unsafeAddrFromString u.safeAddress
-    , avatarUrl: u.avatarUrl
-    }
+  userToUser x =
+    x
+      { safeAddress = P.unsafeAddrFromString x.safeAddress
+      }
 
+-- userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrNative + ErrApi + r) (Array User)
+-- userResolve cc ac opts =
+--   B.userResolve cc ac
+--     { addresses: map addrToString opts.addresses
+--     , userNames: opts.userNames
+--     }
+--     # attempt
+--     <#> lmap mkErrorNative
+--     # map (\x -> x >>= handleApiResult)
+--     # ExceptT
+--   where
+--   handleApiResult apiResult = case apiResultToEither apiResult of
+--     Left apiError -> Left $ inj (Proxy :: _ "errApi") apiError
+--     Right data_ -> pure $ map userToUser data_
+--   userToUser u =
+--     { id: u.id
+--     , username: u.username
+--     , safeAddress: P.unsafeAddrFromString u.safeAddress
+--     , avatarUrl: u.avatarUrl
+--     }
 --------------------------------------------------------------------------------
 -- API / safeDeploy
 --------------------------------------------------------------------------------
