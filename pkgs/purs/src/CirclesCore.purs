@@ -3,15 +3,25 @@ module CirclesCore
   , ErrApi
   , ErrInvalidUrl
   , ErrNative
+  , ErrNewWebSocketProvider
+  , ErrSafeDeploy
+  , ErrSafePredictAddress
   , ErrService
+  , ErrTrustGetNetwork
+  , ErrTrustIsTrusted
+  , ErrUserRegister
+  , ErrUserResolve
   , NativeError
   , ResolveOptions
+  , SafeDeployOptions
   , SafeStatus
   , TrustNode
   , User
   , UserOptions
   , _errApi
   , _errInvalidUrl
+  , _errNative
+  , _errService
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -43,7 +53,6 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Variant (Variant, case_, inj, on)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
@@ -60,7 +69,10 @@ import Wallet.PrivateKey as P
 type Result e a
   = ExceptV e Aff a
 
-newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect B.Provider
+type ErrNewWebSocketProvider r
+  = ErrNative + ErrInvalidUrl + r
+
+newWebSocketProvider :: forall r. String -> ExceptV (ErrNewWebSocketProvider r) Effect B.Provider
 newWebSocketProvider x1 =
   B.newWebSocketProvider x1
     # try
@@ -88,23 +100,6 @@ privKeyToAccount w3 pk =
     <#> lmap mkErrorNative
     # ExceptT
 
-safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrNative + r) P.Address
-safePredictAddress cc ac opts =
-  B.safePredictAddress cc ac { nonce: P.nonceToBigInt opts.nonce }
-    # fromEffectFnAff
-    <#> P.unsafeAddrFromString
-    # attempt
-    <#> lmap mkErrorNative
-    # ExceptT
-
-safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrNative + r) P.Address
-safePrepareDeploy cc ac opts =
-  B.safePrepareDeploy cc ac { nonce: P.nonceToBigInt opts.nonce }
-    <#> P.unsafeAddrFromString
-    # attempt
-    <#> lmap mkErrorNative
-    # ExceptT
-
 --------------------------------------------------------------------------------
 -- API / trustIsTrusted
 --------------------------------------------------------------------------------
@@ -113,7 +108,10 @@ type TrustIsTrustedOptions
     , limit :: Int
     }
 
-trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> Result (ErrNative + r) B.TrustIsTrustedResult
+type ErrTrustIsTrusted r
+  = ErrNative + r
+
+trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> Result (ErrTrustIsTrusted r) B.TrustIsTrustedResult
 trustIsTrusted cc = mapFn2 (convertCore cc).trust.isTrusted pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
@@ -133,7 +131,10 @@ type TrustNode
     , safeAddress :: Address
     }
 
-trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrNative + r) (Array TrustNode)
+type ErrTrustGetNetwork r
+  = ErrNative + r
+
+trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
 trustGetNetwork cc = mapFn2 (convertCore cc).trust.getNetwork pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
   where
   mapArg2 x =
@@ -155,7 +156,10 @@ type UserOptions
     , email :: String
     }
 
-userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> Result (ErrService + ErrNative + r) Unit
+type ErrUserRegister r
+  = ErrService + ErrNative + r
+
+userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> Result (ErrUserRegister r) Unit
 userRegister cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
@@ -179,7 +183,10 @@ type User
     , avatarUrl :: String
     }
 
-userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrNative + ErrApi + r) (Array User)
+type ErrUserResolve r
+  = ErrNative + ErrApi + r
+
+userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrUserResolve r) (Array User)
 userResolve cc = mapFn2 (convertCore cc).user.resolve pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   mapArg2 x =
@@ -197,26 +204,6 @@ userResolve cc = mapFn2 (convertCore cc).user.resolve pure (mapArg2 >>> pure) mk
       { safeAddress = P.unsafeAddrFromString x.safeAddress
       }
 
--- userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrNative + ErrApi + r) (Array User)
--- userResolve cc ac opts =
---   B.userResolve cc ac
---     { addresses: map addrToString opts.addresses
---     , userNames: opts.userNames
---     }
---     # attempt
---     <#> lmap mkErrorNative
---     # map (\x -> x >>= handleApiResult)
---     # ExceptT
---   where
---   handleApiResult apiResult = case apiResultToEither apiResult of
---     Left apiError -> Left $ inj (Proxy :: _ "errApi") apiError
---     Right data_ -> pure $ map userToUser data_
---   userToUser u =
---     { id: u.id
---     , username: u.username
---     , safeAddress: P.unsafeAddrFromString u.safeAddress
---     , avatarUrl: u.avatarUrl
---     }
 --------------------------------------------------------------------------------
 -- API / safeDeploy
 --------------------------------------------------------------------------------
@@ -224,13 +211,42 @@ type SafeDeployOptions
   = { safeAddress :: Address
     }
 
-safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> Result (ErrService + ErrNative + r) Unit
+type ErrSafeDeploy r
+  = ErrService + ErrNative + r
+
+safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> Result (ErrSafeDeploy r) Unit
 safeDeploy cc = mapFn2 (convertCore cc).safe.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
     x
       { safeAddress = addrToString x.safeAddress
       }
+
+--------------------------------------------------------------------------------
+-- API / safePredictAddress
+--------------------------------------------------------------------------------
+type ErrSafePredictAddress r
+  = ErrNative + r
+
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) P.Address
+safePredictAddress cc = mapFn2 (convertCore cc).safe.predictAddress pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
+  where
+  mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
+
+  mapOk = P.unsafeAddrFromString
+
+--------------------------------------------------------------------------------
+-- API / safePrepareDeploy
+--------------------------------------------------------------------------------
+type ErrSafePrepareDeploy r
+  = ErrNative + r
+
+safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) P.Address
+safePrepareDeploy cc = mapFn2 (convertCore cc).safe.prepareDeploy pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
+  where
+  mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
+
+  mapOk = P.unsafeAddrFromString
 
 --------------------------------------------------------------------------------
 -- API / safeIsFunded

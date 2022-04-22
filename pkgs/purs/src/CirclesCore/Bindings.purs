@@ -8,18 +8,13 @@ module CirclesCore.Bindings
   , Provider
   , TrustIsTrustedResult
   , User
-  , UserOptions
   , Web3
   , convertCore
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
-  , safePredictAddress
-  , safePrepareDeploy
-  , safePrepareDeployImpl
   , unsafeSampleCore
-  , userRegister
   ) where
 
 import Prelude
@@ -28,8 +23,7 @@ import Control.Promise (Promise)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3)
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Effect.Aff.Compat (EffectFnAff)
 import Foreign (Foreign)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -51,6 +45,11 @@ type User
     , avatarUrl :: String
     }
 
+type TrustIsTrustedResult
+  = { trustConnections :: Int
+    , isTrusted :: Boolean
+    }
+
 --------------------------------------------------------------------------------
 -- FFI
 --------------------------------------------------------------------------------
@@ -59,16 +58,6 @@ foreign import newWebSocketProvider :: String -> Effect Provider
 foreign import newWeb3 :: Provider -> Effect Web3
 
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
-
-foreign import safePredictAddress :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
-
---------------------------------------------------------------------------------
--- FFI / safePrepareDeploy
---------------------------------------------------------------------------------
-foreign import safePrepareDeployImpl :: CirclesCore -> Account -> { nonce :: BigInt } -> EffectFnAff String
-
-safePrepareDeploy :: CirclesCore -> Account -> { nonce :: BigInt } -> Aff String
-safePrepareDeploy x1 x2 x3 = fromEffectFnAff $ safePrepareDeployImpl x1 x2 x3
 
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
@@ -106,6 +95,8 @@ type CirclesCore_
     , safe ::
         { deploy :: Fn2Promise Account { safeAddress :: String } Boolean
         , isFunded :: Fn2Promise Account { safeAddress :: String } Boolean
+        , predictAddress :: Fn2Promise Account { nonce :: BigInt } String
+        , prepareDeploy :: Fn2Promise Account { nonce :: BigInt } String
         , getSafeStatus ::
             Fn2Promise Account { safeAddress :: String }
               { isCreated :: Boolean
@@ -137,29 +128,6 @@ type CirclesCore_
     }
 
 foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_
-
---------------------------------------------------------------------------------
--- FFI / userRegister
---------------------------------------------------------------------------------
-type UserOptions
-  = { nonce :: BigInt
-    , safeAddress :: String
-    , username :: String
-    , email :: String
-    }
-
-foreign import userRegisterImpl :: CirclesCore -> Account -> UserOptions -> EffectFnAff Boolean
-
-userRegister :: CirclesCore -> Account -> UserOptions -> Aff Boolean
-userRegister x1 x2 x3 = fromEffectFnAff $ userRegisterImpl x1 x2 x3
-
---------------------------------------------------------------------------------
--- trustIsTrusted
--------------------------------------------------------------------------------
-type TrustIsTrustedResult
-  = { trustConnections :: Int
-    , isTrusted :: Boolean
-    }
 
 --------------------------------------------------------------------------------
 -- Utils

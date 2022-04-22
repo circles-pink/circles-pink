@@ -14,24 +14,8 @@ exports.newCirclesCore = (web3) => (options) => () =>
 exports.mkCirclesCore = (web3) => (options) => () =>
   new CirclesCore(web3, options);
 
-exports.userRegisterImpl =
-  (circlesCore) => (account) => (options) => (onErr, onSucc) =>
-    circlesCore.user.register(account, options).then(onSucc).catch(onErr);
-
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
-
-// CirclesCore - Safe
-
-exports.safePredictAddress =
-  (circlesCore) => (account) => (options) => (onErr, onSucc) => {
-    circlesCore.safe.predictAddress(account, options).then(onSucc).catch(onErr);
-  };
-
-exports.safePrepareDeployImpl =
-  (circlesCore) => (account) => (options) => (onErr, onSucc) => {
-    circlesCore.safe.prepareDeploy(account, options).then(onSucc).catch(onErr);
-  };
 
 // CirclesCore - unsafe debug
 

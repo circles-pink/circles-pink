@@ -10,18 +10,13 @@ import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, lift, mapExceptT, runExceptT)
+import Control.Monad.Except (class MonadTrans, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
 import Debug.Extra (todo)
-import Effect (Effect)
-import Effect.Aff (Aff, attempt)
-import Effect.Class (liftEffect)
-import Prim.TypeError (class Warn, Text)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
