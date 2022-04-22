@@ -20,6 +20,7 @@ import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
+import CirclesPink.Garden.StateMachine.Control.States as States
 
 circlesControl ::
   forall t m.
@@ -49,10 +50,7 @@ circlesControl env =
         , setPrivacy: \set _ _ -> set \st -> S._askEmail st { privacy = not st.privacy }
         , next: askEmailNext
         }
-    , infoSecurity:
-        { prev: \set _ _ -> set \st -> S._askEmail st { direction = D._backwards }
-        , next: infoSecurityNext
-        }
+    , infoSecurity: States.infoSecurity env
     , magicWords:
         { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D._backwards }
         , newPrivKey: magicWordsNewPrivateKey
@@ -250,7 +248,7 @@ circlesControl env =
         _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
         _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
         _ <- env.deploySafe st.privKey
-        _ <- env.deployToken st.privKey
+        _ <- (env.deployToken st.privKey <#> const unit)
         pure unit
     results <- run' task
     case results of
