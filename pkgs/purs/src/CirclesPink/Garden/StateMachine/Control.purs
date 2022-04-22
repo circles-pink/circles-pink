@@ -5,8 +5,7 @@ module CirclesPink.Garden.StateMachine.Control
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
-import CirclesPink.Garden.StateMachine.Control.Env (EnvIsFundedError, EnvIsTrustedError)
-import CirclesPink.Garden.StateMachine.Control.Env as E
+import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
@@ -28,7 +27,7 @@ circlesControl ::
   Monad m =>
   MonadTrans t =>
   Monad (t m) =>
-  E.Env m -> ((S.CirclesState -> S.CirclesState) -> t m Unit) -> S.CirclesState -> CirclesAction -> t m Unit
+  Env.Env m -> ((S.CirclesState -> S.CirclesState) -> t m Unit) -> S.CirclesState -> CirclesAction -> t m Unit
 circlesControl env =
   C.mkControl
     _circlesStateMachine
@@ -278,7 +277,10 @@ type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row 
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
 
-isReady :: forall m r. Monad m => E.Env m -> PrivateKey -> ExceptV (EnvIsTrustedError + EnvIsFundedError + r) m Boolean
+type ErrIsReady r
+  = Env.ErrIsTrusted + Env.ErrIsFunded + r
+
+isReady :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrIsReady r) m Boolean
 isReady { isTrusted, isFunded } privKey = do
   isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
   isFunded' <- isFunded privKey
