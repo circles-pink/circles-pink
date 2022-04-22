@@ -36,83 +36,27 @@ circlesControl env =
         , signIn: \set _ _ -> set $ \_ -> S.initLogin
         }
     , infoGeneral:
-        { next:
-            \set _ _ -> set $ \st -> S._askUsername st { direction = D._forwards }
+        { next: \set _ _ -> set $ \st -> S._askUsername st { direction = D._forwards }
         }
     , askUsername:
-        { prev:
-            \set _ _ -> set $ \st -> S._infoGeneral st { direction = D._backwards }
-        , setUsername:
-            \set _ username -> do
-              set $ \st -> S._askUsername st { username = username }
-              set
-                $ \st ->
-                    S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-              result <- lift $ runExceptT $ env.apiCheckUserName username
-              set
-                $ \st ->
-                    if username == st.username then case result of
-                      Left e -> S._askUsername st { usernameApiResult = _failure e }
-                      Right x -> S._askUsername st { usernameApiResult = _success x }
-                    else
-                      S._askUsername st
-        , next:
-            \set _ _ ->
-              set
-                $ \st ->
-                    let
-                      usernameValid =
-                        default false
-                          # onMatch
-                              { success: (\r -> r.isValid) }
-                    in
-                      if usernameValid st.usernameApiResult then
-                        S._askEmail st { direction = D._forwards }
-                      else
-                        S._askUsername st { direction = D._forwards }
+        { prev: \set _ _ -> set $ \st -> S._infoGeneral st { direction = D._backwards }
+        , setUsername: askUsernameSetUsername
+        , next: askUsernameNext
         }
     , askEmail:
-        { prev:
-            \set _ _ -> set $ \st -> S._askUsername st { direction = D._backwards }
-        , setEmail:
-            \set _ email -> do
-              set $ \st -> S._askEmail st { email = email }
-              set
-                $ \st ->
-                    S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-              result <- lift $ runExceptT $ env.apiCheckEmail email
-              set
-                $ \st ->
-                    if email == st.email then case result of
-                      Left e -> S._askEmail st { emailApiResult = _failure e }
-                      Right x -> S._askEmail st { emailApiResult = _success x }
-                    else
-                      S._askEmail st
-              pure unit
+        { prev: \set _ _ -> set $ \st -> S._askUsername st { direction = D._backwards }
+        , setEmail: askEmailSetEmail
         , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
         , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
         , next: askEmailNext
         }
     , infoSecurity:
-        { prev:
-            \set _ _ -> set $ \st -> S._askEmail st { direction = D._backwards }
-        , next:
-            \set _ _ -> do
-              pk <- lift $ env.generatePrivateKey
-              set
-                $ \st ->
-                    if P.zeroKey == st.privateKey then
-                      S._magicWords st { privateKey = pk, direction = D._forwards }
-                    else
-                      S._magicWords st { direction = D._forwards }
+        { prev: \set _ _ -> set $ \st -> S._askEmail st { direction = D._backwards }
+        , next: infoSecurityNext
         }
     , magicWords:
-        { prev:
-            \set _ _ -> set $ \st -> S._infoSecurity st { direction = D._backwards }
-        , newPrivKey:
-            \set _ _ -> do
-              pk <- lift $ env.generatePrivateKey
-              set $ \st -> S._magicWords st { privateKey = pk }
+        { prev: \set _ _ -> set $ \st -> S._infoSecurity st { direction = D._backwards }
+        , newPrivKey: magicWordsNewPrivateKey
         , next: \set _ _ -> set $ \st -> S._submit st { direction = D._forwards }
         }
     , submit:
@@ -125,10 +69,8 @@ circlesControl env =
         }
     , login:
         { login: loginLogin
-        , signUp:
-            \set _ _ -> set $ \_ -> S.init
-        , setMagicWords:
-            \set _ words -> set $ \st -> S._login st { magicWords = words }
+        , signUp: \set _ _ -> set $ \_ -> S.init
+        , setMagicWords: \set _ words -> set $ \st -> S._login st { magicWords = words }
         }
     , trusts:
         { continue: \set _ _ -> pure unit
@@ -140,6 +82,42 @@ circlesControl env =
         }
     }
   where
+  --------------------------------------------------------------------------------
+  -- AskUsername
+  --------------------------------------------------------------------------------
+  askUsernameSetUsername :: ActionHandler t m String S.UserData ( "askUsername" :: S.UserData )
+  askUsernameSetUsername set _ username = do
+    set $ \st -> S._askUsername st { username = username }
+    set
+      $ \st ->
+          S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    result <- lift $ runExceptT $ env.apiCheckUserName username
+    set
+      $ \st ->
+          if username == st.username then case result of
+            Left e -> S._askUsername st { usernameApiResult = _failure e }
+            Right x -> S._askUsername st { usernameApiResult = _success x }
+          else
+            S._askUsername st
+
+  askUsernameNext :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData, "askEmail" :: S.UserData )
+  askUsernameNext set _ _ =
+    set
+      $ \st ->
+          let
+            usernameValid =
+              default false
+                # onMatch
+                    { success: (\r -> r.isValid) }
+          in
+            if usernameValid st.usernameApiResult then
+              S._askEmail st { direction = D._forwards }
+            else
+              S._askUsername st { direction = D._forwards }
+
+  --------------------------------------------------------------------------------
+  -- AskUEmail
+  --------------------------------------------------------------------------------
   askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
   askEmailNext set _ _ =
     set
@@ -155,6 +133,48 @@ circlesControl env =
             else
               S._askEmail st { direction = D._forwards }
 
+  askEmailSetEmail :: ActionHandler t m String S.UserData ( "askEmail" :: S.UserData )
+  askEmailSetEmail set _ email = do
+    set \st -> S._askEmail st { email = email }
+    set \st ->
+      S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    result <- lift $ runExceptT $ env.apiCheckEmail email
+    set \st ->
+      if email == st.email then case result of
+        Left e -> S._askEmail st { emailApiResult = _failure e }
+        Right x -> S._askEmail st { emailApiResult = _success x }
+      else
+        S._askEmail st
+    pure unit
+
+  --------------------------------------------------------------------------------
+  -- InfoSecurity
+  --------------------------------------------------------------------------------
+  infoSecurityNext :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
+  infoSecurityNext set _ _ = do
+    result <- lift $ runExceptT $ env.generatePrivateKey
+    case result of
+      Right pk ->
+        set \st ->
+          if P.zeroKey == st.privateKey then
+            S._magicWords st { privateKey = pk, direction = D._forwards }
+          else
+            S._magicWords st { direction = D._forwards }
+      Left _ -> pure unit
+
+  --------------------------------------------------------------------------------
+  -- MagicWords
+  --------------------------------------------------------------------------------
+  magicWordsNewPrivateKey :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
+  magicWordsNewPrivateKey set _ _ = do
+    result <- lift $ runExceptT $ env.generatePrivateKey
+    case result of
+      Right pk -> set \st -> S._magicWords st { privateKey = pk }
+      Left _ -> pure unit
+
+  --------------------------------------------------------------------------------
+  -- Login
+  --------------------------------------------------------------------------------
   loginLogin :: ActionHandler t m Unit S.LoginState ( "login" :: S.LoginState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   loginLogin set st _ = do
     let
@@ -195,6 +215,9 @@ circlesControl env =
             , isReady
             }
 
+  --------------------------------------------------------------------------------
+  -- Debug
+  --------------------------------------------------------------------------------
   debugCoreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
   debugCoreToWindow _ st _ = do
     let
@@ -204,6 +227,9 @@ circlesControl env =
     _ <- lift $ runExceptT $ env.coreToWindow privKey
     pure unit
 
+  --------------------------------------------------------------------------------
+  -- Dashbaord
+  --------------------------------------------------------------------------------
   dashboardGetTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   dashboardGetTrusts set st _ = do
     result <- lift $ runExceptT $ env.trustGetNetwork st.privKey
@@ -211,6 +237,9 @@ circlesControl env =
       Left e -> set \st' -> S._dashboard st' { error = pure e }
       Right t -> set \st' -> S._dashboard st' { trusts = t }
 
+  --------------------------------------------------------------------------------
+  -- Trusts
+  --------------------------------------------------------------------------------
   trustsGetSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
   trustsGetSafeStatus set st _ = do
     result <- lift $ runExceptT $ env.getSafeStatus st.privKey
@@ -238,6 +267,9 @@ circlesControl env =
                 , error: Nothing
                 }
 
+  --------------------------------------------------------------------------------
+  -- Submit
+  --------------------------------------------------------------------------------
   submitSubmit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
   submitSubmit set st _ = do
     let
@@ -277,6 +309,7 @@ type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row 
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
 
+--------------------------------------------------------------------------------
 type ErrIsReady r
   = Env.ErrIsTrusted + Env.ErrIsFunded + r
 
@@ -285,3 +318,5 @@ isReady { isTrusted, isFunded } privKey = do
   isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
   isFunded' <- isFunded privKey
   pure (isTrusted' || isFunded')
+
+--------------------------------------------------------------------------------
