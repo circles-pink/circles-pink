@@ -7,7 +7,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, lift, runExceptT)
+import Control.Monad.Except (class MonadTrans, catchError, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -89,28 +89,26 @@ circlesControl env =
     set \st -> S._askUsername st { username = username }
     set \st -> S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
     result <- run $ env.apiCheckUserName username
-    set
-      $ \st ->
-          if username == st.username then case result of
-            Left e -> S._askUsername st { usernameApiResult = _failure e }
-            Right x -> S._askUsername st { usernameApiResult = _success x }
-          else
-            S._askUsername st
+    set \st ->
+      if username == st.username then case result of
+        Left e -> S._askUsername st { usernameApiResult = _failure e }
+        Right x -> S._askUsername st { usernameApiResult = _success x }
+      else
+        S._askUsername st
 
   askUsernameNext :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData, "askEmail" :: S.UserData )
   askUsernameNext set _ _ =
-    set
-      $ \st ->
-          let
-            usernameValid =
-              default false
-                # onMatch
-                    { success: (\r -> r.isValid) }
-          in
-            if usernameValid st.usernameApiResult then
-              S._askEmail st { direction = D._forwards }
-            else
-              S._askUsername st { direction = D._forwards }
+    set \st ->
+      let
+        usernameValid =
+          default false
+            # onMatch
+                { success: (\r -> r.isValid) }
+      in
+        if usernameValid st.usernameApiResult then
+          S._askEmail st { direction = D._forwards }
+        else
+          S._askUsername st { direction = D._forwards }
 
   --------------------------------------------------------------------------------
   -- AskEmail
@@ -249,6 +247,8 @@ circlesControl env =
     let
       task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _
       task = do
+        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
+        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
         _ <- env.deploySafe st.privKey
         _ <- env.deployToken st.privKey
         pure unit
@@ -256,14 +256,13 @@ circlesControl env =
     case results of
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right _ ->
-        set
-          $ \_ ->
-              S._dashboard
-                { user: st.user
-                , trusts: st.trusts
-                , privKey: st.privKey
-                , error: Nothing
-                }
+        set \_ ->
+          S._dashboard
+            { user: st.user
+            , trusts: st.trusts
+            , privKey: st.privKey
+            , error: Nothing
+            }
 
   --------------------------------------------------------------------------------
   -- Submit
@@ -325,4 +324,4 @@ run' :: forall t m e e' a. MonadTrans t => Nub e e' => Monad m => ExceptV e m a 
 run' = lift <<< runExceptT'
   where
   runExceptT' :: ExceptV e m a -> m (Either (Variant e') a)
-  runExceptT' = unsafeCoerce runExceptT
+  runExceptT' = unsafeCoerce <<< runExceptT
