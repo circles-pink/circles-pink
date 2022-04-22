@@ -1,6 +1,4 @@
-module CirclesPink.Garden.StateMachine.Control
-  ( circlesControl
-  ) where
+module CirclesPink.Garden.StateMachine.Control (circlesControl) where
 
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
@@ -9,17 +7,17 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
+import Control.Monad.Except (class MonadTrans, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
-import Debug.Extra (todo)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
@@ -89,9 +87,7 @@ circlesControl env =
   askUsernameSetUsername :: ActionHandler t m String S.UserData ( "askUsername" :: S.UserData )
   askUsernameSetUsername set _ username = do
     set \st -> S._askUsername st { username = username }
-    set
-      $ \st ->
-          S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    set \st -> S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
     result <- run $ env.apiCheckUserName username
     set
       $ \st ->
@@ -121,24 +117,22 @@ circlesControl env =
   --------------------------------------------------------------------------------
   askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
   askEmailNext set _ _ =
-    set
-      $ \st ->
-          let
-            emailValid =
-              default false
-                # onMatch
-                    { success: (\r -> r.isValid) }
-          in
-            if (emailValid st.emailApiResult) && st.terms && st.privacy then
-              S._infoSecurity st { direction = D._forwards }
-            else
-              S._askEmail st { direction = D._forwards }
+    set \st ->
+      let
+        emailValid =
+          default false
+            # onMatch
+                { success: (\r -> r.isValid) }
+      in
+        if emailValid st.emailApiResult && st.terms && st.privacy then
+          S._infoSecurity st { direction = D._forwards }
+        else
+          S._askEmail st { direction = D._forwards }
 
   askEmailSetEmail :: ActionHandler t m String S.UserData ( "askEmail" :: S.UserData )
   askEmailSetEmail set _ email = do
     set \st -> S._askEmail st { email = email }
-    set \st ->
-      S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    set \st -> S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
     result <- run $ env.apiCheckEmail email
     set \st ->
       if email == st.email then case result of
@@ -183,7 +177,7 @@ circlesControl env =
 
       privKey = P.mnemonicToKey mnemonic
 
-      task :: ExceptV ( Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrIsTrusted  + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + () ) _ _
+      task :: ExceptV (Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
       task = do
         user <- env.userResolve privKey
         safeStatus <- env.getSafeStatus privKey
@@ -252,11 +246,13 @@ circlesControl env =
 
   trustsFinalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   trustsFinalizeRegisterUser set st _ = do
-    results <-
-      run do
+    let
+      task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _
+      task = do
         _ <- env.deploySafe st.privKey
         _ <- env.deployToken st.privKey
         pure unit
+    results <- run' task
     case results of
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right _ ->
@@ -325,7 +321,8 @@ readyForDeployment { isTrusted, isFunded } privKey = do
 run :: forall t m e a. MonadTrans t => Monad m => ExceptV e m a -> t m (Either (Variant e) a)
 run = lift <<< runExceptT
 
-run' ::
-  forall t (m :: Type -> Type) (e :: Row Type) (e' :: Row Type) (a :: Type).
-  MonadTrans t => Nub e e' => Monad m => ExceptV e m a -> t m (Either (Variant e') a)
-run' = todo -- lift <<< runExceptT
+run' :: forall t m e e' a. MonadTrans t => Nub e e' => Monad m => ExceptV e m a -> t m (Either (Variant e') a)
+run' = lift <<< runExceptT'
+  where
+  runExceptT' :: ExceptV e m a -> m (Either (Variant e') a)
+  runExceptT' = unsafeCoerce runExceptT
