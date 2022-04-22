@@ -1,4 +1,4 @@
-module CirclesPink.Garden.StateMachine.Control.Util where
+module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Env as Env

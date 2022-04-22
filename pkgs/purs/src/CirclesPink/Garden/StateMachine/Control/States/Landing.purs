@@ -2,7 +2,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Landing where
 
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.Control.Util (ActionHandler)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Trans.Class (class MonadTrans)
 
