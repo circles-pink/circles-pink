@@ -59,7 +59,7 @@
         gardenApi = "https://api.circles.garden";
         gardenApiUsers = "https://api.circles.garden/api/users";
         gardenGraphApi = "https://api.thegraph.com";
-        gardenSubgraphName = "CirclesUBI/circles-subgraph";
+        gardenSubgraphName = "azf20/circles-ubi";
         gardenRelay = "https://relay.circles.garden";
         gardenHubAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
         gardenProxyFactoryAddress = "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb";
