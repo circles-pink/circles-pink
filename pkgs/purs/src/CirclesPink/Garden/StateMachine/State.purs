@@ -95,7 +95,8 @@ type TrustState
     , error ::
         Maybe
           ( Variant
-              ( errService ∷ Unit
+              ( errApi :: Unit
+              , errService ∷ Unit
               , errNative ∷ NativeError
               , errInvalidUrl :: String
               )

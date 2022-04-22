@@ -51,7 +51,7 @@ type EnvIsTrustedError r
   = ErrNative + ErrInvalidUrl + r
 
 type EnvIsFundedError r
-  = ErrNative + r
+  = ErrNative + ErrInvalidUrl + r
 
 type EnvTrustGetNetworkError r
   = ErrNative + ErrInvalidUrl + r

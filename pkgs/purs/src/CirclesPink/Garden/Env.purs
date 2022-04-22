@@ -83,6 +83,7 @@ env { request, envVars } =
   , getSafeStatus
   , deploySafe
   , deployToken
+  , isFunded
   }
   where
   apiCheckUserName :: E.EnvApiCheckUserName Aff
@@ -171,6 +172,18 @@ env { request, envVars } =
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustIsTrusted circlesCore account { safeAddress, limit: 3 }
+
+  isFunded :: E.EnvIsFunded Aff
+  isFunded privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    CC.safeIsFunded circlesCore account { safeAddress }
 
   trustGetNetwork :: E.EnvTrustGetNetwork Aff
   trustGetNetwork privKey = do
@@ -270,4 +283,7 @@ testEnv =
   , deployToken:
       \_ ->
         pure ""
+  , isFunded:
+      \_ ->
+        pure false
   }
