@@ -61,11 +61,7 @@ circlesControl env =
         { logout: \_ _ _ -> pure unit
         , getTrusts: dashboardGetTrusts
         }
-    , login:
-        { login: loginLogin
-        , signUp: \set _ _ -> set \_ -> S.init
-        , setMagicWords: \set _ words -> set \st -> S._login st { magicWords = words }
-        }
+    , login: States.login env
     , trusts:
         { continue: \_ _ _ -> pure unit
         , getSafeStatus: trustsGetSafeStatus
@@ -159,51 +155,6 @@ circlesControl env =
     case result of
       Right pk -> set \st -> S._magicWords st { privateKey = pk }
       Left _ -> pure unit
-
-  --------------------------------------------------------------------------------
-  -- Login
-  --------------------------------------------------------------------------------
-  loginLogin :: ActionHandler t m Unit S.LoginState ( "login" :: S.LoginState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
-  loginLogin set st _ = do
-    let
-      mnemonic = P.getMnemonicFromString st.magicWords
-
-      privKey = P.mnemonicToKey mnemonic
-
-      task :: ExceptV (Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
-      task = do
-        user <- env.userResolve privKey
-        safeStatus <- env.getSafeStatus privKey
-        isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
-        trusts <-
-          if isTrusted then
-            pure []
-          else
-            env.trustGetNetwork privKey
-        isReady' <- readyForDeployment env privKey
-        pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
-    results <- run' task
-    case results of
-      Left e -> set \st' -> S._login st' { error = pure e }
-      Right { user, trusts, safeStatus }
-        | safeStatus.isCreated && safeStatus.isDeployed ->
-          set \_ ->
-            S._dashboard
-              { user
-              , trusts
-              , privKey
-              , error: Nothing
-              }
-      Right { user, trusts, safeStatus, isReady } ->
-        set \_ ->
-          S._trusts
-            { user
-            , trusts
-            , privKey
-            , safeStatus
-            , error: Nothing
-            , isReady
-            }
 
   --------------------------------------------------------------------------------
   -- Debug
@@ -300,16 +251,6 @@ circlesControl env =
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
-
---------------------------------------------------------------------------------
-type ErrIsReady r
-  = Env.ErrIsTrusted + Env.ErrIsFunded + r
-
-readyForDeployment :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrIsReady r) m Boolean
-readyForDeployment { isTrusted, isFunded } privKey = do
-  isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
-  isFunded' <- isFunded privKey
-  pure (isTrusted' || isFunded')
 
 --------------------------------------------------------------------------------
 run :: forall t m e a. MonadTrans t => Monad m => ExceptV e m a -> t m (Either (Variant e) a)
