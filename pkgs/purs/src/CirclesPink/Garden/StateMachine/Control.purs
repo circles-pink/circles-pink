@@ -31,10 +31,7 @@ circlesControl ::
 circlesControl env =
   C.mkControl
     _circlesStateMachine
-    { landing:
-        { signUp: \set _ _ -> set \_ -> S.init
-        , signIn: \set _ _ -> set \_ -> S.initLogin
-        }
+    { landing: States.landing env
     , infoGeneral:
         { next: \set _ _ -> set \st -> S._askUsername st { direction = D._forwards }
         }
