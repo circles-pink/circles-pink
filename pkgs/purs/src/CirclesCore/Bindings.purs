@@ -1,7 +1,5 @@
 module CirclesCore.Bindings
   ( Account
-  , ApiError
-  , ApiResult
   , CirclesCore
   , CirclesCore_
   , Options
@@ -12,7 +10,6 @@ module CirclesCore.Bindings
   , User
   , UserOptions
   , Web3
-  , apiResultToEither
   , convertCore
   , newCirclesCore
   , newWeb3
@@ -31,15 +28,13 @@ module CirclesCore.Bindings
 import Prelude
 import Control.Promise (Promise)
 import Data.BigInt (BigInt)
-import Data.Either (Either(..))
 import Data.Function.Uncurried (Fn2)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Foreign (Foreign, unsafeFromForeign)
-import Foreign.Object (Object)
-import Foreign.Object.Unsafe (unsafeIndex)
+import Foreign (Foreign)
 import Unsafe.Coerce (unsafeCoerce)
+import CirclesCore.ApiResult (ApiResult)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -200,31 +195,6 @@ type TrustIsTrustedResult
 --------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
-type ApiError
-  = { message :: String, code :: Int }
-
-newtype ApiResult :: forall k. k -> Type
-newtype ApiResult a
-  = ApiResult (Object Foreign)
-
-apiResultToEither :: forall a. ApiResult a -> Either ApiError a
-apiResultToEither (ApiResult fo) =
-  let
-    status = unsafeIndex fo "status" # unsafeFromForeign
-  in
-    if status == "ok" then
-      let
-        data_ = unsafeIndex fo "data" # unsafeFromForeign
-      in
-        Right data_
-    else
-      let
-        code = unsafeIndex fo "code" # unsafeFromForeign
-
-        message = unsafeIndex fo "message" # unsafeFromForeign
-      in
-        Left { code, message }
-
 foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit
 
 convertCore :: CirclesCore -> CirclesCore_

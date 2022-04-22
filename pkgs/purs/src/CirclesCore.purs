@@ -1,5 +1,6 @@
 module CirclesCore
   ( Err
+  , ErrApi
   , ErrInvalidUrl
   , ErrNative
   , ErrService
@@ -8,6 +9,7 @@ module CirclesCore
   , TrustNode
   , User
   , UserOptions
+  , _errApi
   , _errInvalidUrl
   , module Exp
   , newCirclesCore
@@ -29,8 +31,10 @@ module CirclesCore
   ) where
 
 import Prelude
-import CirclesCore.Bindings (ApiError, apiResultToEither, convertCore)
-import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, ApiError, TrustIsTrustedResult) as Exp
+import CirclesCore.ApiResult (apiResultToEither, ApiError)
+import CirclesCore.ApiResult (ApiError) as Exp
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult) as Exp
+import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
 import Control.Monad.Except (ExceptT(..))
@@ -261,7 +265,7 @@ tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mk
       }
 
 --------------------------------------------------------------------------------
--- Error
+-- Err slices
 --------------------------------------------------------------------------------
 type ErrNative r
   = ( errNative :: NativeError | r )
@@ -269,22 +273,32 @@ type ErrNative r
 type ErrInvalidUrl r
   = ( errInvalidUrl :: String | r )
 
-_errInvalidUrl :: forall r. String -> Variant (ErrInvalidUrl r)
-_errInvalidUrl = inj (Proxy :: _ "errInvalidUrl")
-
 type ErrApi r
   = ( errApi :: ApiError | r )
 
 type ErrService r
   = ( errService :: Unit | r )
 
-type Err r
-  = ErrNative + ErrService + ErrInvalidUrl + r
+--------------------------------------------------------------------------------
+-- Err constructors
+--------------------------------------------------------------------------------
+_errNative :: forall r. NativeError -> Variant (ErrNative r)
+_errNative = inj (Proxy :: _ "errNative")
 
-type NativeError
-  = { message :: String
-    , name :: String
-    }
+_errInvalidUrl :: forall r. String -> Variant (ErrInvalidUrl r)
+_errInvalidUrl = inj (Proxy :: _ "errInvalidUrl")
+
+_errApi :: forall r. ApiError -> Variant (ErrApi r)
+_errApi = inj (Proxy :: _ "errApi")
+
+_errService :: forall r. Unit -> Variant (ErrService r)
+_errService = inj (Proxy :: _ "errService")
+
+--------------------------------------------------------------------------------
+-- Err composition
+--------------------------------------------------------------------------------
+type Err r
+  = ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
 
 printErr :: Variant (Err ()) -> String
 printErr =
@@ -292,6 +306,15 @@ printErr =
     # on (Proxy :: _ "errNative") (\e -> "Native: " <> e.name <> ": " <> e.message)
     # on (Proxy :: _ "errService") (\_ -> "service error")
     # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
+    # on (Proxy :: _ "errApi") (\e -> "Api Error: " <> show e)
+
+--------------------------------------------------------------------------------
+-- Error types
+--------------------------------------------------------------------------------
+type NativeError
+  = { message :: String
+    , name :: String
+    }
 
 --------------------------------------------------------------------------------
 -- Util
