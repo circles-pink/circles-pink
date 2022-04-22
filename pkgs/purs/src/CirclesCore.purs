@@ -51,6 +51,9 @@ import Wallet.PrivateKey as P
 --------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------
+type Result e a
+  = ExceptV e Aff a
+
 newWebSocketProvider :: forall r. String -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect B.Provider
 newWebSocketProvider x1 =
   B.newWebSocketProvider x1
@@ -79,7 +82,7 @@ privKeyToAccount w3 pk =
     <#> lmap mkErrorNative
     # ExceptT
 
-safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrNative + r) P.Address
 safePredictAddress cc ac opts =
   B.safePredictAddress cc ac { nonce: P.nonceToBigInt opts.nonce }
     # fromEffectFnAff
@@ -88,7 +91,7 @@ safePredictAddress cc ac opts =
     <#> lmap mkErrorNative
     # ExceptT
 
-safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> ExceptV (ErrNative + r) Aff P.Address
+safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrNative + r) P.Address
 safePrepareDeploy cc ac opts =
   B.safePrepareDeploy cc ac { nonce: P.nonceToBigInt opts.nonce }
     <#> P.unsafeAddrFromString
@@ -104,7 +107,7 @@ type TrustIsTrustedOptions
     , limit :: Int
     }
 
-trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> ExceptV (ErrNative + r) Aff B.TrustIsTrustedResult
+trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> Result (ErrNative + r) B.TrustIsTrustedResult
 trustIsTrusted cc = mapFn2 (convertCore cc).trust.isTrusted pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
@@ -124,7 +127,7 @@ type TrustNode
     , safeAddress :: Address
     }
 
-trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> ExceptV (ErrNative + r) Aff (Array TrustNode)
+trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrNative + r) (Array TrustNode)
 trustGetNetwork cc ac opts =
   B.trustGetNetwork cc ac { safeAddress: P.addrToString opts.safeAddress }
     # fromEffectFnAff
@@ -146,7 +149,7 @@ type UserOptions
     , email :: String
     }
 
-userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> Result (ErrService + ErrNative + r) Unit
 userRegister cc = mapFn2 (convertCore cc).user.register pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
@@ -170,7 +173,7 @@ type User
     , avatarUrl :: String
     }
 
-userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> ExceptV (ErrNative + ErrApi + r) Aff (Array User)
+userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrNative + ErrApi + r) (Array User)
 userResolve cc ac opts =
   B.userResolve cc ac
     { addresses: map addrToString opts.addresses
@@ -199,7 +202,7 @@ type SafeDeployOptions
   = { safeAddress :: Address
     }
 
-safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff Unit
+safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> Result (ErrService + ErrNative + r) Unit
 safeDeploy cc = mapFn2 (convertCore cc).safe.deploy pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   mapArg2 x =
@@ -214,7 +217,7 @@ type SafeIsFundedOptions
   = { safeAddress :: Address
     }
 
-safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> ExceptV (ErrNative + r) Aff Boolean
+safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> Result (ErrNative + r) Boolean
 safeIsFunded cc = mapFn2 (convertCore cc).safe.isFunded pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
@@ -234,7 +237,7 @@ type SafeStatus
     , isDeployed :: Boolean
     }
 
-safeGetSafeStatus :: forall r. B.CirclesCore -> B.Account -> SafeGetSafeStatusOptions -> ExceptV (ErrNative + r) Aff SafeStatus
+safeGetSafeStatus :: forall r. B.CirclesCore -> B.Account -> SafeGetSafeStatusOptions -> Result (ErrNative + r) SafeStatus
 safeGetSafeStatus cc = mapFn2 (convertCore cc).safe.getSafeStatus pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
@@ -249,7 +252,7 @@ type TokenDeployOptions
   = { safeAddress :: Address
     }
 
-tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> ExceptV (ErrService + ErrNative + r) Aff String
+tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> Result (ErrService + ErrNative + r) String
 tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x =
@@ -293,7 +296,7 @@ printErr =
 --------------------------------------------------------------------------------
 -- Util
 --------------------------------------------------------------------------------
-unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> ExceptV (ErrNative + r) Aff Unit
+unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> Result (ErrNative + r) Unit
 unsafeSampleCore x1 x2 =
   B.unsafeSampleCore x1 x2
     # fromEffectFnAff
