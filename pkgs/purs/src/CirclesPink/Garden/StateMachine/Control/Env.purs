@@ -1,32 +1,35 @@
 module CirclesPink.Garden.StateMachine.Control.Env
-  ( CoreToWindowError
+  ( ApiCheckEmail
+  , ApiCheckUserName
+  , CoreToWindow
+  , DeploySafe
+  , DeployToken
   , Env
-  , EnvApiCheckEmail
-  , EnvApiCheckUserName
-  , EnvCoreToWindow
-  , EnvDeploySafe
-  , EnvDeploySafeError
-  , EnvDeployToken
-  , EnvDeployTokenError
-  , EnvGetSafeAddress
-  , EnvGetSafeStatus
-  , EnvGetSafeStatusError
-  , EnvIsFunded
-  , EnvIsFundedError
-  , EnvIsTrusted
-  , EnvIsTrustedError
-  , EnvTrustGetNetwork
-  , EnvTrustGetNetworkError
-  , EnvUserResolve
-  , GetSafeAddressError
-  , PrepareSafeDeployError
-  , RegisterError
+  , ErrCoreToWindow
+  , ErrDeploySafe
+  , ErrDeployToken
+  , ErrGetSafeAddress
+  , ErrGetSafeStatus
+  , ErrIsFunded
+  , ErrIsTrusted
+  , ErrPrepareSafeDeploy
+  , ErrTrustGetNetwork
+  , ErrUserRegister
+  , ErrUserResolve
+  , GeneratePrivateKey
+  , GetSafeAddress
+  , GetSafeStatus
+  , IsFunded
+  , IsTrusted
+  , PrepareSafeDeploy
+  , TrustGetNetwork
   , UserNotFoundError
-  , UserResolveError
+  , UserRegister
+  , UserResolve
   ) where
 
 import Prelude
-import CirclesCore (ApiError, ErrInvalidUrl, ErrNative, ErrService, TrustIsTrustedResult, TrustNode, User, UserOptions, SafeStatus)
+import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -36,30 +39,6 @@ import Wallet.PrivateKey (Address, PrivateKey)
 --------------------------------------------------------------------------------
 -- Error
 --------------------------------------------------------------------------------
-type RegisterError r
-  = ErrService + ErrNative + ErrInvalidUrl + r
-
-type GetSafeAddressError r
-  = ErrNative + ErrInvalidUrl + r
-
-type PrepareSafeDeployError r
-  = ErrNative + ErrInvalidUrl + r
-
-type CoreToWindowError r
-  = ErrNative + ErrInvalidUrl + r
-
-type EnvIsTrustedError r
-  = ErrNative + ErrInvalidUrl + r
-
-type EnvIsFundedError r
-  = ErrNative + ErrInvalidUrl + r
-
-type EnvTrustGetNetworkError r
-  = ErrNative + ErrInvalidUrl + r
-
-type EnvGetSafeStatusError r
-  = ErrNative + ErrInvalidUrl + r
-
 type UserNotFoundError
   = { safeAddress :: Address
     }
@@ -67,76 +46,108 @@ type UserNotFoundError
 --------------------------------------------------------------------------------
 -- Env
 --------------------------------------------------------------------------------
-type EnvApiCheckUserName m
+type ApiCheckUserName m
   = String -> ExceptT CirclesError m { isValid :: Boolean }
 
 --------------------------------------------------------------------------------
-type EnvApiCheckEmail m
+type ApiCheckEmail m
   = String -> ExceptT CirclesError m { isValid :: Boolean }
 
 --------------------------------------------------------------------------------
-type EnvGetSafeAddress m
-  = forall r. PrivateKey -> ExceptV (GetSafeAddressError + r) m Address
+type ErrGetSafeAddress r
+  = ErrNative + ErrInvalidUrl + r
+
+type GetSafeAddress m
+  = forall r. PrivateKey -> ExceptV (ErrGetSafeAddress + r) m Address
 
 --------------------------------------------------------------------------------
-type EnvCoreToWindow m
-  = forall r. PrivateKey -> ExceptV (CoreToWindowError + r) m Unit
+type ErrCoreToWindow r
+  = ErrNative + ErrInvalidUrl + r
+
+type CoreToWindow m
+  = forall r. PrivateKey -> ExceptV (ErrCoreToWindow + r) m Unit
 
 --------------------------------------------------------------------------------
-type EnvIsTrusted m
-  = forall r. PrivateKey -> ExceptV (EnvIsTrustedError + r) m TrustIsTrustedResult
+type ErrIsTrusted r
+  = ErrNative + ErrInvalidUrl + r
+
+type IsTrusted m
+  = forall r. PrivateKey -> ExceptV (ErrIsTrusted + r) m TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
-type EnvIsFunded m
-  = forall r. PrivateKey -> ExceptV (EnvIsFundedError + r) m Boolean
+type ErrIsFunded r
+  = ErrNative + ErrInvalidUrl + r
+
+type IsFunded m
+  = forall r. PrivateKey -> ExceptV (ErrIsFunded + r) m Boolean
 
 --------------------------------------------------------------------------------
-type EnvTrustGetNetwork m
-  = forall r. PrivateKey -> ExceptV (EnvTrustGetNetworkError + r) m (Array TrustNode)
+type ErrTrustGetNetwork r
+  = ErrNative + ErrInvalidUrl + r
+
+type TrustGetNetwork m
+  = forall r. PrivateKey -> ExceptV (ErrTrustGetNetwork + r) m (Array TrustNode)
 
 --------------------------------------------------------------------------------
-type EnvGetSafeStatus m
-  = forall r. PrivateKey -> ExceptV (EnvGetSafeStatusError + r) m SafeStatus
+type ErrGetSafeStatus r
+  = ErrNative + ErrInvalidUrl + r
+
+type GetSafeStatus m
+  = forall r. PrivateKey -> ExceptV (ErrGetSafeStatus + r) m SafeStatus
 
 --------------------------------------------------------------------------------
-type EnvDeploySafeError r
+type ErrDeploySafe r
   = ErrService + ErrInvalidUrl + ErrNative + r
 
-type EnvDeploySafe m
-  = forall r. PrivateKey -> ExceptV (EnvDeploySafeError + r) m Unit
+type DeploySafe m
+  = forall r. PrivateKey -> ExceptV (ErrDeploySafe + r) m Unit
 
 --------------------------------------------------------------------------------
-type EnvDeployTokenError r
+type ErrDeployToken r
   = ErrService + ErrInvalidUrl + ErrNative + r
 
-type EnvDeployToken m
-  = forall r. PrivateKey -> ExceptV (EnvDeployTokenError + r) m String
+type DeployToken m
+  = forall r. PrivateKey -> ExceptV (ErrDeployToken + r) m String
 
 --------------------------------------------------------------------------------
-type ErrUserResolveError r
-  = ErrNative + ErrInvalidUrl
-      + ( errApi :: ApiError
-      , errUserNotFound :: UserNotFoundError
-      | r
-      )
+type ErrUserResolve r
+  = ErrNative + ErrInvalidUrl + ErrApi + ( errUserNotFound :: UserNotFoundError | r )
 
-type EnvUserResolve m
-  = forall r. PrivateKey -> ExceptV (UserResolveError + r) m User
+type UserResolve m
+  = forall r. PrivateKey -> ExceptV (ErrUserResolve + r) m User
+
+--------------------------------------------------------------------------------
+type ErrPrepareSafeDeploy r
+  = ErrNative + ErrInvalidUrl + r
+
+type PrepareSafeDeploy m
+  = forall r. PrivateKey -> ExceptV (ErrPrepareSafeDeploy + r) m Address
+
+--------------------------------------------------------------------------------
+type ErrUserRegister r
+  = ErrService + ErrNative + ErrInvalidUrl + r
+
+type UserRegister m
+  = forall r. PrivateKey -> UserOptions -> ExceptV (ErrUserRegister + r) m Unit
+
+--------------------------------------------------------------------------------
+type GeneratePrivateKey m
+  = forall r. ExceptV r m PrivateKey
 
 --------------------------------------------------------------------------------
 type Env m
-  = { apiCheckUserName :: EnvApiCheckUserName m
-    , apiCheckEmail :: EnvApiCheckEmail m
-    , generatePrivateKey :: m PrivateKey
-    , userRegister :: forall r. PrivateKey -> UserOptions -> ExceptV (RegisterError + r) m Unit
-    , getSafeAddress :: EnvGetSafeAddress m
-    , safePrepareDeploy :: forall r. PrivateKey -> ExceptV (PrepareSafeDeployError + r) m Address
-    , userResolve :: EnvUserResolve m
-    , coreToWindow :: EnvCoreToWindow m
-    , isTrusted :: EnvIsTrusted m
-    , isFunded :: EnvIsFunded m
-    , trustGetNetwork :: EnvTrustGetNetwork m
-    , getSafeStatus :: EnvGetSafeStatus m
-    , deploySafe :: EnvDeploySafe m
-    , deployToken :: EnvDeployToken m
+  = { apiCheckUserName :: ApiCheckUserName m
+    , apiCheckEmail :: ApiCheckEmail m
+    , generatePrivateKey :: GeneratePrivateKey m
+    , userRegister :: UserRegister m
+    , getSafeAddress :: GetSafeAddress m
+    , safePrepareDeploy :: PrepareSafeDeploy m
+    , userResolve :: UserResolve m
+    , coreToWindow :: CoreToWindow m
+    , isTrusted :: IsTrusted m
+    , isFunded :: IsFunded m
+    , trustGetNetwork :: TrustGetNetwork m
+    , getSafeStatus :: GetSafeStatus m
+    , deploySafe :: DeploySafe m
+    , deployToken :: DeployToken m
     }
