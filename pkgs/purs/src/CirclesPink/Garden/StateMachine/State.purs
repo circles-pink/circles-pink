@@ -65,52 +65,14 @@ type LoginState
     , error ::
         Maybe
           ( Variant
-              ( errApi ::
-                  { code :: Int
-                  , message :: String
-                  }
+              ( errApi ∷ ApiError
+              , errNative ∷ NativeError
+              , errUserNotFound ∷ UserNotFoundError
               , errInvalidUrl :: String
-              , errInvalidUrl :: String
-              , errInvalidUrl :: String
-              , errInvalidUrl :: String
-              , errInvalidUrl :: String
-              , errInvalidUrl :: String
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errNative ::
-                  { message :: String
-                  , name :: String
-                  }
-              , errUserNotFound ::
-                  { safeAddress :: Address
-                  }
               )
           )
     }
 
--- ( errApi ∷ ApiError
--- , errNative ∷ NativeError
--- , errUserNotFound ∷ UserNotFoundError
--- , errInvalidUrl :: String
--- )
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey

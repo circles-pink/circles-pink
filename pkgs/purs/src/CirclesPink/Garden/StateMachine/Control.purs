@@ -117,7 +117,7 @@ circlesControl env =
               S._askUsername st { direction = D._forwards }
 
   --------------------------------------------------------------------------------
-  -- AskUEmail
+  -- AskEmail
   --------------------------------------------------------------------------------
   askEmailNext :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
   askEmailNext set _ _ =
@@ -182,20 +182,9 @@ circlesControl env =
       mnemonic = P.getMnemonicFromString st.magicWords
 
       privKey = P.mnemonicToKey mnemonic
-    results ::
-      Either
-        ( Variant
-            ( Env.ErrUserResolve
-                + Env.ErrGetSafeStatus
-                + Env.ErrIsTrusted
-                + Env.ErrTrustGetNetwork
-                + Env.ErrIsTrusted
-                + Env.ErrIsFunded
-                + ()
-            )
-        )
-        _ <-
-      run do
+
+      task :: ExceptV ( Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrIsTrusted  + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + () ) _ _
+      task = do
         user <- env.userResolve privKey
         safeStatus <- env.getSafeStatus privKey
         isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
@@ -206,6 +195,7 @@ circlesControl env =
             env.trustGetNetwork privKey
         isReady' <- readyForDeployment env privKey
         pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
+    results <- run' task
     case results of
       Left e -> set \st' -> S._login st' { error = pure e }
       Right { user, trusts, safeStatus }
@@ -332,5 +322,10 @@ readyForDeployment { isTrusted, isFunded } privKey = do
   pure (isTrusted' || isFunded')
 
 --------------------------------------------------------------------------------
-run :: forall t m e e' a. MonadTrans t => Nub e e' => Monad m => ExceptV e m a -> t m (Either (Variant e') a)
-run = todo -- lift <<< runExceptT
+run :: forall t m e a. MonadTrans t => Monad m => ExceptV e m a -> t m (Either (Variant e) a)
+run = lift <<< runExceptT
+
+run' ::
+  forall t (m :: Type -> Type) (e :: Row Type) (e' :: Row Type) (a :: Type).
+  MonadTrans t => Nub e e' => Monad m => ExceptV e m a -> t m (Either (Variant e') a)
+run' = todo -- lift <<< runExceptT
