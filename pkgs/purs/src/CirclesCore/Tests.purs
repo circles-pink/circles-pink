@@ -25,19 +25,19 @@ spec =
         (evalEffect_ $ CC.newWebSocketProvider "")
           >>= shouldEqual (Left $ CC._errInvalidUrl "")
       it "Valid URL" do
-        (evalEffect_ $ CC.newWebSocketProvider "ws://localhost:8545")
+        (evalEffect_ $ CC.newWebSocketProvider "ws://localhost:8080")
           >>= shouldEqual (Right unit)
     describe "newWeb3" do
       it "Works" do
         ( evalEffect_ do
-            provider <- CC.newWebSocketProvider "ws://localhost:8545"
+            provider <- CC.newWebSocketProvider "ws://localhost:8080"
             lift $ CC.newWeb3 provider
         )
           >>= shouldEqual (Right unit)
     describe "newCirclesCore" do
       it "Works" do
         ( evalEffect_ do
-            provider <- CC.newWebSocketProvider "ws://localhost:8545"
+            provider <- CC.newWebSocketProvider "ws://localhost:8080"
             web3 <- lift $ CC.newWeb3 provider
             CC.newCirclesCore web3
               { apiServiceEndpoint: ""
@@ -54,16 +54,16 @@ spec =
     describe "safeDeploy" do
       it "Works" do
         ( evalAff_ do
-            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8545"
+            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8080"
             web3 <- effToAff $ lift $ CC.newWeb3 provider
             core <-
               effToAff
                 $ CC.newCirclesCore web3
-                    { apiServiceEndpoint: "http://api.circles.local"
-                    , graphNodeEndpoint: "http://graph.circles.local"
+                    { apiServiceEndpoint: "http://api.circles.xyz"
+                    , graphNodeEndpoint: "http://graph.circles.xyz"
                     , hubAddress: "0x0000000000000000000000000000000000000000"
                     , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
-                    , relayServiceEndpoint: "http://relay.circles.local"
+                    , relayServiceEndpoint: "http://relay.circles.xyz"
                     , safeMasterAddress: "0x0000000000000000000000000000000000000000"
                     , subgraphName: ""
                     , databaseSource: ""
@@ -76,16 +76,16 @@ spec =
     describe "safeIsFunded" do
       it "Works" do
         ( evalAff_ do
-            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8545"
+            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8080"
             web3 <- effToAff $ lift $ CC.newWeb3 provider
             core <-
               effToAff
                 $ CC.newCirclesCore web3
-                    { apiServiceEndpoint: "http://api.circles.local"
-                    , graphNodeEndpoint: "http://graph.circles.local"
+                    { apiServiceEndpoint: "http://api.circles.xyz"
+                    , graphNodeEndpoint: "http://graph.circles.xyz"
                     , hubAddress: "0x0000000000000000000000000000000000000000"
                     , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
-                    , relayServiceEndpoint: "http://relay.circles.local"
+                    , relayServiceEndpoint: "http://relay.circles.xyz"
                     , safeMasterAddress: "0x0000000000000000000000000000000000000000"
                     , subgraphName: ""
                     , databaseSource: ""
@@ -98,16 +98,16 @@ spec =
     describe "tokenDeploy" do
       it "Works" do
         ( evalAff_ do
-            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8545"
+            provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8080"
             web3 <- effToAff $ lift $ CC.newWeb3 provider
             core <-
               effToAff
                 $ CC.newCirclesCore web3
-                    { apiServiceEndpoint: "http://api.circles.local"
-                    , graphNodeEndpoint: "http://graph.circles.local"
+                    { apiServiceEndpoint: "http://api.circles.xyz"
+                    , graphNodeEndpoint: "http://graph.circles.xyz"
                     , hubAddress: "0x0000000000000000000000000000000000000000"
                     , proxyFactoryAddress: "0x0000000000000000000000000000000000000000"
-                    , relayServiceEndpoint: "http://relay.circles.local"
+                    , relayServiceEndpoint: "http://relay.circles.xyz"
                     , safeMasterAddress: "0x0000000000000000000000000000000000000000"
                     , subgraphName: ""
                     , databaseSource: ""

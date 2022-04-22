@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
-import Debug.Extra (todo)
 import Stadium.Control as C
 
 circlesControl ::
@@ -29,5 +28,5 @@ circlesControl env =
     , dashboard: States.dashboard env
     , login: States.login env
     , trusts: States.trusts env
-    , debug: todo -- States.debug env
+    , debug: States.debug env
     }

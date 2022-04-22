@@ -13,7 +13,7 @@ dashboard ::
   MonadTrans t =>
   Monad (t m) =>
   Env.Env m ->
-  { logout :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData )
+  { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   }
 dashboard env =
