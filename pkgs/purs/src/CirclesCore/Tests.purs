@@ -75,7 +75,7 @@ spec =
           >>= shouldEqual (Left unit)
     describe "safeIsFunded" do
       it "Works" do
-        ( evalAff_ do
+        ( evalAff do
             provider <- effToAff $ CC.newWebSocketProvider "ws://localhost:8080"
             web3 <- effToAff $ lift $ CC.newWeb3 provider
             core <-
@@ -94,7 +94,7 @@ spec =
             CC.safeIsFunded core account { safeAddress: P.sampleSafeAddress }
         )
           <#> lmap (const unit)
-          >>= shouldEqual (Left unit)
+          >>= shouldEqual (Right false)
     describe "tokenDeploy" do
       it "Works" do
         ( evalAff_ do
