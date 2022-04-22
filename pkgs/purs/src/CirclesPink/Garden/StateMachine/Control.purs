@@ -10,17 +10,18 @@ import CirclesPink.Garden.StateMachine.Control.Env as E
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, catchError, lift, mapExceptT, runExceptT)
+import Control.Monad.Except (class MonadTrans, lift, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
+import Debug.Extra (todo)
 import Effect (Effect)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, attempt)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (logShow)
+import Prim.TypeError (class Warn, Text)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
@@ -179,7 +180,7 @@ circlesControl env =
         isReady' <- isReady env privKey
         pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
     case results of
-      Left e -> set $ \st' -> S._login st' { error = pure e }
+      Left e -> set $ \st' -> todo -- S._login st' { error = pure e }
       Right { user, trusts, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed ->
           set \_ ->
@@ -281,9 +282,6 @@ circlesControl env =
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v
   = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
-
-effToAff :: forall e a. ExceptV e Effect a -> ExceptV e Aff a
-effToAff = mapExceptT liftEffect
 
 isReady :: forall m r. Monad m => E.Env m -> PrivateKey -> ExceptV (EnvIsTrustedError + EnvIsFundedError + r) m Boolean
 isReady { isTrusted, isFunded } privKey = do

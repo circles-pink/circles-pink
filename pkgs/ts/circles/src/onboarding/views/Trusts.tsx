@@ -49,7 +49,7 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
             >
               {t('safeStateButton')}
             </Button>
-            {state.safeStatus.isCreated || state.safeStatus.isDeployed ? (
+            {state.isReady ? (
               <Button
                 color={theme.baseColor}
                 onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
