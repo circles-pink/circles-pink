@@ -7,7 +7,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import Wallet.PrivateKey as P
-import CirclesPink.Garden.StateMachine.Control.Util (run, ActionHandler)
+import CirclesPink.Garden.StateMachine.Control.Common (run, ActionHandler)
 
 infoSecurity ::
   forall t m.

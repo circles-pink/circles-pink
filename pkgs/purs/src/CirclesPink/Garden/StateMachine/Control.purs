@@ -3,7 +3,9 @@ module CirclesPink.Garden.StateMachine.Control (circlesControl) where
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Control.Common (readyForDeployment)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
@@ -20,7 +22,6 @@ import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
-import CirclesPink.Garden.StateMachine.Control.States as States
 
 circlesControl ::
   forall t m.
@@ -53,20 +54,13 @@ circlesControl env =
         , newPrivKey: magicWordsNewPrivateKey
         , next: \set _ _ -> set \st -> S._submit st { direction = D._forwards }
         }
-    , submit:
-        { prev: \set _ _ -> set \st -> S._magicWords st { direction = D._backwards }
-        , submit: submitSubmit
-        }
+    , submit: States.submit env
     , dashboard:
         { logout: \_ _ _ -> pure unit
         , getTrusts: dashboardGetTrusts
         }
     , login: States.login env
-    , trusts:
-        { continue: \_ _ _ -> pure unit
-        , getSafeStatus: trustsGetSafeStatus
-        , finalizeRegisterUser: trustsFinalizeRegisterUser
-        }
+    , trusts: States.trusts env
     , debug:
         { coreToWindow: debugCoreToWindow
         }
@@ -132,21 +126,6 @@ circlesControl env =
     pure unit
 
   --------------------------------------------------------------------------------
-  -- InfoSecurity
-  --------------------------------------------------------------------------------
-  infoSecurityNext :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  infoSecurityNext set _ _ = do
-    result <- run $ env.generatePrivateKey
-    case result of
-      Right pk ->
-        set \st ->
-          if P.zeroKey == st.privateKey then
-            S._magicWords st { privateKey = pk, direction = D._forwards }
-          else
-            S._magicWords st { direction = D._forwards }
-      Left _ -> pure unit
-
-  --------------------------------------------------------------------------------
   -- MagicWords
   --------------------------------------------------------------------------------
   magicWordsNewPrivateKey :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
@@ -177,76 +156,6 @@ circlesControl env =
     case result of
       Left e -> set \st' -> S._dashboard st' { error = pure e }
       Right t -> set \st' -> S._dashboard st' { trusts = t }
-
-  --------------------------------------------------------------------------------
-  -- Trusts
-  --------------------------------------------------------------------------------
-  trustsGetSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
-  trustsGetSafeStatus set st _ = do
-    result <- run $ env.getSafeStatus st.privKey
-    case result of
-      Left e -> set \st' -> S._trusts st' { error = pure e }
-      Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
-
-  trustsFinalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
-  trustsFinalizeRegisterUser set st _ = do
-    let
-      task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _
-      task = do
-        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
-        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
-        _ <- env.deploySafe st.privKey
-        _ <- (env.deployToken st.privKey <#> const unit)
-        pure unit
-    results <- run' task
-    case results of
-      Left e -> set \st' -> S._trusts st' { error = pure e }
-      Right _ ->
-        set \_ ->
-          S._dashboard
-            { user: st.user
-            , trusts: st.trusts
-            , privKey: st.privKey
-            , error: Nothing
-            }
-
-  --------------------------------------------------------------------------------
-  -- Submit
-  --------------------------------------------------------------------------------
-  submitSubmit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
-  submitSubmit set st _ = do
-    let
-      address = P.privKeyToAddress st.privateKey
-
-      nonce = P.addressToNonce address
-    result <-
-      run do
-        safeAddress <- env.getSafeAddress st.privateKey
-        _ <- env.safePrepareDeploy st.privateKey
-        env.userRegister
-          st.privateKey
-          { email: st.email
-          , nonce
-          , safeAddress
-          , username: st.username
-          }
-        safeStatus <- env.getSafeStatus st.privateKey
-        user <- env.userResolve st.privateKey
-        trusts <- env.trustGetNetwork st.privateKey
-        isReady' <- readyForDeployment env st.privateKey
-        pure { safeStatus, user, trusts, isReady: isReady' }
-    case result of
-      Left e -> set \st' -> let _ = spy "e" e in S._submit st'
-      Right { safeStatus, user, trusts, isReady } ->
-        set \_ ->
-          S._trusts
-            { user
-            , trusts
-            , privKey: st.privateKey
-            , safeStatus
-            , error: Nothing
-            , isReady
-            }
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
 type ActionHandler t m a s v

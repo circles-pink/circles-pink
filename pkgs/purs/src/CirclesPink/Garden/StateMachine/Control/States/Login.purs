@@ -1,26 +1,14 @@
 module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
-import CirclesPink.Garden.StateMachine (_circlesStateMachine)
-import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.Control.States as States
-import CirclesPink.Garden.StateMachine.Control.Util (ActionHandler)
-import CirclesPink.Garden.StateMachine.Direction as D
-import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, catchError, lift, runExceptT)
+import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Variant (Variant, default, onMatch)
-import Debug (spy)
-import Prim.Row (class Nub)
-import RemoteData (RemoteData, _failure, _loading, _success)
-import Stadium.Control as C
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
-import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 login ::
@@ -29,8 +17,9 @@ login ::
   MonadTrans t =>
   Monad (t m) =>
   Env.Env m ->
-  { signUp :: ActionHandler t m Unit S.LandingState ( "infoGeneral" :: S.UserData )
-  , signIn :: ActionHandler t m Unit S.LandingState ( "login" :: S.LoginState )
+  { login :: ActionHandler t m Unit S.LoginState ( "trusts" :: S.TrustState, "login" :: S.LoginState, "dashboard" :: S.DashboardState )
+  , signUp :: ActionHandler t m Unit S.LoginState ( "infoGeneral" :: S.UserData )
+  , setMagicWords :: ActionHandler t m String S.LoginState ( "login" :: S.LoginState )
   }
 login env =
   { login: login'
