@@ -16,6 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, default, onMatch)
 import Debug (spy)
 import Debug.Extra (todo)
+import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Stadium.Control as C
 import Type.Row (type (+))
@@ -181,7 +182,19 @@ circlesControl env =
       mnemonic = P.getMnemonicFromString st.magicWords
 
       privKey = P.mnemonicToKey mnemonic
-    results <-
+    results ::
+      Either
+        ( Variant
+            ( Env.ErrUserResolve
+                + Env.ErrGetSafeStatus
+                + Env.ErrIsTrusted
+                + Env.ErrTrustGetNetwork
+                + Env.ErrIsTrusted
+                + Env.ErrIsFunded
+                + ()
+            )
+        )
+        _ <-
       run do
         user <- env.userResolve privKey
         safeStatus <- env.getSafeStatus privKey
@@ -319,5 +332,5 @@ readyForDeployment { isTrusted, isFunded } privKey = do
   pure (isTrusted' || isFunded')
 
 --------------------------------------------------------------------------------
-run :: forall t m e a. MonadTrans t => Monad m => ExceptT e m a -> t m (Either e a)
-run = lift <<< runExceptT
+run :: forall t m e e' a. MonadTrans t => Nub e e' => Monad m => ExceptV e m a -> t m (Either (Variant e') a)
+run = todo -- lift <<< runExceptT

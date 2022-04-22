@@ -3,7 +3,6 @@ module CirclesPink.Garden.StateMachine.State
   , DashboardState
   , DebugState
   , EmailApiResult
-  , ErrTrustState
   , LandingState
   , LoginState
   , TrustState
@@ -38,7 +37,7 @@ import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey (Address, PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
@@ -66,14 +65,52 @@ type LoginState
     , error ::
         Maybe
           ( Variant
-              ( errApi ∷ ApiError
-              , errNative ∷ NativeError
-              , errUserNotFound ∷ UserNotFoundError
+              ( errApi ::
+                  { code :: Int
+                  , message :: String
+                  }
               , errInvalidUrl :: String
+              , errInvalidUrl :: String
+              , errInvalidUrl :: String
+              , errInvalidUrl :: String
+              , errInvalidUrl :: String
+              , errInvalidUrl :: String
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errNative ::
+                  { message :: String
+                  , name :: String
+                  }
+              , errUserNotFound ::
+                  { safeAddress :: Address
+                  }
               )
           )
     }
 
+-- ( errApi ∷ ApiError
+-- , errNative ∷ NativeError
+-- , errUserNotFound ∷ UserNotFoundError
+-- , errInvalidUrl :: String
+-- )
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
@@ -88,15 +125,6 @@ type DashboardState
           )
     }
 
-type ErrTrustState r
-  = Env.ErrUserResolve
-      + Env.ErrGetSafeStatus
-      + Env.ErrIsTrusted
-      + Env.ErrTrustGetNetwork
-      + Env.ErrDeploySafe
-      + Env.ErrDeployToken
-      + r
-
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
@@ -106,8 +134,9 @@ type TrustState
     , error ::
         Maybe
           ( Variant
-              ( ErrTrustState
-                  ()
+              ( errInvalidUrl :: String
+              , errNative :: NativeError
+              , errService :: Unit
               )
           )
     }
