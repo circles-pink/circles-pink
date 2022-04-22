@@ -5,7 +5,7 @@ module CirclesPink.Garden.Env
 import Prelude
 import CirclesCore (CirclesCore, ErrNative, Web3, ErrInvalidUrl, userResolve)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env as E
+import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
@@ -19,7 +19,7 @@ import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
@@ -45,11 +45,11 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> E.Env Aff
+env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> Env.Env Aff
 env { request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
-  , generatePrivateKey: P.genPrivateKey
+  , generatePrivateKey: lift P.genPrivateKey
   , userRegister:
       \privKey options -> do
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
@@ -86,7 +86,7 @@ env { request, envVars } =
   , isFunded
   }
   where
-  apiCheckUserName :: E.EnvApiCheckUserName Aff
+  apiCheckUserName :: Env.ApiCheckUserName Aff
   apiCheckUserName username =
     if username == "" then
       pure { isValid: false }
@@ -113,7 +113,7 @@ env { request, envVars } =
           )
         # ExceptT
 
-  apiCheckEmail :: E.EnvApiCheckEmail Aff
+  apiCheckEmail :: Env.ApiCheckEmail Aff
   apiCheckEmail email =
     if email == "" then
       pure { isValid: false }
@@ -140,7 +140,7 @@ env { request, envVars } =
           )
         # ExceptT
 
-  getSafeAddress :: E.EnvGetSafeAddress Aff
+  getSafeAddress :: Env.GetSafeAddress Aff
   getSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -152,7 +152,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
-  coreToWindow :: E.EnvCoreToWindow Aff
+  coreToWindow :: Env.CoreToWindow Aff
   coreToWindow privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -161,7 +161,7 @@ env { request, envVars } =
     log "Debug: sampleCore and sampleAccount written to global window object"
     pure unit
 
-  isTrusted :: E.EnvIsTrusted Aff
+  isTrusted :: Env.IsTrusted Aff
   isTrusted privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -173,7 +173,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustIsTrusted circlesCore account { safeAddress, limit: 3 }
 
-  isFunded :: E.EnvIsFunded Aff
+  isFunded :: Env.IsFunded Aff
   isFunded privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -185,7 +185,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeIsFunded circlesCore account { safeAddress }
 
-  trustGetNetwork :: E.EnvTrustGetNetwork Aff
+  trustGetNetwork :: Env.TrustGetNetwork Aff
   trustGetNetwork privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -197,7 +197,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustGetNetwork circlesCore account { safeAddress }
 
-  getSafeStatus :: E.EnvGetSafeStatus Aff
+  getSafeStatus :: Env.GetSafeStatus Aff
   getSafeStatus privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -209,7 +209,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeGetSafeStatus circlesCore account { safeAddress }
 
-  deploySafe :: E.EnvDeploySafe Aff
+  deploySafe :: Env.DeploySafe Aff
   deploySafe privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -221,7 +221,7 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeDeploy circlesCore account { safeAddress }
 
-  deployToken :: E.EnvDeployToken Aff
+  deployToken :: Env.DeployToken Aff
   deployToken privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -252,7 +252,7 @@ getCirclesCore web3 ev =
     , databaseSource: "graph"
     }
 
-testEnv :: E.Env Identity
+testEnv :: Env.Env Identity
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
