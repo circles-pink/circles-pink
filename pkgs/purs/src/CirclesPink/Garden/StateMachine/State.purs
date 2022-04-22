@@ -3,6 +3,7 @@ module CirclesPink.Garden.StateMachine.State
   , DashboardState
   , DebugState
   , EmailApiResult
+  , ErrTrustState
   , LandingState
   , LoginState
   , TrustState
@@ -29,13 +30,14 @@ import Prelude
 import CirclesCore (ApiError, NativeError, TrustNode, SafeStatus)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import Effect.Exception (Error)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
@@ -86,6 +88,15 @@ type DashboardState
           )
     }
 
+type ErrTrustState r
+  = Env.ErrUserResolve
+      + Env.ErrGetSafeStatus
+      + Env.ErrIsTrusted
+      + Env.ErrTrustGetNetwork
+      + Env.ErrDeploySafe
+      + Env.ErrDeployToken
+      + r
+
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
@@ -95,10 +106,8 @@ type TrustState
     , error ::
         Maybe
           ( Variant
-              ( errApi :: Unit
-              , errService ∷ Unit
-              , errNative ∷ NativeError
-              , errInvalidUrl :: String
+              ( ErrTrustState
+                  ()
               )
           )
     }

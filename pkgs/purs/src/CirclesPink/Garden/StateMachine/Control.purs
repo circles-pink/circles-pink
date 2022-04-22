@@ -9,7 +9,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, lift, runExceptT)
+import Control.Monad.Except (class MonadTrans, ExceptT, lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -32,48 +32,48 @@ circlesControl env =
   C.mkControl
     _circlesStateMachine
     { landing:
-        { signUp: \set _ _ -> set $ \_ -> S.init
-        , signIn: \set _ _ -> set $ \_ -> S.initLogin
+        { signUp: \set _ _ -> set \_ -> S.init
+        , signIn: \set _ _ -> set \_ -> S.initLogin
         }
     , infoGeneral:
-        { next: \set _ _ -> set $ \st -> S._askUsername st { direction = D._forwards }
+        { next: \set _ _ -> set \st -> S._askUsername st { direction = D._forwards }
         }
     , askUsername:
-        { prev: \set _ _ -> set $ \st -> S._infoGeneral st { direction = D._backwards }
+        { prev: \set _ _ -> set \st -> S._infoGeneral st { direction = D._backwards }
         , setUsername: askUsernameSetUsername
         , next: askUsernameNext
         }
     , askEmail:
-        { prev: \set _ _ -> set $ \st -> S._askUsername st { direction = D._backwards }
+        { prev: \set _ _ -> set \st -> S._askUsername st { direction = D._backwards }
         , setEmail: askEmailSetEmail
-        , setTerms: \set _ _ -> set $ \st -> S._askEmail st { terms = not st.terms }
-        , setPrivacy: \set _ _ -> set $ \st -> S._askEmail st { privacy = not st.privacy }
+        , setTerms: \set _ _ -> set \st -> S._askEmail st { terms = not st.terms }
+        , setPrivacy: \set _ _ -> set \st -> S._askEmail st { privacy = not st.privacy }
         , next: askEmailNext
         }
     , infoSecurity:
-        { prev: \set _ _ -> set $ \st -> S._askEmail st { direction = D._backwards }
+        { prev: \set _ _ -> set \st -> S._askEmail st { direction = D._backwards }
         , next: infoSecurityNext
         }
     , magicWords:
-        { prev: \set _ _ -> set $ \st -> S._infoSecurity st { direction = D._backwards }
+        { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D._backwards }
         , newPrivKey: magicWordsNewPrivateKey
-        , next: \set _ _ -> set $ \st -> S._submit st { direction = D._forwards }
+        , next: \set _ _ -> set \st -> S._submit st { direction = D._forwards }
         }
     , submit:
-        { prev: \set _ _ -> set $ \st -> S._magicWords st { direction = D._backwards }
+        { prev: \set _ _ -> set \st -> S._magicWords st { direction = D._backwards }
         , submit: submitSubmit
         }
     , dashboard:
-        { logout: \set _ _ -> pure unit
+        { logout: \_ _ _ -> pure unit
         , getTrusts: dashboardGetTrusts
         }
     , login:
         { login: loginLogin
-        , signUp: \set _ _ -> set $ \_ -> S.init
-        , setMagicWords: \set _ words -> set $ \st -> S._login st { magicWords = words }
+        , signUp: \set _ _ -> set \_ -> S.init
+        , setMagicWords: \set _ words -> set \st -> S._login st { magicWords = words }
         }
     , trusts:
-        { continue: \set _ _ -> pure unit
+        { continue: \_ _ _ -> pure unit
         , getSafeStatus: trustsGetSafeStatus
         , finalizeRegisterUser: trustsFinalizeRegisterUser
         }
@@ -87,11 +87,11 @@ circlesControl env =
   --------------------------------------------------------------------------------
   askUsernameSetUsername :: ActionHandler t m String S.UserData ( "askUsername" :: S.UserData )
   askUsernameSetUsername set _ username = do
-    set $ \st -> S._askUsername st { username = username }
+    set \st -> S._askUsername st { username = username }
     set
       $ \st ->
           S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-    result <- lift $ runExceptT $ env.apiCheckUserName username
+    result <- run $ env.apiCheckUserName username
     set
       $ \st ->
           if username == st.username then case result of
@@ -138,7 +138,7 @@ circlesControl env =
     set \st -> S._askEmail st { email = email }
     set \st ->
       S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
-    result <- lift $ runExceptT $ env.apiCheckEmail email
+    result <- run $ env.apiCheckEmail email
     set \st ->
       if email == st.email then case result of
         Left e -> S._askEmail st { emailApiResult = _failure e }
@@ -152,7 +152,7 @@ circlesControl env =
   --------------------------------------------------------------------------------
   infoSecurityNext :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
   infoSecurityNext set _ _ = do
-    result <- lift $ runExceptT $ env.generatePrivateKey
+    result <- run $ env.generatePrivateKey
     case result of
       Right pk ->
         set \st ->
@@ -167,7 +167,7 @@ circlesControl env =
   --------------------------------------------------------------------------------
   magicWordsNewPrivateKey :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
   magicWordsNewPrivateKey set _ _ = do
-    result <- lift $ runExceptT $ env.generatePrivateKey
+    result <- run $ env.generatePrivateKey
     case result of
       Right pk -> set \st -> S._magicWords st { privateKey = pk }
       Left _ -> pure unit
@@ -182,7 +182,7 @@ circlesControl env =
 
       privKey = P.mnemonicToKey mnemonic
     results <-
-      (lift <<< runExceptT) do
+      run do
         user <- env.userResolve privKey
         safeStatus <- env.getSafeStatus privKey
         isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
@@ -191,10 +191,10 @@ circlesControl env =
             pure []
           else
             env.trustGetNetwork privKey
-        isReady' <- isReady env privKey
+        isReady' <- readyForDeployment env privKey
         pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
     case results of
-      Left e -> set $ \st' -> todo -- S._login st' { error = pure e }
+      Left e -> set \st' -> S._login st' { error = pure e }
       Right { user, trusts, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed ->
           set \_ ->
@@ -224,7 +224,7 @@ circlesControl env =
       mnemonic = P.getMnemonicFromString st.magicWords
     let
       privKey = P.mnemonicToKey mnemonic
-    _ <- lift $ runExceptT $ env.coreToWindow privKey
+    _ <- run $ env.coreToWindow privKey
     pure unit
 
   --------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ circlesControl env =
   --------------------------------------------------------------------------------
   dashboardGetTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   dashboardGetTrusts set st _ = do
-    result <- lift $ runExceptT $ env.trustGetNetwork st.privKey
+    result <- run $ env.trustGetNetwork st.privKey
     case result of
       Left e -> set \st' -> S._dashboard st' { error = pure e }
       Right t -> set \st' -> S._dashboard st' { trusts = t }
@@ -242,7 +242,7 @@ circlesControl env =
   --------------------------------------------------------------------------------
   trustsGetSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
   trustsGetSafeStatus set st _ = do
-    result <- lift $ runExceptT $ env.getSafeStatus st.privKey
+    result <- run $ env.getSafeStatus st.privKey
     case result of
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
@@ -250,11 +250,10 @@ circlesControl env =
   trustsFinalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   trustsFinalizeRegisterUser set st _ = do
     results <-
-      lift
-        $ runExceptT do
-            _ <- env.deploySafe st.privKey
-            _ <- env.deployToken st.privKey
-            pure unit
+      run do
+        _ <- env.deploySafe st.privKey
+        _ <- env.deployToken st.privKey
+        pure unit
     case results of
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right _ ->
@@ -277,7 +276,7 @@ circlesControl env =
 
       nonce = P.addressToNonce address
     result <-
-      (lift <<< runExceptT) do
+      run do
         safeAddress <- env.getSafeAddress st.privateKey
         _ <- env.safePrepareDeploy st.privateKey
         env.userRegister
@@ -290,7 +289,7 @@ circlesControl env =
         safeStatus <- env.getSafeStatus st.privateKey
         user <- env.userResolve st.privateKey
         trusts <- env.trustGetNetwork st.privateKey
-        isReady' <- isReady env st.privateKey
+        isReady' <- readyForDeployment env st.privateKey
         pure { safeStatus, user, trusts, isReady: isReady' }
     case result of
       Left e -> set \st' -> let _ = spy "e" e in S._submit st'
@@ -313,10 +312,12 @@ type ActionHandler t m a s v
 type ErrIsReady r
   = Env.ErrIsTrusted + Env.ErrIsFunded + r
 
-isReady :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrIsReady r) m Boolean
-isReady { isTrusted, isFunded } privKey = do
+readyForDeployment :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrIsReady r) m Boolean
+readyForDeployment { isTrusted, isFunded } privKey = do
   isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
   isFunded' <- isFunded privKey
   pure (isTrusted' || isFunded')
 
 --------------------------------------------------------------------------------
+run :: forall t m e a. MonadTrans t => Monad m => ExceptT e m a -> t m (Either e a)
+run = lift <<< runExceptT
