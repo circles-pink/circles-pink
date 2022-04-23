@@ -17,6 +17,7 @@ import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -55,6 +56,20 @@ env { request, envVars } =
         web3 <- mapExceptT liftEffect $ getWeb3 envVars
         circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
         account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+        safeAddress <- getSafeAddress privKey
+        --------------------------------------------------------------------------------
+        -- This Section cannot go to production! it auto-funds safe of user on register
+        --------------------------------------------------------------------------------
+        _ <- todo -- remove
+        _ <-
+          mapExceptT liftEffect
+            $ CC.sendTransaction
+                web3
+                (P.unsafeAddrFromString "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1")
+                safeAddress
+        --------------------------------------------------------------------------------
+        -- Section end ..
+        --------------------------------------------------------------------------------
         CC.userRegister circlesCore account options
   , getSafeAddress
   , safePrepareDeploy:
