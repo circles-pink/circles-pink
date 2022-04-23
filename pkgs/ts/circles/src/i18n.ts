@@ -11,6 +11,9 @@ export const resources = {
       signUpButton: 'Sign Up',
       signInButton: 'Sign In',
       signUpInsteadButton: 'SignUp instead',
+      finalizeButton: 'Finalize Account',
+      safeStateButton: 'Get Safe State',
+      getTrustsButton: 'Get Trust Network',
       landing: {
         claim: 'Welcome to Circles',
         subClaim: 'Create a new Wallet or restore your existing one.',
@@ -55,6 +58,18 @@ export const resources = {
         subClaim:
           'If everything is correct you can hit submit and create your Wallet',
       },
+      trusts: {
+        claim: 'Hey there!',
+        greet: 'Hello',
+        subClaim:
+          'Your Account is in pending state. Follow the instructions to finalize it!',
+      },
+      dashboard: {
+        claim: 'Hey there!',
+        greet: 'Hello',
+        subClaim:
+          'This is your Dashboard, grow your trust network or pay with Circles!',
+      },
     },
   },
   de: {
@@ -65,6 +80,9 @@ export const resources = {
       signUpButton: 'Wallet erstellen',
       signInButton: 'Anmelden',
       signUpInsteadButton: 'Neue Wallet erstellen',
+      finalizeButton: 'Account erstellen',
+      safeStateButton: 'Safe State abfragen',
+      getTrustsButton: 'Vertrauensnetzwerk abfragen',
       landing: {
         claim: 'Willkommen bei Circles',
         subClaim:
@@ -109,6 +127,18 @@ export const resources = {
       submit: {
         claim: 'Diese Daten hast du angegeben',
         subClaim: 'Wenn alles stimmt kannst du sie abschicken.',
+      },
+      trusts: {
+        claim: 'Hallöchen!',
+        greet: 'Hallo',
+        subClaim:
+          'Dein Account ist noch nicht aktiviert. Folge den Anweisungen um ihn freizuschalten!',
+      },
+      dashboard: {
+        claim: 'Hallöchen!',
+        greet: 'Hallo',
+        subClaim:
+          'Dies ist dein Dashboard. Bau dein Netzwerk aus oder zahle mit Circles!',
       },
     },
   },

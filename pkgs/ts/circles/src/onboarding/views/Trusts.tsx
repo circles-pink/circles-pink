@@ -25,9 +25,14 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
     <DialogCard
       text={
         <Text>
-          <FadeIn orientation={orientation} delay={getDelay()}>
+          {state.user.username ? (
+            <Claim color={theme.baseColor}>
+              {t('trusts.greet')}
+              {` ${state.user.username}!`}
+            </Claim>
+          ) : (
             <Claim color={theme.baseColor}>{t('trusts.claim')}</Claim>
-          </FadeIn>
+          )}
 
           <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('trusts.subClaim')}</SubClaim>
@@ -37,12 +42,6 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <Button
-              color={theme.baseColor}
-              onClick={() => act(A._trusts(A._continue(unit)))}
-            >
-              {t('continueButton')}
-            </Button>
             <Button
               color={theme.baseColor}
               onClick={() => act(A._trusts(A._getSafeStatus(unit)))}
