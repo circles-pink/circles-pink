@@ -33,16 +33,12 @@ login env =
 
       privKey = P.mnemonicToKey mnemonic
 
-      task :: ExceptV (Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
+      task :: ExceptV (Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
       task = do
         user <- env.userResolve privKey
         safeStatus <- env.getSafeStatus privKey
         isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
-        trusts <-
-          if isTrusted then
-            pure []
-          else
-            env.trustGetNetwork privKey
+        trusts <- if isTrusted then pure [] else env.trustGetNetwork privKey
         isReady' <- readyForDeployment env privKey
         pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
     results <- run' task

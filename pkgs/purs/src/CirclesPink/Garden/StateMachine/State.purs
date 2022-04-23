@@ -96,9 +96,9 @@ type TrustState
     , error ::
         Maybe
           ( Variant
-              ( errInvalidUrl :: String
-              , errNative :: NativeError
-              , errService :: Unit
+              ( errService ∷ Unit
+              , errNative ∷ NativeError
+              , errInvalidUrl :: String
               )
           )
     }

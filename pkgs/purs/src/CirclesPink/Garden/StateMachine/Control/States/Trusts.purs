@@ -16,13 +16,11 @@ trusts ::
   MonadTrans t =>
   Monad (t m) =>
   Env.Env m ->
-  { continue :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
-  , getSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
+  { getSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
   , finalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   }
 trusts env =
-  { continue: \_ _ _ -> pure unit
-  , getSafeStatus: getSafeStatus
+  { getSafeStatus: getSafeStatus
   , finalizeRegisterUser: finalizeRegisterUser
   }
   where
@@ -32,6 +30,18 @@ trusts env =
       Left e -> set \st' -> S._trusts st' { error = pure e }
       Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
 
+  -- getSafeStatus set st _ = do
+  --   let
+  --     task :: ExceptV (Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
+  --     task = do
+  --       safeStatus <- env.getSafeStatus st.privKey
+  --       isReady' <- readyForDeployment env st.privKey
+  --       pure { safeStatus, isReady: isReady' }
+  --   results <- run' task
+  --   case results of
+  --     Left e -> set \st' -> S._trusts st' { error = pure e }
+  --     Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
+  --
   finalizeRegisterUser set st _ = do
     let
       task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _
