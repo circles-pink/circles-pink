@@ -1,6 +1,7 @@
 "use strict";
 
-var CirclesCore = require("@circles/core");
+// Web3
+
 var Web3 = require("web3");
 
 exports.newWebSocketProvider = (url) => () =>
@@ -8,14 +9,21 @@ exports.newWebSocketProvider = (url) => () =>
 
 exports.newWeb3 = (provider) => () => new Web3(provider);
 
+exports.privKeyToAccount = (web3) => (privKey) => () =>
+  web3.eth.accounts.privateKeyToAccount(privKey);
+
+exports.sendTransaction = (web3) => (from) => (to) => () =>
+  web3.eth.sendTransaction({ from, to, value: web3.utils.toWei("1", "ether") });
+
+// CirclesCore
+
+var CirclesCore = require("@circles/core");
+
 exports.newCirclesCore = (web3) => (options) => () =>
   new CirclesCore(web3, options);
 
 exports.mkCirclesCore = (web3) => (options) => () =>
   new CirclesCore(web3, options);
-
-exports.privKeyToAccount = (web3) => (privKey) => () =>
-  web3.eth.accounts.privateKeyToAccount(privKey);
 
 // CirclesCore - unsafe debug
 

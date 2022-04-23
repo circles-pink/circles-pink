@@ -39,6 +39,7 @@ module CirclesCore
   , safeIsFunded
   , safePredictAddress
   , safePrepareDeploy
+  , sendTransaction
   , tokenDeploy
   , trustGetNetwork
   , trustIsTrusted
@@ -122,6 +123,13 @@ type ErrPrivKeyToAccount r
 privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Effect B.Account
 privKeyToAccount w3 pk =
   B.privKeyToAccount w3 (P.toString pk)
+    # try
+    <#> lmap mkErrorNative
+    # ExceptT
+
+sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrPrivKeyToAccount r) Effect Unit
+sendTransaction w3 f t =
+  B.sendTransaction w3 (P.addrToString f) (P.addrToString t)
     # try
     <#> lmap mkErrorNative
     # ExceptT

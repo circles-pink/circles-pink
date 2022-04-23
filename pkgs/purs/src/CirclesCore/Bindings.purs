@@ -14,6 +14,7 @@ module CirclesCore.Bindings
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
+  , sendTransaction
   , unsafeSampleCore
   ) where
 
@@ -58,6 +59,8 @@ foreign import newWebSocketProvider :: String -> Effect Provider
 foreign import newWeb3 :: Provider -> Effect Web3
 
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
+
+foreign import sendTransaction :: Web3 -> String -> String -> Effect Unit
 
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
