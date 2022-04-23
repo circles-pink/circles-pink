@@ -39,15 +39,15 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
           <>
             <Button
               color={theme.baseColor}
-              onClick={() => act(A._landing(A._signUp(unit)))}
-            >
-              {t('signUpButton')}
-            </Button>
-            <Button
-              color={theme.baseColor}
               onClick={() => act(A._landing(A._signIn(unit)))}
             >
               {t('signInButton')}
+            </Button>
+            <Button
+              color={theme.baseColor}
+              onClick={() => act(A._landing(A._signUp(unit)))}
+            >
+              {t('signUpButton')}
             </Button>
           </>
         </FadeIn>

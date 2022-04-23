@@ -26,7 +26,14 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim color={theme.baseColor}>{t('dashboard.claim')}</Claim>
+            {state.user.username ? (
+              <Claim color={theme.baseColor}>
+                {t('dashboard.greet')}
+                {` ${state.user.username}!`}
+              </Claim>
+            ) : (
+              <Claim color={theme.baseColor}>{t('dashboard.claim')}</Claim>
+            )}
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
