@@ -1,6 +1,6 @@
 import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from 'generated/output/Data.Unit';
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement, useContext, useEffect } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
@@ -20,6 +20,10 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
+
+  useEffect(() => {
+    setInterval(() => act(A._dashboard(A._getTrusts(unit))), 5000);
+  }, []);
 
   return (
     <DialogCard

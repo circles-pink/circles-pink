@@ -14,9 +14,11 @@ debug ::
   Monad (t m) =>
   Env.Env m ->
   { coreToWindow :: ActionHandler t m Unit S.DebugState ( "debug" :: S.DebugState )
+  , setMagicWords :: ActionHandler t m String S.DebugState ( "debug" :: S.DebugState )
   }
 debug env =
   { coreToWindow
+  , setMagicWords: \set _ mw -> set \st -> S._debug st { magicWords = mw }
   }
   where
   coreToWindow _ st _ = do

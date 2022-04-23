@@ -14,6 +14,7 @@ export const resources = {
       finalizeButton: 'Finalize Account',
       safeStateButton: 'Get Safe State',
       getTrustsButton: 'Get Trust Network',
+      debugButton: 'Core to window Object',
       landing: {
         claim: 'Welcome to Circles',
         subClaim: 'Create a new Wallet or restore your existing one.',
@@ -70,6 +71,12 @@ export const resources = {
         subClaim:
           'This is your Dashboard, grow your trust network or pay with Circles!',
       },
+      debug: {
+        claim: 'Internal tools',
+        subClaim:
+          'Attach a sampleCore or sampleAccount Instance to the browser console.',
+        magicWordsPlaceholder: 'Circles Core private key - empty for default',
+      },
     },
   },
   de: {
@@ -83,6 +90,7 @@ export const resources = {
       finalizeButton: 'Account erstellen',
       safeStateButton: 'Safe State abfragen',
       getTrustsButton: 'Vertrauensnetzwerk abfragen',
+      debugButton: 'Core ans window Object',
       landing: {
         claim: 'Willkommen bei Circles',
         subClaim:
@@ -139,6 +147,13 @@ export const resources = {
         greet: 'Hallo',
         subClaim:
           'Dies ist dein Dashboard. Bau dein Netzwerk aus oder zahle mit Circles!',
+      },
+      debug: {
+        claim: 'Interne tools',
+        subClaim:
+          'Eine sampleCore und sampleAccount Instanz in der Browser Console verfügbar machen.',
+        magicWordsPlaceholder:
+          'Circles Core privater Schlüssel - leer für default',
       },
     },
   },

@@ -64,6 +64,7 @@ type CirclesAction
       , debug ::
           Variant
             ( coreToWindow :: Unit
+            , setMagicWords :: String
             )
       )
 

@@ -65,5 +65,6 @@ type CirclesProtocol
       , debug ::
           P.State
             ( coreToWindow :: P.Action ("debug" :> Nil')
+            , setMagicWords :: P.Action ("debug" :> Nil')
             )
       )
