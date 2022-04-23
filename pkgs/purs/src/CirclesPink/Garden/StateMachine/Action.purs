@@ -58,8 +58,7 @@ type CirclesAction
             )
       , trusts ::
           Variant
-            ( continue :: Unit
-            , getSafeStatus :: Unit
+            ( getSafeStatus :: Unit
             , finalizeRegisterUser :: Unit
             )
       , debug ::
@@ -132,9 +131,6 @@ _signUp = inj (Proxy :: _ "signUp")
 
 _setMagicWords :: forall a v. a -> Variant ( setMagicWords :: a | v )
 _setMagicWords = inj (Proxy :: _ "setMagicWords")
-
-_continue :: forall a v. a -> Variant ( continue :: a | v )
-_continue = inj (Proxy :: _ "continue")
 
 _coreToWindow :: forall a v. a -> Variant ( coreToWindow :: a | v )
 _coreToWindow = inj (Proxy :: _ "coreToWindow")

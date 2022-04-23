@@ -59,8 +59,7 @@ type CirclesProtocol
             )
       , trusts ::
           P.State
-            ( continue :: P.Action ("dashboard" :> "trusts" :> Nil')
-            , getSafeStatus :: P.Action ("trusts" :> Nil')
+            ( getSafeStatus :: P.Action ("trusts" :> Nil')
             , finalizeRegisterUser :: P.Action ("dashboard" :> "trusts" :> Nil')
             )
       , debug ::
