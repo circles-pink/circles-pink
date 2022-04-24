@@ -60,7 +60,6 @@ env { request, envVars } =
         --------------------------------------------------------------------------------
         -- This Section cannot go to production! it auto-funds safe of user on register
         --------------------------------------------------------------------------------
-        _ <- todo -- remove
         _ <-
           mapExceptT liftEffect
             $ CC.sendTransaction
