@@ -66,6 +66,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <Button
+              prio={'high'}
               color={theme.baseColor}
               state={mapResult(state.loginResult)}
               onClick={() => act(A._login(A._login(unit)))}
@@ -73,6 +74,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               {t('signInButton')}
             </Button>
             <Button
+              prio={'medium'}
               color={theme.baseColor}
               onClick={() => act(A._login(A._signUp(unit)))}
             >

@@ -84,11 +84,15 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <Button onClick={() => act(A._askEmail(A._prev(unit)))}>
+            <Button
+              prio={'medium'}
+              onClick={() => act(A._askEmail(A._prev(unit)))}
+            >
               {t('prevButton')}
             </Button>
 
             <Button
+              prio={'high'}
               color={theme.baseColor}
               onClick={() => act(A._askEmail(A._next(unit)))}
             >

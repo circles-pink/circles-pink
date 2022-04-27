@@ -60,11 +60,15 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <Button onClick={() => act(A._magicWords(A._prev(unit)))}>
+            <Button
+              prio={'medium'}
+              onClick={() => act(A._magicWords(A._prev(unit)))}
+            >
               {t('prevButton')}
             </Button>
 
             <Button
+              prio={'high'}
               color={theme.baseColor}
               onClick={() => act(A._magicWords(A._next(unit)))}
             >
@@ -92,9 +96,9 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
           <FadeIn orientation={'down'} delay={getWordDelay()}>
             <ButtonRow>
               <Button
-                light={true}
-                fullWidth={true}
+                prio={'low'}
                 color={theme.baseColor}
+                fullWidth={true}
                 onClick={() => copyToClipboard()}
               >
                 {copyNotify ? (
@@ -106,9 +110,9 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
                 )}
               </Button>
               <Button
-                light={true}
-                fullWidth={true}
+                prio={'low'}
                 color={theme.baseColor}
+                fullWidth={true}
                 onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
               >
                 {t('magicWords.newPhraseBtn')}

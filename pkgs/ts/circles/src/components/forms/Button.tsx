@@ -4,54 +4,44 @@ import React, { ReactNode } from 'react';
 
 type Button_Props = Required<ButtonProps>;
 
+const lightColor = 'white';
+const darkColor = 'black';
+
+const lightGray = '#6e6e6e';
+const darkGray = '#8e8e8e';
+
 const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
-  const coloredTheme = `
-    background: ${color};
-    color: white;
-    &:hover {
-      background: ${darken(color)};
-    }
-    `;
-
-  const lightTheme = `
-    background: white;
-    border: 1px solid ${lighten('#8e8e8e')};
-    color: black;
-    &:hover {
-      background: ${lighten('#6e6e6e')};
-    }
-    `;
-
   const prioStyles = {
     high: `
       background: ${color};
+      border: 1px solid ${darken(color)};
       color: white;
       &:hover {
         background: ${darken(color)};
       }
     `,
     medium: `
-      background: ;
-      border: 1px solid ${lighten('#8e8e8e')};
-      color: black;
+      background: ${lightGray};
+      border: 1px solid ${lightGray};
+      color: ${lightColor};
       &:hover {
-        background: ${lighten('#6e6e6e')};
+        background: ${darken(lightGray)};
       }
   `,
     low: `
-  background: white;
-  border: 1px solid ${lighten('#8e8e8e')};
-  color: black;
-  &:hover {
-    background: ${lighten('#6e6e6e')};
-  }
-  `,
+      background: ${lightColor};
+      border: 1px solid ${lighten(darkGray)};
+      color:  ${darkColor};
+      &:hover {
+        background: ${lighten('#6e6e6e')};
+      }
+      `,
   }[prio];
 
   return [
     css`
       ${fullWidth && 'width: 100%;'};
-      ${light ? lightTheme : coloredTheme}
+      ${prioStyles}
     `,
     tw`font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`,
   ];
@@ -93,9 +83,8 @@ const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
 
   return {
     state: props.state || 'enabled',
-    color: props.color || '#6e6e6e',
+    color: props.color || 'lime',
     fullWidth: props.fullWidth === undefined ? false : props.fullWidth,
-    light: props.light || false,
     children: props.children || 'ok',
     onClick: props.onClick || (() => {}),
     prio: props.prio || 'medium',
