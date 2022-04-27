@@ -6,6 +6,10 @@
 
 # Common Functions and Operators
 
+<style>
+    table {font-size: 10pt}
+</style>
+
 | Context     | Module                | Min? | Prefix                         | Infix | Prec | Signature                                        |
 | ----------- | --------------------- | ---- | ------------------------------ | ----- | ---- | ------------------------------------------------ |
 | _none_      | `Data.Function`       |      |                                |       |      |                                                  |
