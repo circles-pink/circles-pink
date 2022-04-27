@@ -48,11 +48,16 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            <Button onClick={() => act(A._submit(A._prev(unit)))}>
+            <Button
+              prio={'medium'}
+              color={theme.baseColor}
+              onClick={() => act(A._submit(A._prev(unit)))}
+            >
               {t('prevButton')}
             </Button>
 
             <Button
+              prio={'high'}
               color={theme.baseColor}
               onClick={() => act(A._submit(A._submit(unit)))}
             >

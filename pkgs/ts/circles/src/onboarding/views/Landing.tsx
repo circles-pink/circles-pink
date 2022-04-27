@@ -38,12 +38,14 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <Button
+              prio={'medium'}
               color={theme.baseColor}
               onClick={() => act(A._landing(A._signIn(unit)))}
             >
               {t('signInButton')}
             </Button>
             <Button
+              prio={'high'}
               color={theme.baseColor}
               onClick={() => act(A._landing(A._signUp(unit)))}
             >
