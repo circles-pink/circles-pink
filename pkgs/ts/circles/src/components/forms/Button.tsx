@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react';
 
 type Button_Props = Required<ButtonProps>;
 
-const Button_ = styled.button<Button_Props>(({ color, fullWidth, light }) => {
+const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
   const coloredTheme = `
     background: ${color};
     color: white;
@@ -21,6 +21,33 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, light }) => {
       background: ${lighten('#6e6e6e')};
     }
     `;
+
+  const prioStyles = {
+    high: `
+      background: ${color};
+      color: white;
+      &:hover {
+        background: ${darken(color)};
+      }
+    `,
+    medium: `
+      background: ;
+      border: 1px solid ${lighten('#8e8e8e')};
+      color: black;
+      &:hover {
+        background: ${lighten('#6e6e6e')};
+      }
+  `,
+    low: `
+  background: white;
+  border: 1px solid ${lighten('#8e8e8e')};
+  color: black;
+  &:hover {
+    background: ${lighten('#6e6e6e')};
+  }
+  `,
+  }[prio];
+
   return [
     css`
       ${fullWidth && 'width: 100%;'};
@@ -37,11 +64,13 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, light }) => {
 type ButtonProps = {
   color?: string;
   fullWidth?: boolean;
-  light?: boolean;
   state?: ButtonState;
   children?: ReactNode;
   onClick?: () => void;
+  prio?: ButtonPrio;
 };
+
+export type ButtonPrio = 'high' | 'medium' | 'low';
 
 export type ButtonState = 'disabled' | 'loading' | 'enabled';
 
@@ -67,7 +96,8 @@ const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
     color: props.color || '#6e6e6e',
     fullWidth: props.fullWidth === undefined ? false : props.fullWidth,
     light: props.light || false,
-    children: props.children || null,
+    children: props.children || 'ok',
     onClick: props.onClick || (() => {}),
+    prio: props.prio || 'medium',
   };
 };
