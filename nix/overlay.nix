@@ -27,6 +27,26 @@
       ${script}
     '';
 
+
+  patch-json = final.writeShellScriptBin "patch-json" (
+    let
+      mkCode = userJs: filePath: ''
+        const f = ${userJs};
+        const oldJson = JSON.parse(fs.readFileSync(\"${filePath}\"));
+        const newJson = f(oldJson);
+        fs.writeFileSync(\"${filePath}\", JSON.stringify(newJson, null, 2));
+      '';
+    in
+    ''
+      USER_JS_CODE="$1"
+      FILE_PATH="$2"
+      JS_CODE="${mkCode "$USER_JS_CODE" "$FILE_PATH"}"
+      echo -e $JS_CODE
+      
+      ${final.pkgs.nodejs}/bin/node -e "$JS_CODE"
+    ''
+  );
+
   yarn2nix-to-node2nix = yarnPkg: final.runCommand "" { } ''
     mkdir -p $out/lib
 

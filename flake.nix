@@ -114,6 +114,8 @@
                   pkgs.notify-done
                   pkgs.chokidar-cli
                   pkgs.log-result
+                  pkgs.just
+                  pkgs.patch-json
                 ];
 
                 # Change the prompt to show that you are in a devShell
