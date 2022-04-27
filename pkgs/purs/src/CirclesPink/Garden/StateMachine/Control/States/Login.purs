@@ -8,6 +8,7 @@ import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Typelevel.Undefined (undefined)
 import Type.Row (type (+))
 import Wallet.PrivateKey as P
 
@@ -43,7 +44,7 @@ login env =
         pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
     results <- run' task
     case results of
-      Left e -> set \st' -> S._login st' { error = pure e }
+      Left e -> set \st' -> S._login st' { loginResult = undefined }
       Right { user, trusts, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed ->
           set \_ ->

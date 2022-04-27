@@ -1,12 +1,20 @@
 module CirclesPink.Garden.StateMachine.State
-  ( CirclesState
+  ( AskEmailState
+  , AskUsernameState
+  , CirclesState
   , DashboardState
   , DebugState
   , EmailApiResult
+  , ErrDashboardStateResolved
+  , ErrLoginStateResolved
   , ErrTrustState
   , ErrTrustStateResolved
+  , InfoGeneralState
+  , InfoSecurityState
   , LandingState
   , LoginState
+  , MagicWordsState
+  , SubmitState
   , TrustState
   , UserData
   , UsernameApiResult
@@ -34,12 +42,12 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, PrivateKey)
+import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
@@ -62,32 +70,52 @@ type UserData
     , privateKey :: PrivateKey
     }
 
+type InfoGeneralState
+  = UserData
+
+type AskUsernameState
+  = UserData
+
+type AskEmailState
+  = UserData
+
+type InfoSecurityState
+  = UserData
+
+type MagicWordsState
+  = UserData
+
+type SubmitState
+  = UserData
+
+--------------------------------------------------------------------------------
+type ErrLoginStateResolved
+  = Variant
+      ( errApi :: ApiError
+      , errNative :: NativeError
+      , errUserNotFound :: UserNotFoundError
+      , errInvalidUrl :: String
+      )
+
 type LoginState
   = { magicWords :: String
-    , error ::
-        Maybe
-          ( Variant
-              ( errApi ∷ ApiError
-              , errNative ∷ NativeError
-              , errUserNotFound ∷ UserNotFoundError
-              , errInvalidUrl :: String
-              )
-          )
+    , loginResult :: RemoteData ErrLoginStateResolved Unit
     }
+
+--------------------------------------------------------------------------------
+type ErrDashboardStateResolved
+  = Variant
+      ( errService :: Unit
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
 
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , trustNetwork :: Array TrustNode
-    , error ::
-        Maybe
-          ( Variant
-              ( errService ∷ Unit
-              , errNative ∷ NativeError
-              , errInvalidUrl :: String
-              )
-          )
+    , error :: Maybe ErrDashboardStateResolved
     }
 
 --------------------------------------------------------------------------------
@@ -96,8 +124,8 @@ type ErrTrustState
 
 type ErrTrustStateResolved
   = Variant
-      ( errService ∷ Unit
-      , errNative ∷ NativeError
+      ( errService :: Unit
+      , errNative :: NativeError
       , errInvalidUrl :: String
       )
 
@@ -107,8 +135,7 @@ type TrustState
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
-    , error ::
-        Maybe ErrTrustStateResolved
+    , error :: Maybe ErrTrustStateResolved
     }
 
 --------------------------------------------------------------------------------
@@ -132,7 +159,7 @@ type DebugState
     }
 
 -- init :: CirclesState
-init ∷ forall v. Variant ( infoGeneral :: UserData | v )
+init :: forall v. Variant ( infoGeneral :: UserData | v )
 init =
   _infoGeneral
     { direction: D._forwards
@@ -154,7 +181,7 @@ initLogin :: forall v. Variant ( login :: LoginState | v )
 initLogin =
   _login
     { magicWords: ""
-    , error: Nothing
+    , loginResult: _notAsked
     }
 
 initDebug :: forall v. Variant ( debug :: DebugState | v )
