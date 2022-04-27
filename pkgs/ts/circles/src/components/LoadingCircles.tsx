@@ -10,12 +10,12 @@ import { range } from 'fp-ts/lib/NonEmptyArray';
 
 type ItemProps = Props & { index: number };
 
-const wrapOffset = (fac: number): number => (fac >= 1 ? fac - 1 : fac);
+const wrapOffset = (fac: number): number => (fac >= 1 ? 1 - fac : fac);
 
 const Item = styled.div<ItemProps>(({ width, count, color, index }) => {
   const height = width / count;
-  const time = 15;
-  const offset = index * 0.1; //index * (1 / count);
+  const time = 1.5;
+  const offset = index * (1 / count);
   const name = `pulseDot${index}`;
   console.log(wrapOffset(offset + 0), wrapOffset(offset + 0.5));
   return css`
@@ -23,23 +23,15 @@ const Item = styled.div<ItemProps>(({ width, count, color, index }) => {
     height: ${height}px;
     background-color: ${color};
     border-radius: 50%;
-    animation: ${name} ${time}s infinite linear;
-
+    transform: scale(0);
+    animation: ${name} ${time}s infinite ease-in-out;
+    animation-delay: ${offset * time * 0.5}s;
     @keyframes ${name} {
       0% {
-        transform: scale(${wrapOffset(offset + 0)});
-      }
-      25% {
-        transform: scale(${wrapOffset(offset + 0.5)});
-      }
-      50% {
-        transform: scale(${wrapOffset(offset + 1)});
-      }
-      75% {
-        transform: scale(${wrapOffset(offset + 0.5)});
+        transform: scale(-1);
       }
       100% {
-        transform: scale(${wrapOffset(offset + 0)});
+        transform: scale(1);
       }
     }
   `;
@@ -67,21 +59,14 @@ const Root = styled.div<RootProps>(({ width, count }) => {
 type LoadingCirclesProps = {
   width?: number;
   count?: number;
-  debug?: boolean;
   color?: string;
 };
 
 type Props = Required<LoadingCirclesProps>;
 
-const normProps = ({
-  width,
-  count,
-  debug,
-  color,
-}: LoadingCirclesProps): Props => ({
-  width: withDefault(width, 100),
-  count: withDefault(count, 3),
-  debug: withDefault(debug, false),
+const normProps = ({ width, count, color }: LoadingCirclesProps): Props => ({
+  width: withDefault(width, 400),
+  count: withDefault(count, 10),
   color: withDefault(color, 'red'),
 });
 
