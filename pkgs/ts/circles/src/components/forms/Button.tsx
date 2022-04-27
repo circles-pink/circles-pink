@@ -1,7 +1,6 @@
 import tw, { css, styled } from 'twin.macro';
 import { darken, lighten } from '../../onboarding/utils/colorUtils';
 import React, { ReactNode } from 'react';
-import { ThreeDotsPulse } from '../ThreeDotsPulse';
 
 type Button_Props = Required<ButtonProps>;
 
@@ -70,11 +69,7 @@ export const Button = (props_: ButtonProps) => {
   return (
     <Button_ {...props}>
       {props.children}
-      {props.state === 'loading' ? (
-        <ThreeDotsPulse color={lightColor} width={40} />
-      ) : (
-        ''
-      )}
+      {props.state === 'loading' ? '...' : ''}
     </Button_>
   );
 };
@@ -84,8 +79,6 @@ export const Button = (props_: ButtonProps) => {
 // -----------------------------------------------------------------------------
 
 const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
-  console.log(props);
-
   return {
     state: props.state || 'enabled',
     color: props.color || 'lime',
