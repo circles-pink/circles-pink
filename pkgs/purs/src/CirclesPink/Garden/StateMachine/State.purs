@@ -6,6 +6,7 @@ module CirclesPink.Garden.StateMachine.State
   , DebugState
   , EmailApiResult
   , ErrDashboardStateResolved
+  , ErrLoginState
   , ErrLoginStateResolved
   , ErrTrustState
   , ErrTrustStateResolved
@@ -90,32 +91,33 @@ type SubmitState
 
 --------------------------------------------------------------------------------
 type ErrLoginStateResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errUserNotFound :: UserNotFoundError
-      , errInvalidUrl :: String
-      )
+  = ( errApi :: ApiError
+    , errNative :: NativeError
+    , errUserNotFound :: UserNotFoundError
+    , errInvalidUrl :: String
+    )
+
+type ErrLoginState
+  = Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()
 
 type LoginState
   = { magicWords :: String
-    , loginResult :: RemoteData ErrLoginStateResolved Unit
+    , loginResult :: RemoteData (Variant ErrLoginStateResolved) Unit
     }
 
 --------------------------------------------------------------------------------
 type ErrDashboardStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+  = ( errService :: Unit
+    , errNative :: NativeError
+    , errInvalidUrl :: String
+    )
 
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , trustNetwork :: Array TrustNode
-    , error :: Maybe ErrDashboardStateResolved
+    , error :: Maybe (Variant ErrDashboardStateResolved)
     }
 
 --------------------------------------------------------------------------------
@@ -123,11 +125,10 @@ type ErrTrustState
   = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
 
 type ErrTrustStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+  = ( errService :: Unit
+    , errNative :: NativeError
+    , errInvalidUrl :: String
+    )
 
 type TrustState
   = { user :: CC.User
@@ -135,7 +136,7 @@ type TrustState
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
-    , error :: Maybe ErrTrustStateResolved
+    , error :: Maybe (Variant ErrTrustStateResolved)
     }
 
 --------------------------------------------------------------------------------
