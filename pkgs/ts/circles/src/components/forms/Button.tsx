@@ -1,38 +1,34 @@
 import tw, { css, styled } from 'twin.macro';
-import chroma from 'chroma-js';
 import { darken, lighten } from '../../onboarding/utils/colorUtils';
-import { state } from 'fp-ts';
-import { ReactElement, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 
 type Button_Props = Required<ButtonProps>;
 
-export const Button_ = styled.button<Button_Props>(
-  ({ color, fullWidth, light }) => {
-    const coloredTheme = `
-    background: ${color || '#6e6e6e'};
+const Button_ = styled.button<Button_Props>(({ color, fullWidth, light }) => {
+  const coloredTheme = `
+    background: ${color};
     color: white;
     &:hover {
-      background: ${color ? darken(color) : darken('#6e6e6e')};
+      background: ${darken(color)};
     }
     `;
 
-    const lightTheme = `
+  const lightTheme = `
     background: white;
-    border: 1px solid ${color ? color : lighten('#8e8e8e')};
+    border: 1px solid ${lighten('#8e8e8e')};
     color: black;
     &:hover {
-      background: ${color ? lighten(color) : lighten('#6e6e6e')};
+      background: ${lighten('#6e6e6e')};
     }
     `;
-    return [
-      css`
-        ${fullWidth && 'width: 100%;'};
-        ${light ? lightTheme : coloredTheme}
-      `,
-      tw`font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`,
-    ];
-  }
-);
+  return [
+    css`
+      ${fullWidth && 'width: 100%;'};
+      ${light ? lightTheme : coloredTheme}
+    `,
+    tw`font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`,
+  ];
+});
 
 // -----------------------------------------------------------------------------
 // Button
@@ -43,14 +39,35 @@ type ButtonProps = {
   fullWidth?: boolean;
   light?: boolean;
   state?: ButtonState;
-  children: ReactNode;
+  children?: ReactNode;
+  onClick?: () => void;
 };
 
-type ButtonState = 'disabled' | 'loading' | 'enabled';
+export type ButtonState = 'disabled' | 'loading' | 'enabled';
 
-const Button = ({ children, state }: ButtonProps) => (
-  <Button_>
-    {children}
-    {state === 'loading' ? '...' : ''}
-  </Button_>
-);
+export const Button = (props_: ButtonProps) => {
+  const props = normalizeProps(props_);
+  return (
+    <Button_ {...props}>
+      {props.children}
+      {props.state === 'loading' ? '...' : ''}
+    </Button_>
+  );
+};
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
+  console.log(props);
+
+  return {
+    state: props.state || 'enabled',
+    color: props.color || '#6e6e6e',
+    fullWidth: props.fullWidth === undefined ? false : props.fullWidth,
+    light: props.light || false,
+    children: props.children || null,
+    onClick: props.onClick || (() => {}),
+  };
+};
