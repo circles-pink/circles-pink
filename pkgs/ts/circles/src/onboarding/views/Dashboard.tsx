@@ -10,6 +10,8 @@ import { DashboardState } from 'generated/output/CirclesPink.Garden.StateMachine
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import { Graph, TrustGraph } from '../../components/TrustGraph';
+import { unsafeAddrFromString } from 'generated/output/Wallet.PrivateKey';
 
 type DashboardProps = {
   state: DashboardState;
@@ -22,8 +24,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
-    setInterval(() => act(A._dashboard(A._getTrusts(unit))), 5000);
+    act(A._dashboard(A._getTrusts(unit))); // Should be done in control
+    setInterval(() => act(A._dashboard(A._getTrusts(unit))), 15000);
   }, []);
+
+  // const graph: Graph = new Map([[state.user.safeAddress, state.trusts]]);
 
   return (
     <DialogCard
@@ -43,6 +48,10 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('dashboard.subClaim')}</SubClaim>
           </FadeIn>
+
+          {/* <FadeIn orientation={orientation} delay={getDelay()}>
+            <TrustGraph graph={graph} />
+          </FadeIn> */}
         </Text>
       }
       control={

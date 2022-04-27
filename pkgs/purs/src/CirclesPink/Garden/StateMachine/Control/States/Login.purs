@@ -52,6 +52,7 @@ login env =
               , trusts
               , privKey
               , error: Nothing
+              , trustNetwork: []
               }
       Right { user, trusts, safeStatus, isReady } ->
         set \_ ->
