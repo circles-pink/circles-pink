@@ -10,10 +10,25 @@ import { LoginState } from 'generated/output/CirclesPink.Garden.StateMachine.Sta
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import { RemoteData } from 'generated/output/RemoteData';
+import { ButtonState } from '../../components/forms/Button';
 
 type LoginProps = {
   state: LoginState;
   act: (ac: A.CirclesAction) => void;
+};
+
+const mapResult = <E, A>(remoteData: RemoteData<E, A>): ButtonState => {
+  switch (remoteData.type) {
+    case 'failure':
+      return 'enabled';
+    case 'success':
+      return 'enabled';
+    case 'loading':
+      return 'loading';
+    case 'notAsked':
+      return 'enabled';
+  }
 };
 
 export const Login = ({ state, act }: LoginProps): ReactElement => {
@@ -52,6 +67,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
           <>
             <Button
               color={theme.baseColor}
+              state={mapResult(state.loginResult)}
               onClick={() => act(A._login(A._login(unit)))}
             >
               {t('signInButton')}
