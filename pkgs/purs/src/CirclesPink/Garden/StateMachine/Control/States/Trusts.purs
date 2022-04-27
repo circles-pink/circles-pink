@@ -1,14 +1,15 @@
-module CirclesPink.Garden.StateMachine.Control.States.Trusts where
+module CirclesPink.Garden.StateMachine.Control.States.Trusts
+  ( trusts
+  ) where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Type.Row (type (+))
 
 trusts ::
   forall t m.
@@ -21,33 +22,30 @@ trusts ::
   }
 trusts env =
   { getSafeStatus: getSafeStatus
-  , finalizeRegisterUser: finalizeRegisterUser
+  , finalizeRegisterUser
   }
   where
   getSafeStatus set st _ = do
-    result <- run $ env.getSafeStatus st.privKey
-    case result of
+    let
+      task :: ExceptV S.ErrTrustState _ _
+      task = do
+        safeStatus <- env.getSafeStatus st.privKey
+        isReady' <- readyForDeployment env st.privKey
+        pure { safeStatus, isReady: isReady' }
+    results <- run' task
+    case results of
       Left e -> set \st' -> S._trusts st' { error = pure e }
-      Right ss -> set \st' -> S._trusts st' { safeStatus = ss }
+      Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
 
-  -- getSafeStatus set st _ = do
-  --   let
-  --     task :: ExceptV (Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + ()) _ _
-  --     task = do
-  --       safeStatus <- env.getSafeStatus st.privKey
-  --       isReady' <- readyForDeployment env st.privKey
-  --       pure { safeStatus, isReady: isReady' }
-  --   results <- run' task
-  --   case results of
-  --     Left e -> set \st' -> S._trusts st' { error = pure e }
-  --     Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
   --
   finalizeRegisterUser set st _ = do
     let
-      task :: ExceptV (Env.ErrDeploySafe + Env.ErrDeployToken + ()) _ _
+      task :: ExceptV S.ErrTrustState _ _
       task = do
+        -- First deploy always fails
         _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
         _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
+        -- Second deploy works
         _ <- env.deploySafe st.privKey
         _ <- (env.deployToken st.privKey <#> const unit)
         pure unit
@@ -61,4 +59,5 @@ trusts env =
             , trusts: st.trusts
             , privKey: st.privKey
             , error: Nothing
+            , trustNetwork: []
             }

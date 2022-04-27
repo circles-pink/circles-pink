@@ -3,6 +3,8 @@ module CirclesPink.Garden.StateMachine.State
   , DashboardState
   , DebugState
   , EmailApiResult
+  , ErrTrustState
+  , ErrTrustStateResolved
   , LandingState
   , LoginState
   , TrustState
@@ -77,6 +79,7 @@ type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
+    , trustNetwork :: Array TrustNode
     , error ::
         Maybe
           ( Variant
@@ -86,6 +89,17 @@ type DashboardState
               )
           )
     }
+
+--------------------------------------------------------------------------------
+type ErrTrustState
+  = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
+
+type ErrTrustStateResolved
+  = Variant
+      ( errService ∷ Unit
+      , errNative ∷ NativeError
+      , errInvalidUrl :: String
+      )
 
 type TrustState
   = { user :: CC.User
@@ -94,15 +108,10 @@ type TrustState
     , safeStatus :: SafeStatus
     , isReady :: Boolean
     , error ::
-        Maybe
-          ( Variant
-              ( errService ∷ Unit
-              , errNative ∷ NativeError
-              , errInvalidUrl :: String
-              )
-          )
+        Maybe ErrTrustStateResolved
     }
 
+--------------------------------------------------------------------------------
 type CirclesState
   = Variant
       ( landing :: LandingState
