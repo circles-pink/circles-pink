@@ -16,10 +16,13 @@ module CirclesPink.Garden.StateMachine.State
   , InfoSecurityState
   , LandingState
   , LoginState
+  , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
   , TrustState
+  , TrustStateTrustsResult
   , UserData
+  , UserDataSubmitResult
   , UsernameApiResult
   , _askEmail
   , _askUsername
@@ -83,6 +86,9 @@ type ErrSubmitResolved
       , errUserNotFound :: UserNotFoundError
       )
 
+type UserDataSubmitResult
+  = RemoteData ErrSubmitResolved Unit
+
 type UserData
   = { direction :: D.Direction
     , username :: String
@@ -92,7 +98,7 @@ type UserData
     , terms :: Boolean
     , privacy :: Boolean
     , privateKey :: PrivateKey
-    , submitResult :: RemoteData ErrSubmitResolved Unit
+    , submitResult :: UserDataSubmitResult
     }
 
 type InfoGeneralState
@@ -125,9 +131,12 @@ type ErrLoginStateResolved
 type ErrLoginState
   = Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()
 
+type LoginStateLoginResult
+  = RemoteData ErrLoginStateResolved Unit
+
 type LoginState
   = { magicWords :: String
-    , loginResult :: RemoteData ErrLoginStateResolved Unit
+    , loginResult :: LoginStateLoginResult
     }
 
 --------------------------------------------------------------------------------
@@ -156,16 +165,16 @@ type ErrTrustStateResolved
       , errInvalidUrl :: String
       )
 
+type TrustStateTrustsResult
+  = RemoteData ErrTrustStateResolved Unit
+
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
-    , trustsResult ::
-        RemoteData
-          ErrTrustStateResolved
-          Unit
+    , trustsResult :: TrustStateTrustsResult
     }
 
 --------------------------------------------------------------------------------
