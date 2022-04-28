@@ -4,13 +4,10 @@ import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
-import CirclesPink.Garden.StateMachine.State (ErrSubmitResolved, ErrSubmit)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
-import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
@@ -29,13 +26,13 @@ submit env =
   }
   where
   submit' set st _ = do
-    set \st' -> S._submit st' { submitResult = _loading :: RemoteData (Variant ErrSubmitResolved) Unit }
+    set \st' -> S._submit st' { submitResult = _loading :: RemoteData S.ErrSubmitResolved Unit }
     let
       address = P.privKeyToAddress st.privateKey
 
       nonce = P.addressToNonce address
 
-      task :: ExceptV ErrSubmit _ _
+      task :: ExceptV S.ErrSubmit _ _
       task = do
         safeAddress <- env.getSafeAddress st.privateKey
         _ <- env.safePrepareDeploy st.privateKey
