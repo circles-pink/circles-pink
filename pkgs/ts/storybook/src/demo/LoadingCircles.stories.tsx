@@ -6,9 +6,8 @@ export default {
   title: "Components/LoadingCircles",
   component: LoadingCircles,
   argTypes: {
-    speed: { control: { type: "range", min: 0, max: 10, step: 0.1 } },
+    duration: { control: { type: "range", min: 0.1, max: 10, step: 0.01 } },
     width: { control: { type: "range", min: 0, max: 300, step: 1 } },
-    count: { control: { type: "range", min: 1, max: 10, step: 1 } },
     maxScale: { control: { type: "range", min: 0.5, max: 1.5, step: 0.01 } },
     pulse: { control: { type: "range", min: 0, max: 1.0, step: 0.01 } },
   },
