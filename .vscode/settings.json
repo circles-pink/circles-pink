@@ -9,5 +9,5 @@
   "[purescript]": {
     "editor.defaultFormatter": "nwolverson.ide-purescript"
   },
-  "purescript.exportsCodeLens": false
+  "purescript.exportsCodeLens": true
 }
