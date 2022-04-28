@@ -49,7 +49,7 @@ type CirclesProtocol
       , dashboard ::
           P.State
             ( logout :: P.Action ("landing" :> Nil')
-            , getTrusts :: P.Action ("dashboard" :> Nil')
+            , getTrustNetwork :: P.Action ("dashboard" :> Nil')
             )
       , login ::
           P.State
