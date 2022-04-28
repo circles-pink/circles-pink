@@ -1,14 +1,17 @@
 module CirclesPink.Garden.StateMachine.Control.States.Submit where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
+import CirclesPink.Garden.StateMachine.State (ErrSubmitResolved, ErrSubmit)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
+import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Debug (spy)
+import Data.Variant (Variant)
+import RemoteData (RemoteData, _failure, _loading)
 import Wallet.PrivateKey as P
 
 submit ::
@@ -26,12 +29,14 @@ submit env =
   }
   where
   submit' set st _ = do
+    set \st' -> S._submit st' { submitResult = _loading :: RemoteData (Variant ErrSubmitResolved) Unit }
     let
       address = P.privKeyToAddress st.privateKey
 
       nonce = P.addressToNonce address
-    result <-
-      run do
+
+      task :: ExceptV ErrSubmit _ _
+      task = do
         safeAddress <- env.getSafeAddress st.privateKey
         _ <- env.safePrepareDeploy st.privateKey
         env.userRegister
@@ -46,8 +51,9 @@ submit env =
         trusts <- env.trustGetNetwork st.privateKey
         isReady' <- readyForDeployment env st.privateKey
         pure { safeStatus, user, trusts, isReady: isReady' }
+    result <- run' task
     case result of
-      Left e -> set \st' -> let _ = spy "e" e in S._submit st'
+      Left e -> set \st' -> S._submit st' { submitResult = _failure e }
       Right { safeStatus, user, trusts, isReady } ->
         set \_ ->
           S._trusts
