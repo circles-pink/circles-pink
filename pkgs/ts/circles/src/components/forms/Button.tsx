@@ -27,7 +27,7 @@ export const Button = (props_: ButtonProps) => {
   return (
     <Button_ {...props}>
       <ButtonContent>
-        <TextWrapper>{props.children}</TextWrapper>
+        <TextWrapper {...props}>{props.children}</TextWrapper>
         {props.state === 'loading' ? <Loading color={buttonColor} /> : ''}
       </ButtonContent>
     </Button_>
@@ -88,9 +88,16 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
 // -----------------------------------------------------------------------------
 
 const ButtonContent = styled.div(() => [tw`flex items-center`]);
-const TextWrapper = styled.div(() => [
+
+// -----------------------------------------------------------------------------
+// UI / TextWrapper
+// -----------------------------------------------------------------------------
+
+type TextWrapperProps = ButtonProps;
+
+const TextWrapper = styled.div<TextWrapperProps>(props => [
   css`
-    margin-right: 10px;
+    margin-right: ${props.state === 'loading' ? '10' : '0'}px;
   `,
 ]);
 

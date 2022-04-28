@@ -9,10 +9,8 @@ import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading)
-import Type.Row (type (+))
 import Wallet.PrivateKey as P
 
 login ::

@@ -8,6 +8,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrDashboardStateResolved
   , ErrLoginState
   , ErrLoginStateResolved
+  , ErrSubmit
+  , ErrSubmitResolved
   , ErrTrustState
   , ErrTrustStateResolved
   , InfoGeneralState
@@ -60,6 +62,26 @@ type EmailApiResult
 type LandingState
   = {}
 
+--------------------------------------------------------------------------------
+-- UserData
+--------------------------------------------------------------------------------
+type ErrSubmit
+  = Env.ErrGetSafeAddress
+      + Env.ErrPrepareSafeDeploy
+      + Env.ErrUserRegister
+      + Env.ErrUserResolve
+      + Env.ErrTrustGetNetwork
+      + Env.ErrGetSafeStatus
+      + ()
+
+type ErrSubmitResolved
+  = ( errApi :: ApiError
+    , errInvalidUrl :: String
+    , errNative :: NativeError
+    , errService :: Unit
+    , errUserNotFound :: UserNotFoundError
+    )
+
 type UserData
   = { direction :: D.Direction
     , username :: String
@@ -69,6 +91,7 @@ type UserData
     , terms :: Boolean
     , privacy :: Boolean
     , privateKey :: PrivateKey
+    , submitResult :: RemoteData (Variant ErrSubmitResolved) Unit
     }
 
 type InfoGeneralState
@@ -136,7 +159,7 @@ type TrustState
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
-    , error :: Maybe (Variant ErrTrustStateResolved)
+    , trustsResult :: RemoteData (Variant ErrTrustStateResolved) Unit
     }
 
 --------------------------------------------------------------------------------
@@ -171,6 +194,7 @@ init =
     , terms: false
     , privacy: false
     , privateKey: P.zeroKey
+    , submitResult: _notAsked
     }
 
 initLanding :: forall v. Variant ( landing :: LandingState | v )
