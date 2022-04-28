@@ -6,6 +6,7 @@
     "bip39": "^3.0.4",
     "ethereumjs-util": "^7.1.4",
     "ethereumjs-wallet": "^1.0.2",
+    "gun": "^0.2020.1237",
     "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^2.0.0",
     "web3": "^1.7.1"
