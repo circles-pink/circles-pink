@@ -11,7 +11,6 @@ module CirclesPink.Garden.StateMachine.State
   , ErrSubmit
   , ErrSubmitResolved
   , ErrTrustState
-  , ErrTrustStateResolved
   , InfoGeneralState
   , InfoSecurityState
   , LandingState
@@ -146,19 +145,21 @@ type DashboardState
 type ErrTrustState
   = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
 
-type ErrTrustStateResolved
-  = ( errService :: Unit
-    , errNative :: NativeError
-    , errInvalidUrl :: String
-    )
-
 type TrustState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
-    , trustsResult :: RemoteData (Variant ErrTrustStateResolved) Unit
+    , trustsResult ::
+        RemoteData
+          ( Variant
+              ( errService :: Unit
+              , errNative :: NativeError
+              , errInvalidUrl :: String
+              )
+          )
+          Unit
     }
 
 --------------------------------------------------------------------------------
