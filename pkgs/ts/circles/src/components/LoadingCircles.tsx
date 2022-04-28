@@ -13,19 +13,34 @@ import { normalizeUI, withDefaults } from '../ui-utils';
 type ItemProps = NormProps & { index: number };
 
 const Item = styled.div<ItemProps>(
-  ({ width, count, color, index, speed, maxScale, done, colorDone, pulse }) => {
+  ({
+    width,
+    count,
+    color,
+    index,
+    duration,
+    maxScale,
+    done,
+    colorDone,
+    pulse,
+  }) => {
     const height = width / count;
     const offset = index * (1 / count);
-    const delay = offset * speed * 0.5;
+    const delay = offset * duration * 0.5;
 
-    const anim = keyframes`
-      0%,${pulse * 100}% {
-        transform: scale(0);
-      }
-      100% {
-        transform: scale(${maxScale});
-      }
-  `;
+    const anim = keyframes(
+      css`
+        0%,
+        ${pulse * 100}% {
+          transform: scale(0);
+          zoom: ;
+        }
+        100% {
+          transform: scale(${maxScale});
+        }
+      `,
+      [count, duration, width]
+    );
 
     return css`
       width: ${width}px;
@@ -34,7 +49,7 @@ const Item = styled.div<ItemProps>(
       background-color: ${done ? colorDone : color};
       border-radius: 50%;
       transform: scale(0);
-      animation: ${anim} ${speed}s infinite ease-in-out;
+      animation: ${anim} ${duration}s infinite ease-in-out;
       animation-delay: ${delay}s;
       animation-direction: alternate;
     `;
@@ -67,7 +82,7 @@ const Norm = (props: NormProps) => {
   return (
     <Root {...props}>
       {range(0, count - 1).map(index => (
-        <Item {...props} index={index} />
+        <Item key={index} {...props} index={index} />
       ))}
     </Root>
   );
@@ -82,7 +97,7 @@ type LoadingCirclesProps = {
   count?: number;
   color?: string;
   colorDone?: string;
-  speed?: number;
+  duration?: number;
   maxScale?: number;
   done?: boolean;
   pulse?: number;
@@ -94,7 +109,7 @@ const normProps = (props: LoadingCirclesProps): NormProps =>
     count: 3,
     color: 'pink',
     colorDone: 'lime',
-    speed: 0.9,
+    duration: 0.9,
     maxScale: 0.5,
     done: false,
     pulse: 0.2,
