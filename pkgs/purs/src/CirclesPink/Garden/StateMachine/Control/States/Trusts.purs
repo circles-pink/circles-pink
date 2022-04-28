@@ -5,13 +5,11 @@ module CirclesPink.Garden.StateMachine.Control.States.Trusts
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.State (ErrTrustStateResolved)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading)
 
 trusts ::
@@ -41,7 +39,7 @@ trusts env =
       Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
 
   finalizeRegisterUser set st _ = do
-    set \st' -> S._trusts st' { trustsResult = _loading :: RemoteData (Variant ErrTrustStateResolved) Unit }
+    set \st' -> S._trusts st' { trustsResult = _loading :: RemoteData S.ErrTrustStateResolved Unit }
     let
       task :: ExceptV S.ErrTrustState _ _
       task = do

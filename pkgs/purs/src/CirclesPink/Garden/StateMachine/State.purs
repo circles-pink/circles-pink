@@ -11,6 +11,7 @@ module CirclesPink.Garden.StateMachine.State
   , ErrSubmit
   , ErrSubmitResolved
   , ErrTrustState
+  , ErrTrustStateResolved
   , InfoGeneralState
   , InfoSecurityState
   , LandingState
@@ -74,12 +75,13 @@ type ErrSubmit
       + ()
 
 type ErrSubmitResolved
-  = ( errApi :: ApiError
-    , errInvalidUrl :: String
-    , errNative :: NativeError
-    , errService :: Unit
-    , errUserNotFound :: UserNotFoundError
-    )
+  = Variant
+      ( errApi :: ApiError
+      , errInvalidUrl :: String
+      , errNative :: NativeError
+      , errService :: Unit
+      , errUserNotFound :: UserNotFoundError
+      )
 
 type UserData
   = { direction :: D.Direction
@@ -90,7 +92,7 @@ type UserData
     , terms :: Boolean
     , privacy :: Boolean
     , privateKey :: PrivateKey
-    , submitResult :: RemoteData (Variant ErrSubmitResolved) Unit
+    , submitResult :: RemoteData ErrSubmitResolved Unit
     }
 
 type InfoGeneralState
@@ -113,37 +115,46 @@ type SubmitState
 
 --------------------------------------------------------------------------------
 type ErrLoginStateResolved
-  = ( errApi :: ApiError
-    , errNative :: NativeError
-    , errUserNotFound :: UserNotFoundError
-    , errInvalidUrl :: String
-    )
+  = Variant
+      ( errApi :: ApiError
+      , errNative :: NativeError
+      , errUserNotFound :: UserNotFoundError
+      , errInvalidUrl :: String
+      )
 
 type ErrLoginState
   = Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()
 
 type LoginState
   = { magicWords :: String
-    , loginResult :: RemoteData (Variant ErrLoginStateResolved) Unit
+    , loginResult :: RemoteData ErrLoginStateResolved Unit
     }
 
 --------------------------------------------------------------------------------
 type ErrDashboardStateResolved
-  = ( errService :: Unit
-    , errNative :: NativeError
-    , errInvalidUrl :: String
-    )
+  = Variant
+      ( errService :: Unit
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
 
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
-    , error :: Maybe (Variant ErrDashboardStateResolved)
+    , error :: Maybe ErrDashboardStateResolved
     }
 
 --------------------------------------------------------------------------------
 type ErrTrustState
   = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
+
+type ErrTrustStateResolved
+  = Variant
+      ( errService :: Unit
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
 
 type TrustState
   = { user :: CC.User
@@ -153,12 +164,7 @@ type TrustState
     , isReady :: Boolean
     , trustsResult ::
         RemoteData
-          ( Variant
-              ( errService :: Unit
-              , errNative :: NativeError
-              , errInvalidUrl :: String
-              )
-          )
+          ErrTrustStateResolved
           Unit
     }
 
