@@ -62,5 +62,4 @@ trusts env =
             , trusts: st.trusts
             , privKey: st.privKey
             , error: Nothing
-            , trustNetwork: []
             }
