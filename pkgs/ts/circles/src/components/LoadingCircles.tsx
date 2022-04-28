@@ -1,47 +1,49 @@
 import styled from '@emotion/styled';
 import { count } from 'console';
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { css } from 'twin.macro';
 import { range } from 'fp-ts/lib/NonEmptyArray';
+import { keyframes } from '@emotion/react';
+import { normalizeUI, withDefaults } from '../ui-utils';
 
 // -----------------------------------------------------------------------------
 // UI / Item
 // -----------------------------------------------------------------------------
 
-type ItemProps = Props & { index: number };
+type ItemProps = NormProps & { index: number };
 
-const wrapOffset = (fac: number): number => (fac >= 1 ? 1 - fac : fac);
+const Item = styled.div<ItemProps>(
+  ({ width, count, color, index, speed, maxScale }) => {
+    const height = width / count;
+    const offset = index * (1 / count);
 
-const Item = styled.div<ItemProps>(({ width, count, color, index }) => {
-  const height = width / count;
-  const time = 1.5;
-  const offset = index * (1 / count);
-  const name = `pulseDot${index}`;
-  console.log(wrapOffset(offset + 0), wrapOffset(offset + 0.5));
-  return css`
-    width: ${width}px;
-    height: ${height}px;
-    background-color: ${color};
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ${name} ${time}s infinite ease-in-out;
-    animation-delay: ${offset * time * 0.5}s;
-    @keyframes ${name} {
-      0% {
-        transform: scale(-1);
-      }
-      100% {
-        transform: scale(1);
-      }
+    const anim = keyframes`
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(${maxScale});
     }
   `;
-});
+
+    return css`
+      width: ${width}px;
+      height: ${height}px;
+      background-color: ${color};
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ${anim} ${speed}s infinite ease-in-out;
+      animation-delay: ${offset * speed * 0.5}s;
+      animation-direction: alternate;
+    `;
+  }
+);
 
 // -----------------------------------------------------------------------------
 // UI / Root
 // -----------------------------------------------------------------------------
 
-type RootProps = Props;
+type RootProps = NormProps;
 
 const Root = styled.div<RootProps>(({ width, count }) => {
   const height = width / count;
@@ -53,6 +55,23 @@ const Root = styled.div<RootProps>(({ width, count }) => {
 });
 
 // -----------------------------------------------------------------------------
+// UI / Norm
+// -----------------------------------------------------------------------------
+
+type NormProps = Required<LoadingCirclesProps>;
+
+const Norm = (props: NormProps) => {
+  const { count } = props;
+  return (
+    <Root {...props}>
+      {range(0, count - 1).map(index => (
+        <Item {...props} index={index} />
+      ))}
+    </Root>
+  );
+};
+
+// -----------------------------------------------------------------------------
 // UI / LoadingCircles
 // -----------------------------------------------------------------------------
 
@@ -60,32 +79,17 @@ type LoadingCirclesProps = {
   width?: number;
   count?: number;
   color?: string;
+  speed?: number;
+  maxScale?: number;
 };
 
-type Props = Required<LoadingCirclesProps>;
+const normProps = (props: LoadingCirclesProps): NormProps =>
+  withDefaults(props, {
+    width: 400,
+    count: 10,
+    color: 'red',
+    speed: 1.5,
+    maxScale: 0.8,
+  });
 
-const normProps = ({ width, count, color }: LoadingCirclesProps): Props => ({
-  width: withDefault(width, 400),
-  count: withDefault(count, 10),
-  color: withDefault(color, 'red'),
-});
-
-export const LoadingCircles = (props_: LoadingCirclesProps) => {
-  const props = normProps(props_);
-  const { count } = props;
-
-  return (
-    <Root {...props}>
-      {range(0, count - 1).map(index => (
-        <Item {...props} index={index}></Item>
-      ))}
-    </Root>
-  );
-};
-
-// -----------------------------------------------------------------------------
-// Utils
-// -----------------------------------------------------------------------------
-
-const withDefault = <T,>(x: T | undefined, def: T): T =>
-  x === undefined ? def : x;
+export const LoadingCircles = normalizeUI(normProps, Norm);
