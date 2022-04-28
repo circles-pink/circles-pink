@@ -48,7 +48,7 @@ type CirclesAction
       , dashboard ::
           Variant
             ( logout :: Unit
-            , getTrustNetwork :: Unit
+            , getTrusts :: Unit
             )
       , login ::
           Variant

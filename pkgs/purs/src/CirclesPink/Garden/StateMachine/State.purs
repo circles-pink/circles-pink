@@ -5,8 +5,6 @@ module CirclesPink.Garden.StateMachine.State
   , DashboardState
   , DebugState
   , EmailApiResult
-  , ErrDashboardStateGetTrustNetwork
-  , ErrDashboardStateGetTrustNetworkResolved
   , ErrDashboardStateResolved
   , ErrLoginState
   , ErrLoginStateResolved
@@ -137,20 +135,11 @@ type ErrDashboardStateResolved
     , errInvalidUrl :: String
     )
 
-type ErrDashboardStateGetTrustNetwork
-  = Env.ErrTrustGetNetwork + ()
-
-type ErrDashboardStateGetTrustNetworkResolved
-  = ( errInvalidUrl :: String
-    , errNative :: NativeError
-    )
-
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe (Variant ErrDashboardStateResolved)
-    , getTrustNetworkResult :: RemoteData (Variant (ErrDashboardStateGetTrustNetworkResolved)) (Array TrustNode)
     }
 
 --------------------------------------------------------------------------------
