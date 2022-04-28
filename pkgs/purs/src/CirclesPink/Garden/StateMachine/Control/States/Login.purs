@@ -10,7 +10,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant)
-import RemoteData (RemoteData, _failure, _loading)
+import RemoteData (RemoteData, _failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
 login ::
@@ -64,6 +64,6 @@ login env =
             , trusts
             , privKey
             , safeStatus
-            , error: Nothing
+            , trustsResult: _notAsked
             , isReady
             }
