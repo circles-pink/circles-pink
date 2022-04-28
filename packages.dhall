@@ -150,3 +150,9 @@ in  upstream
     , repo = "https://github.com/thought2/purescript-dot-language.git"
     , version = "c3a6a831349b4ff2acb5a789557cefd7ca5d1ecd"
     }
+  with gun =
+    { dependencies =
+      [ "effect", "console", "maybe", "aff", "foldable-traversable", "prelude" ]
+    , repo = "https://github.com/timdeputter/purescript-gun.git"
+    , version = "master"
+    }
