@@ -46,3 +46,15 @@ const DIR = args[0];
     fs.writeFileSync(filePath, newSrc);
   }
 }
+
+{
+  const files = glob.sync(join(DIR, "*/*.d.ts"));
+
+  for (let filePath of files) {
+    const oldSrc = fs.readFileSync(filePath).toString();
+
+    const newSrc = oldSrc.replace(/: unsupported kind/g, "");
+
+    fs.writeFileSync(filePath, newSrc);
+  }
+}
