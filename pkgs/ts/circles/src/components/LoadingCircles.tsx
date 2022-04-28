@@ -33,7 +33,6 @@ const Item = styled.div<ItemProps>(
         0%,
         ${pulse * 100}% {
           transform: scale(0);
-          zoom: ;
         }
         100% {
           transform: scale(${maxScale});
