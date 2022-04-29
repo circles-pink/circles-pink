@@ -1,7 +1,6 @@
 module Test.Main where
 
 import Prelude
-import CirclesCore.Gun as CirclesCore.Gun
 import CirclesCore.Tests as CirclesCore.Tests
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -26,7 +25,6 @@ mainTestSpec =
   launchAff_
     $ runSpec [ consoleReporter ] do
         CirclesCore.Tests.spec
-        CirclesCore.Gun.spec
 
 main :: Effect Unit
 main = do

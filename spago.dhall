@@ -53,7 +53,6 @@ to generate this file without the comments in this block.
   , "undefined"
   , "unsafe-coerce"
   , "variant"
-  , "gun"
   ]
 , packages = ./packages.dhall
 , sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]

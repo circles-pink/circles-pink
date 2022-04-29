@@ -1,5 +1,5 @@
 {
-  "name": "@circles-pink/state-machine",
+  "name": "circles",
   "version": "1.0.0",
   "scripts": {
     "prettier:check": "prettier --check .",

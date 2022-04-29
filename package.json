@@ -5,7 +5,17 @@
   "workspaces": [
     "pkgs/ts/@circles-pink/content",
     "pkgs/ts/@circles-pink/zeus-client",
-    "pkgs/ts/common"
+    "pkgs/ts/dev-utils",
+    "pkgs/ts/common",
+    "pkgs/ts/storybook",
+    "pkgs/ts/cli",
+    "pkgs/ts/circles",
+    "pkgs/ts/circles-directus",
+    "pkgs/ts/generated",
+    "pkgs/ts/assets",
+    "pkgs/ts/tasks-explorer",
+    "pkgs/ts/seed-db",
+    "pkgs/ts/tasks-explorer-server"
   ],
   "devDependencies": {
     "@types/node": "^17.0.14",

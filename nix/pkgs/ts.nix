@@ -2,39 +2,70 @@
 let
 
   inherit (pkgs) lib;
-  inherit (lib) pipe;
+  inherit (lib)
+    pipe filterAttrs splitString intersperse concatMapStringsSep
+    concatStrings removePrefix importJSON cleanSource concatMap;
+  inherit (builtins) mapAttrs attrNames readFile;
+
 
 in
 rec {
 
-  localPackages = builtins.mapAttrs (_: pkgs.lib.cleanSource)
+  localPackages' = mapAttrs (_: pkgs.lib.cleanSource)
     {
       "@circles-pink/content" = ../../pkgs/ts/${"@"}circles-pink/content;
       "@circles-pink/zeus-client" = ../../pkgs/ts/${"@"}circles-pink/zeus-client;
-      "common" = ../../pkgs/ts/common;
-
-
-      # dev-utils = ../../pkgs/ts/dev-utils;
-      # common = ../../pkgs/ts/common;
-      # storybook = ../../pkgs/ts/storybook;
-      # cli = ../../pkgs/ts/cli;
-      # circles-pink = ../../pkgs/ts/state-machine;
-      # circles-directus = ../../pkgs/ts/circles-directus;
-      # generated = ../../pkgs/ts/generated;
-      # assets = ../../pkgs/ts/assets;
-      # tasks-explorer = ../../pkgs/ts/tasks-explorer;
-      # seed-db = ../../pkgs/ts/seed-db;
-      # tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-      # "@circles-pink/zeus-client" = ../../pkgs/ts/ts/circles-pink/zeus-client;
-      # "@circles-pink/content" = ../../pkgs/ts/ts/circles-pink/content;
+      dev-utils = ../../pkgs/ts/dev-utils;
+      common = ../../pkgs/ts/common;
+      storybook = ../../pkgs/ts/storybook;
+      cli = ../../pkgs/ts/cli;
+      circles = ../../pkgs/ts/circles;
+      circles-directus = ../../pkgs/ts/circles-directus;
+      generated = ../../pkgs/ts/generated;
+      assets = ../../pkgs/ts/assets;
+      tasks-explorer = ../../pkgs/ts/tasks-explorer;
+      seed-db = ../../pkgs/ts/seed-db;
+      tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
     };
 
+  # cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
+  # cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
+  # cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
+
+  localPackages =
+    {
+      "@circles-pink/content" = cleanSource ../../pkgs/ts/${"@"}circles-pink/content;
+      "@circles-pink/zeus-client" = pkgs.runCommand "" { } ''
+        cp -r ${cleanSource ../../pkgs/ts/${"@"}circles-pink/zeus-client} $out
+        chmod -R +w $out
+        cp -r ${zeus-client} $out/src
+      '';
+      dev-utils = cleanSource ../../pkgs/ts/dev-utils;
+      common = cleanSource ../../pkgs/ts/common;
+      storybook = cleanSource ../../pkgs/ts/storybook;
+      cli = cleanSource ../../pkgs/ts/cli;
+      circles = cleanSource ../../pkgs/ts/circles;
+      circles-directus = cleanSource ../../pkgs/ts/circles-directus;
+      generated = pkgs.runCommand "" { } ''
+        cp -r ${cleanSource ../../pkgs/ts/generated} $out
+        chmod -R +w $out
+        cp -r ${pursOutput} $out/output
+      '';
+      assets = pkgs.runCommand "" { } ''
+        cp -r ${cleanSource ../../pkgs/ts/assets} $out
+        chmod -R +w $out
+        cp -r ${assets} $out/src
+      '';
+      tasks-explorer = cleanSource ../../pkgs/ts/tasks-explorer;
+      seed-db = cleanSource ../../pkgs/ts/seed-db;
+      tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
+    };
 
   printPkgNameYarn2NixStyle = pn: pipe pn [
-    (lib.splitString "/")
-    (lib.intersperse "-")
-    lib.concatStrings
-    (lib.removePrefix "@")
+    (splitString "/")
+    (intersperse "-")
+    concatStrings
+    (removePrefix "@")
   ];
 
   src = pkgs.nix-filter.filter {
@@ -44,7 +75,7 @@ rec {
       "yarn.lock"
     ] ++ (
       pkgs.lib.pipe localPackages [
-        builtins.attrNames
+        attrNames
         (map (name: "pkgs/ts/${name}/package.json"))
       ]
     )
@@ -55,12 +86,42 @@ rec {
     inherit src;
   };
 
+  fullWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
+    src = pkgs.lib.cleanSource ../../.;
+  };
+
   workspaces =
     let
       mapLocalPkg = name: source:
         let
           emptyWorkspace = emptyWorkspaces.${printPkgNameYarn2NixStyle name};
-          dependencies = pipe [ ];
+          dependencies = pipe "${source}/package.json" [
+            importJSON
+            (_: _.dependencies)
+            (filterAttrs (k: v: v == "*"))
+            attrNames
+          ];
+
+          getDeps = dep: pipe "${workspaces.${dep}}/libexec/${dep}/deps/${dep}/package.json" [
+            importJSON
+            (_: _.dependencies)
+            (filterAttrs (k: v: v == "*"))
+            attrNames
+          ];
+
+          transitiveDependencies = pipe dependencies [
+            (concatMap (dep: [ dep ] ++ getDeps dep))
+          ];
+
+          mkDep = dep: ''
+            chmod -R +w $out
+            # rm -rf $out/libexec/${name}/deps/${dep}
+            # ln -sf ${workspaces.${dep}}/libexec/${dep}/deps/${dep} $out/libexec/${name}/deps/${dep}
+
+            #rm -rf $out/libexec/${name}/deps/${dep}
+            echo "copy ${dep}"
+            cp -r ${workspaces.${dep}}/libexec/${dep}/deps/${dep}/. $out/libexec/${name}/deps/${dep}
+          '';
         in
         pkgs.runCommand name { } ''
           # Start with empty workspace
@@ -68,10 +129,15 @@ rec {
           chmod -R +w $out
 
           # Add local package source
-          cp -r ${source}/* -t $out/libexec/${name}/deps/${name} # WARNING: Hidden files omitted!
+          rm -rf $out/libexec/${name}/deps/${name}
+          mkdir $out/libexec/${name}/deps/${name}
+          cp -r ${source}/. $out/libexec/${name}/deps/${name}
+        
+          # Link Dependencies
+          ${concatMapStringsSep "\n" mkDep transitiveDependencies}
         '';
     in
-    builtins.mapAttrs mapLocalPkg localPackages;
+    mapAttrs mapLocalPkg localPackages;
 
 
   bins = {
@@ -117,10 +183,6 @@ rec {
       cp -r ${workspaces.storybook} $tmp/build
       chmod -R +w $tmp
 
-      cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
-      cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
-      cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
-
       export STORYBOOK_TASKS_EXPLORER_SERVER="${envVars.tasks}"
       export STORYBOOK_DIRECTUS_URL="${envVars.directus."/graphql"}"
       export STORYBOOK_GARDEN_API="${envVars.gardenApi}"
@@ -133,7 +195,8 @@ rec {
       export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
       export STORYBOOK_GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
       cd $tmp/build/libexec/storybook/node_modules/storybook
-      OUTPUT_DIR=$out yarn build
+
+      ../../node_modules/.bin/build-storybook --output-dir $out
 
       chmod -R +w $tmp
       rm -rf $tmp
@@ -141,3 +204,5 @@ rec {
   };
 
 }
+
+
