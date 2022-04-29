@@ -16,7 +16,7 @@ spec =
     describe "Put" do
       it "Puts data" do
         gundb <- liftEffect $ offline
-        ctx <- liftEffect $ gundb # get "users" # put (encodeJson { name: "John", surnameee: "Doe" })
+        ctx <- liftEffect $ gundb # get "users" # put (encodeJson { name: "Jane", surname: "Doe" })
         result <- (gundb # get "users" # once)
         let
           r = spy "res" result

@@ -10,6 +10,7 @@ type CirclesAction
           Variant
             ( signIn :: Unit
             , signUp :: Unit
+            , checkForSession :: Unit
             )
       , infoGeneral ::
           Variant
@@ -148,3 +149,6 @@ _finalizeRegisterUser = inj (Proxy :: _ "finalizeRegisterUser")
 
 _addTrustConnection :: forall a v. a -> Variant ( addTrustConnection :: a | v )
 _addTrustConnection = inj (Proxy :: _ "addTrustConnection")
+
+_checkForSession :: forall a v. a -> Variant ( checkForSession :: a | v )
+_checkForSession = inj (Proxy :: _ "checkForSession")
