@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { Onboarding } from "circles/src/onboarding";
+import { Onboarding } from "@circles-pink/web-client/src/onboarding";
 import { onboardingArgs } from "./onboardingArgs";
 import { getContent } from "@circles-pink/content/src";
 

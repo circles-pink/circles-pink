@@ -1,6 +1,9 @@
 import React, { ReactElement } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { TrustGraph, Graph } from "circles/src/components/TrustGraph";
+import {
+  TrustGraph,
+  Graph,
+} from "@circles-pink/web-client/src/components/TrustGraph";
 import { TrustNode } from "generated/output/CirclesCore";
 import {
   Address,

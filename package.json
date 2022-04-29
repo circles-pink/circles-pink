@@ -9,7 +9,7 @@
     "pkgs/ts/common",
     "pkgs/ts/storybook",
     "pkgs/ts/cli",
-    "pkgs/ts/circles",
+    "pkgs/ts/@circles-pink/web-client",
     "pkgs/ts/circles-directus",
     "pkgs/ts/generated",
     "pkgs/ts/assets",

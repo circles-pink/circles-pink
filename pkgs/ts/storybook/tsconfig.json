@@ -3,5 +3,8 @@
   "extends": "../../../tsconfig.json",
   "include": ["src"],
   "exclude": ["node_modules"],
-  "references": [{ "path": "../circles" }, { "path": "../generated" }]
+  "references": [
+    { "path": "../@circles-pink/web-client" },
+    { "path": "../generated" }
+  ]
 }

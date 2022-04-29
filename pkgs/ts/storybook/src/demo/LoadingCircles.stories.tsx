@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { LoadingCircles } from "circles/src/components/LoadingCircles";
+import { LoadingCircles } from "@circles-pink/web-client/src/components/LoadingCircles";
 
 export default {
   title: "Components/LoadingCircles",
