@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { StepIndicator } from "circles/src/components/StepIndicator";
+import { StepIndicator } from "@circles-pink/web-client/src/components/StepIndicator";
 
 export default {
   title: "Components/StepIndicator",

@@ -1,6 +1,6 @@
 import React, { ReactElement } from "react";
 import { ComponentMeta } from "@storybook/react";
-import { Button } from "circles/src/components/forms";
+import { Button } from "@circles-pink/web-client/src/components/forms";
 
 export default {
   title: "Components/Forms/Button",

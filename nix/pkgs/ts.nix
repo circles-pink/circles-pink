@@ -11,22 +11,7 @@ let
 in
 rec {
 
-  localPackages' = mapAttrs (_: pkgs.lib.cleanSource)
-    {
-      "@circles-pink/content" = ../../pkgs/ts/${"@"}circles-pink/content;
-      "@circles-pink/zeus-client" = ../../pkgs/ts/${"@"}circles-pink/zeus-client;
-      dev-utils = ../../pkgs/ts/dev-utils;
-      common = ../../pkgs/ts/common;
-      storybook = ../../pkgs/ts/storybook;
-      cli = ../../pkgs/ts/cli;
-      circles = ../../pkgs/ts/circles;
-      circles-directus = ../../pkgs/ts/circles-directus;
-      generated = ../../pkgs/ts/generated;
-      assets = ../../pkgs/ts/assets;
-      tasks-explorer = ../../pkgs/ts/tasks-explorer;
-      seed-db = ../../pkgs/ts/seed-db;
-      tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-    };
+
 
   # cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
   # cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
@@ -44,7 +29,7 @@ rec {
       common = cleanSource ../../pkgs/ts/common;
       storybook = cleanSource ../../pkgs/ts/storybook;
       cli = cleanSource ../../pkgs/ts/cli;
-      circles = cleanSource ../../pkgs/ts/circles;
+      "@circles-pink/web-client" = cleanSource ../../pkgs/ts/${"@"}circles-pink/web-client;
       circles-directus = cleanSource ../../pkgs/ts/circles-directus;
       generated = pkgs.runCommand "" { } ''
         cp -r ${cleanSource ../../pkgs/ts/generated} $out
