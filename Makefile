@@ -101,10 +101,10 @@ generate-watch:
 
 generate-zeus:
 	nix build .#zeus-client --out-link result-zeus-client
-	rm -rf ./pkgs/ts/zeus-client/src
-	mkdir -p ./pkgs/ts/zeus-client/src
-	cp -r result-zeus-client/* -t ./pkgs/ts/zeus-client/src
-	chmod -R u+w ./pkgs/ts/zeus-client/src
+	rm -rf ./pkgs/ts/@circles-pink/zeus-client/src
+	mkdir -p ./pkgs/ts/@circles-pink/zeus-client/src
+	cp -r result-zeus-client/* -t ./pkgs/ts/@circles-pink/zeus-client/src
+	chmod -R u+w ./pkgs/ts/@circles-pink/zeus-client/src
 	rm result-zeus-client
 
 run-garden-nix:
