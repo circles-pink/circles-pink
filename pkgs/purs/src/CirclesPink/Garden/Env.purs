@@ -18,6 +18,7 @@ import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -275,7 +276,11 @@ env { request, envVars } =
   restoreSession = do
     gundb <- lift $ liftEffect $ offline
     result <- gundb # get "session" # once <#> note _errRestoreSession # ExceptT
+    let
+      _ = spy "result rs" result
     privateKey <- decodeJson result.data # lmap (const _errRestoreSession) # except
+    let
+      _ = spy "privateKey" privateKey
     pure privateKey
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3

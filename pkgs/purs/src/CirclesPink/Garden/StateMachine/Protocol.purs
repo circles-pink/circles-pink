@@ -11,6 +11,7 @@ type CirclesProtocol
           P.State
             ( signUp :: P.Action ("infoGeneral" :> Nil')
             , signIn :: P.Action ("login" :> Nil')
+            , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
             )
       , infoGeneral ::
           P.State
