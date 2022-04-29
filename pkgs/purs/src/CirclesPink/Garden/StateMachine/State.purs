@@ -6,6 +6,8 @@ module CirclesPink.Garden.StateMachine.State
   , DebugState
   , EmailApiResult
   , ErrDashboardStateResolved
+  , ErrLandingState
+  , ErrLandingStateResolved
   , ErrLoginState
   , ErrLoginStateResolved
   , ErrSubmit
@@ -17,6 +19,7 @@ module CirclesPink.Garden.StateMachine.State
   , InfoGeneralState
   , InfoSecurityState
   , LandingState
+  , LandingStateCheckSessionResult
   , LoginState
   , LoginStateLoginResult
   , MagicWordsState
@@ -64,9 +67,6 @@ type UsernameApiResult
 
 type EmailApiResult
   = RemoteData CirclesError { isValid :: Boolean }
-
-type LandingState
-  = {}
 
 --------------------------------------------------------------------------------
 -- UserData
@@ -123,6 +123,20 @@ type MagicWordsState
 
 type SubmitState
   = UserData
+
+--------------------------------------------------------------------------------
+type ErrLandingStateResolved
+  = Variant ( errRestoreSession ∷ Unit )
+
+type ErrLandingState
+  = Env.ErrRestoreSession + ()
+
+type LandingStateCheckSessionResult
+  = RemoteData ErrLandingStateResolved Unit
+
+type LandingState
+  = { checkSessionResult :: LandingStateCheckSessionResult
+    }
 
 --------------------------------------------------------------------------------
 type ErrLoginStateResolved
@@ -240,7 +254,7 @@ init =
 initLanding :: forall v. Variant ( landing :: LandingState | v )
 initLanding =
   _landing
-    {}
+    { checkSessionResult: _notAsked }
 
 initLogin :: forall v. Variant ( login :: LoginState | v )
 initLogin =
