@@ -1,21 +1,41 @@
-{ pkgs, pursOutput, assets, zeus-client, ... }: rec {
+{ pkgs, pursOutput, assets, zeus-client, ... }:
+let
+
+  inherit (pkgs) lib;
+  inherit (lib) pipe;
+
+in
+rec {
 
   localPackages = builtins.mapAttrs (_: pkgs.lib.cleanSource)
     {
-      dev-utils = ../../pkgs/ts/dev-utils;
-      common = ../../pkgs/ts/common;
-      storybook = ../../pkgs/ts/storybook;
-      cli = ../../pkgs/ts/cli;
-      circles = ../../pkgs/ts/circles;
-      circles-directus = ../../pkgs/ts/circles-directus;
-      generated = ../../pkgs/ts/generated;
-      assets = ../../pkgs/ts/assets;
-      tasks-explorer = ../../pkgs/ts/tasks-explorer;
-      seed-db = ../../pkgs/ts/seed-db;
-      tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
-      zeus-client = ../../pkgs/ts/zeus-client;
-      content = ../../pkgs/ts/content;
+      "@circles-pink/content" = ../../pkgs/ts/${"@"}circles-pink/content;
+      "@circles-pink/zeus-client" = ../../pkgs/ts/${"@"}circles-pink/zeus-client;
+      "common" = ../../pkgs/ts/common;
+
+
+      # dev-utils = ../../pkgs/ts/dev-utils;
+      # common = ../../pkgs/ts/common;
+      # storybook = ../../pkgs/ts/storybook;
+      # cli = ../../pkgs/ts/cli;
+      # circles-pink = ../../pkgs/ts/state-machine;
+      # circles-directus = ../../pkgs/ts/circles-directus;
+      # generated = ../../pkgs/ts/generated;
+      # assets = ../../pkgs/ts/assets;
+      # tasks-explorer = ../../pkgs/ts/tasks-explorer;
+      # seed-db = ../../pkgs/ts/seed-db;
+      # tasks-explorer-server = ../../pkgs/ts/tasks-explorer-server;
+      # "@circles-pink/zeus-client" = ../../pkgs/ts/ts/circles-pink/zeus-client;
+      # "@circles-pink/content" = ../../pkgs/ts/ts/circles-pink/content;
     };
+
+
+  printPkgNameYarn2NixStyle = pn: pipe pn [
+    (lib.splitString "/")
+    (lib.intersperse "-")
+    lib.concatStrings
+    (lib.removePrefix "@")
+  ];
 
   src = pkgs.nix-filter.filter {
     root = pkgs.lib.cleanSource ../../.;
@@ -35,65 +55,24 @@
     inherit src;
   };
 
-  replaceEmptyLocalDep = pkgName: pkgs.lib.pipe localPackages [
-    (pkgs.lib.mapAttrsToList (depName: drv:
-      let
-
-        depName' = pkgs.lib.pipe "${drv}/package.json" [
-          builtins.readFile
-          builtins.fromJSON
-          (x: x.name)
-        ];
-
-        extraLevel =
-          if builtins.length (builtins.split "/" depName') == 1 then
-            ""
-          else
-            "../";
-
-      in
-      ''
-        dir="$tmp/libexec/${pkgName}/deps/${depName'}"
-        if [ -d $dir ];
-        then
-          tmpNodeModules=`mktemp -d`
-        
-          if [ -d "$dir/node_modules/" ];
-            then cp -r $dir/node_modules/ $tmpNodeModules/node_modules
-          fi
-        
-          rm -rf $dir
-          cp -r ${drv} $dir
-          chmod +w $dir
-          rm -rf $dir/node_modules
-        
-          if [ -d "$tmpNodeModules/node_modules" ];
-            then cp -r $tmpNodeModules/node_modules $dir/node_modules
-            else cp -rf $dir/../../${extraLevel}node_modules $dir/node_modules
-          fi
-
-          chmod -R +w $tmpNodeModules
-          rm -rf $tmpNodeModules
-        fi
-      ''))
-    (builtins.concatStringsSep "\n")
-  ];
-
   workspaces =
-    builtins.mapAttrs
-      (name: value: pkgs.runCommand "" { } ''
-        tmp=`mktemp -d`
-        cp -r ${value}/* -t $tmp
-        chmod -R +w $tmp
+    let
+      mapLocalPkg = name: source:
+        let
+          emptyWorkspace = emptyWorkspaces.${printPkgNameYarn2NixStyle name};
+          dependencies = pipe [ ];
+        in
+        pkgs.runCommand name { } ''
+          # Start with empty workspace
+          cp -r ${emptyWorkspace} $out
+          chmod -R +w $out
 
-        ${replaceEmptyLocalDep name}
+          # Add local package source
+          cp -r ${source}/* -t $out/libexec/${name}/deps/${name} # WARNING: Hidden files omitted!
+        '';
+    in
+    builtins.mapAttrs mapLocalPkg localPackages;
 
-        cp -r $tmp $out
-
-        chmod -R +w $tmp
-        rm -rf $tmp
-      '')
-      emptyWorkspaces;
 
   bins = {
     depcruise = pkgs.writeShellScriptBin "depcruise" ''
