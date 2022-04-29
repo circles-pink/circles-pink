@@ -30,7 +30,7 @@ act :: EnvVars -> CirclesAction -> StateT CirclesState Aff Unit
 act envVars ac = do
   log ("ACTION: " <> show ac)
   toStateT (control envVars) ac
-  st <- get
+  _ <- get
   --log ("STATE: " <> show st)
   log ""
 

@@ -8,6 +8,7 @@ module Wallet.PrivateKey
   , genPrivateKey
   , getMnemonicFromString
   , getWords
+  , isPrivateKey
   , keyToMnemonic
   , mnemonicToKey
   , nonceToBigInt
@@ -23,6 +24,7 @@ module Wallet.PrivateKey
   ) where
 
 import Prelude
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
 import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.String (Pattern(..))
@@ -116,6 +118,9 @@ sampleAddress = Address "0xfb7dc4d8f841af32d777e698d6c71409e85955d9"
 sampleSafeAddress :: Address
 sampleSafeAddress = Address "0x984501180D63335928eA7fb59c17d33e0398Ed39"
 
+isPrivateKey :: String -> Boolean
+isPrivateKey s = isPrivateKeyImpl s
+
 privKeyToAddress :: PrivateKey -> Address
 privKeyToAddress pk = Address $ privKeyToAddressImpl $ toString pk
 
@@ -140,3 +145,16 @@ foreign import mnemonicToEntropyImpl :: String -> String
 foreign import privKeyToAddressImpl :: String -> String
 
 foreign import addressToNonceImpl :: String -> BigInt
+
+foreign import isPrivateKeyImpl :: String -> Boolean
+
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+instance decodeJsonPrivateKey :: DecodeJson PrivateKey where
+  decodeJson j = do
+    s <- decodeJson j
+    pure $ PrivateKey s
+
+instance encodeJsonPrivateKey :: EncodeJson PrivateKey where
+  encodeJson (PrivateKey s) = encodeJson s

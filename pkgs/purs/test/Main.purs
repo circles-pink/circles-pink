@@ -4,6 +4,7 @@ import Prelude
 import CirclesCore.Tests as CirclesCore.Tests
 import Effect (Effect)
 import Effect.Aff (launchAff_)
+import GunDB.Tests as GunDB.Tests
 import PursDeps.Tests as PursDeps.Tests
 import Test.Data.BigInt as Test.Data.BigInt
 import Test.Spec.Reporter (consoleReporter)
@@ -25,6 +26,7 @@ mainTestSpec =
   launchAff_
     $ runSpec [ consoleReporter ] do
         CirclesCore.Tests.spec
+        GunDB.Tests.spec
 
 main :: Effect Unit
 main = do
