@@ -78,6 +78,7 @@ type ErrSubmit
       + Env.ErrUserResolve
       + Env.ErrTrustGetNetwork
       + Env.ErrGetSafeStatus
+      + Env.ErrSaveSession
       + ()
 
 type ErrSubmitResolved
@@ -87,6 +88,7 @@ type ErrSubmitResolved
       , errNative :: NativeError
       , errService :: Unit
       , errUserNotFound :: UserNotFoundError
+      , errSaveSession :: Unit
       )
 
 type UserDataSubmitResult
@@ -129,10 +131,17 @@ type ErrLoginStateResolved
       , errNative :: NativeError
       , errUserNotFound :: UserNotFoundError
       , errInvalidUrl :: String
+      , errSaveSession :: Unit
       )
 
 type ErrLoginState
-  = Env.ErrUserResolve + Env.ErrGetSafeStatus + Env.ErrTrustGetNetwork + Env.ErrIsTrusted + Env.ErrIsFunded + ()
+  = Env.ErrUserResolve
+      + Env.ErrGetSafeStatus
+      + Env.ErrTrustGetNetwork
+      + Env.ErrIsTrusted
+      + Env.ErrIsFunded
+      + Env.ErrSaveSession
+      + ()
 
 type LoginStateLoginResult
   = RemoteData ErrLoginStateResolved Unit

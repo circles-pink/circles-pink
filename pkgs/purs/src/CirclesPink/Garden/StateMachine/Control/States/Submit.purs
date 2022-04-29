@@ -47,6 +47,7 @@ submit env =
         user <- env.userResolve st.privateKey
         trusts <- env.trustGetNetwork st.privateKey
         isReady' <- readyForDeployment env st.privateKey
+        _ <- env.saveSession st.privateKey
         pure { safeStatus, user, trusts, isReady: isReady' }
     result <- run' task
     case result of

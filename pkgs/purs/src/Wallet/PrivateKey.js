@@ -14,6 +14,15 @@ exports.privKeyToAddressImpl = function (privKey) {
     .getAddressString();
 };
 
+exports.isPrivateKeyImpl = function (str) {
+  try {
+    ethWallet.fromPrivateKey(ethUtils.toBuffer("0x" + str));
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
 exports.addressToNonceImpl = function (address) {
   return parseInt(address.slice(30), 16);
 };

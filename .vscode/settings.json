@@ -9,7 +9,7 @@
   "[purescript]": {
     "editor.defaultFormatter": "nwolverson.ide-purescript"
   },
-  "purescript.exportsCodeLens": false,
+  "purescript.exportsCodeLens": true,
   "[dhall]": {
     "editor.defaultFormatter": "dhall.vscode-dhall-lsp-server"
   }

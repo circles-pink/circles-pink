@@ -1,7 +1,7 @@
 module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
@@ -46,7 +46,8 @@ login env =
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
       Right { user, trusts, safeStatus }
-        | safeStatus.isCreated && safeStatus.isDeployed ->
+        | safeStatus.isCreated && safeStatus.isDeployed -> do
+          _ <- run $ env.saveSession privKey
           set \_ ->
             S._dashboard
               { user
@@ -55,7 +56,8 @@ login env =
               , error: Nothing
               , trustAddResult: _notAsked
               }
-      Right { user, trusts, safeStatus, isReady } ->
+      Right { user, trusts, safeStatus, isReady } -> do
+        _ <- run $ env.saveSession privKey
         set \_ ->
           S._trusts
             { user
