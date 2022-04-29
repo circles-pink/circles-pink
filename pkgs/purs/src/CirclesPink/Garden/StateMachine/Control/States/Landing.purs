@@ -15,7 +15,7 @@ landing ::
   { signUp :: ActionHandler t m Unit S.LandingState ( "infoGeneral" :: S.UserData )
   , signIn :: ActionHandler t m Unit S.LandingState ( "login" :: S.LoginState )
   }
-landing env =
+landing _ =
   { signUp: \set _ _ -> set \_ -> S.init
   , signIn: \set _ _ -> set \_ -> S.initLogin
   }

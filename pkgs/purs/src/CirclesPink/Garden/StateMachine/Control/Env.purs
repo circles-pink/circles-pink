@@ -15,6 +15,8 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsFunded
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
+  , ErrRestoreSession
+  , ErrSaveSession
   , ErrTrustGetNetwork
   , ErrUserRegister
   , ErrUserResolve
@@ -24,10 +26,13 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , IsFunded
   , IsTrusted
   , PrepareSafeDeploy
+  , RestoreSession
+  , SaveSession
   , TrustGetNetwork
   , UserNotFoundError
   , UserRegister
   , UserResolve
+  , _errRestoreSession
   ) where
 
 import Prelude
@@ -35,6 +40,8 @@ import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, Tr
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Data.Variant (Variant, inj)
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, PrivateKey)
 
@@ -143,6 +150,18 @@ type ErrAddTrustConnection r
 type AddTrustConnection m
   = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
+type ErrSaveSession r
+  = ( errSaveSession :: Unit | r )
+
+type SaveSession m
+  = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
+
+type ErrRestoreSession r
+  = ( errRestoreSession :: Unit | r )
+
+type RestoreSession m
+  = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
+
 --------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
@@ -160,4 +179,12 @@ type Env m
     , deploySafe :: DeploySafe m
     , deployToken :: DeployToken m
     , addTrustConnection :: AddTrustConnection m
+    , saveSession :: SaveSession m
+    , restoreSession :: RestoreSession m
     }
+
+--------------------------------------------------------------------------------
+-- Err constructors
+--------------------------------------------------------------------------------
+_errRestoreSession :: forall r. Variant (ErrRestoreSession r)
+_errRestoreSession = inj (Proxy :: _ "errRestoreSession") unit

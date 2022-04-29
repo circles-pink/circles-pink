@@ -35,3 +35,5 @@ tests =
       A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
     T.test "addressToNonce" do
       A.equal (P.nonceToString $ P.addressToNonce P.sampleAddress) "22032785429977"
+    T.test "isPriavateKey" do
+      A.equal true (P.isPrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c")

@@ -5,14 +5,15 @@ module CirclesPink.Garden.Env
 import Prelude
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
+import CirclesPink.Garden.StateMachine.Control.Env (_errRestoreSession)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError)
+import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..))
+import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
@@ -21,6 +22,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -37,6 +39,7 @@ type EnvVars
     , gardenProxyFactoryAddress :: String
     , gardenSafeMasterAddress :: String
     , gardenEthereumNodeWebSocket :: String
+    , saveSession :: String
     }
 
 _errService :: CirclesError
@@ -62,6 +65,8 @@ env { request, envVars } =
   , deployToken
   , isFunded
   , addTrustConnection
+  , saveSession
+  , restoreSession
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -260,6 +265,19 @@ env { request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
 
+  saveSession :: Env.SaveSession Aff
+  saveSession privKey = do
+    gundb <- liftEffect $ offline
+    _ <- liftEffect $ gundb # get "session" # put (encodeJson { privKey })
+    pure unit
+
+  restoreSession :: Env.RestoreSession Aff
+  restoreSession = do
+    gundb <- lift $ liftEffect $ offline
+    result <- gundb # get "session" # once <#> note _errRestoreSession # ExceptT
+    privateKey <- decodeJson result.data # lmap (const _errRestoreSession) # except
+    pure privateKey
+
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -296,4 +314,15 @@ testEnv =
   , deployToken: \_ -> pure ""
   , isFunded: \_ -> pure false
   , addTrustConnection: \_ _ _ -> pure ""
+  , getSafeStatus:
+      \_ ->
+        pure
+          { isCreated: false
+          , isDeployed: false
+          }
+  , deploySafe: \_ -> pure unit
+  , deployToken: \_ -> pure ""
+  , isFunded: \_ -> pure false
+  , saveSession: \_ -> pure unit
+  , restoreSession: pure P.sampleKey
   }
