@@ -141,7 +141,7 @@ type ErrAddTrustConnection r
   = ErrNative + ErrInvalidUrl + r
 
 type AddTrustConnection m
-  = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m Unit
+  = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
 --------------------------------------------------------------------------------
 type Env m
