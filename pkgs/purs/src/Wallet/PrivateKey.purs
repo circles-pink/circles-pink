@@ -24,9 +24,10 @@ module Wallet.PrivateKey
   ) where
 
 import Prelude
-import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
+import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.BigInt (BigInt)
 import Data.BigInt as B
+import Data.Either (Either(..))
 import Data.String (Pattern(..))
 import Data.String as S
 import Data.String.Regex as R
@@ -153,8 +154,11 @@ foreign import isPrivateKeyImpl :: String -> Boolean
 --------------------------------------------------------------------------------
 instance decodeJsonPrivateKey :: DecodeJson PrivateKey where
   decodeJson j = do
-    s <- decodeJson j
-    pure $ PrivateKey s
+    result <- decodeJson j
+    if (isPrivateKey result) then
+      Right $ PrivateKey result
+    else
+      Left $ TypeMismatch "Not a valid Private Key"
 
 instance encodeJsonPrivateKey :: EncodeJson PrivateKey where
   encodeJson (PrivateKey s) = encodeJson s
