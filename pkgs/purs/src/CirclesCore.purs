@@ -12,6 +12,7 @@ module CirclesCore
   , ErrSafePredictAddress
   , ErrService
   , ErrTokenDeploy
+  , ErrTrustAddConnection
   , ErrTrustGetNetwork
   , ErrTrustIsTrusted
   , ErrUserRegister
@@ -21,6 +22,7 @@ module CirclesCore
   , SafeDeployOptions
   , SafeStatus
   , TokenDeployOptions
+  , TrustAddConnectionOptions
   , TrustNode
   , User
   , UserOptions
@@ -41,6 +43,7 @@ module CirclesCore
   , safePrepareDeploy
   , sendTransaction
   , tokenDeploy
+  , trustAddConnection
   , trustGetNetwork
   , trustIsTrusted
   , unsafeSampleCore
@@ -173,6 +176,22 @@ trustGetNetwork cc = mapFn2 (convertCore cc).trust.getNetwork pure (mapArg2 >>> 
   mapOk = map mapTrustNode
 
   mapTrustNode tn = tn { safeAddress = P.unsafeAddrFromString tn.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / trustAddConnection
+--------------------------------------------------------------------------------
+type TrustAddConnectionOptions
+  = { user :: Address
+    , canSendTo :: Address
+    }
+
+type ErrTrustAddConnection r
+  = ErrNative + r
+
+trustAddConnection :: forall r. B.CirclesCore -> B.Account -> TrustAddConnectionOptions -> Result (ErrTrustAddConnection r) String
+trustAddConnection cc = mapFn2 (convertCore cc).trust.addConnection pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { user = addrToString x.user, canSendTo = addrToString x.canSendTo }
 
 --------------------------------------------------------------------------------
 -- API / userRegister

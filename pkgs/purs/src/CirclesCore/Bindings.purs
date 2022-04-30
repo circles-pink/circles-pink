@@ -112,9 +112,7 @@ type CirclesCore_
     , trust ::
         { isTrusted ::
             Fn2Promise Account
-              { safeAddress :: String
-              , limit :: Int
-              }
+              { safeAddress :: String, limit :: Int }
               TrustIsTrustedResult
         , getNetwork ::
             Fn2Promise Account { safeAddress :: String }
@@ -127,6 +125,10 @@ type CirclesCore_
                   , safeAddress :: String
                   }
               )
+        , addConnection ::
+            Fn2Promise Account
+              { user :: String, canSendTo :: String }
+              String
         }
     }
 
