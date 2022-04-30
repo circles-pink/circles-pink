@@ -14,6 +14,7 @@ export const resources = {
       finalizeButton: 'Finalize Account',
       safeStateButton: 'Get Safe State',
       getTrustsButton: 'Get Trust Network',
+      addTrustsButton: 'Trust',
       debugButton: 'Core to window Object',
       landing: {
         claim: 'Welcome to Circles',
@@ -70,6 +71,8 @@ export const resources = {
         greet: 'Hello',
         subClaim:
           'This is your Dashboard, grow your trust network or pay with Circles!',
+        addTrustPlaceholder: 'Address of a person you want to trust',
+        debugTitle: 'Dashboard actions for testing:',
       },
       debug: {
         claim: 'Internal tools',
@@ -90,6 +93,7 @@ export const resources = {
       finalizeButton: 'Account erstellen',
       safeStateButton: 'Safe State abfragen',
       getTrustsButton: 'Vertrauensnetzwerk abfragen',
+      addTrustsButton: 'Vertrauen',
       debugButton: 'Core ans window Object',
       landing: {
         claim: 'Willkommen bei Circles',
@@ -147,6 +151,9 @@ export const resources = {
         greet: 'Hallo',
         subClaim:
           'Dies ist dein Dashboard. Bau dein Netzwerk aus oder zahle mit Circles!',
+        addTrustPlaceholder:
+          'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
+        debugTitle: 'Dashboard actions zum ausprobieren:',
       },
       debug: {
         claim: 'Interne tools',
