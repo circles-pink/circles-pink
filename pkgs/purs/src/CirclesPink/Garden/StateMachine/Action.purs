@@ -49,7 +49,7 @@ type CirclesAction
           Variant
             ( logout :: Unit
             , getTrusts :: Unit
-            , addTrustConnection :: Unit
+            , addTrustConnection :: String
             )
       , login ::
           Variant

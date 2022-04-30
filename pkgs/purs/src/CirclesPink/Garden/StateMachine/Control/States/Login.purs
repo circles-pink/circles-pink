@@ -53,7 +53,7 @@ login env =
               , trusts
               , privKey
               , error: Nothing
-              , trustAddProcesses: []
+              , trustAddResult: _notAsked
               }
       Right { user, trusts, safeStatus, isReady } ->
         set \_ ->

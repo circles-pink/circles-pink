@@ -10,6 +10,7 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLoginStateResolved
   , ErrSubmit
   , ErrSubmitResolved
+  , ErrTrustAddConnection
   , ErrTrustAddConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
@@ -20,7 +21,7 @@ module CirclesPink.Garden.StateMachine.State
   , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
-  , TrustAddProcess
+  , TrustAddResult
   , TrustState
   , TrustStateTrustsResult
   , UserData
@@ -155,18 +156,18 @@ type ErrTrustAddConnectionResolved
       , errInvalidUrl :: String
       )
 
-type TrustAddProcess
-  = { from :: Address
-    , to :: Address
-    , result :: RemoteData ErrTrustAddConnectionResolved Unit
-    }
+type ErrTrustAddConnection
+  = Env.ErrAddTrustConnection + ()
+
+type TrustAddResult
+  = RemoteData ErrTrustAddConnectionResolved Unit
 
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
-    , trustAddProcesses :: Array TrustAddProcess
+    , trustAddResult :: TrustAddResult
     }
 
 --------------------------------------------------------------------------------

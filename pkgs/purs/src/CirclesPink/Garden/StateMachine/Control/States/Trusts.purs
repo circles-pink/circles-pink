@@ -10,7 +10,7 @@ import Control.Monad.Except (class MonadTrans, catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import RemoteData (RemoteData, _failure, _loading)
+import RemoteData (RemoteData, _failure, _loading, _notAsked)
 
 trusts ::
   forall t m.
@@ -60,5 +60,5 @@ trusts env =
             , trusts: st.trusts
             , privKey: st.privKey
             , error: Nothing
-            , trustAddProcesses: []
+            , trustAddResult: _notAsked
             }
