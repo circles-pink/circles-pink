@@ -11,12 +11,6 @@ let
 in
 rec {
 
-
-
-  # cp -r ${assets} $tmp/build/libexec/storybook/node_modules/assets/src
-  # cp -r ${pursOutput} $tmp/build/libexec/storybook/node_modules/generated/output
-  # cp -r ${zeus-client} $tmp/build/libexec/storybook/node_modules/@circles-pink/zeus-client/src
-
   localPackages =
     {
       "@circles-pink/content" = cleanSource ../../pkgs/ts/${"@"}circles-pink/content;
