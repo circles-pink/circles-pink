@@ -1,10 +1,14 @@
 module Test.Wallet.PrivateKey where
 
 import Prelude
+import Data.Argonaut (Json, decodeJson)
 import Data.Array as Arr
+import Data.Bifunctor (lmap)
+import Data.Either (Either)
 import Data.String as S
 import Test.Unit as T
 import Test.Unit.Assert as A
+import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 tests :: T.TestSuite
@@ -35,5 +39,15 @@ tests =
       A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
     T.test "addressToNonce" do
       A.equal (P.nonceToString $ P.addressToNonce P.sampleAddress) "22032785429977"
-    T.test "isPriavateKey" do
+    T.test "isPrivateKey" do
       A.equal true (P.isPrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c")
+
+-- T.test "decodeJsonPrivateKey" do
+--   json <- pure encodeJson { privKey: "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c" }
+--   result <- pure decodePrivKey json
+--   pk <- case result of
+--     Left _ -> Left (const false)
+--     Right k -> Right k
+--   A.equal P.sampleKey pk
+decodePrivKey :: Json -> Either Boolean PrivateKey
+decodePrivKey j = decodeJson j # lmap (const false)
