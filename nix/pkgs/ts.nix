@@ -7,7 +7,6 @@ let
     concatStrings removePrefix importJSON cleanSource concatMap;
   inherit (builtins) mapAttrs attrNames readFile;
 
-
 in
 rec {
 
