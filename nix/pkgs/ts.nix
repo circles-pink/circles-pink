@@ -5,7 +5,7 @@ let
   inherit (lib)
     pipe filterAttrs splitString intersperse concatMapStringsSep
     concatStrings removePrefix importJSON cleanSource concatMap;
-  inherit (builtins) mapAttrs attrNames readFile;
+  inherit (builtins) mapAttrs attrNames;
 
 in
 rec {
@@ -13,7 +13,7 @@ rec {
   localPackages =
     {
       "@circles-pink/content" =
-        cleanSource ../../pkgs/ts/${"@"}circles-pink/content;
+        cleanSource "${../../pkgs/ts}/@circles-pink/content";
       "@circles-pink/zeus-client" = pkgs.runCommand "" { } ''
         cp -r ${cleanSource ../../pkgs/ts/${"@"}circles-pink/zeus-client} $out
         chmod -R +w $out
@@ -85,14 +85,14 @@ rec {
           dependencies = pipe "${source}/package.json" [
             importJSON
             (_: _.dependencies)
-            (filterAttrs (k: v: v == "*"))
+            (filterAttrs (_: v: v == "*"))
             attrNames
           ];
 
           getDeps = dep: pipe "${workspaces.${dep}}/libexec/${dep}/deps/${dep}/package.json" [
             importJSON
             (_: _.dependencies)
-            (filterAttrs (k: v: v == "*"))
+            (filterAttrs (_: v: v == "*"))
             attrNames
           ];
 
