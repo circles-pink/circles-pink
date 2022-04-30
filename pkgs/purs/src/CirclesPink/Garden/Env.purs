@@ -258,8 +258,7 @@ env { request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
-    _ <- CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
-    pure unit
+    CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
@@ -296,5 +295,5 @@ testEnv =
   , deploySafe: \_ -> pure unit
   , deployToken: \_ -> pure ""
   , isFunded: \_ -> pure false
-  , addTrustConnection: \_ _ _ -> pure unit
+  , addTrustConnection: \_ _ _ -> pure ""
   }
