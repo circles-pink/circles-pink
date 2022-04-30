@@ -4,6 +4,17 @@ default:
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
 
+branchless-get:
+	git fetch
+	git rebase origin/branchless
+
+branchless-put: branchless-get branchless-put_
+
+branchless-put_:
+	git push
+	gh pr create --base branchless --body "" --title "Branchless Update"
+	gh pr merge --auto --rebase
+
 generate_:
 	make generate_
 
