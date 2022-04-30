@@ -12,30 +12,39 @@ rec {
 
   localPackages =
     {
-      "@circles-pink/content" = cleanSource ../../pkgs/ts/${"@"}circles-pink/content;
+      "@circles-pink/content" =
+        cleanSource ../../pkgs/ts/${"@"}circles-pink/content;
       "@circles-pink/zeus-client" = pkgs.runCommand "" { } ''
         cp -r ${cleanSource ../../pkgs/ts/${"@"}circles-pink/zeus-client} $out
         chmod -R +w $out
         cp -r ${zeus-client} $out/src
       '';
-      dev-utils = cleanSource ../../pkgs/ts/dev-utils;
-      common = cleanSource ../../pkgs/ts/common;
-      storybook = cleanSource ../../pkgs/ts/storybook;
-      cli = cleanSource ../../pkgs/ts/cli;
+      dev-utils =
+        cleanSource ../../pkgs/ts/dev-utils;
+      common =
+        cleanSource ../../pkgs/ts/common;
+      storybook =
+        cleanSource ../../pkgs/ts/storybook;
+      cli =
+        cleanSource ../../pkgs/ts/cli;
       "@circles-pink/web-client" = cleanSource ../../pkgs/ts/${"@"}circles-pink/web-client;
-      circles-directus = cleanSource ../../pkgs/ts/circles-directus;
-      generated = pkgs.runCommand "" { } ''
-        cp -r ${cleanSource ../../pkgs/ts/generated} $out
-        chmod -R +w $out
-        cp -r ${pursOutput} $out/output
-      '';
+      circles-directus =
+        cleanSource ../../pkgs/ts/circles-directus;
+      generated =
+        pkgs.runCommand "" { } ''
+          cp -r ${cleanSource ../../pkgs/ts/generated} $out
+          chmod -R +w $out
+          cp -r ${pursOutput} $out/output
+        '';
       assets = pkgs.runCommand "" { } ''
         cp -r ${cleanSource ../../pkgs/ts/assets} $out
         chmod -R +w $out
         cp -r ${assets} $out/src
       '';
-      tasks-explorer = cleanSource ../../pkgs/ts/tasks-explorer;
-      seed-db = cleanSource ../../pkgs/ts/seed-db;
+      tasks-explorer =
+        cleanSource ../../pkgs/ts/tasks-explorer;
+      seed-db =
+        cleanSource ../../pkgs/ts/seed-db;
       tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
     };
 
