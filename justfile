@@ -11,7 +11,7 @@ branchless-get:
 branchless-put: branchless-get branchless-put_
 
 branchless-put_:
-	git push
+	git push --force
 	gh pr create --base branchless --body "" --title "Branchless Update"
 	gh pr merge --auto --rebase
 
