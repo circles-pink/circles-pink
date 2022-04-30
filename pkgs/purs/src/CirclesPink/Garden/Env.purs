@@ -3,7 +3,7 @@ module CirclesPink.Garden.Env
   ) where
 
 import Prelude
-import CirclesCore (CirclesCore, ErrNative, Web3, ErrInvalidUrl, userResolve)
+import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
@@ -17,7 +17,6 @@ import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -51,46 +50,10 @@ env { request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey: lift P.genPrivateKey
-  , userRegister:
-      \privKey options -> do
-        web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        safeAddress <- getSafeAddress privKey
-        --------------------------------------------------------------------------------
-        -- This Section cannot go to production! it auto-funds safe of user on register
-        --------------------------------------------------------------------------------
-        _ <-
-          mapExceptT liftEffect
-            $ CC.sendTransaction
-                web3
-                (P.unsafeAddrFromString "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1")
-                safeAddress
-        --------------------------------------------------------------------------------
-        -- Section end ..
-        --------------------------------------------------------------------------------
-        CC.userRegister circlesCore account options
+  , userRegister
   , getSafeAddress
-  , safePrepareDeploy:
-      \privKey -> do
-        web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        let
-          address = P.privKeyToAddress privKey
-        let
-          nonce = P.addressToNonce address
-        CC.safePrepareDeploy circlesCore account { nonce: nonce }
-  , userResolve:
-      \privKey -> do
-        web3 <- mapExceptT liftEffect $ getWeb3 envVars
-        account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-        circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-        safeAddress <- getSafeAddress privKey
-        users <- userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
-        case head users of
-          Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
-          Just u -> pure u
+  , safePrepareDeploy
+  , userResolve
   , coreToWindow
   , isTrusted
   , trustGetNetwork
@@ -154,6 +117,26 @@ env { request, envVars } =
           )
         # ExceptT
 
+  userRegister :: Env.UserRegister Aff
+  userRegister privKey options = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    safeAddress <- getSafeAddress privKey
+    --------------------------------------------------------------------------------
+    -- This Section cannot go to production! it auto-funds safe of user on register
+    --------------------------------------------------------------------------------
+    _ <-
+      mapExceptT liftEffect
+        $ CC.sendTransaction
+            web3
+            (P.unsafeAddrFromString "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1")
+            safeAddress
+    --------------------------------------------------------------------------------
+    -- Section end ..
+    --------------------------------------------------------------------------------
+    CC.userRegister circlesCore account options
+
   getSafeAddress :: Env.GetSafeAddress Aff
   getSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
@@ -165,6 +148,28 @@ env { request, envVars } =
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
+
+  safePrepareDeploy :: Env.PrepareSafeDeploy Aff
+  safePrepareDeploy privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    let
+      address = P.privKeyToAddress privKey
+    let
+      nonce = P.addressToNonce address
+    CC.safePrepareDeploy circlesCore account { nonce: nonce }
+
+  userResolve :: Env.UserResolve Aff
+  userResolve privKey = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    safeAddress <- getSafeAddress privKey
+    users <- CC.userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
+    case head users of
+      Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
+      Just u -> pure u
 
   coreToWindow :: Env.CoreToWindow Aff
   coreToWindow privKey = do
@@ -274,30 +279,12 @@ testEnv =
   , userRegister: \_ _ -> pure unit
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
-  , userResolve:
-      \_ ->
-        pure
-          { id: 0
-          , username: ""
-          , safeAddress: sampleAddress
-          , avatarUrl: ""
-          }
+  , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure { isTrusted: false, trustConnections: 0 }
   , trustGetNetwork: \_ -> pure []
-  , getSafeStatus:
-      \_ ->
-        pure
-          { isCreated: false
-          , isDeployed: false
-          }
-  , deploySafe:
-      \_ ->
-        pure unit
-  , deployToken:
-      \_ ->
-        pure ""
-  , isFunded:
-      \_ ->
-        pure false
+  , getSafeStatus: \_ -> pure { isCreated: false, isDeployed: false }
+  , deploySafe: \_ -> pure unit
+  , deployToken: \_ -> pure ""
+  , isFunded: \_ -> pure false
   }
