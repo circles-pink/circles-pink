@@ -116,6 +116,7 @@
                   pkgs.log-result
                   pkgs.just
                   pkgs.patch-json
+                  pkgs.gh
                   #nodePackages.webpack
                 ];
 
