@@ -59,7 +59,7 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
           </>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      // // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
