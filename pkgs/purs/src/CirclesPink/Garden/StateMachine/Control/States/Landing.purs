@@ -8,7 +8,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import Debug (spy)
-import RemoteData (RemoteData, _failure, _loading)
+import RemoteData (RemoteData, _failure, _loading, _success)
 
 landing ::
   forall t m.
@@ -32,10 +32,9 @@ landing env =
             privKey <- env.restoreSession
             pure privKey
         result <- run' task
+        let
+          _ = spy "result" result
         case result of
           Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
-          Right pk -> do
-            let
-              _ = spy "pk" pk
-            pure unit
+          Right _ -> set \st -> S._landing st { checkSessionResult = _success unit }
   }
