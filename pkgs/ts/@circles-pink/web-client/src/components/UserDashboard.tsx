@@ -3,10 +3,10 @@ import tw, { css, styled } from 'twin.macro';
 import { ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
-// DialogCard
+// UserDashboard
 // -----------------------------------------------------------------------------
 
-type DialogCardProps = {
+type UserDashboardProps = {
   header?: ReactElement;
   text: ReactElement;
   interaction?: ReactElement;
@@ -15,14 +15,14 @@ type DialogCardProps = {
   debug?: ReactElement;
 };
 
-export const DialogCard = ({
+export const UserDashboard = ({
   header,
   text,
   interaction,
   control,
   mainContent,
   debug,
-}: DialogCardProps): ReactElement => {
+}: UserDashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
 
   return (

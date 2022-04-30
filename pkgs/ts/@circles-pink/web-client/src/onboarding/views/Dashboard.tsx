@@ -3,7 +3,7 @@ import { unit } from 'generated/output/Data.Unit';
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
-import { DialogCard } from '../../components/DialogCard';
+import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { DashboardState } from 'generated/output/CirclesPink.Garden.StateMachine.State';
@@ -31,7 +31,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   // const graph: Graph = new Map([[state.user.safeAddress, state.trusts]]);
 
   return (
-    <DialogCard
+    <UserDashboard
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -66,7 +66,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           </>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
