@@ -27,6 +27,8 @@
 
   inputs.flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
 
+  inputs.deadnix.url = "github:astro/deadnix";
+
   outputs = inputs:
     let
       devSystems = [ "x86_64-linux" "aarch64-darwin" ];
@@ -46,6 +48,7 @@
           nixopsLatest = inputs.nixops.defaultPackage.${system};
           circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
         })
+        inputs.deadnix.overlay
       ];
 
       pkgs = import inputs.nixpkgs {
@@ -117,6 +120,7 @@
                   pkgs.just
                   pkgs.patch-json
                   pkgs.gh
+                  pkgs.deadnix
                   #nodePackages.webpack
                 ];
 
@@ -151,6 +155,14 @@
                 deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
                 pursTests = pkgs.circles-pink.purs.projectTests;
+                nixLint =
+                  let
+                    # This is only the beginning, in the end all nix files should be linted
+                    paths = [ ./nix/pkgs/ts.nix ];
+                  in
+                  pkgs.runCommand "nix-lint" { } ''
+                    ${pkgs.deadnix}/bin/deadnix --fail ${builtins.concatStringsSep " " paths} > $out
+                  '';
               };
           };
 
