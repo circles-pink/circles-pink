@@ -1,10 +1,12 @@
 module CirclesPink.Garden.StateMachine.Control.Env
-  ( ApiCheckEmail
+  ( AddTrustConnection
+  , ApiCheckEmail
   , ApiCheckUserName
   , CoreToWindow
   , DeploySafe
   , DeployToken
   , Env
+  , ErrAddTrustConnection
   , ErrCoreToWindow
   , ErrDeploySafe
   , ErrDeployToken
@@ -135,6 +137,13 @@ type GeneratePrivateKey m
   = forall r. ExceptV r m PrivateKey
 
 --------------------------------------------------------------------------------
+type ErrAddTrustConnection r
+  = ErrNative + ErrInvalidUrl + r
+
+type AddTrustConnection m
+  = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m Unit
+
+--------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
     , apiCheckEmail :: ApiCheckEmail m
@@ -150,4 +159,5 @@ type Env m
     , getSafeStatus :: GetSafeStatus m
     , deploySafe :: DeploySafe m
     , deployToken :: DeployToken m
+    , addTrustConnection :: AddTrustConnection m
     }

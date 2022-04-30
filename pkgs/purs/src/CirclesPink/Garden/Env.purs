@@ -61,6 +61,7 @@ env { request, envVars } =
   , deploySafe
   , deployToken
   , isFunded
+  , addTrustConnection
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -252,6 +253,14 @@ env { request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.tokenDeploy circlesCore account { safeAddress }
 
+  addTrustConnection :: Env.AddTrustConnection Aff
+  addTrustConnection pk other us = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
+    _ <- CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
+    pure unit
+
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
@@ -287,4 +296,5 @@ testEnv =
   , deploySafe: \_ -> pure unit
   , deployToken: \_ -> pure ""
   , isFunded: \_ -> pure false
+  , addTrustConnection: \_ _ _ -> pure unit
   }

@@ -10,6 +10,7 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLoginStateResolved
   , ErrSubmit
   , ErrSubmitResolved
+  , ErrTrustAddConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
   , InfoGeneralState
@@ -19,6 +20,7 @@ module CirclesPink.Garden.StateMachine.State
   , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
+  , TrustAddProcess
   , TrustState
   , TrustStateTrustsResult
   , UserData
@@ -53,7 +55,7 @@ import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey (Address, PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
@@ -147,11 +149,24 @@ type ErrDashboardStateResolved
       , errInvalidUrl :: String
       )
 
+type ErrTrustAddConnectionResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type TrustAddProcess
+  = { from :: Address
+    , to :: Address
+    , result :: RemoteData ErrTrustAddConnectionResolved Unit
+    }
+
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
+    , trustAddProcesses :: Array TrustAddProcess
     }
 
 --------------------------------------------------------------------------------
