@@ -8,6 +8,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , Env
   , ErrAddTrustConnection
   , ErrCoreToWindow
+  , ErrDecode
   , ErrDeploySafe
   , ErrDeployToken
   , ErrGetSafeAddress
@@ -15,6 +16,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsFunded
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
+  , ErrReadStorage
   , ErrRestoreSession
   , ErrSaveSession
   , ErrTrustGetNetwork
@@ -26,13 +28,15 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , IsFunded
   , IsTrusted
   , PrepareSafeDeploy
+  , RequestPath
   , RestoreSession
   , SaveSession
   , TrustGetNetwork
   , UserNotFoundError
   , UserRegister
   , UserResolve
-  , _errRestoreSession
+  , _errDecode
+  , _errReadStorage
   ) where
 
 import Prelude
@@ -40,6 +44,7 @@ import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, Tr
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Data.Argonaut (JsonDecodeError)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -156,8 +161,17 @@ type ErrSaveSession r
 type SaveSession m
   = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
+type RequestPath
+  = Array String
+
+type ErrReadStorage r
+  = ( errReadStorage :: RequestPath | r )
+
+type ErrDecode r
+  = ( errDecode :: JsonDecodeError | r )
+
 type ErrRestoreSession r
-  = ( errRestoreSession :: Unit | r )
+  = ErrReadStorage + ErrDecode + r
 
 type RestoreSession m
   = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
@@ -186,5 +200,8 @@ type Env m
 --------------------------------------------------------------------------------
 -- Err constructors
 --------------------------------------------------------------------------------
-_errRestoreSession :: forall r. Variant (ErrRestoreSession r)
-_errRestoreSession = inj (Proxy :: _ "errRestoreSession") unit
+_errReadStorage :: forall r. RequestPath -> Variant (ErrReadStorage r)
+_errReadStorage = inj (Proxy :: _ "errReadStorage")
+
+_errDecode :: forall r. JsonDecodeError -> Variant (ErrDecode r)
+_errDecode = inj (Proxy :: _ "errDecode")

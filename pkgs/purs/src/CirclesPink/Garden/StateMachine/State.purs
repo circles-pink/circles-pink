@@ -10,6 +10,7 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLandingStateResolved
   , ErrLoginState
   , ErrLoginStateResolved
+  , ErrLoginTask
   , ErrSubmit
   , ErrSubmitResolved
   , ErrTrustAddConnection
@@ -50,10 +51,11 @@ module CirclesPink.Garden.StateMachine.State
 import Prelude
 import CirclesCore (ApiError, SafeStatus, TrustNode, NativeError)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
+import Data.Argonaut (JsonDecodeError)
 import Data.Maybe (Maybe)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
@@ -126,7 +128,10 @@ type SubmitState
 
 --------------------------------------------------------------------------------
 type ErrLandingStateResolved
-  = Variant ( errRestoreSession ∷ Unit )
+  = Variant
+      ( errDecode :: JsonDecodeError
+      , errReadStorage :: RequestPath
+      )
 
 type ErrLandingState
   = Env.ErrRestoreSession + ()
@@ -157,8 +162,16 @@ type ErrLoginState
       + Env.ErrSaveSession
       + ()
 
+type ErrLoginTask r
+  = Env.ErrUserResolve
+      + Env.ErrGetSafeStatus
+      + Env.ErrTrustGetNetwork
+      + Env.ErrIsTrusted
+      + Env.ErrIsFunded
+      + r
+
 type LoginStateLoginResult
-  = RemoteData ErrLoginStateResolved Unit
+  = RemoteData (Variant ErrLoginState) Unit
 
 type LoginState
   = { magicWords :: String

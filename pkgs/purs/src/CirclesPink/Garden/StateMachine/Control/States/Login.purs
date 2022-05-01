@@ -1,7 +1,8 @@
 module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run, run')
+import CirclesCore (TrustNode, User, SafeStatus)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, loginTask, readyForDeployment, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
@@ -9,6 +10,8 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
+import Type.Row (type (+))
+import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 login ::
@@ -33,16 +36,7 @@ login env =
       mnemonic = P.getMnemonicFromString st.magicWords
 
       privKey = P.mnemonicToKey mnemonic
-
-      task :: ExceptV S.ErrLoginState _ _
-      task = do
-        user <- env.userResolve privKey
-        safeStatus <- env.getSafeStatus privKey
-        isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
-        trusts <- if isTrusted then pure [] else env.trustGetNetwork privKey
-        isReady' <- readyForDeployment env privKey
-        pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
-    results <- run' task
+    results <- run $ loginTask env privKey
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
       Right { user, trusts, safeStatus }
