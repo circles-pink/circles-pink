@@ -59,6 +59,13 @@ let
       sha256 = "sha256-YmohKiypAl9sbnmg3JKtvcGnyNnmHvLKK1ifl4SmyQY=";
     }
 
+    {
+      name = "just";
+      publisher = "skellock";
+      version = "2.0.0";
+      sha256 = "sha256-FOp/dcW0+07rADEpUMzx+SGYjhvE4IhcCOqUQ38yCN4=";
+    }
+
   ];
 
   vscodium-with-extensions = pkgs.vscode-with-extensions.override {
