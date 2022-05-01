@@ -41,6 +41,7 @@ landing env =
                   , trusts
                   , privKey
                   , error: Nothing
+                  , trustAddResult: _notAsked
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
             set \_ ->
