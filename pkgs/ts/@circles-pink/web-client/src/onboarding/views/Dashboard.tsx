@@ -13,7 +13,7 @@ import { ThemeContext } from '../../context/theme';
 import { mapResult } from '../utils/mapResult';
 import tw from 'twin.macro';
 import { ListElement } from '../../components/ListElement';
-import { mdiCashFast, mdiCashPlus } from '@mdi/js';
+import { mdiCashFast, mdiHandCoin } from '@mdi/js';
 import Icon from '@mdi/react';
 
 type DashboardProps = {
@@ -90,7 +90,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
             >
               <ActionRow>
                 <ButtonText>Receive</ButtonText>
-                <Icon path={mdiCashPlus} size={1} color={'white'} />
+                <Icon path={mdiHandCoin} size={1} color={'white'} />
               </ActionRow>
             </Button>
             {/* <Button
