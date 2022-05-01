@@ -53,6 +53,7 @@ type CirclesProtocol
             , getTrusts :: P.Action ("dashboard" :> Nil')
             , addTrustConnection :: P.Action ("dashboard" :> Nil')
             , getBalance :: P.Action ("dashboard" :> Nil')
+            -- , getUsers :: P.Action ("dashboard" :> Nil')
             )
       , login ::
           P.State

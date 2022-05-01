@@ -53,6 +53,7 @@ env { request, envVars } =
   , apiCheckEmail
   , generatePrivateKey: lift P.genPrivateKey
   , userRegister
+  , getUsers
   , getSafeAddress
   , safePrepareDeploy
   , userResolve
@@ -176,6 +177,13 @@ env { request, envVars } =
     case head users of
       Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
       Just u -> pure u
+
+  getUsers :: Env.GetUsers Aff
+  getUsers privKey userNames addresses = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    CC.userResolve circlesCore account { userNames, addresses }
 
   coreToWindow :: Env.CoreToWindow Aff
   coreToWindow privKey = do
@@ -316,6 +324,7 @@ testEnv =
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
   , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
+  , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure { isTrusted: false, trustConnections: 0 }
   , trustGetNetwork: \_ -> pure []

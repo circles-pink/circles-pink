@@ -1,7 +1,6 @@
 module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
-import CirclesCore (Balance)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 
@@ -53,6 +52,10 @@ type CirclesAction
             , getTrusts :: Unit
             , addTrustConnection :: String
             , getBalance :: Unit
+            -- , getUsers ::
+            --     { userNames :: Array String
+            --     , addresses :: Array Address
+            --     }
             )
       , login ::
           Variant
