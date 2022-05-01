@@ -318,15 +318,6 @@ testEnv =
   , deployToken: \_ -> pure ""
   , isFunded: \_ -> pure false
   , addTrustConnection: \_ _ _ -> pure ""
-  , getSafeStatus:
-      \_ ->
-        pure
-          { isCreated: false
-          , isDeployed: false
-          }
-  , deploySafe: \_ -> pure unit
-  , deployToken: \_ -> pure ""
-  , isFunded: \_ -> pure false
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
   }
