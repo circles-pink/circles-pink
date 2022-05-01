@@ -10,10 +10,11 @@ import { DashboardState } from 'generated/output/CirclesPink.Garden.StateMachine
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
-import { Graph, TrustGraph } from '../../components/TrustGraph';
-import { unsafeAddrFromString } from 'generated/output/Wallet.PrivateKey';
 import { mapResult } from '../utils/mapResult';
 import tw from 'twin.macro';
+import { ListElement } from '../../components/ListElement';
+import { mdiCashFast, mdiCashPlus } from '@mdi/js';
+import Icon from '@mdi/react';
 
 type DashboardProps = {
   state: DashboardState;
@@ -70,51 +71,83 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           </FadeIn> */}
         </Text>
       }
-      mainContent={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
-            <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
-            <DebugOptionsDescription>
-              trust.addConnection
-            </DebugOptionsDescription>
-            <ActionRow>
-              <InputWrapper>
-                <Input
-                  type="text"
-                  value={addTrust}
-                  placeholder={t('dashboard.addTrustPlaceholder')}
-                  onChange={e => setAddTrust(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(A._dashboard(A._addTrustConnection(addTrust)))
-                  }
-                />
-              </InputWrapper>
-              <Button
-                prio={'high'}
-                color={theme.baseColor}
-                state={mapResult(state.trustAddResult)}
-                onClick={() =>
-                  act(A._dashboard(A._addTrustConnection(addTrust)))
-                }
-              >
-                {t('addTrustsButton')}
-              </Button>
-            </ActionRow>
-          </>
-        </FadeIn>
-      }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             <Button
+              prio="high"
+              color={theme.baseColor}
+              // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
+            >
+              <ActionRow>
+                <ButtonText>Send</ButtonText>
+                <Icon path={mdiCashFast} size={1} color={'white'} />
+              </ActionRow>
+            </Button>
+            <Button
+              color={theme.baseColor}
+              // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
+            >
+              <ActionRow>
+                <ButtonText>Receive</ButtonText>
+                <Icon path={mdiCashPlus} size={1} color={'white'} />
+              </ActionRow>
+            </Button>
+            {/* <Button
               color={theme.baseColor}
               onClick={() => act(A._dashboard(A._getTrusts(unit)))}
             >
               {t('getTrustsButton')}
-            </Button>
+            </Button> */}
           </>
         </FadeIn>
+      }
+      mainContent={
+        <>
+          <FlexRow>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <ListElement title={'Trust Network'} />
+            </FadeIn>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <ListElement title={'Transactions'} />
+            </FadeIn>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <ListElement title={'Explore'} />
+            </FadeIn>
+          </FlexRow>
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <>
+              <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
+              <DebugOptionsDescription>
+                trust.addConnection
+              </DebugOptionsDescription>
+              <ActionRow>
+                <InputWrapper>
+                  <Input
+                    type="text"
+                    value={addTrust}
+                    placeholder={t('dashboard.addTrustPlaceholder')}
+                    onChange={e => setAddTrust(e.target.value)}
+                    onKeyPress={e =>
+                      e.key === 'Enter' &&
+                      act(A._dashboard(A._addTrustConnection(addTrust)))
+                    }
+                  />
+                </InputWrapper>
+                <Button
+                  prio={'high'}
+                  color={theme.baseColor}
+                  state={mapResult(state.trustAddResult)}
+                  onClick={() =>
+                    act(A._dashboard(A._addTrustConnection(addTrust)))
+                  }
+                >
+                  {t('addTrustsButton')}
+                </Button>
+              </ActionRow>
+            </>
+          </FadeIn>
+        </>
       }
       // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
@@ -122,6 +155,8 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 };
 
 const DebugOptionsTitle = tw.h2`text-xl`;
+const ButtonText = tw.span`mr-2`;
 const DebugOptionsDescription = tw.h2`text-sm text-gray-400`;
 const ActionRow = tw.div`flex justify-between items-center`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
+const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4`;
