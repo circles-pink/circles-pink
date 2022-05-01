@@ -12,3 +12,4 @@ secrets.json
 yarn-error.log
 *.buildinfo
 ts-dist/
+.env

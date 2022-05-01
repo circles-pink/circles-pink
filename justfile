@@ -29,3 +29,7 @@ dev-browser:
 
 build-storybook:
 	make build-storybook
+
+circles-garden:
+  cd $GARDEN_PATH && \
+  make clean && make up && make contracts && make subgraph
