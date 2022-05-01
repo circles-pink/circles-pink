@@ -28,7 +28,7 @@ login env =
   }
   where
   login' set st _ = do
-    set \st' -> S._login st' { loginResult = _loading :: RemoteData S.ErrLoginStateResolved Unit }
+    set \st' -> S._login st' { loginResult = _loading :: RemoteData _ _ }
     let
       mnemonic = P.getMnemonicFromString st.magicWords
 
