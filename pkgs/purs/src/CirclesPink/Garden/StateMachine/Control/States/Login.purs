@@ -2,8 +2,9 @@ module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
 import CirclesCore (TrustNode, User, SafeStatus)
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, loginTask, readyForDeployment, run, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, TaskReturn, loginTask, readyForDeployment, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.State (ErrLoginState)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
@@ -36,12 +37,16 @@ login env =
       mnemonic = P.getMnemonicFromString st.magicWords
 
       privKey = P.mnemonicToKey mnemonic
-    results <- run $ loginTask env privKey
+    results <-
+      (run' :: ExceptV (S.ErrLoginState) m TaskReturn -> _)
+        $ do
+            loginResult <- loginTask env privKey
+            _ <- run $ env.saveSession privKey
+            pure loginResult
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
       Right { user, trusts, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed -> do
-          _ <- run $ env.saveSession privKey
           set \_ ->
             S._dashboard
               { user
@@ -51,7 +56,6 @@ login env =
               , trustAddResult: _notAsked
               }
       Right { user, trusts, safeStatus, isReady } -> do
-        _ <- run $ env.saveSession privKey
         set \_ ->
           S._trusts
             { user
