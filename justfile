@@ -15,6 +15,10 @@ branchless-put_:
 	gh pr create --base branchless --body "" --title "Branchless Update"
 	gh pr merge --auto --rebase
 
+branchless-to-main:
+	gh pr create --head branchless --base main --title "branchless to main"
+	gh pr merge --rebase branchless
+
 generate_:
 	make generate_
 
