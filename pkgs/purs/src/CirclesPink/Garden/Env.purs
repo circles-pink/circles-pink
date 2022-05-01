@@ -5,7 +5,7 @@ module CirclesPink.Garden.Env
 import Prelude
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env (_errRestoreSession)
+import CirclesPink.Garden.StateMachine.Control.Env (_errDecode, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
@@ -27,7 +27,7 @@ import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (sampleAddress, zeroKey)
+import Wallet.PrivateKey (PrivateKey, sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
 type EnvVars
@@ -269,15 +269,18 @@ env { request, envVars } =
   saveSession :: Env.SaveSession Aff
   saveSession privKey = do
     gundb <- liftEffect $ offline
-    _ <- liftEffect $ gundb # get "session" # put (encodeJson { privKey })
+    _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
     pure unit
 
   restoreSession :: Env.RestoreSession Aff
   restoreSession = do
     gundb <- lift $ liftEffect $ offline
-    result <- gundb # get "session" # once <#> note _errRestoreSession # ExceptT
-    privateKey <- decodeJson result.data # lmap (const _errRestoreSession) # except
-    pure privateKey
+    result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
+    resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
+    pure resultPk.privKey
+
+privateKeyStore :: String
+privateKeyStore = "session"
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do

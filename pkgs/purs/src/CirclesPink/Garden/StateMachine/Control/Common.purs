@@ -1,7 +1,9 @@
 module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
+import CirclesCore (TrustNode, User, SafeStatus)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.State (ErrLoginTask)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
@@ -34,3 +36,23 @@ readyForDeployment { isTrusted, isFunded } privKey = do
   isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
   isFunded' <- isFunded privKey
   pure (isTrusted' || isFunded')
+
+--------------------------------------------------------------------------------
+type TaskReturn
+  = { user :: User
+    , isTrusted :: Boolean
+    , trusts :: Array TrustNode
+    , safeStatus :: SafeStatus
+    , isReady :: Boolean
+    }
+
+loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
+loginTask env privKey = do
+  user <- env.userResolve privKey
+  safeStatus <- env.getSafeStatus privKey
+  isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
+  trusts <- if isTrusted then pure [] else env.trustGetNetwork privKey
+  isReady' <- readyForDeployment env privKey
+  pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
+
+--------------------------------------------------------------------------------
