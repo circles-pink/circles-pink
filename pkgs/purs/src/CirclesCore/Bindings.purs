@@ -1,5 +1,6 @@
 module CirclesCore.Bindings
   ( Account
+  , Balance
   , CirclesCore
   , CirclesCore_
   , Fn2Promise
@@ -23,6 +24,7 @@ import CirclesCore.ApiResult (ApiResult)
 import Control.Promise (Promise)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3)
+import Data.Maybe (Maybe)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
 import Foreign (Foreign)
@@ -49,6 +51,13 @@ type User
 type TrustIsTrustedResult
   = { trustConnections :: Int
     , isTrusted :: Boolean
+    }
+
+type Balance
+  = { length :: Int
+    , negative :: Int
+    , red :: Maybe Boolean
+    , words :: Array Int
     }
 
 --------------------------------------------------------------------------------
@@ -108,6 +117,7 @@ type CirclesCore_
         }
     , token ::
         { deploy :: Fn2Promise Account { safeAddress :: String } String
+        , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
         }
     , trust ::
         { isTrusted ::

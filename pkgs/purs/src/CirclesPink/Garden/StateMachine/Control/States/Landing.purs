@@ -8,7 +8,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import RemoteData (RemoteData, _failure, _loading, _notAsked)
+import RemoteData (RemoteData, _failure, _loading, _notAsked, _success)
 
 landing ::
   forall t m.
@@ -33,7 +33,7 @@ landing env =
             pure { privKey, loginResult }
         case result of
           Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
-          Right { privKey, loginResult: { user, trusts, safeStatus } }
+          Right { privKey, loginResult: { user, trusts, safeStatus, balance } }
             | safeStatus.isCreated && safeStatus.isDeployed -> do
               set \_ ->
                 S._dashboard
@@ -42,6 +42,7 @@ landing env =
                   , privKey
                   , error: Nothing
                   , trustAddResult: _notAsked
+                  , getBalanceResult: _success balance
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
             set \_ ->

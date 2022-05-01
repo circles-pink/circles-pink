@@ -19,11 +19,13 @@ dashboard ::
   { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
+  , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   }
 dashboard env =
   { logout: \_ _ _ -> pure unit
   , getTrusts
   , addTrustConnection
+  , getBalance
   }
   where
   getTrusts set st _ = do
@@ -42,3 +44,13 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { trustAddResult = _failure e }
       Right _ -> set \st' -> S._dashboard st' { trustAddResult = _success unit }
+
+  getBalance set st _ = do
+    set \st' -> S._dashboard st' { getBalanceResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrTokenGetBalance _ _
+      task = env.getBalance st.privKey st.user.safeAddress
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { getBalanceResult = _failure e }
+      Right b -> set \st' -> S._dashboard st' { getBalanceResult = _success b }
