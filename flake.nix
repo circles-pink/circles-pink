@@ -59,6 +59,7 @@
       purescript-tsd-gen = inputs.purescript-tsd-gen;
       easy-purescript-nix = import inputs.easy-purescript-nix { inherit pkgs; };
       overlay = import ./nix/overlay.nix;
+      checks = import ./nix/checks.nix { inherit pkgs; };
 
       perSystem = (inputs.flake-utils.lib.eachSystem [ "x86_64-linux" ]
         (system:
@@ -154,16 +155,7 @@
               {
                 deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
-                pursTests = pkgs.circles-pink.purs.projectTests;
-                nixLint =
-                  let
-                    # This is only the beginning, in the end all nix files should be linted
-                    paths = [ ./nix/pkgs/ts.nix ];
-                  in
-                  pkgs.runCommand "nix-lint" { } ''
-                    ${pkgs.deadnix}/bin/deadnix --fail ${builtins.concatStringsSep " " paths} > $out
-                  '';
-              };
+              } // checks;
           };
 
           ciNix = args@{ src }: inputs.flake-compat-ci.lib.recurseIntoFlakeWith {
