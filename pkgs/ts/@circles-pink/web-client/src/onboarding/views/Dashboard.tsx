@@ -16,6 +16,7 @@ import { ListElement } from '../../components/ListElement';
 import { mdiCashFast, mdiHandCoin } from '@mdi/js';
 import Icon from '@mdi/react';
 import { CirclesCurrency } from '../../assets/CirclesCurrency';
+import { TrustNetworkList } from '../../components/TrustNetworkList';
 
 type DashboardProps = {
   state: DashboardState;
@@ -55,6 +56,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   return (
     <UserDashboard
+      header={
+        <FadeIn orientation={orientation} delay={getDelay()}>
+          <UserHandle>{`@${state.user.username}`}</UserHandle>
+        </FadeIn>
+      }
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -95,35 +101,17 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 <Icon path={mdiHandCoin} size={1} color={'white'} />
               </ActionRow>
             </Button>
-            {/* <Button
-              color={theme.baseColor}
-              onClick={() => act(A._dashboard(A._getTrusts(unit)))}
-            >
-              {t('getTrustsButton')}
-            </Button> */}
           </>
         </FadeIn>
       }
       mainContent={
         <>
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            {state.user.username ? (
-              <Claim color={'gray'}>
-                {t('dashboard.greet')}
-                {` ${state.user.username}!`}
-              </Claim>
-            ) : (
-              <Claim color={theme.baseColor}>{t('dashboard.claim')}</Claim>
-            )}
-          </FadeIn>
-
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>{t('dashboard.subClaim')}</SubClaim>
-          </FadeIn>
-
           <FlexBox>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <ListElement title={'Trust Network'} />
+              <TrustNetworkList
+                title={'Trust Network'}
+                content={state.trusts}
+              />
             </FadeIn>
             {/* <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Transactions'} />
@@ -187,6 +175,19 @@ const Amount = styled.h2<AmountProps>(({ color }) => [
   `,
 ]);
 const BalanceWrapper = tw.div`flex flex-row items-center`;
+
+// -----------------------------------------------------------------------------
+// UI / UserHandle
+// -----------------------------------------------------------------------------
+
+type UserHandleProps = { color?: string };
+
+const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
+  tw`flex justify-around text-lg`,
+  css`
+    color: ${color || 'black'};
+  `,
+]);
 
 // -----------------------------------------------------------------------------
 // UI

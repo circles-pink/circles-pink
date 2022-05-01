@@ -20,12 +20,20 @@ dashboard ::
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
+  -- , getUsers ::
+  --     ActionHandler t m
+  --       { userNames :: Array String
+  --       , addresses :: Array P.Address
+  --       }
+  --       S.DashboardState
+  --       ( "dashboard" :: S.DashboardState )
   }
 dashboard env =
   { logout: \_ _ _ -> pure unit
   , getTrusts
   , addTrustConnection
   , getBalance
+  -- , getUsers
   }
   where
   getTrusts set st _ = do
@@ -54,3 +62,5 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { getBalanceResult = _failure e }
       Right b -> set \st' -> S._dashboard st' { getBalanceResult = _success b }
+
+-- getUsers _ st { userNames, addresses } = run' $ env.getUsers st.privateKey userNames addresses

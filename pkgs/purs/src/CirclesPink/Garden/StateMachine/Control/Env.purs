@@ -14,6 +14,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrGetBalance
   , ErrGetSafeAddress
   , ErrGetSafeStatus
+  , ErrGetUsers
   , ErrIsFunded
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
@@ -27,6 +28,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , GetBalance
   , GetSafeAddress
   , GetSafeStatus
+  , GetUsers
   , IsFunded
   , IsTrusted
   , PrepareSafeDeploy
@@ -133,6 +135,13 @@ type UserResolve m
   = forall r. PrivateKey -> ExceptV (ErrUserResolve + r) m User
 
 --------------------------------------------------------------------------------
+type ErrGetUsers r
+  = ErrNative + ErrInvalidUrl + ErrApi + ( errUserNotFound :: UserNotFoundError | r )
+
+type GetUsers m
+  = forall r. PrivateKey -> (Array String) -> (Array Address) -> ExceptV (ErrGetUsers + r) m (Array User)
+
+--------------------------------------------------------------------------------
 type ErrPrepareSafeDeploy r
   = ErrNative + ErrInvalidUrl + r
 
@@ -194,6 +203,7 @@ type Env m
     , getSafeAddress :: GetSafeAddress m
     , safePrepareDeploy :: PrepareSafeDeploy m
     , userResolve :: UserResolve m
+    , getUsers :: GetUsers m
     , coreToWindow :: CoreToWindow m
     , isTrusted :: IsTrusted m
     , isFunded :: IsFunded m
