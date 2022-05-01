@@ -10,6 +10,8 @@ import { LandingState } from 'generated/output/CirclesPink.Garden.StateMachine.S
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import tw from 'twin.macro';
+import { LoadingCircles } from '../../components/LoadingCircles';
 
 type LandingProps = {
   state: LandingState;
@@ -22,9 +24,27 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
-    console.log('check for session');
     act(A._landing(A._checkForSession(unit)));
   }, []);
+
+  if (state.checkSessionResult.type === 'loading') {
+    return (
+      <DialogCard
+        mainContent={
+          <>
+            <CenterElement>
+              <Claim color={theme.baseColor}>
+                {t('landing.restoreSession')}
+              </Claim>
+            </CenterElement>
+            <CenterElement>
+              <LoadingCircles width={250} color={theme.baseColor} />
+            </CenterElement>
+          </>
+        }
+      />
+    );
+  }
 
   return (
     <DialogCard
@@ -63,3 +83,5 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
     />
   );
 };
+
+const CenterElement = tw.div`flex justify-around`;

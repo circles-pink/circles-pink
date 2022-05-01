@@ -19,6 +19,7 @@ export const resources = {
       landing: {
         claim: 'Welcome to Circles',
         subClaim: 'Create a new Wallet or restore your existing one.',
+        restoreSession: 'Restoring your Session',
       },
       login: {
         claim: 'Welcome back',
@@ -101,6 +102,7 @@ export const resources = {
         claim: 'Willkommen bei Circles',
         subClaim:
           'Erstelle eine neue Wallet oder stelle eine bestehende wieder her.',
+        restoreSession: 'Session wird wiederhergestellt',
       },
       login: {
         claim: 'Willkommen zurück!',
