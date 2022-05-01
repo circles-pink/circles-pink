@@ -65,6 +65,8 @@ export const resources = {
         greet: 'Hello',
         subClaim:
           'Your Account is in pending state. Follow the instructions to finalize it!',
+        getMoreTruts: 'Collect at least three trust connections',
+        fundYourSafe: 'Or fund your Safe with xDai. Your Safe Address is:',
       },
       dashboard: {
         claim: 'Hey there!',
@@ -145,6 +147,9 @@ export const resources = {
         greet: 'Hallo',
         subClaim:
           'Dein Account ist noch nicht aktiviert. Folge den Anweisungen um ihn freizuschalten!',
+        getMoreTruts: 'Sammle mindestens drei Trusts von Circles User:innen',
+        fundYourSafe:
+          'Oder funde deinen Safe mit xDai. Deine Safe Adresse lautet:',
       },
       dashboard: {
         claim: 'Hallöchen!',

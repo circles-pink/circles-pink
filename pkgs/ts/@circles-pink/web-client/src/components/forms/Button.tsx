@@ -87,7 +87,7 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
 // UI
 // -----------------------------------------------------------------------------
 
-const ButtonContent = styled.div(() => [tw`flex items-center`]);
+const ButtonContent = styled.div(() => [tw`flex justify-around items-center`]);
 
 // -----------------------------------------------------------------------------
 // UI / TextWrapper
