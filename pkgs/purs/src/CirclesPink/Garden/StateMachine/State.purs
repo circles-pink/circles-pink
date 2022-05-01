@@ -131,10 +131,16 @@ type ErrLandingStateResolved
   = Variant
       ( errDecode :: JsonDecodeError
       , errReadStorage :: RequestPath
+      , errApi :: ApiError
+      , errNative :: NativeError
+      , errUserNotFound :: UserNotFoundError
+      , errInvalidUrl :: String
       )
 
 type ErrLandingState
-  = Env.ErrRestoreSession + ()
+  = Env.ErrRestoreSession
+      + ErrLoginTask
+      + ()
 
 type LandingStateCheckSessionResult
   = RemoteData ErrLandingStateResolved Unit
@@ -154,11 +160,7 @@ type ErrLoginStateResolved
       )
 
 type ErrLoginState
-  = Env.ErrUserResolve
-      + Env.ErrGetSafeStatus
-      + Env.ErrTrustGetNetwork
-      + Env.ErrIsTrusted
-      + Env.ErrIsFunded
+  = ErrLoginTask
       + Env.ErrSaveSession
       + ()
 
@@ -171,7 +173,7 @@ type ErrLoginTask r
       + r
 
 type LoginStateLoginResult
-  = RemoteData (Variant ErrLoginState) Unit
+  = RemoteData ErrLoginStateResolved Unit
 
 type LoginState
   = { magicWords :: String

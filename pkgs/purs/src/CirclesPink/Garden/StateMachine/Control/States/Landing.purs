@@ -1,15 +1,14 @@
 module CirclesPink.Garden.StateMachine.Control.States.Landing where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, loginTask, run, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, loginTask, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
-import Debug (spy)
-import RemoteData (RemoteData, _failure, _loading, _success)
-import Undefined (undefined)
+import Data.Maybe (Maybe(..))
+import RemoteData (RemoteData, _failure, _loading, _notAsked)
 
 landing ::
   forall t m.
@@ -25,15 +24,32 @@ landing env =
   { signUp: \set _ _ -> set \_ -> S.init
   , signIn: \set _ _ -> set \_ -> S.initLogin
   , checkForSession:
-      \set st ac -> do
+      \set _ _ -> do
         set \st' -> S._landing st' { checkSessionResult = _loading :: RemoteData S.ErrLandingStateResolved Unit }
-        let
-          task :: ExceptV S.ErrLandingState _ _
-          task = do
+        result <-
+          (run' :: ExceptV S.ErrLandingState _ _ -> _) do
             privKey <- env.restoreSession
-            pure privKey
-        result <- run' task
+            loginResult <- loginTask env privKey
+            pure { privKey, loginResult }
         case result of
           Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
-          Right pk -> undefined -- run $ loginTask env pk
+          Right { privKey, loginResult: { user, trusts, safeStatus } }
+            | safeStatus.isCreated && safeStatus.isDeployed -> do
+              set \_ ->
+                S._dashboard
+                  { user
+                  , trusts
+                  , privKey
+                  , error: Nothing
+                  }
+          Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
+            set \_ ->
+              S._trusts
+                { user
+                , trusts
+                , privKey
+                , safeStatus
+                , trustsResult: _notAsked
+                , isReady
+                }
   }
