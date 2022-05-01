@@ -8,7 +8,6 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import RemoteData (RemoteData, _failure, _loading, _success)
-import Undefined (undefined)
 import Wallet.PrivateKey as P
 
 dashboard ::
@@ -35,7 +34,7 @@ dashboard env =
       Right t -> set \st' -> S._dashboard st' { trusts = t }
 
   addTrustConnection set st u = do
-    set \st' -> S._dashboard st' { trustAddResult = _loading :: RemoteData S.ErrTrustAddConnectionResolved Unit }
+    set \st' -> S._dashboard st' { trustAddResult = _loading :: RemoteData _ _ }
     let
       task :: ExceptV S.ErrTrustAddConnection _ _
       task = env.addTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
