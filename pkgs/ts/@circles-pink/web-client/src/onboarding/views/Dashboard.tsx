@@ -104,36 +104,40 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       mainContent={
         <>
-          <FlexRow>
+          <FlexBox>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Trust Network'} />
             </FadeIn>
-            <FadeIn orientation={'up'} delay={getDelay()}>
+            {/* <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Transactions'} />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Explore'} />
-            </FadeIn>
-          </FlexRow>
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            <>
-              <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
-              <DebugOptionsDescription>
-                trust.addConnection
-              </DebugOptionsDescription>
-              <ActionRow>
-                <InputWrapper>
-                  <Input
-                    type="text"
-                    value={addTrust}
-                    placeholder={t('dashboard.addTrustPlaceholder')}
-                    onChange={e => setAddTrust(e.target.value)}
-                    onKeyPress={e =>
-                      e.key === 'Enter' &&
-                      act(A._dashboard(A._addTrustConnection(addTrust)))
-                    }
-                  />
-                </InputWrapper>
+            </FadeIn> */}
+          </FlexBox>
+        </>
+      }
+      debug={
+        <FadeIn orientation={orientation} delay={getDelay()}>
+          <>
+            <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
+            <DebugOptionsDescription>
+              trust.addConnection
+            </DebugOptionsDescription>
+            <ActionRow>
+              <InputWrapper>
+                <Input
+                  type="text"
+                  value={addTrust}
+                  placeholder={t('dashboard.addTrustPlaceholder')}
+                  onChange={e => setAddTrust(e.target.value)}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(A._dashboard(A._addTrustConnection(addTrust)))
+                  }
+                />
+              </InputWrapper>
+              <DebugButtonWrapper>
                 <Button
                   prio={'high'}
                   color={theme.baseColor}
@@ -144,19 +148,19 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 >
                   {t('addTrustsButton')}
                 </Button>
-              </ActionRow>
-            </>
-          </FadeIn>
-        </>
+              </DebugButtonWrapper>
+            </ActionRow>
+          </>
+        </FadeIn>
       }
-      // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
 
 const DebugOptionsTitle = tw.h2`text-xl`;
-const ButtonText = tw.span`mr-2`;
+const ButtonText = tw.span`mr-3`;
+const DebugButtonWrapper = tw.span`mb-3`;
 const DebugOptionsDescription = tw.h2`text-sm text-gray-400`;
 const ActionRow = tw.div`flex justify-between items-center`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
-const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4`;
+const FlexBox = tw.div`flex flex-col justify-between mb-4`;
