@@ -1,18 +1,14 @@
 module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
-import CirclesCore (TrustNode, User, SafeStatus)
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, TaskReturn, loginTask, readyForDeployment, run, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, TaskReturn, loginTask, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.State (ErrLoginState)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import RemoteData (RemoteData, _failure, _loading, _notAsked)
-import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
+import RemoteData (RemoteData, _failure, _loading, _notAsked, _success)
 import Wallet.PrivateKey as P
 
 login ::
@@ -45,7 +41,7 @@ login env =
             pure loginResult
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
-      Right { user, trusts, safeStatus }
+      Right { user, trusts, safeStatus, balance }
         | safeStatus.isCreated && safeStatus.isDeployed -> do
           set \_ ->
             S._dashboard
@@ -54,6 +50,7 @@ login env =
               , privKey
               , error: Nothing
               , trustAddResult: _notAsked
+              , getBalanceResult: _success balance
               }
       Right { user, trusts, safeStatus, isReady } -> do
         set \_ ->

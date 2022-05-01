@@ -12,6 +12,7 @@ module CirclesCore
   , ErrSafePredictAddress
   , ErrService
   , ErrTokenDeploy
+  , ErrTokenGetBalance
   , ErrTrustAddConnection
   , ErrTrustGetNetwork
   , ErrTrustIsTrusted
@@ -22,6 +23,7 @@ module CirclesCore
   , SafeDeployOptions
   , SafeStatus
   , TokenDeployOptions
+  , TokenGetBalanceOptions
   , TrustAddConnectionOptions
   , TrustNode
   , User
@@ -43,6 +45,7 @@ module CirclesCore
   , safePrepareDeploy
   , sendTransaction
   , tokenDeploy
+  , tokenGetBalance
   , trustAddConnection
   , trustGetNetwork
   , trustIsTrusted
@@ -61,6 +64,7 @@ import CirclesCore.Bindings
   , CirclesCore
   , Account
   , TrustIsTrustedResult
+  , Balance
   )
   as Exp
 import CirclesCore.ApiResult (ApiError) as Exp
@@ -336,6 +340,21 @@ type ErrTokenDeploy r
 
 tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> Result (ErrTokenDeploy r) String
 tokenDeploy cc = mapFn2 (convertCore cc).token.deploy pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / tokenGetBalance
+--------------------------------------------------------------------------------
+type TokenGetBalanceOptions
+  = { safeAddress :: Address
+    }
+
+type ErrTokenGetBalance r
+  = ErrNative + r
+
+tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) B.Balance
+tokenGetBalance cc = mapFn2 (convertCore cc).token.getBalance pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x = x { safeAddress = addrToString x.safeAddress }
 

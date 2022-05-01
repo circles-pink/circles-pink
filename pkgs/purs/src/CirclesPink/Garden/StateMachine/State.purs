@@ -13,6 +13,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLoginTask
   , ErrSubmit
   , ErrSubmitResolved
+  , ErrTokenGetBalance
+  , ErrTokenGetBalanceResolved
   , ErrTrustAddConnection
   , ErrTrustAddConnectionResolved
   , ErrTrustState
@@ -25,6 +27,7 @@ module CirclesPink.Garden.StateMachine.State
   , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
+  , TokenGetBalanceResult
   , TrustAddResult
   , TrustState
   , TrustStateTrustsResult
@@ -49,7 +52,7 @@ module CirclesPink.Garden.StateMachine.State
   ) where
 
 import Prelude
-import CirclesCore (ApiError, SafeStatus, TrustNode, NativeError)
+import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode, Balance)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -61,7 +64,7 @@ import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, PrivateKey)
+import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
@@ -200,12 +203,25 @@ type ErrTrustAddConnection
 type TrustAddResult
   = RemoteData ErrTrustAddConnectionResolved Unit
 
+type ErrTokenGetBalanceResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenGetBalance
+  = Env.ErrGetBalance + ()
+
+type TokenGetBalanceResult
+  = RemoteData ErrTokenGetBalanceResolved Balance
+
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
     , trustAddResult :: TrustAddResult
+    , getBalanceResult :: TokenGetBalanceResult
     }
 
 --------------------------------------------------------------------------------

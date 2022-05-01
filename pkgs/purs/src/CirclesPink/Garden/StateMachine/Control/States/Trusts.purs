@@ -61,4 +61,5 @@ trusts env =
             , privKey: st.privKey
             , error: Nothing
             , trustAddResult: _notAsked
+            , getBalanceResult: _notAsked
             }

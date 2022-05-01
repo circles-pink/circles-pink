@@ -39,7 +39,6 @@ type EnvVars
     , gardenProxyFactoryAddress :: String
     , gardenSafeMasterAddress :: String
     , gardenEthereumNodeWebSocket :: String
-    , saveSession :: String
     }
 
 _errService :: CirclesError
@@ -67,6 +66,7 @@ env { request, envVars } =
   , addTrustConnection
   , saveSession
   , restoreSession
+  , getBalance
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -278,6 +278,13 @@ env { request, envVars } =
     resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
     pure resultPk.privKey
 
+  getBalance :: Env.GetBalance Aff
+  getBalance privKey safeAddress = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    CC.tokenGetBalance circlesCore account { safeAddress }
+
 privateKeyStore :: String
 privateKeyStore = "session"
 
@@ -319,4 +326,5 @@ testEnv =
   , addTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
+  , getBalance: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
   }
