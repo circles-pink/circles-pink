@@ -11,14 +11,20 @@ import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { mapResult } from '../utils/mapResult';
-import tw from 'twin.macro';
+import tw, { css, styled } from 'twin.macro';
 import { ListElement } from '../../components/ListElement';
 import { mdiCashFast, mdiHandCoin } from '@mdi/js';
 import Icon from '@mdi/react';
+import { CirclesCurrency } from '../../assets/CirclesCurrency';
 
 type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
+};
+
+const mapBalance = (raw: string) => {
+  const rawBalance = parseInt(raw);
+  return Math.floor(rawBalance / 10000000000000000) / 100;
 };
 
 export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
@@ -52,18 +58,14 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            {state.user.username ? (
-              <Claim color={theme.baseColor}>
-                {t('dashboard.greet')}
-                {` ${state.user.username}!`}
-              </Claim>
-            ) : (
-              <Claim color={theme.baseColor}>{t('dashboard.claim')}</Claim>
-            )}
-          </FadeIn>
-
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>{t('dashboard.subClaim')}</SubClaim>
+            <BalanceWrapper>
+              <Amount color={theme.baseColor}>
+                {state.getBalanceResult.type === 'success'
+                  ? mapBalance(state.getBalanceResult.value.toString())
+                  : 0}
+              </Amount>
+              <CirclesCurrency color={theme.baseColor} />
+            </BalanceWrapper>
           </FadeIn>
 
           {/* <FadeIn orientation={orientation} delay={getDelay()}>
@@ -104,6 +106,21 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       mainContent={
         <>
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            {state.user.username ? (
+              <Claim color={'gray'}>
+                {t('dashboard.greet')}
+                {` ${state.user.username}!`}
+              </Claim>
+            ) : (
+              <Claim color={theme.baseColor}>{t('dashboard.claim')}</Claim>
+            )}
+          </FadeIn>
+
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <SubClaim>{t('dashboard.subClaim')}</SubClaim>
+          </FadeIn>
+
           <FlexBox>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Trust Network'} />
@@ -156,6 +173,24 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
     />
   );
 };
+
+// -----------------------------------------------------------------------------
+// UI / Balance
+// -----------------------------------------------------------------------------
+
+type AmountProps = { color?: string };
+
+const Amount = styled.h2<AmountProps>(({ color }) => [
+  tw`text-5xl mr-2 my-6`,
+  css`
+    color: ${color || 'black'};
+  `,
+]);
+const BalanceWrapper = tw.div`flex flex-row items-center`;
+
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
 
 const DebugOptionsTitle = tw.h2`text-xl`;
 const ButtonText = tw.span`mr-3`;

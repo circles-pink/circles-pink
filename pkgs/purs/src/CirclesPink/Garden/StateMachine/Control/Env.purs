@@ -11,6 +11,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrDecode
   , ErrDeploySafe
   , ErrDeployToken
+  , ErrGetBalance
   , ErrGetSafeAddress
   , ErrGetSafeStatus
   , ErrIsFunded
@@ -23,6 +24,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrUserRegister
   , ErrUserResolve
   , GeneratePrivateKey
+  , GetBalance
   , GetSafeAddress
   , GetSafeStatus
   , IsFunded
@@ -40,7 +42,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ) where
 
 import Prelude
-import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions)
+import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, Balance)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -177,6 +179,13 @@ type RestoreSession m
   = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
 
 --------------------------------------------------------------------------------
+type ErrGetBalance r
+  = ErrNative + ErrInvalidUrl + r
+
+type GetBalance m
+  = forall r. PrivateKey -> Address -> ExceptV (ErrGetBalance + r) m Balance
+
+--------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
     , apiCheckEmail :: ApiCheckEmail m
@@ -195,6 +204,7 @@ type Env m
     , addTrustConnection :: AddTrustConnection m
     , saveSession :: SaveSession m
     , restoreSession :: RestoreSession m
+    , getBalance :: GetBalance m
     }
 
 --------------------------------------------------------------------------------

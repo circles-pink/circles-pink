@@ -1,6 +1,7 @@
 module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
+import CirclesCore (Balance)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 
@@ -51,6 +52,7 @@ type CirclesAction
             ( logout :: Unit
             , getTrusts :: Unit
             , addTrustConnection :: String
+            , getBalance :: Unit
             )
       , login ::
           Variant
@@ -152,3 +154,6 @@ _addTrustConnection = inj (Proxy :: _ "addTrustConnection")
 
 _checkForSession :: forall a v. a -> Variant ( checkForSession :: a | v )
 _checkForSession = inj (Proxy :: _ "checkForSession")
+
+_getBalance :: forall a v. a -> Variant ( getBalance :: a | v )
+_getBalance = inj (Proxy :: _ "getBalance")
