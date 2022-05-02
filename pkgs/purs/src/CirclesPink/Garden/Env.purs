@@ -70,6 +70,7 @@ env { request, envVars } =
   , getBalance
   , checkUBIPayout
   , requestUBIPayout
+  , transfer
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -309,6 +310,13 @@ env { request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.tokenRequestUBIPayout circlesCore account { safeAddress }
 
+  transfer :: Env.Transfer Aff
+  transfer privKey from to value paymentNote = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    CC.tokenTransfer circlesCore account { from, to, value, paymentNote }
+
 privateKeyStore :: String
 privateKeyStore = "session"
 
@@ -354,4 +362,5 @@ testEnv =
   , getBalance: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
   , checkUBIPayout: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
   , requestUBIPayout: \_ _ -> pure ""
+  , transfer: \_ _ _ _ _ -> pure ""
   }

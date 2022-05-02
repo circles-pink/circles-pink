@@ -15,6 +15,7 @@ module CirclesCore
   , ErrTokenDeploy
   , ErrTokenGetBalance
   , ErrTokenRequestUBIPayout
+  , ErrTokenTransfer
   , ErrTrustAddConnection
   , ErrTrustGetNetwork
   , ErrTrustIsTrusted
@@ -28,6 +29,7 @@ module CirclesCore
   , TokenDeployOptions
   , TokenGetBalanceOptions
   , TokenRequestUBIPayoutOptions
+  , TokenTransferOptions
   , TrustAddConnectionOptions
   , TrustNode
   , User
@@ -36,6 +38,7 @@ module CirclesCore
   , _errInvalidUrl
   , _errNative
   , _errService
+  , intToBN
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -48,10 +51,12 @@ module CirclesCore
   , safePredictAddress
   , safePrepareDeploy
   , sendTransaction
+  , strToBN
   , tokenCheckUBIPayout
   , tokenDeploy
   , tokenGetBalance
   , tokenRequestUBIPayout
+  , tokenTransfer
   , trustAddConnection
   , trustGetNetwork
   , trustIsTrusted
@@ -63,22 +68,10 @@ module CirclesCore
 --------------------------------------------------------------------------------
 -- Re-Exports
 --------------------------------------------------------------------------------
-import CirclesCore.Bindings
-  ( Options
-  , Provider
-  , Web3
-  , CirclesCore
-  , Account
-  , TrustIsTrustedResult
-  , Balance
-  )
-  as Exp
-import CirclesCore.ApiResult (ApiError) as Exp
---------------------------------------------------------------------------------
--- Imports
---------------------------------------------------------------------------------
 import Prelude
+import CirclesCore.ApiResult (ApiError) as Exp
 import CirclesCore.ApiResult (apiResultToEither, ApiError)
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult, Balance) as Exp
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
@@ -98,7 +91,7 @@ import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigIn
 import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
--- API
+-- Web3
 --------------------------------------------------------------------------------
 type Result e a
   = ExceptV e Aff a
@@ -120,6 +113,18 @@ newWebSocketProvider x1 =
 newWeb3 :: B.Provider -> Effect B.Web3
 newWeb3 = B.newWeb3
 
+--------------------------------------------------------------------------------
+-- Web3 Utils
+--------------------------------------------------------------------------------
+strToBN :: String -> Effect B.Balance
+strToBN = B.strToBN
+
+intToBN :: Int -> Effect B.Balance
+intToBN = B.intToBN
+
+--------------------------------------------------------------------------------
+-- API
+--------------------------------------------------------------------------------
 type ErrNewCirclesCore r
   = ErrNative + r
 
@@ -393,6 +398,24 @@ tokenRequestUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenRequestUBI
 tokenRequestUBIPayout cc = mapFn2 (convertCore cc).token.requestUBIPayout pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / tokenTransfer
+--------------------------------------------------------------------------------
+type TokenTransferOptions
+  = { from :: Address
+    , to :: Address
+    , value :: B.Balance
+    , paymentNote :: String
+    }
+
+type ErrTokenTransfer r
+  = ErrNative + r
+
+tokenTransfer :: forall r. B.CirclesCore -> B.Account -> TokenTransferOptions -> Result (ErrTokenTransfer r) String
+tokenTransfer cc = mapFn2 (convertCore cc).token.transfer pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { from = addrToString x.from, to = addrToString x.to }
 
 --------------------------------------------------------------------------------
 -- Err slices
