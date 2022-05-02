@@ -2,7 +2,7 @@ import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from 'generated/output/Data.Unit';
 import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { Button, Input } from '../../components/forms';
-import { Claim, SubClaim, Text } from '../../components/text';
+import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
@@ -12,8 +12,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { mapResult } from '../utils/mapResult';
 import tw, { css, styled } from 'twin.macro';
-import { ListElement } from '../../components/ListElement';
-import { mdiCashFast, mdiHandCoin } from '@mdi/js';
+import { mdiCashFast, mdiCog, mdiHandCoin, mdiLogout } from '@mdi/js';
 import Icon from '@mdi/react';
 import { CirclesCurrency } from '../../assets/CirclesCurrency';
 import { TrustNetworkList } from '../../components/TrustNetworkList';
@@ -36,7 +35,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   useEffect(() => {
     act(A._dashboard(A._getTrusts(unit))); // Should be done in control
-    setInterval(() => act(A._dashboard(A._getTrusts(unit))), 15000);
+    const pollTrusts = window.setInterval(
+      () => act(A._dashboard(A._getTrusts(unit))),
+      15000
+    );
+    return () => window.clearInterval(pollTrusts);
   }, []);
 
   useEffect(() => {
@@ -57,9 +60,17 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   return (
     <UserDashboard
       header={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <UserHandle>{`@${state.user.username}`}</UserHandle>
-        </FadeIn>
+        <JustifyBetween>
+          <FadeIn orientation={'down'} delay={getDelay()}>
+            <Icon path={mdiCog} size={1} color={theme.darkColor} />
+          </FadeIn>
+          <FadeIn orientation={'down'} delay={getDelay()}>
+            <UserHandle>{`@${state.user.username}`}</UserHandle>
+          </FadeIn>
+          <FadeIn orientation={'down'} delay={getDelay()}>
+            <Icon path={mdiLogout} size={1} color={theme.darkColor} />
+          </FadeIn>
+        </JustifyBetween>
       }
       text={
         <Text>
@@ -81,7 +92,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <ControlContent>
             <Button
               prio="high"
               color={theme.baseColor}
@@ -101,7 +112,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 <Icon path={mdiHandCoin} size={1} color={'white'} />
               </ActionRow>
             </Button>
-          </>
+          </ControlContent>
         </FadeIn>
       }
       mainContent={
@@ -111,6 +122,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
               <TrustNetworkList
                 title={'Trust Network'}
                 content={state.trusts}
+                theme={theme}
               />
             </FadeIn>
             {/* <FadeIn orientation={'up'} delay={getDelay()}>
@@ -155,6 +167,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 </Button>
               </DebugButtonWrapper>
             </ActionRow>
+            <FlexBox>Own Safe Address: {state.user.safeAddress}</FlexBox>
           </>
         </FadeIn>
       }
@@ -169,12 +182,12 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 type AmountProps = { color?: string };
 
 const Amount = styled.h2<AmountProps>(({ color }) => [
-  tw`text-5xl mr-2 my-6`,
+  tw`text-5xl mr-2 my-2`,
   css`
     color: ${color || 'black'};
   `,
 ]);
-const BalanceWrapper = tw.div`flex flex-row items-center`;
+const BalanceWrapper = tw.div`flex flex-row items-center m-2`;
 
 // -----------------------------------------------------------------------------
 // UI / UserHandle
@@ -200,3 +213,6 @@ const DebugOptionsDescription = tw.h2`text-sm text-gray-400`;
 const ActionRow = tw.div`flex justify-between items-center`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
 const FlexBox = tw.div`flex flex-col justify-between mb-4`;
+const ControlContent = tw.div`m-2`;
+const JustifyBetween = tw.div`flex justify-between items-center mx-4`;
+const JustifyAround = tw.div`flex justify-around`;
