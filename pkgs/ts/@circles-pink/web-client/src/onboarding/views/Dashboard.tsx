@@ -41,6 +41,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   useEffect(() => {
     // Gather initial Client information
+    act(A._dashboard(A._getBalance(unit)));
     act(A._dashboard(A._getTrusts(unit))); // Should be done in control
     act(A._dashboard(A._checkUBIPayout(unit)));
 
@@ -89,7 +90,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [mappedTrusts, setMappedTrusts] = useState<MappedTrustNodes>([]);
 
   useEffect(() => {
-    // Whenever trusts ar updated, we wanna get the according usernames
+    // Whenever trusts are updated, we wanna get the according usernames
     const addresses = state.trusts.map(t => t.safeAddress);
     act(A._dashboard(A._getUsers({ userNames: [], addresses })));
   }, [state.trusts]);
@@ -122,7 +123,9 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
         break;
       case 'success':
         setAddTrust('');
-        act(A._dashboard(A._getTrusts(unit)));
+        setTimeout(() => {
+          act(A._dashboard(A._getTrusts(unit)));
+        }, 1000);
         break;
     }
   }, [state.trustAddResult]);
