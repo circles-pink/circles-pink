@@ -11,11 +11,13 @@ module CirclesCore.Bindings
   , User
   , Web3
   , convertCore
+  , intToBN
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
+  , strToBN
   , unsafeSampleCore
   ) where
 
@@ -71,6 +73,10 @@ foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
 foreign import sendTransaction :: Web3 -> String -> String -> Effect Unit
 
+foreign import strToBN :: String -> Effect Balance
+
+foreign import intToBN :: Int -> Effect Balance
+
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
 --------------------------------------------------------------------------------
@@ -121,6 +127,14 @@ type CirclesCore_
         , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
         , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
         , requestUBIPayout :: Fn2Promise Account { safeAddress :: String } String
+        , transfer ::
+            Fn2Promise Account
+              { from :: String
+              , to :: String
+              , value :: Balance
+              , paymentNote :: String
+              }
+              String
         }
     , trust ::
         { isTrusted ::
