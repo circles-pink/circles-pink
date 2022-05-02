@@ -17,6 +17,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrTokenCheckUBIPayoutResolved
   , ErrTokenGetBalance
   , ErrTokenGetBalanceResolved
+  , ErrTokenRequestUBIPayout
+  , ErrTokenRequestUBIPayoutResolved
   , ErrTrustAddConnection
   , ErrTrustAddConnectionResolved
   , ErrTrustState
@@ -31,6 +33,7 @@ module CirclesPink.Garden.StateMachine.State
   , SubmitState
   , TokenCheckUBIPayoutResult
   , TokenGetBalanceResult
+  , TokenRequestUBIPayoutResult
   , TrustAddResult
   , TrustState
   , TrustStateTrustsResult
@@ -226,6 +229,20 @@ type ErrTokenCheckUBIPayout
 type TokenCheckUBIPayoutResult
   = RemoteData ErrTokenCheckUBIPayoutResolved Balance
 
+-- | Token / RequestUBIPayout
+type ErrTokenRequestUBIPayoutResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenRequestUBIPayout
+  = Env.ErrRequestUBIPayout + ()
+
+type TokenRequestUBIPayoutResult
+  = RemoteData ErrTokenRequestUBIPayoutResolved String
+
+-- | Dashboard State
 type ErrDashboardStateResolved
   = Variant
       ( errService :: Unit
@@ -241,6 +258,7 @@ type DashboardState
     , trustAddResult :: TrustAddResult
     , getBalanceResult :: TokenGetBalanceResult
     , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
     }
 
 --------------------------------------------------------------------------------

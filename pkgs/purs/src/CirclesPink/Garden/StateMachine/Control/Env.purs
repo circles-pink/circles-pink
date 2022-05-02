@@ -21,6 +21,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
   , ErrReadStorage
+  , ErrRequestUBIPayout
   , ErrRestoreSession
   , ErrSaveSession
   , ErrTrustGetNetwork
@@ -35,6 +36,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , IsTrusted
   , PrepareSafeDeploy
   , RequestPath
+  , RequestUBIPayout
   , RestoreSession
   , SaveSession
   , TrustGetNetwork
@@ -207,6 +209,13 @@ type CheckUBIPayout m
   = forall r. PrivateKey -> Address -> ExceptV (ErrCheckUBIPayout + r) m Balance
 
 --------------------------------------------------------------------------------
+type ErrRequestUBIPayout r
+  = ErrNative + ErrInvalidUrl + r
+
+type RequestUBIPayout m
+  = forall r. PrivateKey -> Address -> ExceptV (ErrRequestUBIPayout + r) m String
+
+--------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
     , apiCheckEmail :: ApiCheckEmail m
@@ -228,6 +237,7 @@ type Env m
     , restoreSession :: RestoreSession m
     , getBalance :: GetBalance m
     , checkUBIPayout :: CheckUBIPayout m
+    , requestUBIPayout :: RequestUBIPayout m
     }
 
 --------------------------------------------------------------------------------
