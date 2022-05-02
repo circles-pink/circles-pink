@@ -52,6 +52,7 @@ login env =
               , trustAddResult: _notAsked
               , getBalanceResult: _success balance
               , checkUBIPayoutResult: _notAsked
+              , requestUBIPayoutResult: _notAsked
               }
       Right { user, trusts, safeStatus, isReady } -> do
         set \_ ->

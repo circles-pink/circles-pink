@@ -21,6 +21,7 @@ dashboard ::
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , checkUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
+  , requestUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   -- , getUsers ::
   --     ActionHandler t m
   --       { userNames :: Array String
@@ -35,6 +36,7 @@ dashboard env =
   , addTrustConnection
   , getBalance
   , checkUBIPayout
+  , requestUBIPayout
   -- , getUsers
   }
   where
@@ -68,11 +70,21 @@ dashboard env =
   checkUBIPayout set st _ = do
     set \st' -> S._dashboard st' { checkUBIPayoutResult = _loading :: RemoteData _ _ }
     let
-      task :: ExceptV S.ErrTokenGetBalance _ _
+      task :: ExceptV S.ErrTokenCheckUBIPayout _ _
       task = env.checkUBIPayout st.privKey st.user.safeAddress
     result <- run' $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { checkUBIPayoutResult = _failure e }
       Right b -> set \st' -> S._dashboard st' { checkUBIPayoutResult = _success b }
+
+  requestUBIPayout set st _ = do
+    set \st' -> S._dashboard st' { requestUBIPayoutResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrTokenRequestUBIPayout _ _
+      task = env.requestUBIPayout st.privKey st.user.safeAddress
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _failure e }
+      Right b -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _success b }
 
 -- getUsers _ st { userNames, addresses } = run' $ env.getUsers st.privateKey userNames addresses
