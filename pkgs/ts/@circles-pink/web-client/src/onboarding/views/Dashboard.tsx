@@ -40,7 +40,13 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
 
   // User Interaction
+  // Add Trust
   const [addTrust, setAddTrust] = useState<string>('');
+  // Transfer
+  const [from, setFrom] = useState<string>('');
+  const [to, setTo] = useState<string>('');
+  const [value, setValue] = useState<number>(0);
+  const [paymentNote, setPaymentNote] = useState<string>('');
 
   // animation
   const orientation: Orientation = 'left';
@@ -80,7 +86,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   useEffect(() => {
     if (state.getBalanceResult.type === 'success') {
-      setBalance(mapBalance(state.getBalanceResult.value));
+      setBalance(mapBalanceToHr(state.getBalanceResult.value));
     }
   }, [state.getBalanceResult]);
 
@@ -151,6 +157,28 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
         break;
     }
   }, [state.trustAddResult]);
+
+  // -----------------------------------------------------------------------------
+  // Transfer
+  // -----------------------------------------------------------------------------
+
+  useEffect(() => {
+    switch (state.transferResult.type) {
+      case 'loading':
+      case 'notAsked':
+      case 'failure':
+        break;
+      case 'success':
+        setFrom('');
+        setTo('');
+        setValue(0);
+        setPaymentNote('');
+        setTimeout(() => {
+          act(A._dashboard(A._getBalance(unit)));
+        }, 2000);
+        break;
+    }
+  }, [state.transferResult]);
 
   // -----------------------------------------------------------------------------
   // Trust
@@ -246,6 +274,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       debug={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
+            {/* Trust AddConnection */}
             <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
             <DebugOptionsDescription>
               trust.addConnection
@@ -277,6 +306,110 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
               </DebugButtonWrapper>
             </ActionRow>
             <FlexBox>Own Safe Address: {state.user.safeAddress}</FlexBox>
+            {/* Token Transfer */}
+            <DebugOptionsDescription>token.transfer</DebugOptionsDescription>
+            <ActionRow>
+              <InputWrapper>
+                <Input
+                  type="text"
+                  value={from}
+                  placeholder={'From'}
+                  onChange={e => setFrom(e.target.value)}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(
+                      A._dashboard(
+                        A._transfer({
+                          from,
+                          to,
+                          value: mapBalanceToBN(value),
+                          paymentNote,
+                        })
+                      )
+                    )
+                  }
+                />
+                <Input
+                  type="text"
+                  value={to}
+                  placeholder={'To'}
+                  onChange={e => setTo(e.target.value)}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(
+                      A._dashboard(
+                        A._transfer({
+                          from,
+                          to,
+                          value: mapBalanceToBN(value),
+                          paymentNote,
+                        })
+                      )
+                    )
+                  }
+                />
+                <Input
+                  type="number"
+                  value={value}
+                  placeholder={'Amount'}
+                  onChange={e => setValue(parseInt(e.target.value))}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(
+                      A._dashboard(
+                        A._transfer({
+                          from,
+                          to,
+                          value: mapBalanceToBN(value),
+                          paymentNote,
+                        })
+                      )
+                    )
+                  }
+                />
+                <Input
+                  type="string"
+                  value={paymentNote}
+                  placeholder={'Payment Note'}
+                  onChange={e => setPaymentNote(e.target.value)}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(
+                      A._dashboard(
+                        A._transfer({
+                          from,
+                          to,
+                          value: mapBalanceToBN(value),
+                          paymentNote,
+                        })
+                      )
+                    )
+                  }
+                />
+              </InputWrapper>
+              <DebugButtonWrapper>
+                <Button
+                  prio={'high'}
+                  color={theme.baseColor}
+                  state={mapResult(state.transferResult)}
+                  onClick={() =>
+                    act(
+                      A._dashboard(
+                        A._transfer({
+                          from,
+                          to,
+                          value: mapBalanceToBN(value),
+                          paymentNote,
+                        })
+                      )
+                    )
+                  }
+                >
+                  Send
+                </Button>
+              </DebugButtonWrapper>
+            </ActionRow>
+            {JSON.stringify(state.transferResult, null, 2)}
           </>
         </FadeIn>
       }
@@ -331,10 +464,17 @@ const JustifyAround = tw.div`flex justify-around`;
 // Util
 // -----------------------------------------------------------------------------
 
-const mapBalance = (raw: Balance) => {
+const mapBalanceToHr = (raw: Balance) => {
   const rawBalance = parseInt(raw.toString());
   // Map and round balance to human readable format
   return (
     Math.floor(rawBalance / 1000 / 1000 / 1000 / 1000 / 1000 / 10) / 100
   ).toFixed(2);
+};
+
+const mapBalanceToBN = (raw: number) => {
+  const rawBalance = (raw * 100).toString();
+  // Map and round balance to big number format
+  // Todo: Replace! Ugly but works for the moment...
+  return rawBalance + '0000000000000000';
 };

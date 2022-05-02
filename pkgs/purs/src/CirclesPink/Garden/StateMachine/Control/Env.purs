@@ -222,7 +222,7 @@ type ErrTransfer r
   = ErrNative + ErrInvalidUrl + r
 
 type Transfer m
-  = forall r. PrivateKey -> Address -> Address -> Int -> String -> ExceptV (ErrTransfer + r) m String
+  = forall r. PrivateKey -> Address -> Address -> String -> String -> ExceptV (ErrTransfer + r) m String
 
 --------------------------------------------------------------------------------
 type Env m
