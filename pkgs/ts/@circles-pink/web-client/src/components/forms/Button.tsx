@@ -79,7 +79,7 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
       ${fullWidth && 'width: 100%;'};
       ${prioStyles}
     `,
-    tw`font-bold py-2 px-4 rounded-full mr-1 cursor-pointer`,
+    tw`font-bold py-2 px-4 my-1 mr-2 rounded-full cursor-pointer`,
   ];
 });
 
