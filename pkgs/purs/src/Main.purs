@@ -1,13 +1,8 @@
 module Main where
 
 import Prelude
-import CirclesM as C
 import Effect (Effect)
-import Effect.Aff (Aff, runAff_)
 import Effect.Class.Console (log)
-import CirclesPink.Garden.Env (env)
-import HTTP.Milkis as HM
-import Milkis.Impl.Node (nodeFetch)
 
 -- script :: CirclesM Unit
 -- script = do
