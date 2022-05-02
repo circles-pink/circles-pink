@@ -55,7 +55,7 @@ type CirclesProtocol
             , getBalance :: P.Action ("dashboard" :> Nil')
             , checkUBIPayout :: P.Action ("dashboard" :> Nil')
             , requestUBIPayout :: P.Action ("dashboard" :> Nil')
-            -- , getUsers :: P.Action ("dashboard" :> Nil')
+            , getUsers :: P.Action ("dashboard" :> Nil')
             )
       , login ::
           P.State

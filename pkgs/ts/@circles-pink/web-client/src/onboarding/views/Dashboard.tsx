@@ -15,16 +15,22 @@ import tw, { css, styled } from 'twin.macro';
 import { mdiCashFast, mdiCog, mdiHandCoin, mdiLogout } from '@mdi/js';
 import Icon from '@mdi/react';
 import { CirclesCurrency } from '../../assets/CirclesCurrency';
-import { TrustNetworkList } from '../../components/TrustNetworkList';
+import {
+  MappedTrustNodes,
+  TrustNetworkList,
+} from '../../components/TrustNetworkList';
+import { Balance } from 'generated/output/CirclesCore.Bindings';
+import { User } from 'generated/output/CirclesCore';
 
 type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
 };
 
-const mapBalance = (raw: string) => {
-  const rawBalance = parseInt(raw);
-  return Math.floor(rawBalance / 10000000000000000) / 100;
+const mapBalance = (raw: Balance) => {
+  const rawBalance = parseInt(raw.toString());
+  // Map and round balance to human readable format
+  return Math.floor(rawBalance / 1000 / 1000 / 1000 / 1000 / 1000 / 10) / 100;
 };
 
 export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
@@ -55,6 +61,10 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
     };
   }, []);
 
+  // -----------------------------------------------------------------------------
+  // UBI Payout
+  // -----------------------------------------------------------------------------
+
   useEffect(() => {
     // If polling for checkPayout happens successfully
     // we can start a new payout request
@@ -62,6 +72,47 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       act(A._dashboard(A._requestUBIPayout(unit)));
     }
   }, [state.checkUBIPayoutResult]);
+
+  useEffect(() => {
+    // Refresh balance after payout request with small timeout
+    if (state.requestUBIPayoutResult.type === 'success') {
+      setTimeout(() => {
+        act(A._dashboard(A._getBalance(unit)));
+      }, 2000);
+    }
+  }, [state.requestUBIPayoutResult]);
+
+  // -----------------------------------------------------------------------------
+  // Trusts get userdata
+  // -----------------------------------------------------------------------------
+
+  const [mappedTrusts, setMappedTrusts] = useState<MappedTrustNodes>([]);
+
+  useEffect(() => {
+    // Whenever trusts ar updated, we wanna get the according usernames
+    const addresses = state.trusts.map(t => t.safeAddress);
+    act(A._dashboard(A._getUsers({ userNames: [], addresses })));
+  }, [state.trusts]);
+
+  useEffect(() => {
+    // Map received userdata with users trusts for display
+    if (state.getUsersResult.type === 'success') {
+      const mapped = state.trusts.map(t => {
+        const users = state.getUsersResult.value as User[];
+        const info = users.find(u => u.safeAddress === t.safeAddress);
+        return {
+          ...t,
+          username: info?.username || 'Unnamed',
+          avatarUrl: info?.avatarUrl || null,
+        };
+      });
+      setMappedTrusts(mapped);
+    }
+  }, [state.getUsersResult]);
+
+  // -----------------------------------------------------------------------------
+  // Add Trust
+  // -----------------------------------------------------------------------------
 
   useEffect(() => {
     switch (state.trustAddResult.type) {
@@ -99,7 +150,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
             <BalanceWrapper>
               <Amount color={theme.baseColor}>
                 {state.getBalanceResult.type === 'success'
-                  ? mapBalance(state.getBalanceResult.value.toString())
+                  ? mapBalance(state.getBalanceResult.value)
                   : 0}
               </Amount>
               <CirclesCurrency color={theme.baseColor} />
@@ -139,13 +190,15 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       mainContent={
         <>
           <FlexBox>
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustNetworkList
-                title={'Trust Network'}
-                content={state.trusts}
-                theme={theme}
-              />
-            </FadeIn>
+            {mappedTrusts && (
+              <FadeIn orientation={'up'} delay={getDelay()}>
+                <TrustNetworkList
+                  title={'Trust Network'}
+                  content={mappedTrusts}
+                  theme={theme}
+                />
+              </FadeIn>
+            )}
             {/* <FadeIn orientation={'up'} delay={getDelay()}>
               <ListElement title={'Transactions'} />
             </FadeIn>

@@ -11,9 +11,16 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 
+type UserData = {
+  username: string;
+  avatarUrl: string | null;
+};
+
+export type MappedTrustNodes = Array<TrustNode & UserData>;
+
 type TrustNetworkListProps = {
   title?: string;
-  content: TrustNode[];
+  content: MappedTrustNodes;
   theme: Theme;
 };
 
@@ -40,9 +47,9 @@ export const TrustNetworkList = ({
               <TableHead>
                 <JustifyAround>You Can Send</JustifyAround>
               </TableHead>
-              <TableHead>
+              {/* <TableHead>
                 <JustifyAround>Transferable</JustifyAround>
-              </TableHead>
+              </TableHead> */}
             </TableRow>
           </TableHeader>
 
@@ -50,7 +57,7 @@ export const TrustNetworkList = ({
             {content.map((c, index) => {
               return (
                 <TableRow theme={theme} key={index}>
-                  <TableData>x</TableData>
+                  <TableData>{c.username}</TableData>
                   <TableData>{c.safeAddress}</TableData>
                   <TableData>
                     <JustifyAround>
@@ -74,9 +81,9 @@ export const TrustNetworkList = ({
                       />
                     </JustifyAround>
                   </TableData>
-                  <TableData>
+                  {/* <TableData>
                     <JustifyAround>y €</JustifyAround>
-                  </TableData>
+                  </TableData> */}
                 </TableRow>
               );
             })}
