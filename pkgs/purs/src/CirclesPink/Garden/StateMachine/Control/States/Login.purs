@@ -8,7 +8,7 @@ import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import RemoteData (RemoteData, _failure, _loading, _notAsked, _success)
+import RemoteData (RemoteData, _failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
 login ::
@@ -41,7 +41,7 @@ login env =
             pure loginResult
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
-      Right { user, trusts, safeStatus, balance }
+      Right { user, trusts, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed -> do
           set \_ ->
             S._dashboard
@@ -50,7 +50,7 @@ login env =
               , privKey
               , error: Nothing
               , trustAddResult: _notAsked
-              , getBalanceResult: _success balance
+              , getBalanceResult: _notAsked
               , checkUBIPayoutResult: _notAsked
               , requestUBIPayoutResult: _notAsked
               , getUsersResult: _notAsked

@@ -71,6 +71,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
           </>
         </FadeIn>
       }
+      // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
