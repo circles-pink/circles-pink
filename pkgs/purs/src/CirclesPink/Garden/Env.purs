@@ -315,7 +315,7 @@ env { request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-    bn <- lift $ liftEffect $ CC.intToBN value
+    bn <- lift $ liftEffect $ CC.strToBN value
     CC.tokenTransfer circlesCore account { from, to, value: bn, paymentNote }
 
 privateKeyStore :: String
