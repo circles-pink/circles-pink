@@ -10,6 +10,7 @@ import {
   mdiLan,
 } from '@mdi/js';
 import Icon from '@mdi/react';
+import { darken } from '../onboarding/utils/colorUtils';
 
 type UserData = {
   username: string;
@@ -31,10 +32,12 @@ export const TrustNetworkList = ({
 }: TrustNetworkListProps) => {
   return (
     <Frame theme={theme}>
-      <JustifyBetween>
-        <Claim color={'white'}>{title}</Claim>
-        <Icon path={mdiLan} size={1.5} color={'white'} />
-      </JustifyBetween>
+      <Title>
+        <JustifyBetween>
+          <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
+          <Icon path={mdiLan} size={1.5} color={darken(theme.lightColor, 2)} />
+        </JustifyBetween>
+      </Title>
       <TableContainer>
         <Table>
           <TableHeader>
@@ -105,7 +108,7 @@ type FameProps = {
 };
 
 const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
-  tw`block p-8 border border-gray-800 shadow-xl rounded-xl text-white m-2`,
+  tw`block p-8 border border-gray-800 shadow-xl rounded-xl`,
   css`
     background-color: ${theme.lightColor};
   `,
@@ -117,8 +120,8 @@ const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
 
 const TableContainer = tw.div`overflow-hidden overflow-x-auto border border-gray-100 rounded`;
 const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
-const TableHeader = tw.thead`px-4 py-2 font-medium text-left whitespace-nowrap`;
-const TableHead = tw.th`px-4 py-2 font-medium text-left whitespace-nowrap`;
+const TableHeader = tw.thead`px-4 py-2 lg:text-lg text-left whitespace-nowrap`;
+const TableHead = tw.th`px-4 py-2 text-left whitespace-nowrap`;
 const TableBody = tw.tbody`divide-y divide-gray-100`;
 const TableData = tw.td`px-4 py-2 whitespace-nowrap`;
 
@@ -135,5 +138,6 @@ const TableRow = styled.tr<TableRowProps>(({ theme }: TableRowProps) => [
 // UI
 // -----------------------------------------------------------------------------
 
+const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
 const JustifyAround = tw.div`flex justify-around`;

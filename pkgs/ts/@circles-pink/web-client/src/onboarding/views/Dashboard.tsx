@@ -22,22 +22,33 @@ import {
 import { Balance } from 'generated/output/CirclesCore.Bindings';
 import { User } from 'generated/output/CirclesCore';
 
+// -----------------------------------------------------------------------------
+// Dashboard
+// -----------------------------------------------------------------------------
+
 type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
 };
 
-const mapBalance = (raw: Balance) => {
-  const rawBalance = parseInt(raw.toString());
-  // Map and round balance to human readable format
-  return Math.floor(rawBalance / 1000 / 1000 / 1000 / 1000 / 1000 / 10) / 100;
-};
-
 export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
+  // -----------------------------------------------------------------------------
+  // State & Context
+  // -----------------------------------------------------------------------------
+
+  // Theme
   const [theme] = useContext(ThemeContext);
+
+  // User Interaction
   const [addTrust, setAddTrust] = useState<string>('');
+
+  // animation
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
+
+  // -----------------------------------------------------------------------------
+  // Side Effects
+  // -----------------------------------------------------------------------------
 
   useEffect(() => {
     // Gather initial Client information
@@ -61,6 +72,17 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       window.clearInterval(pollUBIPayout);
     };
   }, []);
+
+  // -----------------------------------------------------------------------------
+  // Balance
+  // -----------------------------------------------------------------------------
+  const [balance, setBalance] = useState<string>('0.00');
+
+  useEffect(() => {
+    if (state.getBalanceResult.type === 'success') {
+      setBalance(mapBalance(state.getBalanceResult.value));
+    }
+  }, [state.getBalanceResult]);
 
   // -----------------------------------------------------------------------------
   // UBI Payout
@@ -130,12 +152,16 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
     }
   }, [state.trustAddResult]);
 
+  // -----------------------------------------------------------------------------
+  // Trust
+  // -----------------------------------------------------------------------------
+
   // const graph: Graph = new Map([[state.user.safeAddress, state.trusts]]);
 
   return (
     <UserDashboard
       header={
-        <JustifyBetween>
+        <HeaderContent>
           <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiCog} size={1} color={theme.darkColor} />
           </FadeIn>
@@ -145,17 +171,13 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiLogout} size={1} color={theme.darkColor} />
           </FadeIn>
-        </JustifyBetween>
+        </HeaderContent>
       }
       text={
         <Text>
-          <FadeIn orientation={orientation} delay={getDelay()}>
+          <FadeIn orientation={'up'} delay={getDelay()}>
             <BalanceWrapper>
-              <Amount color={theme.baseColor}>
-                {state.getBalanceResult.type === 'success'
-                  ? mapBalance(state.getBalanceResult.value)
-                  : 0}
-              </Amount>
+              <Amount color={theme.baseColor}>{balance}</Amount>
               <CirclesCurrency color={theme.baseColor} />
             </BalanceWrapper>
           </FadeIn>
@@ -166,48 +188,58 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
         </Text>
       }
       control={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <ControlContent>
-            <Button
-              prio="high"
-              color={theme.baseColor}
-              // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
-            >
-              <ActionRow>
-                <ButtonText>Send</ButtonText>
-                <Icon path={mdiCashFast} size={1} color={'white'} />
-              </ActionRow>
-            </Button>
-            <Button
-              color={theme.baseColor}
-              // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
-            >
-              <ActionRow>
-                <ButtonText>Receive</ButtonText>
-                <Icon path={mdiHandCoin} size={1} color={'white'} />
-              </ActionRow>
-            </Button>
-          </ControlContent>
-        </FadeIn>
+        <ControlContent>
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <>
+              <Button
+                prio="high"
+                color={theme.baseColor}
+                // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
+              >
+                <ActionRow>
+                  <ButtonText>Send</ButtonText>
+                  <Icon path={mdiCashFast} size={1} color={'white'} />
+                </ActionRow>
+              </Button>
+              <Button
+                color={theme.baseColor}
+                // onClick={() => act(A._dashboard(A._getTrusts(unit)))}
+              >
+                <ActionRow>
+                  <ButtonText>Receive</ButtonText>
+                  <Icon path={mdiHandCoin} size={1} color={'white'} />
+                </ActionRow>
+              </Button>
+            </>
+          </FadeIn>
+        </ControlContent>
       }
       mainContent={
         <>
           <FlexBox>
-            {mappedTrusts && (
-              <FadeIn orientation={'up'} delay={getDelay()}>
-                <TrustNetworkList
-                  title={'Trust Network'}
-                  content={mappedTrusts}
-                  theme={theme}
-                />
-              </FadeIn>
-            )}
-            {/* <FadeIn orientation={'up'} delay={getDelay()}>
-              <ListElement title={'Transactions'} />
-            </FadeIn>
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <ListElement title={'Explore'} />
-            </FadeIn> */}
+            <FlexItemGrow>
+              {mappedTrusts && (
+                <FadeIn orientation={'up'} delay={getDelay()}>
+                  <TrustNetworkList
+                    title={'Trust Network'}
+                    content={mappedTrusts}
+                    theme={theme}
+                  />
+                </FadeIn>
+              )}
+            </FlexItemGrow>
+
+            {/* <FlexItemGrow>
+              {mappedTrusts && (
+                <FadeIn orientation={'up'} delay={getDelay()}>
+                  <TrustNetworkList
+                    title={'Explore'}
+                    content={mappedTrusts}
+                    theme={theme}
+                  />
+                </FadeIn>
+              )}
+            </FlexItemGrow> */}
           </FlexBox>
         </>
       }
@@ -283,13 +315,26 @@ const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
 // UI
 // -----------------------------------------------------------------------------
 
+const ControlContent = tw.div`m-2 lg:m-0 lg:my-2`;
+const HeaderContent = tw.div`flex justify-between items-center mx-4`;
 const DebugOptionsTitle = tw.h2`text-xl`;
 const ButtonText = tw.span`mr-3`;
 const DebugButtonWrapper = tw.span`mb-3`;
 const DebugOptionsDescription = tw.h2`text-sm text-gray-400`;
 const ActionRow = tw.div`flex justify-between items-center`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
-const FlexBox = tw.div`flex flex-col justify-between mb-4`;
-const ControlContent = tw.div`m-2`;
-const JustifyBetween = tw.div`flex justify-between items-center mx-4`;
+const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
+const FlexItemGrow = tw.div`flex-grow`;
 const JustifyAround = tw.div`flex justify-around`;
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const mapBalance = (raw: Balance) => {
+  const rawBalance = parseInt(raw.toString());
+  // Map and round balance to human readable format
+  return (
+    Math.floor(rawBalance / 1000 / 1000 / 1000 / 1000 / 1000 / 10) / 100
+  ).toFixed(2);
+};

@@ -30,8 +30,6 @@ const Frame = styled.div<FrameProps>(({ themeColor }) => {
     tw`relative block p-8 pb-24 rounded-sm shadow-xl w-full h-full`,
     css`
       border-top: solid 4px ${themeColor};
-      flex-grow: 1;
-      flex-basis: 0;
     `,
   ];
 });
