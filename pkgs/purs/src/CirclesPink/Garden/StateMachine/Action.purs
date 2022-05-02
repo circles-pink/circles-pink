@@ -58,7 +58,7 @@ type CirclesAction
             , transfer ::
                 { from :: String
                 , to :: String
-                , value :: Int
+                , value :: String
                 , paymentNote :: String
                 }
             , getUsers ::

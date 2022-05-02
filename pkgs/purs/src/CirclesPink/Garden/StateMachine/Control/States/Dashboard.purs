@@ -27,7 +27,7 @@ dashboard ::
       ActionHandler t m
         { from :: String
         , to :: String
-        , value :: Int
+        , value :: String
         , paymentNote :: String
         }
         S.DashboardState
