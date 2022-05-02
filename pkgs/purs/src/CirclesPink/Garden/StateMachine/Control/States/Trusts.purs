@@ -64,4 +64,5 @@ trusts env =
             , getBalanceResult: _notAsked
             , checkUBIPayoutResult: _notAsked
             , requestUBIPayoutResult: _notAsked
+            , getUsersResult: _notAsked
             }

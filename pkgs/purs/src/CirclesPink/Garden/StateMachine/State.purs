@@ -6,6 +6,8 @@ module CirclesPink.Garden.StateMachine.State
   , DebugState
   , EmailApiResult
   , ErrDashboardStateResolved
+  , ErrGetUsers
+  , ErrGetUsersResolved
   , ErrLandingState
   , ErrLandingStateResolved
   , ErrLoginState
@@ -23,6 +25,7 @@ module CirclesPink.Garden.StateMachine.State
   , ErrTrustAddConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
+  , GetUsersResult
   , InfoGeneralState
   , InfoSecurityState
   , LandingState
@@ -58,7 +61,7 @@ module CirclesPink.Garden.StateMachine.State
   ) where
 
 import Prelude
-import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode, Balance)
+import CirclesCore (ApiError, Balance, NativeError, SafeStatus, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -190,6 +193,21 @@ type LoginState
     }
 
 --------------------------------------------------------------------------------
+-- | User / getUsers
+type ErrGetUsersResolved
+  = Variant
+      ( errApi :: ApiError
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      , errUserNotFound :: UserNotFoundError
+      )
+
+type ErrGetUsers
+  = Env.ErrGetUsers + ()
+
+type GetUsersResult
+  = RemoteData ErrGetUsersResolved (Array User)
+
 -- | Trust / AddConnection
 type ErrTrustAddConnectionResolved
   = Variant
@@ -257,6 +275,7 @@ type DashboardState
     , error :: Maybe ErrDashboardStateResolved
     , trustAddResult :: TrustAddResult
     , getBalanceResult :: TokenGetBalanceResult
+    , getUsersResult :: GetUsersResult
     , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
     , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
     }
