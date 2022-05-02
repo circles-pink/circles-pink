@@ -11,8 +11,10 @@ module CirclesCore
   , ErrSafeIsFunded
   , ErrSafePredictAddress
   , ErrService
+  , ErrTokenCheckUBIPayout
   , ErrTokenDeploy
   , ErrTokenGetBalance
+  , ErrTokenRequestUBIPayout
   , ErrTrustAddConnection
   , ErrTrustGetNetwork
   , ErrTrustIsTrusted
@@ -22,8 +24,10 @@ module CirclesCore
   , ResolveOptions
   , SafeDeployOptions
   , SafeStatus
+  , TokenCheckUBIPayoutOptions
   , TokenDeployOptions
   , TokenGetBalanceOptions
+  , TokenRequestUBIPayoutOptions
   , TrustAddConnectionOptions
   , TrustNode
   , User
@@ -44,8 +48,10 @@ module CirclesCore
   , safePredictAddress
   , safePrepareDeploy
   , sendTransaction
+  , tokenCheckUBIPayout
   , tokenDeploy
   , tokenGetBalance
+  , tokenRequestUBIPayout
   , trustAddConnection
   , trustGetNetwork
   , trustIsTrusted
@@ -355,6 +361,36 @@ type ErrTokenGetBalance r
 
 tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) B.Balance
 tokenGetBalance cc = mapFn2 (convertCore cc).token.getBalance pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / tokenCheckUBIPayout
+--------------------------------------------------------------------------------
+type TokenCheckUBIPayoutOptions
+  = { safeAddress :: Address
+    }
+
+type ErrTokenCheckUBIPayout r
+  = ErrNative + r
+
+tokenCheckUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenCheckUBIPayoutOptions -> Result (ErrTokenCheckUBIPayout r) B.Balance
+tokenCheckUBIPayout cc = mapFn2 (convertCore cc).token.checkUBIPayout pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / tokenRequestUBIPayout
+--------------------------------------------------------------------------------
+type TokenRequestUBIPayoutOptions
+  = { safeAddress :: Address
+    }
+
+type ErrTokenRequestUBIPayout r
+  = ErrNative + r
+
+tokenRequestUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenRequestUBIPayoutOptions -> Result (ErrTokenRequestUBIPayout r) String
+tokenRequestUBIPayout cc = mapFn2 (convertCore cc).token.requestUBIPayout pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x = x { safeAddress = addrToString x.safeAddress }
 
