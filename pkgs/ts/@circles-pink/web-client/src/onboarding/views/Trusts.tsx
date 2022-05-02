@@ -18,7 +18,7 @@ import {
   mdiAccountGroup,
   mdiCashFast,
 } from '@mdi/js';
-import tw from 'twin.macro';
+import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { mapResult } from '../utils/mapResult';
@@ -78,103 +78,117 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
       }
       mainContent={
         <FlexRow>
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <InfoCard
-              title={'Trusts'}
-              text={
-                <>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <Text>{t('trusts.getMoreTruts')}</Text>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterElement>
-                      <QrCode
-                        data={state.user.safeAddress}
-                        height="200"
-                        width="200"
-                        fgColor="gray"
-                        bgColor="white"
-                      />
-                    </CenterElement>
-                  </FadeIn>
-                  <FlexRow>
+          <FlexItemGrow>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <InfoCard
+                title={'Trusts'}
+                text={
+                  <>
                     <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric1CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 1 ? theme.baseColor : 'gray'
-                        }
-                      />
+                      <Text>{t('trusts.getMoreTruts')}</Text>
                     </FadeIn>
                     <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric2CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 2 ? theme.baseColor : 'gray'
-                        }
-                      />
+                      <CenterElement>
+                        <QrCode
+                          data={state.user.safeAddress}
+                          height="200"
+                          width="200"
+                          fgColor="gray"
+                          bgColor="white"
+                        />
+                      </CenterElement>
                     </FadeIn>
-                    <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric3CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 3 ? theme.baseColor : 'gray'
-                        }
-                      />
-                    </FadeIn>
-                  </FlexRow>
-                </>
-              }
-              themeColor={theme.baseColor}
-              icon={mdiAccountGroup}
-            />
-          </FadeIn>
+                    <FlexRow>
+                      <FadeIn orientation={orientation} delay={getDelay()}>
+                        <Icon
+                          path={mdiNumeric1CircleOutline}
+                          size={2}
+                          color={
+                            state.trusts.length >= 1 ? theme.baseColor : 'gray'
+                          }
+                        />
+                      </FadeIn>
+                      <FadeIn orientation={orientation} delay={getDelay()}>
+                        <Icon
+                          path={mdiNumeric2CircleOutline}
+                          size={2}
+                          color={
+                            state.trusts.length >= 2 ? theme.baseColor : 'gray'
+                          }
+                        />
+                      </FadeIn>
+                      <FadeIn orientation={orientation} delay={getDelay()}>
+                        <Icon
+                          path={mdiNumeric3CircleOutline}
+                          size={2}
+                          color={
+                            state.trusts.length >= 3 ? theme.baseColor : 'gray'
+                          }
+                        />
+                      </FadeIn>
+                    </FlexRow>
+                  </>
+                }
+                themeColor={theme.baseColor}
+                icon={mdiAccountGroup}
+              />
+            </FadeIn>
+          </FlexItemGrow>
 
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <InfoCard
-              title={'Gnosis Safe'}
-              text={
-                <>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <Text>{t('trusts.fundYourSafe')}</Text>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterElement>
-                      <QrCode
-                        data={state.user.safeAddress}
-                        height="200"
-                        width="200"
-                        fgColor="gray"
-                        bgColor="white"
-                      />
-                    </CenterElement>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterText>
-                      <Text>{state.user.safeAddress}</Text>
-                    </CenterText>
-                  </FadeIn>
-                </>
-              }
-              themeColor={theme.baseColor}
-              icon={mdiCashFast}
-            />
-          </FadeIn>
+          <FlexItemGrow>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <InfoCard
+                title={'Gnosis Safe'}
+                text={
+                  <>
+                    <FadeIn orientation={orientation} delay={getDelay()}>
+                      <Text>{t('trusts.fundYourSafe')}</Text>
+                    </FadeIn>
+                    <FadeIn orientation={orientation} delay={getDelay()}>
+                      <CenterElement>
+                        <QrCode
+                          data={state.user.safeAddress}
+                          height="200"
+                          width="200"
+                          fgColor="gray"
+                          bgColor="white"
+                        />
+                      </CenterElement>
+                    </FadeIn>
+                    <FadeIn orientation={orientation} delay={getDelay()}>
+                      <CenterText>
+                        <Text>{state.user.safeAddress}</Text>
+                      </CenterText>
+                    </FadeIn>
+                  </>
+                }
+                themeColor={theme.baseColor}
+                icon={mdiCashFast}
+              />
+            </FadeIn>
+          </FlexItemGrow>
         </FlexRow>
       }
-      // // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
 
 // -----------------------------------------------------------------------------
+// FlexItemGrow
+// -----------------------------------------------------------------------------
+
+const FlexItemGrow = styled.div(() => [
+  css`
+    flex-grow: 1;
+    flex-basis: 0;
+  `,
+]);
+// -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
 
-const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4`;
+const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4 gap-4`;
 const CenterText = tw.div`text-center`;
 const CenterElement = tw.div`flex justify-around`;
 const Text = tw.p`mt-4 text-lg font-medium text-gray-500`;
