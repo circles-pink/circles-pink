@@ -55,6 +55,12 @@ type CirclesAction
             , getBalance :: Unit
             , checkUBIPayout :: Unit
             , requestUBIPayout :: Unit
+            , transfer ::
+                { from :: String
+                , to :: String
+                , value :: Int
+                , paymentNote :: String
+                }
             , getUsers ::
                 { userNames :: Array String
                 , addresses :: Array Address
@@ -172,3 +178,6 @@ _requestUBIPayout = inj (Proxy :: _ "requestUBIPayout")
 
 _getUsers :: forall a v. a -> Variant ( getUsers :: a | v )
 _getUsers = inj (Proxy :: _ "getUsers")
+
+_transfer :: forall a v. a -> Variant ( transfer :: a | v )
+_transfer = inj (Proxy :: _ "transfer")
