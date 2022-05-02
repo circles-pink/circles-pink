@@ -2,11 +2,13 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ( AddTrustConnection
   , ApiCheckEmail
   , ApiCheckUserName
+  , CheckUBIPayout
   , CoreToWindow
   , DeploySafe
   , DeployToken
   , Env
   , ErrAddTrustConnection
+  , ErrCheckUBIPayout
   , ErrCoreToWindow
   , ErrDecode
   , ErrDeploySafe
@@ -160,18 +162,21 @@ type GeneratePrivateKey m
   = forall r. ExceptV r m PrivateKey
 
 --------------------------------------------------------------------------------
+-- | Trust Add Connection
 type ErrAddTrustConnection r
   = ErrNative + ErrInvalidUrl + r
 
 type AddTrustConnection m
   = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
+-- | Save Session
 type ErrSaveSession r
   = ( errSaveSession :: Unit | r )
 
 type SaveSession m
   = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
+-- | Restore Session
 type RequestPath
   = Array String
 
@@ -195,6 +200,13 @@ type GetBalance m
   = forall r. PrivateKey -> Address -> ExceptV (ErrGetBalance + r) m Balance
 
 --------------------------------------------------------------------------------
+type ErrCheckUBIPayout r
+  = ErrNative + ErrInvalidUrl + r
+
+type CheckUBIPayout m
+  = forall r. PrivateKey -> Address -> ExceptV (ErrCheckUBIPayout + r) m Balance
+
+--------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
     , apiCheckEmail :: ApiCheckEmail m
@@ -215,6 +227,7 @@ type Env m
     , saveSession :: SaveSession m
     , restoreSession :: RestoreSession m
     , getBalance :: GetBalance m
+    , checkUBIPayout :: CheckUBIPayout m
     }
 
 --------------------------------------------------------------------------------
