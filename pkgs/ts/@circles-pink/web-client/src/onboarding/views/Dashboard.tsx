@@ -34,13 +34,34 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
+    // Gather initial Client information
     act(A._dashboard(A._getTrusts(unit))); // Should be done in control
+    act(A._dashboard(A._checkUBIPayout(unit)));
+
+    // Setup polling intervals
     const pollTrusts = window.setInterval(
       () => act(A._dashboard(A._getTrusts(unit))),
-      15000
+      15 * 1000
     );
-    return () => window.clearInterval(pollTrusts);
+    const pollUBIPayout = window.setInterval(
+      () => act(A._dashboard(A._checkUBIPayout(unit))),
+      5 * 60 * 1000
+    );
+
+    // Clear polling intervals
+    return () => {
+      window.clearInterval(pollTrusts);
+      window.clearInterval(pollUBIPayout);
+    };
   }, []);
+
+  useEffect(() => {
+    // If polling for checkPayout happens successfully
+    // we can start a new payout request
+    if (state.checkUBIPayoutResult.type === 'success') {
+      act(A._dashboard(A._requestUBIPayout(unit)));
+    }
+  }, [state.checkUBIPayoutResult]);
 
   useEffect(() => {
     switch (state.trustAddResult.type) {
