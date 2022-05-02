@@ -22,13 +22,13 @@ dashboard ::
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , checkUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , requestUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  -- , getUsers ::
-  --     ActionHandler t m
-  --       { userNames :: Array String
-  --       , addresses :: Array P.Address
-  --       }
-  --       S.DashboardState
-  --       ( "dashboard" :: S.DashboardState )
+  , getUsers ::
+      ActionHandler t m
+        { userNames :: Array String
+        , addresses :: Array P.Address
+        }
+        S.DashboardState
+        ( "dashboard" :: S.DashboardState )
   }
 dashboard env =
   { logout: \_ _ _ -> pure unit
@@ -37,7 +37,7 @@ dashboard env =
   , getBalance
   , checkUBIPayout
   , requestUBIPayout
-  -- , getUsers
+  , getUsers
   }
   where
   getTrusts set st _ = do
@@ -86,5 +86,15 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _failure e }
       Right b -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _success b }
+
+  getUsers set st { userNames, addresses } = do
+    set \st' -> S._dashboard st' { getUsersResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrGetUsers _ _
+      task = env.getUsers st.privKey userNames addresses
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
+      Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
 -- getUsers _ st { userNames, addresses } = run' $ env.getUsers st.privateKey userNames addresses

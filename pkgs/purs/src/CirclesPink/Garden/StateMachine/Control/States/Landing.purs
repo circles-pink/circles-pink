@@ -45,6 +45,7 @@ landing env =
                   , getBalanceResult: _success balance
                   , checkUBIPayoutResult: _notAsked
                   , requestUBIPayoutResult: _notAsked
+                  , getUsersResult: _notAsked
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
             set \_ ->

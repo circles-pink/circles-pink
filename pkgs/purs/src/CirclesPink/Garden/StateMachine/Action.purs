@@ -3,6 +3,7 @@ module CirclesPink.Garden.StateMachine.Action where
 import Prelude
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
+import Wallet.PrivateKey (Address)
 
 type CirclesAction
   = Variant
@@ -54,10 +55,10 @@ type CirclesAction
             , getBalance :: Unit
             , checkUBIPayout :: Unit
             , requestUBIPayout :: Unit
-            -- , getUsers ::
-            --     { userNames :: Array String
-            --     , addresses :: Array Address
-            --     }
+            , getUsers ::
+                { userNames :: Array String
+                , addresses :: Array Address
+                }
             )
       , login ::
           Variant
@@ -168,3 +169,6 @@ _checkUBIPayout = inj (Proxy :: _ "checkUBIPayout")
 
 _requestUBIPayout :: forall a v. a -> Variant ( requestUBIPayout :: a | v )
 _requestUBIPayout = inj (Proxy :: _ "requestUBIPayout")
+
+_getUsers :: forall a v. a -> Variant ( getUsers :: a | v )
+_getUsers = inj (Proxy :: _ "getUsers")
