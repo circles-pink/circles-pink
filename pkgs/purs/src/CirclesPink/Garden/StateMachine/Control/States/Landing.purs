@@ -46,6 +46,7 @@ landing env =
                   , checkUBIPayoutResult: _notAsked
                   , requestUBIPayoutResult: _notAsked
                   , getUsersResult: _notAsked
+                  , transferResult: _notAsked
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
             set \_ ->

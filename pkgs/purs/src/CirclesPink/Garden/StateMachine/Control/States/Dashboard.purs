@@ -8,6 +8,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
 import RemoteData (RemoteData, _failure, _loading, _success)
+import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
 dashboard ::
@@ -22,6 +23,15 @@ dashboard ::
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , checkUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , requestUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
+  , transfer ::
+      ActionHandler t m
+        { from :: String
+        , to :: String
+        , value :: Int
+        , paymentNote :: String
+        }
+        S.DashboardState
+        ( "dashboard" :: S.DashboardState )
   , getUsers ::
       ActionHandler t m
         { userNames :: Array String
@@ -38,6 +48,7 @@ dashboard env =
   , checkUBIPayout
   , requestUBIPayout
   , getUsers
+  , transfer
   }
   where
   getTrusts set st _ = do
@@ -97,4 +108,12 @@ dashboard env =
       Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
       Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
--- getUsers _ st { userNames, addresses } = run' $ env.getUsers st.privateKey userNames addresses
+  transfer set st { from, to, value, paymentNote } = do
+    set \st' -> S._dashboard st' { transferResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrTokenTransfer _ _
+      task = env.transfer st.privKey (unsafeAddrFromString from) (unsafeAddrFromString to) value paymentNote
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
+      Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
