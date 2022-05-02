@@ -87,12 +87,12 @@ const OnboardingContent = ({
   content = {},
 }: OnboardingProps): ReactElement => {
   const [state, act] = useStateMachine(initState || init, control);
-  const [theme, setColor] = useContext(ThemeContext);
+  const [theme, setTheme] = useContext(ThemeContext);
 
   i18n.changeLanguage(lang);
 
   useEffect(() => {
-    if (baseColor) setColor(baseColor);
+    if (baseColor) setTheme({ ...theme, baseColor });
   }, [baseColor]);
 
   return (

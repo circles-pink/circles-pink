@@ -1,20 +1,27 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, SetStateAction, useState } from 'react';
 import chroma from 'chroma-js';
 
 export type Theme = {
   baseColor: string;
+  cardColor: string;
+  darkColor: string;
+  lightColor: string;
+  textColor: string;
 };
 
 const defaultTheme: Theme = {
-  baseColor: chroma('hotpink').hex(),
+  baseColor: chroma('#FF69B4').hex(),
+  cardColor: chroma('#40376E').hex(),
+  darkColor: chroma('#65655E').hex(),
+  lightColor: chroma('#CFD6EA').hex(),
+  textColor: chroma('#7e7e7e').hex(),
 };
 
-export type ThemeContextType = {
-  baseColor: string;
-  setTheme: (theme: Theme) => void;
+export type ThemeContextType = Theme & {
+  setTheme: SetColor;
 };
 
-type SetColor = (color: string) => void;
+type SetColor = React.Dispatch<SetStateAction<Theme>>;
 
 export const ThemeContext: React.Context<[Theme, SetColor]> =
   React.createContext(
@@ -27,16 +34,10 @@ type ThemeProviderProps = {
 };
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-
-  const setColor = (color: string) => {
-    setThemeState({
-      baseColor: chroma(color).hex(),
-    });
-  };
+  const [theme, setTheme] = useState<Theme>(defaultTheme);
 
   return (
-    <ThemeContext.Provider value={[theme, setColor]}>
+    <ThemeContext.Provider value={[theme, setTheme]}>
       {children}
     </ThemeContext.Provider>
   );
