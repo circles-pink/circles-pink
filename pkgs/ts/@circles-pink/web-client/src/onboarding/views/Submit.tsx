@@ -12,6 +12,7 @@ import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
+import { mapResult } from '../utils/mapResult';
 
 type SubmitProps = {
   state: UserData;
@@ -59,6 +60,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
             <Button
               prio={'high'}
               color={theme.baseColor}
+              state={mapResult(state.submitResult)}
               onClick={() => act(A._submit(A._submit(unit)))}
             >
               {t('submitButton')}

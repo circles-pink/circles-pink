@@ -57,7 +57,9 @@ export const TrustNetworkList = ({
             {content.map((c, index) => {
               return (
                 <TableRow theme={theme} key={index}>
-                  <TableData>{c.username}</TableData>
+                  <TableData>
+                    <b>{c.username}</b>
+                  </TableData>
                   <TableData>{c.safeAddress}</TableData>
                   <TableData>
                     <JustifyAround>

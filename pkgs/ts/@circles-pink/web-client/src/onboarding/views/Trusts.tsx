@@ -21,6 +21,7 @@ import {
 import tw from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
+import { mapResult } from '../utils/mapResult';
 
 // -----------------------------------------------------------------------------
 // Trusts
@@ -67,6 +68,7 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
               <Button
                 color={theme.baseColor}
                 onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
+                state={mapResult(state.trustsResult)}
               >
                 {t('finalizeButton')}
               </Button>
