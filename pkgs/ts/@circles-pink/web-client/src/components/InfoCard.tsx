@@ -27,9 +27,11 @@ type FrameProps = InfoCardProps;
 
 const Frame = styled.div<FrameProps>(({ themeColor }) => {
   return [
-    tw`relative block p-8 pb-24 rounded-sm shadow-xl w-full h-full`,
+    tw`relative block p-8 pb-24 rounded-sm shadow-xl`,
     css`
       border-top: solid 4px ${themeColor};
+      flex-grow: 1;
+      flex-basis: 0;
     `,
   ];
 });
