@@ -118,6 +118,8 @@ type CirclesCore_
     , token ::
         { deploy :: Fn2Promise Account { safeAddress :: String } String
         , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
+        , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
+        , requestUBIPayout :: Fn2Promise Account { safeAddress :: String } String
         }
     , trust ::
         { isTrusted ::

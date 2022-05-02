@@ -62,4 +62,5 @@ trusts env =
             , error: Nothing
             , trustAddResult: _notAsked
             , getBalanceResult: _notAsked
+            , checkUBIPayoutResult: _notAsked
             }

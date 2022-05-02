@@ -13,6 +13,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLoginTask
   , ErrSubmit
   , ErrSubmitResolved
+  , ErrTokenCheckUBIPayout
+  , ErrTokenCheckUBIPayoutResolved
   , ErrTokenGetBalance
   , ErrTokenGetBalanceResolved
   , ErrTrustAddConnection
@@ -27,6 +29,7 @@ module CirclesPink.Garden.StateMachine.State
   , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
+  , TokenCheckUBIPayoutResult
   , TokenGetBalanceResult
   , TrustAddResult
   , TrustState
@@ -184,13 +187,7 @@ type LoginState
     }
 
 --------------------------------------------------------------------------------
-type ErrDashboardStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
+-- | Trust / AddConnection
 type ErrTrustAddConnectionResolved
   = Variant
       ( errNative :: NativeError
@@ -203,6 +200,7 @@ type ErrTrustAddConnection
 type TrustAddResult
   = RemoteData ErrTrustAddConnectionResolved Unit
 
+-- | Token / GetBalance
 type ErrTokenGetBalanceResolved
   = Variant
       ( errNative :: NativeError
@@ -215,6 +213,26 @@ type ErrTokenGetBalance
 type TokenGetBalanceResult
   = RemoteData ErrTokenGetBalanceResolved Balance
 
+-- | Token / CheckUBIPayout
+type ErrTokenCheckUBIPayoutResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenCheckUBIPayout
+  = Env.ErrCheckUBIPayout + ()
+
+type TokenCheckUBIPayoutResult
+  = RemoteData ErrTokenCheckUBIPayoutResolved Balance
+
+type ErrDashboardStateResolved
+  = Variant
+      ( errService :: Unit
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
@@ -222,6 +240,7 @@ type DashboardState
     , error :: Maybe ErrDashboardStateResolved
     , trustAddResult :: TrustAddResult
     , getBalanceResult :: TokenGetBalanceResult
+    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
     }
 
 --------------------------------------------------------------------------------
