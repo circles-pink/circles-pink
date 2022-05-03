@@ -9,7 +9,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make generate-watch"],
+      "args": ["-c", "nix develop -c just generate-watch"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -27,7 +27,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make dev-storybook"],
+      "args": ["-c", "nix develop -c just dev-storybook"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -45,7 +45,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "make dev-storybook_"],
+      "args": ["-c", "just dev-storybook_"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -63,7 +63,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make spago-test-watch"],
+      "args": ["-c", "nix develop -c just spago-test-watch"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -81,7 +81,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c notify-done make vm-deploy"],
+      "args": ["-c", "nix develop -c notify-done just vm-deploy"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -99,7 +99,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "nix develop -c make vm-deploy-dry-watch"],
+      "args": ["-c", "nix develop -c just vm-deploy-dry-watch"],
       "group": "none",
       "presentation": {
         "reveal": "always",
@@ -117,7 +117,7 @@
       "type": "process",
       "command": "bash",
       "isBackground": true,
-      "args": ["-c", "make dev-browser"],
+      "args": ["-c", "just dev-browser"],
       "group": "none",
       "presentation": {
         "reveal": "never",
