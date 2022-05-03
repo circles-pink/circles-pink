@@ -29,7 +29,6 @@ export const UserDashboard = ({
   return (
     <>
       <Frame borderColor={theme.baseColor}>
-        {/* <Overlay /> */}
         <Header>{header}</Header>
         <CardHead>
           <IntroContent>

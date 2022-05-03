@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactElement, SetStateAction } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { TrustNode } from 'generated/output/CirclesCore';
 import { Theme } from '../context/theme';
@@ -7,10 +7,17 @@ import {
   mdiAccountArrowLeft,
   mdiAccountArrowRight,
   mdiAccountCancel,
-  mdiLan,
+  mdiAccountMinus,
+  mdiAccountPlus,
+  mdiCashFast,
+  mdiCashRemove,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
+import {
+  addrToString,
+  unsafeAddrFromString,
+} from 'generated/output/Wallet.PrivateKey';
 
 type UserData = {
   username: string;
@@ -19,40 +26,58 @@ type UserData = {
 
 export type MappedTrustNodes = Array<TrustNode & UserData>;
 
+type Overlay = 'SEND' | 'RECEIVE';
+
 type TrustNetworkListProps = {
   title?: string;
   content: MappedTrustNodes;
   theme: Theme;
+  icon: any;
+  actionRow?: ReactElement | ReactElement[] | string;
+  setActiveOverlay?: React.Dispatch<SetStateAction<Overlay>>;
+  setOverlayOpen?: React.Dispatch<SetStateAction<boolean>>;
+  setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
+  addTrust: (to: string) => void;
 };
 
 export const TrustNetworkList = ({
   title,
   content,
   theme,
+  icon,
+  actionRow,
+  setActiveOverlay,
+  setOverlayOpen,
+  setOverwriteTo,
+  addTrust,
 }: TrustNetworkListProps) => {
   return (
     <Frame theme={theme}>
       <Title>
         <JustifyBetween>
           <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
-          <Icon path={mdiLan} size={1.5} color={darken(theme.lightColor, 2)} />
+          <Icon path={icon} size={1.5} color={darken(theme.lightColor, 2)} />
         </JustifyBetween>
       </Title>
+      {actionRow}
       <TableContainer>
         <Table>
           <TableHeader>
             <TableRow theme={theme}>
               <TableHead>User</TableHead>
-              <TableHead>Safe Address</TableHead>
+              {/* <TableHead>Safe Address</TableHead> */}
               <TableHead>
-                <JustifyAround>You Can Receive</JustifyAround>
+                <JustifyAround>Receivable</JustifyAround>
               </TableHead>
               <TableHead>
-                <JustifyAround>You Can Send</JustifyAround>
+                <JustifyAround>Sendable</JustifyAround>
               </TableHead>
               {/* <TableHead>
                 <JustifyAround>Transferable</JustifyAround>
               </TableHead> */}
+              <TableHead>
+                <JustifyAround>Action</JustifyAround>
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -63,7 +88,7 @@ export const TrustNetworkList = ({
                   <TableData>
                     <b>{c.username}</b>
                   </TableData>
-                  <TableData>{c.safeAddress}</TableData>
+                  {/* <TableData>{c.safeAddress}</TableData> */}
                   <TableData>
                     <JustifyAround>
                       <Icon
@@ -89,6 +114,45 @@ export const TrustNetworkList = ({
                   {/* <TableData>
                     <JustifyAround>y €</JustifyAround>
                   </TableData> */}
+                  <TableData>
+                    <JustifyBetween>
+                      <Clickable
+                        clickable={c.isOutgoing}
+                        onClick={() => {
+                          if (
+                            setActiveOverlay &&
+                            setOverlayOpen &&
+                            setOverwriteTo
+                          ) {
+                            setOverwriteTo(addrToString(c.safeAddress));
+                            setActiveOverlay('SEND');
+                            setOverlayOpen(true);
+                          }
+                        }}
+                      >
+                        <Icon
+                          path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+                          size={1.5}
+                          color={c.isOutgoing ? theme.baseColor : 'white'}
+                        />
+                      </Clickable>
+
+                      <Clickable
+                        clickable={c.isIncoming}
+                        onClick={() => {
+                          if (c.isIncoming) {
+                            addTrust(addrToString(c.safeAddress));
+                          }
+                        }}
+                      >
+                        <Icon
+                          path={c.isIncoming ? mdiAccountMinus : mdiAccountPlus}
+                          size={1.5}
+                          color={c.isIncoming ? 'white' : theme.baseColor}
+                        />
+                      </Clickable>
+                    </JustifyBetween>
+                  </TableData>
                 </TableRow>
               );
             })}
@@ -137,6 +201,12 @@ const TableRow = styled.tr<TableRowProps>(({ theme }: TableRowProps) => [
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
+type ClickableProps = {
+  clickable: boolean;
+};
+const Clickable = styled.div<ClickableProps>(({ clickable }) => [
+  clickable ? tw`cursor-pointer` : tw`cursor-not-allowed`,
+]);
 
 const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
