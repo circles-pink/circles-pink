@@ -1,6 +1,5 @@
 import tw, { css, styled } from 'twin.macro';
 import React, { ReactElement } from 'react';
-import { Claim } from './text';
 import Icon from '@mdi/react';
 import { Theme } from '../context/theme';
 import { mdiCloseCircleOutline } from '@mdi/js';
@@ -15,7 +14,6 @@ export const Overlay = (props: OverlayProps) => {
   const { content, theme, closeOverlay } = props;
   return (
     <Frame {...props}>
-      {/* <Claim color={themeColor}>{title}</Claim> */}
       {content}
       <IconContainer onClick={() => closeOverlay()}>
         <Icon path={mdiCloseCircleOutline} size={2} color={theme.baseColor} />
@@ -24,6 +22,10 @@ export const Overlay = (props: OverlayProps) => {
   );
 };
 
+// -----------------------------------------------------------------------------
+// UI / Frame
+// -----------------------------------------------------------------------------
+
 type FrameProps = OverlayProps;
 
 const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
@@ -31,11 +33,16 @@ const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
   css`
     background-color: ${'white'};
     border: 2px solid ${theme.baseColor};
-    z-index: 50;
-    top: 5%;
+    z-index: 100;
+    top: 30%;
     width: 80%;
     margin-left: 10%;
     min-height: 6rem;
   `,
 ]);
+
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
+
 const IconContainer = tw.div`absolute bottom-8 right-6 top-6 cursor-pointer`;
