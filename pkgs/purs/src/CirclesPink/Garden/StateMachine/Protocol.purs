@@ -57,6 +57,7 @@ type CirclesProtocol
             , requestUBIPayout :: P.Action ("dashboard" :> Nil')
             , getUsers :: P.Action ("dashboard" :> Nil')
             , transfer :: P.Action ("dashboard" :> Nil')
+            , userSearch :: P.Action ("dashboard" :> Nil')
             )
       , login ::
           P.State
