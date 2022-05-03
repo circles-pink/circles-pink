@@ -39,6 +39,12 @@ dashboard ::
         }
         S.DashboardState
         ( "dashboard" :: S.DashboardState )
+  , userSearch ::
+      ActionHandler t m
+        { query :: String
+        }
+        S.DashboardState
+        ( "dashboard" :: S.DashboardState )
   }
 dashboard env =
   { logout: \_ _ _ -> pure unit
@@ -49,6 +55,7 @@ dashboard env =
   , requestUBIPayout
   , getUsers
   , transfer
+  , userSearch
   }
   where
   getTrusts set st _ = do
@@ -107,6 +114,16 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
       Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
+
+  userSearch set st options = do
+    set \st' -> S._dashboard st' { userSearchResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrUserSearch _ _
+      task = env.userSearch st.privKey options
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { userSearchResult = _failure e }
+      Right u -> set \st' -> S._dashboard st' { userSearchResult = _success u }
 
   transfer set st { from, to, value, paymentNote } = do
     set \st' -> S._dashboard st' { transferResult = _loading :: RemoteData _ _ }

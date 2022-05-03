@@ -109,7 +109,9 @@ type CirclesCore_
               , userNames :: Array String
               }
               (ApiResult (Array User))
-        -- , search :: Fn2Promise Account { query :: String } (Array User)
+        , search ::
+            Fn2Promise Account { query :: String }
+              (ApiResult (Array User))
         }
     , safe ::
         { deploy :: Fn2Promise Account { safeAddress :: String } Boolean

@@ -65,6 +65,9 @@ type CirclesAction
                 { userNames :: Array String
                 , addresses :: Array Address
                 }
+            , userSearch ::
+                { query :: String
+                }
             )
       , login ::
           Variant
@@ -181,3 +184,6 @@ _getUsers = inj (Proxy :: _ "getUsers")
 
 _transfer :: forall a v. a -> Variant ( transfer :: a | v )
 _transfer = inj (Proxy :: _ "transfer")
+
+_userSearch :: forall a v. a -> Variant ( userSearch :: a | v )
+_userSearch = inj (Proxy :: _ "userSearch")

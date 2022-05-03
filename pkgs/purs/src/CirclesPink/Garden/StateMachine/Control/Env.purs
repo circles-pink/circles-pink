@@ -28,6 +28,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrTrustGetNetwork
   , ErrUserRegister
   , ErrUserResolve
+  , ErrUserSearch
   , GeneratePrivateKey
   , GetBalance
   , GetSafeAddress
@@ -45,6 +46,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , UserNotFoundError
   , UserRegister
   , UserResolve
+  , UserSearch
   , _errDecode
   , _errReadStorage
   ) where
@@ -141,6 +143,13 @@ type UserResolve m
   = forall r. PrivateKey -> ExceptV (ErrUserResolve + r) m User
 
 --------------------------------------------------------------------------------
+type ErrUserSearch r
+  = ErrInvalidUrl + ErrNative + ErrApi + r
+
+type UserSearch m
+  = forall r. PrivateKey -> { query :: String } -> ExceptV (ErrUserSearch + r) m (Array User)
+
+--------------------------------------------------------------------------------
 type ErrGetUsers r
   = ErrNative + ErrInvalidUrl + ErrApi + ( errUserNotFound :: UserNotFoundError | r )
 
@@ -233,6 +242,7 @@ type Env m
     , getSafeAddress :: GetSafeAddress m
     , safePrepareDeploy :: PrepareSafeDeploy m
     , userResolve :: UserResolve m
+    , userSearch :: UserSearch m
     , getUsers :: GetUsers m
     , coreToWindow :: CoreToWindow m
     , isTrusted :: IsTrusted m

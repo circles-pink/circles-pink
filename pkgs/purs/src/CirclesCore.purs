@@ -10,6 +10,7 @@ module CirclesCore
   , ErrSafeGetSafeStatus
   , ErrSafeIsFunded
   , ErrSafePredictAddress
+  , ErrSearch
   , ErrService
   , ErrTokenCheckUBIPayout
   , ErrTokenDeploy
@@ -25,6 +26,7 @@ module CirclesCore
   , ResolveOptions
   , SafeDeployOptions
   , SafeStatus
+  , SearchOptions
   , TokenCheckUBIPayoutOptions
   , TokenDeployOptions
   , TokenGetBalanceOptions
@@ -63,6 +65,7 @@ module CirclesCore
   , unsafeSampleCore
   , userRegister
   , userResolve
+  , userSearch
   ) where
 
 --------------------------------------------------------------------------------
@@ -257,6 +260,25 @@ userResolve cc = mapFn2 (convertCore cc).user.resolve pure (mapArg2 >>> pure) mk
       , userNames = x.userNames
       }
 
+  mapOk x = case apiResultToEither x of
+    Left apiError -> Left $ _errApi apiError
+    Right data_ -> pure $ map userToUser data_
+
+  userToUser x = x { safeAddress = P.unsafeAddrFromString x.safeAddress }
+
+--------------------------------------------------------------------------------
+-- API / userRegister
+--------------------------------------------------------------------------------
+type SearchOptions
+  = { query :: String
+    }
+
+type ErrSearch r
+  = ErrNative + ErrApi + r
+
+userSearch :: forall r. B.CirclesCore -> B.Account -> SearchOptions -> Result (ErrSearch r) (Array User)
+userSearch cc = mapFn2 (convertCore cc).user.search pure pure mkErrorNative mapOk
+  where
   mapOk x = case apiResultToEither x of
     Left apiError -> Left $ _errApi apiError
     Right data_ -> pure $ map userToUser data_

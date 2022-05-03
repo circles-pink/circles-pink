@@ -54,6 +54,7 @@ env { request, envVars } =
   , generatePrivateKey: lift P.genPrivateKey
   , userRegister
   , getUsers
+  , userSearch
   , getSafeAddress
   , safePrepareDeploy
   , userResolve
@@ -146,6 +147,13 @@ env { request, envVars } =
     -- Section end ..
     --------------------------------------------------------------------------------
     CC.userRegister circlesCore account options
+
+  userSearch :: Env.UserSearch Aff
+  userSearch privKey options = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    CC.userSearch circlesCore account options
 
   getSafeAddress :: Env.GetSafeAddress Aff
   getSafeAddress privKey = do
@@ -346,6 +354,7 @@ testEnv =
   , apiCheckEmail: \_ -> pure { isValid: true }
   , generatePrivateKey: pure zeroKey
   , userRegister: \_ _ -> pure unit
+  , userSearch: \_ _ -> pure []
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
   , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
