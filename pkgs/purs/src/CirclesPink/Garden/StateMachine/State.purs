@@ -25,6 +25,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrTokenTransferResolved
   , ErrTrustAddConnection
   , ErrTrustAddConnectionResolved
+  , ErrTrustRemoveConnection
+  , ErrTrustRemoveConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
   , ErrUserSearch
@@ -43,6 +45,7 @@ module CirclesPink.Garden.StateMachine.State
   , TokenRequestUBIPayoutResult
   , TokenTransferResult
   , TrustAddResult
+  , TrustRemoveResult
   , TrustState
   , TrustStateTrustsResult
   , UserData
@@ -242,6 +245,19 @@ type ErrTrustAddConnection
 type TrustAddResult
   = RemoteData ErrTrustAddConnectionResolved Unit
 
+-- | Trust / RemoveConnection
+type ErrTrustRemoveConnectionResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTrustRemoveConnection
+  = Env.ErrRemoveTrustConnection + ()
+
+type TrustRemoveResult
+  = RemoteData ErrTrustRemoveConnectionResolved Unit
+
 -- | Token / GetBalance
 type ErrTokenGetBalanceResolved
   = Variant
@@ -308,6 +324,7 @@ type DashboardState
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
     , trustAddResult :: TrustAddResult
+    , trustRemoveResult :: TrustRemoveResult
     , getBalanceResult :: TokenGetBalanceResult
     , getUsersResult :: GetUsersResult
     , checkUBIPayoutResult :: TokenCheckUBIPayoutResult

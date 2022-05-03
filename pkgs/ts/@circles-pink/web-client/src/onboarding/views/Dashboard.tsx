@@ -308,6 +308,9 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                     addTrust={to =>
                       act(A._dashboard(A._addTrustConnection(to)))
                     }
+                    removeTrust={to =>
+                      act(A._dashboard(A._removeTrustConnection(to)))
+                    }
                   />
                 </FadeIn>
               )}
@@ -326,6 +329,9 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                     setOverwriteTo={setOverwriteTo}
                     addTrust={to =>
                       act(A._dashboard(A._addTrustConnection(to)))
+                    }
+                    removeTrust={to =>
+                      act(A._dashboard(A._removeTrustConnection(to)))
                     }
                     actionRow={
                       <JustifyBetweenCenter>
@@ -463,4 +469,11 @@ const ButtonText = tw.span`mr-3`;
 const DebugButtonWrapper = tw.span`mb-3`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
 const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
-const FlexItemGrow = tw.div`flex-grow`;
+
+const FlexItemGrow = styled.div(() => [
+  tw`h-full`,
+  css`
+    flex-grow: 1;
+    flex-basis: 0;
+  `,
+]);

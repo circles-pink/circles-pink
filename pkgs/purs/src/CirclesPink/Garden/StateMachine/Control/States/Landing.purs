@@ -42,6 +42,7 @@ landing env =
                   , privKey
                   , error: Nothing
                   , trustAddResult: _notAsked
+                  , trustRemoveResult: _notAsked
                   , getBalanceResult: _notAsked
                   , checkUBIPayoutResult: _notAsked
                   , requestUBIPayoutResult: _notAsked

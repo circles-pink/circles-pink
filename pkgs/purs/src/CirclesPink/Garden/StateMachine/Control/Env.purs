@@ -21,6 +21,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
   , ErrReadStorage
+  , ErrRemoveTrustConnection
   , ErrRequestUBIPayout
   , ErrRestoreSession
   , ErrSaveSession
@@ -37,6 +38,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , IsFunded
   , IsTrusted
   , PrepareSafeDeploy
+  , RemoveTrustConnection
   , RequestPath
   , RequestUBIPayout
   , RestoreSession
@@ -182,6 +184,13 @@ type ErrAddTrustConnection r
 type AddTrustConnection m
   = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
+-- | Trust Remove Connection
+type ErrRemoveTrustConnection r
+  = ErrNative + ErrInvalidUrl + r
+
+type RemoveTrustConnection m
+  = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
+
 -- | Save Session
 type ErrSaveSession r
   = ( errSaveSession :: Unit | r )
@@ -252,6 +261,7 @@ type Env m
     , deploySafe :: DeploySafe m
     , deployToken :: DeployToken m
     , addTrustConnection :: AddTrustConnection m
+    , removeTrustConnection :: RemoveTrustConnection m
     , saveSession :: SaveSession m
     , restoreSession :: RestoreSession m
     , getBalance :: GetBalance m

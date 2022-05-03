@@ -158,6 +158,10 @@ type CirclesCore_
             Fn2Promise Account
               { user :: String, canSendTo :: String }
               String
+        , removeConnection ::
+            Fn2Promise Account
+              { user :: String, canSendTo :: String }
+              String
         }
     }
 

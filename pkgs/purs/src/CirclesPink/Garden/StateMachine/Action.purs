@@ -52,6 +52,7 @@ type CirclesAction
             ( logout :: Unit
             , getTrusts :: Unit
             , addTrustConnection :: String
+            , removeTrustConnection :: String
             , getBalance :: Unit
             , checkUBIPayout :: Unit
             , requestUBIPayout :: Unit
@@ -166,6 +167,9 @@ _finalizeRegisterUser = inj (Proxy :: _ "finalizeRegisterUser")
 
 _addTrustConnection :: forall a v. a -> Variant ( addTrustConnection :: a | v )
 _addTrustConnection = inj (Proxy :: _ "addTrustConnection")
+
+_removeTrustConnection :: forall a v. a -> Variant ( removeTrustConnection :: a | v )
+_removeTrustConnection = inj (Proxy :: _ "removeTrustConnection")
 
 _checkForSession :: forall a v. a -> Variant ( checkForSession :: a | v )
 _checkForSession = inj (Proxy :: _ "checkForSession")

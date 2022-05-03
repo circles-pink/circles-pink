@@ -20,6 +20,7 @@ dashboard ::
   { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
+  , removeTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , checkUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , requestUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
@@ -50,6 +51,7 @@ dashboard env =
   { logout: \_ _ _ -> pure unit
   , getTrusts
   , addTrustConnection
+  , removeTrustConnection
   , getBalance
   , checkUBIPayout
   , requestUBIPayout
@@ -74,6 +76,16 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { trustAddResult = _failure e }
       Right _ -> set \st' -> S._dashboard st' { trustAddResult = _success unit }
+
+  removeTrustConnection set st u = do
+    set \st' -> S._dashboard st' { trustRemoveResult = _loading :: RemoteData _ _ }
+    let
+      task :: ExceptV S.ErrTrustRemoveConnection _ _
+      task = env.removeTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { trustRemoveResult = _failure e }
+      Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
   getBalance set st _ = do
     set \st' -> S._dashboard st' { getBalanceResult = _loading :: RemoteData _ _ }
