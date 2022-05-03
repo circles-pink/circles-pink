@@ -54,7 +54,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
           />
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
+      // debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>

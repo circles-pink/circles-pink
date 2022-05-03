@@ -1,7 +1,6 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { ThemeContext } from '../context/theme';
-import { Overlay } from './Overlay';
 
 // -----------------------------------------------------------------------------
 // UserDashboard
@@ -9,10 +8,11 @@ import { Overlay } from './Overlay';
 
 type UserDashboardProps = {
   header?: ReactElement;
-  text: ReactElement;
+  text?: ReactElement;
   interaction?: ReactElement;
-  control: ReactElement;
+  control?: ReactElement;
   mainContent?: ReactElement;
+  overlay?: ReactElement | null;
   debug?: ReactElement;
 };
 
@@ -22,6 +22,7 @@ export const UserDashboard = ({
   interaction,
   control,
   mainContent,
+  overlay,
   debug,
 }: UserDashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
@@ -29,6 +30,7 @@ export const UserDashboard = ({
   return (
     <>
       <Frame borderColor={theme.baseColor}>
+        {overlay}
         <Header>{header}</Header>
         <CardHead>
           <IntroContent>
@@ -56,7 +58,7 @@ type FrameProps = {
 };
 
 const Frame = styled.div((props: FrameProps) => [
-  tw`bg-gray-50 border border-dotted`,
+  tw`relative bg-gray-50 border border-dotted`,
   css`
     border-color: ${props.borderColor};
   `,

@@ -2,6 +2,8 @@ import tw, { css, styled } from 'twin.macro';
 import { darken, lighten } from '../../onboarding/utils/colorUtils';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { LoadingCircles } from '../LoadingCircles';
+import { JustifyAroundCenter } from '../helper';
+import Icon from '@mdi/react';
 
 // -----------------------------------------------------------------------------
 // UI / Button
@@ -18,6 +20,7 @@ type ButtonProps = {
   children?: ReactNode;
   onClick?: () => void;
   prio?: ButtonPrio;
+  icon?: string | null;
 };
 
 export const Button = (props_: ButtonProps) => {
@@ -27,7 +30,16 @@ export const Button = (props_: ButtonProps) => {
   return (
     <Button_ {...props}>
       <ButtonContent>
-        <TextWrapper {...props}>{props.children}</TextWrapper>
+        <TextWrapper state={props.state}>
+          {props.icon ? (
+            <JustifyAroundCenter>
+              <ButtonText>Send</ButtonText>
+              <Icon path={props.icon} size={1} color={'white'} />
+            </JustifyAroundCenter>
+          ) : (
+            props.children
+          )}
+        </TextWrapper>
         {props.state === 'loading' ? <Loading color={buttonColor} /> : ''}
       </ButtonContent>
     </Button_>
@@ -93,13 +105,16 @@ const ButtonContent = styled.div(() => [tw`flex justify-around items-center`]);
 // UI / TextWrapper
 // -----------------------------------------------------------------------------
 
-type TextWrapperProps = ButtonProps;
+type TextWrapperProps = { state: ButtonState };
 
 const TextWrapper = styled.div<TextWrapperProps>(props => [
   css`
     margin-right: ${props.state === 'loading' ? '10' : '0'}px;
   `,
 ]);
+
+// Gap to icon
+const ButtonText = tw.span`mr-3`;
 
 // -----------------------------------------------------------------------------
 // UI / Loading
@@ -127,6 +142,7 @@ const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
     children: props.children || 'ok',
     onClick: props.onClick || (() => {}),
     prio: props.prio || 'medium',
+    icon: props.icon || null,
   };
 };
 
