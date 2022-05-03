@@ -52,6 +52,7 @@ type CirclesProtocol
             ( logout :: P.Action ("landing" :> Nil')
             , getTrusts :: P.Action ("dashboard" :> Nil')
             , addTrustConnection :: P.Action ("dashboard" :> Nil')
+            , removeTrustConnection :: P.Action ("dashboard" :> Nil')
             , getBalance :: P.Action ("dashboard" :> Nil')
             , checkUBIPayout :: P.Action ("dashboard" :> Nil')
             , requestUBIPayout :: P.Action ("dashboard" :> Nil')

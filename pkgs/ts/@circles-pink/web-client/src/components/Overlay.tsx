@@ -34,7 +34,7 @@ const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
     background-color: ${'white'};
     border: 2px solid ${theme.baseColor};
     z-index: 100;
-    top: 30%;
+    top: 20%;
     width: 80%;
     margin-left: 10%;
     min-height: 6rem;
