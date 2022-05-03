@@ -1,6 +1,7 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { ThemeContext } from '../context/theme';
+import { Overlay } from './Overlay';
 
 // -----------------------------------------------------------------------------
 // UserDashboard
@@ -28,6 +29,7 @@ export const UserDashboard = ({
   return (
     <>
       <Frame borderColor={theme.baseColor}>
+        {/* <Overlay /> */}
         <Header>{header}</Header>
         <CardHead>
           <IntroContent>

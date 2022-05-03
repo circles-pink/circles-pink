@@ -55,6 +55,7 @@ login env =
               , requestUBIPayoutResult: _notAsked
               , getUsersResult: _notAsked
               , transferResult: _notAsked
+              , userSearchResult: _notAsked
               }
       Right { user, trusts, safeStatus, isReady } -> do
         set \_ ->

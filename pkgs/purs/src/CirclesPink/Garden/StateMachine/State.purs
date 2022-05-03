@@ -27,6 +27,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrTrustAddConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
+  , ErrUserSearch
+  , ErrUserSearchResolved
   , GetUsersResult
   , InfoGeneralState
   , InfoSecurityState
@@ -45,6 +47,7 @@ module CirclesPink.Garden.StateMachine.State
   , TrustStateTrustsResult
   , UserData
   , UserDataSubmitResult
+  , UserSearchResult
   , UsernameApiResult
   , _askEmail
   , _askUsername
@@ -211,6 +214,21 @@ type ErrGetUsers
 type GetUsersResult
   = RemoteData ErrGetUsersResolved (Array User)
 
+--------------------------------------------------------------------------------
+-- | User / search
+type ErrUserSearchResolved
+  = Variant
+      ( errApi :: ApiError
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrUserSearch
+  = Env.ErrUserSearch + ()
+
+type UserSearchResult
+  = RemoteData ErrUserSearchResolved (Array User)
+
 -- | Trust / AddConnection
 type ErrTrustAddConnectionResolved
   = Variant
@@ -295,6 +313,7 @@ type DashboardState
     , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
     , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
     , transferResult :: TokenTransferResult
+    , userSearchResult :: UserSearchResult
     }
 
 --------------------------------------------------------------------------------

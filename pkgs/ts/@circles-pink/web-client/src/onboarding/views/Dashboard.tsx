@@ -47,6 +47,8 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [to, setTo] = useState<string>('');
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
+  // Search
+  const [search, setSearch] = useState<string>('');
 
   // animation
   const orientation: Orientation = 'left';
@@ -410,6 +412,36 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
               </DebugButtonWrapper>
             </ActionRow>
             {JSON.stringify(state.transferResult, null, 2)}
+            {/* User Search*/}
+            {/* Trust AddConnection */}
+            <DebugOptionsDescription>user.search</DebugOptionsDescription>
+            <ActionRow>
+              <InputWrapper>
+                <Input
+                  type="text"
+                  value={search}
+                  placeholder={'Search by username'}
+                  onChange={e => setSearch(e.target.value)}
+                  onKeyPress={e =>
+                    e.key === 'Enter' &&
+                    act(A._dashboard(A._userSearch({ query: search })))
+                  }
+                />
+              </InputWrapper>
+              <DebugButtonWrapper>
+                <Button
+                  prio={'high'}
+                  color={theme.baseColor}
+                  state={mapResult(state.userSearchResult)}
+                  onClick={() =>
+                    act(A._dashboard(A._userSearch({ query: search })))
+                  }
+                >
+                  {'Search'}
+                </Button>
+              </DebugButtonWrapper>
+            </ActionRow>
+            {JSON.stringify(state.userSearchResult, null, 2)}
           </>
         </FadeIn>
       }
