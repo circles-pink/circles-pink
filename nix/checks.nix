@@ -4,14 +4,7 @@ let
 
   inherit (builtins) toJSON trace readFile;
   inherit (pkgs.lib)
-    foldr
-    nameValuePair
     pipe
-    filterAttrs
-    mapAttrsToList
-    listToAttrs
-    hasPrefix
-    isAttrs
     mapAttrs
     length
     runTests;
