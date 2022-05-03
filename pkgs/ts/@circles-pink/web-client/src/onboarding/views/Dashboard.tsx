@@ -8,19 +8,16 @@ import React, {
   useState,
 } from 'react';
 import { Button, Input } from '../../components/forms';
-import { Claim, Text } from '../../components/text';
+import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { DashboardState } from 'generated/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
-import { Theme, ThemeContext } from '../../context/theme';
+import { ThemeContext } from '../../context/theme';
 import { mapResult } from '../utils/mapResult';
-import QrCode from 'react-qrcode-svg';
 import tw, { css, styled } from 'twin.macro';
 import {
-  mdiAccountSearch,
   mdiCashFast,
   mdiCog,
   mdiHandCoin,
@@ -32,27 +29,25 @@ import Icon from '@mdi/react';
 import { CirclesCurrency } from '../../assets/CirclesCurrency';
 import {
   MappedTrustNodes,
-  TrustNetworkList,
-} from '../../components/TrustNetworkList';
-import { Balance } from 'generated/output/CirclesCore.Bindings';
+  TrustUserList,
+} from '../../components/TrustUserList';
 import { TrustNode, User } from 'generated/output/CirclesCore';
 import { Overlay } from '../../components/Overlay';
-import { addrToString } from 'generated/output/Wallet.PrivateKey';
+import { JustifyBetweenCenter } from '../../components/helper';
+import { Send, SendProps } from './dashboard/Send';
+import { Receive } from './dashboard/Receive';
+import { mapBalanceToHr } from '../utils/balance';
 
 // -----------------------------------------------------------------------------
 // Dashboard
 // -----------------------------------------------------------------------------
 
-type DashboardProps = {
+export type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
 };
 
 export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
-  // -----------------------------------------------------------------------------
-  // State & Context
-  // -----------------------------------------------------------------------------
-
   // Theme
   const [theme] = useContext(ThemeContext);
 
@@ -61,22 +56,25 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [overlayOpen, setOverlayOpen] = useState<boolean>(false);
   const [activeOverlay, setActiveOverlay] = useState<Overlay>('SEND');
 
+  const toggleOverlay = (type: Overlay) => {
+    if (!overlayOpen) {
+      setActiveOverlay(type);
+      setOverlayOpen(true);
+    } else if (overlayOpen && activeOverlay !== type) {
+      setActiveOverlay(type);
+    } else {
+      setOverlayOpen(!overlayOpen);
+    }
+  };
+
   // User Interaction
-  // Add Trust
-  const [addTrust, setAddTrust] = useState<string>('');
-  // Transfer
-  const [from, setFrom] = useState<string>(
-    addrToString(state.user.safeAddress)
-  );
-  const [to, setTo] = useState<string>('');
+  // Set transfer target
   const [overwriteTo, setOverwriteTo] = useState<string>('');
-  const [value, setValue] = useState<number>(0);
-  const [paymentNote, setPaymentNote] = useState<string>('');
+
   // Search
   const [search, setSearch] = useState<string>('');
 
   // animation
-  const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
 
   // -----------------------------------------------------------------------------
@@ -124,7 +122,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   useEffect(() => {
     // If polling for checkPayout happens successfully
     // we can start a new payout request
-    if (state.checkUBIPayoutResult.type === 'success') {
+    if (
+      state.checkUBIPayoutResult.type === 'success' &&
+      // Limit payout request to over one Circle
+      state.checkUBIPayoutResult.value.toString().length > 18
+    ) {
       act(A._dashboard(A._requestUBIPayout(unit)));
     }
   }, [state.checkUBIPayoutResult]);
@@ -202,7 +204,6 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       case 'failure':
         break;
       case 'success':
-        setAddTrust('');
         setTimeout(() => {
           act(A._dashboard(A._getTrusts(unit)));
         }, 1000);
@@ -221,10 +222,6 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       case 'failure':
         break;
       case 'success':
-        setFrom('');
-        setTo('');
-        setValue(0);
-        setPaymentNote('');
         setTimeout(() => {
           act(A._dashboard(A._getBalance(unit)));
         }, 2000);
@@ -274,39 +271,21 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
               <Button
                 prio="high"
                 color={theme.baseColor}
-                onClick={() => {
-                  if (!overlayOpen) {
-                    setActiveOverlay('SEND');
-                    setOverlayOpen(true);
-                  } else if (overlayOpen && activeOverlay !== 'SEND') {
-                    setActiveOverlay('SEND');
-                  } else {
-                    setOverlayOpen(!overlayOpen);
-                  }
-                }}
+                onClick={() => toggleOverlay('SEND')}
               >
-                <ActionRow>
+                <JustifyBetweenCenter>
                   <ButtonText>Send</ButtonText>
                   <Icon path={mdiCashFast} size={1} color={'white'} />
-                </ActionRow>
+                </JustifyBetweenCenter>
               </Button>
               <Button
                 color={theme.baseColor}
-                onClick={() => {
-                  if (!overlayOpen) {
-                    setActiveOverlay('RECEIVE');
-                    setOverlayOpen(true);
-                  } else if (overlayOpen && activeOverlay !== 'RECEIVE') {
-                    setActiveOverlay('RECEIVE');
-                  } else {
-                    setOverlayOpen(!overlayOpen);
-                  }
-                }}
+                onClick={() => toggleOverlay('RECEIVE')}
               >
-                <ActionRow>
+                <JustifyBetweenCenter>
                   <ButtonText>Receive</ButtonText>
                   <Icon path={mdiHandCoin} size={1} color={'white'} />
-                </ActionRow>
+                </JustifyBetweenCenter>
               </Button>
             </>
           </FadeIn>
@@ -314,30 +293,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       mainContent={
         <MainContent>
-          {overlayOpen && (
-            <Overlay
-              theme={theme}
-              content={
-                activeOverlay === 'SEND' ? (
-                  <SendContent
-                    closeOverlay={() => setOverlayOpen(false)}
-                    overwriteTo={overwriteTo}
-                    state={state}
-                    act={act}
-                    theme={theme}
-                  />
-                ) : (
-                  <ReceiveContent state={state} act={act} theme={theme} />
-                )
-              }
-              closeOverlay={() => setOverlayOpen(false)}
-            />
-          )}
           <FlexBox>
             <FlexItemGrow>
               {mappedTrusts && (
                 <FadeIn orientation={'up'} delay={getDelay()}>
-                  <TrustNetworkList
+                  <TrustUserList
                     title={'Trust Network'}
                     content={mappedTrusts}
                     theme={theme}
@@ -356,7 +316,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
             <FlexItemGrow>
               {mappedSearch && (
                 <FadeIn orientation={'up'} delay={getDelay()}>
-                  <TrustNetworkList
+                  <TrustUserList
                     title={'Explore'}
                     content={mappedSearch}
                     theme={theme}
@@ -368,7 +328,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                       act(A._dashboard(A._addTrustConnection(to)))
                     }
                     actionRow={
-                      <ActionRow>
+                      <JustifyBetweenCenter>
                         <InputWrapper>
                           <Input
                             type="text"
@@ -397,7 +357,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                             {'Search'}
                           </Button>
                         </DebugButtonWrapper>
-                      </ActionRow>
+                      </JustifyBetweenCenter>
                     }
                   />
                 </FadeIn>
@@ -406,370 +366,63 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           </FlexBox>
         </MainContent>
       }
-      debug={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
-            {/* Trust AddConnection */}
-            <DebugOptionsTitle>{t('dashboard.debugTitle')}</DebugOptionsTitle>
-            <DebugOptionsDescription>
-              trust.addConnection
-            </DebugOptionsDescription>
-            <ActionRow>
-              <InputWrapper>
-                <Input
-                  type="text"
-                  value={addTrust}
-                  placeholder={t('dashboard.addTrustPlaceholder')}
-                  onChange={e => setAddTrust(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(A._dashboard(A._addTrustConnection(addTrust)))
-                  }
-                />
-              </InputWrapper>
-              <DebugButtonWrapper>
-                <Button
-                  prio={'high'}
-                  color={theme.baseColor}
-                  state={mapResult(state.trustAddResult)}
-                  onClick={() =>
-                    act(A._dashboard(A._addTrustConnection(addTrust)))
-                  }
-                >
-                  {t('addTrustsButton')}
-                </Button>
-              </DebugButtonWrapper>
-            </ActionRow>
-            <FlexBox>Own Safe Address: {state.user.safeAddress}</FlexBox>
-            {/* Token Transfer */}
-            <DebugOptionsDescription>token.transfer</DebugOptionsDescription>
-            <ActionRow>
-              <InputWrapper>
-                <Input
-                  type="text"
-                  value={from}
-                  placeholder={'From'}
-                  onChange={e => setFrom(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(
-                      A._dashboard(
-                        A._transfer({
-                          from,
-                          to,
-                          value: mapBalanceToBN(value),
-                          paymentNote,
-                        })
-                      )
-                    )
-                  }
-                />
-                <Input
-                  type="text"
-                  value={to}
-                  placeholder={'To'}
-                  onChange={e => setTo(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(
-                      A._dashboard(
-                        A._transfer({
-                          from,
-                          to,
-                          value: mapBalanceToBN(value),
-                          paymentNote,
-                        })
-                      )
-                    )
-                  }
-                />
-                <Input
-                  type="number"
-                  value={value}
-                  placeholder={'Amount'}
-                  onChange={e => setValue(parseInt(e.target.value))}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(
-                      A._dashboard(
-                        A._transfer({
-                          from,
-                          to,
-                          value: mapBalanceToBN(value),
-                          paymentNote,
-                        })
-                      )
-                    )
-                  }
-                />
-                <Input
-                  type="string"
-                  value={paymentNote}
-                  placeholder={'Payment Note'}
-                  onChange={e => setPaymentNote(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(
-                      A._dashboard(
-                        A._transfer({
-                          from,
-                          to,
-                          value: mapBalanceToBN(value),
-                          paymentNote,
-                        })
-                      )
-                    )
-                  }
-                />
-              </InputWrapper>
-              <DebugButtonWrapper>
-                <Button
-                  prio={'high'}
-                  color={theme.baseColor}
-                  state={mapResult(state.transferResult)}
-                  onClick={() =>
-                    act(
-                      A._dashboard(
-                        A._transfer({
-                          from,
-                          to,
-                          value: mapBalanceToBN(value),
-                          paymentNote,
-                        })
-                      )
-                    )
-                  }
-                >
-                  Send
-                </Button>
-              </DebugButtonWrapper>
-            </ActionRow>
-            {JSON.stringify(state.transferResult, null, 2)}
-            {/* User Search*/}
-            {/* Trust AddConnection */}
-            <DebugOptionsDescription>user.search</DebugOptionsDescription>
-            <ActionRow>
-              <InputWrapper>
-                <Input
-                  type="text"
-                  value={search}
-                  placeholder={'Search by username'}
-                  onChange={e => setSearch(e.target.value)}
-                  onKeyPress={e =>
-                    e.key === 'Enter' &&
-                    act(A._dashboard(A._userSearch({ query: search })))
-                  }
-                />
-              </InputWrapper>
-              <DebugButtonWrapper>
-                <Button
-                  prio={'high'}
-                  color={theme.baseColor}
-                  state={mapResult(state.userSearchResult)}
-                  onClick={() =>
-                    act(A._dashboard(A._userSearch({ query: search })))
-                  }
-                >
-                  {'Search'}
-                </Button>
-              </DebugButtonWrapper>
-            </ActionRow>
-            {JSON.stringify(state.userSearchResult, null, 2)}
-          </>
-        </FadeIn>
+      overlay={
+        overlayOpen ? (
+          <Overlay
+            theme={theme}
+            closeOverlay={() => setOverlayOpen(false)}
+            content={
+              <DashboardOverlay
+                overlay={activeOverlay}
+                setOverlayOpen={setOverlayOpen}
+                closeOverlay={() => setOverlayOpen(false)}
+                overwriteTo={overwriteTo}
+                state={state}
+                act={act}
+                theme={theme}
+              />
+            }
+          />
+        ) : null
       }
     />
   );
 };
 
 // -----------------------------------------------------------------------------
-// UI / Send
+// UI / DashboardOverlay
 // -----------------------------------------------------------------------------
-type SendContentProps = DashboardProps & {
-  theme: Theme;
-  closeOverlay: () => void;
-  overwriteTo?: string;
+
+type OverlayType = 'SEND' | 'RECEIVE';
+
+type DashboardOverlayProps = SendProps & {
+  overlay: OverlayType;
+  setOverlayOpen: React.Dispatch<SetStateAction<boolean>>;
 };
 
-const SendContent = ({
+const DashboardOverlay = ({
+  overlay,
   state,
   act,
   theme,
-  closeOverlay,
+  setOverlayOpen,
   overwriteTo,
-}: SendContentProps) => {
-  const [from, setFrom] = useState<string>(
-    addrToString(state.user.safeAddress)
-  );
-  const [to, setTo] = useState<string>(overwriteTo || '');
-  const [value, setValue] = useState<number>(0);
-  const [paymentNote, setPaymentNote] = useState<string>('');
-
-  useEffect(() => {
-    switch (state.transferResult.type) {
-      case 'loading':
-      case 'notAsked':
-      case 'failure':
-        break;
-      case 'success':
-        setTo('');
-        setValue(0);
-        setPaymentNote('');
-        closeOverlay();
-        break;
-    }
-  }, [state.transferResult]);
-
-  return (
-    <>
-      <Claim color={theme.baseColor}>Send Circles</Claim>
-      <br />
-      <Input
-        type="text"
-        value={to}
-        placeholder={'To'}
-        onChange={e => setTo(e.target.value)}
-        onKeyPress={e =>
-          e.key === 'Enter' &&
-          act(
-            A._dashboard(
-              A._transfer({
-                from,
-                to,
-                value: mapBalanceToBN(value),
-                paymentNote,
-              })
-            )
-          )
-        }
-      />
-      <Input
-        type="number"
-        step=".01"
-        value={value}
-        placeholder={'Amount'}
-        onChange={e => {
-          const twoDecimals = parseFloat(e.target.value).toFixed(2);
-          setValue(parseFloat(twoDecimals));
-        }}
-        onKeyPress={e =>
-          e.key === 'Enter' &&
-          act(
-            A._dashboard(
-              A._transfer({
-                from,
-                to,
-                value: mapBalanceToBN(value),
-                paymentNote,
-              })
-            )
-          )
-        }
-      />
-      <Input
-        type="string"
-        value={paymentNote}
-        placeholder={'Payment Note'}
-        onChange={e => setPaymentNote(e.target.value)}
-        onKeyPress={e =>
-          e.key === 'Enter' &&
-          act(
-            A._dashboard(
-              A._transfer({
-                from,
-                to,
-                value: mapBalanceToBN(value),
-                paymentNote,
-              })
-            )
-          )
-        }
-      />
-      <ActionRow>
-        <InputWrapper>
-          {/* <Input
-          type="text"
-          value={from}
-          placeholder={'From'}
-          onChange={e => setFrom(e.target.value)}
-          onKeyPress={e =>
-            e.key === 'Enter' &&
-            act(
-              A._dashboard(
-                A._transfer({
-                  from,
-                  to,
-                  value: mapBalanceToBN(value),
-                  paymentNote,
-                })
-              )
-            )
-          }
-        /> */}
-        </InputWrapper>
-        <DebugButtonWrapper>
-          <Button
-            prio={'high'}
-            color={theme.baseColor}
-            state={mapResult(state.transferResult)}
-            onClick={() =>
-              act(
-                A._dashboard(
-                  A._transfer({
-                    from,
-                    to,
-                    value: mapBalanceToBN(value),
-                    paymentNote,
-                  })
-                )
-              )
-            }
-          >
-            <ActionRow>
-              <ButtonText>Send</ButtonText>
-              <Icon path={mdiCashFast} size={1} color={'white'} />
-            </ActionRow>
-          </Button>
-        </DebugButtonWrapper>
-      </ActionRow>
-    </>
-  );
-};
-
-// -----------------------------------------------------------------------------
-// UI / Send
-// -----------------------------------------------------------------------------
-type ReceiveContentProps = DashboardProps & { theme: Theme };
-
-const ReceiveContent = ({ state, act, theme }: ReceiveContentProps) => {
-  const [from, setFrom] = useState<string>(
-    addrToString(state.user.safeAddress)
-  );
-  const [to, setTo] = useState<string>('');
-  const [value, setValue] = useState<number>(0);
-  const [paymentNote, setPaymentNote] = useState<string>('');
-
-  return (
-    <>
-      <Claim color={theme.baseColor}>Receive Circles</Claim>
-      <br />
-      <CenterText>
-        <Text>Show this QR code to the sender:</Text>
-      </CenterText>
-      <CenterElement>
-        <QrCode
-          data={state.user.safeAddress}
-          height="200"
-          width="200"
-          fgColor="gray"
-          bgColor="white"
+}: DashboardOverlayProps) => {
+  switch (overlay) {
+    case 'SEND':
+      return (
+        <Send
+          closeOverlay={() => setOverlayOpen(false)}
+          overwriteTo={overwriteTo}
+          state={state}
+          act={act}
+          theme={theme}
         />
-      </CenterElement>
-      <CenterText>
-        <Text>{state.user.safeAddress}</Text>
-      </CenterText>
-    </>
-  );
+      );
+
+    case 'RECEIVE':
+      return <Receive state={state} act={act} theme={theme} />;
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -806,33 +459,8 @@ const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
 const HeaderContent = tw.div`flex justify-between items-center mx-4`;
 const ControlContent = tw.div`m-2 lg:m-0 lg:my-2`;
 const MainContent = tw.div`relative`;
-const DebugOptionsTitle = tw.h2`text-xl`;
 const ButtonText = tw.span`mr-3`;
 const DebugButtonWrapper = tw.span`mb-3`;
-const DebugOptionsDescription = tw.h2`text-sm text-gray-400`;
-const ActionRow = tw.div`flex justify-between items-center`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
 const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
 const FlexItemGrow = tw.div`flex-grow`;
-const CenterElement = tw.div`flex justify-around`;
-const CenterText = tw.div`text-center`;
-const JustifyAround = tw.div`flex justify-around`;
-
-// -----------------------------------------------------------------------------
-// Util
-// -----------------------------------------------------------------------------
-
-const mapBalanceToHr = (raw: Balance) => {
-  const rawBalance = parseInt(raw.toString());
-  // Map and round balance to human readable format
-  return (
-    Math.floor(rawBalance / 1000 / 1000 / 1000 / 1000 / 1000 / 10) / 100
-  ).toFixed(2);
-};
-
-const mapBalanceToBN = (raw: number) => {
-  const rawBalance = (raw * 100).toString();
-  // Map and round balance to big number format
-  // Todo: Replace! Ugly but works for the moment...
-  return rawBalance + '0000000000000000';
-};

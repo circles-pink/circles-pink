@@ -80,7 +80,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           </FadeIn>
         </>
       }
-      debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
+      // debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>

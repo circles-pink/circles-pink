@@ -14,10 +14,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import {
-  addrToString,
-  unsafeAddrFromString,
-} from 'generated/output/Wallet.PrivateKey';
+import { addrToString } from 'generated/output/Wallet.PrivateKey';
 
 type UserData = {
   username: string;
@@ -28,7 +25,7 @@ export type MappedTrustNodes = Array<TrustNode & UserData>;
 
 type Overlay = 'SEND' | 'RECEIVE';
 
-type TrustNetworkListProps = {
+type TrustUserListProps = {
   title?: string;
   content: MappedTrustNodes;
   theme: Theme;
@@ -40,7 +37,7 @@ type TrustNetworkListProps = {
   addTrust: (to: string) => void;
 };
 
-export const TrustNetworkList = ({
+export const TrustUserList = ({
   title,
   content,
   theme,
@@ -50,7 +47,7 @@ export const TrustNetworkList = ({
   setOverlayOpen,
   setOverwriteTo,
   addTrust,
-}: TrustNetworkListProps) => {
+}: TrustUserListProps) => {
   return (
     <Frame theme={theme}>
       <Title>
@@ -86,7 +83,7 @@ export const TrustNetworkList = ({
               return (
                 <TableRow theme={theme} key={index}>
                   <TableData>
-                    <b>{c.username}</b>
+                    <b>@{c.username}</b>
                   </TableData>
                   {/* <TableData>{c.safeAddress}</TableData> */}
                   <TableData>
@@ -119,14 +116,16 @@ export const TrustNetworkList = ({
                       <Clickable
                         clickable={c.isOutgoing}
                         onClick={() => {
-                          if (
-                            setActiveOverlay &&
-                            setOverlayOpen &&
-                            setOverwriteTo
-                          ) {
-                            setOverwriteTo(addrToString(c.safeAddress));
-                            setActiveOverlay('SEND');
-                            setOverlayOpen(true);
+                          if (c.isOutgoing) {
+                            if (
+                              setActiveOverlay &&
+                              setOverlayOpen &&
+                              setOverwriteTo
+                            ) {
+                              setOverwriteTo(addrToString(c.safeAddress));
+                              setActiveOverlay('SEND');
+                              setOverlayOpen(true);
+                            }
                           }
                         }}
                       >
@@ -138,9 +137,9 @@ export const TrustNetworkList = ({
                       </Clickable>
 
                       <Clickable
-                        clickable={c.isIncoming}
+                        clickable={!c.isIncoming}
                         onClick={() => {
-                          if (c.isIncoming) {
+                          if (!c.isIncoming) {
                             addTrust(addrToString(c.safeAddress));
                           }
                         }}
@@ -187,7 +186,7 @@ const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
 const TableHeader = tw.thead`px-4 py-2 lg:text-lg text-left whitespace-nowrap`;
 const TableHead = tw.th`px-4 py-2 text-left whitespace-nowrap`;
 const TableBody = tw.tbody`divide-y divide-gray-100`;
-const TableData = tw.td`px-4 py-2 whitespace-nowrap`;
+const TableData = tw.td`px-4 py-2 lg:text-lg whitespace-nowrap`;
 
 type TableRowProps = {
   theme: Theme;
