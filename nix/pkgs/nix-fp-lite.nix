@@ -46,6 +46,8 @@ let
 
   list =
     let
+      inherit (lib) range concatMapStrings const;
+
       mapAccumL = "TODO";
 
       # string -> int -> list string
