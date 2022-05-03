@@ -44,6 +44,16 @@ let
       };
     };
 
+  list =
+    let
+      mapAccumL = "TODO";
+
+      # string -> int -> list string
+      replicate = s: n: pipe n [ (range 1) (concatMapStrings (const s)) ];
+
+    in
+    { };
+
   function =
     let
       identity = x: x;
