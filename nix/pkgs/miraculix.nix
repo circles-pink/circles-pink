@@ -13,25 +13,30 @@ let
   # string -> list test -> test
   testGroup = name: tests: tag "testGroup" { inherit name tests; };
 
-  runTests' = depth: match {
-    test = { name, assertion }: flip match assertion {
-      left = _: log' [ "${name}: ok" ];
-      right = msg: log' ([ "${name}: failed" ] ++ msg);
+  runTests' =
+    let
+      inherit (io) bind_;
+      inherit (list) mapAccumL;
+    in
+    depth: match {
+      test = { name, assertion }: flip match assertion {
+        left = _: log' [ "${name}: ok" ];
+        right = msg: log' ([ "${name}: failed" ] ++ msg);
+      };
+
+      group = { name, tests }: pipe
+        (log [ name ]) [
+        (bind_ (mapAccumL (runTests' depth) 0 tests))
+      ];
     };
 
-    group = { name, tests }: pipe
-      (log [ name ]) [
-      (applySnd (io.sequence (runTests' depth) tests))
-    ];
-  };
-
   runTests =
-    let A = io.Apply; in
+    let inherit (io) bind_; in
     pipe
       (log' [ "Runnig Test suite..." ]) [
-      (io.bind (_: 1))
-      (applySnd A (runTests' 0))
-      (applySnd A (log' [ "Runnig Test suite..." ]))
+      (bind (_: 1))
+      (bind_ A (runTests' 0))
+      (bind_ A (log' [ "Runnig Test suite..." ]))
     ];
 
   runTestsDrv = "TODO";
@@ -66,9 +71,6 @@ let
 
   log' = "TODO";
 
-  # string -> int -> list string
-  replicate = s: n: pipe n [ (range 1) (concatMapStrings (const s)) ];
-
   # int -> list string
   mkIndent = replicate "  ";
 
@@ -78,6 +80,7 @@ in
 , isEq
 , isLt
 , runTests
+, runTestsDrv
 , testCase
 , testGroup
 }
