@@ -23,6 +23,9 @@ circles-garden:
     cd $GARDEN_PATH && \
     make clean && make up && make contracts && make subgraph
 
+ci:
+	nix flake check 2>&1 | sed -E "s#/nix/store/[^/]+#.#g"
+
 # All Makefile tasks
 
 dev-storybook:
@@ -159,6 +162,3 @@ directus-seed-db:
 
 directus-seed-db_:
 	make directus-seed-db_
-
-ci:
-	make ci
