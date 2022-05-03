@@ -20,6 +20,7 @@ module CirclesCore
   , ErrTrustAddConnection
   , ErrTrustGetNetwork
   , ErrTrustIsTrusted
+  , ErrTrustRemoveConnection
   , ErrUserRegister
   , ErrUserResolve
   , NativeError
@@ -34,6 +35,7 @@ module CirclesCore
   , TokenTransferOptions
   , TrustAddConnectionOptions
   , TrustNode
+  , TrustRemoveConnectionOptions
   , User
   , UserOptions
   , _errApi
@@ -62,6 +64,7 @@ module CirclesCore
   , trustAddConnection
   , trustGetNetwork
   , trustIsTrusted
+  , trustRemoveConnection
   , unsafeSampleCore
   , userRegister
   , userResolve
@@ -208,6 +211,22 @@ type ErrTrustAddConnection r
 
 trustAddConnection :: forall r. B.CirclesCore -> B.Account -> TrustAddConnectionOptions -> Result (ErrTrustAddConnection r) String
 trustAddConnection cc = mapFn2 (convertCore cc).trust.addConnection pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  mapArg2 x = x { user = addrToString x.user, canSendTo = addrToString x.canSendTo }
+
+--------------------------------------------------------------------------------
+-- API / trustRemoveConnection
+--------------------------------------------------------------------------------
+type TrustRemoveConnectionOptions
+  = { user :: Address
+    , canSendTo :: Address
+    }
+
+type ErrTrustRemoveConnection r
+  = ErrNative + r
+
+trustRemoveConnection :: forall r. B.CirclesCore -> B.Account -> TrustRemoveConnectionOptions -> Result (ErrTrustRemoveConnection r) String
+trustRemoveConnection cc = mapFn2 (convertCore cc).trust.removeConnection pure (mapArg2 >>> pure) mkErrorNative pure
   where
   mapArg2 x = x { user = addrToString x.user, canSendTo = addrToString x.canSendTo }
 

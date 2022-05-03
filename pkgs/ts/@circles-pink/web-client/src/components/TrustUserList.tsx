@@ -7,14 +7,20 @@ import {
   mdiAccountArrowLeft,
   mdiAccountArrowRight,
   mdiAccountCancel,
-  mdiAccountMinus,
-  mdiAccountPlus,
+  mdiHeart,
+  mdiHeartOutline,
   mdiCashFast,
   mdiCashRemove,
+  mdiAt,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
 import { addrToString } from 'generated/output/Wallet.PrivateKey';
+import {
+  JustifyAroundCenter,
+  JustifyBetweenCenter,
+  JustifyStartCenter,
+} from './helper';
 
 type UserData = {
   username: string;
@@ -35,6 +41,7 @@ type TrustUserListProps = {
   setOverlayOpen?: React.Dispatch<SetStateAction<boolean>>;
   setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
   addTrust: (to: string) => void;
+  removeTrust: (to: string) => void;
 };
 
 export const TrustUserList = ({
@@ -47,6 +54,7 @@ export const TrustUserList = ({
   setOverlayOpen,
   setOverwriteTo,
   addTrust,
+  removeTrust,
 }: TrustUserListProps) => {
   return (
     <Frame theme={theme}>
@@ -59,60 +67,65 @@ export const TrustUserList = ({
       {actionRow}
       <TableContainer>
         <Table>
-          <TableHeader>
-            <TableRow theme={theme}>
-              <TableHead>User</TableHead>
-              {/* <TableHead>Safe Address</TableHead> */}
-              <TableHead>
-                <JustifyAround>Receivable</JustifyAround>
-              </TableHead>
-              <TableHead>
-                <JustifyAround>Sendable</JustifyAround>
-              </TableHead>
-              {/* <TableHead>
+          {content.length > 0 && (
+            <TableHeader>
+              <TableRow theme={theme}>
+                <TableHead>User</TableHead>
+                {/* <TableHead>Safe Address</TableHead> */}
+                <TableHead>
+                  <JustifyAround>Receivable</JustifyAround>
+                </TableHead>
+                <TableHead>
+                  <JustifyAround>Sendable</JustifyAround>
+                </TableHead>
+                {/* <TableHead>
                 <JustifyAround>Transferable</JustifyAround>
               </TableHead> */}
-              <TableHead>
-                <JustifyAround>Action</JustifyAround>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
+                <TableHead>
+                  <JustifyAround>Action</JustifyAround>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+          )}
 
           <TableBody>
             {content.map((c, index) => {
               return (
                 <TableRow theme={theme} key={index}>
                   <TableData>
-                    <b>@{c.username}</b>
+                    <JustifyStartCenter>
+                      <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
+                      <b>{c.username}</b>
+                    </JustifyStartCenter>
                   </TableData>
                   {/* <TableData>{c.safeAddress}</TableData> */}
                   <TableData>
-                    <JustifyAround>
+                    <JustifyAroundCenter>
                       <Icon
                         path={
                           c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel
                         }
-                        size={1.5}
+                        size={1.6}
                         color={c.isIncoming ? theme.baseColor : 'white'}
                       />
-                    </JustifyAround>
+                    </JustifyAroundCenter>
                   </TableData>
                   <TableData>
-                    <JustifyAround>
+                    <JustifyAroundCenter>
                       <Icon
                         path={
                           c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
                         }
-                        size={1.5}
+                        size={1.6}
                         color={c.isOutgoing ? theme.baseColor : 'white'}
                       />
-                    </JustifyAround>
+                    </JustifyAroundCenter>
                   </TableData>
                   {/* <TableData>
                     <JustifyAround>y €</JustifyAround>
                   </TableData> */}
                   <TableData>
-                    <JustifyBetween>
+                    <JustifyBetweenCenter>
                       <Clickable
                         clickable={c.isOutgoing}
                         onClick={() => {
@@ -131,26 +144,28 @@ export const TrustUserList = ({
                       >
                         <Icon
                           path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-                          size={1.5}
+                          size={1.75}
                           color={c.isOutgoing ? theme.baseColor : 'white'}
                         />
                       </Clickable>
 
                       <Clickable
-                        clickable={!c.isIncoming}
+                        clickable={true}
                         onClick={() => {
                           if (!c.isIncoming) {
                             addTrust(addrToString(c.safeAddress));
+                          } else {
+                            removeTrust(addrToString(c.safeAddress));
                           }
                         }}
                       >
                         <Icon
-                          path={c.isIncoming ? mdiAccountMinus : mdiAccountPlus}
+                          path={c.isIncoming ? mdiHeart : mdiHeartOutline}
                           size={1.5}
-                          color={c.isIncoming ? 'white' : theme.baseColor}
+                          color={c.isIncoming ? theme.baseColor : 'white'}
                         />
                       </Clickable>
-                    </JustifyBetween>
+                    </JustifyBetweenCenter>
                   </TableData>
                 </TableRow>
               );
@@ -186,7 +201,7 @@ const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
 const TableHeader = tw.thead`px-4 py-2 lg:text-lg text-left whitespace-nowrap`;
 const TableHead = tw.th`px-4 py-2 text-left whitespace-nowrap`;
 const TableBody = tw.tbody`divide-y divide-gray-100`;
-const TableData = tw.td`px-4 py-2 lg:text-lg whitespace-nowrap`;
+const TableData = tw.td`px-4 py-2 text-lg whitespace-nowrap`;
 
 type TableRowProps = {
   theme: Theme;

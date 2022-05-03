@@ -66,6 +66,7 @@ env { request, envVars } =
   , deployToken
   , isFunded
   , addTrustConnection
+  , removeTrustConnection
   , saveSession
   , restoreSession
   , getBalance
@@ -284,6 +285,13 @@ env { request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
 
+  removeTrustConnection :: Env.RemoveTrustConnection Aff
+  removeTrustConnection pk other us = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
+    CC.trustRemoveConnection circlesCore account { user: other, canSendTo: us }
+
   saveSession :: Env.SaveSession Aff
   saveSession privKey = do
     gundb <- liftEffect $ offline
@@ -367,6 +375,7 @@ testEnv =
   , deployToken: \_ -> pure ""
   , isFunded: \_ -> pure false
   , addTrustConnection: \_ _ _ -> pure ""
+  , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
   , getBalance: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
