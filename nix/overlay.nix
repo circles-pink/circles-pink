@@ -15,6 +15,8 @@
 
   lib = prev.lib // (import ./pkgs/lib.nix { pkgs = final; });
 
+  nix-fp-lite = import ./pkgs/nix-fp-lite.nix { lib = final.pkgs.lib; };
+
   writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
     let
       exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;
