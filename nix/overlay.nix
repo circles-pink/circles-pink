@@ -17,6 +17,8 @@
 
   nix-fp-lite = import ./pkgs/nix-fp-lite.nix { lib = final.pkgs.lib; };
 
+  miraculix = import ./pkgs/miraculix.nix { pkgs = final; };
+
   writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
     let
       exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;

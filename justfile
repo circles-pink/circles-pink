@@ -24,7 +24,7 @@ circles-garden:
     make clean && make up && make contracts && make subgraph
 
 ci:
-	nix -L flake check 2>&1 | sed -E "s#/nix/store/[^/]+/#./#g"
+	nix -L flake check --show-trace 2>&1 | sed -E "s#/nix/store/[^/]+/#./#g"
 
 # All Makefile tasks
 
