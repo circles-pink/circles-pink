@@ -109,6 +109,7 @@ type TextWrapperProps = { state: ButtonState };
 
 const TextWrapper = styled.div<TextWrapperProps>(props => [
   css`
+    transition: margin-right 0.2s;
     margin-right: ${props.state === 'loading' ? '10' : '0'}px;
   `,
 ]);

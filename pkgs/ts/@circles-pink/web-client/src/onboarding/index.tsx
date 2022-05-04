@@ -55,6 +55,12 @@ type ViewProps = {
 };
 
 const View = ({ state, act }: ViewProps): ReactElement | null => {
+  const [debugContext, setDebugContext] = useContext(DebugContext);
+
+  (window as any).magicDebug = () => {
+    setDebugContext(!debugContext);
+  };
+
   switch (state.type) {
     case 'landing':
       return <Landing state={state.value} act={act} />;
@@ -89,13 +95,8 @@ const OnboardingContent = ({
 }: OnboardingProps): ReactElement => {
   const [state, act] = useStateMachine(initState || init, control);
   const [theme, setTheme] = useContext(ThemeContext);
-  const [debugContext, setDebugContext] = useContext(DebugContext);
 
   i18n.changeLanguage(lang);
-
-  (window as any).magicDebug = () => {
-    setDebugContext(!debugContext);
-  };
 
   useEffect(() => {
     if (baseColor) setTheme({ ...theme, baseColor });
