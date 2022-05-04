@@ -75,6 +75,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
           </>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

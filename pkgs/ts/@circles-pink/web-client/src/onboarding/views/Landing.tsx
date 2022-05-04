@@ -75,7 +75,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
           </>
         </FadeIn>
       }
-      // debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };
