@@ -5,15 +5,17 @@ vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
 
 branchless-get:
+	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
 	git fetch
-	git rebase origin/branchless
+	git rebase origin/main
 
 branchless-put: branchless-get branchless-put_
 
 branchless-put_:
+	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
 	git push --force
-	gh pr create --base branchless --body "" --title "Branchless Update"
-	gh pr merge --auto --rebase
+	gh pr create --base main --body "" --title "Branchless Update"
+	gh pr merge --auto --rebase 
 
 branchless-to-main:
 	gh pr create --head branchless --base main --title "branchless to main"
