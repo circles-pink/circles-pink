@@ -4,8 +4,6 @@
 
 var Gun = require("gun");
 
-var Maybe = require("../Data.Maybe");
-
 exports.syncWithPeer = function (url) {
   return function () {
     return Gun(url);
@@ -91,45 +89,49 @@ exports.set = function (ref) {
   };
 };
 
-exports._load = function (waittime) {
-  return function (ctx) {
-    return function (onError, onSuccess) {
-      var canceled = false;
-      ctx.load(
-        function (data) {
-          if (!canceled) {
-            if (data === undefined) {
-              onSuccess(Maybe.Nothing.value0);
-            } else {
-              onSuccess(Maybe.Just.create(data));
+exports._load = (Nothing) => (Just) => {
+  return function (waittime) {
+    return function (ctx) {
+      return function (onError, onSuccess) {
+        var canceled = false;
+        ctx.load(
+          function (data) {
+            if (!canceled) {
+              if (data === undefined) {
+                onSuccess(Nothing);
+              } else {
+                onSuccess(Just(data));
+              }
             }
-          }
-        },
-        { wait: waittime }
-      );
-      return function (cancelError, cancelerError, cancelerSuccess) {
-        canceled = true;
-        cancelerSuccess();
+          },
+          { wait: waittime }
+        );
+        return function (cancelError, cancelerError, cancelerSuccess) {
+          canceled = true;
+          cancelerSuccess();
+        };
       };
     };
   };
 };
 
-exports._once = function (ctx) {
-  return function (onError, onSuccess) {
-    var canceled = false;
-    ctx.once(function (data, key) {
-      if (!canceled) {
-        if (data === undefined) {
-          onSuccess(Maybe.Nothing.value0);
-        } else {
-          onSuccess(Maybe.Just.create({ data: data, key: key }));
+exports._once = (Nothing) => (Just) => {
+  return function (ctx) {
+    return function (onError, onSuccess) {
+      var canceled = false;
+      ctx.once(function (data, key) {
+        if (!canceled) {
+          if (data === undefined) {
+            onSuccess(Nothing);
+          } else {
+            onSuccess(Just({ data: data, key: key }));
+          }
         }
-      }
-    });
-    return function (cancelError, cancelerError, cancelerSuccess) {
-      canceled = true;
-      cancelerSuccess();
+      });
+      return function (cancelError, cancelerError, cancelerSuccess) {
+        canceled = true;
+        cancelerSuccess();
+      };
     };
   };
 };
