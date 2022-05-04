@@ -54,8 +54,8 @@ type CirclesAction
             , addTrustConnection :: String
             , removeTrustConnection :: String
             , getBalance :: Unit
-            , checkUBIPayout :: Unit
-            , requestUBIPayout :: Unit
+            , checkUBIPayout :: Unit -- Deprecated
+            , requestUBIPayout :: Unit -- Deprecated
             , transfer ::
                 { from :: String
                 , to :: String

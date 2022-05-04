@@ -64,6 +64,7 @@ module CirclesPink.Garden.StateMachine.State
   , _submit
   , _trusts
   , init
+  , initDashboard
   , initDebug
   , initLanding
   , initLogin
@@ -77,8 +78,10 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Argonaut (JsonDecodeError)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
+import Prim.Row (class Cons)
+import Record as R
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -323,12 +326,13 @@ type DashboardState
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
+    , balance :: TokenGetBalanceResult
     , trustAddResult :: TrustAddResult
     , trustRemoveResult :: TrustRemoveResult
-    , getBalanceResult :: TokenGetBalanceResult
+    , getBalanceResult :: TokenGetBalanceResult -- Deprecated
     , getUsersResult :: GetUsersResult
-    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
+    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult -- Deprecated
+    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult -- Deprecated
     , transferResult :: TokenTransferResult
     , userSearchResult :: UserSearchResult
     }
@@ -409,6 +413,30 @@ initDebug =
     { magicWords: "hockey middle idea enable forget case mountain sugar chronic income crouch critic venue giant tell marble rose scene prefer shoe cheap run print pigeon"
     }
 
+--------------------------------------------------------------------------------
+type InitDashboard
+  = { user :: CC.User
+    , privKey :: PrivateKey
+    , trusts :: Array TrustNode
+    }
+
+initDashboard :: InitDashboard -> forall v. Variant ( dashboard :: DashboardState | v )
+initDashboard id =
+  _dashboard
+    $ R.disjointUnion id
+        { error: Nothing
+        , balance: _notAsked :: RemoteData _ _
+        , trustAddResult: _notAsked :: RemoteData _ _
+        , trustRemoveResult: _notAsked :: RemoteData _ _
+        , getBalanceResult: _notAsked :: RemoteData _ _
+        , checkUBIPayoutResult: _notAsked :: RemoteData _ _
+        , requestUBIPayoutResult: _notAsked :: RemoteData _ _
+        , getUsersResult: _notAsked :: RemoteData _ _
+        , transferResult: _notAsked :: RemoteData _ _
+        , userSearchResult: _notAsked :: RemoteData _ _
+        }
+
+--------------------------------------------------------------------------------
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
 

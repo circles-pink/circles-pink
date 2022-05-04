@@ -55,17 +55,8 @@ trusts env =
       Left e -> set \st' -> S._trusts st' { trustsResult = _failure e }
       Right _ ->
         set \_ ->
-          S._dashboard
+          S.initDashboard
             { user: st.user
             , trusts: st.trusts
             , privKey: st.privKey
-            , error: Nothing
-            , trustAddResult: _notAsked
-            , trustRemoveResult: _notAsked
-            , getBalanceResult: _notAsked
-            , checkUBIPayoutResult: _notAsked
-            , requestUBIPayoutResult: _notAsked
-            , getUsersResult: _notAsked
-            , transferResult: _notAsked
-            , userSearchResult: _notAsked
             }
