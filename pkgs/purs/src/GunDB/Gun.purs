@@ -22,7 +22,7 @@ module GunDB
 import Effect.Aff.Compat
 import Control.Semigroupoid ((<<<))
 import Data.Argonaut (Json)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Foreign (Foreign)
@@ -74,15 +74,15 @@ foreign import put :: Json -> GunChainCtx -> Effect GunChainCtx
 
 -- | Get the current data without subscribing to updates. Or `Nothing` if it cannot be found.
 once :: GunChainCtx -> Aff (Maybe { data :: Json, key :: Json })
-once = fromEffectFnAff <<< _once
+once = fromEffectFnAff <<< _once Nothing Just
 
-foreign import _once :: GunChainCtx -> EffectFnAff (Maybe { data :: Json, key :: Json })
+foreign import _once :: forall a. Maybe a -> (a -> Maybe a) -> GunChainCtx -> EffectFnAff (Maybe { data :: Json, key :: Json })
 
 -- | Loads a complete graph at once
 load :: Int -> GunChainCtx -> Aff (Maybe Json)
-load waittime ctx = fromEffectFnAff (_load waittime ctx)
+load waittime ctx = fromEffectFnAff (_load Nothing Just waittime ctx)
 
-foreign import _load :: Int -> GunChainCtx -> EffectFnAff (Maybe Json)
+foreign import _load :: forall a. Maybe a -> (a -> Maybe a) -> Int -> GunChainCtx -> EffectFnAff (Maybe Json)
 
 -- | Add a unique item to an unordered list.
 foreign import set :: GunChainCtx -> GunChainCtx -> Effect GunChainCtx
