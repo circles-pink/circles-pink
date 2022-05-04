@@ -61,6 +61,7 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
           </>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

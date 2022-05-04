@@ -48,6 +48,7 @@ export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
           </Button>
         </FadeIn>
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

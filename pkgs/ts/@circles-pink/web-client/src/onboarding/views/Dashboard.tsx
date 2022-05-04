@@ -391,6 +391,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           />
         ) : null
       }
+      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
 };

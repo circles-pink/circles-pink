@@ -26,6 +26,7 @@ import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from 'generated/output/CirclesPink.Garden.StateMachine.Action';
 import { env } from '../env';
+import { DebugContext, DebugProvider } from '../context/debug';
 
 type Language = 'en' | 'de';
 
@@ -88,8 +89,13 @@ const OnboardingContent = ({
 }: OnboardingProps): ReactElement => {
   const [state, act] = useStateMachine(initState || init, control);
   const [theme, setTheme] = useContext(ThemeContext);
+  const [debugContext, setDebugContext] = useContext(DebugContext);
 
   i18n.changeLanguage(lang);
+
+  (window as any).magicDebug = () => {
+    setDebugContext(!debugContext);
+  };
 
   useEffect(() => {
     if (baseColor) setTheme({ ...theme, baseColor });
@@ -98,7 +104,9 @@ const OnboardingContent = ({
   return (
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
-        <View state={state} act={act} />
+        <DebugProvider>
+          <View state={state} act={act} />
+        </DebugProvider>
       </I18nextProvider>
     </AnimProvider>
   );

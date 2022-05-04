@@ -1,5 +1,6 @@
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement, useContext, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
+import { DebugContext } from '../context/debug';
 import { ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
@@ -24,6 +25,7 @@ export const DialogCard = ({
   debug,
 }: DialogCardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
+  const [debugContext] = useContext(DebugContext);
 
   return (
     <>
@@ -41,7 +43,7 @@ export const DialogCard = ({
           <MainContent>{mainContent}</MainContent>
         </CardBody>
       </Frame>
-      <Debug>{debug}</Debug>
+      {debugContext && <Debug>{debug}</Debug>}
     </>
   );
 };

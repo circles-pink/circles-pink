@@ -1,5 +1,6 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
+import { DebugContext } from '../context/debug';
 import { ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
@@ -26,6 +27,7 @@ export const UserDashboard = ({
   debug,
 }: UserDashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
+  const [debugContext] = useContext(DebugContext);
 
   return (
     <>
@@ -44,7 +46,7 @@ export const UserDashboard = ({
           <MainContent>{mainContent}</MainContent>
         </CardBody>
       </Frame>
-      <Debug>{debug}</Debug>
+      {debugContext && <Debug>{debug}</Debug>}
     </>
   );
 };
