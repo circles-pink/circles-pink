@@ -36,19 +36,10 @@ landing env =
           Right { privKey, loginResult: { user, trusts, safeStatus } }
             | safeStatus.isCreated && safeStatus.isDeployed -> do
               set \_ ->
-                S._dashboard
+                S.initDashboard
                   { user
                   , trusts
                   , privKey
-                  , error: Nothing
-                  , trustAddResult: _notAsked
-                  , trustRemoveResult: _notAsked
-                  , getBalanceResult: _notAsked
-                  , checkUBIPayoutResult: _notAsked
-                  , requestUBIPayoutResult: _notAsked
-                  , getUsersResult: _notAsked
-                  , transferResult: _notAsked
-                  , userSearchResult: _notAsked
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
             set \_ ->

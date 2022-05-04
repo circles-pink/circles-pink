@@ -54,8 +54,8 @@ type CirclesProtocol
             , addTrustConnection :: P.Action ("dashboard" :> Nil')
             , removeTrustConnection :: P.Action ("dashboard" :> Nil')
             , getBalance :: P.Action ("dashboard" :> Nil')
-            , checkUBIPayout :: P.Action ("dashboard" :> Nil')
-            , requestUBIPayout :: P.Action ("dashboard" :> Nil')
+            , checkUBIPayout :: P.Action ("dashboard" :> Nil') -- Deprecated
+            , requestUBIPayout :: P.Action ("dashboard" :> Nil') -- Deprecated
             , getUsers :: P.Action ("dashboard" :> Nil')
             , transfer :: P.Action ("dashboard" :> Nil')
             , userSearch :: P.Action ("dashboard" :> Nil')
