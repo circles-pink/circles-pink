@@ -27,20 +27,16 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
     act(A._landing(A._checkForSession(unit)));
   }, []);
 
-  if (state.checkSessionResult.type === 'loading') {
+  if (
+    state.checkSessionResult.type === 'notAsked' ||
+    state.checkSessionResult.type === 'loading'
+  ) {
     return (
       <DialogCard
         mainContent={
-          <>
-            <CenterElement>
-              <Claim color={theme.baseColor}>
-                {t('landing.restoreSession')}
-              </Claim>
-            </CenterElement>
-            <CenterElement>
-              <LoadingCircles width={250} color={theme.baseColor} />
-            </CenterElement>
-          </>
+          <CenterElement>
+            <LoadingCircles width={250} color={theme.baseColor} />
+          </CenterElement>
         }
       />
     );
@@ -84,4 +80,4 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   );
 };
 
-const CenterElement = tw.div`flex justify-around`;
+const CenterElement = tw.div`flex justify-around mb-8`;
