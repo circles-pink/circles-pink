@@ -1,9 +1,15 @@
 { pkgs, ... }:
 let
-  inherit (pkgs) nix-fp-lite;
-  inherit (nix-fp-lite) io;
-  inherit (nix-fp-lite.Apply) applySnd;
-  inherit (nix-fp-lite.type) tag;
+  inherit (pkgs) nix-fp-lite lib runCommand;
+  inherit (lib) pipe flip concatStringsSep;
+  inherit (nix-fp-lite) io list Apply type either function;
+  inherit (Apply) applySnd;
+  inherit (function) comp;
+  inherit (type) tag match;
+  inherit (either) left right;
+  inherit (io) bind_ log pure;
+  inherit (list) mapAccumL replicate;
+  inherit (lib) todo_ todo const;
 
   # Test
 
@@ -14,32 +20,31 @@ let
   testGroup = name: tests: tag "testGroup" { inherit name tests; };
 
   runTests' =
-    let
-      inherit (io) bind_;
-      inherit (list) mapAccumL;
-    in
     depth: match {
       test = { name, assertion }: flip match assertion {
         left = _: log' [ "${name}: ok" ];
         right = msg: log' ([ "${name}: failed" ] ++ msg);
       };
-
       group = { name, tests }: pipe
         (log [ name ]) [
         (bind_ (mapAccumL (runTests' depth) 0 tests))
       ];
     };
 
-  runTests =
-    let inherit (io) bind_; in
-    pipe
-      (log' [ "Runnig Test suite..." ]) [
-      (bind (_: 1))
-      (bind_ A (runTests' 0))
-      (bind_ A (log' [ "Runnig Test suite..." ]))
+  runTests = tests:
+    pipe io.do [
+      (io.drop_ (log "Runnig Test suite..."))
+      #(bind_ (runTests' 0))
+      (io.bindAs "failureCount" (s: pure 0))
+      (io.drop (s: (log "${toString s.failureCount} tests failed.")))
+      (io.map (s: s.failureCount))
     ];
 
-  runTestsDrv = "TODO";
+  runTestsDrv = tests:
+    let failedCount = runTests tests null; in
+    if failedCount == 0
+    then runCommand "empty" { } "mkdir $out"
+    else abort "Tests failed";
 
   # Assert
 
@@ -50,7 +55,7 @@ let
     else left [ "Value ${val} does not satisfy: " msg ];
 
   # a -> assert
-  isTrue = actual:
+  isTrue = val:
     if val
     then right null
     else left [ "Value ${val} is not true" ];
@@ -69,18 +74,20 @@ let
 
   # Util
 
-  log' = "TODO";
+  log' = comp log (concatStringsSep "\n");
 
   # int -> list string
   mkIndent = replicate "  ";
 
 in
-{ satisfies
-, isTrue
-, isEq
-, isLt
-, runTests
-, runTestsDrv
-, testCase
-, testGroup
+{
+  inherit
+    satisfies
+    isTrue
+    isEq
+    isLt
+    runTests
+    runTestsDrv
+    testCase
+    testGroup;
 }
