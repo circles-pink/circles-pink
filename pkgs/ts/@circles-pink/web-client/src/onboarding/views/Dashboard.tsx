@@ -37,6 +37,7 @@ import { JustifyBetweenCenter } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
 import { Receive } from './dashboard/Receive';
 import { mapBalanceToHr } from '../utils/balance';
+import { Balance } from './dashboard/Balance';
 
 // -----------------------------------------------------------------------------
 // Dashboard
@@ -103,17 +104,6 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       window.clearInterval(pollUBIPayout);
     };
   }, []);
-
-  // -----------------------------------------------------------------------------
-  // Balance
-  // -----------------------------------------------------------------------------
-  const [balance, setBalance] = useState<string>('0.00');
-
-  useEffect(() => {
-    if (state.getBalanceResult.type === 'success') {
-      setBalance(mapBalanceToHr(state.getBalanceResult.value));
-    }
-  }, [state.getBalanceResult]);
 
   // -----------------------------------------------------------------------------
   // UBI Payout
@@ -253,10 +243,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={'up'} delay={getDelay()}>
-            <BalanceWrapper>
-              <Amount color={theme.baseColor}>{balance}</Amount>
-              <CirclesCurrency color={theme.baseColor} />
-            </BalanceWrapper>
+            <Balance theme={theme} balance={state.getBalanceResult} />
           </FadeIn>
 
           {/* <FadeIn orientation={orientation} delay={getDelay()}>
@@ -431,20 +418,6 @@ const DashboardOverlay = ({
       return <Receive state={state} act={act} theme={theme} />;
   }
 };
-
-// -----------------------------------------------------------------------------
-// UI / Balance
-// -----------------------------------------------------------------------------
-
-type AmountProps = { color?: string };
-
-const Amount = styled.h2<AmountProps>(({ color }) => [
-  tw`text-5xl mr-2 my-2`,
-  css`
-    color: ${color || 'black'};
-  `,
-]);
-const BalanceWrapper = tw.div`flex flex-row items-center m-2`;
 
 // -----------------------------------------------------------------------------
 // UI / UserHandle
