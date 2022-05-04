@@ -54,15 +54,16 @@ let
       replicate = s: n: pipe n [ (range 1) (concatMapStrings (const s)) ];
 
     in
-    { };
+    { inherit replicate mapAccumL; };
 
   function =
     let
       identity = x: x;
-      const = _: x: x;
+      const = x: _: x;
+      comp = f: g: x: f (g (x));
     in
     {
-      inherit identity const;
+      inherit identity const comp;
     };
 
   Apply =
@@ -74,7 +75,9 @@ let
         (f: Apply.apply f m2)
       ];
     in
-    { };
+    {
+      inherit applySnd;
+    };
 
   Bind =
     { };
@@ -82,12 +85,27 @@ let
   io =
     let
       inherit (builtins) seq trace;
+      inherit (function) const comp;
 
-      map = f: x: _: f (x null); # seq, too?
-      bind = f: x: _: let r = x null; in seq r (f r null);
-      apply = f: x: _: (f null) (x null); # seq, too?
+      map = f: x: _: let x' = x null; in seq x' (f x');
+      bind = f: x: _: let x' = x null; in seq x' (f x' null);
+      apply = f: x: _:
+        let
+          f' = f null;
+          x' = x null;
+        in
+        seq f' (seq x' (f' x'));
       pure = x: _: x;
-      bind_ = y: x: _: let r = x null; in seq r (y null);
+      bind_ = y: bind (const y);
+      map_ = x: map (const x);
+
+      bindAs = n: x: y: bind (s: map (v: s // { ${n} = v; }) (x s)) y;
+      drop = bindAs "_";
+      drop_ = x: drop (const x);
+      letAs = n: x: bindAs (comp pure x);
+      applySnd = fp.Apply.applySnd Apply;
+      do = pure { };
+
 
       # Instances
 
@@ -100,15 +118,36 @@ let
       # Util
 
       log = s: _: trace s null;
+
     in
     {
-      inherit map bind apply pure Functor Bind Apply Applicative Monad log;
+      inherit
+        map
+        bind
+        bindAs
+        drop
+        drop_
+        bind_
+        map_
+        apply
+        pure
+        Functor
+        Bind
+        Apply
+        Applicative
+        Monad
+        log
+        letAs
+        applySnd
+        do;
     };
 
-in
-{
-  inherit either io function Apply type;
-  tests = {
-    either = either.tests;
+  fp = {
+    inherit either io function Apply type list;
+    tests = {
+      either = either.tests;
+    };
   };
-}
+
+in
+fp
