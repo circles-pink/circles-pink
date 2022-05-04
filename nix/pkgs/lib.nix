@@ -19,4 +19,8 @@
       const fs = require("fs");
       fs.writeFileSync(process.env.out, constantCase("${str}"))
     '');
+
+  todo = msg: abort "TODO: ${msg}";
+
+  todo_ = abort "TODO";
 }

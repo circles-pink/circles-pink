@@ -50,8 +50,9 @@ in
       mkdir $out
     '';
 
-  # nixUnitTests = runTestsDrv (testGroup "group" [
-  #   (testCase "test" (isEq 1 2))
-  # ]);
+  # nixUnitTests = let inherit (pkgs.miraculix) testCase testGroup runTestsDrv isEq; in
+  #   runTestsDrv (testGroup "group" [
+  #     (testCase "test" (isEq 1 2))
+  #   ]);
 
 } // (doTestSuite pkgs.nix-fp-lite.tests)
