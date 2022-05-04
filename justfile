@@ -19,8 +19,9 @@ branchless-to-main:
 	gh pr merge --rebase branchless
 
 circles-garden:
-    cd $GARDEN_PATH && \
-    make clean && make up && make contracts && make subgraph
+	cd $GARDEN_PATH && \
+	nix-shell -p nodejs-12_x --command \
+	"make clean && make up && make contracts && make subgraph"
 
 ci:
 	nix -L flake check --show-trace 2>&1 | sed -E "s#/nix/store/[^/]+/#./#g"
