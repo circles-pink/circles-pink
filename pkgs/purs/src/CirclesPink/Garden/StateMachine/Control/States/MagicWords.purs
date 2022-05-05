@@ -1,12 +1,11 @@
 module CirclesPink.Garden.StateMachine.Control.States.MagicWords where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans)
-import Data.Either (Either(..))
+import Control.Monad.Except (class MonadTrans, lift)
 
 magicWords ::
   forall t m.
@@ -25,7 +24,5 @@ magicWords env =
   }
   where
   newPrivKey set _ _ = do
-    result <- run $ env.generatePrivateKey
-    case result of
-      Right pk -> set \st -> S._magicWords st { privateKey = pk }
-      Left _ -> pure unit
+    pk <- lift $ env.generatePrivateKey
+    set \st -> S._magicWords st { privateKey = pk }
