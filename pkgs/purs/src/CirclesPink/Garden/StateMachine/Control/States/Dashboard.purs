@@ -153,13 +153,20 @@ dashboard env =
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
 
+--------------------------------------------------------------------------------
+type EitherV e a
+  = Either (Variant e) a
+
+type RemoteDataV e a
+  = RemoteData (Variant e) a
+
 runAsRemoteData ::
   forall e a t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) => (RemoteData (Variant e) a -> t m Unit) -> ExceptV e m a -> t m (Either (Variant e) a)
+  Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> ExceptV e m a -> t m (EitherV e a)
 runAsRemoteData setCb comp = do
   setCb _loading
   result <- run comp
   setCb $ either _failure _success result
   pure result
+
+--------------------------------------------------------------------------------
