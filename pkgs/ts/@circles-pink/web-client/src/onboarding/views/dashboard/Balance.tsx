@@ -3,28 +3,17 @@ import React from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CirclesCurrency } from '../../../assets/CirclesCurrency';
 import { Theme } from '../../../context/theme';
-import { mapBalanceToHr } from '../../utils/balance';
+import { displayBalance } from '../../utils/timeCircles';
 
 type BalanceProps = {
   theme: Theme;
   balance: TokenGetBalanceResult;
 };
+
 export const Balance = ({ theme, balance }: BalanceProps) => {
   switch (balance.type) {
     case 'notAsked':
-      return (
-        <BalanceWrapper>
-          <Amount color={theme.baseColor}>0.00</Amount>
-          <CirclesCurrency color={theme.baseColor} />
-        </BalanceWrapper>
-      );
     case 'failure':
-      return (
-        <BalanceWrapper>
-          <Amount color={theme.baseColor}>0.00</Amount>
-          <CirclesCurrency color={theme.baseColor} />
-        </BalanceWrapper>
-      );
     case 'loading':
       return (
         <BalanceWrapper>
@@ -36,7 +25,7 @@ export const Balance = ({ theme, balance }: BalanceProps) => {
       return (
         <BalanceWrapper>
           <Amount color={theme.baseColor}>
-            {mapBalanceToHr(balance.value.data)}
+            {displayBalance(balance.value.data.toString())}
           </Amount>
           <CirclesCurrency color={theme.baseColor} />
         </BalanceWrapper>
@@ -45,7 +34,7 @@ export const Balance = ({ theme, balance }: BalanceProps) => {
 };
 
 // -----------------------------------------------------------------------------
-// UI / Balance
+// UI / Amount
 // -----------------------------------------------------------------------------
 
 type AmountProps = { color?: string };
@@ -56,4 +45,9 @@ const Amount = styled.h2<AmountProps>(({ color }) => [
     color: ${color || 'black'};
   `,
 ]);
+
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
+
 const BalanceWrapper = tw.div`flex flex-row items-center m-2`;

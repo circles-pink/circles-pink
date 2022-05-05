@@ -8,6 +8,10 @@ import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
+import {
+  convertCirclesToTimeCircles,
+  convertTimeCirclesToCircles,
+} from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
 
 // -----------------------------------------------------------------------------
@@ -56,7 +60,13 @@ export const Send = ({
         A._transfer({
           from,
           to,
-          value: mapBalanceToBN(value),
+          value: mapBalanceToBN(
+            parseFloat(
+              convertTimeCirclesToCircles(value, new Date().toString()).toFixed(
+                2
+              )
+            )
+          ),
           paymentNote,
         })
       )

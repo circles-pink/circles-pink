@@ -3,7 +3,6 @@ import { Balance } from 'generated/output/CirclesCore.Bindings';
 export const mapBalanceToBN = (raw: number): string => {
   const rawBalance = (raw * 100).toString();
   // Map and round balance to big number format
-  // Todo: Replace! Ugly but works for the moment...
   return rawBalance + '0000000000000000';
 };
 
