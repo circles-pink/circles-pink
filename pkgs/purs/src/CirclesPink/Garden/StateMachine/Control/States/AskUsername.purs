@@ -29,7 +29,7 @@ askUsername env =
   where
   setUsername set _ username = do
     set \st -> S._askUsername st { username = username }
-    set \st -> S._askUsername st { usernameApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    set \st -> S._askUsername st { usernameApiResult = _loading unit :: RemoteData Unit Unit CirclesError { isValid :: Boolean } }
     result <- run $ env.apiCheckUserName username
     set \st ->
       if username == st.username then case result of

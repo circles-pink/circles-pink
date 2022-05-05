@@ -9,8 +9,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
-import RemoteData (RemoteData, _failure, _loading, _notAsked)
+import RemoteData (RemoteData, _failure, _loading)
 
 trusts ::
   forall t m.
@@ -39,7 +38,7 @@ trusts env =
       Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
 
   finalizeRegisterUser set st _ = do
-    set \st' -> S._trusts st' { trustsResult = _loading :: RemoteData _ _ }
+    set \st' -> S._trusts st' { trustsResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTrustState _ _
       task = do

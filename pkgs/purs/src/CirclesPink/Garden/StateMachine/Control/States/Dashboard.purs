@@ -11,7 +11,6 @@ import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..), either)
 import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import Undefined (undefined)
 import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -72,7 +71,7 @@ dashboard env =
       Right t -> set \st' -> S._dashboard st' { trusts = t }
 
   addTrustConnection set st u = do
-    set \st' -> S._dashboard st' { trustAddResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { trustAddResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTrustAddConnection _ _
       task = env.addTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
@@ -82,7 +81,7 @@ dashboard env =
       Right _ -> set \st' -> S._dashboard st' { trustAddResult = _success unit }
 
   removeTrustConnection set st u = do
-    set \st' -> S._dashboard st' { trustRemoveResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { trustRemoveResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTrustRemoveConnection _ _
       task = env.removeTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
@@ -97,7 +96,7 @@ dashboard env =
     --     (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
     --     (env.getBalance st.privKey st.user.safeAddress)
     --
-    result <-
+    _ <-
       run (env.checkUBIPayout st.privKey st.user.safeAddress)
         # asRemoteData (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
     -- result <-
@@ -107,7 +106,7 @@ dashboard env =
     pure unit
 
   checkUBIPayout set st _ = do
-    set \st' -> S._dashboard st' { checkUBIPayoutResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { checkUBIPayoutResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTokenCheckUBIPayout _ _
       task = env.checkUBIPayout st.privKey st.user.safeAddress
@@ -117,7 +116,7 @@ dashboard env =
       Right b -> set \st' -> S._dashboard st' { checkUBIPayoutResult = _success b }
 
   requestUBIPayout set st _ = do
-    set \st' -> S._dashboard st' { requestUBIPayoutResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { requestUBIPayoutResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTokenRequestUBIPayout _ _
       task = env.requestUBIPayout st.privKey st.user.safeAddress
@@ -127,7 +126,7 @@ dashboard env =
       Right b -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _success b }
 
   getUsers set st { userNames, addresses } = do
-    set \st' -> S._dashboard st' { getUsersResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrGetUsers _ _
       task = env.getUsers st.privKey userNames addresses
@@ -137,7 +136,7 @@ dashboard env =
       Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
   userSearch set st options = do
-    set \st' -> S._dashboard st' { userSearchResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { userSearchResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrUserSearch _ _
       task = env.userSearch st.privKey options
@@ -147,7 +146,7 @@ dashboard env =
       Right u -> set \st' -> S._dashboard st' { userSearchResult = _success u }
 
   transfer set st { from, to, value, paymentNote } = do
-    set \st' -> S._dashboard st' { transferResult = _loading :: RemoteData _ _ }
+    set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTokenTransfer _ _
       task = env.transfer st.privKey (unsafeAddrFromString from) (unsafeAddrFromString to) value paymentNote
@@ -161,13 +160,13 @@ type EitherV e a
   = Either (Variant e) a
 
 type RemoteDataV e a
-  = RemoteData (Variant e) a
+  = RemoteData Unit Unit (Variant e) a
 
 asRemoteData ::
   forall e a t m.
   Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
 asRemoteData setCb comp = do
-  setCb _loading
+  setCb $ _loading unit
   result <- comp
   setCb $ either _failure _success result
   pure result

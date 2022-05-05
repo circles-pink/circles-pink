@@ -80,7 +80,6 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Argonaut (JsonDecodeError)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import Prim.Row (class Cons)
 import Record as R
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
@@ -89,10 +88,10 @@ import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 type UsernameApiResult
-  = RemoteData CirclesError { isValid :: Boolean }
+  = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
 type EmailApiResult
-  = RemoteData CirclesError { isValid :: Boolean }
+  = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
 --------------------------------------------------------------------------------
 -- UserData
@@ -118,7 +117,7 @@ type ErrSubmitResolved
       )
 
 type UserDataSubmitResult
-  = RemoteData ErrSubmitResolved Unit
+  = RemoteData Unit Unit ErrSubmitResolved Unit
 
 type UserData
   = { direction :: D.Direction
@@ -167,7 +166,7 @@ type ErrLandingState
       + ()
 
 type LandingStateCheckSessionResult
-  = RemoteData ErrLandingStateResolved Unit
+  = RemoteData Unit Unit ErrLandingStateResolved Unit
 
 type LandingState
   = { checkSessionResult :: LandingStateCheckSessionResult
@@ -197,7 +196,7 @@ type ErrLoginTask r
       + r
 
 type LoginStateLoginResult
-  = RemoteData ErrLoginStateResolved Unit
+  = RemoteData Unit Unit ErrLoginStateResolved Unit
 
 type LoginState
   = { magicWords :: String
@@ -218,7 +217,7 @@ type ErrGetUsers
   = Env.ErrGetUsers + ()
 
 type GetUsersResult
-  = RemoteData ErrGetUsersResolved (Array User)
+  = RemoteData Unit Unit ErrGetUsersResolved (Array User)
 
 --------------------------------------------------------------------------------
 -- | User / search
@@ -233,7 +232,7 @@ type ErrUserSearch
   = Env.ErrUserSearch + ()
 
 type UserSearchResult
-  = RemoteData ErrUserSearchResolved (Array User)
+  = RemoteData Unit Unit ErrUserSearchResolved (Array User)
 
 -- | Trust / AddConnection
 type ErrTrustAddConnectionResolved
@@ -246,7 +245,7 @@ type ErrTrustAddConnection
   = Env.ErrAddTrustConnection + ()
 
 type TrustAddResult
-  = RemoteData ErrTrustAddConnectionResolved Unit
+  = RemoteData Unit Unit ErrTrustAddConnectionResolved Unit
 
 -- | Trust / RemoveConnection
 type ErrTrustRemoveConnectionResolved
@@ -259,7 +258,7 @@ type ErrTrustRemoveConnection
   = Env.ErrRemoveTrustConnection + ()
 
 type TrustRemoveResult
-  = RemoteData ErrTrustRemoveConnectionResolved Unit
+  = RemoteData Unit Unit ErrTrustRemoveConnectionResolved Unit
 
 -- | Token / GetBalance
 type ErrTokenGetBalanceResolved
@@ -272,7 +271,7 @@ type ErrTokenGetBalance
   = Env.ErrGetBalance + ()
 
 type TokenGetBalanceResult
-  = RemoteData ErrTokenGetBalanceResolved Balance
+  = RemoteData Unit Unit ErrTokenGetBalanceResolved Balance
 
 -- | Token / CheckUBIPayout
 type ErrTokenCheckUBIPayoutResolved
@@ -285,7 +284,7 @@ type ErrTokenCheckUBIPayout
   = Env.ErrCheckUBIPayout + ()
 
 type TokenCheckUBIPayoutResult
-  = RemoteData ErrTokenCheckUBIPayoutResolved Balance
+  = RemoteData Unit Unit ErrTokenCheckUBIPayoutResolved Balance
 
 -- | Token / RequestUBIPayout
 type ErrTokenRequestUBIPayoutResolved
@@ -298,7 +297,7 @@ type ErrTokenRequestUBIPayout
   = Env.ErrRequestUBIPayout + ()
 
 type TokenRequestUBIPayoutResult
-  = RemoteData ErrTokenRequestUBIPayoutResolved String
+  = RemoteData Unit Unit ErrTokenRequestUBIPayoutResolved String
 
 -- | Token / Transfer
 type ErrTokenTransferResolved
@@ -311,7 +310,7 @@ type ErrTokenTransfer
   = Env.ErrTransfer + ()
 
 type TokenTransferResult
-  = RemoteData ErrTokenTransferResolved String
+  = RemoteData Unit Unit ErrTokenTransferResolved String
 
 -- | Dashboard State
 type ErrDashboardStateResolved
@@ -349,7 +348,7 @@ type ErrTrustStateResolved
       )
 
 type TrustStateTrustsResult
-  = RemoteData ErrTrustStateResolved Unit
+  = RemoteData Unit Unit ErrTrustStateResolved Unit
 
 type TrustState
   = { user :: CC.User
@@ -386,25 +385,25 @@ init =
   _infoGeneral
     { direction: D._forwards
     , username: ""
-    , usernameApiResult: _notAsked
+    , usernameApiResult: _notAsked unit
     , email: ""
-    , emailApiResult: _notAsked
+    , emailApiResult: _notAsked unit
     , terms: false
     , privacy: false
     , privateKey: P.zeroKey
-    , submitResult: _notAsked
+    , submitResult: _notAsked unit
     }
 
 initLanding :: forall v. Variant ( landing :: LandingState | v )
 initLanding =
   _landing
-    { checkSessionResult: _notAsked }
+    { checkSessionResult: _notAsked unit }
 
 initLogin :: forall v. Variant ( login :: LoginState | v )
 initLogin =
   _login
     { magicWords: ""
-    , loginResult: _notAsked
+    , loginResult: _notAsked unit
     }
 
 initDebug :: forall v. Variant ( debug :: DebugState | v )
@@ -425,15 +424,15 @@ initDashboard id =
   _dashboard
     $ R.disjointUnion id
         { error: Nothing
-        , balance: _notAsked :: RemoteData _ _
-        , trustAddResult: _notAsked :: RemoteData _ _
-        , trustRemoveResult: _notAsked :: RemoteData _ _
-        , getBalanceResult: _notAsked :: RemoteData _ _
-        , checkUBIPayoutResult: _notAsked :: RemoteData _ _
-        , requestUBIPayoutResult: _notAsked :: RemoteData _ _
-        , getUsersResult: _notAsked :: RemoteData _ _
-        , transferResult: _notAsked :: RemoteData _ _
-        , userSearchResult: _notAsked :: RemoteData _ _
+        , balance: _notAsked unit :: RemoteData _ _ _ _
+        , trustAddResult: _notAsked unit :: RemoteData _ _ _ _
+        , trustRemoveResult: _notAsked unit :: RemoteData _ _ _ _
+        , getBalanceResult: _notAsked unit :: RemoteData _ _ _ _
+        , checkUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _
+        , requestUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _
+        , getUsersResult: _notAsked unit :: RemoteData _ _ _ _
+        , transferResult: _notAsked unit :: RemoteData _ _ _ _
+        , userSearchResult: _notAsked unit :: RemoteData _ _ _ _
         }
 
 --------------------------------------------------------------------------------

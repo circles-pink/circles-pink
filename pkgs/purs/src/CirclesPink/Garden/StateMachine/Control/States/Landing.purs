@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 
 landing ::
@@ -25,7 +24,7 @@ landing env =
   , signIn: \set _ _ -> set \_ -> S.initLogin
   , checkForSession:
       \set _ _ -> do
-        set \st' -> S._landing st' { checkSessionResult = _loading :: RemoteData S.ErrLandingStateResolved Unit }
+        set \st' -> S._landing st' { checkSessionResult = _loading unit :: RemoteData Unit Unit S.ErrLandingStateResolved Unit }
         result <-
           (run' :: ExceptV S.ErrLandingState _ _ -> _) do
             privKey <- env.restoreSession
@@ -48,7 +47,7 @@ landing env =
                 , trusts
                 , privKey
                 , safeStatus
-                , trustsResult: _notAsked
+                , trustsResult: _notAsked unit
                 , isReady
                 }
   }
