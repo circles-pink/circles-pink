@@ -46,7 +46,7 @@ askEmail env =
 
   setEmail set _ email = do
     set \st -> S._askEmail st { email = email }
-    set \st -> S._askEmail st { emailApiResult = _loading :: RemoteData CirclesError { isValid :: Boolean } }
+    set \st -> S._askEmail st { emailApiResult = _loading unit :: RemoteData Unit Unit CirclesError { isValid :: Boolean } }
     result <- run $ env.apiCheckEmail email
     set \st ->
       if email == st.email then case result of

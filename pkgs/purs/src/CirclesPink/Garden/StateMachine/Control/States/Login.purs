@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
@@ -28,7 +27,7 @@ login env =
   }
   where
   login' set st _ = do
-    set \st' -> S._login st' { loginResult = _loading :: RemoteData _ _ }
+    set \st' -> S._login st' { loginResult = _loading unit :: RemoteData _ _ _ _ }
     let
       mnemonic = P.getMnemonicFromString st.magicWords
 
@@ -56,6 +55,6 @@ login env =
             , trusts
             , privKey
             , safeStatus
-            , trustsResult: _notAsked
+            , trustsResult: _notAsked unit
             , isReady
             }
