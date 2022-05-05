@@ -19,9 +19,11 @@ import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Variant (inj)
 import Effect (Effect)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Effect.Now (now)
+import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
@@ -73,6 +75,8 @@ env { request, envVars } =
   , checkUBIPayout
   , requestUBIPayout
   , transfer
+  , getTimestamp
+  , sleep
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -334,6 +338,15 @@ env { request, envVars } =
     bn <- lift $ liftEffect $ CC.strToBN value
     CC.tokenTransfer circlesCore account { from, to, value: bn, paymentNote }
 
+  getTimestamp :: Env.GetTimestamp Aff
+  getTimestamp = liftEffect now
+
+  sleep :: Env.Sleep Aff
+  sleep t =
+    makeAff \f -> do
+      id <- setTimeout t $ f $ Right unit
+      pure $ Canceler $ \_ -> liftEffect $ clearTimeout id
+
 privateKeyStore :: String
 privateKeyStore = "session"
 
@@ -382,4 +395,6 @@ testEnv =
   , checkUBIPayout: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
+  , getTimestamp: pure bottom
+  , sleep: \_ -> pure unit
   }

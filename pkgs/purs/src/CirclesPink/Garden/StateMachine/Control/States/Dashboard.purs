@@ -7,10 +7,12 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.Trans.Class (class MonadTrans)
+import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either)
 import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteReport (RemoteReport)
+import Undefined (undefined)
 import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -25,8 +27,6 @@ dashboard ::
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , removeTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , checkUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , requestUBIPayout :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , transfer ::
       ActionHandler t m
         { from :: String
@@ -56,8 +56,6 @@ dashboard env =
   , addTrustConnection
   , removeTrustConnection
   , getBalance
-  , checkUBIPayout
-  , requestUBIPayout
   , getUsers
   , transfer
   , userSearch
@@ -91,39 +89,16 @@ dashboard env =
       Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
   getBalance set st _ = do
-    -- _ <-
-    --   runAsRemoteData
-    --     (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-    --     (env.getBalance st.privKey st.user.safeAddress)
-    --
+    _ <-
+      run (env.getBalance st.privKey st.user.safeAddress)
+        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
     _ <-
       run (env.checkUBIPayout st.privKey st.user.safeAddress)
-        # asRemoteData (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
-    -- result <-
-    --   runAsRemoteData
-    --     (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
-    --     (env.checkUBIPayout st.privKey st.user.safeAddress)
+        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+    _ <-
+      run (env.requestUBIPayout st.privKey st.user.safeAddress)
+        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
     pure unit
-
-  checkUBIPayout set st _ = do
-    set \st' -> S._dashboard st' { checkUBIPayoutResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrTokenCheckUBIPayout _ _
-      task = env.checkUBIPayout st.privKey st.user.safeAddress
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { checkUBIPayoutResult = _failure e }
-      Right b -> set \st' -> S._dashboard st' { checkUBIPayoutResult = _success b }
-
-  requestUBIPayout set st _ = do
-    set \st' -> S._dashboard st' { requestUBIPayoutResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrTokenRequestUBIPayout _ _
-      task = env.requestUBIPayout st.privKey st.user.safeAddress
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _failure e }
-      Right b -> set \st' -> S._dashboard st' { requestUBIPayoutResult = _success b }
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -162,13 +137,30 @@ type EitherV e a
 type RemoteDataV e a
   = RemoteData Unit Unit (Variant e) a
 
-asRemoteData ::
+subscribeRemoteData ::
   forall e a t m.
   Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
-asRemoteData setCb comp = do
+subscribeRemoteData setCb comp = do
   setCb $ _loading unit
   result <- comp
   setCb $ either _failure _success result
+  pure result
+
+--------------------------------------------------------------------------------
+type RemoteReportV e a
+  = RemoteReport (Variant e) a
+
+subscribeRemoteReport ::
+  forall e a t m.
+  Monad m => MonadTrans t => Monad (t m) => Env.Env m -> (RemoteReportV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
+subscribeRemoteReport env setCb comp = do
+  startTime <- lift $ env.getTimestamp
+  setCb $ _loading { timestamp: startTime, retry: undefined }
+  result <- comp
+  endTime <- lift $ env.getTimestamp
+  setCb case result of
+    Left e -> _failure { error: e, timestamp: endTime, retry: undefined }
+    Right d -> _success { data: d, timestamp: endTime, retry: undefined }
   pure result
 
 --------------------------------------------------------------------------------

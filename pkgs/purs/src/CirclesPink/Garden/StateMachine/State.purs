@@ -82,6 +82,7 @@ import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Record as R
 import RemoteData (RemoteData, _notAsked)
+import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
@@ -271,7 +272,7 @@ type ErrTokenGetBalance
   = Env.ErrGetBalance + ()
 
 type TokenGetBalanceResult
-  = RemoteData Unit Unit ErrTokenGetBalanceResolved Balance
+  = RemoteReport ErrTokenGetBalanceResolved Balance
 
 -- | Token / CheckUBIPayout
 type ErrTokenCheckUBIPayoutResolved
@@ -284,7 +285,7 @@ type ErrTokenCheckUBIPayout
   = Env.ErrCheckUBIPayout + ()
 
 type TokenCheckUBIPayoutResult
-  = RemoteData Unit Unit ErrTokenCheckUBIPayoutResolved Balance
+  = RemoteReport ErrTokenCheckUBIPayoutResolved Balance
 
 -- | Token / RequestUBIPayout
 type ErrTokenRequestUBIPayoutResolved
@@ -297,7 +298,7 @@ type ErrTokenRequestUBIPayout
   = Env.ErrRequestUBIPayout + ()
 
 type TokenRequestUBIPayoutResult
-  = RemoteData Unit Unit ErrTokenRequestUBIPayoutResolved String
+  = RemoteReport ErrTokenRequestUBIPayoutResolved String
 
 -- | Token / Transfer
 type ErrTokenTransferResolved
@@ -325,13 +326,12 @@ type DashboardState
     , privKey :: PrivateKey
     , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
-    , balance :: TokenGetBalanceResult
     , trustAddResult :: TrustAddResult
     , trustRemoveResult :: TrustRemoveResult
-    , getBalanceResult :: TokenGetBalanceResult -- Deprecated
+    , getBalanceResult :: TokenGetBalanceResult
     , getUsersResult :: GetUsersResult
-    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult -- Deprecated
-    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult -- Deprecated
+    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
     , transferResult :: TokenTransferResult
     , userSearchResult :: UserSearchResult
     }
@@ -424,7 +424,6 @@ initDashboard id =
   _dashboard
     $ R.disjointUnion id
         { error: Nothing
-        , balance: _notAsked unit :: RemoteData _ _ _ _
         , trustAddResult: _notAsked unit :: RemoteData _ _ _ _
         , trustRemoveResult: _notAsked unit :: RemoteData _ _ _ _
         , getBalanceResult: _notAsked unit :: RemoteData _ _ _ _
