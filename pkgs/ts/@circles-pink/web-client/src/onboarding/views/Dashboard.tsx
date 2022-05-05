@@ -26,7 +26,6 @@ import {
   mdiMagnify,
 } from '@mdi/js';
 import Icon from '@mdi/react';
-import { CirclesCurrency } from '../../assets/CirclesCurrency';
 import {
   MappedTrustNodes,
   TrustUserList,
@@ -36,7 +35,6 @@ import { Overlay } from '../../components/Overlay';
 import { JustifyBetweenCenter } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
 import { Receive } from './dashboard/Receive';
-import { mapBalanceToHr } from '../utils/balance';
 import { Balance } from './dashboard/Balance';
 
 // -----------------------------------------------------------------------------
