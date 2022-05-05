@@ -8,7 +8,8 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
-import Data.Either (Either(..), either)
+import Data.Either (Either(..), either, isRight)
+import Data.String (length)
 import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
@@ -89,17 +90,29 @@ dashboard env =
       Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
   getBalance set st _ = do
-    _ <-
+    balance <-
       run (env.getBalance st.privKey st.user.safeAddress)
         # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-    _ <-
-      run (env.checkUBIPayout st.privKey st.user.safeAddress)
-        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
-    _ <-
-      run (env.requestUBIPayout st.privKey st.user.safeAddress)
-        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
-    pure unit
+        # retryUntil env (const { delay: 2000 }) (\r _ -> isRight r) 0
+    case balance of
+      Left _ -> pure unit
+      Right _ -> do
+        checkPayout <-
+          run (env.checkUBIPayout st.privKey st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+            # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
+        case checkPayout of
+          Left _ -> pure unit
+          Right checkPayout'
+            | checkPayout'.length >= 18 -> do
+              _ <-
+                run (env.requestUBIPayout st.privKey st.user.safeAddress)
+                  # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
+                  # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
+              pure unit
+          _ -> pure unit
 
+  --pure unit
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
     let
@@ -147,20 +160,49 @@ subscribeRemoteData setCb comp = do
   pure result
 
 --------------------------------------------------------------------------------
-type RemoteReportV e a
-  = RemoteReport (Variant e) a
-
 subscribeRemoteReport ::
   forall e a t m.
-  Monad m => MonadTrans t => Monad (t m) => Env.Env m -> (RemoteReportV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
-subscribeRemoteReport env setCb comp = do
-  startTime <- lift $ env.getTimestamp
-  setCb $ _loading { timestamp: startTime, retry: undefined }
+  Monad m =>
+  MonadTrans t =>
+  Monad (t m) =>
+  Env.Env m -> (RemoteReport e a -> t m Unit) -> t m (Either e a) -> Int -> t m (Either e a)
+subscribeRemoteReport { getTimestamp } setCb comp retry = do
+  startTime <- lift getTimestamp
+  setCb $ _loading { timestamp: startTime, retry }
   result <- comp
-  endTime <- lift $ env.getTimestamp
+  endTime <- lift getTimestamp
   setCb case result of
-    Left e -> _failure { error: e, timestamp: endTime, retry: undefined }
-    Right d -> _success { data: d, timestamp: endTime, retry: undefined }
+    Left e -> _failure { error: e, timestamp: endTime, retry }
+    Right d -> _success { data: d, timestamp: endTime, retry }
   pure result
 
+subscribeRemoteReport_ ::
+  forall e a t m.
+  Monad m =>
+  MonadTrans t =>
+  Monad (t m) =>
+  Env.Env m -> (RemoteReport e a -> t m Unit) -> t m (Either e a) -> t m (Either e a)
+subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
+
 --------------------------------------------------------------------------------
+type RetryConfig
+  = { delay :: Int
+    }
+
+retryUntil ::
+  forall t m e a.
+  Monad m =>
+  MonadTrans t =>
+  Monad (t m) =>
+  Env.Env m -> (Int -> RetryConfig) -> (Either e a -> Int -> Boolean) -> Int -> (Int -> t m (Either e a)) -> t m (Either e a)
+retryUntil env@{ sleep } getCfg pred retry mkCompu = do
+  let
+    { delay } = getCfg retry
+  result <- mkCompu retry
+  let
+    newRetry = retry + 1
+  lift $ sleep delay
+  if pred result retry then
+    pure result
+  else
+    retryUntil env getCfg pred newRetry mkCompu
