@@ -17,6 +17,7 @@
     "chroma-js": "^2.4.2",
     "cytoscape": "^3.21.1",
     "cytoscape-cose-bilkent": "^4.1.0",
+    "dayjs": "^1.11.1",
     "fp-ts": "^2.11.9",
     "generated": "*",
     "i18next": "^21.6.13",
