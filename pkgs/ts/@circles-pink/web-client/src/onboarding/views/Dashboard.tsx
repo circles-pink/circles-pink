@@ -86,49 +86,18 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
     // Gather initial Client information
     act(A._dashboard(A._getBalance(unit)));
     act(A._dashboard(A._getTrusts(unit))); // Should be done in control
-    act(A._dashboard(A._checkUBIPayout(unit)));
 
     // Setup polling intervals
     const pollTrusts = window.setInterval(
       () => act(A._dashboard(A._getTrusts(unit))),
       15 * 1000
     );
-    const pollUBIPayout = window.setInterval(
-      () => act(A._dashboard(A._checkUBIPayout(unit))),
-      5 * 60 * 1000
-    );
 
     // Clear polling intervals
     return () => {
       window.clearInterval(pollTrusts);
-      window.clearInterval(pollUBIPayout);
     };
   }, []);
-
-  // -----------------------------------------------------------------------------
-  // UBI Payout
-  // -----------------------------------------------------------------------------
-
-  useEffect(() => {
-    // If polling for checkPayout happens successfully
-    // we can start a new payout request
-    if (
-      state.checkUBIPayoutResult.type === 'success' &&
-      // Limit payout request to over one Circle
-      state.checkUBIPayoutResult.value.toString().length > 18
-    ) {
-      act(A._dashboard(A._requestUBIPayout(unit)));
-    }
-  }, [state.checkUBIPayoutResult]);
-
-  useEffect(() => {
-    // Refresh balance after payout request with small timeout
-    if (state.requestUBIPayoutResult.type === 'success') {
-      setTimeout(() => {
-        act(A._dashboard(A._getBalance(unit)));
-      }, 2000);
-    }
-  }, [state.requestUBIPayoutResult]);
 
   // -----------------------------------------------------------------------------
   // User Search
