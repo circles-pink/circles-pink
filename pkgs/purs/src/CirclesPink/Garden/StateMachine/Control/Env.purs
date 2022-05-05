@@ -34,6 +34,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , GetBalance
   , GetSafeAddress
   , GetSafeStatus
+  , GetTimestamp
   , GetUsers
   , IsFunded
   , IsTrusted
@@ -43,6 +44,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , RequestUBIPayout
   , RestoreSession
   , SaveSession
+  , Sleep
   , Transfer
   , TrustGetNetwork
   , UserNotFoundError
@@ -59,6 +61,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (JsonDecodeError)
+import Data.DateTime.Instant (Instant)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -242,6 +245,13 @@ type ErrTransfer r
 type Transfer m
   = forall r. PrivateKey -> Address -> Address -> String -> String -> ExceptV (ErrTransfer + r) m String
 
+type GetTimestamp :: forall k. (Type -> k) -> k
+type GetTimestamp m
+  = m Instant
+
+type Sleep m
+  = Int -> m Unit
+
 --------------------------------------------------------------------------------
 type Env m
   = { apiCheckUserName :: ApiCheckUserName m
@@ -268,6 +278,8 @@ type Env m
     , checkUBIPayout :: CheckUBIPayout m
     , requestUBIPayout :: RequestUBIPayout m
     , transfer :: Transfer m
+    , getTimestamp :: GetTimestamp m
+    , sleep :: Sleep m
     }
 
 --------------------------------------------------------------------------------
