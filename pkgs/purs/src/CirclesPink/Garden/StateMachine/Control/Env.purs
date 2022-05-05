@@ -175,9 +175,9 @@ type ErrUserRegister r
 type UserRegister m
   = forall r. PrivateKey -> UserOptions -> ExceptV (ErrUserRegister + r) m Unit
 
---------------------------------------------------------------------------------
+type GeneratePrivateKey :: forall k. (Type -> k) -> k
 type GeneratePrivateKey m
-  = forall r. ExceptV r m PrivateKey
+  = m PrivateKey
 
 --------------------------------------------------------------------------------
 -- | Trust Add Connection

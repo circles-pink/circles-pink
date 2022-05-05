@@ -53,7 +53,7 @@ env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> Env.Env Af
 env { request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
-  , generatePrivateKey: lift P.genPrivateKey
+  , generatePrivateKey
   , userRegister
   , getUsers
   , userSearch
@@ -132,6 +132,9 @@ env { request, envVars } =
                 Right { isValid: false }
           )
         # ExceptT
+
+  generatePrivateKey :: Env.GeneratePrivateKey Aff
+  generatePrivateKey = P.genPrivateKey
 
   userRegister :: Env.UserRegister Aff
   userRegister privKey options = do
