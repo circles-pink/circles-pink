@@ -8,7 +8,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
-import Data.Either (Either(..))
+import Data.Either (Either(..), either)
 import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Undefined (undefined)
@@ -161,8 +161,5 @@ runAsRemoteData ::
 runAsRemoteData setCb comp = do
   setCb _loading
   result <- run comp
-  setCb
-    $ case result of
-        Left e -> _failure e
-        Right ok -> _success ok
+  setCb $ either _failure _success result
   pure result
