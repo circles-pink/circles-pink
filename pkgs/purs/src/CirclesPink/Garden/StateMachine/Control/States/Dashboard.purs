@@ -6,6 +6,7 @@ import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
+import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either, isRight)
@@ -89,30 +90,26 @@ dashboard env =
       Left e -> set \st' -> S._dashboard st' { trustRemoveResult = _failure e }
       Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
-  getBalance set st _ = do
-    balance <-
-      run (env.getBalance st.privKey st.user.safeAddress)
-        # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-        # retryUntil env (const { delay: 2000 }) (\r _ -> isRight r) 0
-    case balance of
-      Left _ -> pure unit
-      Right _ -> do
+  getBalance set st _ =
+    void do
+      runExceptT do
+        _ <-
+          run (env.getBalance st.privKey st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # retryUntil env (const { delay: 2000 }) (\r _ -> isRight r) 0
+            # ExceptT
         checkPayout <-
           run (env.checkUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
-        case checkPayout of
-          Left _ -> pure unit
-          Right checkPayout'
-            | checkPayout'.length >= 18 -> do
-              _ <-
-                run (env.requestUBIPayout st.privKey st.user.safeAddress)
-                  # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
-                  # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
-              pure unit
-          _ -> pure unit
+            # ExceptT
+        when (checkPayout.length >= 18) do
+          run (env.requestUBIPayout st.privKey st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
+            # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
+            # ExceptT
+            # void
 
-  --pure unit
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
     let
