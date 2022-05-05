@@ -36,7 +36,7 @@ export const Balance = ({ theme, balance }: BalanceProps) => {
       return (
         <BalanceWrapper>
           <Amount color={theme.baseColor}>
-            {mapBalanceToHr(balance.value)}
+            {mapBalanceToHr(balance.value.data)}
           </Amount>
           <CirclesCurrency color={theme.baseColor} />
         </BalanceWrapper>
