@@ -92,15 +92,18 @@ dashboard env =
       Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
   getBalance set st _ = do
-    _ <-
-      runAsRemoteData
-        (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-        (env.getBalance st.privKey st.user.safeAddress)
+    -- _ <-
+    --   runAsRemoteData
+    --     (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+    --     (env.getBalance st.privKey st.user.safeAddress)
     --
     result <-
-      runAsRemoteData
-        (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
-        (env.checkUBIPayout st.privKey st.user.safeAddress)
+      run (env.checkUBIPayout st.privKey st.user.safeAddress)
+        # asRemoteData (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+    -- result <-
+    --   runAsRemoteData
+    --     (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+    --     (env.checkUBIPayout st.privKey st.user.safeAddress)
     pure unit
 
   checkUBIPayout set st _ = do
@@ -160,12 +163,12 @@ type EitherV e a
 type RemoteDataV e a
   = RemoteData (Variant e) a
 
-runAsRemoteData ::
+asRemoteData ::
   forall e a t m.
-  Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> ExceptV e m a -> t m (EitherV e a)
-runAsRemoteData setCb comp = do
+  Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
+asRemoteData setCb comp = do
   setCb _loading
-  result <- run comp
+  result <- comp
   setCb $ either _failure _success result
   pure result
 
