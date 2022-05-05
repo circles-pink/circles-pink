@@ -1,4 +1,6 @@
-module CirclesPink.Garden.StateMachine.Control.States.Dashboard where
+module CirclesPink.Garden.StateMachine.Control.States.Dashboard
+  ( dashboard
+  ) where
 
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
@@ -7,7 +9,9 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
 import Data.Either (Either(..))
+import Data.Variant (Variant)
 import RemoteData (RemoteData, _failure, _loading, _success)
+import Undefined (undefined)
 import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -88,14 +92,16 @@ dashboard env =
       Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
 
   getBalance set st _ = do
-    set \st' -> S._dashboard st' { getBalanceResult = _loading :: RemoteData _ _ }
-    let
-      task :: ExceptV S.ErrTokenGetBalance _ _
-      task = env.getBalance st.privKey st.user.safeAddress
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { getBalanceResult = _failure e }
-      Right b -> set \st' -> S._dashboard st' { getBalanceResult = _success b }
+    _ <-
+      runAsRemoteData
+        (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+        (env.getBalance st.privKey st.user.safeAddress)
+    --
+    result <-
+      runAsRemoteData
+        (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+        (env.checkUBIPayout st.privKey st.user.safeAddress)
+    pure unit
 
   checkUBIPayout set st _ = do
     set \st' -> S._dashboard st' { checkUBIPayoutResult = _loading :: RemoteData _ _ }
@@ -146,3 +152,17 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
+
+runAsRemoteData ::
+  forall e a t m.
+  Monad m =>
+  MonadTrans t =>
+  Monad (t m) => (RemoteData (Variant e) a -> t m Unit) -> ExceptV e m a -> t m (Either (Variant e) a)
+runAsRemoteData setCb comp = do
+  setCb _loading
+  result <- run comp
+  setCb
+    $ case result of
+        Left e -> _failure e
+        Right ok -> _success ok
+  pure result
