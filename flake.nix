@@ -211,8 +211,13 @@
                   });
               publish = effects.mkEffect {
                 effectScript = ''
-                  ${pkgs.nodePackages.npm}/bin/npm publish --dry-run --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
+                  export NODE_AUTH_TOKEN=`readSecretJSON secrets .npm-token`;
+                  ${pkgs.nodePackages.npm}/bin/npm publish --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
+
+                secretsMap = {
+                  "secrets" = "secrets";
+                };
               };
             };
         };
