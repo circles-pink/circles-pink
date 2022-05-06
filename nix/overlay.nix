@@ -106,22 +106,21 @@
     rec {
 
       dumpNpmVersions =
-        let script = ''
-          (j) => {
-            const delimiter = "-rc.";
-            const [version, postfix] = j.version.split(delimiter)
-            if (postfix == undefined) return j;
-            const newPostfix = parseInt(postfix, 10);
-            const newVersion = version + delimiter + newPostfix; 
-            return {...j, version: newVersion }  
-          }
+        final.writeJS "dump-npm-versions" { } ''
+            const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
+            const update = (j) => {
+              const delimiter = "-rc.";
+              const [version, postfix] = j.version.split(delimiter)
+              if (postfix == undefined) return j;
+              const newPostfix = parseInt(postfix, 10);
+              const newVersion = version + delimiter + newPostfix; 
+              return {...j, version: newVersion }  
+            };
+          const oldJson = JSON.parse(fs.readFileSync(filePath));
+          const newJson = update(oldJson);
+          fs.writeFileSync(filePath, JSON.stringify(newJson + "\n", null, 2));
         '';
-        in
-        final.writeShellScriptBin "dump-npm-versions" ''
-          ${final.patch-json}/bin/patch-json \
-            '${script}' \
-            "pkgs/ts/@circles-pink/state-machine/package.json"
-        '';
+
 
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
