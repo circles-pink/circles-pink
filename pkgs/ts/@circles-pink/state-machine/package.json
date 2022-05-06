@@ -1,5 +1,5 @@
 {
-  "name": "generated",
+  "name": "@circles-pink/state-machine",
   "version": "1.0.0",
   "dependencies": {
     "@circles/core": "^2.10.10",

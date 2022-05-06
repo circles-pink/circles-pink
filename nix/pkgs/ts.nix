@@ -48,6 +48,10 @@ rec {
       tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
     };
 
+  # builtWorkspaces = {
+  #   generated = 
+  # };
+
   printPkgNameYarn2NixStyle = pn: pipe pn [
     (splitString "/")
     (intersperse "-")
