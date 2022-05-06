@@ -86,18 +86,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   useEffect(() => {
     // Gather initial Client information
     act(A._dashboard(A._getBalance(unit)));
-    act(A._dashboard(A._getTrusts(unit))); // Should be done in control
-
-    // Setup polling intervals
-    const pollTrusts = window.setInterval(
-      () => act(A._dashboard(A._getTrusts(unit))),
-      15 * 1000
-    );
-
-    // Clear polling intervals
-    return () => {
-      window.clearInterval(pollTrusts);
-    };
+    act(A._dashboard(A._getTrusts(unit)));
   }, []);
 
   // -----------------------------------------------------------------------------
@@ -108,9 +97,12 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   useEffect(() => {
     // Map received userdata with users trusts for display
-    if (state.userSearchResult.type === 'success') {
+    if (
+      state.userSearchResult.type === 'success' &&
+      state.trustsResult.type === 'success'
+    ) {
       const mapped = state.userSearchResult.value.map(u => {
-        const trusts = state.trusts as TrustNode[];
+        const trusts = state.trustsResult.value as TrustNode[];
         const t = trusts.find(t => t.safeAddress === u.safeAddress);
         return {
           ...u,
@@ -133,14 +125,19 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
 
   useEffect(() => {
     // Whenever trusts are updated, we wanna get the according usernames
-    const addresses = state.trusts.map(t => t.safeAddress);
-    act(A._dashboard(A._getUsers({ userNames: [], addresses })));
-  }, [state.trusts]);
+    if (state.trustsResult.type === 'success') {
+      const addresses = state.trustsResult.value.data.map(t => t.safeAddress);
+      act(A._dashboard(A._getUsers({ userNames: [], addresses })));
+    }
+  }, [state.trustsResult]);
 
   useEffect(() => {
     // Map received userdata with users trusts for display
-    if (state.getUsersResult.type === 'success') {
-      const mapped = state.trusts.map(t => {
+    if (
+      state.getUsersResult.type === 'success' &&
+      state.trustsResult.type === 'success'
+    ) {
+      const mapped = state.trustsResult.value.data.map(t => {
         const users = state.getUsersResult.value as User[];
         const info = users.find(u => u.safeAddress === t.safeAddress);
         return {
@@ -149,27 +146,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           avatarUrl: info?.avatarUrl || null,
         };
       });
-      setMappedTrusts(mapped);
+      setMappedTrusts(
+        mapped.sort((a, b) => a.username.localeCompare(b.username))
+      );
     }
-  }, [state.getUsersResult]);
-
-  // -----------------------------------------------------------------------------
-  // Add Trust
-  // -----------------------------------------------------------------------------
-
-  useEffect(() => {
-    switch (state.trustAddResult.type) {
-      case 'loading':
-      case 'notAsked':
-      case 'failure':
-        break;
-      case 'success':
-        setTimeout(() => {
-          act(A._dashboard(A._getTrusts(unit)));
-        }, 1000);
-        break;
-    }
-  }, [state.trustAddResult]);
+  }, [state.getUsersResult, state.trustsResult]);
 
   // -----------------------------------------------------------------------------
   // Transfer
@@ -265,9 +246,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                     addTrust={to =>
                       act(A._dashboard(A._addTrustConnection(to)))
                     }
+                    trustAddResult={state.trustAddResult}
                     removeTrust={to =>
                       act(A._dashboard(A._removeTrustConnection(to)))
                     }
+                    trustRemoveResult={state.trustRemoveResult}
                   />
                 </FadeIn>
               )}
@@ -287,9 +270,11 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                     addTrust={to =>
                       act(A._dashboard(A._addTrustConnection(to)))
                     }
+                    trustAddResult={state.trustAddResult}
                     removeTrust={to =>
                       act(A._dashboard(A._removeTrustConnection(to)))
                     }
+                    trustRemoveResult={state.trustRemoveResult}
                     actionRow={
                       <JustifyBetweenCenter>
                         <InputWrapper>

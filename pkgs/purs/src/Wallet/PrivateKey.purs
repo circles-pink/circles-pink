@@ -36,6 +36,7 @@ import Data.String.Regex.Unsafe (unsafeRegex)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
+import Data.Hashable (class Hashable)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -47,6 +48,8 @@ newtype Address
   = Address String
 
 derive newtype instance showAddress :: Show Address
+
+derive newtype instance hashableAddress :: Hashable Address
 
 newtype Nonce
   = Nonce BigInt

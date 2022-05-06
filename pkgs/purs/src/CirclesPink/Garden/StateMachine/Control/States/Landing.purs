@@ -32,12 +32,11 @@ landing env =
             pure { privKey, loginResult }
         case result of
           Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
-          Right { privKey, loginResult: { user, trusts, safeStatus } }
+          Right { privKey, loginResult: { user, safeStatus } }
             | safeStatus.isCreated && safeStatus.isDeployed -> do
               set \_ ->
                 S.initDashboard
                   { user
-                  , trusts
                   , privKey
                   }
           Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do

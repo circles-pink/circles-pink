@@ -40,12 +40,11 @@ login env =
             pure loginResult
     case results of
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
-      Right { user, trusts, safeStatus }
+      Right { user, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed -> do
           set \_ ->
             S.initDashboard
               { user
-              , trusts
               , privKey
               }
       Right { user, trusts, safeStatus, isReady } -> do

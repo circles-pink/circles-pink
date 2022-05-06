@@ -10,11 +10,10 @@ import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either, isRight)
-import Data.String (length)
 import Data.Variant (Variant)
+import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
-import Undefined (undefined)
 import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -63,32 +62,45 @@ dashboard env =
   , userSearch
   }
   where
-  getTrusts set st _ = do
-    result <-
-      run $ env.trustGetNetwork st.privKey
-    case result of
-      Left e -> set \st' -> S._dashboard st' { error = pure e }
-      Right t -> set \st' -> S._dashboard st' { trusts = t }
+  getTrusts set st _ =
+    void do
+      runExceptT do
+        _ <-
+          run (env.trustGetNetwork st.privKey)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+            # ExceptT
+        pure unit
 
-  addTrustConnection set st u = do
-    set \st' -> S._dashboard st' { trustAddResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrTrustAddConnection _ _
-      task = env.addTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { trustAddResult = _failure e }
-      Right _ -> set \st' -> S._dashboard st' { trustAddResult = _success unit }
+  addTrustConnection set st u =
+    void do
+      runExceptT do
+        _ <-
+          run (env.addTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
+            # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
+            # ExceptT
+        _ <-
+          run (env.trustGetNetwork st.privKey)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+            # retryUntil env (const { delay: 500 }) (\_ n -> n == 5) 0
+            # ExceptT
+        pure unit
 
-  removeTrustConnection set st u = do
-    set \st' -> S._dashboard st' { trustRemoveResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrTrustRemoveConnection _ _
-      task = env.removeTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { trustRemoveResult = _failure e }
-      Right _ -> set \st' -> S._dashboard st' { trustRemoveResult = _success unit }
+  removeTrustConnection set st u =
+    void do
+      runExceptT do
+        _ <-
+          run (env.removeTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
+            # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
+            # ExceptT
+        _ <-
+          run (env.trustGetNetwork st.privKey)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+            # retryUntil env (const { delay: 500 }) (\_ n -> n == 5) 0
+            # ExceptT
+        pure unit
 
   getBalance set st _ =
     void do
