@@ -61,9 +61,9 @@
         gardenGraphApi = "https://api.thegraph.com";
         gardenSubgraphName = "azf20/circles-ubi";
         gardenRelay = "https://relay.circles.garden";
-        gardenHubAddress = "0xCfEB869F69431e42cdB54A4F4f105C19C080A601";
-        gardenProxyFactoryAddress = "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb";
-        gardenSafeMasterAddress = "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550";
+        gardenHubAddress = "0x29b9a7fBb8995b2423a71cC17cf9810798F6C543";
+        gardenProxyFactoryAddress = "0x8b4404DE0CaECE4b966a9959f134f0eFDa636156";
+        gardenSafeMasterAddress = "0x2CB0ebc503dE87CFD8f0eCEED8197bF7850184ae";
         gardenEthereumNodeWebSocket = "wss://dark-frosty-field.xdai.quiknode.pro";
       };
 
