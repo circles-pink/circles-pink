@@ -3,17 +3,17 @@ module CirclesPink.Garden.StateMachine.Control (circlesControl) where
 import Prelude
 import CirclesPink.Garden.StateMachine (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.Control.Class (class CirclesControl)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
+import Control.Monad.Reader (ReaderT(..))
 import Stadium.Control as C
 
 circlesControl ::
   forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
+  CirclesControl t m =>
   Env.Env m -> ((S.CirclesState -> S.CirclesState) -> t m Unit) -> S.CirclesState -> CirclesAction -> t m Unit
 circlesControl env =
   C.mkControl

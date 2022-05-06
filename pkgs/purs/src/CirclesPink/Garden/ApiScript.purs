@@ -20,11 +20,11 @@ control ::
   EnvVars ->
   ((CirclesState -> CirclesState) -> StateT CirclesState Aff Unit) ->
   CirclesState -> CirclesAction -> StateT CirclesState Aff Unit
-control envVars =
-  milkisRequest nodeFetch
-    # addLogging
-    # (\request -> env { request, envVars })
-    # circlesControl
+control envVars = undefined
+  -- milkisRequest nodeFetch
+  --   # addLogging
+  --   # (\request -> env { request, envVars })
+  --   # circlesControl
 
 act :: EnvVars -> CirclesAction -> StateT CirclesState Aff Unit
 act envVars ac = do

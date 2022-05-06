@@ -3,11 +3,13 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
+import CirclesPink.Garden.StateMachine.Control.Class (class CirclesControl)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.Reader (ReaderT(..), ask)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either, isRight)
 import Data.String (length)
@@ -20,9 +22,7 @@ import Wallet.PrivateKey as P
 
 dashboard ::
   forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
+  CirclesControl t m =>
   Env.Env m ->
   { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
@@ -64,6 +64,7 @@ dashboard env =
   }
   where
   getTrusts set st _ = do
+    --env_ <- ask
     result <-
       run $ env.trustGetNetwork st.privKey
     case result of

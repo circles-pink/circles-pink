@@ -18,9 +18,10 @@ import Control.Monad.State (StateT, execStateT)
 import Data.Identity (Identity)
 import Data.Newtype (unwrap)
 import Stadium.Control (toStateT)
+import Control.Monad.Reader.Trans (runReaderT, ReaderT)
 
 act :: CirclesAction -> StateT CirclesState Identity Unit
-act = toStateT $ circlesControl testEnv
+act = toStateT $ runReaderT testEnv $ circlesControl testEnv
 
 execFrom :: CirclesState -> StateT CirclesState Identity Unit -> CirclesState
 execFrom st m = unwrap $ execStateT m st
