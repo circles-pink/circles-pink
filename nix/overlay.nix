@@ -107,15 +107,16 @@
 
       dumpNpmVersions =
         final.writers.writeJS "dump-npm-versions" { } ''
-            const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
-            const update = (j) => {
-              const delimiter = "-rc.";
-              const [version, postfix] = j.version.split(delimiter)
-              if (postfix == undefined) return j;
-              const newPostfix = parseInt(postfix, 10);
-              const newVersion = version + delimiter + newPostfix; 
-              return {...j, version: newVersion }  
-            };
+          const fs = require("fs");
+          const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
+          const update = (j) => {
+            const delimiter = "-rc.";
+            const [version, postfix] = j.version.split(delimiter)
+            if (postfix == undefined) return j;
+            const newPostfix = parseInt(postfix, 10);
+            const newVersion = version + delimiter + newPostfix; 
+            return {...j, version: newVersion }  
+          };
           const oldJson = JSON.parse(fs.readFileSync(filePath));
           const newJson = update(oldJson);
           fs.writeFileSync(filePath, JSON.stringify(newJson + "\n", null, 2));
