@@ -105,10 +105,9 @@
   circles-pink = import ./pkgs { pkgs = final; } //
     rec {
 
-      dumpNpmVersions =
-        final.writeShellScriptBin "dunp-npm-versions" ''
-          ${final.nodejs}/bin/node ${js}
-          npm version --preid rc -w @circles-pink/state-machine prerelease
+      bumpNpmVersions =
+        final.writeShellScriptBin "bump-npm-versions" ''
+          ${final.nodePackages.npm}/bin/npm version --preid rc -w @circles-pink/state-machine prerelease
         '';
 
 
