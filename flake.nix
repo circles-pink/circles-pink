@@ -211,7 +211,7 @@
                   });
               publish = effects.mkEffect {
                 effectScript = ''
-                  export NODE_AUTH_TOKEN=`readSecretJSON secrets .npm-token`;
+                  export NODE_AUTH_TOKEN=`readSecretString secrets .npm-token`;
                   ${pkgs.nodePackages.npm}/bin/npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
                   ${pkgs.nodePackages.npm}/bin/npm publish --verbose --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
