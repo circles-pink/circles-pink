@@ -211,8 +211,7 @@
                   });
               publish = effects.mkEffect {
                 userSetupScript = ''
-                  readSecretJSON secrets .npm-token > /token.txt
-                  export NODE_AUTH_TOKEN=`cat /token.txt`;
+                  NODE_AUTH_TOKEN=`readSecretString secrets '."npm-token"'`;
                   ${pkgs.nodePackages.npm}/bin/npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
                 '';
 
