@@ -87,7 +87,7 @@ rec {
       (xs: if length xs == 1 then elemAt xs 0 else "${scope}/${elemAt xs 1}")
     ];
 
-  src = pkgs.nix-filter.filter {
+  src' = pkgs.nix-filter.filter {
     root = pkgs.lib.cleanSource ../../.;
     include = [
       "package.json"
@@ -100,6 +100,13 @@ rec {
     )
     ;
   };
+
+  src = runCommand "" { } ''
+    cp -r ${src} $out
+    cd $out
+    chmod -R +w $out
+    ${pkgs.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine 1.0.0
+  '';
 
   emptyWorkspaces = pipe
     (pkgs.yarn2nix-moretea.mkYarnWorkspace { inherit src; }) [
