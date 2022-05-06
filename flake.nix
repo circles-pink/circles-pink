@@ -216,7 +216,11 @@
                 '';
 
                 effectScript = ''
-                  ${pkgs.nodePackages.npm}/bin/npm publish --verbose --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
+                  ${pkgs.nodePackages.npm}/bin/npm publish \
+                    --verbose \
+                    --tag next \
+                    --access public \
+                    ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
 
                 secretsMap = {
