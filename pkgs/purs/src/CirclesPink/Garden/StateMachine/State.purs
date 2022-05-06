@@ -25,6 +25,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrTokenTransferResolved
   , ErrTrustAddConnection
   , ErrTrustAddConnectionResolved
+  , ErrTrustGetTrusts
+  , ErrTrustGetTrustsResolved
   , ErrTrustRemoveConnection
   , ErrTrustRemoveConnectionResolved
   , ErrTrustState
@@ -45,6 +47,7 @@ module CirclesPink.Garden.StateMachine.State
   , TokenRequestUBIPayoutResult
   , TokenTransferResult
   , TrustAddResult
+  , TrustGetTrusts
   , TrustRemoveResult
   , TrustState
   , TrustStateTrustsResult
@@ -80,6 +83,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Data.Argonaut (JsonDecodeError)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
+import Foreign.Object (Object, empty)
 import Record as R
 import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
@@ -235,6 +239,19 @@ type ErrUserSearch
 type UserSearchResult
   = RemoteData Unit Unit ErrUserSearchResolved (Array User)
 
+-- Trust / GetTrusts
+type ErrTrustGetTrustsResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTrustGetTrusts
+  = Env.ErrAddTrustConnection + ()
+
+type TrustGetTrusts
+  = RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
+
 -- | Trust / AddConnection
 type ErrTrustAddConnectionResolved
   = Variant
@@ -246,7 +263,7 @@ type ErrTrustAddConnection
   = Env.ErrAddTrustConnection + ()
 
 type TrustAddResult
-  = RemoteData Unit Unit ErrTrustAddConnectionResolved Unit
+  = Object (RemoteReport ErrTrustAddConnectionResolved String)
 
 -- | Trust / RemoveConnection
 type ErrTrustRemoveConnectionResolved
@@ -259,7 +276,7 @@ type ErrTrustRemoveConnection
   = Env.ErrRemoveTrustConnection + ()
 
 type TrustRemoveResult
-  = RemoteData Unit Unit ErrTrustRemoveConnectionResolved Unit
+  = Object (RemoteReport ErrTrustRemoveConnectionResolved String)
 
 -- | Token / GetBalance
 type ErrTokenGetBalanceResolved
@@ -324,8 +341,8 @@ type ErrDashboardStateResolved
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
-    , trusts :: Array TrustNode
     , error :: Maybe ErrDashboardStateResolved
+    , trustsResult :: TrustGetTrusts
     , trustAddResult :: TrustAddResult
     , trustRemoveResult :: TrustRemoveResult
     , getBalanceResult :: TokenGetBalanceResult
@@ -416,7 +433,6 @@ initDebug =
 type InitDashboard
   = { user :: CC.User
     , privKey :: PrivateKey
-    , trusts :: Array TrustNode
     }
 
 initDashboard :: InitDashboard -> forall v. Variant ( dashboard :: DashboardState | v )
@@ -424,8 +440,9 @@ initDashboard id =
   _dashboard
     $ R.disjointUnion id
         { error: Nothing
-        , trustAddResult: _notAsked unit :: RemoteData _ _ _ _
-        , trustRemoveResult: _notAsked unit :: RemoteData _ _ _ _
+        , trustAddResult: empty :: Object _
+        , trustRemoveResult: empty :: Object _
+        , trustsResult: _notAsked unit :: RemoteData _ _ _ _
         , getBalanceResult: _notAsked unit :: RemoteData _ _ _ _
         , checkUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _
         , requestUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _

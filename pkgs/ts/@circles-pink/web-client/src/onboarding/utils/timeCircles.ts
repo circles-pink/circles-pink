@@ -57,7 +57,7 @@ const mapCircles = (
 ) => {
   const transactionDateUnix = dayjs(dateTime).unix();
   const daysSinceDay0Unix = (transactionDateUnix - day0Unix) / oneDayInSeconds;
-  const dayInCurrentCycle = Math.ceil(daysSinceDay0Unix % 365.25);
+  const dayInCurrentCycle = daysSinceDay0Unix % 365.25;
   const yearsSince = (transactionDateUnix - day0Unix) / oneYearInSeconds;
   const perDayValue = getBaseCirclesPerDayValue(yearsSince);
 

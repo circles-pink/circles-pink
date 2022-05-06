@@ -56,6 +56,5 @@ trusts env =
         set \_ ->
           S.initDashboard
             { user: st.user
-            , trusts: st.trusts
             , privKey: st.privKey
             }

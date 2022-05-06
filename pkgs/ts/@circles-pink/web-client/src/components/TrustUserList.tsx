@@ -21,6 +21,13 @@ import {
   JustifyBetweenCenter,
   JustifyStartCenter,
 } from './helper';
+import {
+  ErrTrustAddConnectionResolved,
+  TrustAddResult,
+  TrustRemoveResult,
+} from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import { RemoteReport } from 'generated/output/RemoteReport';
+import { LoadingCircles } from './LoadingCircles';
 
 type UserData = {
   username: string;
@@ -42,20 +49,13 @@ type TrustUserListProps = {
   setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
   addTrust: (to: string) => void;
   removeTrust: (to: string) => void;
+  trustAddResult: TrustAddResult;
+  trustRemoveResult: TrustRemoveResult;
 };
 
-export const TrustUserList = ({
-  title,
-  content,
-  theme,
-  icon,
-  actionRow,
-  setActiveOverlay,
-  setOverlayOpen,
-  setOverwriteTo,
-  addTrust,
-  removeTrust,
-}: TrustUserListProps) => {
+export const TrustUserList = (props: TrustUserListProps) => {
+  const { title, content, theme, icon, actionRow } = props;
+
   return (
     <Frame theme={theme}>
       <Title>
@@ -91,83 +91,11 @@ export const TrustUserList = ({
           <TableBody>
             {content.map((c, index) => {
               return (
-                <TableRow theme={theme} key={index}>
-                  <TableData>
-                    <JustifyStartCenter>
-                      <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
-                      <b>{c.username}</b>
-                    </JustifyStartCenter>
-                  </TableData>
-                  {/* <TableData>{c.safeAddress}</TableData> */}
-                  <TableData>
-                    <JustifyAroundCenter>
-                      <Icon
-                        path={
-                          c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel
-                        }
-                        size={1.6}
-                        color={c.isIncoming ? theme.baseColor : 'white'}
-                      />
-                    </JustifyAroundCenter>
-                  </TableData>
-                  <TableData>
-                    <JustifyAroundCenter>
-                      <Icon
-                        path={
-                          c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
-                        }
-                        size={1.6}
-                        color={c.isOutgoing ? theme.baseColor : 'white'}
-                      />
-                    </JustifyAroundCenter>
-                  </TableData>
-                  {/* <TableData>
-                    <JustifyAround>y €</JustifyAround>
-                  </TableData> */}
-                  <TableData>
-                    <JustifyBetweenCenter>
-                      <Clickable
-                        clickable={c.isOutgoing}
-                        onClick={() => {
-                          if (c.isOutgoing) {
-                            if (
-                              setActiveOverlay &&
-                              setOverlayOpen &&
-                              setOverwriteTo
-                            ) {
-                              setOverwriteTo(addrToString(c.safeAddress));
-                              setActiveOverlay('SEND');
-                              setOverlayOpen(true);
-                            }
-                          }
-                        }}
-                      >
-                        <Icon
-                          path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-                          size={1.75}
-                          color={c.isOutgoing ? theme.baseColor : 'white'}
-                        />
-                      </Clickable>
-
-                      <Clickable
-                        clickable={true}
-                        onClick={() => {
-                          if (!c.isIncoming) {
-                            addTrust(addrToString(c.safeAddress));
-                          } else {
-                            removeTrust(addrToString(c.safeAddress));
-                          }
-                        }}
-                      >
-                        <Icon
-                          path={c.isIncoming ? mdiHeart : mdiHeartOutline}
-                          size={1.5}
-                          color={c.isIncoming ? theme.baseColor : 'white'}
-                        />
-                      </Clickable>
-                    </JustifyBetweenCenter>
-                  </TableData>
-                </TableRow>
+                <ContentRow
+                  key={addrToString(c.safeAddress)}
+                  c={c}
+                  {...props}
+                />
               );
             })}
           </TableBody>
@@ -175,6 +103,125 @@ export const TrustUserList = ({
       </TableContainer>
     </Frame>
   );
+};
+
+// -----------------------------------------------------------------------------
+// UI / ContentRow
+// -----------------------------------------------------------------------------
+
+const ContentRow = (
+  props: TrustUserListProps & { c: TrustNode & UserData }
+): ReactElement => {
+  const {
+    c,
+    theme,
+    setActiveOverlay,
+    setOverlayOpen,
+    setOverwriteTo,
+    addTrust,
+    removeTrust,
+    trustAddResult,
+    trustRemoveResult,
+  } = props;
+
+  const trustAddLoading = trustAddResult[addrToString(c.safeAddress)]
+    ? trustIsLoading(trustAddResult[addrToString(c.safeAddress)])
+    : false;
+
+  const trustRemoveLoading = trustRemoveResult[addrToString(c.safeAddress)]
+    ? trustIsLoading(trustRemoveResult[addrToString(c.safeAddress)])
+    : false;
+
+  return (
+    <TableRow theme={theme}>
+      <TableData>
+        <JustifyStartCenter>
+          <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
+          <b>{c.username}</b>
+        </JustifyStartCenter>
+      </TableData>
+      {/* <TableData>{c.safeAddress}</TableData> */}
+      <TableData>
+        <JustifyAroundCenter>
+          <Icon
+            path={c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel}
+            size={1.6}
+            color={c.isIncoming ? theme.baseColor : 'white'}
+          />
+        </JustifyAroundCenter>
+      </TableData>
+      <TableData>
+        <JustifyAroundCenter>
+          <Icon
+            path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
+            size={1.6}
+            color={c.isOutgoing ? theme.baseColor : 'white'}
+          />
+        </JustifyAroundCenter>
+      </TableData>
+      {/* <TableData>
+            <JustifyAround>y €</JustifyAround>
+          </TableData> */}
+      <TableData>
+        <JustifyBetweenCenter>
+          <Clickable
+            clickable={c.isOutgoing}
+            onClick={() => {
+              if (c.isOutgoing) {
+                if (setActiveOverlay && setOverlayOpen && setOverwriteTo) {
+                  setOverwriteTo(addrToString(c.safeAddress));
+                  setActiveOverlay('SEND');
+                  setOverlayOpen(true);
+                }
+              }
+            }}
+          >
+            <Icon
+              path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+              size={1.75}
+              color={c.isOutgoing ? theme.baseColor : 'white'}
+            />
+          </Clickable>
+
+          {!trustAddLoading && !trustRemoveLoading ? (
+            <Clickable
+              clickable={true}
+              onClick={() => {
+                if (!c.isIncoming) {
+                  addTrust(addrToString(c.safeAddress));
+                } else {
+                  removeTrust(addrToString(c.safeAddress));
+                }
+              }}
+            >
+              <Icon
+                path={c.isIncoming ? mdiHeart : mdiHeartOutline}
+                size={1.5}
+                color={c.isIncoming ? theme.baseColor : 'white'}
+              />
+            </Clickable>
+          ) : (
+            <LoadingCircles count={1} width={35} color={theme.baseColor} />
+          )}
+        </JustifyBetweenCenter>
+      </TableData>
+    </TableRow>
+  );
+};
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const trustIsLoading = (
+  result: RemoteReport<ErrTrustAddConnectionResolved, string>
+) => {
+  switch (result.type) {
+    case 'loading':
+      return true;
+    default:
+      return false;
+  }
 };
 
 // -----------------------------------------------------------------------------
