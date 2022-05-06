@@ -25,8 +25,8 @@ import {
   ErrTrustAddConnectionResolved,
   TrustAddResult,
   TrustRemoveResult,
-} from 'generated/output/CirclesPink.Garden.StateMachine.State';
-import { RemoteReport } from 'generated/output/RemoteReport';
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
 
 type UserData = {
