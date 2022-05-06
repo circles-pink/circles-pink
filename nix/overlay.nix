@@ -105,6 +105,24 @@
   circles-pink = import ./pkgs { pkgs = final; } //
     rec {
 
+      dumpNpmVersions =
+        let script = ''
+          (j) => {
+            const delimiter = "-rc.";
+            const [version, postfix] = j.version.split(delimiter)
+            if (postfix == undefined) return j;
+            const newPostfix = parseInt(postfix, 10);
+            const newVersion = version + delimiter + newPostfix; 
+            return {...j, version: newVersion }  
+          }
+        '';
+        in
+        final.writeShellScriptBin "dump-npm-versions" ''
+          ${final.patch-json}/bin/patch-json \
+            "pkgs/ts/@circles-pink/state-machine/package.json" \
+            '${script}'
+        '';
+
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
         pursOutput = purs.default;

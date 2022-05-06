@@ -122,6 +122,7 @@
                   pkgs.patch-json
                   pkgs.gh
                   pkgs.deadnix
+                  pkgs.circles-pink.dumpNpmVersions
                   #nodePackages.webpack
                 ];
 
