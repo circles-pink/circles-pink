@@ -156,7 +156,7 @@
               {
                 deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
-                inherit (effects) publish;
+                #inherit (effects) publish;
               } // checks;
           };
 
