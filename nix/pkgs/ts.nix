@@ -1,7 +1,7 @@
 { pkgs, pursOutput, assets, zeus-client, ... }:
 let
 
-  inherit (pkgs) lib;
+  inherit (pkgs) lib runCommand;
   inherit (lib)
     pipe
     filterAttrs
@@ -57,10 +57,19 @@ rec {
       tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
     };
 
-  # publicWorkspaces = {
-  #   "@circles-pink/state-machine" = workspaces.@circles-pink/state-machine; 
-  #   "@circles-pink/web-client" = {};
-  # };
+  publicWorkspaces = {
+    "@circles-pink/state-machine" = let name = "@circles-pink/state-machine"; in
+      pipe
+        workspaces.${name} [
+        (x: runCommand name { } ''
+          cp -r ${x}/libexec/${name}/deps/${name} $out
+          chmod -R +w $out
+          rm -rf $out/output/*/externs.cbor
+        '')
+      ];
+
+    "@circles-pink/web-client" = { };
+  };
 
   printPkgNameYarn2NixStyle = pn: pipe pn [
     (splitString "/")

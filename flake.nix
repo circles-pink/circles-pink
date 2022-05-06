@@ -155,6 +155,7 @@
               {
                 deploy-nixops-example-prebuilt = effects.deploy.prebuilt;
                 #deploy-nixops-example-dependencies = effects.nixops-example.dependencies;
+                inherit (effects) publish;
               } // checks;
           };
 
@@ -184,7 +185,7 @@
 
           effects = { src }:
             let
-              pkgs = inputs.nixpkgs.legacyPackages.${cdSystem};
+              nixpkgs = inputs.nixpkgs.legacyPackages.${cdSystem};
               effects = inputs.hercules-ci-effects.lib.withPkgs pkgs;
             in
             {
@@ -210,7 +211,7 @@
                   });
               publish = effects.mkEffect {
                 effectScript = ''
-                  ${pkgs.npm}/bin/npm publish --dry-run --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
+                  ${pkgs.nodePackages.npm}/bin/npm publish --dry-run --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
               };
             };
