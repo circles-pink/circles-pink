@@ -212,6 +212,9 @@
               publish = effects.mkEffect {
                 effectScript = ''
                   export NODE_AUTH_TOKEN=`readSecretJSON secrets .npm-token`;
+                  echo _auth=$NODE_AUTH_TOKEN >> .npmrc
+                  # echo email=<youremail> >> .npmrc
+                  echo always-auth=true >> .npmrc
                   ${pkgs.nodePackages.npm}/bin/npm publish --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
 
