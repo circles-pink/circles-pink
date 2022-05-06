@@ -106,24 +106,9 @@
     rec {
 
       dumpNpmVersions =
-        let js = final.writeText "script.js" ''
-          const fs = require("fs");
-          const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
-          const update = (j) => {
-            const delimiter = "-rc.";
-            const [version, postfix] = j.version.split(delimiter)
-            if (postfix == undefined) return j;
-            const newPostfix = parseInt(postfix, 10);
-            const newVersion = version + delimiter + newPostfix; 
-            return {...j, version: newVersion }  
-          };
-          const oldJson = JSON.parse(fs.readFileSync(filePath));
-          const newJson = update(oldJson);
-          fs.writeFileSync(filePath, JSON.stringify(newJson + "\n", null, 2));
-        '';
-        in
         final.writeShellScriptBin "dunp-npm-versions" ''
           ${final.nodejs}/bin/node ${js}
+          npm version --preid rc -w @circles-pink/state-machine prerelease
         '';
 
 
