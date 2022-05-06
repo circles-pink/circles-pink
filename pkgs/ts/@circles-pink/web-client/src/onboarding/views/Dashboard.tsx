@@ -26,10 +26,7 @@ import {
   mdiMagnify,
 } from '@mdi/js';
 import Icon from '@mdi/react';
-import {
-  MappedTrustNodes,
-  TrustUserList,
-} from '../../components/TrustUserList';
+import { TrustUserList } from '../../components/TrustUserList';
 import {
   TrustNode,
   User,
@@ -39,6 +36,18 @@ import { JustifyBetweenCenter } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
 import { Receive } from './dashboard/Receive';
 import { Balance } from './dashboard/Balance';
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+export type MappedTrustNodes = Array<TrustNode & UserData>;
+
+export type UserData = {
+  username: string;
+  avatarUrl: string | null;
+  safeAddress: string;
+};
 
 // -----------------------------------------------------------------------------
 // Dashboard
@@ -70,7 +79,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   };
 
   // User Interaction
-  // Set transfer target
+  // Set transfer target, when clicking on contact action
   const [overwriteTo, setOverwriteTo] = useState<string>('');
 
   // Search
@@ -102,8 +111,10 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       state.trustsResult.type === 'success'
     ) {
       const mapped = state.userSearchResult.value.map(u => {
-        const trusts = state.trustsResult.value as TrustNode[];
-        const t = trusts.find(t => t.safeAddress === u.safeAddress);
+        const trusts = state.trustsResult.value.data;
+        const t = trusts.find(
+          (t: TrustNode) => t.safeAddress === u.safeAddress
+        );
         return {
           ...u,
           isIncoming: t?.isIncoming || false,
@@ -137,17 +148,23 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       state.getUsersResult.type === 'success' &&
       state.trustsResult.type === 'success'
     ) {
-      const mapped = state.trustsResult.value.data.map(t => {
-        const users = state.getUsersResult.value as User[];
-        const info = users.find(u => u.safeAddress === t.safeAddress);
-        return {
-          ...t,
-          username: info?.username || 'Unnamed',
-          avatarUrl: info?.avatarUrl || null,
-        };
-      });
+      const mapped = state.trustsResult.value.data.map<MappedTrustNodes>(
+        (t: TrustNode) => {
+          const users = state.getUsersResult.value;
+          const info = users.find(
+            (u: UserData) => u.safeAddress === t.safeAddress
+          );
+          return {
+            ...t,
+            username: info?.username || 'Unnamed',
+            avatarUrl: info?.avatarUrl || null,
+          };
+        }
+      );
       setMappedTrusts(
-        mapped.sort((a, b) => a.username.localeCompare(b.username))
+        mapped.sort((a: UserData, b: UserData) =>
+          a.username.localeCompare(b.username)
+        )
       );
     }
   }, [state.getUsersResult, state.trustsResult]);

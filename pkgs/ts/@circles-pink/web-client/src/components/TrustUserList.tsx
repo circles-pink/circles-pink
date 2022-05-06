@@ -28,13 +28,7 @@ import {
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
-
-type UserData = {
-  username: string;
-  avatarUrl: string | null;
-};
-
-export type MappedTrustNodes = Array<TrustNode & UserData>;
+import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
