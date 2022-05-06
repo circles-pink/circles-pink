@@ -30,6 +30,8 @@ export const Balance = ({ theme, balance }: BalanceProps) => {
           <CirclesCurrency color={theme.baseColor} />
         </BalanceWrapper>
       );
+    default:
+      return <></>;
   }
 };
 
