@@ -210,24 +210,25 @@
                     forgetState = true;
 
                   });
-              publish = effects.mkEffect {
-                userSetupScript = ''
-                  NODE_AUTH_TOKEN=`readSecretString secrets '."npm-token"'`;
-                  ${pkgs.nodePackages.npm}/bin/npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
-                '';
+              publish = effects.runIf (src.ref == "refs/heads/main")
+                (effects.mkEffect {
+                  userSetupScript = ''
+                    NODE_AUTH_TOKEN=`readSecretString secrets '."npm-token"'`;
+                    ${pkgs.nodePackages.npm}/bin/npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
+                  '';
 
-                effectScript = ''
-                  ${pkgs.nodePackages.npm}/bin/npm publish \
-                    --verbose \
-                    --tag next \
-                    --access public \
-                    ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
-                '';
+                  effectScript = ''
+                    ${pkgs.nodePackages.npm}/bin/npm publish \
+                      --verbose \
+                      --tag next \
+                      --access public \
+                      ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
+                  '';
 
-                secretsMap = {
-                  "secrets" = "secrets";
-                };
-              };
+                  secretsMap = {
+                    "secrets" = "secrets";
+                  };
+                });
             };
         };
 
