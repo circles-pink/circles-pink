@@ -38,7 +38,7 @@
         const f = ${userJs};
         const oldJson = JSON.parse(fs.readFileSync(\"${filePath}\"));
         const newJson = f(oldJson);
-        fs.writeFileSync(\"${filePath}\", JSON.stringify(newJson, null, 2));
+        fs.writeFileSync(\"${filePath}\", JSON.stringify(newJson + "\n", null, 2));
       '';
     in
     ''
