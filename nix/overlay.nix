@@ -106,7 +106,7 @@
     rec {
 
       dumpNpmVersions =
-        final.writers.writeJS "dump-npm-versions" { } ''
+        let js = final.writeText "script.js" ''
           const fs = require("fs");
           const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
           const update = (j) => {
@@ -120,6 +120,10 @@
           const oldJson = JSON.parse(fs.readFileSync(filePath));
           const newJson = update(oldJson);
           fs.writeFileSync(filePath, JSON.stringify(newJson + "\n", null, 2));
+        '';
+        in
+        final.writeShellScriptBin "dunp-npm-versions" ''
+          ${final.nodejs}/bin/node ${js}
         '';
 
 
