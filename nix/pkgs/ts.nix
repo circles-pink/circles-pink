@@ -101,8 +101,8 @@ rec {
     ;
   };
 
-  src = runCommand "" { } ''
-    cp -r ${src} $out
+  src = runCommand "src-cleaned" { } ''
+    cp -r ${src'} $out
     cd $out
     chmod -R +w $out
     ${pkgs.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine 1.0.0
