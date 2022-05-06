@@ -210,8 +210,8 @@ retryUntil env@{ sleep } getCfg pred retry mkCompu = do
   result <- mkCompu retry
   let
     newRetry = retry + 1
-  lift $ sleep delay
   if pred result retry then
     pure result
-  else
+  else do
+    lift $ sleep delay
     retryUntil env getCfg pred newRetry mkCompu
