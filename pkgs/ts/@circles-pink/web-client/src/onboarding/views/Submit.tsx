@@ -1,10 +1,10 @@
-import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
-import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
+import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
-import { unit } from 'generated/output/Data.Unit';
+import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { getIncrementor } from '../utils/getCounter';

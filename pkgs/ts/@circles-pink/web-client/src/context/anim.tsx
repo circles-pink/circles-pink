@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useEffect, useState } from 'react';
-import { CirclesState } from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 
 // -----------------------------------------------------------------------------
 // Types

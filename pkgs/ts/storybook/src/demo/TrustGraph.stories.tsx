@@ -4,11 +4,11 @@ import {
   TrustGraph,
   Graph,
 } from "@circles-pink/web-client/src/components/TrustGraph";
-import { TrustNode } from "generated/output/CirclesCore";
+import { TrustNode } from "@circles-pink/state-machine/output/CirclesCore";
 import {
   Address,
   unsafeAddrFromString,
-} from "generated/output/Wallet.PrivateKey";
+} from "@circles-pink/state-machine/output/Wallet.PrivateKey";
 // import Cytoscape from "cytoscape";
 // import COSEBilkent from "cytoscape-cose-bilkent";
 

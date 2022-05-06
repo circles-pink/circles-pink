@@ -1,12 +1,12 @@
-import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
-import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
+import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
 
 import { Claim, SubClaim, Text } from '../../components/text';
 import { Button, Input, Checkbox } from '../../components/forms';
 import { mapIndicatorColors } from '../utils/mapIndicatorColors';
-import { unit } from 'generated/output/Data.Unit';
+import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';

@@ -24,7 +24,7 @@
     "tasks-explorer": "*",
     "babel-preset-react-app": "^10.0.1",
     "@circles-pink/web-client": "*",
-    "generated": "*",
+    "@circles-pink/state-machine": "*",
     "react": "^17.0.2",
     "react-docgen-typescript-loader": "^3.7.2",
     "react-dom": "^17.0.2",
