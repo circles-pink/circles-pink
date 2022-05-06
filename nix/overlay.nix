@@ -106,7 +106,7 @@
     rec {
 
       dumpNpmVersions =
-        final.writeJS "dump-npm-versions" { } ''
+        final.writers.writeJS "dump-npm-versions" { } ''
             const filePath = "pkgs/ts/@circles-pink/state-machine/package.json"
             const update = (j) => {
               const delimiter = "-rc.";
