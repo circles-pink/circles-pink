@@ -119,8 +119,8 @@
         in
         final.writeShellScriptBin "dump-npm-versions" ''
           ${final.patch-json}/bin/patch-json \
-            "pkgs/ts/@circles-pink/state-machine/package.json" \
-            '${script}'
+            '${script}' \
+            "pkgs/ts/@circles-pink/state-machine/package.json"
         '';
 
       ts = (import ./pkgs/ts.nix {
