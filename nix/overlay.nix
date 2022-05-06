@@ -107,7 +107,7 @@
 
       bumpNpmVersions =
         final.writeShellScriptBin "bump-npm-versions" ''
-          ${final.nodePackages.npm}/bin/npm version --preid rc -w @circles-pink/state-machine prerelease
+          ${final.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine patch
         '';
 
 
