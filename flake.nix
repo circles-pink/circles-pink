@@ -208,11 +208,11 @@
                     forgetState = true;
 
                   });
-              publish = mkEffect ({
+              publish = effects.mkEffect {
                 effectScript = ''
                   ${pkgs.npm}/bin/npm publish --dry-run --tag next ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
                 '';
-              });
+              };
             };
         };
 
