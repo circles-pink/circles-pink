@@ -1,7 +1,7 @@
 import {
   EmailApiResult,
   UsernameApiResult,
-} from 'generated/output/CirclesPink.Garden.StateMachine.State';
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 
 export const mapIndicatorColors = (
   apiResult: UsernameApiResult | EmailApiResult

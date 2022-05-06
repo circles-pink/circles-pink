@@ -1,6 +1,6 @@
 import { mdiCashFast } from '@mdi/js';
-import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
-import { addrToString } from 'generated/output/Wallet.PrivateKey';
+import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
+import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import React, { useEffect, useState } from 'react';
 import { Button, Input } from '../../../components/forms';
 import { JustifyEnd } from '../../../components/helper';

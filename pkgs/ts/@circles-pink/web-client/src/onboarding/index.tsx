@@ -1,11 +1,11 @@
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
-import { mkControl } from 'generated/output/CirclesPink.Garden.TS';
+import { mkControl } from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
   init,
-} from 'generated/output/CirclesPink.Garden.StateMachine.State';
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
@@ -24,7 +24,7 @@ import {
 import '../styles/global.css';
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
-import { CirclesAction } from 'generated/output/CirclesPink.Garden.StateMachine.Action';
+import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 

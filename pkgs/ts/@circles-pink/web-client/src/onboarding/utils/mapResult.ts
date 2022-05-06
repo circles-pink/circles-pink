@@ -1,4 +1,4 @@
-import { RemoteData } from 'generated/output/RemoteData';
+import { RemoteData } from '@circles-pink/state-machine/output/RemoteData';
 import { ButtonState } from '../../components/forms/Button';
 
 export const mapResult = <E, A>(remoteData: RemoteData<E, A>): ButtonState => {

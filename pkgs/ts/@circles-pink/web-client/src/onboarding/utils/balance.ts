@@ -1,4 +1,4 @@
-import { Balance } from 'generated/output/CirclesCore.Bindings';
+import { Balance } from '@circles-pink/state-machine/output/CirclesCore.Bindings';
 // import { BN } from 'ethereumjs-util';
 
 export const mapBalanceToBN = (raw: number): string => {

@@ -1,6 +1,6 @@
 import React, { ReactElement, SetStateAction } from 'react';
 import tw, { css, styled } from 'twin.macro';
-import { TrustNode } from 'generated/output/CirclesCore';
+import { TrustNode } from '@circles-pink/state-machine/output/CirclesCore';
 import { Theme } from '../context/theme';
 import { Claim } from './text';
 import {
@@ -15,7 +15,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import { addrToString } from 'generated/output/Wallet.PrivateKey';
+import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import {
   JustifyAroundCenter,
   JustifyBetweenCenter,

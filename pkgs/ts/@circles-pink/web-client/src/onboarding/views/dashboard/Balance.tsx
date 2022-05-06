@@ -1,4 +1,4 @@
-import { TokenGetBalanceResult } from 'generated/output/CirclesPink.Garden.StateMachine.State';
+import { TokenGetBalanceResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import React from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CirclesCurrency } from '../../../assets/CirclesCurrency';

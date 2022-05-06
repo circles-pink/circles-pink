@@ -1,7 +1,10 @@
-import * as A from 'generated/output/CirclesPink.Garden.StateMachine.Action';
-import { UserData } from 'generated/output/CirclesPink.Garden.StateMachine.State';
-import { unit } from 'generated/output/Data.Unit';
-import { getWords, keyToMnemonic } from 'generated/output/Wallet.PrivateKey';
+import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
+import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { unit } from '@circles-pink/state-machine/output/Data.Unit';
+import {
+  getWords,
+  keyToMnemonic,
+} from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import React, { ReactElement, useContext, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { FadeIn, ZoomIn } from 'anima-react';

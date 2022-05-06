@@ -1,4 +1,4 @@
-PURS_OUTPUT=pkgs/ts/generated/output
+PURS_OUTPUT=pkgs/ts/@circles-pink/state-machine/output
 
 all: dev-storybook build-storybook rw-result
 
@@ -37,6 +37,7 @@ clean-install:
 ifeq ($(PRUNE),true)
 	rm -rf node_modules
 	rm -rf pkgs/ts/*/node_modules
+	rm -rf pkgs/ts/*/*/node_modules
 endif
 
 clean-materialized:

@@ -3,9 +3,18 @@ let
 
   inherit (pkgs) lib;
   inherit (lib)
-    pipe filterAttrs splitString intersperse concatMapStringsSep
-    concatStrings removePrefix importJSON cleanSource concatMap;
-  inherit (builtins) mapAttrs attrNames;
+    pipe
+    filterAttrs
+    splitString
+    intersperse
+    concatMapStringsSep
+    concatStrings
+    removePrefix
+    importJSON
+    cleanSource
+    concatMap
+    mapAttrs';
+  inherit (builtins) mapAttrs attrNames length elemAt;
 
 in
 rec {
@@ -30,9 +39,9 @@ rec {
       "@circles-pink/web-client" = cleanSource ../../pkgs/ts/${"@"}circles-pink/web-client;
       circles-directus =
         cleanSource ../../pkgs/ts/circles-directus;
-      generated =
+      "@circles-pink/state-machine" =
         pkgs.runCommand "" { } ''
-          cp -r ${cleanSource ../../pkgs/ts/generated} $out
+          cp -r ${cleanSource ../../pkgs/ts/${"@"}circles-pink/state-machine} $out
           chmod -R +w $out
           cp -r ${pursOutput} $out/output
         '';
@@ -48,8 +57,9 @@ rec {
       tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
     };
 
-  # builtWorkspaces = {
-  #   generated = 
+  # publicWorkspaces = {
+  #   "@circles-pink/state-machine" = workspaces.@circles-pink/state-machine; 
+  #   "@circles-pink/web-client" = {};
   # };
 
   printPkgNameYarn2NixStyle = pn: pipe pn [
@@ -58,6 +68,15 @@ rec {
     concatStrings
     (removePrefix "@")
   ];
+
+  validScope = "@circles-pink";
+
+  parsePkgNameYarn2NixStyle = scope: pn:
+    let scope' = "${removePrefix "@" scope}-"; in
+    pipe pn [
+      (splitString scope')
+      (xs: if length xs == 1 then elemAt xs 0 else "${scope}/${elemAt xs 1}")
+    ];
 
   src = pkgs.nix-filter.filter {
     root = pkgs.lib.cleanSource ../../.;
@@ -73,9 +92,10 @@ rec {
     ;
   };
 
-  emptyWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
-    inherit src;
-  };
+  emptyWorkspaces = pipe
+    (pkgs.yarn2nix-moretea.mkYarnWorkspace { inherit src; }) [
+    (mapAttrs' (name: value: { name = parsePkgNameYarn2NixStyle validScope name; inherit value; }))
+  ];
 
   fullWorkspaces = pkgs.yarn2nix-moretea.mkYarnWorkspace {
     src = pkgs.lib.cleanSource ../../.;
@@ -85,7 +105,7 @@ rec {
     let
       mapLocalPkg = name: source:
         let
-          emptyWorkspace = emptyWorkspaces.${printPkgNameYarn2NixStyle name};
+          emptyWorkspace = emptyWorkspaces.${name};
           dependencies = pipe "${source}/package.json" [
             importJSON
             (_: _.dependencies)
