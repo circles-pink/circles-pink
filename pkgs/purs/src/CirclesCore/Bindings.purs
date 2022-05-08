@@ -1,15 +1,20 @@
 module CirclesCore.Bindings
   ( Account
-  , Balance
+  , Balance(..)
   , CirclesCore
-  , CirclesCore_
+  , CirclesCore_(..)
+  , CoreSafe(..)
+  , CoreToken(..)
+  , CoreTrust(..)
+  , CoreUser(..)
   , Fn2Promise
   , Fn3Promise
   , Options
   , Provider
-  , TrustIsTrustedResult
-  , User
+  , TrustIsTrustedResult(..)
+  , User(..)
   , Web3
+  , checkResult
   , convertCore
   , intToBN
   , newCirclesCore
@@ -26,10 +31,12 @@ import CirclesCore.ApiResult (ApiResult)
 import Control.Promise (Promise)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3)
-import Data.Maybe (Maybe)
+import Data.Newtype (class Newtype)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
 import Foreign (Foreign)
+import Structural (class Structural, checkStructural)
+import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
@@ -43,24 +50,44 @@ foreign import data CirclesCore :: Type
 
 foreign import data Account :: Type
 
-type User
-  = { id :: Int
-    , username :: String
-    , safeAddress :: String
-    , avatarUrl :: String
-    }
+instance structuralAccount :: Structural Account
 
-type TrustIsTrustedResult
-  = { trustConnections :: Int
-    , isTrusted :: Boolean
-    }
+--------------------------------------------------------------------------------
+newtype User
+  = User
+  { id :: Int
+  , username :: String
+  , safeAddress :: String
+  , avatarUrl :: String
+  }
 
-type Balance
-  = { length :: Int
-    , negative :: Int
-    , red :: Maybe Boolean
-    , words :: Array Int
-    }
+derive instance newtypeUser :: Newtype User _
+
+derive newtype instance structuralUser :: Structural User
+
+--------------------------------------------------------------------------------
+newtype TrustIsTrustedResult
+  = TrustIsTrustedResult
+  { trustConnections :: Int
+  , isTrusted :: Boolean
+  }
+
+derive instance newtypeTrustIsTrustedResult :: Newtype TrustIsTrustedResult _
+
+derive newtype instance structuralTrustIsTrustedResult :: Structural TrustIsTrustedResult
+
+--------------------------------------------------------------------------------
+newtype Balance
+  = Balance
+  { length :: Int
+  , negative :: Int
+  , red :: Boolean
+  , words :: Array Int
+  }
+
+derive instance newtypeBalance :: Newtype Balance _
+
+derive newtype instance structuralBalance :: Structural Balance
 
 --------------------------------------------------------------------------------
 -- FFI
@@ -93,78 +120,116 @@ type Options
 
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
 
-type CirclesCore_
-  = { user ::
-        { register ::
-            Fn2Promise Account
-              { nonce :: BigInt
-              , safeAddress :: String
-              , username :: String
-              , email :: String
-              }
-              Boolean
-        , resolve ::
-            Fn2Promise Account
-              { addresses :: Array String
-              , userNames :: Array String
-              }
-              (ApiResult (Array User))
-        , search ::
-            Fn2Promise Account { query :: String }
-              (ApiResult (Array User))
-        }
-    , safe ::
-        { deploy :: Fn2Promise Account { safeAddress :: String } Boolean
-        , isFunded :: Fn2Promise Account { safeAddress :: String } Boolean
-        , predictAddress :: Fn2Promise Account { nonce :: BigInt } String
-        , prepareDeploy :: Fn2Promise Account { nonce :: BigInt } String
-        , getSafeStatus ::
-            Fn2Promise Account { safeAddress :: String }
-              { isCreated :: Boolean
-              , isDeployed :: Boolean
-              }
-        }
-    , token ::
-        { deploy :: Fn2Promise Account { safeAddress :: String } String
-        , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
-        , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
-        , requestUBIPayout :: Fn2Promise Account { safeAddress :: String } String
-        , transfer ::
-            Fn2Promise Account
-              { from :: String
-              , to :: String
-              , value :: Balance
-              , paymentNote :: String
-              }
-              String
-        }
-    , trust ::
-        { isTrusted ::
-            Fn2Promise Account
-              { safeAddress :: String, limit :: Int }
-              TrustIsTrustedResult
-        , getNetwork ::
-            Fn2Promise Account { safeAddress :: String }
-              ( Array
-                  { isIncoming :: Boolean
-                  , isOutgoing :: Boolean
-                  , limitPercentageIn :: Int
-                  , limitPercentageOut :: Int
-                  , mutualConnections :: Array Foreign
-                  , safeAddress :: String
-                  }
-              )
-        , addConnection ::
-            Fn2Promise Account
-              { user :: String, canSendTo :: String }
-              String
-        , removeConnection ::
-            Fn2Promise Account
-              { user :: String, canSendTo :: String }
-              String
-        }
-    }
+newtype CirclesCore_
+  = CirclesCore_
+  { user :: CoreUser
+  , trust :: CoreTrust
+  , safe :: CoreSafe
+  , token :: CoreToken
+  }
 
+derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
+
+derive newtype instance structuralCirclesCore_ :: Structural CirclesCore_
+
+--------------------------------------------------------------------------------
+newtype CoreUser
+  = CoreUser
+  { register ::
+      Fn2Promise Account
+        { nonce :: BigInt
+        , safeAddress :: String
+        , username :: String
+        , email :: String
+        }
+        Boolean
+  , resolve ::
+      Fn2Promise Account
+        { addresses :: Array String
+        , userNames :: Array String
+        }
+        (ApiResult (Array User))
+  , search ::
+      Fn2Promise Account { query :: String }
+        (ApiResult (Array User))
+  }
+
+derive instance newtypeCoreUser :: Newtype CoreUser _
+
+derive newtype instance structuralCoreUser :: Structural CoreUser
+
+--------------------------------------------------------------------------------
+newtype CoreSafe
+  = CoreSafe
+  { deploy :: Fn2Promise Account { safeAddress :: String } Boolean
+  , isFunded :: Fn2Promise Account { safeAddress :: String } Boolean
+  , predictAddress :: Fn2Promise Account { nonce :: BigInt } String
+  , prepareDeploy :: Fn2Promise Account { nonce :: BigInt } String
+  , getSafeStatus ::
+      Fn2Promise Account { safeAddress :: String }
+        { isCreated :: Boolean
+        , isDeployed :: Boolean
+        }
+  }
+
+derive instance newtypeCoreSafe :: Newtype CoreSafe _
+
+derive newtype instance structuralCoreSafe :: Structural CoreSafe
+
+--------------------------------------------------------------------------------
+newtype CoreToken
+  = CoreToken
+  { deploy :: Fn2Promise Account { safeAddress :: String } String
+  , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
+  , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
+  , requestUBIPayout :: Fn2Promise Account { safeAddress :: String } String
+  , transfer ::
+      Fn2Promise Account
+        { from :: String
+        , to :: String
+        , value :: Balance
+        , paymentNote :: String
+        }
+        String
+  }
+
+derive instance newtypeCoreToken :: Newtype CoreToken _
+
+derive newtype instance structuralCoreToken :: Structural CoreToken
+
+--------------------------------------------------------------------------------
+newtype CoreTrust
+  = CoreTrust
+  { isTrusted ::
+      Fn2Promise Account
+        { safeAddress :: String, limit :: Int }
+        TrustIsTrustedResult
+  , getNetwork ::
+      Fn2Promise Account { safeAddress :: String }
+        ( Array
+            { isIncoming :: Boolean
+            , isOutgoing :: Boolean
+            , limitPercentageIn :: Int
+            , limitPercentageOut :: Int
+            , mutualConnections :: Array Foreign
+            , safeAddress :: String
+            }
+        )
+  , addConnection ::
+      Fn2Promise Account
+        { user :: String, canSendTo :: String }
+        String
+  , removeConnection ::
+      Fn2Promise Account
+        { user :: String, canSendTo :: String }
+        String
+  }
+
+derive instance newtypeCoreTrust :: Newtype CoreTrust _
+
+derive newtype instance structuralCoreTrust :: Structural CoreTrust
+
+--------------------------------------------------------------------------------
 foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_
 
 --------------------------------------------------------------------------------
@@ -180,3 +245,7 @@ type Fn2Promise a1 a2 b
 
 type Fn3Promise a1 a2 a3 b
   = Fn3 a1 a2 a3 (Promise b)
+
+--------------------------------------------------------------------------------
+checkResult :: Unit
+checkResult = checkStructural (Proxy :: _ CirclesCore_)

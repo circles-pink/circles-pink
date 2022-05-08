@@ -394,8 +394,8 @@ testEnv =
   , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
-  , getBalance: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
-  , checkUBIPayout: \_ _ -> pure { length: 0, negative: 0, red: Nothing, words: [] }
+  , getBalance: \_ _ -> pure { length: 0, negative: 0, red: false, words: [] }
+  , checkUBIPayout: \_ _ -> pure { length: 0, negative: 0, red: false, words: [] }
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom
