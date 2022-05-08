@@ -4,12 +4,15 @@ module RemoteData
   , _loading
   , _notAsked
   , _success
+  , isFailure
+  , isLoading
+  , isNotAsked
   , isSuccess
   ) where
 
 import Prelude
 import Data.Newtype (class Newtype, unwrap)
-import Data.Variant (Variant, default, inj, onMatch)
+import Data.Variant (Variant, default, inj, match, on, onMatch)
 import Type.Proxy (Proxy(..))
 
 newtype RemoteData n l e a
@@ -42,10 +45,14 @@ _success = RemoteData <<< inj (Proxy :: _ "success")
 --------------------------------------------------------------------------------
 -- Destructors
 --------------------------------------------------------------------------------
+isNotAsked :: forall n l e a. RemoteData n l e a -> Boolean
+isNotAsked = unwrap >>> (default false # onMatch { notAsked: const true })
+
+isLoading :: forall n l e a. RemoteData n l e a -> Boolean
+isLoading = unwrap >>> (default false # onMatch { loading: const true })
+
+isFailure :: forall n l e a. RemoteData n l e a -> Boolean
+isFailure = unwrap >>> (default false # onMatch { failure: const true })
+
 isSuccess :: forall n l e a. RemoteData n l e a -> Boolean
-isSuccess =
-  unwrap
-    >>> ( default false
-          # onMatch
-              { success: const true }
-      )
+isSuccess = unwrap >>> (default false # onMatch { success: const true })
