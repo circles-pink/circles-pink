@@ -10,6 +10,7 @@ import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either, isRight)
+import Data.Newtype.Extra ((-|))
 import Data.Variant (Variant)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
@@ -115,7 +116,7 @@ dashboard env =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
-        when (checkPayout.length >= 18) do
+        when (checkPayout -| _.length >= 18) do
           run (env.requestUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0

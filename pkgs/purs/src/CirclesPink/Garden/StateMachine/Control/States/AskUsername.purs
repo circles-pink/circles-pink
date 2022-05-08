@@ -8,6 +8,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Data.Either (Either(..))
+import Data.Newtype (unwrap)
 import Data.Variant (default, onMatch)
 import RemoteData (RemoteData, _failure, _loading, _success)
 
@@ -46,7 +47,7 @@ askUsername env =
             # onMatch
                 { success: (\r -> r.isValid) }
       in
-        if usernameValid st.usernameApiResult then
+        if usernameValid $ unwrap st.usernameApiResult then
           S._askEmail st { direction = D._forwards }
         else
           S._askUsername st { direction = D._forwards }
