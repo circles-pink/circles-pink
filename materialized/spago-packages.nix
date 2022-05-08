@@ -833,18 +833,6 @@ let
         installPhase = "ln -s $src $out";
       };
 
-    "promises" = pkgs.stdenv.mkDerivation {
-        name = "promises";
-        version = "v3.1.1";
-        src = pkgs.fetchgit {
-          url = "https://github.com/thimoteus/purescript-promises.git";
-          rev = "76aac1f6583c39a3745f862636d16c7292d29690";
-          sha256 = "17vc9ambjad1sjlkv72d5zrhq3m1m5wix2fkqflbbfwabk5qisvz";
-        };
-        phases = "installPhase";
-        installPhase = "ln -s $src $out";
-      };
-
     "psci-support" = pkgs.stdenv.mkDerivation {
         name = "psci-support";
         version = "v5.0.0";
@@ -1092,6 +1080,18 @@ let
           url = "https://github.com/purescript/purescript-unfoldable.git";
           rev = "bbcc2b062b9b7d3d61f123cfb32cc8c7fb811aa6";
           sha256 = "1v3bz04wj6hj7s6mcf49hajylg6w58n78q54sqi2ra2zq8h99kpw";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "unordered-collections" = pkgs.stdenv.mkDerivation {
+        name = "unordered-collections";
+        version = "v2.1.4";
+        src = pkgs.fetchgit {
+          url = "https://github.com/fehrenbach/purescript-unordered-collections.git";
+          rev = "1be289188cef093520098e318ec910cf3ea5b40d";
+          sha256 = "0vgfpdymxvgqf3sh8ji2w2b01w3s294v5mh04046s21qaywdi1jh";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
