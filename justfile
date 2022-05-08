@@ -33,9 +33,9 @@ circles-garden:
 	"make clean && make up && make contracts && make subgraph"
 
 circles-garden-fund-safe addr:
-	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools
-	npm install
-	node fund-safe.js {{addr}}
+	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools && \
+	npm install && \
+	node fund-safe.js {{addr}} \
 
 checkouts:
 	DIR=checkouts; \
