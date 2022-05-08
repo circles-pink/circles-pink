@@ -442,13 +442,13 @@ initDashboard id =
         { error: Nothing
         , trustAddResult: empty :: Object _
         , trustRemoveResult: empty :: Object _
-        , trustsResult: _notAsked unit :: RemoteData _ _ _ _
-        , getBalanceResult: _notAsked unit :: RemoteData _ _ _ _
-        , checkUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _
-        , requestUBIPayoutResult: _notAsked unit :: RemoteData _ _ _ _
-        , getUsersResult: _notAsked unit :: RemoteData _ _ _ _
-        , transferResult: _notAsked unit :: RemoteData _ _ _ _
-        , userSearchResult: _notAsked unit :: RemoteData _ _ _ _
+        , trustsResult: _notAsked unit
+        , getBalanceResult: _notAsked unit
+        , checkUBIPayoutResult: _notAsked unit
+        , requestUBIPayoutResult: _notAsked unit
+        , getUsersResult: _notAsked unit
+        , transferResult: _notAsked unit
+        , userSearchResult: _notAsked unit
         }
 
 --------------------------------------------------------------------------------

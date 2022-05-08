@@ -38,7 +38,7 @@ trusts env =
       Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
 
   finalizeRegisterUser set st _ = do
-    set \st' -> S._trusts st' { trustsResult = _loading unit :: RemoteData _ _ _ _ }
+    set \st' -> S._trusts st' { trustsResult = _loading unit }
     let
       task :: ExceptV S.ErrTrustState _ _
       task = do
