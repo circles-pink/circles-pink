@@ -1,22 +1,30 @@
 module CirclesCore.ApiResult
   ( ApiError
-  , ApiResult
+  , ApiResult(..)
   , apiResultToEither
   ) where
 
 import Prelude
 import Data.Either (Either(..))
+import Data.Newtype (class Newtype)
 import Foreign (Foreign, unsafeFromForeign)
 import Foreign.Object (Object)
 import Foreign.Object.Unsafe (unsafeIndex)
+import Structural (class Structural)
 
 type ApiError
   = { message :: String, code :: Int }
+
+--------------------------------------------------------------------------------
+derive instance newtypeApiResult :: Newtype (ApiResult a) _
+
+derive newtype instance structuralApiResult :: Structural a => Structural (ApiResult a)
 
 newtype ApiResult :: forall k. k -> Type
 newtype ApiResult a
   = ApiResult (Object Foreign)
 
+--------------------------------------------------------------------------------
 apiResultToEither :: forall a. ApiResult a -> Either ApiError a
 apiResultToEither (ApiResult fo) =
   let
