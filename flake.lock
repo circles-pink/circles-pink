@@ -83,6 +83,22 @@
         "type": "github"
       }
     },
+    "circles-docker": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1651063146,
+        "narHash": "sha256-IB9uqa45dpJgB1VDpLUqlqtHBdAuPNsgnTJA5Mc2eG8=",
+        "owner": "CirclesUBI",
+        "repo": "circles-docker",
+        "rev": "0b8529a1431764c5cd443df21bcc9db93fb92fdc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "CirclesUBI",
+        "repo": "circles-docker",
+        "type": "github"
+      }
+    },
     "circles-pink-vendor": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -98,6 +114,22 @@
       "original": {
         "owner": "circles-pink",
         "repo": "circles-pink-vendor",
+        "type": "github"
+      }
+    },
+    "circles-toolbelt": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1643798490,
+        "narHash": "sha256-8q31YrsCJYE2eN2hWa25B3/G0I2ZTiq2l2itCySByJA=",
+        "owner": "CirclesUBI",
+        "repo": "circles-toolbelt",
+        "rev": "4d2cb791a15e6edf8a6f1d6bc66aafff4e194ff9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "CirclesUBI",
+        "repo": "circles-toolbelt",
         "type": "github"
       }
     },
@@ -756,7 +788,9 @@
     },
     "root": {
       "inputs": {
+        "circles-docker": "circles-docker",
         "circles-pink-vendor": "circles-pink-vendor",
+        "circles-toolbelt": "circles-toolbelt",
         "deadnix": "deadnix",
         "easy-purescript-nix": "easy-purescript-nix",
         "flake-compat": "flake-compat",

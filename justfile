@@ -1,3 +1,7 @@
+CIRCLES_DEV := env_var_or_default('CIRCLES_DEV', 'dev')
+CIRCLES_TOOLBELT_PATH := env_var_or_default('CIRCLES_TOOLBELT_PATH', 'checkouts/circles-toolbelt')
+GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
+
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
 
@@ -24,15 +28,23 @@ branchless-to-main:
 	gh pr merge --rebase branchless
 
 circles-garden:
-	cd $GARDEN_PATH && \
-	nix-shell -p nodejs-12_x --command \
+	cd {{GARDEN_PATH}} && \
+	nix-shell -p nodejs-12_x -p docker-compose --command \
 	"make clean && make up && make contracts && make subgraph"
 
 circles-garden-fund-safe addr:
-	cd $CIRCLES_TOOLBELT_PATH/helper-tools
+	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools
 	npm install
 	node fund-safe.js {{addr}}
 
+checkouts:
+	DIR=checkouts; \
+	OUT=result-checkouts; \
+	rm -rf $DIR && \
+	nix build .#checkouts --out-link $OUT && \
+	cp -r $OUT/. $DIR && \
+	chmod -R +w $DIR && \
+	rm -rf $OUT; \
 
 ci:
 	nix -L flake check 2>&1 | sed -E "s#/nix/store/[^/]+/#./#g"

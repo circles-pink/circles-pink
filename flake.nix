@@ -29,6 +29,16 @@
 
   inputs.deadnix.url = "github:astro/deadnix";
 
+  inputs.circles-toolbelt = {
+    url = "github:CirclesUBI/circles-toolbelt";
+    flake = false;
+  };
+
+  inputs.circles-docker = {
+    url = "github:CirclesUBI/circles-docker";
+    flake = false;
+  };
+
   outputs = inputs:
     let
       devSystems = [ "x86_64-linux" "aarch64-darwin" ];
@@ -74,6 +84,15 @@
                 # TODO: make generic with a map for all checks
                 ln -s ${self.checks.${system}.deploy-nixops-example-prebuilt} $out/deploy-nixops-example-prebuilt
                 ln -s ${self.checks.${system}.pursTests} $out/pursTests
+              '';
+
+              checkouts = pkgs.runCommand "checkouts" { } ''
+                mkdir $out
+                cp -R ${inputs.circles-docker} $out/circles-docker
+                chmod -R +w $out
+                mv $out/circles-docker/.env.example $out/circles-docker/.env
+                
+                cp -R ${inputs.circles-toolbelt} $out/circles-toolbelt
               '';
             };
 

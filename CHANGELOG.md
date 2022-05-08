@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Start using a Changelog.
+- Introduce `checkouts` just task.
+  It checks out third prarty repos (like `circles-docker`) via Nix into the `checkouts` subdirectory.
 
 ### Changed
 
