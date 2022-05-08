@@ -2,12 +2,9 @@ module CirclesPink.Garden.StateMachine.State
   ( AskEmailState
   , AskUsernameState
   , CirclesState
-  , DashboardState
   , DebugState
   , EmailApiResult
-  , ErrDashboardStateResolved
-  , ErrGetUsers
-  , ErrGetUsersResolved
+  , module Exp
   , ErrLandingState
   , ErrLandingStateResolved
   , ErrLoginState
@@ -15,25 +12,8 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLoginTask
   , ErrSubmit
   , ErrSubmitResolved
-  , ErrTokenCheckUBIPayout
-  , ErrTokenCheckUBIPayoutResolved
-  , ErrTokenGetBalance
-  , ErrTokenGetBalanceResolved
-  , ErrTokenRequestUBIPayout
-  , ErrTokenRequestUBIPayoutResolved
-  , ErrTokenTransfer
-  , ErrTokenTransferResolved
-  , ErrTrustAddConnection
-  , ErrTrustAddConnectionResolved
-  , ErrTrustGetTrusts
-  , ErrTrustGetTrustsResolved
-  , ErrTrustRemoveConnection
-  , ErrTrustRemoveConnectionResolved
   , ErrTrustState
   , ErrTrustStateResolved
-  , ErrUserSearch
-  , ErrUserSearchResolved
-  , GetUsersResult
   , InfoGeneralState
   , InfoSecurityState
   , LandingState
@@ -42,22 +22,13 @@ module CirclesPink.Garden.StateMachine.State
   , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
-  , TokenCheckUBIPayoutResult
-  , TokenGetBalanceResult
-  , TokenRequestUBIPayoutResult
-  , TokenTransferResult
-  , TrustAddResult
-  , TrustGetTrusts
-  , TrustRemoveResult
   , TrustState
   , TrustStateTrustsResult
   , UserData
   , UserDataSubmitResult
-  , UserSearchResult
   , UsernameApiResult
   , _askEmail
   , _askUsername
-  , _dashboard
   , _debug
   , _infoGeneral
   , _infoSecurity
@@ -67,12 +38,14 @@ module CirclesPink.Garden.StateMachine.State
   , _submit
   , _trusts
   , init
-  , initDashboard
   , initDebug
   , initLanding
   , initLogin
   ) where
 
+--------------------------------------------------------------------------------
+-- Re-expprts
+--------------------------------------------------------------------------------
 import Prelude
 import CirclesCore (ApiError, Balance, NativeError, SafeStatus, TrustNode, User)
 import CirclesCore as CC
@@ -80,6 +53,8 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPa
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
+import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
+import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
 import Data.Argonaut (JsonDecodeError)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
@@ -209,151 +184,6 @@ type LoginState
     }
 
 --------------------------------------------------------------------------------
--- | User / getUsers
-type ErrGetUsersResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      , errUserNotFound :: UserNotFoundError
-      )
-
-type ErrGetUsers
-  = Env.ErrGetUsers + ()
-
-type GetUsersResult
-  = RemoteData Unit Unit ErrGetUsersResolved (Array User)
-
---------------------------------------------------------------------------------
--- | User / search
-type ErrUserSearchResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrUserSearch
-  = Env.ErrUserSearch + ()
-
-type UserSearchResult
-  = RemoteData Unit Unit ErrUserSearchResolved (Array User)
-
--- Trust / GetTrusts
-type ErrTrustGetTrustsResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTrustGetTrusts
-  = Env.ErrAddTrustConnection + ()
-
-type TrustGetTrusts
-  = RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
-
--- | Trust / AddConnection
-type ErrTrustAddConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTrustAddConnection
-  = Env.ErrAddTrustConnection + ()
-
-type TrustAddResult
-  = Object (RemoteReport ErrTrustAddConnectionResolved String)
-
--- | Trust / RemoveConnection
-type ErrTrustRemoveConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTrustRemoveConnection
-  = Env.ErrRemoveTrustConnection + ()
-
-type TrustRemoveResult
-  = Object (RemoteReport ErrTrustRemoveConnectionResolved String)
-
--- | Token / GetBalance
-type ErrTokenGetBalanceResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTokenGetBalance
-  = Env.ErrGetBalance + ()
-
-type TokenGetBalanceResult
-  = RemoteReport ErrTokenGetBalanceResolved Balance
-
--- | Token / CheckUBIPayout
-type ErrTokenCheckUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTokenCheckUBIPayout
-  = Env.ErrCheckUBIPayout + ()
-
-type TokenCheckUBIPayoutResult
-  = RemoteReport ErrTokenCheckUBIPayoutResolved Balance
-
--- | Token / RequestUBIPayout
-type ErrTokenRequestUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTokenRequestUBIPayout
-  = Env.ErrRequestUBIPayout + ()
-
-type TokenRequestUBIPayoutResult
-  = RemoteReport ErrTokenRequestUBIPayoutResolved String
-
--- | Token / Transfer
-type ErrTokenTransferResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTokenTransfer
-  = Env.ErrTransfer + ()
-
-type TokenTransferResult
-  = RemoteData Unit Unit ErrTokenTransferResolved String
-
--- | Dashboard State
-type ErrDashboardStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type DashboardState
-  = { user :: CC.User
-    , privKey :: PrivateKey
-    , error :: Maybe ErrDashboardStateResolved
-    , trustsResult :: TrustGetTrusts
-    , trustAddResult :: TrustAddResult
-    , trustRemoveResult :: TrustRemoveResult
-    , getBalanceResult :: TokenGetBalanceResult
-    , getUsersResult :: GetUsersResult
-    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
-    , transferResult :: TokenTransferResult
-    , userSearchResult :: UserSearchResult
-    }
-
---------------------------------------------------------------------------------
 type ErrTrustState
   = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
 
@@ -430,28 +260,6 @@ initDebug =
     }
 
 --------------------------------------------------------------------------------
-type InitDashboard
-  = { user :: CC.User
-    , privKey :: PrivateKey
-    }
-
-initDashboard :: InitDashboard -> forall v. Variant ( dashboard :: DashboardState | v )
-initDashboard id =
-  _dashboard
-    $ R.disjointUnion id
-        { error: Nothing
-        , trustAddResult: empty :: Object _
-        , trustRemoveResult: empty :: Object _
-        , trustsResult: _notAsked unit
-        , getBalanceResult: _notAsked unit
-        , checkUBIPayoutResult: _notAsked unit
-        , requestUBIPayoutResult: _notAsked unit
-        , getUsersResult: _notAsked unit
-        , transferResult: _notAsked unit
-        , userSearchResult: _notAsked unit
-        }
-
---------------------------------------------------------------------------------
 _landing :: forall a v. a -> Variant ( landing :: a | v )
 _landing = inj (Proxy :: _ "landing")
 
@@ -472,9 +280,6 @@ _magicWords = inj (Proxy :: _ "magicWords")
 
 _submit :: forall a v. a -> Variant ( submit :: a | v )
 _submit = inj (Proxy :: _ "submit")
-
-_dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
-_dashboard = inj (Proxy :: _ "dashboard")
 
 _login :: forall a v. a -> Variant ( login :: a | v )
 _login = inj (Proxy :: _ "login")
