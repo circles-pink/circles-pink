@@ -26,7 +26,7 @@ submit env =
   }
   where
   submit' set st _ = do
-    set \st' -> S._submit st' { submitResult = _loading unit :: RemoteData _ _ _ _ }
+    set \st' -> S._submit st' { submitResult = _loading unit }
     let
       address = P.privKeyToAddress st.privateKey
 
