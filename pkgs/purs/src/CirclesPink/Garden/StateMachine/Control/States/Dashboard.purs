@@ -124,7 +124,7 @@ dashboard env =
             # void
 
   getUsers set st { userNames, addresses } = do
-    set \st' -> S._dashboard st' { getUsersResult = _loading unit }
+    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrGetUsers _ _
       task = env.getUsers st.privKey userNames addresses
@@ -134,7 +134,7 @@ dashboard env =
       Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
   userSearch set st options = do
-    set \st' -> S._dashboard st' { userSearchResult = _loading unit }
+    set \st' -> S._dashboard st' { userSearchResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrUserSearch _ _
       task = env.userSearch st.privKey options
@@ -144,7 +144,7 @@ dashboard env =
       Right u -> set \st' -> S._dashboard st' { userSearchResult = _success u }
 
   transfer set st { from, to, value, paymentNote } = do
-    set \st' -> S._dashboard st' { transferResult = _loading unit }
+    set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTokenTransfer _ _
       task = env.transfer st.privKey (unsafeAddrFromString from) (unsafeAddrFromString to) value paymentNote
