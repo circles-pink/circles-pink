@@ -17,6 +17,7 @@ import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (wrap)
 import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
@@ -384,7 +385,7 @@ testEnv =
   , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
   , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit
-  , isTrusted: \_ -> pure { isTrusted: false, trustConnections: 0 }
+  , isTrusted: \_ -> pure $ wrap { isTrusted: false, trustConnections: 0 }
   , trustGetNetwork: \_ -> pure []
   , getSafeStatus: \_ -> pure { isCreated: false, isDeployed: false }
   , deploySafe: \_ -> pure unit
@@ -394,8 +395,8 @@ testEnv =
   , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
-  , getBalance: \_ _ -> pure { length: 0, negative: 0, red: false, words: [] }
-  , checkUBIPayout: \_ _ -> pure { length: 0, negative: 0, red: false, words: [] }
+  , getBalance: \_ _ -> pure $ wrap { length: 0, negative: 0, red: false, words: [] }
+  , checkUBIPayout: \_ _ -> pure $ wrap { length: 0, negative: 0, red: false, words: [] }
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom

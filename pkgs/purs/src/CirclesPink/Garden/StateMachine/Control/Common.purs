@@ -8,6 +8,8 @@ import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either)
+import Data.Newtype (unwrap)
+import Data.Newtype.Extra ((-|))
 import Data.Variant (Variant)
 import Prim.Row (class Nub)
 import Type.Row (type (+))
@@ -33,7 +35,7 @@ type ErrReadyForDeployment r
 
 readyForDeployment :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrReadyForDeployment r) m Boolean
 readyForDeployment { isTrusted, isFunded } privKey = do
-  isTrusted' <- isTrusted privKey <#> (\x -> x.isTrusted)
+  isTrusted' <- isTrusted privKey <#> (unwrap >>> _.isTrusted)
   isFunded' <- isFunded privKey
   pure (isTrusted' || isFunded')
 
@@ -50,7 +52,7 @@ loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLogin
 loginTask env privKey = do
   user <- env.userResolve privKey
   safeStatus <- env.getSafeStatus privKey
-  isTrusted <- env.isTrusted privKey <#> (\x -> x.isTrusted)
+  isTrusted <- env.isTrusted privKey <#> (unwrap >>> _.isTrusted)
   trusts <- if isTrusted then pure [] else env.trustGetNetwork privKey
   isReady' <- readyForDeployment env privKey
   pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }

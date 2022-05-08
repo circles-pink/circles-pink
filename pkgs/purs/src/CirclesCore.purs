@@ -86,6 +86,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype.Extra ((-|))
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
@@ -296,8 +297,6 @@ userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
     Left apiError -> Left $ _errApi apiError
     Right data_ -> pure $ map userToUser data_
 
-  userToUser x = x { safeAddress = P.unsafeAddrFromString x.safeAddress }
-
 --------------------------------------------------------------------------------
 -- API / userRegister
 --------------------------------------------------------------------------------
@@ -316,8 +315,6 @@ userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
   mapOk x = case apiResultToEither x of
     Left apiError -> Left $ _errApi apiError
     Right data_ -> pure $ map userToUser data_
-
-  userToUser x = x { safeAddress = P.unsafeAddrFromString x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / safeDeploy
@@ -548,6 +545,9 @@ type NativeError
 --------------------------------------------------------------------------------
 -- Util
 --------------------------------------------------------------------------------
+userToUser :: B.User -> User
+userToUser = unwrap >>> \x -> x { safeAddress = P.unsafeAddrFromString x.safeAddress }
+
 unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> Result (ErrNative + r) Unit
 unsafeSampleCore x1 x2 =
   B.unsafeSampleCore x1 x2
@@ -563,11 +563,3 @@ mapBoolean :: forall r. Boolean -> Either (Variant (ErrService + r)) Unit
 mapBoolean true = Right unit
 
 mapBoolean false = Left $ _errService unit
-
---------------------------------------------------------------------------------
-unwrapAndGet :: forall t a b. Newtype t a => t -> (a -> b) -> b
-unwrapAndGet x f = f $ unwrap x
-
-infixl 1 unwrapAndGet as -|
-
---------------------------------------------------------------------------------
