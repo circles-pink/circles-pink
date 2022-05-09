@@ -1,6 +1,6 @@
 PURS_OUTPUT=pkgs/ts/@circles-pink/state-machine/output
 
-all: dev-storybook build-storybook rw-result
+all: build-storybook rw-result
 
 dev-browser:
 	bash -c '${BROWSER} http://localhost:6006'
