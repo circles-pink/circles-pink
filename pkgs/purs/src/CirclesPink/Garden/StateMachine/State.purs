@@ -5,19 +5,14 @@ module CirclesPink.Garden.StateMachine.State
   , DebugState
   , EmailApiResult
   , module Exp
-  , ErrLandingState
-  , ErrLandingStateResolved
   , ErrLoginState
   , ErrLoginStateResolved
-  , ErrLoginTask
   , ErrSubmit
   , ErrSubmitResolved
   , ErrTrustState
   , ErrTrustStateResolved
   , InfoGeneralState
   , InfoSecurityState
-  , LandingState
-  , LandingStateCheckSessionResult
   , LoginState
   , LoginStateLoginResult
   , MagicWordsState
@@ -32,19 +27,23 @@ module CirclesPink.Garden.StateMachine.State
   , _debug
   , _infoGeneral
   , _infoSecurity
-  , _landing
   , _login
   , _magicWords
   , _submit
   , _trusts
   , init
   , initDebug
-  , initLanding
   , initLogin
+  , module Exp
   ) where
 
 --------------------------------------------------------------------------------
 -- Re-expprts
+--------------------------------------------------------------------------------
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
+--------------------------------------------------------------------------------
+-- Import
 --------------------------------------------------------------------------------
 import Prelude
 import CirclesCore (ApiError, Balance, NativeError, SafeStatus, TrustNode, User)
@@ -53,6 +52,7 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPa
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
 import Data.Argonaut (JsonDecodeError)
@@ -66,6 +66,7 @@ import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 
 type UsernameApiResult
   = RemoteData Unit Unit CirclesError { isValid :: Boolean }
@@ -130,29 +131,6 @@ type SubmitState
   = UserData
 
 --------------------------------------------------------------------------------
-type ErrLandingStateResolved
-  = Variant
-      ( errDecode :: JsonDecodeError
-      , errReadStorage :: RequestPath
-      , errApi :: ApiError
-      , errNative :: NativeError
-      , errUserNotFound :: UserNotFoundError
-      , errInvalidUrl :: String
-      )
-
-type ErrLandingState
-  = Env.ErrRestoreSession
-      + ErrLoginTask
-      + ()
-
-type LandingStateCheckSessionResult
-  = RemoteData Unit Unit ErrLandingStateResolved Unit
-
-type LandingState
-  = { checkSessionResult :: LandingStateCheckSessionResult
-    }
-
---------------------------------------------------------------------------------
 type ErrLoginStateResolved
   = Variant
       ( errApi :: ApiError
@@ -166,14 +144,6 @@ type ErrLoginState
   = ErrLoginTask
       + Env.ErrSaveSession
       + ()
-
-type ErrLoginTask r
-  = Env.ErrUserResolve
-      + Env.ErrGetSafeStatus
-      + Env.ErrTrustGetNetwork
-      + Env.ErrIsTrusted
-      + Env.ErrIsFunded
-      + r
 
 type LoginStateLoginResult
   = RemoteData Unit Unit ErrLoginStateResolved Unit
@@ -209,8 +179,7 @@ type TrustState
 --------------------------------------------------------------------------------
 type CirclesState
   = Variant
-      ( landing :: LandingState
-      , infoGeneral :: UserData
+      ( infoGeneral :: UserData
       , askUsername :: UserData
       , askEmail :: UserData
       , infoSecurity :: UserData
@@ -220,6 +189,7 @@ type CirclesState
       , login :: LoginState
       , trusts :: TrustState
       , debug :: DebugState
+      | CirclesProtocolDef GetState
       )
 
 type DebugState
@@ -241,11 +211,6 @@ init =
     , submitResult: _notAsked unit
     }
 
-initLanding :: forall v. Variant ( landing :: LandingState | v )
-initLanding =
-  _landing
-    { checkSessionResult: _notAsked unit }
-
 initLogin :: forall v. Variant ( login :: LoginState | v )
 initLogin =
   _login
@@ -260,9 +225,6 @@ initDebug =
     }
 
 --------------------------------------------------------------------------------
-_landing :: forall a v. a -> Variant ( landing :: a | v )
-_landing = inj (Proxy :: _ "landing")
-
 _infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )
 _infoGeneral = inj (Proxy :: _ "infoGeneral")
 

@@ -3,7 +3,7 @@ module CirclesPink.Garden.StateMachine.Control.Common where
 import Prelude
 import CirclesCore (SafeStatus, TrustNode, User)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.State (ErrLoginTask)
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)

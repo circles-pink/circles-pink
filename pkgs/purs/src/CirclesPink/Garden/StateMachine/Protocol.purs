@@ -2,18 +2,14 @@ module CirclesPink.Garden.StateMachine.Protocol
   ( CirclesProtocol
   ) where
 
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetProtocol)
 import Stadium.Type.Protocol as P
 import Type.Data.List (type (:>), Nil')
 
+--------------------------------------------------------------------------------
 type CirclesProtocol
   = P.Protocol
-      ( landing ::
-          P.State
-            ( signUp :: P.Action ("infoGeneral" :> Nil')
-            , signIn :: P.Action ("login" :> Nil')
-            , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
-            )
-      , infoGeneral ::
+      ( infoGeneral ::
           P.State
             ( next :: P.Action ("askUsername" :> Nil')
             )
@@ -74,4 +70,5 @@ type CirclesProtocol
             ( coreToWindow :: P.Action ("debug" :> Nil')
             , setMagicWords :: P.Action ("debug" :> Nil')
             )
+      | (CirclesProtocolDef GetProtocol)
       )
