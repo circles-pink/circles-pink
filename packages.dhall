@@ -176,7 +176,7 @@ in  upstream
   with tagged =
     { dependencies = [ "identity", "profunctor" ]
     , repo = "https://github.com/kejace/purescript-tagged"
-    , version = "v0.14"
+    , version = "v3.0.0"
     }
   with web3 =
     { dependencies =
