@@ -2,8 +2,9 @@ module CirclesPink.EnvVars where
 
 import Prelude
 import CirclesPink.URI (URI)
-import Data.Either (Either)
-import Effect (Effect)
+import Control.Monad.Except (ExceptT(..))
+import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as Web3
@@ -38,5 +39,9 @@ instance parseValueAddress :: ParseValue Address where
 type ResolvedConfig
   = Record (Config Resolved)
 
-parse :: Effect (Either EnvError ResolvedConfig)
-parse = TypedEnv.fromEnv (Proxy :: _ (Config Variable)) <$> getEnv
+parse :: ExceptT EnvError Aff ResolvedConfig
+parse =
+  TypedEnv.fromEnv (Proxy :: _ (Config Variable))
+    <$> getEnv
+    # liftEffect
+    # ExceptT
