@@ -1,6 +1,7 @@
 module CirclesPink.EnvVars where
 
 import Prelude
+import CirclesPink.URI (URI)
 import Data.Either (Either)
 import Effect (Effect)
 import Network.Ethereum.Core.HexString (mkHexString)
@@ -13,7 +14,7 @@ import TypedEnv (fromEnv) as TypedEnv
 
 type Config :: forall k. (Symbol -> Type -> k) -> Row k
 type Config f
-  = ( gardenApi :: f "GARDEN_API" String
+  = ( gardenApi :: f "GARDEN_API" URI
     , gardenApiUsers :: f "GARDEN_API_USERS" String
     , gardenGraphApi :: f "GARDEN_GRAPH_API" String
     , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
@@ -25,7 +26,7 @@ type Config f
     )
 
 --------------------------------------------------------------------------------
--- Newtype Wrappers
+-- Newtype Wrappers / Address
 --------------------------------------------------------------------------------
 newtype Address
   = Address Web3.Address
