@@ -31,19 +31,16 @@ type Options
 
 signUpUser :: forall m. Monad m => Env m -> Options -> StateT CirclesState m Unit
 signUpUser env opts = do
-  act' env _askUsername
-    [ _setUsername opts.username
-    , _next unit
-    ]
-  act' env _askEmail
-    [ _setEmail opts.email
-    , _setTerms unit
-    , _setPrivacy unit
-    , _next unit
-    ]
-  act env $ _infoSecurity $ _next unit
-  act env $ _magicWords $ _next unit
-  act env $ _submit $ _submit unit
+  act env $ A._infoGeneral $ A._next unit
+  act env $ A._askUsername $ A._setUsername opts.username
+  act env $ A._askUsername $ A._next unit
+  act env $ A._askEmail $ A._setEmail opts.email
+  act env $ A._askEmail $ A._setTerms unit
+  act env $ A._askEmail $ A._setPrivacy unit
+  act env $ A._askEmail $ A._next unit
+  act env $ A._infoSecurity $ A._next unit
+  act env $ A._magicWords $ A._next unit
+  act env $ A._submit $ A._submit unit
 
 finalizeAccount :: forall m. Env m -> Options -> StateT CirclesState m Unit
 finalizeAccount env = undefined

@@ -38,6 +38,7 @@
   , "test-unit"
   , "transformers"
   , "tuples"
+  , "typedenv"
   , "typelevel"
   , "typelevel-lists"
   , "typelevel-prelude"
