@@ -1013,6 +1013,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "typedenv" = pkgs.stdenv.mkDerivation {
+        name = "typedenv";
+        version = "v1.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/nsaunders/purescript-typedenv.git";
+          rev = "eab8a38ed7b98599c7578488b12d4535b90732ce";
+          sha256 = "08i6dr4mmih8hyyiikgql9xg4ny94fzkah87m5pzdywfr4ikcs38";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "typelevel" = pkgs.stdenv.mkDerivation {
         name = "typelevel";
         version = "v6.0.0";
