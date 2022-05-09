@@ -30,6 +30,7 @@
   , "now"
   , "optparse"
   , "ordered-collections"
+  , "parsing"
   , "prelude"
   , "psci-support"
   , "record"
