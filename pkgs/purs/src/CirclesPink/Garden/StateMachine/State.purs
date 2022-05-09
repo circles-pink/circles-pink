@@ -42,6 +42,7 @@ module CirclesPink.Garden.StateMachine.State
 --------------------------------------------------------------------------------
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing as Exp
 --------------------------------------------------------------------------------
 -- Import
 --------------------------------------------------------------------------------
