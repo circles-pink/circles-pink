@@ -1,12 +1,26 @@
 {
-  "SectionPurs": {
-    "prefix": ["---", "section"],
+  "SectionHeaderPurs": {
+    "prefix": ["---", "section-header"],
     "body": [
       "--------------------------------------------------------------------------------",
       "-- ${1:element}",
       "--------------------------------------------------------------------------------"
     ],
     "description": "80 column wide section header to organize source files",
+    "scope": "purescript"
+  },
+  "SectionPurs": {
+    "prefix": ["---", "section"],
+    "body": [
+      "--------------------------------------------------------------------------------"
+    ],
+    "description": "80 column wide section to organize source files",
+    "scope": "purescript"
+  },
+  "importPlus": {
+    "prefix": ["+", "importPlus"],
+    "body": ["import Type.Row (type (+))"],
+    "description": "80 column wide section to organize source files",
     "scope": "purescript"
   },
   "SectionTS": {
