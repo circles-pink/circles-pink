@@ -65,5 +65,7 @@ getEnvVars = undefined
 
 main :: Effect Unit
 main = do
-  envVars <- getEnvVars
-  runAff_ (\_ -> pure unit) (result envVars)
+  log "hello api script"
+
+--envVars <- getEnvVars
+--runAff_ (\_ -> pure unit) (result envVars)

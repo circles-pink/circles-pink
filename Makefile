@@ -2,22 +2,6 @@ PURS_OUTPUT=pkgs/ts/@circles-pink/state-machine/output
 
 all: dev-storybook build-storybook rw-result
 
-dev-storybook: vm-deploy assets dev-storybook_
-
-dev-storybook_:
-	export STORYBOOK_TASKS_EXPLORER_SERVER="http://tasks.circles.local"; \
-	export STORYBOOK_DIRECTUS_URL="http://directus.circles.local/graphql"; \
-	export STORYBOOK_GARDEN_API="http://api.circles.local"; \
-	export STORYBOOK_GARDEN_API_USERS="http://api.circles.local/api/users"; \
-	export STORYBOOK_GARDEN_GRAPH_API="http://graph.circles.local"; \
-	export STORYBOOK_GARDEN_SUBGRAPH_NAME="CirclesUBI/circles-subgraph"; \
-	export STORYBOOK_GARDEN_RELAY="http://relay.circles.local"; \
-	export STORYBOOK_GARDEN_HUB_ADDRESS="0xCfEB869F69431e42cdB54A4F4f105C19C080A601"; \
-	export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS="0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb"; \
-	export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS="0xC89Ce4735882C9F0f0FE26686c53074E09B0D550"; \
-	export STORYBOOK_GARDEN_ETHEREUM_NODE_WS="ws://localhost:8545"; \
-	yarn workspace storybook run storybook
-
 dev-browser:
 	bash -c '${BROWSER} http://localhost:6006'
 
@@ -107,12 +91,6 @@ generate-zeus:
 	cp -r result-zeus-client/* -t ./pkgs/ts/@circles-pink/zeus-client/src
 	chmod -R u+w ./pkgs/ts/@circles-pink/zeus-client/src
 	rm result-zeus-client
-
-run-garden-nix:
-	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden
-
-run-garden: yarn-install
-	make spago-build && node inspect -e 'require("./$(PURS_OUTPUT)/CirclesPink.Garden.ApiScript").main()'
 
 vm-create:
 	nixops create -d circles-pink-vm networks/vm.nix
