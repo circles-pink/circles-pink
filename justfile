@@ -1,6 +1,24 @@
+set dotenv-load
+
+export PATH := "./node_modules/.bin:" + env_var('PATH')
+
 CIRCLES_DEV := env_var_or_default('CIRCLES_DEV', 'dev')
 CIRCLES_TOOLBELT_PATH := env_var_or_default('CIRCLES_TOOLBELT_PATH', 'checkouts/circles-toolbelt')
 GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
+
+TASKS_EXPLORER_SERVER := env_var_or_default("TASKS_EXPLORER_SERVER", "http://tasks.circles.local")
+DIRECTUS_URL := env_var_or_default("DIRECTUS_URL", "http://directus.circles.local/graphql")
+GARDEN_API := env_var_or_default("GARDEN_API", "http://api.circles.local")
+GARDEN_API_USERS := env_var_or_default("GARDEN_API_USERS", "http://api.circles.local/api/users")
+GARDEN_GRAPH_API := env_var_or_default("GARDEN_GRAPH_API", "http://graph.circles.local")
+GARDEN_SUBGRAPH_NAME := env_var_or_default("GARDEN_SUBGRAPH_NAME", "CirclesUBI/circles-subgraph")
+GARDEN_RELAY := env_var_or_default("GARDEN_RELAY", "http://relay.circles.local")
+GARDEN_HUB_ADDRESS := env_var_or_default("GARDEN_HUB_ADDRESS", "0xCfEB869F69431e42cdB54A4F4f105C19C080A601")
+GARDEN_PROXY_FACTORY_ADRESS := env_var_or_default("GARDEN_PROXY_FACTORY_ADRESS", "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb")
+GARDEN_SAFE_MASTER_ADDRESS := env_var_or_default("GARDEN_SAFE_MASTER_ADDRESS", "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550")
+GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://localhost:8545")
+
+PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
 
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
@@ -49,13 +67,47 @@ checkouts:
 ci:
 	nix -L flake check 2>&1 | sed -E "s#/nix/store/[^/]+/#./#g"
 
-# All Makefile tasks
-
-dev-storybook:
-	make dev-storybook
+dev-storybook: vm-deploy assets dev-storybook_
 
 dev-storybook_:
-	make dev-storybook_
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	export STORYBOOK_TASKS_EXPLORER_SERVER={{TASKS_EXPLORER_SERVER}}
+	export STORYBOOK_DIRECTUS_URL={{DIRECTUS_URL}}
+	export STORYBOOK_GARDEN_API={{GARDEN_API}}
+	export STORYBOOK_TASKS_EXPLORER_SERVER={{GARDEN_API_USERS}}
+	export STORYBOOK_GARDEN_API_USERS={{GARDEN_GRAPH_API}}
+	export STORYBOOK_GARDEN_SUBGRAPH_NAME={{GARDEN_SUBGRAPH_NAME}}
+	export STORYBOOK_GARDEN_RELAY={{GARDEN_RELAY}}
+	export STORYBOOK_GARDEN_HUB_ADDRESS={{GARDEN_HUB_ADDRESS}}
+	export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
+	export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
+	export STORYBOOK_GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	yarn workspace storybook run storybook
+
+_dump:
+	just --unstable --dump --dump-format json | jq
+
+run-garden-nix:
+	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden
+
+run-garden: yarn-install
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	export TASKS_EXPLORER_SERVER={{TASKS_EXPLORER_SERVER}}
+	export DIRECTUS_URL={{DIRECTUS_URL}}
+	export GARDEN_API={{GARDEN_API}}
+	export TASKS_EXPLORER_SERVER={{GARDEN_API_USERS}}
+	export GARDEN_API_USERS={{GARDEN_GRAPH_API}}
+	export GARDEN_SUBGRAPH_NAME={{GARDEN_SUBGRAPH_NAME}}
+	export GARDEN_RELAY={{GARDEN_RELAY}}
+	export GARDEN_HUB_ADDRESS={{GARDEN_HUB_ADDRESS}}
+	export GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
+	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
+	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
+
+# All Makefile tasks
 
 dev-browser:
 	make dev-browser
@@ -122,12 +174,6 @@ generate-watch:
 
 generate-zeus:
 	make generate-zeus
-
-run-garden-nix:
-	make run-garden-nix
-
-run-garden:
-	make run-garden
 
 vm-create:
 	make vm-create
