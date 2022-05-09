@@ -1135,11 +1135,11 @@ let
 
     "tagged" = pkgs.stdenv.mkDerivation {
         name = "tagged";
-        version = "v3.0.0";
+        version = "d34cf9c65e4da086173e4be6c8888319b5ed07c2";
         src = pkgs.fetchgit {
           url = "https://github.com/kejace/purescript-tagged";
-          rev = "6877ea861f9fc3aca2637377ce4443e28b90f137";
-          sha256 = "0ibzy0a57inz859ay91vfbaxfxb8f24syzx0y9pwnx7lgag7291j";
+          rev = "d34cf9c65e4da086173e4be6c8888319b5ed07c2";
+          sha256 = "0wx2463y04fh123qw2dgaavbmrfnpawddw7rw0wllz5x64qf2x47";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
