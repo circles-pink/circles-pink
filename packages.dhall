@@ -150,3 +150,57 @@ in  upstream
     , repo = "https://github.com/thought2/purescript-dot-language.git"
     , version = "c3a6a831349b4ff2acb5a789557cefd7ca5d1ecd"
     }
+  with coroutine-transducers =
+    { dependencies = [ "aff", "coroutines", "effect", "maybe", "psci-support" ]
+    , repo = "https://github.com/blinky3713/purescript-coroutine-transducers"
+    , version = "v1.0.0"
+    }
+  with eth-core =
+    { dependencies =
+      [ "argonaut"
+      , "bytestrings"
+      , "console"
+      , "debug"
+      , "effect"
+      , "foreign-generic"
+      , "ordered-collections"
+      , "parsing"
+      , "prelude"
+      , "psci-support"
+      , "ring-modules"
+      , "simple-json"
+      ]
+    , repo = "https://github.com/f-o-a-m/purescript-eth-core.git"
+    , version = "v8.0.0"
+    }
+  with tagged =
+    { dependencies = [ "identity", "profunctor" ]
+    , repo = "https://github.com/kejace/purescript-tagged"
+    , version = "v0.14"
+    }
+  with web3 =
+    { dependencies =
+      [ "free"
+      , "bytestrings"
+      , "foreign-generic"
+      , "profunctor-lenses"
+      , "fork"
+      , "parsing"
+      , "coroutines"
+      , "aff"
+      , "ring-modules"
+      , "typelevel-prelude"
+      , "tagged"
+      , "eth-core"
+      , "transformers"
+      , "errors"
+      , "partial"
+      , "identity"
+      , "foreign"
+      , "coroutine-transducers"
+      , "eth-core"
+      , "heterogeneous"
+      ]
+    , repo = "https://github.com/f-o-a-m/purescript-web3"
+    , version = "v5.0.0"
+    }

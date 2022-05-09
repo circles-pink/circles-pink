@@ -46,6 +46,7 @@
   , "unordered-collections"
   , "unsafe-coerce"
   , "variant"
+  , "web3"
   ]
 , packages = ./packages.dhall
 , sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]
