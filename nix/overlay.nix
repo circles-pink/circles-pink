@@ -107,7 +107,9 @@
 
       bumpNpmVersions =
         final.writeShellScriptBin "bump-npm-versions" ''
-          ${final.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine patch
+          ${final.nodePackages.npm}/bin/npm version --preid rc -w @circles-pink/state-machine prerelease
+          ${final.git}/bin/git add .
+          ${final.nodePackages.npm}/bin/npm version --preid rc --include-workspace-root --force prerelease
         '';
 
 
