@@ -1,6 +1,6 @@
 {
   "SectionHeaderPurs": {
-    "prefix": ["---", "section-header"],
+    "prefix": ["--- Header", "section-header"],
     "body": [
       "--------------------------------------------------------------------------------",
       "-- ${1:element}",
