@@ -45,6 +45,7 @@
   , "undefined"
   , "unordered-collections"
   , "unsafe-coerce"
+  , "uri"
   , "variant"
   , "web3"
   ]
