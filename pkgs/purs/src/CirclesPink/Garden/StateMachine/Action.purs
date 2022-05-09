@@ -1,19 +1,14 @@
 module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (Address)
 
 type CirclesAction
   = Variant
-      ( landing ::
-          Variant
-            ( signIn :: Unit
-            , signUp :: Unit
-            , checkForSession :: Unit
-            )
-      , infoGeneral ::
+      ( infoGeneral ::
           Variant
             ( next :: Unit
             )
@@ -84,6 +79,7 @@ type CirclesAction
             ( coreToWindow :: Unit
             , setMagicWords :: String
             )
+      | CirclesProtocolDef GetAction
       )
 
 ----
