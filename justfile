@@ -34,8 +34,6 @@ branchless-put_:
 	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
 	[ -z "$(git status --porcelain)" ]
 	bump-npm-versions
-	git stage .
-	git commit -m "Bump package versions"
 	git push --force
 	gh pr create --base main --body "" --title "Branchless Update"
 	gh pr merge --auto --rebase 
