@@ -10,6 +10,7 @@ module CirclesPink.Garden.StateMachine.ProtocolDef
   , LandingStateCheckSessionResult
   , LandingTransitions
   , _landing
+  , initLanding
   ) where
 
 import Prelude
@@ -20,7 +21,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Data.Argonaut (JsonDecodeError)
 import Data.Variant (Variant, inj)
-import RemoteData (RemoteData(..))
+import RemoteData (RemoteData(..), _notAsked)
 import Stadium.Type.Protocol as P
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
@@ -51,6 +52,11 @@ type LandingTransitions
     , signIn :: P.Action ("login" :> Nil')
     , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
     )
+
+initLanding :: forall v. Variant ( landing :: LandingState | v )
+initLanding =
+  _landing
+    { checkSessionResult: _notAsked unit }
 
 type LandingState
   = { checkSessionResult :: LandingStateCheckSessionResult

@@ -4,7 +4,6 @@ module CirclesPink.Garden.StateMachine.State
   , CirclesState
   , DebugState
   , EmailApiResult
-  , module Exp
   , ErrLoginState
   , ErrLoginStateResolved
   , ErrSubmit
@@ -40,28 +39,23 @@ module CirclesPink.Garden.StateMachine.State
 --------------------------------------------------------------------------------
 -- Re-expprts
 --------------------------------------------------------------------------------
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, ErrLandingState, ErrLandingStateResolved, GetAction, GetProtocol, GetState, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing, initLanding) as Exp
 --------------------------------------------------------------------------------
 -- Import
 --------------------------------------------------------------------------------
 import Prelude
-import CirclesCore (ApiError, Balance, NativeError, SafeStatus, TrustNode, User)
+import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
+import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
-import Data.Argonaut (JsonDecodeError)
-import Data.Maybe (Maybe(..))
+import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrDashboardStateResolved, ErrGetUsers, ErrGetUsersResolved, ErrTokenCheckUBIPayout, ErrTokenCheckUBIPayoutResolved, ErrTokenGetBalance, ErrTokenGetBalanceResolved, ErrTokenRequestUBIPayout, ErrTokenRequestUBIPayoutResolved, ErrTokenTransfer, ErrTokenTransferResolved, ErrTrustAddConnection, ErrTrustAddConnectionResolved, ErrTrustGetTrusts, ErrTrustGetTrustsResolved, ErrTrustRemoveConnection, ErrTrustRemoveConnectionResolved, ErrUserSearch, ErrUserSearchResolved, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, UserSearchResult, _dashboard, initDashboard) as Exp
 import Data.Variant (Variant, inj)
-import Foreign.Object (Object, empty)
-import Record as R
 import RemoteData (RemoteData, _notAsked)
-import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)

@@ -43,7 +43,6 @@
   , "typelevel-lists"
   , "typelevel-prelude"
   , "undefined"
-  , "unordered-collections"
   , "unsafe-coerce"
   , "variant"
   ]

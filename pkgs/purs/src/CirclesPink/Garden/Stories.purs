@@ -3,13 +3,13 @@ module CirclesPink.Garden.StateMachine.Stories
   ) where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Action (CirclesAction, _askEmail, _askUsername, _infoSecurity, _magicWords, _next, _setEmail, _setPrivacy, _setTerms, _setUsername, _submit)
+import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import Control.Monad.State (StateT(..))
-import Data.Traversable (sequence, sequence_, traverse)
+import Control.Monad.State (StateT)
+import Data.Traversable (sequence_)
 import Stadium.Control (toStateT)
 import Undefined (undefined)
 

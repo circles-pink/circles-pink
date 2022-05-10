@@ -1935,6 +1935,20 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@circles-pink/state-machine@*":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@circles-pink/state-machine/-/state-machine-1.0.0.tgz#883b2fe7d6fdca74b63d419489a8f685bfad9ac7"
+  integrity sha512-i7xthF/xMMVRDFtj5xjczeD/xtgy46sIdHbQERq0KjgD6C6CzDyc+/GgkWE08F3hzOEsVp5vw8VC7ZoCBADRXw==
+  dependencies:
+    "@circles/core" "^2.10.10"
+    bip39 "^3.0.4"
+    ethereumjs-util "^7.1.4"
+    ethereumjs-wallet "^1.0.2"
+    gun "^0.2020.1237"
+    isomorphic-fetch "^3.0.0"
+    node-fetch "^2.0.0"
+    web3 "^1.7.1"
+
 "@circles/core@^2.10.10":
   version "2.10.11"
   resolved "https://registry.yarnpkg.com/@circles/core/-/core-2.10.11.tgz#f48fd9865c65cd1c0f90ca2c79a58193d3d1aed1"
