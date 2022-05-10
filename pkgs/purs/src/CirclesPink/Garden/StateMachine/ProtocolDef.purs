@@ -1,14 +1,13 @@
 module CirclesPink.Garden.StateMachine.ProtocolDef where
 
 import Prelude
-import Prelude
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Garden.StateMachine.Control.Env (RequestPath, UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Data.Argonaut (JsonDecodeError)
 import Data.Variant (Variant, inj)
-import RemoteData (RemoteData(..))
+import RemoteData (RemoteData(..), _notAsked)
 import Stadium.Type.Protocol as P
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))

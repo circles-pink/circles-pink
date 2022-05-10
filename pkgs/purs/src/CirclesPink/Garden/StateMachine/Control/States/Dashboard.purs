@@ -122,6 +122,12 @@ dashboard env =
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
             # void
+        _ <-
+          run (env.getBalance st.privKey st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
+            # ExceptT
+        pure unit
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
