@@ -45,4 +45,4 @@ const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
 // UI
 // -----------------------------------------------------------------------------
 
-const IconContainer = tw.div`absolute bottom-8 right-6 top-6 cursor-pointer`;
+const IconContainer = tw.div`absolute right-6 top-6 cursor-pointer`;

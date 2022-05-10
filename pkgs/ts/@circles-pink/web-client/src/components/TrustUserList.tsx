@@ -21,7 +21,6 @@ import {
   JustifyBetweenCenter,
   JustifyStartCenter,
 } from './helper';
-
 import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
 import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
@@ -39,8 +38,7 @@ type TrustUserListProps = {
   theme: Theme;
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
-  setActiveOverlay?: React.Dispatch<SetStateAction<Overlay>>;
-  setOverlayOpen?: React.Dispatch<SetStateAction<boolean>>;
+  toggleOverlay?: (type: Overlay) => void;
   setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
   addTrust: (to: string) => void;
   removeTrust: (to: string) => void;
@@ -110,8 +108,7 @@ const ContentRow = (
   const {
     c,
     theme,
-    setActiveOverlay,
-    setOverlayOpen,
+    toggleOverlay,
     setOverwriteTo,
     addTrust,
     removeTrust,
@@ -163,10 +160,9 @@ const ContentRow = (
             clickable={c.isOutgoing}
             onClick={() => {
               if (c.isOutgoing) {
-                if (setActiveOverlay && setOverlayOpen && setOverwriteTo) {
+                if (toggleOverlay && setOverwriteTo) {
                   setOverwriteTo(addrToString(c.safeAddress));
-                  setActiveOverlay('SEND');
-                  setOverlayOpen(true);
+                  toggleOverlay('SEND');
                 }
               }
             }}
