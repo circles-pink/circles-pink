@@ -7,7 +7,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Data.Argonaut (JsonDecodeError)
 import Data.Variant (Variant, inj)
-import RemoteData (RemoteData)
+import RemoteData (RemoteData, _notAsked)
 import Stadium.Type.Protocol as P
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
@@ -31,6 +31,11 @@ type LandingState
 
 type LandingStateCheckSessionResult
   = RemoteData Unit Unit ErrLandingStateResolved Unit
+
+initLanding :: forall v. Variant ( landing :: LandingState | v )
+initLanding =
+  _landing
+    { checkSessionResult: _notAsked unit }
 
 --------------------------------------------------------------------------------
 -- Action
