@@ -19,6 +19,10 @@ import Data.Either (Either)
 import Data.Traversable (sequence_)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (default, onMatch)
+import Data.Variant.Extra (getLabel)
+import Debug (spy)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import Stadium.Control (toStateT)
 import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey)
@@ -30,15 +34,21 @@ runScripT :: forall m a. ScriptT m a -> m (Either String a /\ CirclesState)
 runScripT = flip runStateT init <<< runExceptT
 
 --------------------------------------------------------------------------------
-act :: forall m. Monad m => Env m -> CirclesAction -> StateT CirclesState m Unit
-act env ac = do
-  --log ("ACTION: " <> show ac)
-  --_ <- get
-  toStateT (circlesControl env) ac
+act :: forall m. MonadEffect m => Env m -> CirclesAction -> StateT CirclesState m Unit
+act env =
+  let
+    ctl = toStateT (circlesControl env)
+  in
+    \ac -> do
+      log ("ACTION: " <> show ac)
+      ctl ac
+      st <- get
+      log ("STATE: " <> getLabel st)
+      let
+        x = spy "st" st
+      log ""
 
---log ("STATE: " <> show st)
---log ""
-act' :: forall m a. Monad m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
+act' :: forall m a. MonadEffect m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
 act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
 
 --------------------------------------------------------------------------------
@@ -47,7 +57,7 @@ type SignUpUserOpts
     , email :: String
     }
 
-signUpUser :: forall m. Monad m => Env m -> SignUpUserOpts -> ExceptT String (StateT CirclesState m) PrivateKey
+signUpUser :: forall m. MonadEffect m => Env m -> SignUpUserOpts -> ExceptT String (StateT CirclesState m) PrivateKey
 signUpUser env opts =
   ExceptT do
     act env $ A._infoGeneral $ A._next unit

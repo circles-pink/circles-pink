@@ -12,7 +12,7 @@ module RemoteData
 
 import Prelude
 import Data.Newtype (class Newtype, unwrap)
-import Data.Variant (Variant, default, inj, match, on, onMatch)
+import Data.Variant (Variant, default, inj, onMatch)
 import Type.Proxy (Proxy(..))
 
 newtype RemoteData n l e a
@@ -26,6 +26,8 @@ newtype RemoteData n l e a
   )
 
 derive instance newtypeRemoteData :: Newtype (RemoteData n l e a) _
+
+derive newtype instance showRemoteData :: (Show n, Show l, Show e, Show a) => Show (RemoteData n l e a)
 
 --------------------------------------------------------------------------------
 -- Constructors
