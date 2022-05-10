@@ -13,6 +13,8 @@ import { ThemeContext } from '../../context/theme';
 import { RemoteData } from '@circles-pink/state-machine/output/RemoteData';
 import { ButtonState } from '../../components/forms/Button';
 import { mapResult } from '../utils/mapResult';
+import { TwoButtonRow } from '../../components/helper';
+import tw from 'twin.macro';
 
 type LoginProps = {
   state: LoginState;
@@ -52,7 +54,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'high'}
               color={theme.baseColor}
@@ -68,7 +70,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
             >
               {t('signUpInsteadButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}

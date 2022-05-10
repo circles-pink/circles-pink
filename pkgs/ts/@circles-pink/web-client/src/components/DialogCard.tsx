@@ -72,5 +72,5 @@ const CardHead = tw.div`max-w-7xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-
 const CardBody = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8`;
 const IntroContent = tw.div`lg:w-1/2`;
 const MainContent = tw.div`w-full`;
-const Control = tw.div`mt-8 lg:mt-0 lg:mt-8`;
+const Control = tw.div`flex mt-8 lg:flex-shrink-0 lg:justify-end`;
 const Debug = tw.div`p-8`;

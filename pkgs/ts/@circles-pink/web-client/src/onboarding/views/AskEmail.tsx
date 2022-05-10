@@ -14,6 +14,7 @@ import { ThemeContext } from '../../context/theme';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { OnboardingStepIndicator } from '../../components/layout';
+import { TwoButtonRow } from '../../components/helper';
 
 type AskEmailProps = {
   state: UserData;
@@ -83,7 +84,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
       // debug={<pre>{JSON.stringify(state.emailApiResult, null, 2)}</pre>}
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'medium'}
               onClick={() => act(A._askEmail(A._prev(unit)))}
@@ -98,7 +99,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
             >
               {t('nextButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}

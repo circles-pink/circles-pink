@@ -12,6 +12,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import tw from 'twin.macro';
 import { LoadingCircles } from '../../components/LoadingCircles';
+import { TwoButtonRow } from '../../components/helper';
 
 type LandingProps = {
   state: LandingState;
@@ -57,7 +58,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'medium'}
               color={theme.baseColor}
@@ -72,7 +73,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             >
               {t('signUpButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}

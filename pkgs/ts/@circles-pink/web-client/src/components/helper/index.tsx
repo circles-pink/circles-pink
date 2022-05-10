@@ -18,3 +18,9 @@ export const JustifyBetweenCenter = tw.div`flex justify-around items-center`;
 // -----------------------------------------------------------------------------
 
 export const CenterText = tw.div`text-center`;
+
+// -----------------------------------------------------------------------------
+// Grid
+// -----------------------------------------------------------------------------
+
+export const TwoButtonRow = tw.span`grid grid-cols-2 gap-2`;

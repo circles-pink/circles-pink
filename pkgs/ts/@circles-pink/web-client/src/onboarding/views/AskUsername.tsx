@@ -14,6 +14,7 @@ import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
+import { TwoButtonRow } from '../../components/helper';
 
 type AskUsernameProps = {
   state: UserData;
@@ -57,7 +58,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       // debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'medium'}
               onClick={() => act(A._askUsername(A._prev(unit)))}
@@ -72,7 +73,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
             >
               {t('nextButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
