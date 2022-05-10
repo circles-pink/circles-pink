@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- Add Chance.js and FFI Bindings to generate randomized sample trust networks
 - Refine EnvVar types by replacing "String" with more accurate representations like "Address" from the `web3` package and `URI` from the `uri` package
 - Add a POC that `Protocol`, `State` and `Action` can be defined _at once_ without having to change `stadium`.
   This will reduce boilerplate when adding/modifying the state machine. Currently it's only implemented for the `landing` state.
