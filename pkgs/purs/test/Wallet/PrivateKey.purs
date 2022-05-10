@@ -31,9 +31,9 @@ tests =
       A.equal (P.toString key) (P.toString recoveredKey)
     T.suite "zeroKey" do
       T.test "has correct length" do
-        A.equal (P.zeroKey # P.toString # S.length) 66
+        A.equal (P.sampleKey # P.toString # S.length) 66
       T.test "produces right mnemonic" do
-        A.equal (P.zeroKey # P.keyToMnemonic # P.getWords)
+        A.equal (P.sampleKey # P.keyToMnemonic # P.getWords)
           [ "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "art" ]
     T.test "privKeyToAddress" do
       A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)

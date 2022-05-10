@@ -32,7 +32,7 @@ import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (sampleAddress, zeroKey)
+import Wallet.PrivateKey (sampleAddress, sampleKey)
 import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ testEnv :: Env.Env Identity
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
-  , generatePrivateKey: pure zeroKey
+  , generatePrivateKey: pure sampleKey
   , userRegister: \_ _ -> pure unit
   , userSearch: \_ _ -> pure []
   , getSafeAddress: \_ -> pure sampleAddress

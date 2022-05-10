@@ -21,7 +21,6 @@ module Wallet.PrivateKey
   , toString
   , unsafeAddrFromString
   , unsafeMkPrivateKey
-  , zeroKey
   ) where
 
 import Prelude
@@ -110,9 +109,6 @@ mnemonicToKey (Mnemonic ws) =
   S.joinWith separator ws
     # mnemonicToEntropyImpl
     # PrivateKey
-
-zeroKey :: PrivateKey
-zeroKey = PrivateKey "0000000000000000000000000000000000000000000000000000000000000000"
 
 sampleKey :: PrivateKey
 sampleKey = PrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
