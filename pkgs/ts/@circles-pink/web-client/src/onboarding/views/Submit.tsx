@@ -13,6 +13,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { mapResult } from '../utils/mapResult';
+import { TwoButtonRow } from '../../components/helper';
 
 type SubmitProps = {
   state: UserData;
@@ -48,7 +49,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'medium'}
               color={theme.baseColor}
@@ -65,7 +66,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
             >
               {t('submitButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}

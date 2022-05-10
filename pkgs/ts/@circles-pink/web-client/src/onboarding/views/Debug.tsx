@@ -10,6 +10,7 @@ import { DebugState } from '@circles-pink/state-machine/output/CirclesPink.Garde
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
+import { TwoButtonRow } from '../../components/helper';
 
 type DebugProps = {
   state: DebugState;
@@ -51,14 +52,14 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               color={theme.baseColor}
               onClick={() => act(A._debug(A._coreToWindow(unit)))}
             >
               {t('debugButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}

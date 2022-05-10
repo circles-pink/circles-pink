@@ -1,6 +1,6 @@
 import tw, { css, styled } from 'twin.macro';
 import { darken, lighten } from '../../onboarding/utils/colorUtils';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode } from 'react';
 import { LoadingCircles } from '../LoadingCircles';
 import { JustifyAroundCenter } from '../helper';
 import Icon from '@mdi/react';
@@ -91,7 +91,7 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
       ${fullWidth && 'width: 100%;'};
       ${prioStyles}
     `,
-    tw`font-bold py-2 px-4 my-1 mr-2 rounded-full cursor-pointer`,
+    tw`font-bold py-2 px-4 my-1 rounded-full cursor-pointer`,
   ];
 });
 

@@ -28,7 +28,7 @@ import {
 import Icon from '@mdi/react';
 import { TrustUserList } from '../../components/TrustUserList';
 import { Overlay } from '../../components/Overlay';
-import { JustifyBetweenCenter } from '../../components/helper';
+import { JustifyBetweenCenter, TwoButtonRow } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
 import { Receive } from './dashboard/Receive';
 import { Balance } from './dashboard/Balance';
@@ -215,7 +215,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       control={
         <ControlContent>
           <FadeIn orientation={'up'} delay={getDelay()}>
-            <>
+            <TwoButtonRow>
               <Button
                 prio="high"
                 color={theme.baseColor}
@@ -235,7 +235,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                   <Icon path={mdiHandCoin} size={1} color={'white'} />
                 </JustifyBetweenCenter>
               </Button>
-            </>
+            </TwoButtonRow>
           </FadeIn>
         </ControlContent>
       }

@@ -18,6 +18,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
 import { OnboardingStepIndicator } from '../../components/layout';
+import { TwoButtonRow } from '../../components/helper';
 
 type MagicWordsProps = {
   state: UserData;
@@ -62,7 +63,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <>
+          <TwoButtonRow>
             <Button
               prio={'medium'}
               onClick={() => act(A._magicWords(A._prev(unit)))}
@@ -77,7 +78,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             >
               {t('nextButton')}
             </Button>
-          </>
+          </TwoButtonRow>
         </FadeIn>
       }
       mainContent={
@@ -97,7 +98,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             })}
           </WordGrid>
           <FadeIn orientation={'down'} delay={getWordDelay()}>
-            <ButtonRow>
+            <TwoButtonRow>
               <Button
                 prio={'low'}
                 color={theme.baseColor}
@@ -120,7 +121,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
               >
                 {t('magicWords.newPhraseBtn')}
               </Button>
-            </ButtonRow>
+            </TwoButtonRow>
           </FadeIn>
         </>
       }
@@ -144,4 +145,3 @@ const WordGrid = styled.div((props: WordGridProps) => {
 const WordContainer = tw.div`py-1 mr-2`;
 const Word = tw.div`p-2 bg-white w-full text-center rounded-full relative`;
 const WordNumber = tw.span`select-none text-sm absolute left-2 text-gray-400`;
-const ButtonRow = tw.div`flex`;

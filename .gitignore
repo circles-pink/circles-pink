@@ -15,3 +15,6 @@ ts-dist/
 .env
 checkouts/
 .psci_modules/
+
+# solid state db from gun
+radata
