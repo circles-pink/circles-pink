@@ -3,6 +3,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
+import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -10,7 +11,7 @@ import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Either (Either(..), either, isRight)
-import Data.Newtype.Extra ((-|))
+import Data.String (length)
 import Data.Variant (Variant)
 import Foreign.Object (insert)
 import Partial.Unsafe (unsafePartial)
@@ -112,17 +113,14 @@ dashboard env =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
             # ExceptT
-        _ <-
-          run (env.getBalance st.privKey st.user.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-            # ExceptT
         checkPayout <-
           run (env.checkUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
-        when (checkPayout -| _.length >= 18) do
+        let
+          payoutAmount = CC.bnToStr checkPayout
+        when ((length payoutAmount) >= 18) do
           run (env.requestUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
@@ -132,6 +130,11 @@ dashboard env =
           run (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
+            # ExceptT
+        _ <-
+          run (env.getBalance st.privKey st.user.safeAddress)
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
             # ExceptT
         pure unit
 

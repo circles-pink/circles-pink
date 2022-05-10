@@ -131,7 +131,7 @@ strToBN = B.strToBN
 intToBN :: Int -> Effect B.Balance
 intToBN = B.intToBN
 
-bnToStr :: B.Balance -> Effect String
+bnToStr :: B.Balance -> String
 bnToStr = B.bnToStr
 
 --------------------------------------------------------------------------------
