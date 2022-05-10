@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.10]
+
+### Added
+
+- Ffi for BN to string - preparation for a better check, when UBI should be requested. (BN.length is not working as expected and will be replaced)
+
+### Changed
+
+- Dashboard layout and button rows with grid, for a more static behaviour
+- Balance - better initial fetching and update every 15 sec.
+- Re-introduced initLanding
+
 ## [1.0.5]
 
 ### Added
