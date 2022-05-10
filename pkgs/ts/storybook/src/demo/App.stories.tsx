@@ -3,7 +3,7 @@ import { ComponentMeta } from "@storybook/react";
 import { Onboarding } from "@circles-pink/web-client/src/onboarding";
 import { onboardingArgs } from "./onboardingArgs";
 import { getContent } from "@circles-pink/content/src";
-import { initLanding } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
+import { initLanding } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing";
 
 export default {
   title: "Components/App",
