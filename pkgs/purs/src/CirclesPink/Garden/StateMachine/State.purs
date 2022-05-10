@@ -37,7 +37,7 @@ module CirclesPink.Garden.StateMachine.State
   ) where
 
 --------------------------------------------------------------------------------
--- Re-expprts
+-- Re-exports
 --------------------------------------------------------------------------------
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
@@ -54,12 +54,11 @@ import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrDashboardStateResolved, ErrGetUsers, ErrGetUsersResolved, ErrTokenCheckUBIPayout, ErrTokenCheckUBIPayoutResolved, ErrTokenGetBalance, ErrTokenGetBalanceResolved, ErrTokenRequestUBIPayout, ErrTokenRequestUBIPayoutResolved, ErrTokenTransfer, ErrTokenTransferResolved, ErrTrustAddConnection, ErrTrustAddConnectionResolved, ErrTrustGetTrusts, ErrTrustGetTrustsResolved, ErrTrustRemoveConnection, ErrTrustRemoveConnectionResolved, ErrUserSearch, ErrUserSearchResolved, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, UserSearchResult, _dashboard, initDashboard) as Exp
+import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 
@@ -103,7 +102,7 @@ type UserData
     , emailApiResult :: EmailApiResult
     , terms :: Boolean
     , privacy :: Boolean
-    , privateKey :: PrivateKey
+    , privateKey :: P.PrivateKey
     , submitResult :: UserDataSubmitResult
     }
 
@@ -164,7 +163,7 @@ type TrustStateTrustsResult
 
 type TrustState
   = { user :: CC.User
-    , privKey :: PrivateKey
+    , privKey :: P.PrivateKey
     , trusts :: Array TrustNode
     , safeStatus :: SafeStatus
     , isReady :: Boolean
