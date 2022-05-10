@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.Stories
-  ( signUpUser
+  ( SignUpUserOpts
+  , signUpUser
   ) where
 
 import Prelude
@@ -24,12 +25,13 @@ act env ac = do
 act' :: forall m a. Monad m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
 act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
 
-type Options
+--------------------------------------------------------------------------------
+type SignUpUserOpts
   = { username :: String
     , email :: String
     }
 
-signUpUser :: forall m. Monad m => Env m -> Options -> StateT CirclesState m Unit
+signUpUser :: forall m. Monad m => Env m -> SignUpUserOpts -> StateT CirclesState m Unit
 signUpUser env opts = do
   act env $ A._infoGeneral $ A._next unit
   act env $ A._askUsername $ A._setUsername opts.username
@@ -42,5 +44,6 @@ signUpUser env opts = do
   act env $ A._magicWords $ A._next unit
   act env $ A._submit $ A._submit unit
 
-finalizeAccount :: forall m. Env m -> Options -> StateT CirclesState m Unit
+--------------------------------------------------------------------------------
+finalizeAccount :: forall m. Env m -> StateT CirclesState m Unit
 finalizeAccount env = undefined

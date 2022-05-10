@@ -18,6 +18,7 @@
   , "foreign"
   , "foreign-object"
   , "functions"
+  , "graphs"
   , "http-methods"
   , "identity"
   , "js-timers"

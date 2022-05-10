@@ -8,8 +8,15 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
+import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
 import Control.Monad.State (StateT, execStateT, get)
+import Data.Array (replicate)
 import Data.Either (Either(..))
+import Data.Graph (Graph)
+import Data.Graph as G
+import Data.Map as M
+import Data.Traversable (sequence)
+import Data.Tuple.Nested ((/\))
 import Data.Typelevel.Undefined (undefined)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
@@ -17,6 +24,7 @@ import Effect.Class.Console (log, logShow)
 import HTTP (addLogging)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
+import Network.Ethereum.Core.Signatures (Address)
 import Node.Process (exit)
 import Stadium.Control (toStateT)
 import Stadium.Type.Either (Left)
@@ -64,6 +72,13 @@ result envVars = execStateT (script envVars opts) init
     { username: "pinkie001"
     , email: "pinkie001@pinkie001.net"
     }
+
+mkRandomGraph :: Effect (Graph Address SignUpUserOpts)
+mkRandomGraph = do
+  countUsers <- C.integer { min: 10, max: 20 }
+  replicate countUsers (pure (undefined /\ undefined))
+    # sequence
+    <#> (M.fromFoldable >>> G.fromMap)
 
 main :: Effect Unit
 main = do

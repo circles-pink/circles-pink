@@ -21,6 +21,10 @@ type Chance
         EffectFn1
           (Option ( middle :: Boolean, middle_initial :: Boolean, prefix :: Boolean, nationality :: Nationality ))
           String
+    , integer ::
+        EffectFn1
+          (Option ( min :: Int, max :: Int ))
+          Int
     }
 
 type Casing

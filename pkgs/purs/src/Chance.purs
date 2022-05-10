@@ -1,6 +1,7 @@
 module Chance
   ( Casing(..)
   , Nationality(..)
+  , integer
   , name
   , string
   , stringPool
@@ -57,6 +58,17 @@ stringPool x1 = runEffectFn1 chance.string $ inj2of2 x1'
   x1' =
     x1
       # (O.fromRecord :: _ -> Option StringPoolOpts)
+
+--------------------------------------------------------------------------------
+type IntegerOpts
+  = ( min :: Int, max :: Int )
+
+integer :: forall r. FromRecord r () IntegerOpts => Record r -> Effect Int
+integer x1 = runEffectFn1 chance.integer x1'
+  where
+  x1' =
+    x1
+      # (O.fromRecord :: _ -> Option IntegerOpts)
 
 --------------------------------------------------------------------------------
 type NameOpts
