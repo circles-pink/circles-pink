@@ -5,6 +5,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -24,7 +25,7 @@ dashboard ::
   MonadTrans t =>
   Monad (t m) =>
   Env.Env m ->
-  { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
+  { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: LandingState )
   , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
   , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
   , removeTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
