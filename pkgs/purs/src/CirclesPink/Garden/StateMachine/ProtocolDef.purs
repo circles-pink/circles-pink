@@ -7,7 +7,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Data.Argonaut (JsonDecodeError)
 import Data.Variant (Variant, inj)
-import RemoteData (RemoteData(..), _notAsked)
+import RemoteData (RemoteData(..))
 import Stadium.Type.Protocol as P
 import Type.Data.List (type (:>), Nil')
 import Type.Proxy (Proxy(..))
