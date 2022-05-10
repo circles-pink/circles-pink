@@ -99,7 +99,7 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
 // UI
 // -----------------------------------------------------------------------------
 
-const ButtonContent = styled.div(() => [tw`flex justify-around items-center`]);
+const ButtonContent = styled.span(() => [tw`flex justify-around items-center`]);
 
 // -----------------------------------------------------------------------------
 // UI / TextWrapper
@@ -107,7 +107,7 @@ const ButtonContent = styled.div(() => [tw`flex justify-around items-center`]);
 
 type TextWrapperProps = { state: ButtonState };
 
-const TextWrapper = styled.div<TextWrapperProps>(props => [
+const TextWrapper = styled.span<TextWrapperProps>(props => [
   css`
     transition: margin-right 0.2s;
     margin-right: ${props.state === 'loading' ? '10' : '0'}px;

@@ -1,12 +1,6 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, {
-  ReactElement,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { Button, Input } from '../../components/forms';
 import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
@@ -49,6 +43,8 @@ export type UserData = {
   avatarUrl: string | null;
 };
 
+export type Overlay = 'SEND' | 'RECEIVE';
+
 // -----------------------------------------------------------------------------
 // Dashboard
 // -----------------------------------------------------------------------------
@@ -63,18 +59,17 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
 
   // Overlay
-  type Overlay = 'SEND' | 'RECEIVE';
-  const [overlayOpen, setOverlayOpen] = useState<boolean>(false);
-  const [activeOverlay, setActiveOverlay] = useState<Overlay>('SEND');
+  const [overlay, setOverlay] = useState<[Overlay, boolean]>(['SEND', false]);
 
   const toggleOverlay = (type: Overlay) => {
-    if (!overlayOpen) {
-      setActiveOverlay(type);
-      setOverlayOpen(true);
-    } else if (overlayOpen && activeOverlay !== type) {
-      setActiveOverlay(type);
-    } else {
-      setOverlayOpen(!overlayOpen);
+    if (overlay[1] && overlay[0] !== type) {
+      setOverlay([type, true]);
+    } else if (overlay[1] && overlay[0] === type) {
+      setOverlay([type, false]);
+    } else if (!overlay[1] && overlay[0] !== type) {
+      setOverlay([type, true]);
+    } else if (!overlay[1] && overlay[0] === type) {
+      setOverlay([type, true]);
     }
   };
 
@@ -124,7 +119,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       });
       setMappedSearch(mapped);
     }
-  }, [state.userSearchResult]);
+  }, [state.userSearchResult, state.trustsResult]);
 
   // -----------------------------------------------------------------------------
   // Trusts get userdata
@@ -167,16 +162,13 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   // -----------------------------------------------------------------------------
 
   useEffect(() => {
-    switch (state.transferResult.type) {
-      case 'loading':
-      case 'notAsked':
-      case 'failure':
-        break;
-      case 'success':
-        setTimeout(() => {
-          act(A._dashboard(A._getBalance(unit)));
-        }, 2000);
-        break;
+    if (state.transferResult.type === 'success') {
+      // Close overlay
+      setOverlay(['SEND', false]);
+      // Refresh balance - better be done in purs
+      setTimeout(() => {
+        act(A._dashboard(A._getBalance(unit)));
+      }, 2000);
     }
   }, [state.transferResult]);
 
@@ -219,21 +211,17 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
               <Button
                 prio="high"
                 color={theme.baseColor}
+                icon={mdiCashFast}
                 onClick={() => toggleOverlay('SEND')}
               >
-                <JustifyBetweenCenter>
-                  <ButtonText>Send</ButtonText>
-                  <Icon path={mdiCashFast} size={1} color={'white'} />
-                </JustifyBetweenCenter>
+                Send
               </Button>
               <Button
                 color={theme.baseColor}
+                icon={mdiHandCoin}
                 onClick={() => toggleOverlay('RECEIVE')}
               >
-                <JustifyBetweenCenter>
-                  <ButtonText>Receive</ButtonText>
-                  <Icon path={mdiHandCoin} size={1} color={'white'} />
-                </JustifyBetweenCenter>
+                Receive
               </Button>
             </TwoButtonRow>
           </FadeIn>
@@ -248,8 +236,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 content={mappedTrusts}
                 theme={theme}
                 icon={mdiLan}
-                setActiveOverlay={setActiveOverlay}
-                setOverlayOpen={setOverlayOpen}
+                toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
                 addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
                 trustAddResult={state.trustAddResult}
@@ -267,8 +254,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 content={mappedSearch}
                 theme={theme}
                 icon={mdiMagnify}
-                setActiveOverlay={setActiveOverlay}
-                setOverlayOpen={setOverlayOpen}
+                toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
                 addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
                 trustAddResult={state.trustAddResult}
@@ -310,15 +296,14 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
         </MainContent>
       }
       overlay={
-        overlayOpen ? (
+        overlay[1] ? (
           <Overlay
             theme={theme}
-            closeOverlay={() => setOverlayOpen(false)}
+            closeOverlay={() => setOverlay(['SEND', false])}
             content={
               <DashboardOverlay
-                overlay={activeOverlay}
-                setOverlayOpen={setOverlayOpen}
-                closeOverlay={() => setOverlayOpen(false)}
+                overlay={overlay[0]}
+                closeOverlay={() => setOverlay(['SEND', false])}
                 overwriteTo={overwriteTo}
                 state={state}
                 act={act}
@@ -341,7 +326,7 @@ type OverlayType = 'SEND' | 'RECEIVE';
 
 type DashboardOverlayProps = SendProps & {
   overlay: OverlayType;
-  setOverlayOpen: React.Dispatch<SetStateAction<boolean>>;
+  closeOverlay: () => void;
 };
 
 const DashboardOverlay = ({
@@ -349,19 +334,13 @@ const DashboardOverlay = ({
   state,
   act,
   theme,
-  setOverlayOpen,
+  closeOverlay,
   overwriteTo,
 }: DashboardOverlayProps) => {
   switch (overlay) {
     case 'SEND':
       return (
-        <Send
-          closeOverlay={() => setOverlayOpen(false)}
-          overwriteTo={overwriteTo}
-          state={state}
-          act={act}
-          theme={theme}
-        />
+        <Send overwriteTo={overwriteTo} state={state} act={act} theme={theme} />
       );
 
     case 'RECEIVE':

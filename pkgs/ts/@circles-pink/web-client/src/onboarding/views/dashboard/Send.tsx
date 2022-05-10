@@ -8,10 +8,7 @@ import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
-import {
-  convertCirclesToTimeCircles,
-  convertTimeCirclesToCircles,
-} from '../../utils/timeCircles';
+import { convertTimeCirclesToCircles } from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
 
 // -----------------------------------------------------------------------------
@@ -20,38 +17,15 @@ import { DashboardProps } from '../Dashboard';
 
 export type SendProps = DashboardProps & {
   theme: Theme;
-  closeOverlay: () => void;
   overwriteTo?: string;
 };
 
-export const Send = ({
-  state,
-  act,
-  theme,
-  closeOverlay,
-  overwriteTo,
-}: SendProps) => {
+export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   // State
   const [from, _] = useState<string>(addrToString(state.user.safeAddress));
   const [to, setTo] = useState<string>(overwriteTo || '');
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
-
-  // Effect
-  useEffect(() => {
-    switch (state.transferResult.type) {
-      case 'loading':
-      case 'notAsked':
-      case 'failure':
-        break;
-      case 'success':
-        setTo('');
-        setValue(0);
-        setPaymentNote('');
-        closeOverlay();
-        break;
-    }
-  }, [state.transferResult]);
 
   // Util
   const transact = () =>
