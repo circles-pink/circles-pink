@@ -4,6 +4,7 @@
   "dependencies": {
     "@circles/core": "^2.10.10",
     "bip39": "^3.0.4",
+    "chance": "^1.1.8",
     "ethereumjs-util": "^7.1.4",
     "ethereumjs-wallet": "^1.0.2",
     "gun": "^0.2020.1237",

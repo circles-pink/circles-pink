@@ -28,6 +28,7 @@
   , "node-fs"
   , "node-process"
   , "now"
+  , "option"
   , "optparse"
   , "ordered-collections"
   , "parsing"
