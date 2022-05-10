@@ -533,6 +533,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "graphs" = pkgs.stdenv.mkDerivation {
+        name = "graphs";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-graphs.git";
+          rev = "5d03edc58444595d7ac0ea6df3dc689ec6021b01";
+          sha256 = "0ab22bhy10p2fn3k9njs49k527ams31xpgk8cc4c9l6q2455g6h9";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "heterogeneous" = pkgs.stdenv.mkDerivation {
         name = "heterogeneous";
         version = "v0.5.1";
