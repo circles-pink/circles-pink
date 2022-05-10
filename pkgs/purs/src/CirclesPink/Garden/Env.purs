@@ -1,5 +1,7 @@
 module CirclesPink.Garden.Env
-  ( env, testEnv, EnvVars
+  ( EnvVars(..)
+  , env
+  , testEnv
   ) where
 
 import Prelude
@@ -17,7 +19,8 @@ import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
 import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (wrap)
+import Data.Newtype (class Newtype, wrap)
+import Data.Newtype.Extra ((-|))
 import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
@@ -32,18 +35,23 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (sampleAddress, zeroKey)
 import Wallet.PrivateKey as P
 
-type EnvVars
-  = { gardenApi :: String
-    , gardenApiUsers :: String
-    , gardenGraphApi :: String
-    , gardenSubgraphName :: String
-    , gardenRelay :: String
-    , gardenHubAddress :: String
-    , gardenProxyFactoryAddress :: String
-    , gardenSafeMasterAddress :: String
-    , gardenEthereumNodeWebSocket :: String
-    }
+--------------------------------------------------------------------------------
+newtype EnvVars
+  = EnvVars
+  { gardenApi :: String
+  , gardenApiUsers :: String
+  , gardenGraphApi :: String
+  , gardenSubgraphName :: String
+  , gardenRelay :: String
+  , gardenHubAddress :: String
+  , gardenProxyFactoryAddress :: String
+  , gardenSafeMasterAddress :: String
+  , gardenEthereumNodeWebSocket :: String
+  }
 
+derive instance newtypeEnvVars :: Newtype EnvVars _
+
+--------------------------------------------------------------------------------
 _errService :: CirclesError
 _errService = inj (Proxy :: _ "errService") unit
 
@@ -86,7 +94,7 @@ env { request, envVars } =
       pure { isValid: false }
     else
       request
-        { url: envVars.gardenApiUsers
+        { url: envVars -| _.gardenApiUsers
         , method: POST
         , body: encodeJson { username }
         }
@@ -113,7 +121,7 @@ env { request, envVars } =
       pure { isValid: false }
     else
       request
-        { url: envVars.gardenApiUsers
+        { url: envVars -| _.gardenApiUsers
         , method: POST
         , body: encodeJson { email }
         }
@@ -356,20 +364,20 @@ privateKeyStore = "session"
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
-  provider <- CC.newWebSocketProvider ev.gardenEthereumNodeWebSocket
+  provider <- CC.newWebSocketProvider $ ev -| _.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
 getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV (ErrNative + r) Effect CirclesCore
 getCirclesCore web3 ev =
   CC.newCirclesCore web3
-    { apiServiceEndpoint: ev.gardenApi
-    , graphNodeEndpoint: ev.gardenGraphApi
-    , hubAddress: ev.gardenHubAddress
-    , proxyFactoryAddress: ev.gardenProxyFactoryAddress
-    , relayServiceEndpoint: ev.gardenRelay
-    , safeMasterAddress: ev.gardenSafeMasterAddress
-    , subgraphName: ev.gardenSubgraphName
+    { apiServiceEndpoint: ev -| _.gardenApi
+    , graphNodeEndpoint: ev -| _.gardenGraphApi
+    , hubAddress: ev -| _.gardenHubAddress
+    , proxyFactoryAddress: ev -| _.gardenProxyFactoryAddress
+    , relayServiceEndpoint: ev -| _.gardenRelay
+    , safeMasterAddress: ev -| _.gardenSafeMasterAddress
+    , subgraphName: ev -| _.gardenSubgraphName
     , databaseSource: "graph"
     }
 

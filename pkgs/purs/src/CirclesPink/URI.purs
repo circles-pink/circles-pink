@@ -2,11 +2,12 @@ module CirclesPink.URI
   ( URI(..)
   , options
   , parse
+  , print
   ) where
 
 import Prelude
 import Data.Either (Either, hush)
-import Data.Newtype (class Newtype, wrap)
+import Data.Newtype (class Newtype, unwrap, wrap)
 import Text.Parsing.Parser (ParseError, Parser)
 import Text.Parsing.Parser as P
 import TypedEnv (class ParseValue)
@@ -47,3 +48,6 @@ parser = U.parser options <#> wrap
 
 parse :: String -> Either ParseError URI
 parse s = P.runParser s parser
+
+print :: URI -> String
+print = unwrap >>> U.print options
