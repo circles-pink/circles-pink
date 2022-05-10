@@ -1,7 +1,7 @@
 {
   "name": "circles-pink",
   "private": true,
-  "version": "1.0.5-rc.3",
+  "version": "1.0.6",
   "workspaces": [
     "pkgs/ts/@circles-pink/content",
     "pkgs/ts/@circles-pink/zeus-client",
