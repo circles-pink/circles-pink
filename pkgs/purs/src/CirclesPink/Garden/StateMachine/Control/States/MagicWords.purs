@@ -6,6 +6,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, lift)
+import Data.Maybe (Maybe(..))
 
 magicWords ::
   forall t m.
@@ -25,4 +26,4 @@ magicWords env =
   where
   newPrivKey set _ _ = do
     pk <- lift $ env.generatePrivateKey
-    set \st -> S._magicWords st { privateKey = pk }
+    set \st -> S._magicWords st { privateKey = Just pk }
