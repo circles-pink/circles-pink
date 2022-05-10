@@ -33,6 +33,7 @@
   , "optparse"
   , "ordered-collections"
   , "parsing"
+  , "partial"
   , "prelude"
   , "psci-support"
   , "record"
