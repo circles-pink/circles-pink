@@ -85,14 +85,13 @@ import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype (unwrap)
 import Data.Newtype.Extra ((-|))
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
-import Foreign (Foreign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigInt)
@@ -186,7 +185,7 @@ type TrustNode
     , isOutgoing :: Boolean
     , limitPercentageIn :: Int
     , limitPercentageOut :: Int
-    , mutualConnections :: Array Foreign
+    , mutualConnections :: Array Address
     , safeAddress :: Address
     }
 
@@ -202,7 +201,11 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> 
 
   mapOk = map mapTrustNode
 
-  mapTrustNode tn = tn { safeAddress = P.unsafeAddrFromString tn.safeAddress }
+  mapTrustNode tn =
+    tn
+      { safeAddress = P.unsafeAddrFromString tn.safeAddress
+      , mutualConnections = map P.unsafeAddrFromString tn.mutualConnections
+      }
 
 --------------------------------------------------------------------------------
 -- API / trustAddConnection
