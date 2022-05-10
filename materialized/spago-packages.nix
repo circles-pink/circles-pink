@@ -173,6 +173,30 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "codec" = pkgs.stdenv.mkDerivation {
+        name = "codec";
+        version = "v4.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/garyb/purescript-codec.git";
+          rev = "178d0e73c0a3ac972f9364eb43d1d001bd779cac";
+          sha256 = "1z1wimbpf832467rgc45jiiym7nrh4wxzx4p2ibxsgmcvqy6j0rx";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "codec-argonaut" = pkgs.stdenv.mkDerivation {
+        name = "codec-argonaut";
+        version = "v8.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/garyb/purescript-codec-argonaut.git";
+          rev = "f84e6737baf895a658e5bb34b5e0e6144d5d62d0";
+          sha256 = "0jld7x4fd2yq6sa147y7qz27d7kg4r6lwijwcz7l7q2npjjw20c6";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "console" = pkgs.stdenv.mkDerivation {
         name = "console";
         version = "v5.0.0";
@@ -828,6 +852,18 @@ let
           url = "https://github.com/purescript-open-community/purescript-open-memoize.git";
           rev = "20d5c14d3033d19044e2d49c11d02278bda72a54";
           sha256 = "10xaylggw22s41bdvxvy7jg16idwa7npwjnns4d65mjynh2ia6kv";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "option" = pkgs.stdenv.mkDerivation {
+        name = "option";
+        version = "v9.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/joneshf/purescript-option.git";
+          rev = "8506cbf1fd5d5465a9dc990dfe6f2960ae51c1ab";
+          sha256 = "1ygpw4v3dr6bcjp8ykllgrb3iz43n939i6id2y7qx1dc6diqplrm";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
