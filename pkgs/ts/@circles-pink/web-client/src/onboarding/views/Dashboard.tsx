@@ -11,7 +11,7 @@ import { Button, Input } from '../../components/forms';
 import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -27,26 +27,26 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { TrustUserList } from '../../components/TrustUserList';
-import {
-  TrustNode,
-  User,
-} from '@circles-pink/state-machine/output/CirclesCore';
 import { Overlay } from '../../components/Overlay';
 import { JustifyBetweenCenter } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
 import { Receive } from './dashboard/Receive';
 import { Balance } from './dashboard/Balance';
+import {
+  TrustNode,
+  User,
+} from '@circles-pink/state-machine/output/CirclesCore';
+import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
-export type MappedTrustNodes = Array<TrustNode & UserData>;
+export type MappedTrustNodes = Array<TrustNode & User>;
 
 export type UserData = {
   username: string;
   avatarUrl: string | null;
-  safeAddress: string;
 };
 
 // -----------------------------------------------------------------------------
@@ -110,11 +110,9 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       state.userSearchResult.type === 'success' &&
       state.trustsResult.type === 'success'
     ) {
+      const trusts = state.trustsResult.value.data;
       const mapped = state.userSearchResult.value.map(u => {
-        const trusts = state.trustsResult.value.data;
-        const t = trusts.find(
-          (t: TrustNode) => t.safeAddress === u.safeAddress
-        );
+        const t = trusts.find(t => t.safeAddress === u.safeAddress);
         return {
           ...u,
           isIncoming: t?.isIncoming || false,
@@ -148,23 +146,18 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       state.getUsersResult.type === 'success' &&
       state.trustsResult.type === 'success'
     ) {
-      const mapped = state.trustsResult.value.data.map<MappedTrustNodes>(
-        (t: TrustNode) => {
-          const users = state.getUsersResult.value;
-          const info = users.find(
-            (u: UserData) => u.safeAddress === t.safeAddress
-          );
-          return {
-            ...t,
-            username: info?.username || 'Unnamed',
-            avatarUrl: info?.avatarUrl || null,
-          };
-        }
-      );
+      const users = state.getUsersResult.value;
+      const mapped = state.trustsResult.value.data.map(t => {
+        const info = users.find(u => u.safeAddress === t.safeAddress);
+        return {
+          ...t,
+          username: info?.username || addrToString(t.safeAddress).slice(0, 8),
+          avatarUrl: info?.avatarUrl || null,
+          id: info?.id || 100000,
+        };
+      });
       setMappedTrusts(
-        mapped.sort((a: UserData, b: UserData) =>
-          a.username.localeCompare(b.username)
-        )
+        mapped.sort((a, b) => a.username.localeCompare(b.username))
       );
     }
   }, [state.getUsersResult, state.trustsResult]);
