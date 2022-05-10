@@ -20,6 +20,7 @@ module Wallet.PrivateKey
   , toEntropy
   , toString
   , unsafeAddrFromString
+  , unsafeMkPrivateKey
   , zeroKey
   ) where
 
@@ -69,6 +70,9 @@ derive instance mnemonicEq :: Eq Mnemonic
 --------------------------------------------------------------------------------
 getWords :: Mnemonic -> Array String
 getWords (Mnemonic ws) = ws
+
+unsafeMkPrivateKey :: Partial => String -> PrivateKey
+unsafeMkPrivateKey hexString = PrivateKey $ S.drop 2 $ hexString
 
 getMnemonicFromString :: String -> Mnemonic
 getMnemonicFromString s = Mnemonic $ R.split (unsafeRegex " +" noFlags) $ S.trim s
