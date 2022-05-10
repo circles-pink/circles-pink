@@ -1,12 +1,20 @@
-module CirclesPink.EnvVars where
+module CirclesPink.EnvVars
+  ( Address(..)
+  , Config
+  , EnvVars(..)
+  , getParsedEnv
+  ) where
 
 import Prelude
+import CirclesPink.Garden.Env as E
 import CirclesPink.URI (URI)
-import Control.Monad.Except (ExceptT(..))
+import CirclesPink.URI as U
+import Convertable (class Convertible)
 import Data.Either (Either)
+import Data.Newtype (class Newtype, unwrap, wrap)
+import Data.Newtype.Extra ((-|))
+import Data.Typelevel.Undefined (undefined)
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as Web3
@@ -22,10 +30,10 @@ type Config f
     , gardenGraphApi :: f "GARDEN_GRAPH_API" URI
     , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
     , gardenRelay :: f "GARDEN_RELAY" URI
-    , gardenHubAdress :: f "GARDEN_HUB_ADDRESS" Address
-    , gardenProxyFactoryAdress :: f "GARDEN_PROXY_FACTORY_ADRESS" Address
+    , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" Address
+    , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" Address
     , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" Address
-    , gardenEthereumNodeWs :: f "GARDEN_ETHEREUM_NODE_WS" URI
+    , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
     )
 
 --------------------------------------------------------------------------------
@@ -40,10 +48,27 @@ instance parseValueAddress :: ParseValue Address where
 derive newtype instance showAddress :: Show Address
 
 --------------------------------------------------------------------------------
-type ResolvedConfig
-  = Record (Config Resolved)
+newtype EnvVars
+  = EnvVars (Record (Config Resolved))
 
-getParsedEnv :: Effect (Either EnvError ResolvedConfig)
+derive instance newtypeEnvVars :: Newtype EnvVars _
+
+instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
+  convert e =
+    wrap
+      { gardenApi: U.print $ e -| _.gardenApi
+      , gardenApiUsers: U.print $ e -| _.gardenApi
+      , gardenGraphApi: U.print $ e -| _.gardenApi
+      , gardenSubgraphName: e -| _.gardenSubgraphName
+      , gardenRelay: U.print $ e -| _.gardenApi
+      , gardenHubAddress: show $ e -| _.gardenHubAddress
+      , gardenProxyFactoryAddress: show $ e -| _.gardenProxyFactoryAddress
+      , gardenSafeMasterAddress: show $ e -| _.gardenSafeMasterAddress
+      , gardenEthereumNodeWebSocket: U.print $ e -| _.gardenApi
+      }
+
+--------------------------------------------------------------------------------
+getParsedEnv :: Effect (Either EnvError EnvVars)
 getParsedEnv =
-  TypedEnv.fromEnv (Proxy :: _ (Config Variable))
-    <$> getEnv
+  getEnv
+    <#> (TypedEnv.fromEnv (Proxy :: _ (Config Variable)) >>> map EnvVars)
