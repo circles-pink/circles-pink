@@ -39,12 +39,6 @@ module CirclesPink.Garden.StateMachine.State
 --------------------------------------------------------------------------------
 -- Re-exports
 --------------------------------------------------------------------------------
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing as Exp
---------------------------------------------------------------------------------
--- Import
---------------------------------------------------------------------------------
 import Prelude
 import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode)
 import CirclesCore as CC
@@ -53,6 +47,10 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
+import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing as Exp
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
 import Data.Variant (Variant, inj)
@@ -60,7 +58,6 @@ import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey as P
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 
 type UsernameApiResult
   = RemoteData Unit Unit CirclesError { isValid :: Boolean }
@@ -201,7 +198,7 @@ init =
     , emailApiResult: _notAsked unit
     , terms: false
     , privacy: false
-    , privateKey: P.zeroKey
+    , privateKey: P.sampleKey
     , submitResult: _notAsked unit
     }
 

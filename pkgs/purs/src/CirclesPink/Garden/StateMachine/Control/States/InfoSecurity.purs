@@ -25,7 +25,7 @@ infoSecurity env =
   next set _ _ = do
     pk <- lift env.generatePrivateKey
     set \st ->
-      if P.zeroKey == st.privateKey then
+      if P.sampleKey == st.privateKey then
         S._magicWords st { privateKey = pk, direction = D._forwards }
       else
         S._magicWords st { direction = D._forwards }
