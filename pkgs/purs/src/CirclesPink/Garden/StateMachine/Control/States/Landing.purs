@@ -3,7 +3,6 @@ module CirclesPink.Garden.StateMachine.Control.States.Landing where
 import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, loginTask, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingStateResolved, LandingState, ErrLandingState, _landing)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans)
@@ -16,23 +15,23 @@ landing ::
   MonadTrans t =>
   Monad (t m) =>
   Env.Env m ->
-  { signUp :: ActionHandler t m Unit LandingState ( "infoGeneral" :: S.UserData )
-  , signIn :: ActionHandler t m Unit LandingState ( "login" :: S.LoginState )
-  , checkForSession :: ActionHandler t m Unit LandingState ( "landing" :: LandingState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
+  { signUp :: ActionHandler t m Unit S.LandingState ( "infoGeneral" :: S.UserData )
+  , signIn :: ActionHandler t m Unit S.LandingState ( "login" :: S.LoginState )
+  , checkForSession :: ActionHandler t m Unit S.LandingState ( "landing" :: S.LandingState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
   }
 landing env =
   { signUp: \set _ _ -> set \_ -> S.init
   , signIn: \set _ _ -> set \_ -> S.initLogin
   , checkForSession:
       \set _ _ -> do
-        set \st' -> _landing st' { checkSessionResult = _loading unit :: RemoteData Unit Unit ErrLandingStateResolved Unit }
+        set \st' -> S._landing st' { checkSessionResult = _loading unit :: RemoteData Unit Unit S.ErrLandingStateResolved Unit }
         result <-
-          (run' :: ExceptV ErrLandingState _ _ -> _) do
+          (run' :: ExceptV S.ErrLandingState _ _ -> _) do
             privKey <- env.restoreSession
             loginResult <- loginTask env privKey
             pure { privKey, loginResult }
         case result of
-          Left e -> set \st -> _landing st { checkSessionResult = _failure e }
+          Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
           Right { privKey, loginResult: { user, safeStatus } }
             | safeStatus.isCreated && safeStatus.isDeployed -> do
               set \_ ->
