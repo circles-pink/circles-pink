@@ -1,6 +1,7 @@
 module CirclesPink.Garden.ApiScript where
 
 import Prelude
+import Chance as C
 import CirclesPink.EnvVars (getParsedEnv)
 import CirclesPink.Garden.Env (EnvVars, env)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
@@ -66,6 +67,8 @@ result envVars = execStateT (script envVars opts) init
 
 main :: Effect Unit
 main = do
+  name <- C.name {}
+  log name
   config <- getParsedEnv
   case config of
     Left err -> do
