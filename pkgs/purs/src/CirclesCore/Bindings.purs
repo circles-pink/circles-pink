@@ -104,7 +104,7 @@ foreign import strToBN :: String -> Effect Balance
 
 foreign import intToBN :: Int -> Effect Balance
 
-foreign import bnToStr :: Balance -> Effect String
+foreign import bnToStr :: Balance -> String
 
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
