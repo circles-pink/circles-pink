@@ -8,7 +8,8 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import RemoteData (RemoteData, _failure, _loading, _notAsked)
+import Data.Maybe (Maybe(..))
+import RemoteData (_failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
 submit ::
@@ -27,38 +28,41 @@ submit env =
   where
   submit' set st _ = do
     set \st' -> S._submit st' { submitResult = _loading unit }
-    let
-      address = P.privKeyToAddress st.privateKey
+    case st.privateKey of
+      Nothing -> pure unit
+      Just privateKey -> do
+        let
+          address = P.privKeyToAddress privateKey
 
-      nonce = P.addressToNonce address
+          nonce = P.addressToNonce address
 
-      task :: ExceptV S.ErrSubmit _ _
-      task = do
-        safeAddress <- env.getSafeAddress st.privateKey
-        _ <- env.safePrepareDeploy st.privateKey
-        env.userRegister
-          st.privateKey
-          { email: st.email
-          , nonce
-          , safeAddress
-          , username: st.username
-          }
-        safeStatus <- env.getSafeStatus st.privateKey
-        user <- env.userResolve st.privateKey
-        trusts <- env.trustGetNetwork st.privateKey
-        isReady' <- readyForDeployment env st.privateKey
-        _ <- env.saveSession st.privateKey
-        pure { safeStatus, user, trusts, isReady: isReady' }
-    result <- run' task
-    case result of
-      Left e -> set \st' -> S._submit st' { submitResult = _failure e }
-      Right { safeStatus, user, trusts, isReady } ->
-        set \_ ->
-          S._trusts
-            { user
-            , trusts
-            , privKey: st.privateKey
-            , safeStatus
-            , trustsResult: _notAsked unit
-            , isReady
-            }
+          task :: ExceptV S.ErrSubmit _ _
+          task = do
+            safeAddress <- env.getSafeAddress privateKey
+            _ <- env.safePrepareDeploy privateKey
+            env.userRegister
+              privateKey
+              { email: st.email
+              , nonce
+              , safeAddress
+              , username: st.username
+              }
+            safeStatus <- env.getSafeStatus privateKey
+            user <- env.userResolve privateKey
+            trusts <- env.trustGetNetwork privateKey
+            isReady' <- readyForDeployment env privateKey
+            _ <- env.saveSession privateKey
+            pure { safeStatus, user, trusts, isReady: isReady' }
+        result <- run' task
+        case result of
+          Left e -> set \st' -> S._submit st' { submitResult = _failure e }
+          Right { safeStatus, user, trusts, isReady } ->
+            set \_ ->
+              S._trusts
+                { user
+                , trusts
+                , privKey: privateKey
+                , safeStatus
+                , trustsResult: _notAsked unit
+                , isReady
+                }

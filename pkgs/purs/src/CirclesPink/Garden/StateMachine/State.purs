@@ -47,17 +47,19 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
-import CirclesPink.Garden.StateMachine.ProtocolDef as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction, GetProtocol, GetState) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingState, ErrLandingStateResolved, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing) as Exp
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard as Exp
+import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrDashboardStateResolved, ErrGetUsers, ErrGetUsersResolved, ErrTokenCheckUBIPayout, ErrTokenCheckUBIPayoutResolved, ErrTokenGetBalance, ErrTokenGetBalanceResolved, ErrTokenRequestUBIPayout, ErrTokenRequestUBIPayoutResolved, ErrTokenTransfer, ErrTokenTransferResolved, ErrTrustAddConnection, ErrTrustAddConnectionResolved, ErrTrustGetTrusts, ErrTrustGetTrustsResolved, ErrTrustRemoveConnection, ErrTrustRemoveConnectionResolved, ErrUserSearch, ErrUserSearchResolved, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, UserSearchResult, _dashboard, initDashboard) as Exp
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey as P
+import Wallet.PrivateKey (PrivateKey)
 
 type UsernameApiResult
   = RemoteData Unit Unit CirclesError { isValid :: Boolean }
@@ -99,7 +101,7 @@ type UserData
     , emailApiResult :: EmailApiResult
     , terms :: Boolean
     , privacy :: Boolean
-    , privateKey :: P.PrivateKey
+    , privateKey :: Maybe PrivateKey
     , submitResult :: UserDataSubmitResult
     }
 
@@ -198,7 +200,7 @@ init =
     , emailApiResult: _notAsked unit
     , terms: false
     , privacy: false
-    , privateKey: P.sampleKey
+    , privateKey: Nothing
     , submitResult: _notAsked unit
     }
 
