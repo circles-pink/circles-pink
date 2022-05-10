@@ -25,6 +25,8 @@ instance parseValueURI :: ParseValue URI where
 
 derive instance newtypeURI :: Newtype URI _
 
+derive newtype instance showURI :: Show URI
+
 --------------------------------------------------------------------------------
 options :: Record (AbsoluteURIOptions UserInfo (HostPortPair Host Port) Path HierPath Query)
 options =

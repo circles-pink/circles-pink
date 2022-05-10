@@ -1,20 +1,24 @@
 module CirclesPink.Garden.ApiScript where
 
 import Prelude
+import CirclesPink.EnvVars (getParsedEnv)
 import CirclesPink.Garden.Env (EnvVars, env)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.State (StateT, execStateT, get)
+import Data.Either (Either(..))
 import Data.Typelevel.Undefined (undefined)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class.Console (log)
+import Effect.Class.Console (log, logShow)
 import HTTP (addLogging)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
+import Node.Process (exit)
 import Stadium.Control (toStateT)
+import Stadium.Type.Either (Left)
 
 control ::
   EnvVars ->
@@ -60,11 +64,15 @@ result envVars = execStateT (script envVars opts) init
     , email: "pinkie001@pinkie001.net"
     }
 
-getEnvVars :: Effect EnvVars
-getEnvVars = undefined
-
 main :: Effect Unit
 main = do
+  config <- getParsedEnv
+  case config of
+    Left err -> do
+      log ("ERROR: " <> show err)
+      exit 1
+    Right val -> do
+      logShow val
   log "hello api script"
 
 --envVars <- getEnvVars
