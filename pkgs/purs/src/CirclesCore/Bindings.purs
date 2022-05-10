@@ -14,6 +14,7 @@ module CirclesCore.Bindings
   , TrustIsTrustedResult(..)
   , User(..)
   , Web3
+  , bnToStr
   , checkResult
   , convertCore
   , intToBN
@@ -103,6 +104,8 @@ foreign import sendTransaction :: Web3 -> String -> String -> Effect Unit
 foreign import strToBN :: String -> Effect Balance
 
 foreign import intToBN :: Int -> Effect Balance
+
+foreign import bnToStr :: Balance -> Effect String
 
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore

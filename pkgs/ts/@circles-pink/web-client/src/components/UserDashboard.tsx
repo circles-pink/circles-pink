@@ -42,9 +42,7 @@ export const UserDashboard = ({
           <Control>{control}</Control>
         </CardHead>
 
-        <CardBody>
-          <MainContent>{mainContent}</MainContent>
-        </CardBody>
+        <CardBody>{mainContent}</CardBody>
       </Frame>
       {debugContext && <Debug>{debug}</Debug>}
     </>
@@ -71,9 +69,8 @@ const Frame = styled.div((props: FrameProps) => [
 // -----------------------------------------------------------------------------
 
 const Header = tw.div``;
-const CardHead = tw.div`max-w-7xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:pt-16 lg:pb-4 lg:px-8 lg:flex lg:justify-between`;
+const CardHead = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8 grid lg:grid-cols-2 md:grid-cols-2 lg:gap-4 md:gap-4`;
 const CardBody = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8`;
 const IntroContent = tw.div`lg:w-1/2`;
-const MainContent = tw.div`w-full`;
-const Control = tw.div`flex lg:flex-shrink-0 lg:mt-2`;
+const Control = tw.div`flex lg:flex-shrink-0 lg:mt-2 lg:justify-end md:justify-end`;
 const Debug = tw.div`p-8`;

@@ -1,5 +1,5 @@
-import { TokenGetBalanceResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import React from 'react';
+import { TokenGetBalanceResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CirclesCurrency } from '../../../assets/CirclesCurrency';
 import { Theme } from '../../../context/theme';
@@ -11,28 +11,42 @@ type BalanceProps = {
 };
 
 export const Balance = ({ theme, balance }: BalanceProps) => {
-  switch (balance.type) {
-    case 'notAsked':
-    case 'failure':
-    case 'loading':
-      return (
-        <BalanceWrapper>
-          <Amount color={theme.baseColor}>0.00</Amount>
-          <CirclesCurrency color={theme.baseColor} />
-        </BalanceWrapper>
-      );
-    case 'success':
-      return (
-        <BalanceWrapper>
-          <Amount color={theme.baseColor}>
-            {displayBalance(balance.value.data.toString())}
-          </Amount>
-          <CirclesCurrency color={theme.baseColor} />
-        </BalanceWrapper>
-      );
-    default:
-      return <></>;
-  }
+  // a state is needed here, to avoid flickering balance display
+  const [resBalance, setResBalance] = useState<string>('0');
+
+  useEffect(() => {
+    if (balance.type == 'success') {
+      setResBalance(balance.value.data.toString());
+    }
+  }, [balance]);
+
+  return (
+    <BalanceWrapper>
+      <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
+      <CirclesCurrency color={theme.baseColor} />
+    </BalanceWrapper>
+  );
+
+  // switch (balance.type) {
+  //   case 'notAsked':
+  //   case 'failure':
+  //   case 'loading':
+  //     return (
+  //       <BalanceWrapper>
+  //         <Amount color={theme.baseColor}>0.00</Amount>
+  //         <CirclesCurrency color={theme.baseColor} />
+  //       </BalanceWrapper>
+  //     );
+  //   case 'success':
+  //     return (
+  //       <BalanceWrapper>
+  //         <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
+  //         <CirclesCurrency color={theme.baseColor} />
+  //       </BalanceWrapper>
+  //     );
+  //   default:
+  //     return <></>;
+  // }
 };
 
 // -----------------------------------------------------------------------------
@@ -52,4 +66,4 @@ const Amount = styled.h2<AmountProps>(({ color }) => [
 // UI
 // -----------------------------------------------------------------------------
 
-const BalanceWrapper = tw.div`flex flex-row items-center m-2`;
+const BalanceWrapper = tw.div`flex flex-row items-center`;

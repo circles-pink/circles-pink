@@ -42,6 +42,7 @@ module CirclesCore
   , _errInvalidUrl
   , _errNative
   , _errService
+  , bnToStr
   , intToBN
   , module Exp
   , newCirclesCore
@@ -128,6 +129,9 @@ strToBN = B.strToBN
 
 intToBN :: Int -> Effect B.Balance
 intToBN = B.intToBN
+
+bnToStr :: B.Balance -> Effect String
+bnToStr = B.bnToStr
 
 --------------------------------------------------------------------------------
 -- API

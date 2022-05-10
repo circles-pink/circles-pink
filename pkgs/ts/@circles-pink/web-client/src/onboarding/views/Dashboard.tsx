@@ -152,7 +152,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
         return {
           ...t,
           username: info?.username || addrToString(t.safeAddress).slice(0, 8),
-          avatarUrl: info?.avatarUrl || null,
+          avatarUrl: info?.avatarUrl || '',
           id: info?.id || 100000,
         };
       });
@@ -241,87 +241,72 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       mainContent={
         <MainContent>
-          <FlexBox>
-            <FlexItemGrow>
-              {mappedTrusts && (
-                <FadeIn orientation={'up'} delay={getDelay()}>
-                  <TrustUserList
-                    title={'Trust Network'}
-                    content={mappedTrusts}
-                    theme={theme}
-                    icon={mdiLan}
-                    setActiveOverlay={setActiveOverlay}
-                    setOverlayOpen={setOverlayOpen}
-                    setOverwriteTo={setOverwriteTo}
-                    addTrust={to =>
-                      act(A._dashboard(A._addTrustConnection(to)))
-                    }
-                    trustAddResult={state.trustAddResult}
-                    removeTrust={to =>
-                      act(A._dashboard(A._removeTrustConnection(to)))
-                    }
-                    trustRemoveResult={state.trustRemoveResult}
-                  />
-                </FadeIn>
-              )}
-            </FlexItemGrow>
-
-            <FlexItemGrow>
-              {mappedSearch && (
-                <FadeIn orientation={'up'} delay={getDelay()}>
-                  <TrustUserList
-                    title={'Explore'}
-                    content={mappedSearch}
-                    theme={theme}
-                    icon={mdiMagnify}
-                    setActiveOverlay={setActiveOverlay}
-                    setOverlayOpen={setOverlayOpen}
-                    setOverwriteTo={setOverwriteTo}
-                    addTrust={to =>
-                      act(A._dashboard(A._addTrustConnection(to)))
-                    }
-                    trustAddResult={state.trustAddResult}
-                    removeTrust={to =>
-                      act(A._dashboard(A._removeTrustConnection(to)))
-                    }
-                    trustRemoveResult={state.trustRemoveResult}
-                    actionRow={
-                      <JustifyBetweenCenter>
-                        <InputWrapper>
-                          <Input
-                            type="text"
-                            value={search}
-                            placeholder={'Search by username'}
-                            onChange={e => setSearch(e.target.value)}
-                            onKeyPress={e =>
-                              e.key === 'Enter' &&
-                              act(
-                                A._dashboard(A._userSearch({ query: search }))
-                              )
-                            }
-                          />
-                        </InputWrapper>
-                        <DebugButtonWrapper>
-                          <Button
-                            prio={'high'}
-                            color={theme.baseColor}
-                            state={mapResult(state.userSearchResult)}
-                            onClick={() =>
-                              act(
-                                A._dashboard(A._userSearch({ query: search }))
-                              )
-                            }
-                          >
-                            {'Search'}
-                          </Button>
-                        </DebugButtonWrapper>
-                      </JustifyBetweenCenter>
-                    }
-                  />
-                </FadeIn>
-              )}
-            </FlexItemGrow>
-          </FlexBox>
+          {mappedTrusts && (
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TrustUserList
+                title={'Trust Network'}
+                content={mappedTrusts}
+                theme={theme}
+                icon={mdiLan}
+                setActiveOverlay={setActiveOverlay}
+                setOverlayOpen={setOverlayOpen}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                trustAddResult={state.trustAddResult}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                trustRemoveResult={state.trustRemoveResult}
+              />
+            </FadeIn>
+          )}
+          {mappedSearch && (
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TrustUserList
+                title={'Explore'}
+                content={mappedSearch}
+                theme={theme}
+                icon={mdiMagnify}
+                setActiveOverlay={setActiveOverlay}
+                setOverlayOpen={setOverlayOpen}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                trustAddResult={state.trustAddResult}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                trustRemoveResult={state.trustRemoveResult}
+                actionRow={
+                  <JustifyBetweenCenter>
+                    <InputWrapper>
+                      <Input
+                        type="text"
+                        value={search}
+                        placeholder={'Search by username'}
+                        onChange={e => setSearch(e.target.value)}
+                        onKeyPress={e =>
+                          e.key === 'Enter' &&
+                          act(A._dashboard(A._userSearch({ query: search })))
+                        }
+                      />
+                    </InputWrapper>
+                    <DebugButtonWrapper>
+                      <Button
+                        prio={'high'}
+                        color={theme.baseColor}
+                        state={mapResult(state.userSearchResult)}
+                        onClick={() =>
+                          act(A._dashboard(A._userSearch({ query: search })))
+                        }
+                      >
+                        {'Search'}
+                      </Button>
+                    </DebugButtonWrapper>
+                  </JustifyBetweenCenter>
+                }
+              />
+            </FadeIn>
+          )}
         </MainContent>
       }
       overlay={
@@ -402,8 +387,8 @@ const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
 // -----------------------------------------------------------------------------
 
 const HeaderContent = tw.div`flex justify-between items-center mx-4`;
-const ControlContent = tw.div`m-2 lg:m-0 lg:my-2`;
-const MainContent = tw.div`relative`;
+const ControlContent = tw.div`lg:my-2 md:my-4`;
+const MainContent = tw.div`grid lg:grid-cols-2 gap-4`;
 const ButtonText = tw.span`mr-3`;
 const DebugButtonWrapper = tw.span`mb-3`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
