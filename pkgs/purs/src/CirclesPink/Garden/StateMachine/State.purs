@@ -40,7 +40,7 @@ module CirclesPink.Garden.StateMachine.State
 -- Re-expprts
 --------------------------------------------------------------------------------
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, ErrLandingState, ErrLandingStateResolved, GetAction, GetProtocol, GetState, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing, initLanding) as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction, GetProtocol, GetState) as Exp
 --------------------------------------------------------------------------------
 -- Import
 --------------------------------------------------------------------------------
