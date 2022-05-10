@@ -70,7 +70,7 @@ signUpUser env opts =
     act env $ A._infoSecurity $ A._next unit
     act env $ A._magicWords $ A._next unit
     act env $ A._submit $ A._submit unit
-    get <#> (default (throwError "nooo!") # onMatch { "trusts": _.privKey >>> pure })
+    get <#> (default (throwError "Cannot sign up user.") # onMatch { "trusts": _.privKey >>> pure })
 
 --------------------------------------------------------------------------------
 finalizeAccount :: forall m. Monad m => Env m -> ExceptT String (StateT CirclesState m) Unit

@@ -11,9 +11,10 @@ import CirclesPink.Garden.StateMachine.Stories (ScriptT, runScripT)
 import CirclesPink.Garden.StateMachine.Stories as S
 import Convertable (convert)
 import Data.Either (Either(..))
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class.Console (log, logShow)
+import Effect.Class.Console (log)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Node.Process (exit)
@@ -42,9 +43,11 @@ main = do
       runAff_
         ( \r -> do
             case r of
-              Left e -> logShow e
-              Right _ -> pure unit
+              Left e -> log ("Native error: " <> show e)
+              Right (Left e /\ _) -> log ("Error: " <> show e)
+              _ -> pure unit
         )
         $ runScripT
         $ app env'
+      pure unit
   log "hello api script"
