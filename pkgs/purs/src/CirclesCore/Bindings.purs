@@ -211,7 +211,7 @@ newtype CoreTrust
             , isOutgoing :: Boolean
             , limitPercentageIn :: Int
             , limitPercentageOut :: Int
-            , mutualConnections :: Array Foreign
+            , mutualConnections :: Array String
             , safeAddress :: String
             }
         )
