@@ -21,6 +21,7 @@ import Heterogeneous.Mapping (hmapWithIndex)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as Web3
+import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Node.Process (getEnv)
 import Record.Extra.CirclesPink (zipRecord)
 import Stadium.Type.Tuple (Tuple)

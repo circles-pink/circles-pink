@@ -82,7 +82,7 @@ toString (PrivateKey k) = "0x" <> k
 addrToString :: Address -> String
 addrToString (Address a) = a
 
-unsafeAddrFromString :: String -> Address
+unsafeAddrFromString :: Partial => String -> Address
 unsafeAddrFromString s = Address s
 
 nonceToString :: Nonce -> String

@@ -93,6 +93,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
+import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigInt)
@@ -207,8 +208,8 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> 
 
   mapTrustNode tn =
     tn
-      { safeAddress = P.unsafeAddrFromString tn.safeAddress
-      , mutualConnections = map P.unsafeAddrFromString tn.mutualConnections
+      { safeAddress = unsafePartial $ P.unsafeAddrFromString tn.safeAddress
+      , mutualConnections = unsafePartial $ map P.unsafeAddrFromString tn.mutualConnections
       }
 
 --------------------------------------------------------------------------------
@@ -353,7 +354,7 @@ safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >
 
   mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
 
-  mapOk = P.unsafeAddrFromString
+  mapOk x = unsafePartial $ P.unsafeAddrFromString x
 
 --------------------------------------------------------------------------------
 -- API / safePrepareDeploy
@@ -368,7 +369,7 @@ safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>
 
   mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
 
-  mapOk = P.unsafeAddrFromString
+  mapOk x = unsafePartial $ P.unsafeAddrFromString x
 
 --------------------------------------------------------------------------------
 -- API / safeIsFunded
@@ -553,7 +554,7 @@ type NativeError
 -- Util
 --------------------------------------------------------------------------------
 userToUser :: B.User -> User
-userToUser = unwrap >>> \x -> x { safeAddress = P.unsafeAddrFromString x.safeAddress }
+userToUser = unwrap >>> \x -> x { safeAddress = unsafePartial $ P.unsafeAddrFromString x.safeAddress }
 
 unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> Result (ErrNative + r) Unit
 unsafeSampleCore x1 x2 =
