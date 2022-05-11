@@ -12,5 +12,6 @@
   "purescript.exportsCodeLens": true,
   "[dhall]": {
     "editor.defaultFormatter": "dhall.vscode-dhall-lsp-server"
-  }
+  },
+  "terminal.integrated.persistentSessionReviveProcess": "never"
 }
