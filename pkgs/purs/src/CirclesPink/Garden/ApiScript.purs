@@ -12,6 +12,7 @@ import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.Stories (ScriptT, runScripT)
 import CirclesPink.Garden.StateMachine.Stories as S
+import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
@@ -22,6 +23,7 @@ import Data.Newtype.Extra ((-|))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log, logShow)
 import HTTP.Milkis (milkisRequest)
@@ -54,6 +56,7 @@ fundAddress envVars pk = do
   web3 <- lift $ newWeb3 provider
   let
     targetAddr = W3.privateToAddress pk
+  logShow { targetAddr }
   sendTransaction web3
     { from: safeFunderAddr
     , to: targetAddr
@@ -65,7 +68,10 @@ app envVars env = do
   username <- lift $ liftEffect $ C.stringPool { pool: "abcdefghi" }
   pk <- S.signUpUser env { username, email: "foo1@bar.com" }
   logShow $ keyToMnemonic pk
-  _ <- pure $ fundAddress envVars $ convert pk
+  r <- liftAff $ runExceptT $ fundAddress envVars $ convert pk
+  case r of
+    Left e -> log ("err: ")
+    Right v -> log ("ok: " <> show v)
   --S.finalizeAccount env
   pure unit
 
