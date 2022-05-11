@@ -11,6 +11,7 @@ module CirclesCore
   , ErrSafeIsFunded
   , ErrSafePredictAddress
   , ErrSearch
+  , ErrSendTransaction
   , ErrService
   , ErrTokenCheckUBIPayout
   , ErrTokenDeploy
@@ -147,6 +148,7 @@ newCirclesCore x1 x2 =
     <#> lmap mkErrorNative
     # ExceptT
 
+--------------------------------------------------------------------------------
 type ErrPrivKeyToAccount r
   = ErrNative + r
 
@@ -157,7 +159,11 @@ privKeyToAccount w3 pk =
     <#> lmap mkErrorNative
     # ExceptT
 
-sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrPrivKeyToAccount r) Effect Unit
+--------------------------------------------------------------------------------
+type ErrSendTransaction r
+  = ErrNative + r
+
+sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrSendTransaction r) Effect Unit
 sendTransaction w3 f t =
   B.sendTransaction w3 (P.addrToString f) (P.addrToString t)
     # try
