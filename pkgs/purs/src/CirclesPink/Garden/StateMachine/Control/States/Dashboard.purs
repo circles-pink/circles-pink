@@ -13,6 +13,7 @@ import Data.Either (Either(..), either, isRight)
 import Data.Newtype.Extra ((-|))
 import Data.Variant (Variant)
 import Foreign.Object (insert)
+import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Wallet.PrivateKey (unsafeAddrFromString)
@@ -77,7 +78,7 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          run (env.addTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress)
+          run (env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # ExceptT
@@ -92,7 +93,7 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          run (env.removeTrustConnection st.privKey (P.unsafeAddrFromString u) st.user.safeAddress)
+          run (env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # ExceptT
@@ -158,7 +159,7 @@ dashboard env =
     set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV S.ErrTokenTransfer _ _
-      task = env.transfer st.privKey (unsafeAddrFromString from) (unsafeAddrFromString to) value paymentNote
+      task = env.transfer st.privKey (unsafePartial $ unsafeAddrFromString from) (unsafePartial $ unsafeAddrFromString to) value paymentNote
     result <- run' $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
