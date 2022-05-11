@@ -11,32 +11,19 @@ import CirclesPink.Garden.StateMachine.Stories (ScriptT, runScripT)
 import CirclesPink.Garden.StateMachine.Stories as S
 import Convertable (convert)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class.Console (log)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
-import Network.Ethereum.Web3 (HexString, Provider, TransactionOptions(..), Web3Error, defaultTransactionOptions, runWeb3, sendTx)
+import Network.Ethereum.Web3 (HexString, Web3Error)
 import Node.Process (exit)
 import Undefined (undefined)
 
--- fundAddress :: Aff (Either Web3Error HexString)
--- fundAddress =
---   runWeb3 (undefined :: Provider)
---     $ sendTx
---         ( TransactionOptions
---             { from: Nothing
---             , to: Nothing
---             , value: Nothing
---             , gas: Nothing
---             , gasPrice: Nothing
---             , data: Nothing
---             , nonce: Nothing
---             }
---         )
---         undefined
+fundAddress :: Aff (Either Web3Error HexString)
+fundAddress = undefined
+
 app :: Env Aff -> ScriptT Aff Unit
 app env = do
   pk <- S.signUpUser env { username: "Foo1", email: "foo1@bar.com" }
