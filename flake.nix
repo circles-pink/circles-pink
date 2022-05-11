@@ -241,7 +241,7 @@
                       inherit (builtins) attrValues;
                       inherit (pkgs.lib) concatMapStringsSep;
                       packageJsonUrl = "https://raw.githubusercontent.com/circles-pink/circles-pink/main/package.json";
-                      publish = pkgs.writeBashScriptBin "publish" ''
+                      publish = pkgs.writeShellScriptBin "publish" ''
                         DIR="$1"  
                         ${pkgs.nodePackages.npm}/bin/npm publish --verbose --access public $DIR/
                       '';
