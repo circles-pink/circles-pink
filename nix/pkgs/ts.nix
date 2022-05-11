@@ -117,9 +117,13 @@ rec {
     cp -r ${src'} $out
     cd $out
     chmod -R +w $out
+    VERSION="1.0.0"
     ${pkgs.nodePackages.npm}/bin/npm version \
       ${concatMapStringsSep " " (w: "-w ${w}") (attrNames publicWorkspaces)} \
-      1.0.0
+      "$VERSION"
+
+    ${pkgs.nodePackages.npm}/bin/npm version --include-workspace-root --no-git-tag-version \
+      "$VERSION"
   '';
 
   emptyWorkspaces = pipe
