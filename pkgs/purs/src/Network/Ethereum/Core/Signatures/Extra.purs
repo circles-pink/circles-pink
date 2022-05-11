@@ -8,16 +8,17 @@ import Prelude
 import Convertable (class Convertible, convert)
 import Data.Maybe (fromJust)
 import Network.Ethereum.Core.HexString (HexString, mkHexString, unHex)
-import Network.Ethereum.Core.Signatures (Address, mkAddress)
+import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import TypedEnv (class ParseValue)
-import Undefined (undefined)
 import Wallet.PrivateKey as C
 import Web3.Bindings (web3)
 
 newtype ChecksumAddress
   = ChecksumAddress HexString
+
+derive newtype instance showChecksumAddress :: Show ChecksumAddress
 
 unsafeFromString :: Partial => String -> ChecksumAddress
 unsafeFromString x = mkHexString x # fromJust # ChecksumAddress
