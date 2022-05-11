@@ -33,7 +33,7 @@ export const Button = (props_: ButtonProps) => {
         <TextWrapper state={props.state}>
           {props.icon ? (
             <JustifyAroundCenter>
-              <ButtonText>Send</ButtonText>
+              <ButtonText>{props.children}</ButtonText>
               <Icon path={props.icon} size={1} color={'white'} />
             </JustifyAroundCenter>
           ) : (
