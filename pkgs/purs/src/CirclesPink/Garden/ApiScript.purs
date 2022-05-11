@@ -50,29 +50,26 @@ safeFunderAddr =
 type ErrFundAddress r
   = ErrSendTransaction + ErrNewWebSocketProvider + ErrPrivKeyToAccount + r
 
-fundAddress :: forall r. EnvVars -> W3.PrivateKey -> ExceptV (ErrFundAddress + r) Aff HexString
-fundAddress envVars pk = do
+fundAddress :: forall r. EnvVars -> W3.Address -> ExceptV (ErrFundAddress + r) Aff HexString
+fundAddress envVars safeAddress = do
   provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket
   web3 <- lift $ newWeb3 provider
-  let
-    targetAddr = W3.privateToAddress pk
-  logShow { targetAddr }
   sendTransaction web3
     { from: safeFunderAddr
-    , to: targetAddr
+    , to: safeAddress
     , value: "1000000000000000000"
     }
 
 app :: EnvVars -> Env Aff -> ScriptT Aff Unit
 app envVars env = do
   username <- lift $ liftEffect $ C.stringPool { pool: "abcdefghi" }
-  pk <- S.signUpUser env { username, email: "foo1@bar.com" }
-  logShow $ keyToMnemonic pk
-  r <- liftAff $ runExceptT $ fundAddress envVars $ convert pk
+  { privateKey, safeAddress } <- S.signUpUser env { username, email: "foo1@bar.com" }
+  logShow $ keyToMnemonic privateKey
+  r <- liftAff $ runExceptT $ fundAddress envVars $ convert safeAddress
   case r of
-    Left e -> log ("err: ")
+    Left _ -> log ("err: ")
     Right v -> log ("ok: " <> show v)
-  --S.finalizeAccount env
+  S.finalizeAccount env
   pure unit
 
 main :: Effect Unit

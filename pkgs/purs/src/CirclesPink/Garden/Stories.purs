@@ -15,6 +15,7 @@ import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.State (StateT, get, runStateT)
+import Convertable (convert)
 import Data.Either (Either)
 import Data.Traversable (sequence_)
 import Data.Tuple.Nested (type (/\))
@@ -26,6 +27,7 @@ import Effect.Class.Console (log)
 import Stadium.Control (toStateT)
 import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey as CC
 
 type ScriptT m a
   = ExceptT String (StateT CirclesState m) a
@@ -57,7 +59,15 @@ type SignUpUserOpts
     , email :: String
     }
 
-signUpUser :: forall m. MonadEffect m => Env m -> SignUpUserOpts -> ExceptT String (StateT CirclesState m) PrivateKey
+signUpUser ::
+  forall m.
+  MonadEffect m =>
+  Env m ->
+  SignUpUserOpts ->
+  ExceptT String (StateT CirclesState m)
+    { privateKey :: CC.PrivateKey
+    , safeAddress :: CC.Address
+    }
 signUpUser env opts =
   ExceptT do
     act env $ A._infoGeneral $ A._next unit
@@ -70,8 +80,28 @@ signUpUser env opts =
     act env $ A._infoSecurity $ A._next unit
     act env $ A._magicWords $ A._next unit
     act env $ A._submit $ A._submit unit
-    get <#> (default (throwError "Cannot sign up user.") # onMatch { "trusts": _.privKey >>> pure })
+    get
+      <#> ( default (throwError "Cannot sign up user.")
+            # onMatch
+                { trusts:
+                    \x ->
+                      pure
+                        { privateKey: x.privKey
+                        , safeAddress: x.user.safeAddress
+                        }
+                }
+        )
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m. Monad m => Env m -> ExceptT String (StateT CirclesState m) Unit
-finalizeAccount env = undefined
+finalizeAccount :: forall m. MonadEffect m => Env m -> ExceptT String (StateT CirclesState m) Unit
+finalizeAccount env =
+  ExceptT do
+    act env $ A._trusts $ A._finalizeRegisterUser unit
+    get
+      <#> ( default (throwError "Cannot finalize register user.")
+            # onMatch
+                { dashboard:
+                    \_ ->
+                      pure unit
+                }
+        )
