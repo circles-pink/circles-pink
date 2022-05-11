@@ -236,18 +236,27 @@
                     ${pkgs.nodePackages.npm}/bin/npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
                   '';
 
-                  effectScript = ''
-                    ${pkgs.nodePackages.npm}/bin/npm publish \
-                      --verbose \
-                      --tag next \
-                      --access public \
-                      ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/state-machine"}/
-                      ${pkgs.nodePackages.npm}/bin/npm publish \
-                      --verbose \
-                      --tag next \
-                      --access public \
-                      ${pkgs.circles-pink.ts.publicWorkspaces."@circles-pink/web-client"}/
-                  '';
+                  effectScript =
+                    let
+                      pkgJsonUrl = "https://raw.githubusercontent.com/circles-pink/circles-pink/main/package.json";
+                      publish = pkgs.writeBashScriptBin "publish" ''
+                        DIR="$1"  
+                        ${pkgs.nodePackages.npm}/bin/npm publish --verbose --access public $DIR/
+                      '';
+                      inherit (pkgs.circles-pink.ts) publicWorkspaces;
+                    in
+                    ''
+                      CURRENT_VERSION=`${pkgs.curl}/bin/curl ${packageJsonUrl} | ${pkgs.jq}/bin/jq '.version'`
+                      NEW_VERSION=`cat ${./package.json} | ${pkgs.jq}/bin/jq '.version'`
+                    
+                      if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]
+                        then
+                          echo "Nothing to release."
+                          exit 0
+                      fi
+
+                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ws") publicWorkspaces}    
+                    '';
 
                   secretsMap = {
                     "secrets" = "secrets";
