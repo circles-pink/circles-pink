@@ -2,6 +2,7 @@ module CirclesPink.Garden.StateMachine.Error where
 
 import Prelude
 import Data.Variant (Variant)
+import HTTP (Req)
 
 type CirclesError' r
   = ( errService :: Unit
@@ -13,5 +14,6 @@ type CirclesError
   = Variant
       ( errService :: Unit
       , errParse :: Unit
-      , errNetwork :: Unit
+      , errNetwork :: Req
+      , errParseJson :: Unit
       )
