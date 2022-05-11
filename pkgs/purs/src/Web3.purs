@@ -1,14 +1,19 @@
 module Web3
-  ( sendTransaction
+  ( newWeb3
+  , newWebSocketProvider
+  , sendTransaction
   ) where
 
 import Prelude
+import CirclesPink.URI (URI)
+import CirclesPink.URI as U
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Maybe (fromJust)
 import Data.Variant (Variant, inj)
-import Effect.Aff (Aff, Error, attempt, message)
+import Effect (Effect)
+import Effect.Aff (Aff, Error, attempt, message, try)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (name)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
@@ -41,16 +46,35 @@ _errNative = inj (Proxy :: _ "errNative")
 type ErrSendTransaction r
   = ErrNative + r
 
-sendTransaction :: forall r. { from :: W3.Address, to :: W3.Address, value :: Number } -> ExceptV (ErrSendTransaction + r) Aff HexString
-sendTransaction opts =
+sendTransaction :: forall r. B.Web3 -> { from :: W3.Address, to :: W3.Address, value :: Number } -> ExceptV (ErrSendTransaction + r) Aff HexString
+sendTransaction web3 opts =
   unsafePartial
-    ( B.sendTransaction { from: show opts.from, to: show opts.to, value: opts.value }
+    ( B.sendTransaction web3 { from: show opts.from, to: show opts.to, value: opts.value }
         # fromEffectFnAff
         <#> (mkHexString >>> fromJust)
         # attempt
         <#> lmap mkErrorNative
         # ExceptT
     )
+
+--------------------------------------------------------------------------------
+-- Web3
+--------------------------------------------------------------------------------
+type Result e a
+  = ExceptV e Aff a
+
+type ErrNewWebSocketProvider r
+  = ErrNative + r
+
+newWebSocketProvider :: forall r. URI -> ExceptV (ErrNewWebSocketProvider r) Effect B.Provider
+newWebSocketProvider x1 =
+  B.newWebSocketProvider (U.print x1)
+    # try
+    <#> lmap mkErrorNative
+    # ExceptT
+
+newWeb3 :: B.Provider -> Effect B.Web3
+newWeb3 = B.newWeb3
 
 --------------------------------------------------------------------------------
 -- Util

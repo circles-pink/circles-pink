@@ -18,16 +18,21 @@ import Effect.Class.Console (log)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Network.Ethereum.Web3 (HexString, Web3Error)
+import Network.Ethereum.Web3 as W3
 import Node.Process (exit)
 import Undefined (undefined)
+import Web3 (sendTransaction)
 
-fundAddress :: Aff (Either Web3Error HexString)
-fundAddress = undefined
+safeFunderAddr :: W3.Address
+safeFunderAddr = "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
+
+fundAddress :: W3.PrivateKey -> Aff (Either Web3Error HexString)
+fundAddress = undefined -- sendTransaction  { from: safeFunderAddr  }
 
 app :: Env Aff -> ScriptT Aff Unit
 app env = do
   pk <- S.signUpUser env { username: "Foo1", email: "foo1@bar.com" }
-  --fundAddress pk
+  fundAddress pk
   --S.finalizeAccount env
   pure unit
 
