@@ -238,6 +238,7 @@
 
                   effectScript =
                     let
+                      inherit (builtins) attrValues;
                       inherit (pkgs.lib) concatMapStringsSep;
                       packageJsonUrl = "https://raw.githubusercontent.com/circles-pink/circles-pink/main/package.json";
                       publish = pkgs.writeBashScriptBin "publish" ''
@@ -256,7 +257,7 @@
                           exit 0
                       fi
 
-                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ws") publicWorkspaces}    
+                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ws") (attrValues publicWorkspaces)}    
                     '';
 
                   secretsMap = {
