@@ -1,17 +1,18 @@
 module HTTP
-  ( NetworkError(..)
+  ( ErrNetwork
+  , ErrParseJson
+  , ErrReqFn
   , Req
   , ReqFn
   , Res
-  , _errUnknown
+  , _errNetwork
+  , _errParseJson
   , addLogging
   ) where
 
 import Prelude
-import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (Json, stringify)
-import Data.Either (Either)
 import Data.HTTP.Method (Method)
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff)
@@ -25,15 +26,27 @@ type Req
 type Res
   = { status :: Int, body :: Json }
 
-type NetworkError r
-  = ( errNetwork :: Unit | r )
+--------------------------------------------------------------------------------
+type ErrNetwork r
+  = ( errNetwork :: Req | r )
 
-_errUnknown :: forall r. Variant (NetworkError + r)
-_errUnknown = inj (Proxy :: _ "errNetwork") unit
+_errNetwork :: forall r. Req -> Variant (ErrNetwork + r)
+_errNetwork = inj (Proxy :: _ "errNetwork")
+
+type ErrParseJson r
+  = ( errParseJson :: Unit | r )
+
+_errParseJson :: forall r. Variant (ErrParseJson + r)
+_errParseJson = inj (Proxy :: _ "errParseJson") unit
+
+--------------------------------------------------------------------------------
+type ErrReqFn r
+  = ErrNetwork + ErrParseJson + r
 
 type ReqFn r
-  = Req -> ExceptV (NetworkError + r) Aff Res
+  = Req -> ExceptV (ErrReqFn + r) Aff Res
 
+--------------------------------------------------------------------------------
 addLogging :: forall r. ReqFn r -> ReqFn r
 addLogging reqFn req = do
   log ("HTTP REQUEST: " <> show req.method <> " " <> show req.url <> " " <> (stringify req.body))

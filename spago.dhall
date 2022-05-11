@@ -19,6 +19,7 @@
   , "foreign-object"
   , "functions"
   , "graphs"
+  , "heterogeneous"
   , "http-methods"
   , "identity"
   , "js-timers"

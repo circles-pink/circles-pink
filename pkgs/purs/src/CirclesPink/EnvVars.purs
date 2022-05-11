@@ -13,12 +13,17 @@ import Convertable (class Convertible)
 import Data.Either (Either)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-|))
+import Data.Tuple (Tuple(..))
 import Data.Typelevel.Undefined (undefined)
+import Debug (spy)
 import Effect (Effect)
+import Heterogeneous.Mapping (hmapWithIndex)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as Web3
 import Node.Process (getEnv)
+import Record.Extra.CirclesPink (zipRecord)
+import Stadium.Type.Tuple (Tuple)
 import Type.Proxy (Proxy(..))
 import TypedEnv (class ParseValue, EnvError, Resolved, Variable)
 import TypedEnv (fromEnv) as TypedEnv
@@ -54,21 +59,26 @@ newtype EnvVars
 derive instance newtypeEnvVars :: Newtype EnvVars _
 
 instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
-  convert e =
-    wrap
-      { gardenApi: U.print $ e -| _.gardenApi
-      , gardenApiUsers: U.print $ e -| _.gardenApi
-      , gardenGraphApi: U.print $ e -| _.gardenApi
-      , gardenSubgraphName: e -| _.gardenSubgraphName
-      , gardenRelay: U.print $ e -| _.gardenApi
-      , gardenHubAddress: show $ e -| _.gardenHubAddress
-      , gardenProxyFactoryAddress: show $ e -| _.gardenProxyFactoryAddress
-      , gardenSafeMasterAddress: show $ e -| _.gardenSafeMasterAddress
-      , gardenEthereumNodeWebSocket: U.print $ e -| _.gardenApi
+  convert (EnvVars env) =
+    zipRecord
+      { gardenApi: U.print
+      , gardenApiUsers: U.print
+      , gardenGraphApi: U.print
+      , gardenSubgraphName: identity :: String -> _
+      , gardenRelay: U.print
+      , gardenHubAddress: show :: Address -> _
+      , gardenProxyFactoryAddress: show :: Address -> _
+      , gardenSafeMasterAddress: show :: Address -> _
+      , gardenEthereumNodeWebSocket: U.print
       }
+      (spy "e1" env)
+      # E.EnvVars
+      # spy "e"
 
 --------------------------------------------------------------------------------
 getParsedEnv :: Effect (Either EnvError EnvVars)
 getParsedEnv =
   getEnv
     <#> (TypedEnv.fromEnv (Proxy :: _ (Config Variable)) >>> map EnvVars)
+
+--------------------------------------------------------------------------------

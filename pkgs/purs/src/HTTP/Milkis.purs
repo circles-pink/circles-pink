@@ -5,12 +5,12 @@ module HTTP.Milkis
 
 import Prelude
 import Control.Monad.Except (ExceptT(..))
-import Data.Argonaut (stringify)
-import Data.Either (Either(..))
+import Data.Argonaut (Json, stringify)
+import Data.Bifunctor (lmap)
 import Data.HTTP.Method (Method(..))
-import Effect.Aff (catchError)
-import HTTP (ReqFn, _errUnknown)
-import Milkis (URL(..), fetch, makeHeaders)
+import Effect.Aff (Aff, attempt)
+import HTTP (ReqFn, _errNetwork, _errParseJson)
+import Milkis (Response, URL(..), fetch, makeHeaders)
 import Milkis as M
 import Milkis.Impl (FetchImpl)
 import Unsafe.Coerce (unsafeCoerce)
@@ -24,21 +24,24 @@ matchMethod = case _ of
   _ -> M.getMethod
 
 milkisRequest :: forall r. FetchImpl -> ReqFn r
-milkisRequest fetchImpl { url, method, body } =
-  fetch fetchImpl (URL url)
-    { method: matchMethod method
-    , body: stringify body
-    , headers:
-        makeHeaders
-          { "Content-Type": "application/json" }
-    }
-    >>= ( \res -> do
-          res' <- M.json res
-          pure
-            $ Right
-                { body: unsafeCoerce res'
-                , status: M.statusCode res
-                }
-      )
-    # (\m -> catchError m (\_ -> pure $ Left _errUnknown))
-    # ExceptT
+milkisRequest fetchImpl req@{ url, method, body } = do
+  resp <-
+    fetch fetchImpl (URL url)
+      { method: matchMethod method
+      , body: stringify body
+      , headers: makeHeaders { "Content-Type": "application/json" }
+      }
+      # attempt
+      <#> lmap (const $ _errNetwork req)
+      # ExceptT
+  body' <-
+    getJson resp
+      # attempt
+      <#> lmap (const _errParseJson)
+      # ExceptT
+  let
+    status = M.statusCode resp
+  pure { body: body', status }
+  where
+  getJson :: Response -> Aff Json
+  getJson x = M.json x <#> unsafeCoerce
