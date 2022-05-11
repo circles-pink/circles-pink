@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## [1.0.15]
+
+### Changed
+
+- Publish web-client initially
+
 ## [1.0.14]
 
 ### Changed
