@@ -19,7 +19,6 @@ export const resources = {
       landing: {
         claim: 'Welcome to Circles',
         subClaim: 'Create a new Wallet or restore your existing one.',
-        restoreSession: 'Restoring your Session',
       },
       login: {
         claim: 'Welcome back',
@@ -105,10 +104,9 @@ export const resources = {
       addTrustsButton: 'Vertrauen',
       debugButton: 'Core ans window Object',
       landing: {
-        claim: 'Willkommen bei Circles',
+        claim: 'Probier das Grundeinkommen auf der Blockchain!',
         subClaim:
-          'Erstelle eine neue Wallet oder stelle eine bestehende wieder her.',
-        restoreSession: 'Session wird wiederhergestellt',
+          'Um Teil des Circles Netzwerks zu werden, kannst du hier eine neue Wallet erstellen, oder dich einloggen, wenn du schon eine hast.',
       },
       login: {
         claim: 'Willkommen zurück!',
@@ -118,7 +116,8 @@ export const resources = {
       },
       infoGeneral: {
         claim: 'Schön, dass du dabei bist!',
-        subClaim: 'Lege eine Wallet an und werde Teil des Vertrauensnetzwerks!',
+        subClaim:
+          'Lege eine neue Wallet an und werde Teil des Vertrauensnetzwerks!',
       },
       askUsername: {
         claim: 'Wie möchtest du dich nennen?',
