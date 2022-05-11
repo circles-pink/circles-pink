@@ -141,7 +141,7 @@
                   pkgs.patch-json
                   pkgs.gh
                   pkgs.deadnix
-                  pkgs.circles-pink.bumpNpmVersions
+                  (pkgs.circles-pink.bumpNpmVersions (builtins.attrNames ts.publicWorkspaces))
                   #nodePackages.webpack
                 ];
 

@@ -68,7 +68,7 @@ rec {
         '')
       ];
 
-    "@circles-pink/web-client" = { };
+    # "@circles-pink/web-client" = { };
   };
 
   printPkgNameYarn2NixStyle = pn: pipe pn [
