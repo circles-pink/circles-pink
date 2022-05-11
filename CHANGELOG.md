@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+Please add new entries below.
+
+## [1.0.14]
+
+### Changed
+
+- Change publish pipeline to use release branch
+
 ## [1.0.10]
 
 ### Added
