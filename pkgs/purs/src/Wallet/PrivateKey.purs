@@ -28,7 +28,7 @@ import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError(..), d
 import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.Either (Either(..))
-import Data.String (Pattern(..))
+import Data.String (Pattern(..), joinWith)
 import Data.String as S
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
@@ -63,6 +63,9 @@ newtype Mnemonic
   = Mnemonic (Array String)
 
 derive instance mnemonicEq :: Eq Mnemonic
+
+instance mnemonicShow :: Show Mnemonic where
+  show (Mnemonic xs) = joinWith " " xs -- TODO: Remove!
 
 --------------------------------------------------------------------------------
 -- API

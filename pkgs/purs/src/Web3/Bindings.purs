@@ -28,7 +28,7 @@ type Web3Static
     , eth :: Eth
     }
 
-foreign import sendTransaction :: Web3 -> { from :: String, to :: String, value :: Number } -> EffectFnAff String
+foreign import sendTransaction :: Web3 -> { from :: String, to :: String, value :: String } -> EffectFnAff String
 
 foreign import newWebSocketProvider :: String -> Effect Provider
 
