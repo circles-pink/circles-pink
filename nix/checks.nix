@@ -57,4 +57,5 @@ in
 
 
 
-} // (doTestSuite pkgs.nix-fp-lite.tests)
+} // pkgs.circles-pink.ts.publicWorkspaces
+  // (doTestSuite pkgs.nix-fp-lite.tests)

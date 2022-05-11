@@ -72,7 +72,10 @@ rec {
       pipe
         workspaces.${name} [
         (x: runCommand name { } ''
-          cp -r ${x} $out 
+          cp -r ${x} $out
+          chmod -R +w $out
+          cd $out/libexec/${name}/deps/${name}
+          ${pkgs.nodePackages.typescript}/bin/tsc
         '')
       ];
   };
