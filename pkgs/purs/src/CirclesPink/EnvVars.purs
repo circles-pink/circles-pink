@@ -10,22 +10,14 @@ import CirclesPink.URI (URI)
 import CirclesPink.URI as U
 import Convertable (class Convertible)
 import Data.Either (Either)
-import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.Newtype.Extra ((-|))
-import Data.Tuple (Tuple(..))
-import Data.Typelevel.Undefined (undefined)
+import Data.Newtype (class Newtype)
 import Debug (spy)
 import Effect (Effect)
-import Heterogeneous.Mapping (hmapWithIndex)
-import Network.Ethereum.Core.HexString (mkHexString)
-import Network.Ethereum.Core.Signatures (mkAddress)
-import Network.Ethereum.Core.Signatures as Web3
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Node.Process (getEnv)
 import Record.Extra.CirclesPink (zipRecord)
-import Stadium.Type.Tuple (Tuple)
 import Type.Proxy (Proxy(..))
-import TypedEnv (class ParseValue, EnvError, Resolved, Variable)
+import TypedEnv (EnvError, Resolved, Variable)
 import TypedEnv (fromEnv) as TypedEnv
 
 type Config :: forall k. (Symbol -> Type -> k) -> Row k
@@ -60,9 +52,9 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenSafeMasterAddress: show :: ChecksumAddress -> _
       , gardenEthereumNodeWebSocket: U.print
       }
-      (spy "e1" env)
+      env
+      # (spy "env")
       # E.EnvVars
-      # spy "e"
 
 --------------------------------------------------------------------------------
 getParsedEnv :: Effect (Either EnvError EnvVars)

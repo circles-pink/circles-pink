@@ -6,6 +6,7 @@ import Network.Ethereum.Core.HexString (mkHexString, unHex)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import Wallet.PrivateKey as C
+import Web3.Bindings (web3)
 
 class Convertible a b where
   convert :: a -> b
@@ -21,7 +22,7 @@ instance convertible_W3PrivateKey_CPrivateKey :: Convertible W3.PrivateKey C.Pri
 instance convertible_W3Address_CAddress :: Convertible W3.Address C.Address where
   convert p =
     unsafePartial
-      (p # W3.unAddress # unHex # C.unsafeAddrFromString)
+      (p # W3.unAddress # unHex # web3.utils.toChecksumAddress # C.unsafeAddrFromString)
 
 instance convertible_CAddress_W3Address :: Convertible C.Address W3.Address where
   convert p =
