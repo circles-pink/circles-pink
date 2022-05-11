@@ -54,6 +54,7 @@ import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingSta
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrDashboardStateResolved, ErrGetUsers, ErrGetUsersResolved, ErrTokenCheckUBIPayout, ErrTokenCheckUBIPayoutResolved, ErrTokenGetBalance, ErrTokenGetBalanceResolved, ErrTokenRequestUBIPayout, ErrTokenRequestUBIPayoutResolved, ErrTokenTransfer, ErrTokenTransferResolved, ErrTrustAddConnection, ErrTrustAddConnectionResolved, ErrTrustGetTrusts, ErrTrustGetTrustsResolved, ErrTrustRemoveConnection, ErrTrustRemoveConnectionResolved, ErrUserSearch, ErrUserSearchResolved, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, UserSearchResult, _dashboard, initDashboard) as Exp
 import Data.Maybe (Maybe(..))
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
@@ -182,7 +183,8 @@ type CirclesState
       , login :: LoginState
       , trusts :: TrustState
       , debug :: DebugState
-      | CirclesProtocolDef GetState
+      , landing :: LandingState
+      -- | CirclesProtocolDef GetState
       )
 
 type DebugState

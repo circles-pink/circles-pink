@@ -21,14 +21,15 @@ import {
   JustifyBetweenCenter,
   JustifyStartCenter,
 } from './helper';
+
+import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
+import { LoadingCircles } from './LoadingCircles';
+import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
 import {
   ErrTrustAddConnectionResolved,
   TrustAddResult,
   TrustRemoveResult,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
-import { LoadingCircles } from './LoadingCircles';
-import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 
 type Overlay = 'SEND' | 'RECEIVE';
 

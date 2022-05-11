@@ -4,6 +4,7 @@ import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import {
   getWords,
   keyToMnemonic,
+  PrivateKey,
 } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import React, { ReactElement, useContext, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
@@ -19,6 +20,7 @@ import { ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
+import { maybe } from '@circles-pink/state-machine/output/Data.Maybe';
 
 type MagicWordsProps = {
   state: UserData;
@@ -31,7 +33,10 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
   const getWordDelay = getIncrementor(0, 0.02);
 
-  const words = getWords(keyToMnemonic(state.privateKey));
+  const words = (() =>
+    maybe([] as string[])(pk => getWords(keyToMnemonic(pk as PrivateKey)))(
+      state.privateKey
+    ))();
 
   const [copyNotify, setCopyNotify] = useState('');
 
