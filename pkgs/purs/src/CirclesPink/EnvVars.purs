@@ -1,6 +1,5 @@
 module CirclesPink.EnvVars
-  ( Address(..)
-  , Config
+  ( Config
   , EnvVars(..)
   , getParsedEnv
   ) where
@@ -36,22 +35,11 @@ type Config f
     , gardenGraphApi :: f "GARDEN_GRAPH_API" URI
     , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
     , gardenRelay :: f "GARDEN_RELAY" URI
-    , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" Address
-    , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" Address
-    , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" Address
+    , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" ChecksumAddress
+    , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" ChecksumAddress
+    , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" ChecksumAddress
     , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
     )
-
---------------------------------------------------------------------------------
--- Newtype Wrappers / Address
---------------------------------------------------------------------------------
-newtype Address
-  = Address Web3.Address
-
-instance parseValueAddress :: ParseValue Address where
-  parseValue x = mkHexString x >>= mkAddress <#> Address
-
-derive newtype instance showAddress :: Show Address
 
 --------------------------------------------------------------------------------
 newtype EnvVars
@@ -67,9 +55,9 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenGraphApi: U.print
       , gardenSubgraphName: identity :: String -> _
       , gardenRelay: U.print
-      , gardenHubAddress: show :: Address -> _
-      , gardenProxyFactoryAddress: show :: Address -> _
-      , gardenSafeMasterAddress: show :: Address -> _
+      , gardenHubAddress: show :: ChecksumAddress -> _
+      , gardenProxyFactoryAddress: show :: ChecksumAddress -> _
+      , gardenSafeMasterAddress: show :: ChecksumAddress -> _
       , gardenEthereumNodeWebSocket: U.print
       }
       (spy "e1" env)
