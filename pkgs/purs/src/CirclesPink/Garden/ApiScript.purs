@@ -41,11 +41,10 @@ main = do
 
         env' = env { envVars: convert envVars, request }
       runAff_
-        ( \r -> do
-            case r of
-              Left e -> log ("Native error: " <> show e)
-              Right (Left e /\ _) -> log ("Error: " <> show e)
-              _ -> pure unit
+        ( case _ of
+            Left e -> log ("Native error: " <> show e)
+            Right (Left e /\ _) -> log ("Error: " <> show e)
+            _ -> pure unit
         )
         $ runScripT
         $ app env'

@@ -1,12 +1,13 @@
 module Network.Ethereum.Core.Signatures.Extra
   ( ChecksumAddress
-  , unChecksumAddress
+  --, unChecksumAddress
   , unsafeFromString
   ) where
 
 import Prelude
 import Convertable (class Convertible, convert)
 import Data.Maybe (fromJust)
+import Data.Newtype (unwrap)
 import Network.Ethereum.Core.HexString (HexString, mkHexString, unHex)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as W3
@@ -16,29 +17,27 @@ import Wallet.PrivateKey as C
 import Web3.Bindings (web3)
 
 newtype ChecksumAddress
-  = ChecksumAddress HexString
+  = ChecksumAddress W3.Address
 
-derive newtype instance showChecksumAddress :: Show ChecksumAddress
+instance showChecksumAddress :: Show ChecksumAddress where
+  show (ChecksumAddress a) = show a # web3.utils.toChecksumAddress
 
 unsafeFromString :: Partial => String -> ChecksumAddress
-unsafeFromString x = mkHexString x # fromJust # ChecksumAddress
+unsafeFromString x = mkHexString x >>= W3.mkAddress # fromJust # ChecksumAddress
 
-unChecksumAddress :: ChecksumAddress -> HexString
-unChecksumAddress (ChecksumAddress h) = h
-
+-- unChecksumAddress :: ChecksumAddress -> HexString
+-- unChecksumAddress (ChecksumAddress a) = h
 instance parseValueAddress :: ParseValue ChecksumAddress where
   parseValue x = mkHexString x >>= mkAddress <#> convert
 
 --------------------------------------------------------------------------------
 instance convertible_ChecksumAddress_CAddress :: Convertible ChecksumAddress C.Address where
-  convert p =
+  convert (ChecksumAddress a) =
     unsafePartial
-      (p # unChecksumAddress # unHex # C.unsafeAddrFromString)
+      (W3.unAddress a # unHex # web3.utils.toChecksumAddress # C.unsafeAddrFromString)
 
 instance convertible_ChecksumAddress_W3Address :: Convertible ChecksumAddress W3.Address where
-  convert p =
-    unsafePartial
-      (p # unChecksumAddress # W3.mkAddress # fromJust)
+  convert (ChecksumAddress a) = a
 
 instance convertible_W3Address_ChecksumAddress :: Convertible W3.Address ChecksumAddress where
   convert p =
@@ -46,11 +45,10 @@ instance convertible_W3Address_ChecksumAddress :: Convertible W3.Address Checksu
       ( p
           # W3.unAddress
           # unHex
-          # web3.utils.toChecksumAddress
           # unsafeFromString
       )
 
 instance convertible_CAddress_ChecksumAddress :: Convertible C.Address ChecksumAddress where
   convert p =
     unsafePartial
-      (p # C.addrToString # web3.utils.toChecksumAddress # unsafeFromString)
+      (p # C.addrToString # unsafeFromString)

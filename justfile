@@ -41,22 +41,6 @@ release: branchless-get
 	bump-npm-versions "patch"
 	just branchless-put
 
-# release type:
-# 	[ $(git branch --show-current) == "main" ]
-# 	[ -z "$(git status --porcelain)" ]
-# 	bump-npm-versions {{type}}
-# 	gh pr create --base release --body "" --title "Release"
-# 	gh pr merge --auto --rebase
-
-# release-patch:
-# 	just release "patch"
-
-# release-minor:
-# 	just release "minor"
-
-# release-major:
-# 	just release "major"
-
 branchless-to-main:
 	gh pr create --head branchless --base main --title "branchless to main"
 	gh pr merge --rebase branchless
