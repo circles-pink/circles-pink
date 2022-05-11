@@ -229,7 +229,7 @@
                     forgetState = true;
 
                   });
-              publish = effects.runIf (src.ref == "refs/heads/release")
+              publish = effects.runIf (src.ref == "refs/heads/main")
                 (effects.mkEffect {
                   userSetupScript = ''
                     NODE_AUTH_TOKEN=`readSecretString secrets '."npm-token"'`;
