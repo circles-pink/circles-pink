@@ -1,6 +1,6 @@
 {
   "name": "@circles-pink/web-client",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "main": "./ts-dist/index.js",
   "scripts": {
     "prettier:check": "prettier --check .",
