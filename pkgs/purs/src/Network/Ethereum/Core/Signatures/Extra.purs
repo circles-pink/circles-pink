@@ -14,13 +14,13 @@ import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import TypedEnv (class ParseValue)
 import Wallet.PrivateKey as C
-import Web3.Bindings (web3)
+import Web3.Bindings (web3static)
 
 newtype ChecksumAddress
   = ChecksumAddress W3.Address
 
 instance showChecksumAddress :: Show ChecksumAddress where
-  show (ChecksumAddress a) = show a # web3.utils.toChecksumAddress
+  show (ChecksumAddress a) = show a # web3static.utils.toChecksumAddress
 
 unsafeFromString :: Partial => String -> ChecksumAddress
 unsafeFromString x = mkHexString x >>= W3.mkAddress # fromJust # ChecksumAddress
@@ -34,7 +34,7 @@ instance parseValueAddress :: ParseValue ChecksumAddress where
 instance convertible_ChecksumAddress_CAddress :: Convertible ChecksumAddress C.Address where
   convert (ChecksumAddress a) =
     unsafePartial
-      (W3.unAddress a # unHex # web3.utils.toChecksumAddress # C.unsafeAddrFromString)
+      (W3.unAddress a # unHex # web3static.utils.toChecksumAddress # C.unsafeAddrFromString)
 
 instance convertible_ChecksumAddress_W3Address :: Convertible ChecksumAddress W3.Address where
   convert (ChecksumAddress a) = a
