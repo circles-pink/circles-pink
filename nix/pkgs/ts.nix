@@ -77,6 +77,9 @@ rec {
           cd $out/libexec/${name}/deps/${name}
           ${pkgs.nodePackages.typescript}/bin/tsc
         '')
+        (x: runCommand name { } ''
+          ln -s ${x}/libexec/${name}/deps/${name} $out
+        '')
       ];
   };
 
