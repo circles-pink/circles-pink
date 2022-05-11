@@ -76,6 +76,12 @@ export const resources = {
           'This is your Dashboard, grow your trust network or pay with Circles!',
         addTrustPlaceholder: 'Address of a person you want to trust',
         debugTitle: 'Dashboard actions for testing:',
+        sendButton: 'Send',
+        sendClaim: 'Send Circles',
+        receiveButton: 'Receive',
+        searchButton: 'Search',
+        trustNetworkTitle: 'Trust Network',
+        exploreTitle: 'Explore',
       },
       debug: {
         claim: 'Internal tools',
@@ -161,6 +167,12 @@ export const resources = {
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
         debugTitle: 'Dashboard actions zum ausprobieren:',
+        sendButton: 'Senden',
+        receiveButton: 'Empfangen',
+        searchButton: 'Suchen',
+        trustNetworkTitle: 'Vertrauensnetzwerk',
+        exploreTitle: 'Erkunden',
+        sendClaim: 'Circles überweisen',
       },
       debug: {
         claim: 'Interne tools',

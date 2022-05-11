@@ -214,14 +214,14 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 icon={mdiCashFast}
                 onClick={() => toggleOverlay('SEND')}
               >
-                Send
+                {t('dashboard.sendButton')}
               </Button>
               <Button
                 color={theme.baseColor}
                 icon={mdiHandCoin}
                 onClick={() => toggleOverlay('RECEIVE')}
               >
-                Receive
+                {t('dashboard.receiveButton')}
               </Button>
             </TwoButtonRow>
           </FadeIn>
@@ -232,7 +232,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           {mappedTrusts && (
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
-                title={'Trust Network'}
+                title={t('dashboard.trustNetworkTitle')}
                 content={mappedTrusts}
                 theme={theme}
                 icon={mdiLan}
@@ -250,7 +250,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           {mappedSearch && (
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
-                title={'Explore'}
+                title={t('dashboard.exploreTitle')}
                 content={mappedSearch}
                 theme={theme}
                 icon={mdiMagnify}
@@ -285,7 +285,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                           act(A._dashboard(A._userSearch({ query: search })))
                         }
                       >
-                        {'Search'}
+                        {t('dashboard.searchButton')}
                       </Button>
                     </DebugButtonWrapper>
                   </JustifyBetweenCenter>

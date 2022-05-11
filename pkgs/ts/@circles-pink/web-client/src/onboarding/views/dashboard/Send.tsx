@@ -10,6 +10,7 @@ import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
 import { convertTimeCirclesToCircles } from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
+import { t } from 'i18next';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -49,7 +50,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   // Render
   return (
     <>
-      <Claim color={theme.baseColor}>Send Circles</Claim>
+      <Claim color={theme.baseColor}>{t('dashboard.sendClaim')}</Claim>
       <br />
       <Input
         type="text"
@@ -84,7 +85,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
           icon={mdiCashFast}
           onClick={() => transact()}
         >
-          Send
+          {t('dashboard.sendButton')}
         </Button>
       </JustifyEnd>
     </>
