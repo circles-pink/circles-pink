@@ -34,7 +34,7 @@ tests =
         A.equal (P.sampleKey # P.toString # S.length) 66
       T.test "produces right mnemonic" do
         A.equal (P.sampleKey # P.keyToMnemonic # P.getWords)
-          [ "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "abandon", "art" ]
+          [ "gym", "onion", "turkey", "slice", "blue", "random", "goat", "live", "grit", "educate", "slam", "alone", "enroll", "print", "need", "certain", "stumble", "addict", "drive", "accident", "iron", "provide", "major", "next" ]
     T.test "privKeyToAddress" do
       A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
     T.test "addressToNonce" do
