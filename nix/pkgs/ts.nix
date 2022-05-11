@@ -68,7 +68,13 @@ rec {
         '')
       ];
 
-    # "@circles-pink/web-client" = { };
+    "@circles-pink/web-client" = let name = "@circles-pink/web-client"; in
+      pipe
+        workspaces.${name} [
+        (x: runCommand name { } ''
+          cp -r ${x} $out 
+        '')
+      ];
   };
 
   printPkgNameYarn2NixStyle = pn: pipe pn [
@@ -105,7 +111,9 @@ rec {
     cp -r ${src'} $out
     cd $out
     chmod -R +w $out
-    ${pkgs.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine 1.0.0
+    ${pkgs.nodePackages.npm}/bin/npm version \
+      ${concatMapStringsSep " " (w: "-w ${w}") (attrNames publicWorkspaces)} \
+      1.0.0
   '';
 
   emptyWorkspaces = pipe

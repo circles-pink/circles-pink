@@ -8,7 +8,7 @@ Please add new entries below.
 
 ### Changed
 
-- Change publish pipeline to use release branch
+- Revert release pipeline
 
 ## [1.0.10]
 
