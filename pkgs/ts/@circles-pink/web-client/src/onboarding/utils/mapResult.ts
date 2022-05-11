@@ -1,7 +1,9 @@
 import { RemoteData } from '@circles-pink/state-machine/output/RemoteData';
 import { ButtonState } from '../../components/forms/Button';
 
-export const mapResult = <E, A>(remoteData: RemoteData<E, A>): ButtonState => {
+export const mapResult = <L, N, E, A>(
+  remoteData: RemoteData<N, L, E, A>
+): ButtonState => {
   switch (remoteData.type) {
     case 'failure':
       return 'enabled';

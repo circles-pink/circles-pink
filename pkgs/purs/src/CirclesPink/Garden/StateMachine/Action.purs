@@ -2,6 +2,7 @@ module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction)
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (Address)
@@ -79,7 +80,8 @@ type CirclesAction
             ( coreToWindow :: Unit
             , setMagicWords :: String
             )
-      | CirclesProtocolDef GetAction
+      -- | CirclesProtocolDef GetAction
+      , landing :: LandingAction
       )
 
 ----
