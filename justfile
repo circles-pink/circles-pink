@@ -44,13 +44,13 @@ release type:
 	gh pr create --base release --body "" --title "Release"
 	gh pr merge --auto --rebase
 
-relase-patch:
+release-patch:
 	just release "patch"
 
-relase-minor:
+release-minor:
 	just release "minor"
 
-relase-major:
+release-major:
 	just release "major"
 
 branchless-to-main:
