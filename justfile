@@ -33,11 +33,25 @@ branchless-put: branchless-get branchless-put_
 branchless-put_:
 	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
 	[ -z "$(git status --porcelain)" ]
-	bump-npm-versions
 	git push --force
 	gh pr create --base main --body "" --title "Branchless Update"
-	gh pr merge --auto --rebase 
-	
+	gh pr merge --auto --rebase
+
+release type:
+	[ $(git branch --show-current) == "main" ]
+	[ -z "$(git status --porcelain)" ]
+	bump-npm-versions {{type}}
+	gh pr create --base release --body "" --title "Release"
+	gh pr merge --auto --rebase
+
+relase-patch:
+	just release "patch"
+
+relase-minor:
+	just release "minor"
+
+relase-major:
+	just release "major"
 
 branchless-to-main:
 	gh pr create --head branchless --base main --title "branchless to main"

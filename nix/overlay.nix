@@ -105,13 +105,17 @@
   circles-pink = import ./pkgs { pkgs = final; } //
     rec {
 
-      bumpNpmVersions =
+      bumpNpmVersions = workspaces:
+        let
+          inherit (final.lib) concatMapStringsSep;
+          workspaces' = concatMapStringsSep " " (w: "-w ${w}") workspaces;
+        in
         final.writeShellScriptBin "bump-npm-versions" ''
-          ${final.nodePackages.npm}/bin/npm version -w @circles-pink/state-machine patch
+          RELEASE_TYPE="$1"
+          ${final.nodePackages.npm}/bin/npm version ${workspaces'} "$RELEASE_TYPE"
           ${final.git}/bin/git add .
-          ${final.nodePackages.npm}/bin/npm version --include-workspace-root --force patch
+          ${final.nodePackages.npm}/bin/npm version --include-workspace-root --force "$RELEASE_TYPE"
         '';
-
 
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
