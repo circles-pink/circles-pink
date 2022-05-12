@@ -3,11 +3,24 @@ const path = require('path');
 module.exports = function webpackConfig(env, args) {
   return {
     //entry: path.join(__dirname, 'src/index.tsx'),
+    // output: {
+    //   filename: 'main.js',
+    //   path: path.join(__dirname, 'public'),
+    // },
     output: {
-      filename: 'main.js',
-      //path: path.join(__dirname, 'public'),
+      path: path.join(__dirname, 'public'),
+      filename: 'dist/[name].js',
+      sourceMapFilename: 'dist/[name].js.map',
     },
-    resolve: { extensions: ['.tsx', '.js', '.ts'] },
+    resolve: {
+      extensions: ['.tsx', '.js', '.ts'],
+      fallback: {
+        os: require.resolve('os-browserify/browser'),
+        https: require.resolve('https-browserify'),
+        http: require.resolve('stream-http'),
+        crypto: require.resolve('crypto-browserify'),
+      },
+    },
     module: {
       rules: [
         {
