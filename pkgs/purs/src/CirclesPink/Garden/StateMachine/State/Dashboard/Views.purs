@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ( anythingLoading
+  , defaultView
   ) where
 
 import Prelude
