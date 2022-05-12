@@ -249,7 +249,7 @@
                     in
                     ''
                       NEW_VERSION=`cat ${./package.json} | ${pkgs.jq}/bin/jq '.version'`
-                      CURRENT_VERSION=`${pkgs.curl}/bin/curl https://registry.npmjs.org/@circles-pink/web-client/$NEW_VERSION | ${pkgs.jq}/bin/jq '.version'`
+                      CURRENT_VERSION=`${pkgs.curl}/bin/curl https://registry.npmjs.org/@circles-pink/web-client | ${pkgs.jq}/bin/jq '."dist-tags".latest'`
 
                       if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]
                         then
@@ -257,7 +257,7 @@
                           exit 0
                       fi
 
-                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ws") (attrValues publicWorkspaces)}    
+                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ${ws}") (attrValues publicWorkspaces)}    
                     '';
 
                   secretsMap = {
