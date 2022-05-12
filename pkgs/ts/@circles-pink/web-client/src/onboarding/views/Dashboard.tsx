@@ -6,6 +6,7 @@ import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { defaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -313,7 +314,12 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
           />
         ) : null
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={
+        <>
+          <pre>{JSON.stringify(defaultView(state), null, 2)}</pre>
+          <pre>{JSON.stringify(state, null, 2)}</pre>
+        </>
+      }
     />
   );
 };
