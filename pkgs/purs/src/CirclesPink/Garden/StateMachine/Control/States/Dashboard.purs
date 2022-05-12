@@ -75,6 +75,16 @@ dashboard env =
             # ExceptT
         pure unit
 
+  getUsers set st { userNames, addresses } = do
+    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
+    let
+      task :: ExceptV S.ErrGetUsers _ _
+      task = env.getUsers st.privKey userNames addresses
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
+      Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
+
   addTrustConnection set st u =
     void do
       runExceptT do
@@ -137,16 +147,6 @@ dashboard env =
             # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
             # ExceptT
         pure unit
-
-  getUsers set st { userNames, addresses } = do
-    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrGetUsers _ _
-      task = env.getUsers st.privKey userNames addresses
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
-      Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
   userSearch set st options = do
     set \st' -> S._dashboard st' { userSearchResult = _loading unit :: RemoteData _ _ _ _ }
