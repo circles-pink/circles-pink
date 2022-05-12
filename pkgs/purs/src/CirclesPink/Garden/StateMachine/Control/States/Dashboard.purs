@@ -12,6 +12,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (Trust)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
@@ -121,17 +122,17 @@ dashboard env =
           }
     in
       void do
-        runExceptT do
+        runMaybeT do
           trusts <-
             run (env.trustGetNetwork st.privKey)
               # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-              <#> lmap (const unit)
-              # ExceptT
+              <#> hush
+              # MaybeT
           users <-
             run (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
-              <#> lmap (const unit)
-              # ExceptT
+              <#> hush
+              # MaybeT
           let
             foundUsers = catMaybes $ map hush users
           lift
@@ -141,8 +142,8 @@ dashboard env =
               # subscribeRemoteReport env
                   (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-              <#> lmap (const unit)
-              # ExceptT
+              <#> hush
+              # MaybeT
           pure unit
 
   getUsers set st { userNames, addresses } = do
