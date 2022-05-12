@@ -23,6 +23,7 @@ import Data.Either (Either(..), hush)
 import Data.Int (floor, toNumber)
 import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
+import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\))
@@ -43,7 +44,7 @@ import Partial.Unsafe (unsafePartial)
 import Record as R
 import Sunde (spawn)
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, Mnemonic, PrivateKey, keyToMnemonic)
+import Wallet.PrivateKey (Address, Mnemonic, PrivateKey, getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
@@ -116,7 +117,7 @@ type MkAccountReturn
     , privateKey :: PrivateKey
     , safeAddress :: Address
     , txHash :: HexString
-    , mnemonic :: Mnemonic
+    , mnemonic :: String
     }
 
 mkAccount :: forall r. EnvVars -> Env Aff -> ScriptM (ErrApp + r) MkAccountReturn
@@ -127,7 +128,13 @@ mkAccount envVars env = do
   finalizeAccount env
   let
     mnemonic = keyToMnemonic privateKey
-  pure $ R.merge signupOpts { privateKey, safeAddress, txHash, mnemonic }
+  pure
+    $ R.merge signupOpts
+        { privateKey
+        , safeAddress
+        , txHash
+        , mnemonic: getWords mnemonic # joinWith " "
+        }
 
 --------------------------------------------------------------------------------
 app :: forall r. EnvVars -> Env Aff -> AppM (ErrApp + r) Unit
