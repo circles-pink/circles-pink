@@ -251,6 +251,8 @@
                       CURRENT_VERSION=`${pkgs.curl}/bin/curl ${packageJsonUrl} | ${pkgs.jq}/bin/jq '.version'`
                       NEW_VERSION=`cat ${./package.json} | ${pkgs.jq}/bin/jq '.version'`
                     
+                      echo $CURRENT_VERSION $NEW_VERSION
+
                       if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]
                         then
                           echo "Nothing to release."
