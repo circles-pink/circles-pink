@@ -51,6 +51,8 @@ derive newtype instance showAddress :: Show Address
 
 derive newtype instance mnemonicAddress :: EncodeJson Address
 
+derive instance eqAddress :: Eq Address
+
 --------------------------------------------------------------------------------
 newtype Nonce
   = Nonce BigInt

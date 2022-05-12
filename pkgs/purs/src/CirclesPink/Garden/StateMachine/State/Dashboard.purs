@@ -69,9 +69,7 @@ type Trust
   = { isLoading :: Boolean
     , isIncoming :: Boolean
     , isOutgoing :: Boolean
-    , id :: Int
-    , username :: String
-    , avatarUrl :: String
+    , user :: Maybe User
     }
 
 type DashboardState
@@ -128,7 +126,7 @@ type ErrGetUsers
   = Env.ErrGetUsers + ()
 
 type GetUsersResult
-  = RemoteData Unit Unit ErrGetUsersResolved (Array User)
+  = RemoteReport ErrGetUsersResolved (Array User)
 
 --------------------------------------------------------------------------------
 -- | User / search

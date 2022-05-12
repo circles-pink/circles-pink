@@ -8,6 +8,7 @@ module RemoteData
   , isLoading
   , isNotAsked
   , isSuccess
+  , onSuccess
   ) where
 
 import Prelude
@@ -58,3 +59,10 @@ isFailure = unwrap >>> (default false # onMatch { failure: const true })
 
 isSuccess :: forall n l e a. RemoteData n l e a -> Boolean
 isSuccess = unwrap >>> (default false # onMatch { success: const true })
+
+onSuccess :: forall n l e a b. b -> (a -> b) -> RemoteData n l e a -> b
+onSuccess def f x =
+  ( default def
+      # onMatch { success: f }
+  )
+    (unwrap x)
