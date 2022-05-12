@@ -21,12 +21,12 @@ import {
 } from './views';
 
 // Style
-import '../styles/global.css';
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
+import { Global, css } from '@emotion/react';
 
 type Language = 'en' | 'de';
 
@@ -42,7 +42,25 @@ type OnboardingProps = {
 export const Onboarding = (props: OnboardingProps) => {
   return (
     <ThemeProvider>
-      <OnboardingContent {...props} />
+      <>
+        <Global
+          styles={css`
+            * {
+              box-sizing: border-box;
+              font-family: sans-serif;
+              font-size: 1em;
+            }
+
+            button {
+              outline: none;
+              border: none;
+              padding: 0;
+              margin: 0;
+            }
+          `}
+        />
+        <OnboardingContent {...props} />
+      </>
     </ThemeProvider>
   );
 };
