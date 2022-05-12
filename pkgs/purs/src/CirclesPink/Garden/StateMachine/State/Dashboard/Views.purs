@@ -1,5 +1,7 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard.Views
-  ( anythingLoading
+  ( DefaultView
+  , Trust
+  , Trusts
   , defaultView
   ) where
 
