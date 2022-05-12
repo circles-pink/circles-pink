@@ -248,10 +248,8 @@
                       inherit (pkgs.circles-pink.ts) publicWorkspaces;
                     in
                     ''
-                      CURRENT_VERSION=`${pkgs.curl}/bin/curl ${packageJsonUrl} | ${pkgs.jq}/bin/jq '.version'`
                       NEW_VERSION=`cat ${./package.json} | ${pkgs.jq}/bin/jq '.version'`
-                    
-                      echo $CURRENT_VERSION $NEW_VERSION
+                      CURRENT_VERSION=`${pkgs.curl}/bin/curl https://registry.npmjs.org/@circles-pink/web-client/$NEW_VERSION | ${pkgs.jq}/bin/jq '.version'`
 
                       if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]
                         then
