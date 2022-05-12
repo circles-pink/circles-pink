@@ -25,9 +25,11 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TokenGetBalanceResult
   , TokenRequestUBIPayoutResult
   , TokenTransferResult
+  , Trust
   , TrustAddResult
   , TrustGetTrusts
   , TrustRemoveResult
+  , Trusts
   , UserSearchResult
   , _dashboard
   , initDashboard
@@ -38,9 +40,13 @@ import CirclesCore (ApiError, Balance, NativeError, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import Data.Map (Map)
+import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
+import Network.Ethereum.Core.Signatures (Address)
+import Network.Ethereum.Core.Signatures as W3
 import Record as R
 import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
@@ -56,10 +62,23 @@ type ErrDashboardStateResolved
       , errInvalidUrl :: String
       )
 
+type Trusts
+  = Map W3.Address Trust
+
+type Trust
+  = { isLoading :: Boolean
+    , isIncoming :: Boolean
+    , isOutgoing :: Boolean
+    , id :: Int
+    , username :: String
+    , avatarUrl :: String
+    }
+
 type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , error :: Maybe ErrDashboardStateResolved
+    , trusts :: Trusts
     , trustsResult :: TrustGetTrusts
     , trustAddResult :: TrustAddResult
     , trustRemoveResult :: TrustRemoveResult
@@ -82,6 +101,7 @@ initDashboard id =
   _dashboard
     $ R.disjointUnion id
         { error: Nothing
+        , trusts: M.empty :: Map _ _
         , trustAddResult: empty :: Object _
         , trustRemoveResult: empty :: Object _
         , trustsResult: _notAsked unit
