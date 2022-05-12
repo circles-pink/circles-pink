@@ -3,6 +3,8 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
+
+import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -10,15 +12,31 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
+import Convertable (convert)
+import Data.Array (find)
+import Data.Array as A
 import Data.Either (Either(..), either, isRight)
+import Data.Map as M
+import Data.Maybe (Maybe)
+import Data.Newtype (unwrap)
 import Data.String (length)
-import Data.Variant (Variant)
+import Data.Tuple.Nested ((/\))
+import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (insert)
+import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
-import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteData (RemoteData, _failure, _loading, _success, onSuccess)
 import RemoteReport (RemoteReport)
+import Type.Row (type (+))
+import Undefined (undefined)
 import Wallet.PrivateKey (unsafeAddrFromString)
 import Wallet.PrivateKey as P
+
+type ErrFetchUsersBinarySearch r
+  = ( err :: Unit | r )
+
+fetchUsersBinarySearch :: forall r m. Env.Env m -> Array W3.Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array (Maybe User))
+fetchUsersBinarySearch = undefined
 
 dashboard ::
   forall t m.
@@ -67,24 +85,53 @@ dashboard env =
   where
   getTrusts set st _ =
     void do
-      runExceptT do
-        _ <-
-          run (env.trustGetNetwork st.privKey)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-            # ExceptT
-        pure unit
+      eitherTrusts <-
+        run (env.trustGetNetwork st.privKey)
+          # subscribeRemoteReport env
+              (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+          # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+      case eitherTrusts of
+        Left e -> pure unit
+        Right trusts -> do
+          eitherUsers <- run $ fetchUsersBinarySearch env (map (convert <<< _.safeAddress) trusts)
+          case eitherUsers of
+            Left e' -> pure unit
+            Right users ->
+              let
+                foundUsers = A.catMaybes users
+              in
+                set \st' ->
+                  S._dashboard
+                    st'
+                      { trusts =
+                        trusts
+                          <#> ( \t ->
+                                convert t.safeAddress
+                                  /\ { isLoading: false
+                                    , isIncoming: t.isIncoming
+                                    , isOutgoing: t.isOutgoing
+                                    , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
+                                    }
+                            )
+                          # M.fromFoldable
+                      }
+          pure unit -- users :: Array User <-
+      --   run (env.getUsers st.privKey [] undefined)
+      --     # subscribeRemoteReport_ env
+      --         (\r -> set \st' -> S._dashboard st' { getUsersResult = r })
+      --     # ExceptT
+      pure unit
 
-  getUsers set st { userNames, addresses } = do
-    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV S.ErrGetUsers _ _
-      task = env.getUsers st.privKey userNames addresses
-    result <- run' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
-      Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
+  getUsers set st { userNames, addresses } = pure unit
 
+  -- set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
+  -- let
+  --   task :: ExceptV S.ErrGetUsers _ _
+  --   task = env.getUsers st.privKey userNames addresses
+  -- result <- run' $ task
+  -- case result of
+  --   Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
+  --   Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
   addTrustConnection set st u =
     void do
       runExceptT do
