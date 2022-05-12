@@ -3,7 +3,6 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
-
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
@@ -13,14 +12,15 @@ import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Convertable (convert)
-import Data.Array (find)
+import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
-import Data.Either (Either(..), either, isRight)
+import Data.Either (Either(..), either, hush, isRight)
+import Data.Int (floor, toNumber)
 import Data.Map as M
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.String (length)
-import Data.Tuple.Nested ((/\))
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
@@ -29,14 +29,39 @@ import RemoteData (RemoteData, _failure, _loading, _success, onSuccess)
 import RemoteReport (RemoteReport)
 import Type.Row (type (+))
 import Undefined (undefined)
-import Wallet.PrivateKey (unsafeAddrFromString)
+import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
 type ErrFetchUsersBinarySearch r
   = ( err :: Unit | r )
 
-fetchUsersBinarySearch :: forall r m. Env.Env m -> Array W3.Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array (Maybe User))
-fetchUsersBinarySearch = undefined
+splitArray :: forall a. Array a -> Array a /\ Array a
+splitArray xs =
+  let
+    count = floor ((toNumber $ A.length xs) / 2.0)
+  in
+    take count xs /\ drop count xs
+
+fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array W3.Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array (Either W3.Address User))
+fetchUsersBinarySearch _ _ xs
+  | A.length xs == 0 = pure []
+
+fetchUsersBinarySearch env privKey xs
+  | A.length xs == 1 = do
+    eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+    case eitherUsers of
+      Left _ -> pure $ map Left xs
+      Right ok -> pure $ map Right ok
+
+fetchUsersBinarySearch env privKey xs = do
+  eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+  case eitherUsers of
+    Left _ ->
+      let
+        (ls /\ rs) = splitArray xs
+      in
+        fetchUsersBinarySearch env privKey ls <> fetchUsersBinarySearch env privKey rs
+    Right ok -> pure $ map Right ok
 
 dashboard ::
   forall t m.
@@ -93,12 +118,12 @@ dashboard env =
       case eitherTrusts of
         Left e -> pure unit
         Right trusts -> do
-          eitherUsers <- run $ fetchUsersBinarySearch env (map (convert <<< _.safeAddress) trusts)
+          eitherUsers <- run $ fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
           case eitherUsers of
             Left e' -> pure unit
             Right users ->
               let
-                foundUsers = A.catMaybes users
+                foundUsers = catMaybes $ map hush users
               in
                 set \st' ->
                   S._dashboard
