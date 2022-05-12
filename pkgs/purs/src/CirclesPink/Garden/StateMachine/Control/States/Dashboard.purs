@@ -140,11 +140,7 @@ dashboard env =
                             )
                           # M.fromFoldable
                       }
-          pure unit -- users :: Array User <-
-      --   run (env.getUsers st.privKey [] undefined)
-      --     # subscribeRemoteReport_ env
-      --         (\r -> set \st' -> S._dashboard st' { getUsersResult = r })
-      --     # ExceptT
+          pure unit
       pure unit
 
   getUsers set st { userNames, addresses } = pure unit
