@@ -15,6 +15,6 @@ ts-dist/
 .env
 checkouts/
 .psci_modules/
-
+account-report.json
 # solid state db from gun
 radata
