@@ -12,10 +12,9 @@ import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, finalizeAccount, runScripT, signUpUser)
-import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
+import Control.Monad.Except (mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Control.Parallel (parTraverse)
 import Convertable (convert)
 import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
 import Data.Array ((..))
@@ -30,14 +29,19 @@ import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, default, onMatch)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
-import Effect.Class.Console (log)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
+import Node.ChildProcess (defaultSpawnOptions)
+import Node.Encoding (Encoding(..))
+import Node.FS.Aff (writeTextFile)
 import Node.Process (exit)
 import Partial.Unsafe (unsafePartial)
 import Record as R
+import Sunde (spawn)
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, Mnemonic, PrivateKey, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
@@ -129,18 +133,27 @@ mkAccount envVars env = do
 app :: forall r. EnvVars -> Env Aff -> AppM (ErrApp + r) Unit
 app ev env = do
   let
-    count = 100
+    count = 1
 
-    maxPar = 10
+    maxPar = 1
+
+    reportFilePath = "account-report.json"
+
+    jqPath = "jq"
 
     batchCount = floor (toNumber count / toNumber maxPar)
   report <-
-    (parTraverse (const mkAccount') (1 .. maxPar))
+    (traverse (const mkAccount') (1 .. min maxPar count))
       # (\m -> traverse (const m) (1 .. batchCount))
       <#> join
       <#> map (lmap printErrApp)
       # lift
-  report # encodeJson # stringify # log
+  report
+    # encodeJson
+    # stringify
+    # (\r -> do lift $ spawn { cmd: jqPath, args: [], stdin: pure r } defaultSpawnOptions)
+    >>= (\{ stdout } -> lift $ writeTextFile UTF8 reportFilePath stdout)
+  _ <- liftEffect $ exit 0
   pure unit
   where
   mkAccount' :: Aff (Either (Variant (ErrApp + r)) MkAccountReturn)
@@ -160,7 +173,7 @@ main = do
   envVars' <- getParsedEnv
   case envVars' of
     Left err -> do
-      log ("ERROR: " <> show err)
+      error ("ERROR: " <> show err)
       exit 1
     Right envVars -> do
       let
