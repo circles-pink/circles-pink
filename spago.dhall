@@ -33,6 +33,7 @@
   , "node-fs-aff"
   , "node-process"
   , "now"
+  , "nullable"
   , "option"
   , "optparse"
   , "ordered-collections"

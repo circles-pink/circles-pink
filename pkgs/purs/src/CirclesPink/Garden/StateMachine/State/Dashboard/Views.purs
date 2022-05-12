@@ -4,10 +4,12 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ) where
 
 import Prelude
+import CirclesCore (User)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Data.Array (any)
 import Data.Map as M
+import Data.Nullable (Nullable, toNullable)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (values)
 import Network.Ethereum.Core.Signatures as W3
@@ -46,13 +48,17 @@ type Trust
     , isLoading :: Boolean
     , isIncoming :: Boolean
     , isOutgoing :: Boolean
-    , id :: Int
-    , username :: String
-    , avatarUrl :: String
+    , user :: Nullable User
     }
 
 mapTrust :: W3.Address /\ D.Trust -> Trust
-mapTrust (a /\ t) = t `merge` { safeAddress: show a }
+mapTrust (a /\ t) =
+  { isLoading: t.isLoading
+  , isIncoming: t.isIncoming
+  , isOutgoing: t.isOutgoing
+  , safeAddress: show a
+  , user: toNullable t.user
+  }
 
 mapTrusts :: D.Trusts -> Trusts
 mapTrusts xs = M.toUnfoldable xs <#> mapTrust
