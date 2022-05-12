@@ -21,6 +21,10 @@ type Chance
         EffectFn1
           (Option ( middle :: Boolean, middle_initial :: Boolean, prefix :: Boolean, nationality :: Nationality ))
           String
+    , first ::
+        EffectFn1
+          (Option ( nationality :: Nationality ))
+          String
     , integer ::
         EffectFn1
           (Option ( min :: Int, max :: Int ))

@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.Stories
-  ( ScriptT
+  ( Err
+  , ScriptT
   , SignUpUserOpts
   , finalizeAccount
   , runScripT
@@ -7,32 +8,32 @@ module CirclesPink.Garden.StateMachine.Stories
   ) where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Action (CirclesAction, _askEmail, _askUsername, _infoSecurity, _magicWords, _next, _setEmail, _setPrivacy, _setTerms, _setUsername, _submit)
+import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except (ExceptT(..), runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.State (StateT, get, runStateT)
-import Convertable (convert)
 import Data.Either (Either)
 import Data.Traversable (sequence_)
 import Data.Tuple.Nested (type (/\))
-import Data.Variant (default, onMatch)
+import Data.Variant (Variant, default, inj, onMatch)
 import Data.Variant.Extra (getLabel)
 import Debug (spy)
 import Effect.Class (class MonadEffect)
 import Effect.Class.Console (log)
 import Stadium.Control (toStateT)
-import Undefined (undefined)
-import Wallet.PrivateKey (PrivateKey)
+import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
 import Wallet.PrivateKey as CC
 
-type ScriptT m a
-  = ExceptT String (StateT CirclesState m) a
+type ScriptT r m a
+  = ExceptV (Err r) (StateT CirclesState m) a
 
-runScripT :: forall m a. ScriptT m a -> m (Either String a /\ CirclesState)
+runScripT :: forall r m a. ScriptT r m a -> m (Either (Variant (Err + r)) a /\ CirclesState)
 runScripT = flip runStateT init <<< runExceptT
 
 --------------------------------------------------------------------------------
@@ -54,20 +55,24 @@ act' :: forall m a. MonadEffect m => Env m -> (a -> CirclesAction) -> Array a ->
 act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
 
 --------------------------------------------------------------------------------
+type Err r
+  = ( err :: String | r )
+
+err :: forall r. String -> Variant ( err :: String | r )
+err = inj (Proxy :: _ "err")
+
+--------------------------------------------------------------------------------
 type SignUpUserOpts
   = { username :: String
     , email :: String
     }
 
-signUpUser ::
-  forall m.
-  MonadEffect m =>
-  Env m ->
-  SignUpUserOpts ->
-  ExceptT String (StateT CirclesState m)
-    { privateKey :: CC.PrivateKey
+type SignUpUser
+  = { privateKey :: CC.PrivateKey
     , safeAddress :: CC.Address
     }
+
+signUpUser :: forall m r. MonadEffect m => Env m -> SignUpUserOpts -> ScriptT r m SignUpUser
 signUpUser env opts =
   ExceptT do
     act env $ A._infoGeneral $ A._next unit
@@ -81,7 +86,7 @@ signUpUser env opts =
     act env $ A._magicWords $ A._next unit
     act env $ A._submit $ A._submit unit
     get
-      <#> ( default (throwError "Cannot sign up user.")
+      <#> ( default (throwError $ err "Cannot sign up user.")
             # onMatch
                 { trusts:
                     \x ->
@@ -93,15 +98,13 @@ signUpUser env opts =
         )
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m. MonadEffect m => Env m -> ExceptT String (StateT CirclesState m) Unit
+finalizeAccount :: forall m r. MonadEffect m => Env m -> ScriptT r m Unit
 finalizeAccount env =
   ExceptT do
     act env $ A._trusts $ A._finalizeRegisterUser unit
     get
-      <#> ( default (throwError "Cannot finalize register user.")
+      <#> ( default (throwError $ err "Cannot finalize register user.")
             # onMatch
-                { dashboard:
-                    \_ ->
-                      pure unit
+                { dashboard: \_ -> pure unit
                 }
         )
