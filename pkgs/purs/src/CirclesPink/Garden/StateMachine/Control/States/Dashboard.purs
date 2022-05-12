@@ -1,9 +1,10 @@
 module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ( dashboard
+  , fetchUsersBinarySearch
   ) where
 
 import Prelude
-import CirclesCore (TrustNode, User)
+import CirclesCore (User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -17,18 +18,15 @@ import Data.Array as A
 import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
 import Data.Map as M
-import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant, default, onMatch)
+import Data.Variant (Variant)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
-import RemoteData (RemoteData, _failure, _loading, _success, onSuccess)
+import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Type.Row (type (+))
-import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -114,13 +112,13 @@ dashboard env =
         run (env.trustGetNetwork st.privKey)
           # subscribeRemoteReport env
               (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-          # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+          # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
       case eitherTrusts of
-        Left e -> pure unit
+        Left _ -> pure unit
         Right trusts -> do
           eitherUsers <- run $ fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
           case eitherUsers of
-            Left e' -> pure unit
+            Left _ -> pure unit
             Right users ->
               let
                 foundUsers = catMaybes $ map hush users
@@ -141,18 +139,23 @@ dashboard env =
                           # M.fromFoldable
                       }
           pure unit
+      _ <-
+        run (env.trustGetNetwork st.privKey)
+          # subscribeRemoteReport env
+              (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+          # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
       pure unit
 
-  getUsers set st { userNames, addresses } = pure unit
+  getUsers set st { userNames, addresses } = do
+    set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
+    let
+      task :: ExceptV S.ErrGetUsers _ _
+      task = env.getUsers st.privKey userNames addresses
+    result <- run' $ task
+    case result of
+      Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
+      Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
 
-  -- set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
-  -- let
-  --   task :: ExceptV S.ErrGetUsers _ _
-  --   task = env.getUsers st.privKey userNames addresses
-  -- result <- run' $ task
-  -- case result of
-  --   Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
-  --   Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
   addTrustConnection set st u =
     void do
       runExceptT do

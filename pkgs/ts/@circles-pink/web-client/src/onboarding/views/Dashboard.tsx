@@ -74,6 +74,12 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
     }
   };
 
+  useEffect(() => {
+    if (defaultView(state).trusts.length > 0) {
+      console.log('Trusts:', defaultView(state).trusts);
+    }
+  }, [defaultView(state).trusts.length]);
+
   // User Interaction
   // Set transfer target, when clicking on contact action
   const [overwriteTo, setOverwriteTo] = useState<string>('');

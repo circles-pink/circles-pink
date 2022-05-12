@@ -45,7 +45,6 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
-import Network.Ethereum.Core.Signatures (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Record as R
 import RemoteData (RemoteData, _notAsked)
@@ -126,7 +125,7 @@ type ErrGetUsers
   = Env.ErrGetUsers + ()
 
 type GetUsersResult
-  = RemoteReport ErrGetUsersResolved (Array User)
+  = RemoteData Unit Unit ErrGetUsersResolved (Array User)
 
 --------------------------------------------------------------------------------
 -- | User / search

@@ -45,7 +45,7 @@ import Partial.Unsafe (unsafePartial)
 import Record as R
 import Sunde (spawn)
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, Mnemonic, PrivateKey, getWords, keyToMnemonic)
+import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
