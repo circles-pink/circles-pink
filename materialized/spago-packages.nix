@@ -761,6 +761,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "node-child-process" = pkgs.stdenv.mkDerivation {
+        name = "node-child-process";
+        version = "v7.1.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-node/purescript-node-child-process.git";
+          rev = "5c4e560eceead04efc1d5a3ec1f6de91bb1d512e";
+          sha256 = "18va367xims00hmjwiasiifdfak3cbs0sp4sr52ihb20n19n6h5b";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "node-fs" = pkgs.stdenv.mkDerivation {
         name = "node-fs";
         version = "v6.1.0";
@@ -768,6 +780,18 @@ let
           url = "https://github.com/purescript-node/purescript-node-fs.git";
           rev = "09a2b71a3a86f0cd19c46f4b6c40310cc1648909";
           sha256 = "1w97m2afn7yn757niknkbk7w6nyg4n5dabxr7gzfz368z1nkf45s";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "node-fs-aff" = pkgs.stdenv.mkDerivation {
+        name = "node-fs-aff";
+        version = "v7.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-node/purescript-node-fs-aff.git";
+          rev = "1da5d326573c3b17c6d4dba3d0e0157e60869f91";
+          sha256 = "10aglq89gbchykwlckmg5xsln705qha76f125snkmk056kq2w89h";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
@@ -1176,6 +1200,18 @@ let
           url = "https://github.com/purescript/purescript-strings.git";
           rev = "157e372a23e4becd594d7e7bff6f372a6f63dd82";
           sha256 = "0hyaa4d8gyyvac2nxnwqkn2rvi5vax4bi4yv10mpk7rgb8rv7mb8";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "sunde" = pkgs.stdenv.mkDerivation {
+        name = "sunde";
+        version = "v2.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/justinwoo/purescript-sunde.git";
+          rev = "e9c898ac0ffd5e61d82a6c02606ab84241278709";
+          sha256 = "051kfqc06fbhavd3anvfhi5wfj76a6q4piis4lplypaw9g4n64l2";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
