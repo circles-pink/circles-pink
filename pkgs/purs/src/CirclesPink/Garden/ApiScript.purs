@@ -15,6 +15,7 @@ import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, fi
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
+import Control.Parallel (parTraverse)
 import Convertable (convert)
 import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
 import Data.Array ((..))
@@ -140,9 +141,9 @@ mkAccount envVars env = do
 app :: forall r. EnvVars -> Env Aff -> AppM (ErrApp + r) Unit
 app ev env = do
   let
-    count = 1
+    count = 50
 
-    maxPar = 1
+    maxPar = 5
 
     reportFilePath = "account-report.json"
 
@@ -150,7 +151,7 @@ app ev env = do
 
     batchCount = floor (toNumber count / toNumber maxPar)
   report <-
-    (traverse (const mkAccount') (1 .. min maxPar count))
+    (parTraverse (const mkAccount') (1 .. min maxPar count))
       # (\m -> traverse (const m) (1 .. batchCount))
       <#> join
       <#> map (lmap printErrApp)
