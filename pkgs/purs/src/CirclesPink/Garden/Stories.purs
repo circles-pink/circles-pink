@@ -30,10 +30,10 @@ import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey as CC
 
-type ScriptT r m a
-  = ExceptV (Err r) (StateT CirclesState m) a
+type ScriptT e m a
+  = ExceptV e (StateT CirclesState m) a
 
-runScripT :: forall r m a. ScriptT r m a -> m (Either (Variant (Err + r)) a /\ CirclesState)
+runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
 runScripT = flip runStateT init <<< runExceptT
 
 --------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ type SignUpUser
     , safeAddress :: CC.Address
     }
 
-signUpUser :: forall m r. MonadEffect m => Env m -> SignUpUserOpts -> ScriptT r m SignUpUser
+signUpUser :: forall m r. MonadEffect m => Env m -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
   ExceptT do
     act env $ A._infoGeneral $ A._next unit
@@ -98,7 +98,7 @@ signUpUser env opts =
         )
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m r. MonadEffect m => Env m -> ScriptT r m Unit
+finalizeAccount :: forall m r. MonadEffect m => Env m -> ScriptT (Err + r) m Unit
 finalizeAccount env =
   ExceptT do
     act env $ A._trusts $ A._finalizeRegisterUser unit

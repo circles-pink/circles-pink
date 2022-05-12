@@ -91,7 +91,9 @@ _dump:
 run-garden-nix:
 	nix build --out-link run-garden .#runGarden && ./run-garden/bin/run-garden; rm run-garden
 
-run-garden: yarn-install
+run-garden: yarn-install run-garden_
+
+run-garden_:
 	#!/usr/bin/env bash
 	set -euxo pipefail
 	export GARDEN_API={{GARDEN_API}}

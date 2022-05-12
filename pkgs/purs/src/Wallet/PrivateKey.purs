@@ -1,5 +1,5 @@
 module Wallet.PrivateKey
-  ( Address
+  ( Address(..)
   , Mnemonic
   , Nonce
   , PrivateKey
@@ -43,11 +43,15 @@ import Effect.Class (liftEffect)
 type Entropy
   = String
 
+--------------------------------------------------------------------------------
 newtype Address
   = Address String
 
 derive newtype instance showAddress :: Show Address
 
+derive newtype instance mnemonicAddress :: EncodeJson Address
+
+--------------------------------------------------------------------------------
 newtype Nonce
   = Nonce BigInt
 
@@ -56,13 +60,15 @@ newtype PrivateKey
 
 derive instance privateKeyEq :: Eq PrivateKey
 
-instance showPrivateKey :: Show PrivateKey where
-  show _ = "***private_key***"
+derive newtype instance showPrivateKey :: Show PrivateKey
 
+--------------------------------------------------------------------------------
 newtype Mnemonic
   = Mnemonic (Array String)
 
 derive instance mnemonicEq :: Eq Mnemonic
+
+derive newtype instance mnemonicEncodeJson :: EncodeJson Mnemonic
 
 instance mnemonicShow :: Show Mnemonic where
   show (Mnemonic xs) = joinWith " " xs -- TODO: Remove!

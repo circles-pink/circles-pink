@@ -1,7 +1,6 @@
 module CirclesPink.Garden.ApiScript
   ( fundAddress
   , main
-  , runAppM
   , safeFunderAddr
   ) where
 
@@ -11,15 +10,23 @@ import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
 import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, finalizeAccount, runScripT, signUpUser)
-import Control.Monad.Except (mapExceptT)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
+import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
+import Control.Parallel (parTraverse)
 import Convertable (convert)
-import Data.Argonaut (decodeJson, fromString)
+import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
+import Data.Array ((..))
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush)
+import Data.Int (floor, toNumber)
 import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
-import Data.Tuple.Nested ((/\))
+import Data.Traversable (traverse)
+import Data.Tuple (fst)
+import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, default, onMatch)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
@@ -36,20 +43,27 @@ import Wallet.PrivateKey (Address, Mnemonic, PrivateKey, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
-type AppM r a
-  = ScriptT (ErrApp + r) Aff a
+type ScriptM e a
+  = ScriptT e Aff a
 
 type ErrApp r
   = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
+runScriptM :: forall e a. ScriptM e a -> Aff (Either (Variant e) a /\ CirclesState)
+runScriptM = runScripT
+
+--------------------------------------------------------------------------------
+type AppM r a
+  = ExceptV (ErrApp + r) Aff a
+
 runAppM :: forall r a. AppM r a -> Effect Unit
 runAppM x =
   x
-    # runScripT
+    # runExceptT
     # runAff_
         ( case _ of
             Left e -> log ("Native error: " <> show e)
-            Right (Left e /\ _) -> log ("Error: " <> printErrApp e)
+            Right (Left e) -> log ("Error: " <> printErrApp e)
             _ -> pure unit
         )
 
@@ -65,7 +79,7 @@ safeFunderAddr =
     )
 
 --------------------------------------------------------------------------------
-fundAddress :: forall r. EnvVars -> W3.Address -> AppM r HexString
+fundAddress :: forall r. EnvVars -> W3.Address -> ScriptM (ErrApp + r) HexString
 fundAddress envVars safeAddress =
   mapExceptT lift do
     provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket
@@ -77,7 +91,7 @@ fundAddress envVars safeAddress =
       }
 
 --------------------------------------------------------------------------------
-genUsername :: forall r. AppM r String
+genUsername :: forall r. ScriptM r String
 genUsername =
   (lift <<< lift) ado
     n <- C.first {}
@@ -85,7 +99,7 @@ genUsername =
     in n <> show i
 
 --------------------------------------------------------------------------------
-genSignupOpts :: forall r. AppM r SignUpUserOpts
+genSignupOpts :: forall r. ScriptM r SignUpUserOpts
 genSignupOpts = do
   username <- genUsername
   email <- pure (username <> "@bar.com")
@@ -101,7 +115,7 @@ type MkAccountReturn
     , mnemonic :: Mnemonic
     }
 
-mkAccount :: forall r. EnvVars -> Env Aff -> AppM r MkAccountReturn
+mkAccount :: forall r. EnvVars -> Env Aff -> ScriptM (ErrApp + r) MkAccountReturn
 mkAccount envVars env = do
   signupOpts <- genSignupOpts
   { privateKey, safeAddress } <- signUpUser env signupOpts
@@ -112,10 +126,25 @@ mkAccount envVars env = do
   pure $ R.merge signupOpts { privateKey, safeAddress, txHash, mnemonic }
 
 --------------------------------------------------------------------------------
-app :: forall r. EnvVars -> Env Aff -> AppM r Unit
+app :: forall r. EnvVars -> Env Aff -> AppM (ErrApp + r) Unit
 app ev env = do
-  _ <- mkAccount ev env
+  let
+    count = 100
+
+    maxPar = 10
+
+    batchCount = floor (toNumber count / toNumber maxPar)
+  report <-
+    (parTraverse (const mkAccount') (1 .. maxPar))
+      # (\m -> traverse (const m) (1 .. batchCount))
+      <#> join
+      <#> map (lmap printErrApp)
+      # lift
+  report # encodeJson # stringify # log
   pure unit
+  where
+  mkAccount' :: Aff (Either (Variant (ErrApp + r)) MkAccountReturn)
+  mkAccount' = mkAccount ev env # runScriptM <#> fst
 
 --------------------------------------------------------------------------------
 printErrApp :: forall r. Variant (ErrApp + r) -> String
