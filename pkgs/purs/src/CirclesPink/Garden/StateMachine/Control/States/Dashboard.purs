@@ -4,17 +4,19 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
-import CirclesCore (User)
+import CirclesCore (User, TrustNode)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
 import Data.Map as M
@@ -107,44 +109,41 @@ dashboard env =
   }
   where
   getTrusts set st _ =
-    void do
-      eitherTrusts <-
-        run (env.trustGetNetwork st.privKey)
-          # subscribeRemoteReport env
-              (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-          # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-      case eitherTrusts of
-        Left _ -> pure unit
-        Right trusts -> do
-          eitherUsers <- run $ fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
-          case eitherUsers of
-            Left _ -> pure unit
-            Right users ->
-              let
-                foundUsers = catMaybes $ map hush users
-              in
-                set \st' ->
-                  S._dashboard
-                    st'
-                      { trusts =
-                        trusts
-                          <#> ( \t ->
-                                convert t.safeAddress
-                                  /\ { isLoading: false
-                                    , isIncoming: t.isIncoming
-                                    , isOutgoing: t.isOutgoing
-                                    , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
-                                    }
-                            )
-                          # M.fromFoldable
-                      }
+    let
+      mapTrust :: Array User -> TrustNode -> W3.Address /\ Trust
+      mapTrust foundUsers t = convert t.safeAddress /\ user
+        where
+        user =
+          { isLoading: false
+          , isIncoming: t.isIncoming
+          , isOutgoing: t.isOutgoing
+          , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
+          }
+    in
+      void do
+        runExceptT do
+          trusts <-
+            run (env.trustGetNetwork st.privKey)
+              # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+              # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
+              <#> lmap (const unit)
+              # ExceptT
+          users <-
+            run (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
+              <#> lmap (const unit)
+              # ExceptT
+          let
+            foundUsers = catMaybes $ map hush users
+          lift
+            $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
+          _ <-
+            run (env.trustGetNetwork st.privKey)
+              # subscribeRemoteReport env
+                  (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+              # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+              <#> lmap (const unit)
+              # ExceptT
           pure unit
-      _ <-
-        run (env.trustGetNetwork st.privKey)
-          # subscribeRemoteReport env
-              (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-          # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-      pure unit
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
