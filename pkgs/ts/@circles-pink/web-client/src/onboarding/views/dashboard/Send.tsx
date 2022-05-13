@@ -21,9 +21,14 @@ export type SendProps = DashboardProps & {
   overwriteTo?: string;
 };
 
-export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
+export const Send = ({
+  state: stateRaw,
+  act,
+  theme,
+  overwriteTo,
+}: SendProps) => {
   // State
-  const [from, _] = useState<string>(addrToString(state.user.safeAddress));
+  const [from, _] = useState<string>(addrToString(stateRaw.user.safeAddress));
   const [to, setTo] = useState<string>(overwriteTo || '');
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
@@ -81,7 +86,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
         <Button
           prio={'high'}
           color={theme.baseColor}
-          state={mapResult(state.transferResult)}
+          state={mapResult(stateRaw.transferResult)}
           icon={mdiCashFast}
           onClick={() => transact()}
         >

@@ -1,7 +1,14 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ( DefaultView
+  , ErrDashboardStateResolved
   , ErrGetUsersResolved
+  , ErrTokenCheckUBIPayoutResolved
+  , ErrTokenGetBalanceResolved
+  , ErrTokenRequestUBIPayoutResolved
+  , ErrTokenTransferResolved
+  , ErrTrustAddConnectionResolved
   , ErrTrustGetTrustsResolved
+  , ErrTrustRemoveConnectionResolved
   , ErrUserSearchResolved
   , RemoteData_
   , Trust
@@ -12,6 +19,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 
 import Prelude
 import CirclesCore (ApiError, NativeError, User, TrustNode)
+import CirclesCore.Bindings (Balance(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
@@ -20,7 +28,7 @@ import Data.Map as M
 import Data.Nullable (Nullable, toNullable)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant)
-import Foreign.Object (values)
+import Foreign.Object (Object, values)
 import Network.Ethereum.Core.Signatures as W3
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
@@ -52,13 +60,13 @@ type DefaultView
   = { trusts :: Trusts
     , userSearchResult :: RemoteData Unit Unit ErrUserSearchResolved (Array User)
     , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
+    , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
+    , trustRemoveResult :: Object (RemoteReport ErrTrustRemoveConnectionResolved String)
     , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
-    -- , trustAddResult :: TrustAddResult
-    -- , trustRemoveResult :: TrustRemoveResult
-    -- , getBalanceResult :: TokenGetBalanceResult
-    -- , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-    -- , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
-    -- , transferResult :: TokenTransferResult
+    , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved Balance
+    , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved Balance
+    , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
+    , transferResult :: RemoteData_ ErrTokenTransferResolved String
     }
 
 type Trusts
@@ -90,6 +98,12 @@ defaultView d@{ trusts } =
   , userSearchResult: d.userSearchResult
   , getUsersResult: d.getUsersResult
   , trustsResult: d.trustsResult
+  , trustAddResult: d.trustAddResult
+  , trustRemoveResult: d.trustRemoveResult
+  , checkUBIPayoutResult: d.checkUBIPayoutResult
+  , getBalanceResult: d.getBalanceResult
+  , requestUBIPayoutResult: d.requestUBIPayoutResult
+  , transferResult: d.transferResult
   }
 
 --------------------------------------------------------------------------------
