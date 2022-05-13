@@ -112,7 +112,10 @@ const OnboardingContent = ({
   baseColor,
   content = {},
 }: OnboardingProps): ReactElement => {
-  const [state, act] = useStateMachine(initState || init, control);
+  const [state, act] = (useStateMachine as any)(
+    (initState as unknown as CirclesState) || (init as unknown as CirclesState),
+    control
+  );
   const [theme, setTheme] = useContext(ThemeContext);
 
   i18n.changeLanguage(lang);

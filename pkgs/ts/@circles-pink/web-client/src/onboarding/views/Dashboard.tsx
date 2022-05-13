@@ -6,7 +6,10 @@ import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import { defaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import {
+  DefaultView,
+  defaultView,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -55,7 +58,12 @@ export type DashboardProps = {
   act: (ac: A.CirclesAction) => void;
 };
 
-export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
+export const Dashboard = ({
+  state: stateRaw,
+  act,
+}: DashboardProps): ReactElement => {
+  const state = (defaultView as any)(stateRaw) as DefaultView;
+
   // Theme
   const [theme] = useContext(ThemeContext);
 
@@ -75,10 +83,10 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
   };
 
   useEffect(() => {
-    if (defaultView(state).trusts.length > 0) {
-      console.log('Trusts:', defaultView(state).trusts);
+    if (state.trusts.length > 0) {
+      console.log('Trusts:', state.trusts);
     }
-  }, [defaultView(state).trusts.length]);
+  }, [state.trusts.length]);
 
   // User Interaction
   // Set transfer target, when clicking on contact action
@@ -193,7 +201,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
             <Icon path={mdiCog} size={1} color={theme.darkColor} />
           </FadeIn>
           <FadeIn orientation={'down'} delay={getDelay()}>
-            <UserHandle>{`@${state.user.username}`}</UserHandle>
+            <UserHandle>{`@${stateRaw.user.username}`}</UserHandle>
           </FadeIn>
           <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiLogout} size={1} color={theme.darkColor} />
@@ -312,7 +320,7 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
                 overlay={overlay[0]}
                 closeOverlay={() => setOverlay(['SEND', false])}
                 overwriteTo={overwriteTo}
-                state={state}
+                state={stateRaw}
                 act={act}
                 theme={theme}
               />
@@ -322,8 +330,8 @@ export const Dashboard = ({ state, act }: DashboardProps): ReactElement => {
       }
       debug={
         <>
-          <pre>{JSON.stringify(defaultView(state), null, 2)}</pre>
           <pre>{JSON.stringify(state, null, 2)}</pre>
+          <pre>{JSON.stringify(stateRaw, null, 2)}</pre>
         </>
       }
     />
