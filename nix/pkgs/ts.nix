@@ -175,8 +175,6 @@ rec {
           chmod -R +w $out
 
           # Add local package source
-          rm -rf $out/libexec/${name}/deps/${name}
-          mkdir $out/libexec/${name}/deps/${name}
           cp -r ${source}/. $out/libexec/${name}/deps/${name}
         
           # Link Dependencies
