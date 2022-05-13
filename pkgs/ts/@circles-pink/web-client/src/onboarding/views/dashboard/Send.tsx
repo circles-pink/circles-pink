@@ -11,6 +11,10 @@ import { mapResult } from '../../utils/mapResult';
 import { convertTimeCirclesToCircles } from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
 import { t } from 'i18next';
+import {
+  DefaultView,
+  defaultView,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -27,6 +31,8 @@ export const Send = ({
   theme,
   overwriteTo,
 }: SendProps) => {
+  const state = (defaultView as any)(stateRaw) as DefaultView;
+
   // State
   const [from, _] = useState<string>(addrToString(stateRaw.user.safeAddress));
   const [to, setTo] = useState<string>(overwriteTo || '');
@@ -86,7 +92,7 @@ export const Send = ({
         <Button
           prio={'high'}
           color={theme.baseColor}
-          state={mapResult(stateRaw.transferResult)}
+          state={mapResult(state.transferResult)}
           icon={mdiCashFast}
           onClick={() => transact()}
         >

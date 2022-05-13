@@ -1,4 +1,5 @@
 import { TokenGetBalanceResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CirclesCurrency } from '../../../assets/CirclesCurrency';
@@ -7,7 +8,7 @@ import { displayBalance } from '../../utils/timeCircles';
 
 type BalanceProps = {
   theme: Theme;
-  balance: TokenGetBalanceResult;
+  balance: DefaultView['getBalanceResult'];
 };
 
 export const Balance = ({ theme, balance }: BalanceProps) => {

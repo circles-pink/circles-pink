@@ -192,6 +192,7 @@ dashboard env =
           run (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
+            
             # ExceptT
         checkPayout <-
           run (env.checkUBIPayout st.privKey st.user.safeAddress)
