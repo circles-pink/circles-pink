@@ -18,7 +18,6 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , ErrTrustRemoveConnection
   , ErrTrustRemoveConnectionResolved
   , ErrUserSearch
-  , ErrUserSearchResolved
   , GetUsersResult
   , InitDashboard
   , TokenCheckUBIPayoutResult
@@ -30,7 +29,6 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustGetTrusts
   , TrustRemoveResult
   , Trusts
-  , UserSearchResult
   , _dashboard
   , initDashboard
   ) where
@@ -84,7 +82,7 @@ type DashboardState
     , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
     , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
     , transferResult :: TokenTransferResult
-    , userSearchResult :: UserSearchResult
+    , userSearchResult :: RemoteData Unit Unit (Variant (ErrUserSearch + ())) (Array User)
     }
 
 --------------------------------------------------------------------------------
@@ -129,18 +127,8 @@ type GetUsersResult
 
 --------------------------------------------------------------------------------
 -- | User / search
-type ErrUserSearchResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrUserSearch
-  = Env.ErrUserSearch + ()
-
-type UserSearchResult
-  = RemoteData Unit Unit ErrUserSearchResolved (Array User)
+type ErrUserSearch r
+  = Env.ErrUserSearch + r
 
 -- Trust / GetTrusts
 type ErrTrustGetTrustsResolved

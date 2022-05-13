@@ -139,8 +139,7 @@ dashboard env =
             $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
           _ <-
             run (env.trustGetNetwork st.privKey)
-              # subscribeRemoteReport env
-                  (\r -> set \st' -> S._dashboard st' { trustsResult = r })
+              # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
               <#> hush
               # MaybeT
@@ -222,7 +221,7 @@ dashboard env =
   userSearch set st options = do
     set \st' -> S._dashboard st' { userSearchResult = _loading unit :: RemoteData _ _ _ _ }
     let
-      task :: ExceptV S.ErrUserSearch _ _
+      task :: ExceptV (S.ErrUserSearch ()) _ _
       task = env.userSearch st.privKey options
     result <- run' $ task
     case result of
