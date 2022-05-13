@@ -1,13 +1,14 @@
 {
   "name": "@circles-pink/web-client",
   "version": "1.0.19",
-  "main": "./ts-dist/index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc && babel --extensions .ts,.tsx --out-dir dist src",
     "prettier:check": "prettier --check .",
     "prettier:write": "prettier --write ."
   },
   "dependencies": {
+    "@babel/preset-react": "^7.16.7",
     "@circles-pink/state-machine": "*",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",

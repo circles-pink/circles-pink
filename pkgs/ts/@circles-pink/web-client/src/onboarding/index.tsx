@@ -27,7 +27,6 @@ import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Ga
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import { Global, css } from '@emotion/react';
-import '../styles/global.css';
 
 type Language = 'en' | 'de';
 

@@ -1,14 +1,21 @@
 module.exports = {
   presets: [
+    ['@babel/preset-typescript', {}],
     [
-      // 'next/babel',
-      // {
-      //   'preset-react': {
-      //     runtime: 'automatic',
-      //     importSource: '@emotion/react',
-      //   },
-      // },
-      '@babel/preset-typescript',
+      '@babel/preset-env',
+      {
+        modules: 'commonjs',
+      },
+    ],
+    [
+      '@babel/preset-react',
+      {
+        // pragma: 'dom', // default pragma is React.createElement (only in classic runtime)
+        // pragmaFrag: 'DomFrag', // default is React.Fragment (only in classic runtime)
+        // throwIfNamespace: false, // defaults to true
+        // runtime: 'classic', // defaults to classic
+        // "importSource": "custom-jsx-library" // defaults to react (only in automatic runtime)
+      },
     ],
   ],
   plugins: ['@emotion/babel-plugin', 'babel-plugin-macros'],
