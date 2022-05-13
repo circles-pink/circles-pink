@@ -1,25 +1,19 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard
   ( DashboardState
-  , ErrDashboardStateResolved
+  , ErrDashboardState
   , ErrGetUsers
-  , ErrGetUsersResolved
   , ErrTokenCheckUBIPayout
-  , ErrTokenCheckUBIPayoutResolved
   , ErrTokenGetBalance
-  , ErrTokenGetBalanceResolved
   , ErrTokenRequestUBIPayout
-  , ErrTokenRequestUBIPayoutResolved
   , ErrTokenTransfer
-  , ErrTokenTransferResolved
   , ErrTrustAddConnection
-  , ErrTrustAddConnectionResolved
   , ErrTrustGetTrusts
-  , ErrTrustGetTrustsResolved
   , ErrTrustRemoveConnection
-  , ErrTrustRemoveConnectionResolved
   , ErrUserSearch
   , GetUsersResult
   , InitDashboard
+  , RemoteDataV_
+  , RemoteReportV
   , TokenCheckUBIPayoutResult
   , TokenGetBalanceResult
   , TokenRequestUBIPayoutResult
@@ -29,14 +23,14 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustGetTrusts
   , TrustRemoveResult
   , Trusts
+  , UserSearchResult
   , _dashboard
   , initDashboard
   ) where
 
 import Prelude
-import CirclesCore (ApiError, Balance, NativeError, TrustNode, User)
+import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Data.Map (Map)
 import Data.Map as M
@@ -51,13 +45,24 @@ import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
 
--- | Dashboard State
-type ErrDashboardStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+--------------------------------------------------------------------------------
+-- DashboardState
+--------------------------------------------------------------------------------
+type DashboardState
+  = { user :: CC.User
+    , privKey :: PrivateKey
+    , error :: Maybe (Variant (ErrDashboardState + ()))
+    , trusts :: Trusts
+    , trustsResult :: TrustGetTrusts
+    , trustAddResult :: TrustAddResult
+    , trustRemoveResult :: TrustRemoveResult
+    , getBalanceResult :: TokenGetBalanceResult
+    , getUsersResult :: GetUsersResult
+    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
+    , transferResult :: TokenTransferResult
+    , userSearchResult :: UserSearchResult
+    }
 
 type Trusts
   = Map W3.Address Trust
@@ -69,22 +74,11 @@ type Trust
     , user :: Maybe User
     }
 
-type DashboardState
-  = { user :: CC.User
-    , privKey :: PrivateKey
-    , error :: Maybe ErrDashboardStateResolved
-    , trusts :: Trusts
-    , trustsResult :: TrustGetTrusts
-    , trustAddResult :: TrustAddResult
-    , trustRemoveResult :: TrustRemoveResult
-    , getBalanceResult :: TokenGetBalanceResult
-    , getUsersResult :: GetUsersResult
-    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
-    , transferResult :: TokenTransferResult
-    , userSearchResult :: RemoteData Unit Unit (Variant (ErrUserSearch + ())) (Array User)
-    }
+type ErrDashboardState r
+  = ErrService + ErrNative + ErrInvalidUrl + r
 
+--------------------------------------------------------------------------------
+-- InitDashboard
 --------------------------------------------------------------------------------
 type InitDashboard
   = { user :: CC.User
@@ -109,118 +103,97 @@ initDashboard id =
         }
 
 --------------------------------------------------------------------------------
+-- GetUsersResult
 --------------------------------------------------------------------------------
--- | User / getUsers
-type ErrGetUsersResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      , errUserNotFound :: UserNotFoundError
-      )
-
-type ErrGetUsers
-  = Env.ErrGetUsers + ()
-
 type GetUsersResult
-  = RemoteData Unit Unit ErrGetUsersResolved (Array User)
+  = RemoteDataV_ (ErrGetUsers + ()) (Array User)
+
+type ErrGetUsers r
+  = Env.ErrGetUsers + r
 
 --------------------------------------------------------------------------------
--- | User / search
+-- UserSearchResult
+--------------------------------------------------------------------------------
+type UserSearchResult
+  = RemoteData Unit Unit (Variant (ErrUserSearch + ())) (Array User)
+
 type ErrUserSearch r
   = Env.ErrUserSearch + r
 
--- Trust / GetTrusts
-type ErrTrustGetTrustsResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
-
-type ErrTrustGetTrusts
-  = Env.ErrAddTrustConnection + ()
-
+--------------------------------------------------------------------------------
+-- TrustGetTrusts
+--------------------------------------------------------------------------------
 type TrustGetTrusts
-  = RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
+  = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
 
--- | Trust / AddConnection
-type ErrTrustAddConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustGetTrusts r
+  = Env.ErrAddTrustConnection + r
 
-type ErrTrustAddConnection
-  = Env.ErrAddTrustConnection + ()
-
+--------------------------------------------------------------------------------
+-- TrustAddResult
+--------------------------------------------------------------------------------
 type TrustAddResult
-  = Object (RemoteReport ErrTrustAddConnectionResolved String)
+  = Object (RemoteReportV (ErrTrustAddConnection + ()) String)
 
--- | Trust / RemoveConnection
-type ErrTrustRemoveConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustAddConnection r
+  = Env.ErrAddTrustConnection + r
 
-type ErrTrustRemoveConnection
-  = Env.ErrRemoveTrustConnection + ()
-
+--------------------------------------------------------------------------------
+-- TrustRemoveResult
+--------------------------------------------------------------------------------
 type TrustRemoveResult
-  = Object (RemoteReport ErrTrustRemoveConnectionResolved String)
+  = Object (RemoteReportV (ErrTrustRemoveConnection + ()) String)
 
--- | Token / GetBalance
-type ErrTokenGetBalanceResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustRemoveConnection r
+  = Env.ErrRemoveTrustConnection + r
 
-type ErrTokenGetBalance
-  = Env.ErrGetBalance + ()
-
+--------------------------------------------------------------------------------
+-- TokenGetBalanceResult
+--------------------------------------------------------------------------------
 type TokenGetBalanceResult
-  = RemoteReport ErrTokenGetBalanceResolved Balance
+  = RemoteReportV (ErrTokenGetBalance + ()) Balance
 
--- | Token / CheckUBIPayout
-type ErrTokenCheckUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenGetBalance r
+  = Env.ErrGetBalance + r
 
-type ErrTokenCheckUBIPayout
-  = Env.ErrCheckUBIPayout + ()
-
+--------------------------------------------------------------------------------
+-- TokenCheckUBIPayoutResult
+--------------------------------------------------------------------------------
 type TokenCheckUBIPayoutResult
-  = RemoteReport ErrTokenCheckUBIPayoutResolved Balance
+  = RemoteReportV (ErrTokenCheckUBIPayout + ()) Balance
 
--- | Token / RequestUBIPayout
-type ErrTokenRequestUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenCheckUBIPayout r
+  = Env.ErrCheckUBIPayout + r
 
-type ErrTokenRequestUBIPayout
-  = Env.ErrRequestUBIPayout + ()
-
+--------------------------------------------------------------------------------
+-- TokenRequestUBIPayoutResult
+--------------------------------------------------------------------------------
 type TokenRequestUBIPayoutResult
-  = RemoteReport ErrTokenRequestUBIPayoutResolved String
+  = RemoteReportV (ErrTokenRequestUBIPayout + ()) String
 
--- | Token / Transfer
-type ErrTokenTransferResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenRequestUBIPayout r
+  = Env.ErrRequestUBIPayout + r
 
-type ErrTokenTransfer
-  = Env.ErrTransfer + ()
-
+--------------------------------------------------------------------------------
+-- TokenTransferResult
+--------------------------------------------------------------------------------
 type TokenTransferResult
-  = RemoteData Unit Unit ErrTokenTransferResolved String
+  = RemoteDataV_ (ErrTokenTransfer + ()) String
 
+type ErrTokenTransfer r
+  = Env.ErrTransfer + r
+
+--------------------------------------------------------------------------------
+-- Constructors
 --------------------------------------------------------------------------------
 _dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
 _dashboard = inj (Proxy :: _ "dashboard")
+
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
+type RemoteDataV_ e a
+  = RemoteData Unit Unit (Variant e) a
+
+type RemoteReportV e a
+  = RemoteReport (Variant e) a
