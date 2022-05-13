@@ -75,7 +75,8 @@ rec {
           cp -r ${x} $out
           chmod -R +w $out
           cd $out/libexec/${name}/deps/${name}
-          ${pkgs.nodePackages.typescript}/bin/tsc
+          PATH=$PATH:../../../node_modules/.bin
+          ${pkgs.yarn}/bin/yarn build
         '')
         (x: runCommand name { } ''
           ln -s ${x}/libexec/${name}/deps/${name} $out
