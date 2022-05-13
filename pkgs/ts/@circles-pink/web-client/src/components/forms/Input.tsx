@@ -16,5 +16,6 @@ export const Input = styled.input<StyledInputProps>(props => [
     margin-bottom: 0.75rem;
     line-height: 1.25;
     outline: none;
+    font-size: 1rem;
   `,
 ]);

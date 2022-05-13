@@ -26,7 +26,7 @@ import { AnimProvider } from '../context/anim';
 import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
-import { Global, css } from '@emotion/react';
+import { css, styled } from 'twin.macro';
 
 type Language = 'en' | 'de';
 
@@ -42,25 +42,9 @@ type OnboardingProps = {
 export const Onboarding = (props: OnboardingProps) => {
   return (
     <ThemeProvider>
-      <>
-        <Global
-          styles={css`
-            * {
-              box-sizing: border-box;
-              font-family: sans-serif;
-              font-size: 1em;
-            }
-
-            button {
-              outline: none;
-              border: none;
-              padding: 0;
-              margin: 0;
-            }
-          `}
-        />
+      <Frame>
         <OnboardingContent {...props} />
-      </>
+      </Frame>
     </ThemeProvider>
   );
 };
@@ -133,3 +117,14 @@ const OnboardingContent = ({
     </AnimProvider>
   );
 };
+
+// -----------------------------------------------------------------------------
+// Frame
+// -----------------------------------------------------------------------------
+
+const Frame = styled.div(() => [
+  css`
+    box-sizing: border-box;
+    font-family: sans-serif;
+  `,
+]);

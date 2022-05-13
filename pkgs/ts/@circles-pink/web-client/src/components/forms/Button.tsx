@@ -88,6 +88,9 @@ const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
 
   return [
     css`
+      outline: none;
+      border: none;
+      font-size: 1.1rem;
       ${fullWidth && 'width: 100%;'};
       ${prioStyles}
     `,
