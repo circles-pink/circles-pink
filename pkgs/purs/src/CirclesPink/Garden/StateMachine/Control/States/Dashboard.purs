@@ -148,7 +148,7 @@ dashboard env =
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
     let
-      task :: ExceptV S.ErrGetUsers _ _
+      task :: ExceptV (S.ErrGetUsers + ()) _ _
       task = env.getUsers st.privKey userNames addresses
     result <- run' $ task
     case result of
@@ -231,7 +231,7 @@ dashboard env =
   transfer set st { from, to, value, paymentNote } = do
     set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
     let
-      task :: ExceptV S.ErrTokenTransfer _ _
+      task :: ExceptV (S.ErrTokenTransfer + ()) _ _
       task = env.transfer st.privKey (unsafePartial $ unsafeAddrFromString from) (unsafePartial $ unsafeAddrFromString to) value paymentNote
     result <- run' $ task
     case result of

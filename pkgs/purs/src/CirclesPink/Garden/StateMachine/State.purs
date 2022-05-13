@@ -46,13 +46,12 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
-import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetState)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction, GetProtocol, GetState) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingState, ErrLandingStateResolved, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing) as Exp
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrDashboardStateResolved, ErrGetUsers, ErrGetUsersResolved, ErrTokenCheckUBIPayout, ErrTokenCheckUBIPayoutResolved, ErrTokenGetBalance, ErrTokenGetBalanceResolved, ErrTokenRequestUBIPayout, ErrTokenRequestUBIPayoutResolved, ErrTokenTransfer, ErrTokenTransferResolved, ErrTrustAddConnection, ErrTrustAddConnectionResolved, ErrTrustGetTrusts, ErrTrustGetTrustsResolved, ErrTrustRemoveConnection, ErrTrustRemoveConnectionResolved, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
+import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrTrustRemoveConnection, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
 import Data.Maybe (Maybe(..))
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import Data.Variant (Variant, inj)

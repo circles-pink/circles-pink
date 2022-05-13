@@ -1,13 +1,18 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ( DefaultView
+  , ErrGetUsersResolved
+  , ErrTrustGetTrustsResolved
   , ErrUserSearchResolved
+  , RemoteData_
   , Trust
   , Trusts
   , defaultView
+  , globalLoading
   ) where
 
 import Prelude
-import CirclesCore (ApiError, User, NativeError)
+import CirclesCore (ApiError, NativeError, User, TrustNode)
+import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Data.Array (any)
@@ -17,13 +22,14 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant)
 import Foreign.Object (values)
 import Network.Ethereum.Core.Signatures as W3
-import Record (merge)
-import RemoteData (RemoteData(..), isLoading)
-import Undefined (undefined)
-import Wallet.PrivateKey (Address(..))
+import RemoteData (RemoteData, isLoading)
+import RemoteReport (RemoteReport)
 
-anythingLoading :: DashboardState -> Boolean
-anythingLoading d = any (_ == true) $ join checks
+--------------------------------------------------------------------------------
+-- globalLoading
+--------------------------------------------------------------------------------
+globalLoading :: DashboardState -> Boolean
+globalLoading d = any (_ == true) $ join checks
   where
   check = isLoading
 
@@ -40,9 +46,19 @@ anythingLoading d = any (_ == true) $ join checks
     ]
 
 --------------------------------------------------------------------------------
+-- DefaultView
+--------------------------------------------------------------------------------
 type DefaultView
   = { trusts :: Trusts
     , userSearchResult :: RemoteData Unit Unit ErrUserSearchResolved (Array User)
+    , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
+    , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
+    -- , trustAddResult :: TrustAddResult
+    -- , trustRemoveResult :: TrustRemoveResult
+    -- , getBalanceResult :: TokenGetBalanceResult
+    -- , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+    -- , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
+    -- , transferResult :: TokenTransferResult
     }
 
 type Trusts
@@ -72,8 +88,12 @@ defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts } =
   { trusts: mapTrusts trusts
   , userSearchResult: d.userSearchResult
+  , getUsersResult: d.getUsersResult
+  , trustsResult: d.trustsResult
   }
 
+--------------------------------------------------------------------------------
+-- Resolved Errors
 --------------------------------------------------------------------------------
 type ErrUserSearchResolved
   = Variant
@@ -81,3 +101,69 @@ type ErrUserSearchResolved
       , errNative :: NativeError
       , errInvalidUrl :: String
       )
+
+type ErrGetUsersResolved
+  = Variant
+      ( errApi :: ApiError
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      , errUserNotFound :: UserNotFoundError
+      )
+
+type ErrTrustGetTrustsResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTrustAddConnectionResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTrustRemoveConnectionResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenGetBalanceResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenCheckUBIPayoutResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenRequestUBIPayoutResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrTokenTransferResolved
+  = Variant
+      ( errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+type ErrDashboardStateResolved
+  = Variant
+      ( errService :: Unit
+      , errNative :: NativeError
+      , errInvalidUrl :: String
+      )
+
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
+type RemoteData_ e a
+  = RemoteData Unit Unit e a
+
+type RemoteReportV e a
+  = RemoteReport (Variant e) a
