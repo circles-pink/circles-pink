@@ -45,3 +45,16 @@ const DIR = args[0];
     fs.writeFileSync(filePath, newSrc);
   }
 }
+
+{
+  const filePath = join(DIR, "Milkis.Impl.Window/foreign.js");
+
+  const oldSrc = fs.readFileSync(filePath).toString();
+
+  const newSrc = oldSrc.replace(
+    /exports.windowFetch = window.fetch;/,
+    'exports.windowFetch = typeof window !== "undefined" ? window.fetch : {};'
+  );
+
+  fs.writeFileSync(filePath, newSrc);
+}
