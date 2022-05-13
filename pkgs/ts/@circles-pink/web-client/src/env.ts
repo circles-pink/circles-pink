@@ -1,3 +1,15 @@
+const envDefault = {
+  gardenApi: 'https://api.circles.garden',
+  gardenApiUsers: 'https://api.circles.garden/api/users',
+  gardenGraphApi: 'https://api.thegraph.com',
+  gardenSubgraphName: 'azf20/circles-ubi',
+  gardenRelay: 'https://relay.circles.garden',
+  gardenHubAddress: '0x29b9a7fBb8995b2423a71cC17cf9810798F6C543',
+  gardenProxyFactoryAddress: '0x8b4404DE0CaECE4b966a9959f134f0eFDa636156',
+  gardenSafeMasterAddress: '0x2CB0ebc503dE87CFD8f0eCEED8197bF7850184ae',
+  gardenEthereumNodeWebSocket: 'wss://dark-frosty-field.xdai.quiknode.pro',
+};
+
 const envRaw = {
   gardenApi: process.env.STORYBOOK_GARDEN_API,
   gardenApiUsers: process.env.STORYBOOK_GARDEN_API_USERS,
@@ -15,13 +27,14 @@ type RemoveUndefined<T> = { [key in keyof T]: Exclude<T[key], undefined> };
 type Env = RemoveUndefined<typeof envRaw>;
 
 const parseEnv = (env_: typeof envRaw): Env => {
-  const xs = Object.entries(env_).forEach(([k, v]) => {
+  const xs = Object.entries(env_).map(([k, v]) => {
     if (v === undefined) {
-      throw new Error(`Env var missing: ${k}`);
+      return [k, envDefault[k]];
+    } else {
+      return [k, v];
     }
   });
-
-  return env_ as Env;
+  return Object.fromEntries(xs) as Env;
 };
 
 export const env = parseEnv(envRaw);
