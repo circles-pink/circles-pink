@@ -12,7 +12,7 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "outDir": "ts-dist",
+    "outDir": "dist",
     "jsx": "react",
     "noImplicitAny": false,
     "declaration": true
