@@ -197,15 +197,15 @@ export const Dashboard = ({
     <UserDashboard
       header={
         <HeaderContent>
-          <FadeIn orientation={'down'} delay={getDelay()}>
+          {/* <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiCog} size={1} color={theme.darkColor} />
-          </FadeIn>
+          </FadeIn> */}
           <FadeIn orientation={'down'} delay={getDelay()}>
             <UserHandle>{`@${stateRaw.user.username}`}</UserHandle>
           </FadeIn>
-          <FadeIn orientation={'down'} delay={getDelay()}>
+          {/* <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiLogout} size={1} color={theme.darkColor} />
-          </FadeIn>
+          </FadeIn> */}
         </HeaderContent>
       }
       text={
@@ -385,7 +385,7 @@ const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
 // UI
 // -----------------------------------------------------------------------------
 
-const HeaderContent = tw.div`flex justify-between items-center mx-4`;
+const HeaderContent = tw.div`flex justify-around items-center mx-4`;
 const ControlContent = tw.div`lg:my-2 md:my-4`;
 const MainContent = tw.div`grid lg:grid-cols-2 gap-4`;
 const ButtonText = tw.span`mr-3`;

@@ -2,7 +2,8 @@ import tw, { css, styled } from 'twin.macro';
 
 export const SubClaim = styled.p(() => [
   css`
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    font-size: 1.15rem;
   `,
-  tw`block`,
+  tw`block text-gray-800`,
 ]);
