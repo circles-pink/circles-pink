@@ -59,9 +59,11 @@ type ViewProps = {
 const View = ({ state, act }: ViewProps): ReactElement | null => {
   const [debugContext, setDebugContext] = useContext(DebugContext);
 
-  (window as any).magicDebug = () => {
-    setDebugContext(!debugContext);
-  };
+  if (typeof window !== 'undefined') {
+    (window as any).magicDebug = () => {
+      setDebugContext(!debugContext);
+    };
+  }
 
   switch (state.type) {
     case 'landing':
