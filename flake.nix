@@ -79,19 +79,22 @@
             legacyPackages = { inherit pkgs; } // pkgs.circles-pink;
 
             packages = {
-              ci = pkgs.runCommand "ci" { } ''
-                mkdir $out
-                # TODO: make generic with a map for all checks
-                ln -s ${self.checks.${system}.deploy-nixops-example-prebuilt} $out/deploy-nixops-example-prebuilt
-                ln -s ${self.checks.${system}.pursTests} $out/pursTests
-              '';
+              ci =
+                let
+                  inherit (pkgs.lib) mapAttrsToList pipe;
+                  inherit (builtins) concatStringsSep replaceStrings;
+                in
+                pkgs.runCommand "ci" { } ''
+                  mkdir $out
+                  ${pipe self.checks.${system} [(mapAttrsToList (k: v: "ln -s ${v} $out/${replaceStrings ["/"] ["--"] k}")) (concatStringsSep "\n")]}
+                '';
 
               checkouts = pkgs.runCommand "checkouts" { } ''
                 mkdir $out
                 cp -R ${inputs.circles-docker} $out/circles-docker
                 chmod -R +w $out
                 mv $out/circles-docker/.env.example $out/circles-docker/.env
-                
+
                 cp -R ${inputs.circles-toolbelt} $out/circles-toolbelt
               '';
             };
@@ -148,14 +151,15 @@
                 # Change the prompt to show that you are in a devShell
                 shellHook = ''
                   . ${pkgs.complete-alias}/bin/complete_alias
-              
-                  REPO_ROOT=$PWD
-                  export EDITOR=codium
+
+                  REPO_ROOT = $PWD
+                  export
+                  EDITOR=codium
 
                   alias code=codium
                   alias mk=make
                   alias cd-root="cd $REPO_ROOT"
-              
+
                   complete -F _complete_alias mk
                   complete -F _complete_alias code
 
@@ -242,8 +246,8 @@
                       inherit (pkgs.lib) concatMapStringsSep;
                       packageJsonUrl = "https://raw.githubusercontent.com/circles-pink/circles-pink/main/package.json";
                       publish = pkgs.writeShellScriptBin "publish" ''
-                        DIR="$1"  
-                        ${pkgs.nodePackages.npm}/bin/npm publish --verbose --access public $DIR/
+                        DIR = "$1"
+                          ${pkgs.nodePackages.npm}/bin/npm publish --verbose --access public $DIR/
                       '';
                       inherit (pkgs.circles-pink.ts) publicWorkspaces;
                     in
@@ -252,12 +256,12 @@
                       CURRENT_VERSION=`${pkgs.curl}/bin/curl https://registry.npmjs.org/@circles-pink/web-client | ${pkgs.jq}/bin/jq '."dist-tags".latest'`
 
                       if [ "$CURRENT_VERSION" == "$NEW_VERSION" ]
-                        then
-                          echo "Nothing to release."
-                          exit 0
+                      then
+                      echo "Nothing to release."
+                      exit 0
                       fi
 
-                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ${ws}") (attrValues publicWorkspaces)}    
+                      ${concatMapStringsSep "\n" (ws: "${publish}/bin/publish ${ws}") (attrValues publicWorkspaces)}
                     '';
 
                   secretsMap = {
@@ -270,3 +274,4 @@
     in
     perSystem // general;
 }
+
