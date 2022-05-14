@@ -20,6 +20,12 @@ GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://l
 
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
 
+default:
+	nix build .#ci --out-link result-ci
+
+nix-safe-collect-garbage: default
+	nix-collect-garbage
+
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
 
@@ -106,7 +112,6 @@ run-garden_:
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
-
 
 # All Makefile tasks
 

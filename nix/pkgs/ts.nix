@@ -240,6 +240,7 @@ rec {
       export STORYBOOK_GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
       cd $tmp/build/libexec/storybook/deps/storybook
 
+      # node_modules need to be writeable, because storybook inevitably writes its cache in there!
       cp -r node_modules/ node_modules2
       rm -rf node_modules
       mv node_modules2 node_modules
