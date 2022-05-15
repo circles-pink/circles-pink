@@ -20,17 +20,14 @@ GARDEN_SAFE_MASTER_ADDRESS := env_var_or_default("GARDEN_SAFE_MASTER_ADDRESS", "
 GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://localhost:8545")
 
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
-# a
-default: nix-prepare
+
+default:
 	nix build .#ci --out-link results/ci/result
 
 # This is not perfect yet. After running this a rebuild is instant. However, if a change is made to the codebase parts need to be rebuilt.
 # We don't know the reasons yet.
 nix-not-yet-fully-safe-collect-garbage: default
 	nix-collect-garbage
-
-nix-prepare:
-	[ "{{CIRCLES_DEV_OS}}" == "ubuntu" ] && ulimit -n 200000
 
 version:
 	cat package.json | jq '.version'
