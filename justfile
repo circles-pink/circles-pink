@@ -3,6 +3,7 @@ set dotenv-load
 export PATH := "./node_modules/.bin:" + env_var('PATH')
 
 CIRCLES_DEV := env_var_or_default('CIRCLES_DEV', 'dev')
+CIRCLES_DEV_OS := env_var_or_default('CIRCLES_DEV_OS', '')
 CIRCLES_TOOLBELT_PATH := env_var_or_default('CIRCLES_TOOLBELT_PATH', 'checkouts/circles-toolbelt')
 GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
 
@@ -20,11 +21,17 @@ GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://l
 
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
 
-default:
-	nix build .#ci --out-link result-ci
+default: nix-prepare
+	nix build .#ci --out-link results/ci/result
 
 nix-safe-collect-garbage: default
 	nix-collect-garbage
+
+nix-prepare:
+	[ "{{CIRCLES_DEV_OS}}" == "ubuntu" ] && ulimit -n 200000
+
+version:
+	cat package.json | jq '.version'
 
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json

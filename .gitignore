@@ -18,3 +18,4 @@ checkouts/
 account-report.json
 # solid state db from gun
 radata
+results/
