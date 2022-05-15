@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## [1.0.26]
+
+### Added
+
+- Just task that does a nix-collect-garbage without deleting currently needed derivations.
+- Just default task that does a full ci build and keeps the result in an out-link
+- Run the default task on every `branchless-get` and `branchless-put`
+
+### Changed
+
+- Move nix dev-shell to separate file.
+
 ## [1.0.25]
 
 ### Added
@@ -29,6 +41,7 @@ Please add new entries below.
 ### Changed
 
 - Bundling with Babel 7 to transpile and resolve the twin webpack macros
+- Publish web-client from babel built
 
 ## [1.0.15]
 
