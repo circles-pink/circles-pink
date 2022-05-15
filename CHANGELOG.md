@@ -8,9 +8,8 @@ Please add new entries below.
 
 ### Added
 
-- Just task that does a nix-collect-garbage without deleting currently needed derivations.
+- Just task that does a nix-collect-garbage without deleting currently needed derivations. DOes not yet work 100%.
 - Just default task that does a full ci build and keeps the result in an out-link
-- Run the default task on every `branchless-get` and `branchless-put`
 
 ### Changed
 
