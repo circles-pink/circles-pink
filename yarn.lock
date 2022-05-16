@@ -2146,10 +2146,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@circles/core@^2.10.10":
-  version "2.10.11"
-  resolved "https://registry.yarnpkg.com/@circles/core/-/core-2.10.11.tgz#f48fd9865c65cd1c0f90ca2c79a58193d3d1aed1"
-  integrity sha512-dd1ceRbUklvs/uM+jLz9ypjQDNuFbvnmkbD9FO/Kw/xlGjPy6sPpqszvaronmIlnflGy3eYSEIrFMxgvcinV7w==
+"@circles/core@2.10.10":
+  version "2.10.10"
+  resolved "https://registry.yarnpkg.com/@circles/core/-/core-2.10.10.tgz#c53c5ed96738b481d99223267a1278c32030b3af"
+  integrity sha512-0nX3nUSlzdYVPTlXc52x5bzD0ycbM4JLFILbOSHmndXLPAtFGHZZxMvQlIDIquC0+79ZLnFaXtKZAH7gFObsvQ==
   dependencies:
     "@babel/runtime" "^7.11.2"
     "@circles/safe-contracts" "^1.0.17"
