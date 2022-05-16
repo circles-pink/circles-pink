@@ -32,7 +32,7 @@ type Language = 'en' | 'de';
 
 type Content = {};
 
-type OnboardingProps = {
+export type OnboardingProps = {
   initState?: CirclesState;
   lang?: Language;
   baseColor?: string;
