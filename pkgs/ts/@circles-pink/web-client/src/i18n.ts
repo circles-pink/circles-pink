@@ -78,6 +78,11 @@ export const resources = {
         trustNetworkTitle: 'Trust Network',
         exploreTitle: 'Explore',
         trustList: {
+          tableHead: {
+            user: 'User',
+            relation: 'Relation',
+            action: 'Action',
+          },
           untrust: 'Untrust {{user}}',
           trust: 'Trust {{user}}',
           send: 'Send to {{user}}',
@@ -171,10 +176,15 @@ export const resources = {
         sendButton: 'Senden',
         receiveButton: 'Empfangen',
         searchButton: 'Suchen',
-        trustNetworkTitle: 'Vertrauensnetzwerk',
+        trustNetworkTitle: 'Trust Netzwerk',
         exploreTitle: 'Erkunden',
         sendClaim: 'Circles überweisen',
         trustList: {
+          tableHead: {
+            user: 'User:in',
+            relation: 'Verbindung',
+            action: 'Aktionen',
+          },
           untrust: '{{user}} nicht mehr vertrauen',
           trust: 'Vertraue {{user}}',
           send: 'Circles an {{user}} senden',

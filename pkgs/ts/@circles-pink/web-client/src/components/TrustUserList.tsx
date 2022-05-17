@@ -17,18 +17,10 @@ import {
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
-import {
-  JustifyAroundCenter,
-  JustifyBetweenCenter,
-  JustifyStartCenter,
-} from './helper';
+import { JustifyBetweenCenter, JustifyStartCenter } from './helper';
 import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
 import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
-import {
-  TrustAddResult,
-  TrustRemoveResult,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
   ErrTrustAddConnectionResolved,
@@ -68,12 +60,16 @@ export const TrustUserList = (props: TrustUserListProps) => {
           {content.length > 0 && (
             <TableHeader>
               <TableRow theme={theme}>
-                <TableHead>User</TableHead>
+                <TableHead>{t('dashboard.trustList.tableHead.user')}</TableHead>
                 <TableHead>
-                  <JustifyAround>Relation</JustifyAround>
+                  <JustifyAround>
+                    {t('dashboard.trustList.tableHead.relation')}
+                  </JustifyAround>
                 </TableHead>
                 <TableHead>
-                  <JustifyAround>Action</JustifyAround>
+                  <JustifyAround>
+                    {t('dashboard.trustList.tableHead.action')}
+                  </JustifyAround>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -137,13 +133,13 @@ const ContentRow = (
             path={c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel}
             size={1.6}
             color={c.isIncoming ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelationReceivable(c.isIncoming, c.username)}
+            data-tip={mapToolTipRelRec(c.isIncoming, c.username)}
           />
           <Icon
             path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
             size={1.6}
             color={c.isOutgoing ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelationSendable(c.isOutgoing, c.username)}
+            data-tip={mapToolTipRelSend(c.isOutgoing, c.username)}
           />
         </JustifyBetweenCenter>
       </TableData>
@@ -172,11 +168,9 @@ const ContentRow = (
             <Clickable
               clickable={true}
               onClick={() => {
-                if (!c.isIncoming) {
-                  addTrust(addrToString(c.safeAddress));
-                } else {
-                  removeTrust(addrToString(c.safeAddress));
-                }
+                !c.isIncoming
+                  ? addTrust(addrToString(c.safeAddress))
+                  : removeTrust(addrToString(c.safeAddress));
               }}
             >
               <Icon
@@ -193,56 +187,6 @@ const ContentRow = (
       </TableData>
     </TableRow>
   );
-};
-
-// -----------------------------------------------------------------------------
-// Util
-// -----------------------------------------------------------------------------
-
-const trustIsLoading = (
-  result: RemoteReport<ErrTrustAddConnectionResolved, string>
-) => {
-  switch (result.type) {
-    case 'loading':
-      return true;
-    default:
-      return false;
-  }
-};
-
-// -----------------------------------------------------------------------------
-// Tooltip mapping
-// -----------------------------------------------------------------------------
-
-const replaceUsername = (str: string, user: string) =>
-  str.replace(/{{user}}/, user);
-
-const mapToolTipTrust = (trusted: boolean, user: string) => {
-  if (trusted) {
-    return replaceUsername(t('dashboard.trustList.untrust'), user);
-  }
-  return replaceUsername(t('dashboard.trustList.trust'), user);
-};
-
-const mapToolTipSend = (sendable: boolean, user: string) => {
-  if (sendable) {
-    return replaceUsername(t('dashboard.trustList.send'), user);
-  }
-  return replaceUsername(t('dashboard.trustList.canNotSend'), user);
-};
-
-const mapToolTipRelationSendable = (sendable: boolean, user: string) => {
-  if (sendable) {
-    return replaceUsername(t('dashboard.trustList.relationSendable'), user);
-  }
-  return replaceUsername(t('dashboard.trustList.relationNotSendable'), user);
-};
-
-const mapToolTipRelationReceivable = (receivable: boolean, user: string) => {
-  if (receivable) {
-    return replaceUsername(t('dashboard.trustList.relationReceivable'), user);
-  }
-  return replaceUsername(t('dashboard.trustList.relationNotReceivable'), user);
 };
 
 // -----------------------------------------------------------------------------
@@ -293,3 +237,49 @@ const Clickable = styled.div<ClickableProps>(({ clickable }) => [
 const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
 const JustifyAround = tw.div`flex justify-around`;
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const trustIsLoading = (
+  result: RemoteReport<ErrTrustAddConnectionResolved, string>
+) => {
+  switch (result.type) {
+    case 'loading':
+      return true;
+    default:
+      return false;
+  }
+};
+
+// -----------------------------------------------------------------------------
+// Tooltip mapping
+// -----------------------------------------------------------------------------
+
+const replaceUsername = (str: string, username: string) =>
+  str.replace(/{{user}}/, username);
+
+const mapToolTipTrust = (trusted: boolean, username: string) => {
+  trusted
+    ? replaceUsername(t('dashboard.trustList.untrust'), username)
+    : replaceUsername(t('dashboard.trustList.trust'), username);
+};
+
+const mapToolTipSend = (sendable: boolean, username: string) => {
+  sendable
+    ? replaceUsername(t('dashboard.trustList.send'), username)
+    : replaceUsername(t('dashboard.trustList.canNotSend'), username);
+};
+
+const mapToolTipRelSend = (sendable: boolean, username: string) => {
+  sendable
+    ? replaceUsername(t('dashboard.trustList.relationSendable'), username)
+    : replaceUsername(t('dashboard.trustList.relationNotSendable'), username);
+};
+
+const mapToolTipRelRec = (receivable: boolean, username: string) => {
+  receivable
+    ? replaceUsername(t('dashboard.trustList.relationReceivable'), username)
+    : replaceUsername(t('dashboard.trustList.relationNotReceivable'), username);
+};

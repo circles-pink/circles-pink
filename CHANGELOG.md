@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## Unrelesed
+
+### Added
+
+- Add tooltip for dashboard actions
+- Add translations for hardcoded placeholders
+
+### Changed
+
+- Better responsive Dashboard styling
+- Refactor GunDB bindings to arrow functions and remove unused cancelers
+- Fix border-box for storybook and npm package
+
+## [1.0.24]
+
+### Changed
+
+- Tweak UI for first integration demo
+
+## [1.0.21]
+
+### Changed
+
+- Bundling with Babel 7 to transpile and resolve the twin webpack macros
+
 ## [1.0.15]
 
 ### Changed
