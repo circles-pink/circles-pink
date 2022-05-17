@@ -26,7 +26,7 @@ import { AnimProvider } from '../context/anim';
 import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
-import { css, styled } from 'twin.macro';
+import tw, { css, styled } from 'twin.macro';
 
 type Language = 'en' | 'de';
 
@@ -125,8 +125,13 @@ const OnboardingContent = ({
 // -----------------------------------------------------------------------------
 
 const Frame = styled.div(() => [
+  tw`box-border`,
   css`
-    box-sizing: border-box;
-    font-family: sans-serif;
+    * {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
   `,
 ]);
