@@ -31,11 +31,12 @@ trusts env =
       task = do
         safeStatus <- env.getSafeStatus st.privKey
         isReady' <- readyForDeployment env st.privKey
-        pure { safeStatus, isReady: isReady' }
+        trusts' <- env.trustGetNetwork st.privKey
+        pure { safeStatus, isReady: isReady', trusts: trusts' }
     results <- run' task
     case results of
       Left e -> set \st' -> S._trusts st' { trustsResult = _failure e }
-      Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady }
+      Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady, trusts = r.trusts }
 
   finalizeRegisterUser set st _ = do
     set \st' -> S._trusts st' { trustsResult = _loading unit }

@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext, useState } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { DebugContext } from '../context/debug';
 import { ThemeContext } from '../context/theme';
