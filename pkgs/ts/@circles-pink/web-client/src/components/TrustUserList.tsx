@@ -3,6 +3,7 @@ import tw, { css, styled } from 'twin.macro';
 import { TrustNode } from '@circles-pink/state-machine/output/CirclesCore';
 import { Theme } from '../context/theme';
 import { Claim } from './text';
+import ReactTooltip from 'react-tooltip';
 import {
   mdiAccountArrowLeft,
   mdiAccountArrowRight,
@@ -32,6 +33,7 @@ import {
   DefaultView,
   ErrTrustAddConnectionResolved,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { t } from 'i18next';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -67,16 +69,9 @@ export const TrustUserList = (props: TrustUserListProps) => {
             <TableHeader>
               <TableRow theme={theme}>
                 <TableHead>User</TableHead>
-                {/* <TableHead>Safe Address</TableHead> */}
                 <TableHead>
-                  <JustifyAround>Receivable</JustifyAround>
+                  <JustifyAround>Relation</JustifyAround>
                 </TableHead>
-                <TableHead>
-                  <JustifyAround>Sendable</JustifyAround>
-                </TableHead>
-                {/* <TableHead>
-                <JustifyAround>Transferable</JustifyAround>
-              </TableHead> */}
                 <TableHead>
                   <JustifyAround>Action</JustifyAround>
                 </TableHead>
@@ -135,28 +130,23 @@ const ContentRow = (
           <b>{c.username}</b>
         </JustifyStartCenter>
       </TableData>
-      {/* <TableData>{c.safeAddress}</TableData> */}
       <TableData>
-        <JustifyAroundCenter>
+        <ReactTooltip />
+        <JustifyBetweenCenter>
           <Icon
             path={c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel}
             size={1.6}
             color={c.isIncoming ? theme.baseColor : 'white'}
+            data-tip={mapToolTipRelationReceivable(c.isIncoming, c.username)}
           />
-        </JustifyAroundCenter>
-      </TableData>
-      <TableData>
-        <JustifyAroundCenter>
           <Icon
             path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
             size={1.6}
             color={c.isOutgoing ? theme.baseColor : 'white'}
+            data-tip={mapToolTipRelationSendable(c.isOutgoing, c.username)}
           />
-        </JustifyAroundCenter>
+        </JustifyBetweenCenter>
       </TableData>
-      {/* <TableData>
-            <JustifyAround>y €</JustifyAround>
-          </TableData> */}
       <TableData>
         <JustifyBetweenCenter>
           <Clickable
@@ -174,6 +164,7 @@ const ContentRow = (
               path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
               size={1.75}
               color={c.isOutgoing ? theme.baseColor : 'white'}
+              data-tip={mapToolTipSend(c.isOutgoing, c.username)}
             />
           </Clickable>
 
@@ -192,6 +183,7 @@ const ContentRow = (
                 path={c.isIncoming ? mdiHeart : mdiHeartOutline}
                 size={1.5}
                 color={c.isIncoming ? theme.baseColor : 'white'}
+                data-tip={mapToolTipTrust(c.isIncoming, c.username)}
               />
             </Clickable>
           ) : (
@@ -219,6 +211,41 @@ const trustIsLoading = (
 };
 
 // -----------------------------------------------------------------------------
+// Tooltip mapping
+// -----------------------------------------------------------------------------
+
+const replaceUsername = (str: string, user: string) =>
+  str.replace(/{{user}}/, user);
+
+const mapToolTipTrust = (trusted: boolean, user: string) => {
+  if (trusted) {
+    return replaceUsername(t('dashboard.trustList.untrust'), user);
+  }
+  return replaceUsername(t('dashboard.trustList.trust'), user);
+};
+
+const mapToolTipSend = (sendable: boolean, user: string) => {
+  if (sendable) {
+    return replaceUsername(t('dashboard.trustList.send'), user);
+  }
+  return replaceUsername(t('dashboard.trustList.canNotSend'), user);
+};
+
+const mapToolTipRelationSendable = (sendable: boolean, user: string) => {
+  if (sendable) {
+    return replaceUsername(t('dashboard.trustList.relationSendable'), user);
+  }
+  return replaceUsername(t('dashboard.trustList.relationNotSendable'), user);
+};
+
+const mapToolTipRelationReceivable = (receivable: boolean, user: string) => {
+  if (receivable) {
+    return replaceUsername(t('dashboard.trustList.relationReceivable'), user);
+  }
+  return replaceUsername(t('dashboard.trustList.relationNotReceivable'), user);
+};
+
+// -----------------------------------------------------------------------------
 // UI / Frame
 // -----------------------------------------------------------------------------
 
@@ -227,7 +254,7 @@ type FameProps = {
 };
 
 const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
-  tw`block p-8 border border-gray-800 shadow-xl rounded-xl`,
+  tw`block lg:p-8 md:p-8 p-4 border border-gray-800 shadow-xl rounded-xl`,
   css`
     background-color: ${theme.lightColor};
   `,
@@ -239,10 +266,10 @@ const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
 
 const TableContainer = tw.div`overflow-hidden overflow-x-auto border border-gray-100 rounded`;
 const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
-const TableHeader = tw.thead`px-4 py-2 lg:text-lg text-left whitespace-nowrap`;
-const TableHead = tw.th`px-4 py-2 text-left whitespace-nowrap`;
+const TableHeader = tw.thead`lg:px-4 md:px-4 px-2 lg:text-lg md:text-lg text-left whitespace-nowrap`;
+const TableHead = tw.th`lg:px-4 md:px-4 px-2 text-left whitespace-nowrap`;
 const TableBody = tw.tbody`divide-y divide-gray-100`;
-const TableData = tw.td`px-4 py-2 text-lg whitespace-nowrap`;
+const TableData = tw.td`lg:px-4 md:px-4 px-2 py-2 text-lg whitespace-nowrap`;
 
 type TableRowProps = {
   theme: Theme;

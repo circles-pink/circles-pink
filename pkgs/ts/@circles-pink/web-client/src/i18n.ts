@@ -69,10 +69,6 @@ export const resources = {
         fundYourSafe: 'Or fund your Safe with xDai. Your Safe Address is:',
       },
       dashboard: {
-        claim: 'Hey there!',
-        greet: 'Hello',
-        subClaim:
-          'This is your Dashboard, grow your trust network or pay with Circles!',
         addTrustPlaceholder: 'Address of a person you want to trust',
         debugTitle: 'Dashboard actions for testing:',
         sendButton: 'Send',
@@ -81,6 +77,16 @@ export const resources = {
         searchButton: 'Search',
         trustNetworkTitle: 'Trust Network',
         exploreTitle: 'Explore',
+        trustList: {
+          untrust: 'Untrust {{user}}',
+          trust: 'Trust {{user}}',
+          send: 'Send to {{user}}',
+          canNotSend: 'You can not send to {{user}}',
+          relationSendable: '{{user}} accepts your Circles',
+          relationNotSendable: '{{user}} does not accept your Circles',
+          relationReceivable: 'You accept Circles from {{user}}',
+          relationNotReceivable: 'You do not accept Circles from {{user}}',
+        },
       },
       debug: {
         claim: 'Internal tools',
@@ -159,10 +165,6 @@ export const resources = {
           'Oder funde deinen Safe mit xDai. Deine Safe Adresse lautet:',
       },
       dashboard: {
-        claim: 'Hallöchen!',
-        greet: 'Hallo',
-        subClaim:
-          'Dies ist dein Dashboard. Bau dein Netzwerk aus oder zahle mit Circles!',
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
         debugTitle: 'Dashboard actions zum ausprobieren:',
@@ -172,6 +174,16 @@ export const resources = {
         trustNetworkTitle: 'Vertrauensnetzwerk',
         exploreTitle: 'Erkunden',
         sendClaim: 'Circles überweisen',
+        trustList: {
+          untrust: '{{user}} nicht mehr vertrauen',
+          trust: 'Vertraue {{user}}',
+          send: 'Circles an {{user}} senden',
+          canNotSend: 'Du kannst keine Circles an {{user}} senden',
+          relationSendable: '{{user}} akzeptiert deine Circles',
+          relationNotSendable: '{{user}} akzeptiert deine Circles nicht',
+          relationReceivable: 'Du akzeptierst Circles von {{user}}',
+          relationNotReceivable: 'Du akzeptierst Circles von {{user}} nicht',
+        },
       },
       debug: {
         claim: 'Interne tools',

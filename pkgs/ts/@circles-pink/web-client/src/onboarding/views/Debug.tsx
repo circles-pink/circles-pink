@@ -11,6 +11,7 @@ import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { TwoButtonRow } from '../../components/helper';
+import tw, { css, styled } from 'twin.macro';
 
 type DebugProps = {
   state: DebugState;
@@ -23,46 +24,64 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   return (
-    <DialogCard
-      text={
-        <Text>
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim color={theme.baseColor}>{t('debug.claim')}</Claim>
-          </FadeIn>
+    <Frame>
+      <DialogCard
+        text={
+          <Text>
+            <FadeIn orientation={orientation} delay={getDelay()}>
+              <Claim color={theme.baseColor}>{t('debug.claim')}</Claim>
+            </FadeIn>
 
+            <FadeIn orientation={orientation} delay={getDelay()}>
+              <SubClaim>{t('debug.subClaim')}</SubClaim>
+            </FadeIn>
+          </Text>
+        }
+        interaction={
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>{t('debug.subClaim')}</SubClaim>
+            <Input
+              autoFocus
+              // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
+              type="text"
+              value={state.magicWords}
+              placeholder={t('debug.magicWordsPlaceholder')}
+              onChange={e => act(A._debug(A._setMagicWords(e.target.value)))}
+              onKeyPress={e =>
+                e.key === 'Enter' && act(A._debug(A._coreToWindow(unit)))
+              }
+            />
           </FadeIn>
-        </Text>
-      }
-      interaction={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <Input
-            autoFocus
-            // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
-            type="text"
-            value={state.magicWords}
-            placeholder={t('debug.magicWordsPlaceholder')}
-            onChange={e => act(A._debug(A._setMagicWords(e.target.value)))}
-            onKeyPress={e =>
-              e.key === 'Enter' && act(A._debug(A._coreToWindow(unit)))
-            }
-          />
-        </FadeIn>
-      }
-      control={
-        <FadeIn orientation={orientation} delay={getDelay()}>
-          <TwoButtonRow>
-            <Button
-              color={theme.baseColor}
-              onClick={() => act(A._debug(A._coreToWindow(unit)))}
-            >
-              {t('debugButton')}
-            </Button>
-          </TwoButtonRow>
-        </FadeIn>
-      }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
-    />
+        }
+        control={
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <TwoButtonRow>
+              <Button
+                color={theme.baseColor}
+                onClick={() => act(A._debug(A._coreToWindow(unit)))}
+              >
+                {t('debugButton')}
+              </Button>
+            </TwoButtonRow>
+          </FadeIn>
+        }
+        debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      />
+    </Frame>
   );
 };
+
+// -----------------------------------------------------------------------------
+// UI Frame
+// -----------------------------------------------------------------------------
+
+const Frame = styled.div(() => [
+  tw`box-border`,
+  css`
+    * {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+      font-family: sans-serif;
+    }
+  `,
+]);
