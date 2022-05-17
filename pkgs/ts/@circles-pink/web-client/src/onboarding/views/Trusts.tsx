@@ -1,12 +1,15 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext } from 'react';
+import React, { ReactElement, useContext, useEffect } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { TrustState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  TrustState,
+  _trusts,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -36,6 +39,14 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
+
+  useEffect(() => {
+    const safeStatus = setInterval(
+      () => act(_trusts(A._getSafeStatus(unit))),
+      5000
+    );
+    return () => clearInterval(safeStatus);
+  }, []);
 
   return (
     <DialogCard
@@ -185,4 +196,4 @@ const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4 gap-4`;
 const TrustIndicatorRow = tw.div`flex flex-row justify-between mx-16 mb-4 gap-4`;
 const CenterText = tw.div`text-center`;
 const CenterElement = tw.div`flex justify-around`;
-const Text = tw.p`mt-4 text-lg font-medium text-gray-500`;
+const Text = tw.div`mt-4 text-lg font-medium text-gray-500`;
