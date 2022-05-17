@@ -132,8 +132,9 @@ export const resources = {
       },
       askUsername: {
         claim: 'Wie möchtest du dich nennen?',
-        subClaim: 'Überlege gut, du kannst den Namen später nicht mehr ändern!',
-        usernamePlaceholder: 'Dein wunderschöner Nutzername',
+        subClaim:
+          'Das ist der Name, mit dem du im Circles Netzwerk gefunden wirst. Überlege gut, du kannst den Namen später nicht mehr ändern!',
+        usernamePlaceholder: 'Dein einzigartiger Nutzername',
       },
       askEmail: {
         claim: 'Wie möchtest du kontaktiert werden?',
@@ -145,29 +146,32 @@ export const resources = {
       infoSecurity: {
         claim: 'Gleich erhälst du deinen persönlichen Schlüssel',
         subClaim:
-          'Damit hast du Zugang zum Circles Vertrauensnetzwerk und kannst als einer der ersten das Grundeinkommen auf der Blockchain testen!',
+          'Dieser Schlüssel ist deine Eintrittskarte ins Circles Netzwerk. Damit kannst du dein Vertrauensnetzwerk aufbauen und als einer der ersten das Grundeinkommen auf der Blockchain testen!',
       },
       magicWords: {
         claim: 'Der eine Schlüssel...',
         subClaim1:
           'Schreibe dir diese Worte am besten auf ein Blatt Papier, oder speichere sie an einem sicheren Ort.',
-        subClaim2: 'Damit kannst du deine Wallet immer wiederherstellen.',
+        subClaim2:
+          'Wenn du sie verlierst, dann kann dein Account nicht wiederhergestellt werden. All deine Vertrauensbeziehungen sind damit dann unzugänglich.',
         copyBtn: 'In die Zwischenablage kopieren',
         copiedInfo: 'Kopiert!',
         newPhraseBtn: 'Neuen Schlüssel generieren',
       },
       submit: {
         claim: 'Diese Daten hast du angegeben',
-        subClaim: 'Wenn alles stimmt kannst du sie abschicken.',
+        subClaim:
+          'Wenn alles stimmt kannst du sie abschicken. Damit ist dein Nutzername dann vorgemerkt. Wie du deinen Account aktivierst, erfährst du im nächsten Schritt.',
       },
       trusts: {
         claim: 'Hallöchen!',
         greet: 'Hallo',
         subClaim:
-          'Dein Account ist noch nicht aktiviert. Folge den Anweisungen um ihn freizuschalten!',
-        getMoreTruts: 'Sammle mindestens drei Trusts von Circles User:innen',
+          'Dein Account ist noch nicht aktiviert. Da Interkationen mit deinem Vertrauensnetzwerk in die Blockchain geschrieben werden, was prinzipiell nicht kostenlos sind, brauchst du drei Trusts von Nutzer:innen, die bereits im Circles Netzwerk sind. Natürlich musst du diese Transaktionen nicht selber zahlen, aber es muss ausgeschlossen sein, dass Bots sich diverse Accounts anlegen.',
+        getMoreTruts:
+          'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen, oder lass sie diesen Code scannen.',
         fundYourSafe:
-          'Oder funde deinen Safe mit xDai. Deine Safe Adresse lautet:',
+          'Oder funde deine Wallet mit mindestens einem xDai. Das ist deine Safe Adresse, wenn sie mit mindestens einem Euro gefunded ist, kannst du die Registrierung abschließen.',
       },
       dashboard: {
         addTrustPlaceholder:
