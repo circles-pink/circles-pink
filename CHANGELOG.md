@@ -10,6 +10,7 @@ Please add new entries below.
 
 - Add tooltip for dashboard actions
 - Add translations for hardcoded placeholders
+- Fetch trusts in trust screen
 
 ### Changed
 
