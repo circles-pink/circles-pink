@@ -166,7 +166,7 @@ dashboard env =
         _ <-
           run (env.trustGetNetwork st.privKey)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-            # retryUntil env (const { delay: 500 }) (\_ n -> n == 5) 0
+            # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
             # ExceptT
         pure unit
 
@@ -181,7 +181,7 @@ dashboard env =
         _ <-
           run (env.trustGetNetwork st.privKey)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-            # retryUntil env (const { delay: 500 }) (\_ n -> n == 5) 0
+            # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
             # ExceptT
         pure unit
 
@@ -192,7 +192,6 @@ dashboard env =
           run (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
-            
             # ExceptT
         checkPayout <-
           run (env.checkUBIPayout st.privKey st.user.safeAddress)
