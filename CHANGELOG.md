@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
-## Unrelesed
+## [1.0.25]
 
 ### Added
 
