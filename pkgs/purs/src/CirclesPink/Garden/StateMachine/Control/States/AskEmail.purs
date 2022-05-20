@@ -1,28 +1,27 @@
 module CirclesPink.Garden.StateMachine.Control.States.AskEmail where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run)
+
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans)
+import Control.Monad.Except (runExceptT)
 import Data.Either (Either(..))
 import Data.Newtype (unwrap)
 import Data.Variant (default, onMatch)
 import RemoteData (RemoteData, _failure, _loading, _success)
 
 askEmail
-  :: forall t m
+  :: forall m
    . Monad m
-  => MonadTrans t
-  => Monad (t m)
   => Env.Env m
-  -> { prev :: ActionHandler t m Unit S.UserData ("askUsername" :: S.UserData)
-     , setEmail :: ActionHandler t m String S.UserData ("askEmail" :: S.UserData)
-     , setTerms :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData)
-     , setPrivacy :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData)
-     , next :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData, "infoSecurity" :: S.UserData)
+  -> { prev :: ActionHandler' m Unit S.UserData ("askUsername" :: S.UserData)
+     , setEmail :: ActionHandler' m String S.UserData ("askEmail" :: S.UserData)
+     , setTerms :: ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData)
+     , setPrivacy :: ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData)
+     , next :: ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData, "infoSecurity" :: S.UserData)
      }
 askEmail env =
   { prev: \set _ _ -> set \st -> S._askUsername st { direction = D._backwards }
@@ -48,7 +47,7 @@ askEmail env =
   setEmail set _ email = do
     set \st -> S._askEmail st { email = email }
     set \st -> S._askEmail st { emailApiResult = _loading unit :: RemoteData Unit Unit CirclesError { isValid :: Boolean } }
-    result <- run $ env.apiCheckEmail email
+    result <- runExceptT $ env.apiCheckEmail email
     set \st ->
       if email == st.email then case result of
         Left e -> S._askEmail st { emailApiResult = _failure e }
