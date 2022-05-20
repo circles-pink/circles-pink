@@ -10,6 +10,9 @@ Please add new entries below.
 
 - Just task that does a nix-collect-garbage without deleting currently needed derivations. DOes not yet work 100%.
 - Just default task that does a full ci build and keeps the result in an out-link
+- Refactor control modules
+- Sync trusts with mapping in state-machine
+- Implement trusts in Frontend
 
 ### Changed
 
