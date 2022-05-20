@@ -91,7 +91,7 @@ export const Send = ({
       <JustifyEnd>
         <Button
           prio={'high'}
-          color={theme.baseColor}
+          theme={theme}
           state={mapResult(state.transferResult)}
           icon={mdiCashFast}
           onClick={() => transact()}

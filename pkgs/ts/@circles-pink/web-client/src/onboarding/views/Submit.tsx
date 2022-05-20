@@ -52,7 +52,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
           <TwoButtonRow>
             <Button
               prio={'medium'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._submit(A._prev(unit)))}
             >
               {t('prevButton')}
@@ -60,7 +60,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
 
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               state={mapResult(state.submitResult)}
               onClick={() => act(A._submit(A._submit(unit)))}
             >

@@ -4,7 +4,7 @@
 
 var Gun = require("gun");
 
-exports.syncWithPeer = (url) => () => Gun(url);
+exports.syncWithPeer = (url) => () => new Gun(url);
 
 exports._on = (ctx) => (onErr, onSucc) => {
   try {
@@ -16,9 +16,9 @@ exports._on = (ctx) => (onErr, onSucc) => {
   }
 };
 
-exports.syncWithPeers = (urls) => () => Gun(urls);
+exports.syncWithPeers = (urls) => () => new Gun(urls);
 
-exports.offline = () => Gun();
+exports.offline = () => new Gun();
 
 exports._getOnGunDb = (pathElements) => (ctx) => {
   var arrayLength = pathElements.length;

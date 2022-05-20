@@ -1,7 +1,7 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { DebugContext } from '../context/debug';
-import { ThemeContext } from '../context/theme';
+import { Theme, ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
 // DialogCard
@@ -29,7 +29,7 @@ export const DialogCard = ({
 
   return (
     <>
-      <Frame borderColor={theme.baseColor}>
+      <Frame theme={theme}>
         <Header>{header}</Header>
         <CardHead>
           <IntroContent>
@@ -53,13 +53,14 @@ export const DialogCard = ({
 // -----------------------------------------------------------------------------
 
 type FrameProps = {
-  borderColor: string;
+  theme: Theme;
 };
 
 const Frame = styled.div((props: FrameProps) => [
-  tw`bg-gray-50 border border-dotted`,
+  tw`border border-dotted`,
   css`
-    border-color: ${props.borderColor};
+    border-color: ${props.theme.baseColor};
+    background-color: ${props.theme.bgColor};
   `,
 ]);
 

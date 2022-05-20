@@ -1,3 +1,3 @@
-import { styled } from 'twin.macro';
+import tw, { styled } from 'twin.macro';
 
-export const Text = styled.h2(() => [`text-gray-900 mb-2`]);
+export const Text = styled.span(() => [tw`text-gray-900 mb-2`]);

@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 import { LoadingCircles } from '../LoadingCircles';
 import { JustifyAroundCenter } from '../helper';
 import Icon from '@mdi/react';
+import { defaultTheme, Theme } from '../../context/theme';
 
 // -----------------------------------------------------------------------------
 // UI / Button
@@ -14,7 +15,7 @@ export type ButtonPrio = 'high' | 'medium' | 'low';
 export type ButtonState = 'disabled' | 'loading' | 'enabled';
 
 type ButtonProps = {
-  color?: string;
+  theme?: Theme;
   fullWidth?: boolean;
   state?: ButtonState;
   children?: ReactNode;
@@ -25,12 +26,12 @@ type ButtonProps = {
 
 export const Button = (props_: ButtonProps) => {
   const props = normalizeProps(props_);
-  const buttonColor = mapLoadingColor(props.prio, props.color);
+  const buttonColor = mapLoadingColor(props.prio, props.theme);
 
   return (
     <Button_ {...props}>
       <ButtonContent>
-        <TextWrapper state={props.state}>
+        <TextWrapper state={props.state} theme={props.theme}>
           {props.icon ? (
             <JustifyAroundCenter>
               <ButtonText>{props.children}</ButtonText>
@@ -52,36 +53,33 @@ export const Button = (props_: ButtonProps) => {
 
 type Button_Props = Required<ButtonProps>;
 
-const lightColor = 'white';
-const darkColor = 'black';
-
-const lightGray = '#6e6e6e';
-const darkGray = '#8e8e8e';
-
-const Button_ = styled.button<Button_Props>(({ color, fullWidth, prio }) => {
+const Button_ = styled.button<Button_Props>(({ theme, fullWidth, prio }) => {
   const prioStyles = {
     high: `
-      background: ${color};
-      border: 1px solid ${darken(color)};
-      color: white;
+      background: ${theme.baseColor};
+      border: 1px solid ${darken(theme.baseColor)};
+      color: ${theme.textColorLight};
       &:hover {
-        background: ${darken(color)};
+        background: ${darken(theme.baseColor)};
+        color: ${theme.textColorLight};
       }
     `,
     medium: `
-      background: ${lightGray};
-      border: 1px solid ${lightGray};
-      color: ${lightColor};
+      background: ${theme.darkColor};
+      border: 1px solid ${theme.darkColor};
+      color: ${theme.textColorLight};
       &:hover {
-        background: ${darken(lightGray)};
+        background: ${lighten(theme.darkColor, 0.2)};
+        color: ${theme.textColorLight};
       }
   `,
     low: `
-      background: ${lightColor};
-      border: 1px solid ${lighten(darkGray)};
-      color:  ${darkColor};
+      background: ${theme.lightColor};
+      border: 1px solid ${lighten(theme.darkColor)};
+      color: ${theme.darkColor};
       &:hover {
-        background: ${lighten('#6e6e6e')};
+        background: ${lighten(theme.lightColor, 0.75)};
+        color: ${theme.darkColor};
       }
       `,
   }[prio];
@@ -108,7 +106,7 @@ const ButtonContent = styled.span(() => [tw`flex justify-around items-center`]);
 // UI / TextWrapper
 // -----------------------------------------------------------------------------
 
-type TextWrapperProps = { state: ButtonState };
+type TextWrapperProps = { state: ButtonState; theme: Theme };
 
 const TextWrapper = styled.span<TextWrapperProps>(props => [
   css`
@@ -141,7 +139,7 @@ const Loading = ({ color }: LoadingProps) => {
 const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
   return {
     state: props.state || 'enabled',
-    color: props.color || 'lime',
+    theme: props.theme || defaultTheme,
     fullWidth: props.fullWidth === undefined ? false : props.fullWidth,
     children: props.children || 'ok',
     onClick: props.onClick || (() => {}),
@@ -150,13 +148,13 @@ const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
   };
 };
 
-const mapLoadingColor = (prio: ButtonPrio, themeColor: string): string => {
+const mapLoadingColor = (prio: ButtonPrio, theme: Theme): string => {
   switch (prio) {
     case 'high':
-      return lighten(themeColor);
+      return lighten(theme.baseColor);
     case 'medium':
-      return lighten(darkColor);
+      return theme.textColorLight;
     case 'low':
-      return darkColor;
+      return theme.darkColor;
   }
 };

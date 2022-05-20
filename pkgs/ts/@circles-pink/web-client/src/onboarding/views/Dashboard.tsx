@@ -225,14 +225,14 @@ export const Dashboard = ({
             <TwoButtonRow>
               <Button
                 prio="high"
-                color={theme.baseColor}
+                theme={theme}
                 icon={mdiCashFast}
                 onClick={() => toggleOverlay('SEND')}
               >
                 {t('dashboard.sendButton')}
               </Button>
               <Button
-                color={theme.baseColor}
+                theme={theme}
                 icon={mdiHandCoin}
                 onClick={() => toggleOverlay('RECEIVE')}
               >
@@ -294,7 +294,7 @@ export const Dashboard = ({
                     <DebugButtonWrapper>
                       <Button
                         prio={'high'}
-                        color={theme.baseColor}
+                        theme={theme}
                         state={mapResult(state.userSearchResult)}
                         onClick={() =>
                           act(A._dashboard(A._userSearch({ query: search })))

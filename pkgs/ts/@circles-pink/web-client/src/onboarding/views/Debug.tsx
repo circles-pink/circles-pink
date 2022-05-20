@@ -56,7 +56,7 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <TwoButtonRow>
               <Button
-                color={theme.baseColor}
+                theme={theme}
                 onClick={() => act(A._debug(A._coreToWindow(unit)))}
               >
                 {t('debugButton')}
