@@ -18,10 +18,12 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ) where
 
 import Prelude
+
 import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Data.Array (any)
 import Data.Map as M
@@ -73,7 +75,7 @@ type Trusts = Array Trust
 
 type Trust =
   { safeAddress :: String
-  , isLoading :: Boolean
+  , trustState :: TrustState
   , isIncoming :: Boolean
   , isOutgoing :: Boolean
   , user :: Nullable User
@@ -81,9 +83,9 @@ type Trust =
 
 mapTrust :: W3.Address /\ D.Trust -> Trust
 mapTrust (a /\ t) =
-  { isLoading: t.isLoading
-  , isIncoming: t.isIncoming
+  { isIncoming: t.isIncoming
   , isOutgoing: t.isOutgoing
+  , trustState: t.trustState
   , safeAddress: show a
   , user: toNullable t.user
   }

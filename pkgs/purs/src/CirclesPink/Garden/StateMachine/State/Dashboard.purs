@@ -22,13 +22,20 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustAddResult
   , TrustGetTrusts
   , TrustRemoveResult
+  , TrustState
   , Trusts
   , UserSearchResult
   , _dashboard
+  , _inSync
+  , _loadingTrust
+  , _loadingUntrust
+  , _pendingTrust
+  , _pendingUntrust
   , initDashboard
   ) where
 
 import Prelude
+
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -67,10 +74,10 @@ type DashboardState =
 type Trusts = Map W3.Address Trust
 
 type Trust =
-  { isLoading :: Boolean
-  , isIncoming :: Boolean
+  { isIncoming :: Boolean
   , isOutgoing :: Boolean
   , user :: Maybe User
+  , trustState :: TrustState
   }
 
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
@@ -175,3 +182,28 @@ _dashboard = inj (Proxy :: _ "dashboard")
 type RemoteDataV_ e a = RemoteData Unit Unit (Variant e) a
 
 type RemoteReportV e a = RemoteReport (Variant e) a
+
+--------------------------------------------------------------------------------
+
+type TrustState = Variant
+  ( inSync :: Unit
+  , loadingTrust :: Unit
+  , loadingUntrust :: Unit
+  , pendingTrust :: Unit
+  , pendingUntrust :: Unit
+  )
+
+_inSync :: forall r. Variant (inSync :: Unit | r)
+_inSync = inj (Proxy :: _ "inSync") unit
+
+_loadingTrust :: forall r. Variant (loadingTrust :: Unit | r)
+_loadingTrust = inj (Proxy :: _ "loadingTrust") unit
+
+_loadingUntrust :: forall r. Variant (loadingUntrust :: Unit | r)
+_loadingUntrust = inj (Proxy :: _ "loadingUntrust") unit
+
+_pendingTrust :: forall r. Variant (pendingTrust :: Unit | r)
+_pendingTrust = inj (Proxy :: _ "pendingTrust") unit
+
+_pendingUntrust :: forall r. Variant (pendingUntrust :: Unit | r)
+_pendingUntrust = inj (Proxy :: _ "pendingUntrust") unit
