@@ -43,6 +43,7 @@ pkgs.mkShell {
     pkgs.deadnix
     (pkgs.circles-pink.bumpNpmVersions (builtins.attrNames pkgs.circles-pink.ts.publicWorkspaces))
     #nodePackages.webpack
+    pkgs.purs-tidy
   ];
 
   # Change the prompt to show that you are in a devShell

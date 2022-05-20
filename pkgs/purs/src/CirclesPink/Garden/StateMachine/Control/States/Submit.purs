@@ -12,15 +12,15 @@ import Data.Maybe (Maybe(..))
 import RemoteData (_failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
-submit ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { prev :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  , submit :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData, "trusts" :: S.TrustState )
-  }
+submit
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { prev :: ActionHandler t m Unit S.UserData ("magicWords" :: S.UserData)
+     , submit :: ActionHandler t m Unit S.UserData ("submit" :: S.UserData, "trusts" :: S.TrustState)
+     }
 submit env =
   { prev: \set _ _ -> set \st -> S._magicWords st { direction = D._backwards }
   , submit: submit'

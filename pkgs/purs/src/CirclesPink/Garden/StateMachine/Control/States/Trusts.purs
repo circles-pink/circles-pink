@@ -11,15 +11,15 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import RemoteData (RemoteData, _failure, _loading)
 
-trusts ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { getSafeStatus :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState )
-  , finalizeRegisterUser :: ActionHandler t m Unit S.TrustState ( "trusts" :: S.TrustState, "dashboard" :: S.DashboardState )
-  }
+trusts
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { getSafeStatus :: ActionHandler t m Unit S.TrustState ("trusts" :: S.TrustState)
+     , finalizeRegisterUser :: ActionHandler t m Unit S.TrustState ("trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
+     }
 trusts env =
   { getSafeStatus
   , finalizeRegisterUser

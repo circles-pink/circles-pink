@@ -9,12 +9,16 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans)
 import Stadium.Control as C
 
-circlesControl ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m -> ((S.CirclesState -> S.CirclesState) -> t m Unit) -> S.CirclesState -> CirclesAction -> t m Unit
+circlesControl
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> ((S.CirclesState -> S.CirclesState) -> t m Unit)
+  -> S.CirclesState
+  -> CirclesAction
+  -> t m Unit
 circlesControl env =
   C.mkControl
     _circlesStateMachine

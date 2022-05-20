@@ -56,29 +56,28 @@ globalLoading d = any (_ == true) $ join checks
 --------------------------------------------------------------------------------
 -- DefaultView
 --------------------------------------------------------------------------------
-type DefaultView
-  = { trusts :: Trusts
-    , userSearchResult :: RemoteData Unit Unit ErrUserSearchResolved (Array User)
-    , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
-    , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
-    , trustRemoveResult :: Object (RemoteReport ErrTrustRemoveConnectionResolved String)
-    , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
-    , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved Balance
-    , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved Balance
-    , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
-    , transferResult :: RemoteData_ ErrTokenTransferResolved String
-    }
+type DefaultView =
+  { trusts :: Trusts
+  , userSearchResult :: RemoteData Unit Unit ErrUserSearchResolved (Array User)
+  , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
+  , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
+  , trustRemoveResult :: Object (RemoteReport ErrTrustRemoveConnectionResolved String)
+  , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
+  , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved Balance
+  , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved Balance
+  , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
+  , transferResult :: RemoteData_ ErrTokenTransferResolved String
+  }
 
-type Trusts
-  = Array Trust
+type Trusts = Array Trust
 
-type Trust
-  = { safeAddress :: String
-    , isLoading :: Boolean
-    , isIncoming :: Boolean
-    , isOutgoing :: Boolean
-    , user :: Nullable User
-    }
+type Trust =
+  { safeAddress :: String
+  , isLoading :: Boolean
+  , isIncoming :: Boolean
+  , isOutgoing :: Boolean
+  , user :: Nullable User
+  }
 
 mapTrust :: W3.Address /\ D.Trust -> Trust
 mapTrust (a /\ t) =
@@ -109,75 +108,63 @@ defaultView d@{ trusts } =
 --------------------------------------------------------------------------------
 -- Resolved Errors
 --------------------------------------------------------------------------------
-type ErrUserSearchResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrUserSearchResolved = Variant
+  ( errApi :: ApiError
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrGetUsersResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      , errUserNotFound :: UserNotFoundError
-      )
+type ErrGetUsersResolved = Variant
+  ( errApi :: ApiError
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  , errUserNotFound :: UserNotFoundError
+  )
 
-type ErrTrustGetTrustsResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustGetTrustsResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTrustAddConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustAddConnectionResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTrustRemoveConnectionResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustRemoveConnectionResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTokenGetBalanceResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenGetBalanceResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTokenCheckUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenCheckUBIPayoutResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTokenRequestUBIPayoutResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenRequestUBIPayoutResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrTokenTransferResolved
-  = Variant
-      ( errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTokenTransferResolved = Variant
+  ( errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type ErrDashboardStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrDashboardStateResolved = Variant
+  ( errService :: Unit
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
 --------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
-type RemoteData_ e a
-  = RemoteData Unit Unit e a
+type RemoteData_ e a = RemoteData Unit Unit e a
 
-type RemoteReportV e a
-  = RemoteReport (Variant e) a
+type RemoteReportV e a = RemoteReport (Variant e) a

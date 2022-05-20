@@ -26,12 +26,10 @@ run' = lift <<< runExceptT'
   runExceptT' = unsafeCoerce <<< runExceptT
 
 type ActionHandler :: forall k. (k -> Type -> Type) -> k -> Type -> Type -> Row Type -> Type
-type ActionHandler t m a s v
-  = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
+type ActionHandler t m a s v = ((s -> Variant v) -> t m Unit) -> s -> a -> t m Unit
 
 --------------------------------------------------------------------------------
-type ErrReadyForDeployment r
-  = Env.ErrIsTrusted + Env.ErrIsFunded + r
+type ErrReadyForDeployment r = Env.ErrIsTrusted + Env.ErrIsFunded + r
 
 readyForDeployment :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrReadyForDeployment r) m Boolean
 readyForDeployment { isTrusted, isFunded } privKey = do
@@ -40,13 +38,13 @@ readyForDeployment { isTrusted, isFunded } privKey = do
   pure (isTrusted' || isFunded')
 
 --------------------------------------------------------------------------------
-type TaskReturn
-  = { user :: User
-    , isTrusted :: Boolean
-    , trusts :: Array TrustNode
-    , safeStatus :: SafeStatus
-    , isReady :: Boolean
-    }
+type TaskReturn =
+  { user :: User
+  , isTrusted :: Boolean
+  , trusts :: Array TrustNode
+  , safeStatus :: SafeStatus
+  , isReady :: Boolean
+  }
 
 loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
 loginTask env privKey = do

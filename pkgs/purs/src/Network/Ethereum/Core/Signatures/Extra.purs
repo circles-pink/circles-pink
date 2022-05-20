@@ -16,8 +16,7 @@ import TypedEnv (class ParseValue)
 import Wallet.PrivateKey as C
 import Web3.Bindings (web3static)
 
-newtype ChecksumAddress
-  = ChecksumAddress W3.Address
+newtype ChecksumAddress = ChecksumAddress W3.Address
 
 instance showChecksumAddress :: Show ChecksumAddress where
   show (ChecksumAddress a) = show a # web3static.utils.toChecksumAddress

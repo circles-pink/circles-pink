@@ -52,9 +52,8 @@
         overlay
         (prev: final: {
           purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
-          spago2nix = easy-purescript-nix.spago2nix;
+          inherit (easy-purescript-nix) spago2nix purs-tidy;
           nix-filter = nix-filter.lib;
-          # nodejs = final.nodejs-17_x;
           nixopsLatest = inputs.nixops.defaultPackage.${system};
           circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
         })

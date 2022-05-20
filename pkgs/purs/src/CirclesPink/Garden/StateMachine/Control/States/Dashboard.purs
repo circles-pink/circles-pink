@@ -247,7 +247,12 @@ type RemoteDataV e a
 
 subscribeRemoteData ::
   forall e a t m.
-  Monad m => MonadTrans t => Monad (t m) => (RemoteDataV e a -> t m Unit) -> t m (EitherV e a) -> t m (EitherV e a)
+  Monad m =>
+  MonadTrans t =>
+  Monad (t m) =>
+  (RemoteDataV e a -> t m Unit) ->
+  t m (EitherV e a) ->
+  t m (EitherV e a)
 subscribeRemoteData setCb comp = do
   setCb $ _loading unit
   result <- comp
@@ -260,7 +265,11 @@ subscribeRemoteReport ::
   Monad m =>
   MonadTrans t =>
   Monad (t m) =>
-  Env.Env m -> (RemoteReport e a -> t m Unit) -> t m (Either e a) -> Int -> t m (Either e a)
+  Env.Env m ->
+  (RemoteReport e a -> t m Unit) ->
+  t m (Either e a) ->
+  Int ->
+  t m (Either e a)
 subscribeRemoteReport { getTimestamp } setCb comp retry = do
   startTime <- lift getTimestamp
   setCb $ _loading { timestamp: startTime, retry }
@@ -276,7 +285,10 @@ subscribeRemoteReport_ ::
   Monad m =>
   MonadTrans t =>
   Monad (t m) =>
-  Env.Env m -> (RemoteReport e a -> t m Unit) -> t m (Either e a) -> t m (Either e a)
+  Env.Env m ->
+  (RemoteReport e a -> t m Unit) ->
+  t m (Either e a) ->
+  t m (Either e a)
 subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
 
 --------------------------------------------------------------------------------
@@ -289,7 +301,12 @@ retryUntil ::
   Monad m =>
   MonadTrans t =>
   Monad (t m) =>
-  Env.Env m -> (Int -> RetryConfig) -> (Either e a -> Int -> Boolean) -> Int -> (Int -> t m (Either e a)) -> t m (Either e a)
+  Env.Env m ->
+  (Int -> RetryConfig) ->
+  (Either e a -> Int -> Boolean) ->
+  Int ->
+  (Int -> t m (Either e a)) ->
+  t m (Either e a)
 retryUntil env@{ sleep } getCfg pred retry mkCompu = do
   let
     { delay } = getCfg retry

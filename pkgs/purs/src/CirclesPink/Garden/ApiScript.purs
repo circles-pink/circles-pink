@@ -49,18 +49,15 @@ import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
-type ScriptM e a
-  = ScriptT e Aff a
+type ScriptM e a = ScriptT e Aff a
 
-type ErrApp r
-  = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
+type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
 runScriptM :: forall e a. ScriptM e a -> Aff (Either (Variant e) a /\ CirclesState)
 runScriptM = runScripT
 
 --------------------------------------------------------------------------------
-type AppM r a
-  = ExceptV (ErrApp + r) Aff a
+type AppM r a = ExceptV (ErrApp + r) Aff a
 
 runAppM :: forall r a. AppM r a -> Effect Unit
 runAppM x =
@@ -112,14 +109,14 @@ genSignupOpts = do
   pure { username, email }
 
 --------------------------------------------------------------------------------
-type MkAccountReturn
-  = { username :: String
-    , email :: String
-    , privateKey :: PrivateKey
-    , safeAddress :: Address
-    , txHash :: HexString
-    , mnemonic :: String
-    }
+type MkAccountReturn =
+  { username :: String
+  , email :: String
+  , privateKey :: PrivateKey
+  , safeAddress :: Address
+  , txHash :: HexString
+  , mnemonic :: String
+  }
 
 mkAccount :: forall r. EnvVars -> Env Aff -> ScriptM (ErrApp + r) MkAccountReturn
 mkAccount envVars env = do

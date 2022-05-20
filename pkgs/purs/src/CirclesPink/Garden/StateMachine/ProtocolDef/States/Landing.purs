@@ -16,23 +16,22 @@ import Type.Row (type (+))
 --------------------------------------------------------------------------------
 -- Transitions
 --------------------------------------------------------------------------------
-type LandingTransitions
-  = ( signUp :: P.Action ("infoGeneral" :> Nil')
-    , signIn :: P.Action ("login" :> Nil')
-    , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
-    )
+type LandingTransitions =
+  ( signUp :: P.Action ("infoGeneral" :> Nil')
+  , signIn :: P.Action ("login" :> Nil')
+  , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
+  )
 
 --------------------------------------------------------------------------------
 -- State
 --------------------------------------------------------------------------------
-type LandingState
-  = { checkSessionResult :: LandingStateCheckSessionResult
-    }
+type LandingState =
+  { checkSessionResult :: LandingStateCheckSessionResult
+  }
 
-type LandingStateCheckSessionResult
-  = RemoteData Unit Unit ErrLandingStateResolved Unit
+type LandingStateCheckSessionResult = RemoteData Unit Unit ErrLandingStateResolved Unit
 
-initLanding :: forall v. Variant ( landing :: LandingState | v )
+initLanding :: forall v. Variant (landing :: LandingState | v)
 initLanding =
   _landing
     { checkSessionResult: _notAsked unit }
@@ -40,33 +39,30 @@ initLanding =
 --------------------------------------------------------------------------------
 -- Action
 --------------------------------------------------------------------------------
-type LandingAction
-  = Variant
-      ( signIn :: Unit
-      , signUp :: Unit
-      , checkForSession :: Unit
-      )
+type LandingAction = Variant
+  ( signIn :: Unit
+  , signUp :: Unit
+  , checkForSession :: Unit
+  )
 
 --------------------------------------------------------------------------------
 -- Errors
 --------------------------------------------------------------------------------
-type ErrLandingStateResolved
-  = Variant
-      ( errDecode :: JsonDecodeError
-      , errReadStorage :: RequestPath
-      , errApi :: ApiError
-      , errNative :: NativeError
-      , errUserNotFound :: UserNotFoundError
-      , errInvalidUrl :: String
-      )
+type ErrLandingStateResolved = Variant
+  ( errDecode :: JsonDecodeError
+  , errReadStorage :: RequestPath
+  , errApi :: ApiError
+  , errNative :: NativeError
+  , errUserNotFound :: UserNotFoundError
+  , errInvalidUrl :: String
+  )
 
-type ErrLandingState
-  = Env.ErrRestoreSession
-      + ErrLoginTask
-      + ()
+type ErrLandingState = Env.ErrRestoreSession
+  + ErrLoginTask
+  + ()
 
 --------------------------------------------------------------------------------
 -- Constructors
 --------------------------------------------------------------------------------
-_landing :: forall a v. a -> Variant ( landing :: a | v )
+_landing :: forall a v. a -> Variant (landing :: a | v)
 _landing = inj (Proxy :: _ "landing")

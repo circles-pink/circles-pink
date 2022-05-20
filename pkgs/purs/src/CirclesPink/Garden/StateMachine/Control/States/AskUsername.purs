@@ -12,16 +12,16 @@ import Data.Newtype (unwrap)
 import Data.Variant (default, onMatch)
 import RemoteData (RemoteData, _failure, _loading, _success)
 
-askUsername ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { prev :: ActionHandler t m Unit S.UserData ( "infoGeneral" :: S.UserData )
-  , setUsername :: ActionHandler t m String S.UserData ( "askUsername" :: S.UserData )
-  , next :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData, "askEmail" :: S.UserData )
-  }
+askUsername
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { prev :: ActionHandler t m Unit S.UserData ("infoGeneral" :: S.UserData)
+     , setUsername :: ActionHandler t m String S.UserData ("askUsername" :: S.UserData)
+     , next :: ActionHandler t m Unit S.UserData ("askUsername" :: S.UserData, "askEmail" :: S.UserData)
+     }
 askUsername env =
   { prev: \set _ _ -> set \st -> S._infoGeneral st { direction = D._backwards }
   , setUsername

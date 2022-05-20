@@ -8,16 +8,16 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (class MonadTrans, lift)
 import Data.Maybe (Maybe(..))
 
-magicWords ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { prev :: ActionHandler t m Unit S.UserData ( "infoSecurity" :: S.UserData )
-  , newPrivKey :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  , next :: ActionHandler t m Unit S.UserData ( "submit" :: S.UserData )
-  }
+magicWords
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { prev :: ActionHandler t m Unit S.UserData ("infoSecurity" :: S.UserData)
+     , newPrivKey :: ActionHandler t m Unit S.UserData ("magicWords" :: S.UserData)
+     , next :: ActionHandler t m Unit S.UserData ("submit" :: S.UserData)
+     }
 magicWords env =
   { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D._backwards }
   , newPrivKey

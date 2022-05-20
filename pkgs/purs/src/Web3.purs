@@ -31,13 +31,12 @@ import Web3.Bindings as B
 --------------------------------------------------------------------------------
 -- Error types
 --------------------------------------------------------------------------------
-type NativeError
-  = { message :: String
-    , name :: String
-    }
+type NativeError =
+  { message :: String
+  , name :: String
+  }
 
-type ErrNative r
-  = ( errNative :: NativeError | r )
+type ErrNative r = (errNative :: NativeError | r)
 
 --------------------------------------------------------------------------------
 -- Err constructors
@@ -48,8 +47,7 @@ _errNative = inj (Proxy :: _ "errNative")
 --------------------------------------------------------------------------------
 -- Send Transaction
 --------------------------------------------------------------------------------
-type ErrSendTransaction r
-  = ErrNative + r
+type ErrSendTransaction r = ErrNative + r
 
 sendTransaction :: forall r. B.Web3 -> { from :: W3.Address, to :: W3.Address, value :: String } -> ExceptV (ErrSendTransaction + r) Aff HexString
 sendTransaction web3 opts =
@@ -65,11 +63,9 @@ sendTransaction web3 opts =
 --------------------------------------------------------------------------------
 -- Web3
 --------------------------------------------------------------------------------
-type Result e a
-  = ExceptV e Aff a
+type Result e a = ExceptV e Aff a
 
-type ErrNewWebSocketProvider r
-  = ErrNative + r
+type ErrNewWebSocketProvider r = ErrNative + r
 
 newWebSocketProvider :: forall r. URI -> ExceptV (ErrNewWebSocketProvider r) Aff B.Provider
 newWebSocketProvider x1 =
@@ -83,8 +79,7 @@ newWeb3 :: B.Provider -> Aff B.Web3
 newWeb3 = B.newWeb3 >>> liftEffect
 
 --------------------------------------------------------------------------------
-type ErrPrivKeyToAccount r
-  = ErrNative + r
+type ErrPrivKeyToAccount r = ErrNative + r
 
 privKeyToAccount :: forall r. B.Web3 -> W3.PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Aff B.Account
 privKeyToAccount w3 pk =

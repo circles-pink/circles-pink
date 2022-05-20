@@ -20,31 +20,25 @@ import Effect.Class.Console (log)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
-type Req
-  = { url :: String, method :: Method, body :: Json }
+type Req = { url :: String, method :: Method, body :: Json }
 
-type Res
-  = { status :: Int, body :: Json }
+type Res = { status :: Int, body :: Json }
 
 --------------------------------------------------------------------------------
-type ErrNetwork r
-  = ( errNetwork :: Req | r )
+type ErrNetwork r = (errNetwork :: Req | r)
 
 _errNetwork :: forall r. Req -> Variant (ErrNetwork + r)
 _errNetwork = inj (Proxy :: _ "errNetwork")
 
-type ErrParseJson r
-  = ( errParseJson :: Unit | r )
+type ErrParseJson r = (errParseJson :: Unit | r)
 
 _errParseJson :: forall r. Variant (ErrParseJson + r)
 _errParseJson = inj (Proxy :: _ "errParseJson") unit
 
 --------------------------------------------------------------------------------
-type ErrReqFn r
-  = ErrNetwork + ErrParseJson + r
+type ErrReqFn r = ErrNetwork + ErrParseJson + r
 
-type ReqFn r
-  = Req -> ExceptV (ErrReqFn + r) Aff Res
+type ReqFn r = Req -> ExceptV (ErrReqFn + r) Aff Res
 
 --------------------------------------------------------------------------------
 addLogging :: forall r. ReqFn r -> ReqFn r
