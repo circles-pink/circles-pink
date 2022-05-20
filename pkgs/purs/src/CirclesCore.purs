@@ -470,8 +470,8 @@ tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / tokenTransfer
 --------------------------------------------------------------------------------
 type TokenTransferOptions =
-  { from :: Address
-  , to :: Address
+  { from :: ChecksumAddress
+  , to :: ChecksumAddress
   , value :: B.Balance
   , paymentNote :: String
   }
@@ -483,7 +483,7 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.transfer
 
-  mapArg2 x = x { from = addrToString x.from, to = addrToString x.to }
+  mapArg2 x = x { from = show x.from, to = show x.to }
 
 --------------------------------------------------------------------------------
 -- Err slices

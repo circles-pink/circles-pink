@@ -13,7 +13,7 @@ import {
   mdiCashFast,
   mdiCashRemove,
   mdiAt,
-  mdiClockTimeEleven,
+  mdiTimerSand,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
@@ -190,7 +190,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 <LoadingCircles count={1} width={35} color={theme.baseColor} />
               ) : (
                 <Icon
-                  path={mdiClockTimeEleven}
+                  path={mdiTimerSand}
                   size={1.5}
                   color={theme.baseColor}
                   data-tip={mapToolTipTrust(c.isIncoming, userIdent)}
