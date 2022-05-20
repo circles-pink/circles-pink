@@ -86,6 +86,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <TwoButtonRow>
             <Button
+              theme={theme}
               prio={'medium'}
               onClick={() => act(A._askEmail(A._prev(unit)))}
             >
@@ -94,7 +95,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
 
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._askEmail(A._next(unit)))}
             >
               {t('nextButton')}

@@ -45,6 +45,7 @@ export const InfoSecurity = ({
         <FadeIn orientation={orientation} delay={getDelay()}>
           <TwoButtonRow>
             <Button
+              theme={theme}
               prio={'medium'}
               onClick={() => act(A._infoSecurity(A._prev(unit)))}
             >
@@ -53,7 +54,7 @@ export const InfoSecurity = ({
 
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._infoSecurity(A._next(unit)))}
             >
               {t('nextButton')}

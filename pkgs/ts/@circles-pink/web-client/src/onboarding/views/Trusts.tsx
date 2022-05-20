@@ -64,14 +64,14 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
             {/* <Button
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._trusts(A._getSafeStatus(unit)))}
             >
               {t('safeStateButton')}
             </Button> */}
             {state.isReady ? (
               <Button
-                color={theme.baseColor}
+                theme={theme}
                 onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
                 state={mapResult(state.trustsResult)}
               >

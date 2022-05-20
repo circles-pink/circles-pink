@@ -57,7 +57,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
           <TwoButtonRow>
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               state={mapResult(state.loginResult)}
               onClick={() => act(A._login(A._login(unit)))}
             >
@@ -65,7 +65,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
             </Button>
             <Button
               prio={'medium'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._login(A._signUp(unit)))}
             >
               {t('signUpInsteadButton')}

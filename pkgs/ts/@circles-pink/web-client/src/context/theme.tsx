@@ -6,15 +6,19 @@ export type Theme = {
   cardColor: string;
   darkColor: string;
   lightColor: string;
-  textColor: string;
+  textColorLight: string;
+  textColorDark: string;
+  bgColor: string;
 };
 
-const defaultTheme: Theme = {
+export const defaultTheme: Theme = {
   baseColor: chroma('#FF69B4').hex(),
   cardColor: chroma('#40376E').hex(),
   darkColor: chroma('#65655E').hex(),
   lightColor: chroma('#CFD6EA').hex(),
-  textColor: chroma('#7e7e7e').hex(),
+  textColorDark: chroma('#7e7e7e').hex(),
+  textColorLight: chroma('#fff').hex(),
+  bgColor: chroma('#f9fafb').hex(),
 };
 
 export type ThemeContextType = Theme & {

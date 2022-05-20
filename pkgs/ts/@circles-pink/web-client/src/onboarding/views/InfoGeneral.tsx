@@ -41,7 +41,7 @@ export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <Button
             prio={'high'}
-            color={theme.baseColor}
+            theme={theme}
             onClick={() => act(A._infoGeneral(A._next(unit)))}
           >
             {t('nextButton')}

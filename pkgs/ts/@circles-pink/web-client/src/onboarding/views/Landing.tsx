@@ -61,14 +61,14 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
           <TwoButtonRow>
             <Button
               prio={'medium'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._landing(A._signIn(unit)))}
             >
               {t('signInButton')}
             </Button>
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._landing(A._signUp(unit)))}
             >
               {t('signUpButton')}

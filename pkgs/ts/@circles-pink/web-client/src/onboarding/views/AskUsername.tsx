@@ -60,6 +60,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <TwoButtonRow>
             <Button
+              theme={theme}
               prio={'medium'}
               onClick={() => act(A._askUsername(A._prev(unit)))}
             >
@@ -68,7 +69,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
 
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._askUsername(A._next(unit)))}
             >
               {t('nextButton')}

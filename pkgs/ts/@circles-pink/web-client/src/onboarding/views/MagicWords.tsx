@@ -16,7 +16,7 @@ import { DialogCard } from '../../components/DialogCard';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
-import { ThemeContext } from '../../context/theme';
+import { Theme, ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
@@ -71,6 +71,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
           <TwoButtonRow>
             <Button
               prio={'medium'}
+              theme={theme}
               onClick={() => act(A._magicWords(A._prev(unit)))}
             >
               {t('prevButton')}
@@ -78,7 +79,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 
             <Button
               prio={'high'}
-              color={theme.baseColor}
+              theme={theme}
               onClick={() => act(A._magicWords(A._next(unit)))}
             >
               {t('nextButton')}
@@ -88,7 +89,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
       }
       mainContent={
         <>
-          <WordGrid theme={theme.baseColor}>
+          <WordGrid theme={theme}>
             {words.map((word, index) => {
               return (
                 <WordContainer key={`${word}-${index}`}>
@@ -106,7 +107,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
             <TwoButtonRow>
               <Button
                 prio={'low'}
-                color={theme.baseColor}
+                theme={theme}
                 fullWidth={true}
                 onClick={() => copyToClipboard()}
               >
@@ -120,7 +121,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
               </Button>
               <Button
                 prio={'low'}
-                color={theme.baseColor}
+                theme={theme}
                 fullWidth={true}
                 onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
               >
@@ -136,13 +137,13 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 };
 
 type WordGridProps = {
-  theme: string;
+  theme: Theme;
 };
 
 const WordGrid = styled.div((props: WordGridProps) => {
   return [
     css`
-      background: ${lighten(props.theme)};
+      background: ${lighten(props.theme.lightColor)};
     `,
     tw`grid xl:grid-cols-6 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 py-2 pl-2 rounded-lg mb-4`,
   ];
