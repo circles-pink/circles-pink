@@ -193,17 +193,17 @@ type TrustState = Variant
   , pendingUntrust :: Unit
   )
 
-_inSync :: forall r. Variant (inSync :: Unit | r)
+_inSync :: TrustState
 _inSync = inj (Proxy :: _ "inSync") unit
 
-_loadingTrust :: forall r. Variant (loadingTrust :: Unit | r)
+_loadingTrust :: TrustState
 _loadingTrust = inj (Proxy :: _ "loadingTrust") unit
 
-_loadingUntrust :: forall r. Variant (loadingUntrust :: Unit | r)
+_loadingUntrust :: TrustState
 _loadingUntrust = inj (Proxy :: _ "loadingUntrust") unit
 
-_pendingTrust :: forall r. Variant (pendingTrust :: Unit | r)
+_pendingTrust :: TrustState
 _pendingTrust = inj (Proxy :: _ "pendingTrust") unit
 
-_pendingUntrust :: forall r. Variant (pendingUntrust :: Unit | r)
+_pendingUntrust :: TrustState
 _pendingUntrust = inj (Proxy :: _ "pendingUntrust") unit
