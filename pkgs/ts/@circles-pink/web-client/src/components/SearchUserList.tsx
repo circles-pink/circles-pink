@@ -13,7 +13,6 @@ import {
   mdiCashFast,
   mdiCashRemove,
   mdiAt,
-  mdiClockTimeEleven,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
@@ -25,16 +24,14 @@ import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
 import {
   DefaultView,
   ErrTrustAddConnectionResolved,
-  Trust,
-  Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { t } from 'i18next';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
-type TrustUserListProps = {
+type SearchUserListProps = {
   title?: string;
-  content: Trusts;
+  content: MappedTrustNodes;
   theme: Theme;
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
@@ -46,7 +43,7 @@ type TrustUserListProps = {
   trustRemoveResult: DefaultView['trustRemoveResult'];
 };
 
-export const TrustUserList = (props: TrustUserListProps) => {
+export const SearchUserList = (props: SearchUserListProps) => {
   const { title, content, theme, icon, actionRow } = props;
 
   return (
@@ -99,7 +96,9 @@ export const TrustUserList = (props: TrustUserListProps) => {
 // UI / ContentRow
 // -----------------------------------------------------------------------------
 
-const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
+const ContentRow = (
+  props: SearchUserListProps & { c: TrustNode & UserData }
+): ReactElement => {
   const {
     c,
     theme,
@@ -119,14 +118,12 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
     ? trustIsLoading(trustRemoveResult[addrToString(c.safeAddress)])
     : false;
 
-  const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
-
   return (
     <TableRow theme={theme}>
       <TableData>
         <JustifyStartCenter>
           <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
-          <b>{userIdent}</b>
+          <b>{c.username}</b>
         </JustifyStartCenter>
       </TableData>
       <TableData>
@@ -136,13 +133,13 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             path={c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel}
             size={1.6}
             color={c.isIncoming ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelRec(c.isIncoming, userIdent)}
+            data-tip={mapToolTipRelRec(c.isIncoming, c.username)}
           />
           <Icon
             path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
             size={1.6}
             color={c.isOutgoing ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+            data-tip={mapToolTipRelSend(c.isOutgoing, c.username)}
           />
         </JustifyBetweenCenter>
       </TableData>
@@ -163,11 +160,11 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
               path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
               size={1.75}
               color={c.isOutgoing ? theme.baseColor : 'white'}
-              data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
+              data-tip={mapToolTipSend(c.isOutgoing, c.username)}
             />
           </Clickable>
 
-          {c.trustState.type === 'inSync' ? (
+          {!trustAddLoading && !trustRemoveLoading ? (
             <Clickable
               clickable={true}
               onClick={() => {
@@ -180,23 +177,11 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 path={c.isIncoming ? mdiHeart : mdiHeartOutline}
                 size={1.5}
                 color={c.isIncoming ? theme.baseColor : 'white'}
-                data-tip={mapToolTipTrust(c.isIncoming, userIdent)}
+                data-tip={mapToolTipTrust(c.isIncoming, c.username)}
               />
             </Clickable>
           ) : (
-            <>
-              {c.trustState.type === 'loadingTrust' ||
-              c.trustState.type === 'loadingUntrust' ? (
-                <LoadingCircles count={1} width={35} color={theme.baseColor} />
-              ) : (
-                <Icon
-                  path={mdiClockTimeEleven}
-                  size={1.5}
-                  color={theme.baseColor}
-                  data-tip={mapToolTipTrust(c.isIncoming, userIdent)}
-                />
-              )}
-            </>
+            <LoadingCircles count={1} width={35} color={theme.baseColor} />
           )}
         </JustifyBetweenCenter>
       </TableData>

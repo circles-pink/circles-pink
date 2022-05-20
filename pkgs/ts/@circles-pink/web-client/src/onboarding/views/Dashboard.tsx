@@ -35,6 +35,7 @@ import {
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
+import { SearchUserList } from '../../components/SearchUserList';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -248,7 +249,7 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
                 title={t('dashboard.trustNetworkTitle')}
-                content={mappedTrusts}
+                content={state.trusts}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
@@ -264,7 +265,7 @@ export const Dashboard = ({
           )}
           {mappedSearch && (
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
+              <SearchUserList
                 title={t('dashboard.exploreTitle')}
                 content={mappedSearch}
                 theme={theme}
