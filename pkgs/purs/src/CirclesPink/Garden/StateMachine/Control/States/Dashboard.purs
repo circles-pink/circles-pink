@@ -11,7 +11,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExcept
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (Trust)
-import Control.Monad.Except (ExceptT(..), runExceptT)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
@@ -122,11 +122,11 @@ dashboard env =
       void do
         runExceptT do
           trusts <-
-            runExceptT (env.trustGetNetwork st.privKey)
+            env.trustGetNetwork st.privKey
               # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-              <#> lmap (const unit)
-              # ExceptT
+              # mapExceptT (\x -> x <#> lmap (const unit))
+
           users <-
             runExceptT (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
               <#> lmap (const unit)
@@ -135,11 +135,10 @@ dashboard env =
             foundUsers = catMaybes $ map hush users
           lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
           _ <-
-            runExceptT (env.trustGetNetwork st.privKey)
+            env.trustGetNetwork st.privKey
               # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-              <#> lmap (const unit)
-              # ExceptT
+              # mapExceptT (\x -> x <#> lmap (const unit))
           pure unit
 
   getUsers set st { userNames, addresses } = do
@@ -156,63 +155,62 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          runExceptT (env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
+          env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
-            # ExceptT
+
         _ <-
-          runExceptT (env.trustGetNetwork st.privKey)
+          env.trustGetNetwork st.privKey
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
             # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
-            # ExceptT
+
         pure unit
 
   removeTrustConnection set st u =
     void do
       runExceptT do
         _ <-
-          runExceptT (env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
+          env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
-            # ExceptT
+
         _ <-
-          runExceptT (env.trustGetNetwork st.privKey)
+          env.trustGetNetwork st.privKey
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
             # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
-            # ExceptT
+
         pure unit
 
   getBalance set st _ =
     void do
       runExceptT do
         _ <-
-          runExceptT (env.getBalance st.privKey st.user.safeAddress)
+          env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
-            # ExceptT
+
         checkPayout <-
-          runExceptT (env.checkUBIPayout st.privKey st.user.safeAddress)
+          env.checkUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
-            # ExceptT
+
         let
           payoutAmount = CC.bnToStr checkPayout
         when ((length payoutAmount) >= 18) do
-          runExceptT (env.requestUBIPayout st.privKey st.user.safeAddress)
+          env.requestUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
-            # ExceptT
             # void
         _ <-
-          runExceptT (env.getBalance st.privKey st.user.safeAddress)
+          env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
-            # ExceptT
+
         _ <-
-          runExceptT (env.getBalance st.privKey st.user.safeAddress)
+          env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-            # ExceptT
+
         pure unit
 
   userSearch set st options = do
@@ -261,24 +259,24 @@ subscribeRemoteReport
   -> ExceptT e m a
   -> Int
   -> ExceptT e m a
-subscribeRemoteReport { getTimestamp } setCb comp retry = do
-  startTime <- lift $ getTimestamp
-  lift $ setCb $ _loading { timestamp: startTime, retry }
-  result :: Either e a <- lift $ runExceptT comp
-  endTime <- lift $ getTimestamp
-  lift $ setCb case result of
+subscribeRemoteReport { getTimestamp } setCb comp retry = ExceptT do
+  startTime <- getTimestamp
+  setCb $ _loading { timestamp: startTime, retry }
+  result :: Either e a <- runExceptT comp
+  endTime <- getTimestamp
+  setCb case result of
     Left e -> _failure { error: e, timestamp: endTime, retry }
     Right d -> _success { data: d, timestamp: endTime, retry }
   pure result
 
-subscribeRemoteReport_
-  :: forall e a m
-   . Monad m
-  => Env.Env m
-  -> (RemoteReport e a -> m Unit)
-  -> m (Either e a)
-  -> m (Either e a)
-subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
+-- subscribeRemoteReport_
+--   :: forall e a m
+--    . Monad m
+--   => Env.Env m
+--   -> (RemoteReport e a -> m Unit)
+--   -> m (Either e a)
+--   -> m (Either e a)
+-- subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
 
 --------------------------------------------------------------------------------
 type RetryConfig =
@@ -292,16 +290,16 @@ retryUntil
   -> (Int -> RetryConfig)
   -> (Either e a -> Int -> Boolean)
   -> Int
-  -> (Int -> m (Either e a))
-  -> m (Either e a)
-retryUntil env@{ sleep } getCfg pred retry mkCompu = do
+  -> (Int -> ExceptT e m a)
+  -> ExceptT e m a
+retryUntil env@{ sleep } getCfg pred retry mkCompu = ExceptT do
   let
     { delay } = getCfg retry
-  result <- mkCompu retry
+  result <- runExceptT $ mkCompu retry
   let
     newRetry = retry + 1
   if pred result retry then
     pure result
   else do
     sleep delay
-    retryUntil env getCfg pred newRetry mkCompu
+    runExceptT $ retryUntil env getCfg pred newRetry mkCompu
