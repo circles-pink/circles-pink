@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, _inSync)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, _inSync, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -20,7 +20,7 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (Map)
+import Data.Map (Map, update)
 import Data.Map as M
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
@@ -110,6 +110,17 @@ dashboard env =
   }
   where
   getTrusts set st _ =
+    void do
+      runExceptT do
+        _ <- syncTrusts set st
+          # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
+
+        _ <- syncTrusts set st
+          # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+
+        pure unit
+
+  syncTrusts set st i =
     let
       mapTrust :: Array User -> Map W3.Address Trust -> TrustNode -> W3.Address /\ Trust
       mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
@@ -121,30 +132,20 @@ dashboard env =
           , trustState: _inSync
           }
 
-      syncTrusts i = do
+    in
+      do
         trusts <-
           env.trustGetNetwork st.privKey
             # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
-            # mapExceptT (\x -> x <#> lmap (const unit))
+            # dropError
 
         users <-
           fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
-            # mapExceptT (\x -> x <#> lmap (const unit))
+            # dropError
 
         let
           foundUsers = catMaybes $ map hush users
         lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers st'.trusts # M.fromFoldable }
-
-    in
-      void do
-        runExceptT do
-          _ <- syncTrusts
-            # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-
-          _ <- syncTrusts
-            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-
-          pure unit
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -159,30 +160,35 @@ dashboard env =
   addTrustConnection set st u =
     void do
       runExceptT do
+        let addr = unsafePartial $ P.unsafeAddrFromString u
+        lift $ set \st' ->
+          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _loadingTrust }) (convert addr) st'.trusts }
         _ <-
-          env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress
+          env.addTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
-
-        _ <-
-          env.trustGetNetwork st.privKey
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-            # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
-
+            # dropError
+        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingTrust }) (convert addr) st'.trusts }
+        _ <- syncTrusts set st
+          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
+          # dropError
         pure unit
 
   removeTrustConnection set st u =
     void do
       runExceptT do
+        let addr = unsafePartial $ P.unsafeAddrFromString u
+        lift $ set \st' ->
+          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _loadingUntrust }) (convert addr) st'.trusts }
         _ <-
-          env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress
+          env.removeTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
-
-        _ <-
-          env.trustGetNetwork st.privKey
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-            # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
+            # dropError
+        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingUntrust }) (convert addr) st'.trusts }
+        _ <- syncTrusts set st
+          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
+          # dropError
 
         pure unit
 
@@ -308,3 +314,6 @@ retryUntil env@{ sleep } getCfg pred retry mkCompu = ExceptT do
   else do
     sleep delay
     runExceptT $ retryUntil env getCfg pred newRetry mkCompu
+
+dropError :: ∀ (t320 ∷ Type -> Type) (t322 ∷ Type) (t331 ∷ Type). Functor t320 ⇒ ExceptT t331 t320 t322 → ExceptT Unit t320 t322
+dropError = mapExceptT (\x -> x <#> lmap (const unit))
