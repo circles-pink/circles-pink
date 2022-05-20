@@ -40,6 +40,11 @@ branchless-get:
 	git fetch
 	git rebase origin/main
 
+branchless-diff:
+	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
+	git fetch
+	git diff origin/main
+
 branchless-put: branchless-get branchless-put_
 
 branchless-put_:
