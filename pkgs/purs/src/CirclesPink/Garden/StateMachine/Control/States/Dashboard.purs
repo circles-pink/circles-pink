@@ -20,8 +20,9 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (Map, update)
+import Data.Map (Map, lookup, update)
 import Data.Map as M
+import Data.Maybe (Maybe(..))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, inj)
@@ -125,11 +126,18 @@ dashboard env =
       mapTrust :: Array User -> Map W3.Address Trust -> TrustNode -> W3.Address /\ Trust
       mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
         where
+        trustState = case lookup (convert t.safeAddress) oldTrusts of
+          Nothing -> _inSync
+          Just { isIncoming, trustState: oldTrustState } ->
+            if
+              isIncoming == t.isIncoming then oldTrustState
+            else _inSync
+
         user =
           { isIncoming: t.isIncoming
           , isOutgoing: t.isOutgoing
           , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
-          , trustState: _inSync
+          , trustState
           }
 
     in
