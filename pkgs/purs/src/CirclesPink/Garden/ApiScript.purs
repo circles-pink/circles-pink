@@ -5,15 +5,17 @@ module CirclesPink.Garden.ApiScript
   ) where
 
 import Prelude
+
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
-import CirclesPink.Garden.Env (env)
+import CirclesPink.Garden.Env (env, env')
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, finalizeAccount, runScripT, signUpUser)
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.State (StateT(..))
 import Control.Monad.Trans.Class (lift)
 import Control.Parallel (parTraverse)
 import Convertable (convert)
@@ -45,6 +47,7 @@ import Partial.Unsafe (unsafePartial)
 import Record as R
 import Sunde (spawn)
 import Type.Row (type (+))
+import Undefined (undefined)
 import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
@@ -118,7 +121,7 @@ type MkAccountReturn =
   , mnemonic :: String
   }
 
-mkAccount :: forall r. EnvVars -> Env Aff -> ScriptM (ErrApp + r) MkAccountReturn
+mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> ScriptM (ErrApp + r) MkAccountReturn
 mkAccount envVars env = do
   signupOpts <- genSignupOpts
   { privateKey, safeAddress } <- signUpUser env signupOpts
@@ -135,7 +138,7 @@ mkAccount envVars env = do
         }
 
 --------------------------------------------------------------------------------
-app :: forall r. EnvVars -> Env Aff -> AppM (ErrApp + r) Unit
+app :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> AppM (ErrApp + r) Unit
 app ev env = do
   let
     count = 50
@@ -184,5 +187,5 @@ main = do
       let
         request = milkisRequest nodeFetch
 
-        env' = env { envVars: convert envVars, request }
-      runAppM $ app envVars env'
+        env'' = env' { envVars: convert envVars, request }
+      runAppM $ app envVars env''

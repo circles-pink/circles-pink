@@ -1,16 +1,19 @@
 module CirclesPink.Garden.Env
   ( EnvVars(..)
   , env
+  , env'
   , testEnv
+  , testEnv'
   ) where
 
 import Prelude
+
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (_errDecode, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
+import Control.Monad.Except (class MonadTrans, ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
@@ -32,6 +35,7 @@ import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Undefined (undefined)
 import Wallet.PrivateKey (sampleAddress, sampleKey)
 import Wallet.PrivateKey as P
 
@@ -413,3 +417,9 @@ testEnv =
   , getTimestamp: pure bottom
   , sleep: \_ -> pure unit
   }
+
+testEnv' :: forall t. MonadTrans t => Env.Env (t Identity)
+testEnv' = undefined
+
+env' :: forall t. MonadTrans t => { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> Env.Env (t Aff)
+env' = undefined

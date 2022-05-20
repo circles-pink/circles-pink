@@ -15,7 +15,7 @@ import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except (ExceptT(..), runExceptT)
+import Control.Monad.Except (class MonadTrans, ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.State (StateT, get, runStateT)
 import Data.Either (Either)
@@ -37,9 +37,10 @@ runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesSt
 runScripT = flip runStateT init <<< runExceptT
 
 --------------------------------------------------------------------------------
-act :: forall m. MonadLog m => Env m -> CirclesAction -> StateT CirclesState m Unit
+act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesAction -> StateT CirclesState m Unit
 act env =
   let
+    z = circlesControl env
     ctl = toStateT (circlesControl env)
   in
     \ac -> do
@@ -51,8 +52,8 @@ act env =
         x = spy "st" st
       log ""
 
-act' :: forall m a. MonadLog m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
-act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
+-- act' :: forall m a. MonadLog m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
+-- act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
 
 --------------------------------------------------------------------------------
 type Err r = (err :: String | r)
@@ -71,7 +72,7 @@ type SignUpUser =
   , safeAddress :: CC.Address
   }
 
-signUpUser :: forall m r. MonadLog m => Env m -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
+signUpUser :: forall t m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
   ExceptT do
     act env $ A._infoGeneral $ A._next unit
@@ -98,7 +99,7 @@ signUpUser env opts =
         )
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m r. MonadLog m => Env m -> ScriptT (Err + r) m Unit
+finalizeAccount :: forall m r. MonadLog m => Env (StateT CirclesState m) -> ScriptT (Err + r) m Unit
 finalizeAccount env =
   ExceptT do
     act env $ A._trusts $ A._finalizeRegisterUser unit
