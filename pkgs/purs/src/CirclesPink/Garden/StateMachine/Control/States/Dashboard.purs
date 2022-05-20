@@ -4,16 +4,16 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
+
 import CirclesCore (User, TrustNode)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, run, run')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (Trust)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
-import Control.Monad.Trans.Class (class MonadTrans, lift)
+import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
@@ -33,8 +33,7 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
-type ErrFetchUsersBinarySearch r
-  = ( err :: Unit | r )
+type ErrFetchUsersBinarySearch r = (err :: Unit | r)
 
 splitArray :: forall a. Array a -> Array a /\ Array a
 splitArray xs =
@@ -49,10 +48,10 @@ fetchUsersBinarySearch _ _ xs
 
 fetchUsersBinarySearch env privKey xs
   | A.length xs == 1 = do
-    eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
-    case eitherUsers of
-      Left _ -> pure $ map Left xs
-      Right ok -> pure $ map Right ok
+      eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+      case eitherUsers of
+        Left _ -> pure $ map Left xs
+        Right ok -> pure $ map Right ok
 
 fetchUsersBinarySearch env privKey xs = do
   eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
@@ -64,40 +63,38 @@ fetchUsersBinarySearch env privKey xs = do
         fetchUsersBinarySearch env privKey ls <> fetchUsersBinarySearch env privKey rs
     Right ok -> pure $ map Right ok
 
-dashboard ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { logout :: ActionHandler t m Unit S.DashboardState ( "landing" :: S.LandingState )
-  , getTrusts :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , addTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
-  , removeTrustConnection :: ActionHandler t m String S.DashboardState ( "dashboard" :: S.DashboardState )
-  , getBalance :: ActionHandler t m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , transfer ::
-      ActionHandler t m
-        { from :: String
-        , to :: String
-        , value :: String
-        , paymentNote :: String
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  , getUsers ::
-      ActionHandler t m
-        { userNames :: Array String
-        , addresses :: Array P.Address
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  , userSearch ::
-      ActionHandler t m
-        { query :: String
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  }
+dashboard
+  :: forall m
+   . Monad m
+  => Env.Env m
+  -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
+     , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     , addTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , removeTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     , transfer ::
+         ActionHandler' m
+           { from :: String
+           , to :: String
+           , value :: String
+           , paymentNote :: String
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     , getUsers ::
+         ActionHandler' m
+           { userNames :: Array String
+           , addresses :: Array P.Address
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     , userSearch ::
+         ActionHandler' m
+           { query :: String
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     }
 dashboard env =
   { logout: \_ _ _ -> pure unit
   , getTrusts
@@ -122,27 +119,26 @@ dashboard env =
           }
     in
       void do
-        runMaybeT do
+        runExceptT do
           trusts <-
-            run (env.trustGetNetwork st.privKey)
+            runExceptT (env.trustGetNetwork st.privKey)
               # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-              <#> hush
-              # MaybeT
+              <#> lmap (const unit)
+              # ExceptT
           users <-
-            run (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
-              <#> hush
-              # MaybeT
+            runExceptT (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
+              <#> lmap (const unit)
+              # ExceptT
           let
             foundUsers = catMaybes $ map hush users
-          lift
-            $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
+          lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
           _ <-
-            run (env.trustGetNetwork st.privKey)
+            runExceptT (env.trustGetNetwork st.privKey)
               # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
               # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-              <#> hush
-              # MaybeT
+              <#> lmap (const unit)
+              # ExceptT
           pure unit
 
   getUsers set st { userNames, addresses } = do
@@ -150,7 +146,7 @@ dashboard env =
     let
       task :: ExceptV (S.ErrGetUsers + ()) _ _
       task = env.getUsers st.privKey userNames addresses
-    result <- run' $ task
+    result <- runExceptT $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { getUsersResult = _failure e }
       Right u -> set \st' -> S._dashboard st' { getUsersResult = _success u }
@@ -159,12 +155,12 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          run (env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
+          runExceptT (env.addTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # ExceptT
         _ <-
-          run (env.trustGetNetwork st.privKey)
+          runExceptT (env.trustGetNetwork st.privKey)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
             # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
             # ExceptT
@@ -174,12 +170,12 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          run (env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
+          runExceptT (env.removeTrustConnection st.privKey (unsafePartial $ P.unsafeAddrFromString u) st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # ExceptT
         _ <-
-          run (env.trustGetNetwork st.privKey)
+          runExceptT (env.trustGetNetwork st.privKey)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
             # retryUntil env (const { delay: 1000 }) (\_ n -> n == 10) 0
             # ExceptT
@@ -189,30 +185,30 @@ dashboard env =
     void do
       runExceptT do
         _ <-
-          run (env.getBalance st.privKey st.user.safeAddress)
+          runExceptT (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
             # ExceptT
         checkPayout <-
-          run (env.checkUBIPayout st.privKey st.user.safeAddress)
+          runExceptT (env.checkUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
         let
           payoutAmount = CC.bnToStr checkPayout
         when ((length payoutAmount) >= 18) do
-          run (env.requestUBIPayout st.privKey st.user.safeAddress)
+          runExceptT (env.requestUBIPayout st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
             # void
         _ <-
-          run (env.getBalance st.privKey st.user.safeAddress)
+          runExceptT (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
             # ExceptT
         _ <-
-          run (env.getBalance st.privKey st.user.safeAddress)
+          runExceptT (env.getBalance st.privKey st.user.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
             # ExceptT
@@ -223,7 +219,7 @@ dashboard env =
     let
       task :: ExceptV (S.ErrUserSearch ()) _ _
       task = env.userSearch st.privKey options
-    result <- run' $ task
+    result <- runExceptT' $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { userSearchResult = _failure e }
       Right u -> set \st' -> S._dashboard st' { userSearchResult = _success u }
@@ -233,26 +229,22 @@ dashboard env =
     let
       task :: ExceptV (S.ErrTokenTransfer + ()) _ _
       task = env.transfer st.privKey (unsafePartial $ unsafeAddrFromString from) (unsafePartial $ unsafeAddrFromString to) value paymentNote
-    result <- run' $ task
+    result <- runExceptT $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
 
 --------------------------------------------------------------------------------
-type EitherV e a
-  = Either (Variant e) a
+type EitherV e a = Either (Variant e) a
 
-type RemoteDataV e a
-  = RemoteData Unit Unit (Variant e) a
+type RemoteDataV e a = RemoteData Unit Unit (Variant e) a
 
-subscribeRemoteData ::
-  forall e a t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  (RemoteDataV e a -> t m Unit) ->
-  t m (EitherV e a) ->
-  t m (EitherV e a)
+subscribeRemoteData
+  :: forall e a m
+   . Monad m
+  => (RemoteDataV e a -> m Unit)
+  -> m (EitherV e a)
+  -> m (EitherV e a)
 subscribeRemoteData setCb comp = do
   setCb $ _loading unit
   result <- comp
@@ -260,53 +252,47 @@ subscribeRemoteData setCb comp = do
   pure result
 
 --------------------------------------------------------------------------------
-subscribeRemoteReport ::
-  forall e a t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  (RemoteReport e a -> t m Unit) ->
-  t m (Either e a) ->
-  Int ->
-  t m (Either e a)
+subscribeRemoteReport
+  :: forall e a m
+   . Monad m
+  => Env.Env m
+  -> (RemoteReport e a -> m Unit)
+  -> m (Either e a)
+  -> Int
+  -> m (Either e a)
 subscribeRemoteReport { getTimestamp } setCb comp retry = do
-  startTime <- lift getTimestamp
+  startTime <- getTimestamp
   setCb $ _loading { timestamp: startTime, retry }
   result <- comp
-  endTime <- lift getTimestamp
+  endTime <- getTimestamp
   setCb case result of
     Left e -> _failure { error: e, timestamp: endTime, retry }
     Right d -> _success { data: d, timestamp: endTime, retry }
   pure result
 
-subscribeRemoteReport_ ::
-  forall e a t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  (RemoteReport e a -> t m Unit) ->
-  t m (Either e a) ->
-  t m (Either e a)
+subscribeRemoteReport_
+  :: forall e a m
+   . Monad m
+  => Env.Env m
+  -> (RemoteReport e a -> m Unit)
+  -> m (Either e a)
+  -> m (Either e a)
 subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
 
 --------------------------------------------------------------------------------
-type RetryConfig
-  = { delay :: Int
-    }
+type RetryConfig =
+  { delay :: Int
+  }
 
-retryUntil ::
-  forall t m e a.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  (Int -> RetryConfig) ->
-  (Either e a -> Int -> Boolean) ->
-  Int ->
-  (Int -> t m (Either e a)) ->
-  t m (Either e a)
+retryUntil
+  :: forall m e a
+   . Monad m
+  => Env.Env m
+  -> (Int -> RetryConfig)
+  -> (Either e a -> Int -> Boolean)
+  -> Int
+  -> (Int -> m (Either e a))
+  -> m (Either e a)
 retryUntil env@{ sleep } getCfg pred retry mkCompu = do
   let
     { delay } = getCfg retry
@@ -316,5 +302,5 @@ retryUntil env@{ sleep } getCfg pred retry mkCompu = do
   if pred result retry then
     pure result
   else do
-    lift $ sleep delay
+    sleep delay
     retryUntil env getCfg pred newRetry mkCompu
