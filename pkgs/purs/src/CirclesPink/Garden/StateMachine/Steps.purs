@@ -9,7 +9,7 @@ module CirclesPink.Garden.StateMachine.Steps
 
 import Prelude
 
-import CirclesPink.Garden.Env (testEnv, testEnv')
+import CirclesPink.Garden.Env (liftEnv, testEnv)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
@@ -21,7 +21,7 @@ import Data.Newtype (unwrap)
 import Stadium.Control (toStateT)
 
 act :: CirclesAction -> StateT CirclesState Identity Unit
-act = toStateT $ circlesControl testEnv'
+act = toStateT $ circlesControl (liftEnv testEnv)
 
 execFrom :: CirclesState -> StateT CirclesState Identity Unit -> CirclesState
 execFrom st m = unwrap $ execStateT m st

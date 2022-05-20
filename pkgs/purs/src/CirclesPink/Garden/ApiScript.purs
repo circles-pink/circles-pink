@@ -9,7 +9,7 @@ import Prelude
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
-import CirclesPink.Garden.Env (env, env')
+import CirclesPink.Garden.Env (env, liftEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, finalizeAccount, runScripT, signUpUser)
@@ -187,5 +187,5 @@ main = do
       let
         request = milkisRequest nodeFetch
 
-        env'' = env' { envVars: convert envVars, request }
+        env'' = liftEnv $ env { envVars: convert envVars, request }
       runAppM $ app envVars env''
