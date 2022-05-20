@@ -12,8 +12,7 @@ import Foreign.Object (Object)
 import Foreign.Object.Unsafe (unsafeIndex)
 import Structural (class Structural)
 
-type ApiError
-  = { message :: String, code :: Int }
+type ApiError = { message :: String, code :: Int }
 
 --------------------------------------------------------------------------------
 derive instance newtypeApiResult :: Newtype (ApiResult a) _
@@ -21,8 +20,7 @@ derive instance newtypeApiResult :: Newtype (ApiResult a) _
 derive newtype instance structuralApiResult :: Structural a => Structural (ApiResult a)
 
 newtype ApiResult :: forall k. k -> Type
-newtype ApiResult a
-  = ApiResult (Object Foreign)
+newtype ApiResult a = ApiResult (Object Foreign)
 
 --------------------------------------------------------------------------------
 apiResultToEither :: forall a. ApiResult a -> Either ApiError a

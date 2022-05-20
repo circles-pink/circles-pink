@@ -30,8 +30,7 @@ import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey as CC
 
-type ScriptT e m a
-  = ExceptV e (StateT CirclesState m) a
+type ScriptT e m a = ExceptV e (StateT CirclesState m) a
 
 runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
 runScripT = flip runStateT init <<< runExceptT
@@ -55,22 +54,21 @@ act' :: forall m a. MonadEffect m => Env m -> (a -> CirclesAction) -> Array a ->
 act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
 
 --------------------------------------------------------------------------------
-type Err r
-  = ( err :: String | r )
+type Err r = (err :: String | r)
 
-err :: forall r. String -> Variant ( err :: String | r )
+err :: forall r. String -> Variant (err :: String | r)
 err = inj (Proxy :: _ "err")
 
 --------------------------------------------------------------------------------
-type SignUpUserOpts
-  = { username :: String
-    , email :: String
-    }
+type SignUpUserOpts =
+  { username :: String
+  , email :: String
+  }
 
-type SignUpUser
-  = { privateKey :: CC.PrivateKey
-    , safeAddress :: CC.Address
-    }
+type SignUpUser =
+  { privateKey :: CC.PrivateKey
+  , safeAddress :: CC.Address
+  }
 
 signUpUser :: forall m r. MonadEffect m => Env m -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
@@ -86,7 +84,8 @@ signUpUser env opts =
     act env $ A._magicWords $ A._next unit
     act env $ A._submit $ A._submit unit
     get
-      <#> ( default (throwError $ err "Cannot sign up user.")
+      <#>
+        ( default (throwError $ err "Cannot sign up user.")
             # onMatch
                 { trusts:
                     \x ->
@@ -103,7 +102,8 @@ finalizeAccount env =
   ExceptT do
     act env $ A._trusts $ A._finalizeRegisterUser unit
     get
-      <#> ( default (throwError $ err "Cannot finalize register user.")
+      <#>
+        ( default (throwError $ err "Cannot finalize register user.")
             # onMatch
                 { dashboard: \_ -> pure unit
                 }

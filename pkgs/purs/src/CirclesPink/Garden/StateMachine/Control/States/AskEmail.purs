@@ -12,18 +12,18 @@ import Data.Newtype (unwrap)
 import Data.Variant (default, onMatch)
 import RemoteData (RemoteData, _failure, _loading, _success)
 
-askEmail ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { prev :: ActionHandler t m Unit S.UserData ( "askUsername" :: S.UserData )
-  , setEmail :: ActionHandler t m String S.UserData ( "askEmail" :: S.UserData )
-  , setTerms :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData )
-  , setPrivacy :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData )
-  , next :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData, "infoSecurity" :: S.UserData )
-  }
+askEmail
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { prev :: ActionHandler t m Unit S.UserData ("askUsername" :: S.UserData)
+     , setEmail :: ActionHandler t m String S.UserData ("askEmail" :: S.UserData)
+     , setTerms :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData)
+     , setPrivacy :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData)
+     , next :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData, "infoSecurity" :: S.UserData)
+     }
 askEmail env =
   { prev: \set _ _ -> set \st -> S._askUsername st { direction = D._backwards }
   , setEmail

@@ -61,137 +61,119 @@ import Type.Row (type (+))
 import Wallet.PrivateKey as P
 import Wallet.PrivateKey (PrivateKey)
 
-type UsernameApiResult
-  = RemoteData Unit Unit CirclesError { isValid :: Boolean }
+type UsernameApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
-type EmailApiResult
-  = RemoteData Unit Unit CirclesError { isValid :: Boolean }
+type EmailApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
 --------------------------------------------------------------------------------
 -- UserData
 --------------------------------------------------------------------------------
-type ErrSubmit
-  = Env.ErrGetSafeAddress
-      + Env.ErrPrepareSafeDeploy
-      + Env.ErrUserRegister
-      + Env.ErrUserResolve
-      + Env.ErrTrustGetNetwork
-      + Env.ErrGetSafeStatus
-      + Env.ErrSaveSession
-      + ()
+type ErrSubmit = Env.ErrGetSafeAddress
+  + Env.ErrPrepareSafeDeploy
+  + Env.ErrUserRegister
+  + Env.ErrUserResolve
+  + Env.ErrTrustGetNetwork
+  + Env.ErrGetSafeStatus
+  + Env.ErrSaveSession
+  + ()
 
-type ErrSubmitResolved
-  = Variant
-      ( errApi :: ApiError
-      , errInvalidUrl :: String
-      , errNative :: NativeError
-      , errService :: Unit
-      , errUserNotFound :: UserNotFoundError
-      , errSaveSession :: Unit
-      )
+type ErrSubmitResolved = Variant
+  ( errApi :: ApiError
+  , errInvalidUrl :: String
+  , errNative :: NativeError
+  , errService :: Unit
+  , errUserNotFound :: UserNotFoundError
+  , errSaveSession :: Unit
+  )
 
-type UserDataSubmitResult
-  = RemoteData Unit Unit ErrSubmitResolved Unit
+type UserDataSubmitResult = RemoteData Unit Unit ErrSubmitResolved Unit
 
-type UserData
-  = { direction :: D.Direction
-    , username :: String
-    , usernameApiResult :: UsernameApiResult
-    , email :: String
-    , emailApiResult :: EmailApiResult
-    , terms :: Boolean
-    , privacy :: Boolean
-    , privateKey :: Maybe PrivateKey
-    , submitResult :: UserDataSubmitResult
-    }
+type UserData =
+  { direction :: D.Direction
+  , username :: String
+  , usernameApiResult :: UsernameApiResult
+  , email :: String
+  , emailApiResult :: EmailApiResult
+  , terms :: Boolean
+  , privacy :: Boolean
+  , privateKey :: Maybe PrivateKey
+  , submitResult :: UserDataSubmitResult
+  }
 
-type InfoGeneralState
-  = UserData
+type InfoGeneralState = UserData
 
-type AskUsernameState
-  = UserData
+type AskUsernameState = UserData
 
-type AskEmailState
-  = UserData
+type AskEmailState = UserData
 
-type InfoSecurityState
-  = UserData
+type InfoSecurityState = UserData
 
-type MagicWordsState
-  = UserData
+type MagicWordsState = UserData
 
-type SubmitState
-  = UserData
+type SubmitState = UserData
 
 --------------------------------------------------------------------------------
-type ErrLoginStateResolved
-  = Variant
-      ( errApi :: ApiError
-      , errNative :: NativeError
-      , errUserNotFound :: UserNotFoundError
-      , errInvalidUrl :: String
-      , errSaveSession :: Unit
-      )
+type ErrLoginStateResolved = Variant
+  ( errApi :: ApiError
+  , errNative :: NativeError
+  , errUserNotFound :: UserNotFoundError
+  , errInvalidUrl :: String
+  , errSaveSession :: Unit
+  )
 
-type ErrLoginState
-  = ErrLoginTask
-      + Env.ErrSaveSession
-      + ()
+type ErrLoginState = ErrLoginTask
+  + Env.ErrSaveSession
+  + ()
 
-type LoginStateLoginResult
-  = RemoteData Unit Unit ErrLoginStateResolved Unit
+type LoginStateLoginResult = RemoteData Unit Unit ErrLoginStateResolved Unit
 
-type LoginState
-  = { magicWords :: String
-    , loginResult :: LoginStateLoginResult
-    }
+type LoginState =
+  { magicWords :: String
+  , loginResult :: LoginStateLoginResult
+  }
 
 --------------------------------------------------------------------------------
-type ErrTrustState
-  = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
+type ErrTrustState = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
 
-type ErrTrustStateResolved
-  = Variant
-      ( errService :: Unit
-      , errNative :: NativeError
-      , errInvalidUrl :: String
-      )
+type ErrTrustStateResolved = Variant
+  ( errService :: Unit
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
 
-type TrustStateTrustsResult
-  = RemoteData Unit Unit ErrTrustStateResolved Unit
+type TrustStateTrustsResult = RemoteData Unit Unit ErrTrustStateResolved Unit
 
-type TrustState
-  = { user :: CC.User
-    , privKey :: P.PrivateKey
-    , trusts :: Array TrustNode
-    , safeStatus :: SafeStatus
-    , isReady :: Boolean
-    , trustsResult :: TrustStateTrustsResult
-    }
+type TrustState =
+  { user :: CC.User
+  , privKey :: P.PrivateKey
+  , trusts :: Array TrustNode
+  , safeStatus :: SafeStatus
+  , isReady :: Boolean
+  , trustsResult :: TrustStateTrustsResult
+  }
 
 --------------------------------------------------------------------------------
-type CirclesState
-  = Variant
-      ( infoGeneral :: UserData
-      , askUsername :: UserData
-      , askEmail :: UserData
-      , infoSecurity :: UserData
-      , magicWords :: UserData
-      , submit :: UserData
-      , dashboard :: DashboardState
-      , login :: LoginState
-      , trusts :: TrustState
-      , debug :: DebugState
-      , landing :: LandingState
-      -- | CirclesProtocolDef GetState
-      )
+type CirclesState = Variant
+  ( infoGeneral :: UserData
+  , askUsername :: UserData
+  , askEmail :: UserData
+  , infoSecurity :: UserData
+  , magicWords :: UserData
+  , submit :: UserData
+  , dashboard :: DashboardState
+  , login :: LoginState
+  , trusts :: TrustState
+  , debug :: DebugState
+  , landing :: LandingState
+  -- | CirclesProtocolDef GetState
+  )
 
-type DebugState
-  = { magicWords :: String
-    }
+type DebugState =
+  { magicWords :: String
+  }
 
 -- init :: CirclesState
-init :: forall v. Variant ( infoGeneral :: UserData | v )
+init :: forall v. Variant (infoGeneral :: UserData | v)
 init =
   _infoGeneral
     { direction: D._forwards
@@ -205,43 +187,43 @@ init =
     , submitResult: _notAsked unit
     }
 
-initLogin :: forall v. Variant ( login :: LoginState | v )
+initLogin :: forall v. Variant (login :: LoginState | v)
 initLogin =
   _login
     { magicWords: ""
     , loginResult: _notAsked unit
     }
 
-initDebug :: forall v. Variant ( debug :: DebugState | v )
+initDebug :: forall v. Variant (debug :: DebugState | v)
 initDebug =
   _debug
     { magicWords: "hockey middle idea enable forget case mountain sugar chronic income crouch critic venue giant tell marble rose scene prefer shoe cheap run print pigeon"
     }
 
 --------------------------------------------------------------------------------
-_infoGeneral :: forall a v. a -> Variant ( infoGeneral :: a | v )
+_infoGeneral :: forall a v. a -> Variant (infoGeneral :: a | v)
 _infoGeneral = inj (Proxy :: _ "infoGeneral")
 
-_askUsername :: forall a v. a -> Variant ( askUsername :: a | v )
+_askUsername :: forall a v. a -> Variant (askUsername :: a | v)
 _askUsername = inj (Proxy :: _ "askUsername")
 
-_askEmail :: forall a v. a -> Variant ( askEmail :: a | v )
+_askEmail :: forall a v. a -> Variant (askEmail :: a | v)
 _askEmail = inj (Proxy :: _ "askEmail")
 
-_infoSecurity :: forall a v. a -> Variant ( infoSecurity :: a | v )
+_infoSecurity :: forall a v. a -> Variant (infoSecurity :: a | v)
 _infoSecurity = inj (Proxy :: _ "infoSecurity")
 
-_magicWords :: forall a v. a -> Variant ( magicWords :: a | v )
+_magicWords :: forall a v. a -> Variant (magicWords :: a | v)
 _magicWords = inj (Proxy :: _ "magicWords")
 
-_submit :: forall a v. a -> Variant ( submit :: a | v )
+_submit :: forall a v. a -> Variant (submit :: a | v)
 _submit = inj (Proxy :: _ "submit")
 
-_login :: forall a v. a -> Variant ( login :: a | v )
+_login :: forall a v. a -> Variant (login :: a | v)
 _login = inj (Proxy :: _ "login")
 
-_trusts :: forall a v. a -> Variant ( trusts :: a | v )
+_trusts :: forall a v. a -> Variant (trusts :: a | v)
 _trusts = inj (Proxy :: _ "trusts")
 
-_debug :: forall a v. a -> Variant ( debug :: a | v )
+_debug :: forall a v. a -> Variant (debug :: a | v)
 _debug = inj (Proxy :: _ "debug")

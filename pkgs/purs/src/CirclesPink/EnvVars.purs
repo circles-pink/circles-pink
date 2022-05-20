@@ -21,21 +21,20 @@ import TypedEnv (EnvError, Resolved, Variable)
 import TypedEnv (fromEnv) as TypedEnv
 
 type Config :: forall k. (Symbol -> Type -> k) -> Row k
-type Config f
-  = ( gardenApi :: f "GARDEN_API" URI
-    , gardenApiUsers :: f "GARDEN_API_USERS" URI
-    , gardenGraphApi :: f "GARDEN_GRAPH_API" URI
-    , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
-    , gardenRelay :: f "GARDEN_RELAY" URI
-    , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" ChecksumAddress
-    , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" ChecksumAddress
-    , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" ChecksumAddress
-    , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
-    )
+type Config f =
+  ( gardenApi :: f "GARDEN_API" URI
+  , gardenApiUsers :: f "GARDEN_API_USERS" URI
+  , gardenGraphApi :: f "GARDEN_GRAPH_API" URI
+  , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
+  , gardenRelay :: f "GARDEN_RELAY" URI
+  , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" ChecksumAddress
+  , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" ChecksumAddress
+  , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" ChecksumAddress
+  , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
+  )
 
 --------------------------------------------------------------------------------
-newtype EnvVars
-  = EnvVars (Record (Config Resolved))
+newtype EnvVars = EnvVars (Record (Config Resolved))
 
 derive instance newtypeEnvVars :: Newtype EnvVars _
 

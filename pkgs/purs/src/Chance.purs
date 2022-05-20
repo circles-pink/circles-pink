@@ -40,8 +40,7 @@ getNationality En = inj1of2 $ string' (Proxy :: _ "en")
 getNationality It = inj2of2 $ string' (Proxy :: _ "it")
 
 --------------------------------------------------------------------------------
-type StringOpts
-  = ( length :: Int, casing :: Casing, alpha :: Boolean, numeric :: Boolean )
+type StringOpts = (length :: Int, casing :: Casing, alpha :: Boolean, numeric :: Boolean)
 
 string :: forall r. FromRecord r () StringOpts => Record r -> Effect String
 string x1 = runEffectFn1 chance.string $ inj1of2 x1'
@@ -52,8 +51,7 @@ string x1 = runEffectFn1 chance.string $ inj1of2 x1'
       # O.modify (Proxy :: _ "casing") getCasing
 
 --------------------------------------------------------------------------------
-type StringPoolOpts
-  = ( length :: Int, pool :: String )
+type StringPoolOpts = (length :: Int, pool :: String)
 
 stringPool :: forall r. FromRecord r () StringPoolOpts => Record r -> Effect String
 stringPool x1 = runEffectFn1 chance.string $ inj2of2 x1'
@@ -63,8 +61,7 @@ stringPool x1 = runEffectFn1 chance.string $ inj2of2 x1'
       # (O.fromRecord :: _ -> Option StringPoolOpts)
 
 --------------------------------------------------------------------------------
-type IntegerOpts
-  = ( min :: Int, max :: Int )
+type IntegerOpts = (min :: Int, max :: Int)
 
 integer :: forall r. FromRecord r () IntegerOpts => Record r -> Aff Int
 integer x1 = runEffectFn1 chance.integer x1' # liftEffect
@@ -74,8 +71,7 @@ integer x1 = runEffectFn1 chance.integer x1' # liftEffect
       # (O.fromRecord :: _ -> Option IntegerOpts)
 
 --------------------------------------------------------------------------------
-type NameOpts
-  = ( middle :: Boolean, middle_initial :: Boolean, prefix :: Boolean, nationality :: Nationality )
+type NameOpts = (middle :: Boolean, middle_initial :: Boolean, prefix :: Boolean, nationality :: Nationality)
 
 name :: forall r. FromRecord r () NameOpts => Record r -> Aff String
 name x1 = runEffectFn1 chance.name x1' # liftEffect
@@ -86,8 +82,7 @@ name x1 = runEffectFn1 chance.name x1' # liftEffect
       # O.modify (Proxy :: _ "nationality") getNationality
 
 --------------------------------------------------------------------------------
-type FirstOpts
-  = ( nationality :: Nationality )
+type FirstOpts = (nationality :: Nationality)
 
 first :: forall r. FromRecord r () FirstOpts => Record r -> Aff String
 first x1 = runEffectFn1 chance.first x1' # liftEffect

@@ -18,8 +18,7 @@ import URI.HostPortPair (HostPortPair)
 import URI.HostPortPair as HostPortPair
 
 --------------------------------------------------------------------------------
-newtype URI
-  = URI (AbsoluteURI UserInfo (HostPortPair Host Port) Path HierPath Query)
+newtype URI = URI (AbsoluteURI UserInfo (HostPortPair Host Port) Path HierPath Query)
 
 instance parseValueURI :: ParseValue URI where
   parseValue = parse >>> hush

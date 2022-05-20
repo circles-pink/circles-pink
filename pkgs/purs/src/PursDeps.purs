@@ -51,8 +51,7 @@ import Undefined (undefined)
 --------------------------------------------------------------------------------
 -- Opts
 --------------------------------------------------------------------------------
-type Opts
-  = { depsJsonPath :: String }
+type Opts = { depsJsonPath :: String }
 
 parseOpts :: Parser Opts
 parseOpts = ado
@@ -69,14 +68,11 @@ prog =
 --------------------------------------------------------------------------------
 -- Error
 --------------------------------------------------------------------------------
-type Err r
-  = (ErrReadFile + ErrParse + r)
+type Err r = (ErrReadFile + ErrParse + r)
 
-type ErrReadFile r
-  = ( errReadFile :: String | r )
+type ErrReadFile r = (errReadFile :: String | r)
 
-type ErrParse r
-  = ( errParse :: JsonDecodeError | r )
+type ErrParse r = (errParse :: JsonDecodeError | r)
 
 printError :: Variant (Err ()) -> String
 printError =
@@ -87,27 +83,23 @@ printError =
 --------------------------------------------------------------------------------
 -- Types
 --------------------------------------------------------------------------------
-type PursDeps
-  = Map ModuleName DepEntry
+type PursDeps = Map ModuleName DepEntry
 
-type DepEntry
-  = { path :: String, depends :: Array ModuleName }
+type DepEntry = { path :: String, depends :: Array ModuleName }
 
-type ModuleName
-  = Array String
+type ModuleName = Array String
 
 --------------------------------------------------------------------------------
 -- ModuleTree
 --------------------------------------------------------------------------------
-newtype ModuleForest
-  = ModuleForest (Map String ModuleTree)
+newtype ModuleForest = ModuleForest (Map String ModuleTree)
 
 derive instance eqModuleForest :: Eq ModuleForest
 
-type ModuleTree
-  = { exists :: Boolean
-    , subModules :: ModuleForest
-    }
+type ModuleTree =
+  { exists :: Boolean
+  , subModules :: ModuleForest
+  }
 
 emptyModuleForest :: ModuleForest
 emptyModuleForest = ModuleForest M.empty
@@ -117,12 +109,12 @@ insert (mn /\ de) (ModuleForest mf) = case A.uncons mn of
   Nothing -> ModuleForest mf
   Just { head, tail }
     | tail == [] ->
-      ModuleForest
-        $ M.insertWith
-            (\old _ -> old { exists = true })
-            head
-            { exists: true, subModules: emptyModuleForest }
-            mf
+        ModuleForest
+          $ M.insertWith
+              (\old _ -> old { exists = true })
+              head
+              { exists: true, subModules: emptyModuleForest }
+              mf
   Just { head, tail } ->
     ModuleForest
       $ M.insertWith
@@ -134,14 +126,11 @@ insert (mn /\ de) (ModuleForest mf) = case A.uncons mn of
 --------------------------------------------------------------------------------
 -- Result
 --------------------------------------------------------------------------------
-type Result' r env m a
-  = ReaderT env (ExceptV (Err + r) m) a
+type Result' r env m a = ReaderT env (ExceptV (Err + r) m) a
 
-type Env m
-  = { opts :: Opts, cap :: Cap m }
+type Env m = { opts :: Opts, cap :: Cap m }
 
-type Result r m a
-  = Result' r (Env m) m a
+type Result r m a = Result' r (Env m) m a
 
 runResult :: forall env m a. env -> Result' () env m a -> m (Either (Variant (Err ())) a)
 runResult cap' r = runExceptT $ runReaderT r cap'
@@ -177,11 +166,12 @@ decodeDepEntry j = do
   depends <- traverse decodeModuleName depends'
   pure $ { path, depends }
 
-decodeKV ::
-  forall k v.
-  (String -> Either JsonDecodeError k) ->
-  (Json -> Either JsonDecodeError v) ->
-  String /\ Json -> Either JsonDecodeError (k /\ v)
+decodeKV
+  :: forall k v
+   . (String -> Either JsonDecodeError k)
+  -> (Json -> Either JsonDecodeError v)
+  -> String /\ Json
+  -> Either JsonDecodeError (k /\ v)
 decodeKV decK decV (k /\ v) = do
   k' <- decK k
   v' <- decV v
@@ -274,16 +264,14 @@ moduleNameToId = S.joinWith "__"
 --------------------------------------------------------------------------------
 -- Main'
 --------------------------------------------------------------------------------
-type Cap m
-  = { readFile :: CapReadFile m
-    , log :: CapLog m
-    }
+type Cap m =
+  { readFile :: CapReadFile m
+  , log :: CapLog m
+  }
 
-type CapReadFile m
-  = forall r. String -> ExceptV (ErrReadFile + r) m String
+type CapReadFile m = forall r. String -> ExceptV (ErrReadFile + r) m String
 
-type CapLog m
-  = forall r. String -> ExceptV r m Unit
+type CapLog m = forall r. String -> ExceptV r m Unit
 
 readFile :: forall r m. Monad m => Result r m String
 readFile = do

@@ -17,28 +17,25 @@ import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing as Landing
 --------------------------------------------------------------------------------
 -- CirclesProtocolDef
 --------------------------------------------------------------------------------
-type CirclesProtocolDef f
-  = ( landing :: f (P.State Landing.LandingTransitions) Landing.LandingState Landing.LandingAction
-    -- , infoGeneral :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , askUsername :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , askEmail :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , infoSecurity :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , magicWords :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , submit :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , dashboard :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , login :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , trusts :: f (P.State LandingTransitions) LandingState LandingAction
-    -- , debug :: f (P.State LandingTransitions) LandingState LandingAction
-    )
+type CirclesProtocolDef f =
+  ( landing :: f (P.State Landing.LandingTransitions) Landing.LandingState Landing.LandingAction
+  -- , infoGeneral :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , askUsername :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , askEmail :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , infoSecurity :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , magicWords :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , submit :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , dashboard :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , login :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , trusts :: f (P.State LandingTransitions) LandingState LandingAction
+  -- , debug :: f (P.State LandingTransitions) LandingState LandingAction
+  )
 
 --------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
-type GetProtocol p s a
-  = p
+type GetProtocol p s a = p
 
-type GetState p s a
-  = s
+type GetState p s a = s
 
-type GetAction p s a
-  = a
+type GetAction p s a = a

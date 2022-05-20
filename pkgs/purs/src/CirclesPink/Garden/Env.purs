@@ -36,8 +36,7 @@ import Wallet.PrivateKey (sampleAddress, sampleKey)
 import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
-newtype EnvVars
-  = EnvVars
+newtype EnvVars = EnvVars
   { gardenApi :: String
   , gardenApiUsers :: String
   , gardenGraphApi :: String
@@ -99,13 +98,15 @@ env { request, envVars } =
         , body: encodeJson { username }
         }
         # runExceptT
-        <#> ( \result -> case result of
+        <#>
+          ( \result -> case result of
               Left e -> Left e
               Right x
                 | x.status /= 200 && x.status /= 409 -> Left $ _errService
                 | otherwise -> Right x
           )
-        <#> ( \result -> do
+        <#>
+          ( \result -> do
               res <- result
               body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
               if body'.status == "ok" then
@@ -126,13 +127,15 @@ env { request, envVars } =
         , body: encodeJson { email }
         }
         # runExceptT
-        <#> ( \result -> case result of
+        <#>
+          ( \result -> case result of
               Left e -> Left e
               Right x
                 | x.status /= 200 && x.status /= 409 -> Left $ _errService
                 | otherwise -> Right x
           )
-        <#> ( \result -> do
+        <#>
+          ( \result -> do
               res <- result
               body' :: { status :: String } <- decodeJson res.body # lmap (const _errParse)
               if body'.status == "ok" then

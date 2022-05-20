@@ -8,11 +8,10 @@ import Prelude
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 
-type Direction
-  = Variant
-      ( forwards :: Unit
-      , backwards :: Unit
-      )
+type Direction = Variant
+  ( forwards :: Unit
+  , backwards :: Unit
+  )
 
 _forwards ∷ Direction
 _forwards = inj (Proxy :: _ "forwards") unit

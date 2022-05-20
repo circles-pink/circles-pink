@@ -11,11 +11,10 @@ import CirclesPink.Garden.StateMachine.State as S
 import Stadium.Type.StateMachine as STM
 import Type.Proxy (Proxy(..))
 
-type CirclesStateMachine
-  = STM.StateMachine
-      P.CirclesProtocol
-      S.CirclesState
-      A.CirclesAction
+type CirclesStateMachine = STM.StateMachine
+  P.CirclesProtocol
+  S.CirclesState
+  A.CirclesAction
 
 _circlesStateMachine :: Proxy CirclesStateMachine
 _circlesStateMachine = Proxy :: _ CirclesStateMachine

@@ -8,15 +8,15 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Trans.Class (class MonadTrans, lift)
 import Data.Maybe (Maybe(..), isNothing)
 
-infoSecurity ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { prev :: ActionHandler t m Unit S.UserData ( "askEmail" :: S.UserData )
-  , next :: ActionHandler t m Unit S.UserData ( "magicWords" :: S.UserData )
-  }
+infoSecurity
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { prev :: ActionHandler t m Unit S.UserData ("askEmail" :: S.UserData)
+     , next :: ActionHandler t m Unit S.UserData ("magicWords" :: S.UserData)
+     }
 infoSecurity env =
   { prev: \set _ _ -> set \st -> S._askEmail st { direction = D._backwards }
   , next

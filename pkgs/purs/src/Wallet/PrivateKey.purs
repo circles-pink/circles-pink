@@ -40,12 +40,10 @@ import Effect.Class (liftEffect)
 --------------------------------------------------------------------------------
 -- Types
 --------------------------------------------------------------------------------
-type Entropy
-  = String
+type Entropy = String
 
 --------------------------------------------------------------------------------
-newtype Address
-  = Address String
+newtype Address = Address String
 
 derive newtype instance showAddress :: Show Address
 
@@ -54,19 +52,16 @@ derive newtype instance mnemonicAddress :: EncodeJson Address
 derive instance eqAddress :: Eq Address
 
 --------------------------------------------------------------------------------
-newtype Nonce
-  = Nonce BigInt
+newtype Nonce = Nonce BigInt
 
-newtype PrivateKey
-  = PrivateKey Entropy
+newtype PrivateKey = PrivateKey Entropy
 
 derive instance privateKeyEq :: Eq PrivateKey
 
 derive newtype instance showPrivateKey :: Show PrivateKey
 
 --------------------------------------------------------------------------------
-newtype Mnemonic
-  = Mnemonic (Array String)
+newtype Mnemonic = Mnemonic (Array String)
 
 derive instance mnemonicEq :: Eq Mnemonic
 

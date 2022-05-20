@@ -103,11 +103,9 @@ import Wallet.PrivateKey as P
 --------------------------------------------------------------------------------
 -- Web3
 --------------------------------------------------------------------------------
-type Result e a
-  = ExceptV e Aff a
+type Result e a = ExceptV e Aff a
 
-type ErrNewWebSocketProvider r
-  = ErrNative + ErrInvalidUrl + r
+type ErrNewWebSocketProvider r = ErrNative + ErrInvalidUrl + r
 
 newWebSocketProvider :: forall r. String -> ExceptV (ErrNewWebSocketProvider r) Effect B.Provider
 newWebSocketProvider x1 =
@@ -138,8 +136,7 @@ bnToStr = B.bnToStr
 --------------------------------------------------------------------------------
 -- API
 --------------------------------------------------------------------------------
-type ErrNewCirclesCore r
-  = ErrNative + r
+type ErrNewCirclesCore r = ErrNative + r
 
 newCirclesCore :: forall r. B.Web3 -> B.Options -> ExceptV (ErrNewCirclesCore r) Effect B.CirclesCore
 newCirclesCore x1 x2 =
@@ -149,8 +146,7 @@ newCirclesCore x1 x2 =
     # ExceptT
 
 --------------------------------------------------------------------------------
-type ErrPrivKeyToAccount r
-  = ErrNative + r
+type ErrPrivKeyToAccount r = ErrNative + r
 
 privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Effect B.Account
 privKeyToAccount w3 pk =
@@ -160,8 +156,7 @@ privKeyToAccount w3 pk =
     # ExceptT
 
 --------------------------------------------------------------------------------
-type ErrSendTransaction r
-  = ErrNative + r
+type ErrSendTransaction r = ErrNative + r
 
 sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrSendTransaction r) Effect Unit
 sendTransaction w3 f t =
@@ -173,13 +168,12 @@ sendTransaction w3 f t =
 --------------------------------------------------------------------------------
 -- API / trustIsTrusted
 --------------------------------------------------------------------------------
-type TrustIsTrustedOptions
-  = { safeAddress :: Address
-    , limit :: Int
-    }
+type TrustIsTrustedOptions =
+  { safeAddress :: Address
+  , limit :: Int
+  }
 
-type ErrTrustIsTrusted r
-  = ErrNative + r
+type ErrTrustIsTrusted r = ErrNative + r
 
 trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> Result (ErrTrustIsTrusted r) B.TrustIsTrustedResult
 trustIsTrusted cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -191,17 +185,16 @@ trustIsTrusted cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / trustGetNetwork
 --------------------------------------------------------------------------------
-type TrustNode
-  = { isIncoming :: Boolean
-    , isOutgoing :: Boolean
-    , limitPercentageIn :: Int
-    , limitPercentageOut :: Int
-    , mutualConnections :: Array Address
-    , safeAddress :: Address
-    }
+type TrustNode =
+  { isIncoming :: Boolean
+  , isOutgoing :: Boolean
+  , limitPercentageIn :: Int
+  , limitPercentageOut :: Int
+  , mutualConnections :: Array Address
+  , safeAddress :: Address
+  }
 
-type ErrTrustGetNetwork r
-  = ErrNative + r
+type ErrTrustGetNetwork r = ErrNative + r
 
 trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
 trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
@@ -221,13 +214,12 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> 
 --------------------------------------------------------------------------------
 -- API / trustAddConnection
 --------------------------------------------------------------------------------
-type TrustAddConnectionOptions
-  = { user :: Address
-    , canSendTo :: Address
-    }
+type TrustAddConnectionOptions =
+  { user :: Address
+  , canSendTo :: Address
+  }
 
-type ErrTrustAddConnection r
-  = ErrNative + r
+type ErrTrustAddConnection r = ErrNative + r
 
 trustAddConnection :: forall r. B.CirclesCore -> B.Account -> TrustAddConnectionOptions -> Result (ErrTrustAddConnection r) String
 trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -239,13 +231,12 @@ trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / trustRemoveConnection
 --------------------------------------------------------------------------------
-type TrustRemoveConnectionOptions
-  = { user :: Address
-    , canSendTo :: Address
-    }
+type TrustRemoveConnectionOptions =
+  { user :: Address
+  , canSendTo :: Address
+  }
 
-type ErrTrustRemoveConnection r
-  = ErrNative + r
+type ErrTrustRemoveConnection r = ErrNative + r
 
 trustRemoveConnection :: forall r. B.CirclesCore -> B.Account -> TrustRemoveConnectionOptions -> Result (ErrTrustRemoveConnection r) String
 trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -257,15 +248,14 @@ trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / userRegister
 --------------------------------------------------------------------------------
-type UserOptions
-  = { nonce :: Nonce
-    , safeAddress :: Address
-    , username :: String
-    , email :: String
-    }
+type UserOptions =
+  { nonce :: Nonce
+  , safeAddress :: Address
+  , username :: String
+  , email :: String
+  }
 
-type ErrUserRegister r
-  = ErrService + ErrNative + r
+type ErrUserRegister r = ErrService + ErrNative + r
 
 userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> Result (ErrUserRegister r) Unit
 userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
@@ -281,20 +271,19 @@ userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 --------------------------------------------------------------------------------
 -- API / userResolve
 --------------------------------------------------------------------------------
-type ResolveOptions
-  = { addresses :: Array Address
-    , userNames :: Array String
-    }
+type ResolveOptions =
+  { addresses :: Array Address
+  , userNames :: Array String
+  }
 
-type User
-  = { id :: Int
-    , username :: String
-    , safeAddress :: Address
-    , avatarUrl :: String
-    }
+type User =
+  { id :: Int
+  , username :: String
+  , safeAddress :: Address
+  , avatarUrl :: String
+  }
 
-type ErrUserResolve r
-  = ErrNative + ErrApi + r
+type ErrUserResolve r = ErrNative + ErrApi + r
 
 userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrUserResolve r) (Array User)
 userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
@@ -314,12 +303,11 @@ userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 --------------------------------------------------------------------------------
 -- API / userRegister
 --------------------------------------------------------------------------------
-type SearchOptions
-  = { query :: String
-    }
+type SearchOptions =
+  { query :: String
+  }
 
-type ErrSearch r
-  = ErrNative + ErrApi + r
+type ErrSearch r = ErrNative + ErrApi + r
 
 userSearch :: forall r. B.CirclesCore -> B.Account -> SearchOptions -> Result (ErrSearch r) (Array User)
 userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
@@ -333,12 +321,11 @@ userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
 --------------------------------------------------------------------------------
 -- API / safeDeploy
 --------------------------------------------------------------------------------
-type SafeDeployOptions
-  = { safeAddress :: Address
-    }
+type SafeDeployOptions =
+  { safeAddress :: Address
+  }
 
-type ErrSafeDeploy r
-  = ErrService + ErrNative + r
+type ErrSafeDeploy r = ErrService + ErrNative + r
 
 safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> Result (ErrSafeDeploy r) Unit
 safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
@@ -350,8 +337,7 @@ safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 --------------------------------------------------------------------------------
 -- API / safePredictAddress
 --------------------------------------------------------------------------------
-type ErrSafePredictAddress r
-  = ErrNative + r
+type ErrSafePredictAddress r = ErrNative + r
 
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) P.Address
 safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
@@ -365,8 +351,7 @@ safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >
 --------------------------------------------------------------------------------
 -- API / safePrepareDeploy
 --------------------------------------------------------------------------------
-type ErrSafePrepareDeploy r
-  = ErrNative + r
+type ErrSafePrepareDeploy r = ErrNative + r
 
 safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) P.Address
 safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
@@ -380,12 +365,11 @@ safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>
 --------------------------------------------------------------------------------
 -- API / safeIsFunded
 --------------------------------------------------------------------------------
-type SafeIsFundedOptions
-  = { safeAddress :: Address
-    }
+type SafeIsFundedOptions =
+  { safeAddress :: Address
+  }
 
-type ErrSafeIsFunded r
-  = ErrNative + r
+type ErrSafeIsFunded r = ErrNative + r
 
 safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> Result (ErrSafeIsFunded r) Boolean
 safeIsFunded cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -397,17 +381,16 @@ safeIsFunded cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / safeGetSafeStatus
 --------------------------------------------------------------------------------
-type SafeGetSafeStatusOptions
-  = { safeAddress :: Address
-    }
+type SafeGetSafeStatusOptions =
+  { safeAddress :: Address
+  }
 
-type SafeStatus
-  = { isCreated :: Boolean
-    , isDeployed :: Boolean
-    }
+type SafeStatus =
+  { isCreated :: Boolean
+  , isDeployed :: Boolean
+  }
 
-type ErrSafeGetSafeStatus r
-  = ErrNative + r
+type ErrSafeGetSafeStatus r = ErrNative + r
 
 safeGetSafeStatus :: forall r. B.CirclesCore -> B.Account -> SafeGetSafeStatusOptions -> Result (ErrSafeGetSafeStatus r) SafeStatus
 safeGetSafeStatus cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -419,12 +402,11 @@ safeGetSafeStatus cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / tokenDeploy
 --------------------------------------------------------------------------------
-type TokenDeployOptions
-  = { safeAddress :: Address
-    }
+type TokenDeployOptions =
+  { safeAddress :: Address
+  }
 
-type ErrTokenDeploy r
-  = ErrService + ErrNative + r
+type ErrTokenDeploy r = ErrService + ErrNative + r
 
 tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> Result (ErrTokenDeploy r) String
 tokenDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -436,12 +418,11 @@ tokenDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / tokenGetBalance
 --------------------------------------------------------------------------------
-type TokenGetBalanceOptions
-  = { safeAddress :: Address
-    }
+type TokenGetBalanceOptions =
+  { safeAddress :: Address
+  }
 
-type ErrTokenGetBalance r
-  = ErrNative + r
+type ErrTokenGetBalance r = ErrNative + r
 
 tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) B.Balance
 tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -453,12 +434,11 @@ tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / tokenCheckUBIPayout
 --------------------------------------------------------------------------------
-type TokenCheckUBIPayoutOptions
-  = { safeAddress :: Address
-    }
+type TokenCheckUBIPayoutOptions =
+  { safeAddress :: Address
+  }
 
-type ErrTokenCheckUBIPayout r
-  = ErrNative + r
+type ErrTokenCheckUBIPayout r = ErrNative + r
 
 tokenCheckUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenCheckUBIPayoutOptions -> Result (ErrTokenCheckUBIPayout r) B.Balance
 tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -470,12 +450,11 @@ tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / tokenRequestUBIPayout
 --------------------------------------------------------------------------------
-type TokenRequestUBIPayoutOptions
-  = { safeAddress :: Address
-    }
+type TokenRequestUBIPayoutOptions =
+  { safeAddress :: Address
+  }
 
-type ErrTokenRequestUBIPayout r
-  = ErrNative + r
+type ErrTokenRequestUBIPayout r = ErrNative + r
 
 tokenRequestUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenRequestUBIPayoutOptions -> Result (ErrTokenRequestUBIPayout r) String
 tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -487,15 +466,14 @@ tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / tokenTransfer
 --------------------------------------------------------------------------------
-type TokenTransferOptions
-  = { from :: Address
-    , to :: Address
-    , value :: B.Balance
-    , paymentNote :: String
-    }
+type TokenTransferOptions =
+  { from :: Address
+  , to :: Address
+  , value :: B.Balance
+  , paymentNote :: String
+  }
 
-type ErrTokenTransfer r
-  = ErrNative + r
+type ErrTokenTransfer r = ErrNative + r
 
 tokenTransfer :: forall r. B.CirclesCore -> B.Account -> TokenTransferOptions -> Result (ErrTokenTransfer r) String
 tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
@@ -507,17 +485,13 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- Err slices
 --------------------------------------------------------------------------------
-type ErrNative r
-  = ( errNative :: NativeError | r )
+type ErrNative r = (errNative :: NativeError | r)
 
-type ErrInvalidUrl r
-  = ( errInvalidUrl :: String | r )
+type ErrInvalidUrl r = (errInvalidUrl :: String | r)
 
-type ErrApi r
-  = ( errApi :: ApiError | r )
+type ErrApi r = (errApi :: ApiError | r)
 
-type ErrService r
-  = ( errService :: Unit | r )
+type ErrService r = (errService :: Unit | r)
 
 --------------------------------------------------------------------------------
 -- Err constructors
@@ -537,8 +511,7 @@ _errService = inj (Proxy :: _ "errService")
 --------------------------------------------------------------------------------
 -- Err composition
 --------------------------------------------------------------------------------
-type Err r
-  = ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
+type Err r = ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
 
 printErr :: Variant (Err ()) -> String
 printErr =
@@ -551,10 +524,10 @@ printErr =
 --------------------------------------------------------------------------------
 -- Error types
 --------------------------------------------------------------------------------
-type NativeError
-  = { message :: String
-    , name :: String
-    }
+type NativeError =
+  { message :: String
+  , name :: String
+  }
 
 --------------------------------------------------------------------------------
 -- Util

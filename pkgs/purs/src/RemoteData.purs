@@ -16,8 +16,7 @@ import Data.Newtype (class Newtype, unwrap)
 import Data.Variant (Variant, default, inj, onMatch)
 import Type.Proxy (Proxy(..))
 
-newtype RemoteData n l e a
-  = RemoteData
+newtype RemoteData n l e a = RemoteData
   ( Variant
       ( notAsked :: n
       , loading :: l

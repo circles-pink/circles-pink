@@ -10,16 +10,16 @@ import Data.Either (Either(..))
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
-login ::
-  forall t m.
-  Monad m =>
-  MonadTrans t =>
-  Monad (t m) =>
-  Env.Env m ->
-  { login :: ActionHandler t m Unit S.LoginState ( "trusts" :: S.TrustState, "login" :: S.LoginState, "dashboard" :: S.DashboardState )
-  , signUp :: ActionHandler t m Unit S.LoginState ( "infoGeneral" :: S.UserData )
-  , setMagicWords :: ActionHandler t m String S.LoginState ( "login" :: S.LoginState )
-  }
+login
+  :: forall t m
+   . Monad m
+  => MonadTrans t
+  => Monad (t m)
+  => Env.Env m
+  -> { login :: ActionHandler t m Unit S.LoginState ("trusts" :: S.TrustState, "login" :: S.LoginState, "dashboard" :: S.DashboardState)
+     , signUp :: ActionHandler t m Unit S.LoginState ("infoGeneral" :: S.UserData)
+     , setMagicWords :: ActionHandler t m String S.LoginState ("login" :: S.LoginState)
+     }
 login env =
   { login: login'
   , signUp: \set _ _ -> set \_ -> S.init
@@ -42,11 +42,11 @@ login env =
       Left e -> set \st' -> S._login st' { loginResult = _failure e }
       Right { user, safeStatus }
         | safeStatus.isCreated && safeStatus.isDeployed -> do
-          set \_ ->
-            S.initDashboard
-              { user
-              , privKey
-              }
+            set \_ ->
+              S.initDashboard
+                { user
+                , privKey
+                }
       Right { user, trusts, safeStatus, isReady } -> do
         set \_ ->
           S._trusts

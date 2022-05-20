@@ -23,10 +23,10 @@ foreign import data Web3 :: Type
 
 foreign import data Account :: Type
 
-type Web3Static
-  = { utils :: Utils
-    , eth :: Eth
-    }
+type Web3Static =
+  { utils :: Utils
+  , eth :: Eth
+  }
 
 foreign import sendTransaction :: Web3 -> { from :: String, to :: String, value :: String } -> EffectFnAff String
 
@@ -37,10 +37,10 @@ foreign import newWeb3 :: Provider -> Effect Web3
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
 --------------------------------------------------------------------------------
-type Utils
-  = { toChecksumAddress :: String -> String
-    }
+type Utils =
+  { toChecksumAddress :: String -> String
+  }
 
-type Eth
-  = {
-    }
+type Eth =
+  {
+  }

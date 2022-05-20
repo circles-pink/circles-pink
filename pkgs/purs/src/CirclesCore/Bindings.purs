@@ -53,8 +53,7 @@ foreign import data Account :: Type
 instance structuralAccount :: Structural Account
 
 --------------------------------------------------------------------------------
-newtype User
-  = User
+newtype User = User
   { id :: Int
   , username :: String
   , safeAddress :: String
@@ -66,8 +65,7 @@ derive instance newtypeUser :: Newtype User _
 derive newtype instance structuralUser :: Structural User
 
 --------------------------------------------------------------------------------
-newtype TrustIsTrustedResult
-  = TrustIsTrustedResult
+newtype TrustIsTrustedResult = TrustIsTrustedResult
   { trustConnections :: Int
   , isTrusted :: Boolean
   }
@@ -77,8 +75,7 @@ derive instance newtypeTrustIsTrustedResult :: Newtype TrustIsTrustedResult _
 derive newtype instance structuralTrustIsTrustedResult :: Structural TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
-newtype Balance
-  = Balance
+newtype Balance = Balance
   { length :: Int
   , negative :: Int
   , red :: Boolean
@@ -109,21 +106,20 @@ foreign import bnToStr :: Balance -> String
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
 --------------------------------------------------------------------------------
-type Options
-  = { apiServiceEndpoint :: String
-    , graphNodeEndpoint :: String
-    , hubAddress :: String
-    , proxyFactoryAddress :: String
-    , relayServiceEndpoint :: String
-    , safeMasterAddress :: String
-    , subgraphName :: String
-    , databaseSource :: String
-    }
+type Options =
+  { apiServiceEndpoint :: String
+  , graphNodeEndpoint :: String
+  , hubAddress :: String
+  , proxyFactoryAddress :: String
+  , relayServiceEndpoint :: String
+  , safeMasterAddress :: String
+  , subgraphName :: String
+  , databaseSource :: String
+  }
 
 foreign import newCirclesCore :: Web3 -> Options -> Effect CirclesCore
 
-newtype CirclesCore_
-  = CirclesCore_
+newtype CirclesCore_ = CirclesCore_
   { user :: CoreUser
   , trust :: CoreTrust
   , safe :: CoreSafe
@@ -135,8 +131,7 @@ derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
 derive newtype instance structuralCirclesCore_ :: Structural CirclesCore_
 
 --------------------------------------------------------------------------------
-newtype CoreUser
-  = CoreUser
+newtype CoreUser = CoreUser
   { register ::
       Fn2Promise Account
         { nonce :: BigInt
@@ -161,8 +156,7 @@ derive instance newtypeCoreUser :: Newtype CoreUser _
 derive newtype instance structuralCoreUser :: Structural CoreUser
 
 --------------------------------------------------------------------------------
-newtype CoreSafe
-  = CoreSafe
+newtype CoreSafe = CoreSafe
   { deploy :: Fn2Promise Account { safeAddress :: String } Boolean
   , isFunded :: Fn2Promise Account { safeAddress :: String } Boolean
   , predictAddress :: Fn2Promise Account { nonce :: BigInt } String
@@ -179,8 +173,7 @@ derive instance newtypeCoreSafe :: Newtype CoreSafe _
 derive newtype instance structuralCoreSafe :: Structural CoreSafe
 
 --------------------------------------------------------------------------------
-newtype CoreToken
-  = CoreToken
+newtype CoreToken = CoreToken
   { deploy :: Fn2Promise Account { safeAddress :: String } String
   , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
   , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
@@ -200,8 +193,7 @@ derive instance newtypeCoreToken :: Newtype CoreToken _
 derive newtype instance structuralCoreToken :: Structural CoreToken
 
 --------------------------------------------------------------------------------
-newtype CoreTrust
-  = CoreTrust
+newtype CoreTrust = CoreTrust
   { isTrusted ::
       Fn2Promise Account
         { safeAddress :: String, limit :: Int }
@@ -242,11 +234,9 @@ foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit
 convertCore :: CirclesCore -> CirclesCore_
 convertCore = unsafeCoerce
 
-type Fn2Promise a1 a2 b
-  = Fn2 a1 a2 (Promise b)
+type Fn2Promise a1 a2 b = Fn2 a1 a2 (Promise b)
 
-type Fn3Promise a1 a2 a3 b
-  = Fn3 a1 a2 a3 (Promise b)
+type Fn3Promise a1 a2 a3 b = Fn3 a1 a2 a3 (Promise b)
 
 --------------------------------------------------------------------------------
 checkResult :: Unit
