@@ -1,9 +1,8 @@
 module CirclesPink.Garden.Env
   ( EnvVars(..)
   , env
-  , env'
+  , liftEnv
   , testEnv
-  , testEnv'
   ) where
 
 import Prelude
@@ -33,6 +32,7 @@ import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
+import Record.Extra.CirclesPink (zipRecord)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Undefined (undefined)
@@ -418,8 +418,54 @@ testEnv =
   , sleep: \_ -> pure unit
   }
 
-testEnv' :: forall t. MonadTrans t => Env.Env (t Identity)
-testEnv' = undefined
+--------------------------------------------------------------------------------
 
-env' :: forall t. MonadTrans t => { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> Env.Env (t Aff)
-env' = undefined
+liftVal :: forall e m a t. MonadTrans t => Monad m => ExceptT e m a -> ExceptT e (t m) a
+liftVal f = f # mapExceptT lift
+
+liftFn1 :: forall a1 e m a t. MonadTrans t => Monad m => (a1 -> ExceptT e m a) -> a1 -> (ExceptT e (t m) a)
+liftFn1 f x1 = f x1 # mapExceptT lift
+
+liftFn2 :: forall a1 a2 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> ExceptT e m a) -> a1 -> a2 -> (ExceptT e (t m) a)
+liftFn2 f x1 x2 = f x1 x2 # mapExceptT lift
+
+liftFn3 :: forall a1 a2 a3 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> ExceptT e m a) -> a1 -> a2 -> a3 -> (ExceptT e (t m) a)
+liftFn3 f x1 x2 x3 = f x1 x2 x3 # mapExceptT lift
+
+liftFn4 :: forall a1 a2 a3 a4 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> a4 -> ExceptT e m a) -> a1 -> a2 -> a3 -> a4 -> (ExceptT e (t m) a)
+liftFn4 f x1 x2 x3 x4 = f x1 x2 x3 x4 # mapExceptT lift
+
+liftFn5 :: forall a1 a2 a3 a4 a5 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> a4 -> a5 -> ExceptT e m a) -> a1 -> a2 -> a3 -> a4 -> a5 -> (ExceptT e (t m) a)
+liftFn5 f x1 x2 x3 x4 x5 = f x1 x2 x3 x4 x5 # mapExceptT lift
+
+liftEnv :: forall t m. MonadTrans t => Monad m => Env.Env m -> Env.Env (t m)
+liftEnv e =
+  { apiCheckUserName: liftFn1 e.apiCheckUserName
+  , apiCheckEmail: liftFn1 e.apiCheckEmail
+  , generatePrivateKey: lift e.generatePrivateKey
+  , userRegister: liftFn2 e.userRegister
+  , userSearch: liftFn2 e.userSearch
+  , getSafeAddress: liftFn1 e.getSafeAddress
+  , safePrepareDeploy: liftFn1 e.safePrepareDeploy
+  , userResolve: liftFn1 e.userResolve
+  , getUsers: liftFn3 e.getUsers
+  , coreToWindow: liftFn1 e.coreToWindow
+  , isTrusted: liftFn1 e.isTrusted
+  , trustGetNetwork: liftFn1 e.trustGetNetwork
+  , getSafeStatus: liftFn1 e.getSafeStatus
+  , deploySafe: liftFn1 e.deploySafe
+  , deployToken: liftFn1 e.deployToken
+  , isFunded: liftFn1 e.isFunded
+  , addTrustConnection: liftFn3 e.addTrustConnection
+  , removeTrustConnection: liftFn3 e.removeTrustConnection
+  , saveSession: liftFn1 e.saveSession
+  , restoreSession: liftVal e.restoreSession
+  , getBalance: liftFn2 e.getBalance
+  , checkUBIPayout: liftFn2 e.checkUBIPayout
+  , requestUBIPayout: liftFn2 e.requestUBIPayout
+  , transfer: liftFn5 e.transfer
+  , getTimestamp: lift e.getTimestamp
+  , sleep: lift <<< e.sleep
+  }
+
+--------------------------------------------------------------------------------
