@@ -30,6 +30,7 @@ import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Type.Row (type (+))
+import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -257,15 +258,15 @@ subscribeRemoteReport
    . Monad m
   => Env.Env m
   -> (RemoteReport e a -> m Unit)
-  -> m (Either e a)
+  -> ExceptT e m a
   -> Int
-  -> m (Either e a)
+  -> ExceptT e m a
 subscribeRemoteReport { getTimestamp } setCb comp retry = do
-  startTime <- getTimestamp
-  setCb $ _loading { timestamp: startTime, retry }
-  result <- comp
-  endTime <- getTimestamp
-  setCb case result of
+  startTime <- lift $ getTimestamp
+  lift $ setCb $ _loading { timestamp: startTime, retry }
+  result :: Either e a <- lift $ runExceptT comp
+  endTime <- lift $ getTimestamp
+  lift $ setCb case result of
     Left e -> _failure { error: e, timestamp: endTime, retry }
     Right d -> _success { data: d, timestamp: endTime, retry }
   pure result

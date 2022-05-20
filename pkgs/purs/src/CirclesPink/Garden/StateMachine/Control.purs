@@ -28,7 +28,7 @@ circlesControl env = C.mkControl
   , infoSecurity: States.infoSecurity env
   , magicWords: States.magicWords env
   , submit: States.submit env
-  , dashboard: undefined --  States.dashboard env
+  , dashboard: States.dashboard env
   , login: States.login env
   , trusts: States.trusts env
   , debug: States.debug env
