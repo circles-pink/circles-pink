@@ -79,7 +79,6 @@
             legacyPackages = { inherit pkgs; } // pkgs.circles-pink;
 
             packages = {
-              sample = pkgs.writeShellScriptBin "sample" '''';
               ci =
                 let
                   inherit (pkgs.lib) mapAttrsToList pipe;
@@ -184,7 +183,7 @@
                       inherit (pkgs.lib) concatMapStringsSep;
                       packageJsonUrl = "https://raw.githubusercontent.com/circles-pink/circles-pink/main/package.json";
                       publish = pkgs.writeShellScriptBin "publish" ''
-                        DIR = "$1"
+                        DIR="$1"
                           ${pkgs.nodePackages.npm}/bin/npm publish --verbose --access public $DIR/
                       '';
                       inherit (pkgs.circles-pink.ts) publicWorkspaces;
