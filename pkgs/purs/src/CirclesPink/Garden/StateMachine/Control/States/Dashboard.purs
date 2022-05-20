@@ -28,6 +28,7 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, inj)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
+import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)

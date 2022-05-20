@@ -76,7 +76,9 @@ module CirclesCore
 --------------------------------------------------------------------------------
 -- Re-Exports
 --------------------------------------------------------------------------------
+
 import Prelude
+
 import CirclesCore.ApiResult (ApiError) as Exp
 import CirclesCore.ApiResult (apiResultToEither, ApiError)
 import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult, Balance) as Exp
@@ -94,6 +96,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
+import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -215,8 +218,8 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> 
 -- API / trustAddConnection
 --------------------------------------------------------------------------------
 type TrustAddConnectionOptions =
-  { user :: Address
-  , canSendTo :: Address
+  { user :: ChecksumAddress
+  , canSendTo :: ChecksumAddress
   }
 
 type ErrTrustAddConnection r = ErrNative + r
@@ -226,14 +229,14 @@ trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.trust -| _.addConnection
 
-  mapArg2 x = x { user = addrToString x.user, canSendTo = addrToString x.canSendTo }
+  mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
 
 --------------------------------------------------------------------------------
 -- API / trustRemoveConnection
 --------------------------------------------------------------------------------
 type TrustRemoveConnectionOptions =
-  { user :: Address
-  , canSendTo :: Address
+  { user :: ChecksumAddress
+  , canSendTo :: ChecksumAddress
   }
 
 type ErrTrustRemoveConnection r = ErrNative + r
@@ -243,7 +246,7 @@ trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.trust -| _.removeConnection
 
-  mapArg2 x = x { user = addrToString x.user, canSendTo = addrToString x.canSendTo }
+  mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
 
 --------------------------------------------------------------------------------
 -- API / userRegister
