@@ -3,22 +3,21 @@ module CirclesPink.Garden.StateMachine.Control.States.Trusts
   ) where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler, readyForDeployment, run')
+
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', readyForDeployment, runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans, catchError)
+import Control.Monad.Except (catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import RemoteData (RemoteData, _failure, _loading)
+import RemoteData (_failure, _loading)
 
 trusts
-  :: forall t m
+  :: forall m
    . Monad m
-  => MonadTrans t
-  => Monad (t m)
   => Env.Env m
-  -> { getSafeStatus :: ActionHandler t m Unit S.TrustState ("trusts" :: S.TrustState)
-     , finalizeRegisterUser :: ActionHandler t m Unit S.TrustState ("trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
+  -> { getSafeStatus :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState)
+     , finalizeRegisterUser :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
      }
 trusts env =
   { getSafeStatus
@@ -33,7 +32,7 @@ trusts env =
         isReady' <- readyForDeployment env st.privKey
         trusts' <- env.trustGetNetwork st.privKey
         pure { safeStatus, isReady: isReady', trusts: trusts' }
-    results <- run' task
+    results <- runExceptT' task
     case results of
       Left e -> set \st' -> S._trusts st' { trustsResult = _failure e }
       Right r -> set \st' -> S._trusts st' { safeStatus = r.safeStatus, isReady = r.isReady, trusts = r.trusts }
@@ -50,7 +49,7 @@ trusts env =
         _ <- env.deploySafe st.privKey
         _ <- (env.deployToken st.privKey <#> const unit)
         pure unit
-    results <- run' task
+    results <- runExceptT' task
     case results of
       Left e -> set \st' -> S._trusts st' { trustsResult = _failure e }
       Right _ ->

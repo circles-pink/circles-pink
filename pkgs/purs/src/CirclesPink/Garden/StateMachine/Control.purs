@@ -19,18 +19,17 @@ circlesControl
   -> S.CirclesState
   -> CirclesAction
   -> m Unit
-circlesControl env = undefined
--- C.mkControl
---   _circlesStateMachine
---   { landing: States.landing env
---   , infoGeneral: States.infoGeneral env
---   , askUsername: States.askUsername env
---   , askEmail: States.askEmail env
---   , infoSecurity: States.infoSecurity env
---   , magicWords: States.magicWords env
---   , submit: States.submit env
---   , dashboard: States.dashboard env
---   , login: States.login env
---   , trusts: States.trusts env
---   , debug: States.debug env
---   }
+circlesControl env = C.mkControl
+  _circlesStateMachine
+  { landing: States.landing $ env
+  , infoGeneral: States.infoGeneral env
+  , askUsername: States.askUsername env
+  , askEmail: States.askEmail env
+  , infoSecurity: States.infoSecurity env
+  , magicWords: States.magicWords env
+  , submit: States.submit env
+  , dashboard: undefined --  States.dashboard env
+  , login: States.login env
+  , trusts: States.trusts env
+  , debug: States.debug env
+  }
