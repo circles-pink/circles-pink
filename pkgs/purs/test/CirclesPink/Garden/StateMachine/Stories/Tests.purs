@@ -4,7 +4,7 @@ module CirclesPink.Garden.StateMachine.Stories.Tests
 
 import Prelude
 
-import CirclesPink.Garden.Env (testEnv)
+import CirclesPink.Garden.Env (testEnv')
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.Stories (ScriptT, runScripT, signUpUser)
@@ -32,7 +32,7 @@ spec =
   describe "CirclesPink.Garden.StateMachine.Stories" do
     describe "A user can signup" do
       it "ends up in `trusts` state" do
-        ( signUpUser testEnv { username: "Foo", email: "foo@bar.com" }
+        ( signUpUser testEnv' { username: "Foo", email: "foo@bar.com" }
             # execAppM
             # getLabel
         )
