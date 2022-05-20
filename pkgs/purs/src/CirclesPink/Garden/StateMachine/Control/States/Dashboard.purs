@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, _inSync)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -20,15 +20,17 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
+import Data.Map (Map)
 import Data.Map as M
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant)
+import Data.Variant (Variant, inj)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
@@ -109,36 +111,39 @@ dashboard env =
   where
   getTrusts set st _ =
     let
-      mapTrust :: Array User -> TrustNode -> W3.Address /\ Trust
-      mapTrust foundUsers t = convert t.safeAddress /\ user
+      mapTrust :: Array User -> Map W3.Address Trust -> TrustNode -> W3.Address /\ Trust
+      mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
         where
         user =
-          { isLoading: false
-          , isIncoming: t.isIncoming
+          { isIncoming: t.isIncoming
           , isOutgoing: t.isOutgoing
           , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
+          , trustState: _inSync
           }
+
+      syncTrusts i = do
+        trusts <-
+          env.trustGetNetwork st.privKey
+            # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
+            # mapExceptT (\x -> x <#> lmap (const unit))
+
+        users <-
+          fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
+            # mapExceptT (\x -> x <#> lmap (const unit))
+
+        let
+          foundUsers = catMaybes $ map hush users
+        lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers st'.trusts # M.fromFoldable }
+
     in
       void do
         runExceptT do
-          trusts <-
-            env.trustGetNetwork st.privKey
-              # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-              # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
-              # mapExceptT (\x -> x <#> lmap (const unit))
+          _ <- syncTrusts
+            # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
 
-          users <-
-            runExceptT (fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts))
-              <#> lmap (const unit)
-              # ExceptT
-          let
-            foundUsers = catMaybes $ map hush users
-          lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers # M.fromFoldable }
-          _ <-
-            env.trustGetNetwork st.privKey
-              # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r })
-              # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
-              # mapExceptT (\x -> x <#> lmap (const unit))
+          _ <- syncTrusts
+            # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
+
           pure unit
 
   getUsers set st { userNames, addresses } = do
