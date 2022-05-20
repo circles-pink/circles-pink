@@ -14,6 +14,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (class MonadTrans, ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
+import Convertable (convert)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
@@ -306,14 +307,14 @@ env { request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
-    CC.trustAddConnection circlesCore account { user: other, canSendTo: us }
+    CC.trustAddConnection circlesCore account { user: convert other, canSendTo: convert us }
 
   removeTrustConnection :: Env.RemoveTrustConnection Aff
   removeTrustConnection pk other us = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
-    CC.trustRemoveConnection circlesCore account { user: other, canSendTo: us }
+    CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
 
   saveSession :: Env.SaveSession Aff
   saveSession privKey = do
