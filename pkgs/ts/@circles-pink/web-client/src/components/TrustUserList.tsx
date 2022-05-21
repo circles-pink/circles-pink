@@ -1,6 +1,5 @@
-import React, { ReactElement, SetStateAction } from 'react';
+import React, { ReactElement, SetStateAction, useEffect } from 'react';
 import tw, { css, styled } from 'twin.macro';
-import { TrustNode } from '@circles-pink/state-machine/output/CirclesCore';
 import { Theme } from '../context/theme';
 import { Claim } from './text';
 import ReactTooltip from 'react-tooltip';
@@ -21,7 +20,6 @@ import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateK
 import { JustifyBetweenCenter, JustifyStartCenter } from './helper';
 import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
-import { MappedTrustNodes, UserData } from '../onboarding/views/Dashboard';
 import {
   DefaultView,
   ErrTrustAddConnectionResolved,
@@ -34,7 +32,7 @@ type Overlay = 'SEND' | 'RECEIVE';
 
 type TrustUserListProps = {
   title?: string;
-  content: Trusts;
+  trusts: Trusts;
   theme: Theme;
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
@@ -47,7 +45,7 @@ type TrustUserListProps = {
 };
 
 export const TrustUserList = (props: TrustUserListProps) => {
-  const { title, content, theme, icon, actionRow } = props;
+  const { title, trusts, theme, icon, actionRow } = props;
 
   return (
     <Frame theme={theme}>
@@ -60,7 +58,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
       {actionRow}
       <TableContainer>
         <Table>
-          {content.length > 0 && (
+          {trusts.length > 0 && (
             <TableHeader>
               <TableRow theme={theme}>
                 <TableHead>{t('dashboard.trustList.tableHead.user')}</TableHead>
@@ -79,7 +77,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
           )}
 
           <TableBody>
-            {content.map((c, index) => {
+            {trusts.map((c, index) => {
               return (
                 <ContentRow
                   key={addrToString(c.safeAddress)}
@@ -100,24 +98,12 @@ export const TrustUserList = (props: TrustUserListProps) => {
 // -----------------------------------------------------------------------------
 
 const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
-  const {
-    c,
-    theme,
-    toggleOverlay,
-    setOverwriteTo,
-    addTrust,
-    removeTrust,
-    trustAddResult,
-    trustRemoveResult,
-  } = props;
+  const { c, theme, toggleOverlay, setOverwriteTo, addTrust, removeTrust } =
+    props;
 
-  const trustAddLoading = trustAddResult[addrToString(c.safeAddress)]
-    ? trustIsLoading(trustAddResult[addrToString(c.safeAddress)])
-    : false;
-
-  const trustRemoveLoading = trustRemoveResult[addrToString(c.safeAddress)]
-    ? trustIsLoading(trustRemoveResult[addrToString(c.safeAddress)])
-    : false;
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [c]);
 
   const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
 
@@ -276,25 +262,25 @@ const replaceUsername = (str: string, username: string) =>
   str.replace(/{{user}}/, username);
 
 const mapToolTipTrust = (trusted: boolean, username: string) => {
-  trusted
+  return trusted
     ? replaceUsername(t('dashboard.trustList.untrust'), username)
     : replaceUsername(t('dashboard.trustList.trust'), username);
 };
 
 const mapToolTipSend = (sendable: boolean, username: string) => {
-  sendable
+  return sendable
     ? replaceUsername(t('dashboard.trustList.send'), username)
     : replaceUsername(t('dashboard.trustList.canNotSend'), username);
 };
 
 const mapToolTipRelSend = (sendable: boolean, username: string) => {
-  sendable
+  return sendable
     ? replaceUsername(t('dashboard.trustList.relationSendable'), username)
     : replaceUsername(t('dashboard.trustList.relationNotSendable'), username);
 };
 
 const mapToolTipRelRec = (receivable: boolean, username: string) => {
-  receivable
+  return receivable
     ? replaceUsername(t('dashboard.trustList.relationReceivable'), username)
     : replaceUsername(t('dashboard.trustList.relationNotReceivable'), username);
 };

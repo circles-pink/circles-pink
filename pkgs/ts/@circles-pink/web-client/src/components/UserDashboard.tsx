@@ -20,7 +20,6 @@ type UserDashboardProps = {
 export const UserDashboard = ({
   header,
   text,
-  interaction,
   control,
   mainContent,
   overlay,
@@ -35,10 +34,7 @@ export const UserDashboard = ({
         {overlay}
         <Header>{header}</Header>
         <CardHead>
-          <IntroContent>
-            {text}
-            {interaction}
-          </IntroContent>
+          <IntroContent>{text}</IntroContent>
           <Control>{control}</Control>
         </CardHead>
 
@@ -71,6 +67,6 @@ const Frame = styled.div((props: FrameProps) => [
 const Header = tw.div``;
 const CardHead = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8 grid lg:grid-cols-2 md:grid-cols-2 lg:gap-4 md:gap-4`;
 const CardBody = tw.div`max-w-7xl mx-auto pb-8 px-4 sm:px-6 lg:pb-16 lg:px-8`;
-const IntroContent = tw.div`lg:w-1/2`;
-const Control = tw.div`flex lg:flex-shrink-0 lg:mt-2 lg:justify-end md:justify-end`;
+const IntroContent = tw.div`flex md:mt-2 lg:mt-2`;
+const Control = tw.div`flex lg:mt-2 lg:justify-end md:justify-end`;
 const Debug = tw.div`p-8`;

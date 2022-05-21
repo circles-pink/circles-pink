@@ -5,10 +5,14 @@ import { Button, Input } from '../../components/forms';
 import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import {
+  DashboardState,
+  _inSync,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
   defaultView,
+  Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
@@ -23,7 +27,6 @@ import {
   mdiLogout,
   mdiMagnify,
 } from '@mdi/js';
-import Icon from '@mdi/react';
 import { TrustUserList } from '../../components/TrustUserList';
 import { Overlay } from '../../components/Overlay';
 import { JustifyBetweenCenter, TwoButtonRow } from '../../components/helper';
@@ -34,8 +37,7 @@ import {
   TrustNode,
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
-import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
-import { SearchUserList } from '../../components/SearchUserList';
+import ReactTooltip from 'react-tooltip';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -83,18 +85,9 @@ export const Dashboard = ({
     }
   };
 
-  useEffect(() => {
-    if (state.trusts.length > 0) {
-      console.log('Trusts:', state.trusts);
-    }
-  }, [state.trusts.length]);
-
   // User Interaction
   // Set transfer target, when clicking on contact action
   const [overwriteTo, setOverwriteTo] = useState<string>('');
-
-  // Search
-  const [search, setSearch] = useState<string>('');
 
   // animation
   const getDelay = getIncrementor(0, 0.05);
@@ -113,7 +106,16 @@ export const Dashboard = ({
   // User Search
   // -----------------------------------------------------------------------------
 
-  const [mappedSearch, setMappedSearch] = useState<MappedTrustNodes>([]);
+  // Search Input
+  const [search, setSearch] = useState<string>('');
+
+  // Mapped with trust data
+  const [mappedSearch, setMappedSearch] = useState<Trusts>([]);
+
+  useEffect(() => {
+    // Query on user input
+    act(A._dashboard(A._userSearch({ query: search })));
+  }, [search]);
 
   useEffect(() => {
     // Map received userdata with users trusts for display
@@ -121,57 +123,28 @@ export const Dashboard = ({
       state.userSearchResult.type === 'success' &&
       state.trustsResult.type === 'success'
     ) {
-      const trusts = state.trustsResult.value.data;
+      const trusts = state.trusts;
       const mapped = state.userSearchResult.value.map(u => {
         const t = trusts.find(t => t.safeAddress === u.safeAddress);
         return {
           ...u,
           isIncoming: t?.isIncoming || false,
           isOutgoing: t?.isOutgoing || false,
-          limitPercentageIn: t?.limitPercentageIn || 0,
-          limitPercentageOut: t?.limitPercentageOut || 0,
-          mutualConnections: t?.mutualConnections || [],
+          trustState: t?.trustState || _inSync,
+          user: {
+            username: u.username,
+            avatarUrl: u.avatarUrl,
+            id: u.id,
+            safeAddress: u.safeAddress,
+          },
+          // limitPercentageIn: t?.limitPercentageIn || 0,
+          // limitPercentageOut: t?.limitPercentageOut || 0,
+          // mutualConnections: t?.mutualConnections || [],
         };
       });
       setMappedSearch(mapped);
     }
   }, [state.userSearchResult, state.trustsResult]);
-
-  // -----------------------------------------------------------------------------
-  // Trusts get userdata
-  // -----------------------------------------------------------------------------
-
-  const [mappedTrusts, setMappedTrusts] = useState<MappedTrustNodes>([]);
-
-  useEffect(() => {
-    // Whenever trusts are updated, we wanna get the according usernames
-    if (state.trustsResult.type === 'success') {
-      const addresses = state.trustsResult.value.data.map(t => t.safeAddress);
-      act(A._dashboard(A._getUsers({ userNames: [], addresses })));
-    }
-  }, [state.trustsResult]);
-
-  useEffect(() => {
-    // Map received userdata with users trusts for display
-    if (
-      state.getUsersResult.type === 'success' &&
-      state.trustsResult.type === 'success'
-    ) {
-      const users = state.getUsersResult.value;
-      const mapped = state.trustsResult.value.data.map(t => {
-        const info = users.find(u => u.safeAddress === t.safeAddress);
-        return {
-          ...t,
-          username: info?.username || addrToString(t.safeAddress).slice(0, 8),
-          avatarUrl: info?.avatarUrl || '',
-          id: info?.id || 100000,
-        };
-      });
-      setMappedTrusts(
-        mapped.sort((a, b) => a.username.localeCompare(b.username))
-      );
-    }
-  }, [state.getUsersResult, state.trustsResult]);
 
   // -----------------------------------------------------------------------------
   // Transfer
@@ -245,54 +218,45 @@ export const Dashboard = ({
       }
       mainContent={
         <MainContent>
-          {mappedTrusts && (
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
-                title={t('dashboard.trustNetworkTitle')}
-                content={state.trusts}
-                theme={theme}
-                icon={mdiLan}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                trustRemoveResult={state.trustRemoveResult}
-              />
-            </FadeIn>
-          )}
-          {mappedSearch && (
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <SearchUserList
-                title={t('dashboard.exploreTitle')}
-                content={mappedSearch}
-                theme={theme}
-                icon={mdiMagnify}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                trustRemoveResult={state.trustRemoveResult}
-                actionRow={
-                  <JustifyBetweenCenter>
-                    <InputWrapper>
-                      <Input
-                        type="text"
-                        value={search}
-                        placeholder={'Search by username'}
-                        onChange={e => setSearch(e.target.value)}
-                        onKeyPress={e =>
-                          e.key === 'Enter' &&
-                          act(A._dashboard(A._userSearch({ query: search })))
-                        }
-                      />
-                    </InputWrapper>
-                    <DebugButtonWrapper>
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <TrustUserList
+              title={t('dashboard.trustNetworkTitle')}
+              trusts={state.trusts}
+              theme={theme}
+              icon={mdiLan}
+              toggleOverlay={toggleOverlay}
+              setOverwriteTo={setOverwriteTo}
+              addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+              trustAddResult={state.trustAddResult}
+              removeTrust={to =>
+                act(A._dashboard(A._removeTrustConnection(to)))
+              }
+              trustRemoveResult={state.trustRemoveResult}
+            />
+          </FadeIn>
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <TrustUserList
+              title={t('dashboard.exploreTitle')}
+              trusts={mappedSearch}
+              theme={theme}
+              icon={mdiMagnify}
+              toggleOverlay={toggleOverlay}
+              setOverwriteTo={setOverwriteTo}
+              addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+              trustAddResult={state.trustAddResult}
+              removeTrust={to =>
+                act(A._dashboard(A._removeTrustConnection(to)))
+              }
+              trustRemoveResult={state.trustRemoveResult}
+              actionRow={
+                <JustifyBetweenCenter>
+                  <Input
+                    type="text"
+                    value={search}
+                    placeholder={'Search by username'}
+                    onChange={e => setSearch(e.target.value)}
+                  />
+                  {/* <DebugButtonWrapper>
                       <Button
                         prio={'high'}
                         theme={theme}
@@ -303,12 +267,11 @@ export const Dashboard = ({
                       >
                         {t('dashboard.searchButton')}
                       </Button>
-                    </DebugButtonWrapper>
-                  </JustifyBetweenCenter>
-                }
-              />
-            </FadeIn>
-          )}
+                    </DebugButtonWrapper> */}
+                </JustifyBetweenCenter>
+              }
+            />
+          </FadeIn>
         </MainContent>
       }
       overlay={
