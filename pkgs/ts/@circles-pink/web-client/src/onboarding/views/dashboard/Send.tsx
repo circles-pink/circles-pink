@@ -1,4 +1,4 @@
-import { mdiCashFast } from '@mdi/js';
+import { mdiCashFast, mdiQrcodeScan } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import React, { useEffect, useState } from 'react';
@@ -10,11 +10,15 @@ import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
 import { convertTimeCirclesToCircles } from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
+import QrScanner from 'eth-qr-scanner';
 import { t } from 'i18next';
 import {
   DefaultView,
   defaultView,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import Icon from '@mdi/react';
+import styled from '@emotion/styled';
+import tw from 'twin.macro';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -38,6 +42,7 @@ export const Send = ({
   const [to, setTo] = useState<string>(overwriteTo || '');
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
+  const [scannerOpen, setScannerOpen] = useState<boolean>(false);
 
   // Util
   const transact = () =>
@@ -58,18 +63,42 @@ export const Send = ({
       )
     );
 
+  const handleScan = data => {
+    if (data) {
+      setTo(data);
+    }
+  };
+  const handleError = err => {
+    console.error(err);
+  };
+
   // Render
   return (
     <>
       <Claim color={theme.baseColor}>{t('dashboard.sendClaim')}</Claim>
+      <div>
+        {scannerOpen && (
+          <QrScanner
+            delay={300}
+            onError={handleError}
+            onScan={handleScan}
+            style={{ width: '100%' }}
+          />
+        )}
+      </div>
       <br />
-      <Input
-        type="text"
-        value={to}
-        placeholder={'To'}
-        onChange={e => setTo(e.target.value)}
-        onKeyPress={e => e.key === 'Enter' && transact()}
-      />
+      <InputRow>
+        <Input
+          type="text"
+          value={to}
+          placeholder={'To'}
+          onChange={e => setTo(e.target.value)}
+          onKeyPress={e => e.key === 'Enter' && transact()}
+        />
+        <IconContainer onClick={() => setScannerOpen(!scannerOpen)}>
+          <Icon path={mdiQrcodeScan} size={1.5} color={theme.baseColor} />
+        </IconContainer>
+      </InputRow>
       <Input
         type="number"
         step=".01"
@@ -102,3 +131,6 @@ export const Send = ({
     </>
   );
 };
+
+const InputRow = styled.div(() => [tw`flex`]);
+const IconContainer = styled.div(() => [tw`ml-2 cursor-pointer`]);
