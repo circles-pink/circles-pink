@@ -38,6 +38,7 @@ import {
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
 import ReactTooltip from 'react-tooltip';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -114,7 +115,9 @@ export const Dashboard = ({
 
   useEffect(() => {
     // Query on user input
-    act(A._dashboard(A._userSearch({ query: search })));
+    if (search !== '') {
+      act(A._dashboard(A._userSearch({ query: search })));
+    }
   }, [search]);
 
   useEffect(() => {
@@ -292,12 +295,7 @@ export const Dashboard = ({
           />
         ) : null
       }
-      debug={
-        <>
-          <pre>{JSON.stringify(state, null, 2)}</pre>
-          <pre>{JSON.stringify(stateRaw, null, 2)}</pre>
-        </>
-      }
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

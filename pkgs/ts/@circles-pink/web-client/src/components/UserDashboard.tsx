@@ -14,7 +14,7 @@ type UserDashboardProps = {
   control?: ReactElement;
   mainContent?: ReactElement;
   overlay?: ReactElement | null;
-  debug?: ReactElement;
+  debug?: ReactElement | ReactElement[];
 };
 
 export const UserDashboard = ({
