@@ -1,4 +1,9 @@
-import React, { ReactElement, SetStateAction, useEffect } from 'react';
+import React, {
+  ReactElement,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
 import { Claim } from './text';
@@ -17,7 +22,11 @@ import {
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
-import { JustifyBetweenCenter, JustifyStartCenter } from './helper';
+import {
+  JustifyAroundCenter,
+  JustifyBetweenCenter,
+  JustifyStartCenter,
+} from './helper';
 import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
 import { LoadingCircles } from './LoadingCircles';
 import {
@@ -27,6 +36,8 @@ import {
   Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { t } from 'i18next';
+import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
+import { PageSelector } from './PageSelector';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -45,7 +56,27 @@ type TrustUserListProps = {
 };
 
 export const TrustUserList = (props: TrustUserListProps) => {
-  const { title, trusts, theme, icon, actionRow } = props;
+  const { title, trusts: allTrusts, theme, icon, actionRow } = props;
+
+  // Paginate trusts
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const paginationInfo = paginate(allTrusts.length, currentPage);
+
+  const pageControls = fetchPageNumbers({
+    currentPage,
+    totalPages: paginationInfo.pages.length,
+    pageNeighbours: 1,
+  });
+
+  const trusts = allTrusts
+    // Sorty by safe address
+    .sort((a, b) => a.safeAddress.localeCompare(b.safeAddress))
+    // Sort by username and priorize users with username
+    .sort((a, b) =>
+      a.user && b.user ? a.user.username.localeCompare(b.user.username) : 0
+    )
+    // Get slice on current page
+    .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
 
   return (
     <Frame theme={theme}>
@@ -89,6 +120,15 @@ export const TrustUserList = (props: TrustUserListProps) => {
           </TableBody>
         </Table>
       </TableContainer>
+      {paginationInfo.totalPages > 1 && (
+        <JustifyAroundCenter>
+          <PageSelector
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pageControls={pageControls}
+          />
+        </JustifyAroundCenter>
+      )}
     </Frame>
   );
 };
