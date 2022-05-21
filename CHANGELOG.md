@@ -4,11 +4,25 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## Unrelesed
+
+### Added
+
+- Pagination for trust list
+- Scan address mvp in send circles overlay
+
+### Changed
+
+- The debug state (magicDebug) is now sorted and filterable
+- Search is now triggered on change and pressing the button is obsolete
+- Removed extra search component and refactored search results, mapping is still not in sync with trustState from trusts
+- Fixed Tooltips
+
 ## [1.0.26]
 
 ### Added
 
-- Just task that does a nix-collect-garbage without deleting currently needed derivations. DOes not yet work 100%.
+- Just task that does a nix-collect-garbage without deleting currently needed derivations. Does not yet work 100%.
 - Just default task that does a full ci build and keeps the result in an out-link
 - Refactor control modules
 - Sync trusts with mapping in state-machine
