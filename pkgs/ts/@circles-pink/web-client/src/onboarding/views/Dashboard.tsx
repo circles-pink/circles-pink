@@ -1,6 +1,12 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useEffect, useState } from 'react';
+import React, {
+  ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Button, Input } from '../../components/forms';
 import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
@@ -8,6 +14,7 @@ import { FadeIn } from 'anima-react';
 import {
   DashboardState,
   _inSync,
+  _loadingTrust,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
@@ -67,7 +74,10 @@ export const Dashboard = ({
   state: stateRaw,
   act,
 }: DashboardProps): ReactElement => {
-  const state = (defaultView as any)(stateRaw) as DefaultView;
+  const state = useMemo<DefaultView>(
+    () => (defaultView as any)(stateRaw) as DefaultView,
+    [stateRaw]
+  );
 
   // Theme
   const [theme] = useContext(ThemeContext);
@@ -129,12 +139,17 @@ export const Dashboard = ({
     ) {
       const trusts = state.trusts;
       const mapped = state.userSearchResult.value.map(u => {
-        const t = trusts.find(t => t.safeAddress === u.safeAddress);
+        const currentlyAdding =
+          u.safeAddress in state.trustAddResult ? _loadingTrust : _inSync;
+        const t = trusts.find(
+          t => t.safeAddress.toLowerCase() === u.safeAddress.toLowerCase()
+        );
+
         return {
           ...u,
           isIncoming: t?.isIncoming || false,
           isOutgoing: t?.isOutgoing || false,
-          trustState: t?.trustState || _inSync,
+          trustState: t?.trustState || currentlyAdding,
           user: {
             username: u.username,
             avatarUrl: u.avatarUrl,
@@ -148,7 +163,7 @@ export const Dashboard = ({
       });
       setMappedSearch(mapped);
     }
-  }, [state.userSearchResult, state.trustsResult]);
+  }, [state.userSearchResult, state.trustsResult, state.trusts]);
 
   // -----------------------------------------------------------------------------
   // Transfer
