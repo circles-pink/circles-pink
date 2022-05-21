@@ -24,6 +24,7 @@
     "cytoscape": "^3.21.1",
     "cytoscape-cose-bilkent": "^4.1.0",
     "dayjs": "^1.11.1",
+    "eth-qr-scanner": "^1.1.0",
     "fp-ts": "^2.11.9",
     "i18next": "^21.6.13",
     "i18next-browser-languagedetector": "^6.1.3",
