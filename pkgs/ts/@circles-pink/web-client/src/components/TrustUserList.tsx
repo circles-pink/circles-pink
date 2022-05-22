@@ -146,6 +146,9 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
   }, [c]);
 
   const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
+  const isTrusted = c.trustState.type === 'trusted';
+  const isUntrusted = c.trustState.type === 'untrusted';
+  const inSync = isTrusted || isUntrusted;
 
   return (
     <TableRow theme={theme}>
@@ -159,10 +162,10 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
         <ReactTooltip />
         <JustifyBetweenCenter>
           <Icon
-            path={c.isIncoming ? mdiAccountArrowLeft : mdiAccountCancel}
+            path={isTrusted ? mdiAccountArrowLeft : mdiAccountCancel}
             size={1.6}
-            color={c.isIncoming ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelRec(c.isIncoming, userIdent)}
+            color={isTrusted ? theme.baseColor : 'white'}
+            data-tip={mapToolTipRelRec(isTrusted, userIdent)}
           />
           <Icon
             path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
@@ -193,20 +196,20 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             />
           </Clickable>
 
-          {c.trustState.type === 'inSync' ? (
+          {inSync ? (
             <Clickable
               clickable={true}
               onClick={() => {
-                !c.isIncoming
+                isUntrusted
                   ? addTrust(addrToString(c.safeAddress))
                   : removeTrust(addrToString(c.safeAddress));
               }}
             >
               <Icon
-                path={c.isIncoming ? mdiHeart : mdiHeartOutline}
+                path={isTrusted ? mdiHeart : mdiHeartOutline}
                 size={1.5}
-                color={c.isIncoming ? theme.baseColor : 'white'}
-                data-tip={mapToolTipTrust(c.isIncoming, userIdent)}
+                color={isTrusted ? theme.baseColor : 'white'}
+                data-tip={mapToolTipTrust(isTrusted, userIdent)}
               />
             </Clickable>
           ) : (
@@ -219,7 +222,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                   path={mdiTimerSand}
                   size={1.5}
                   color={theme.baseColor}
-                  data-tip={mapToolTipTrust(c.isIncoming, userIdent)}
+                  data-tip={mapToolTipTrust(isTrusted, userIdent)}
                 />
               )}
             </>

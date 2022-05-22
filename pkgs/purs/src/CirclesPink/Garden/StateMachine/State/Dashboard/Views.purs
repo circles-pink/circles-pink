@@ -76,15 +76,13 @@ type Trusts = Array Trust
 type Trust =
   { safeAddress :: String
   , trustState :: TrustState
-  , isIncoming :: Boolean
   , isOutgoing :: Boolean
   , user :: Nullable User
   }
 
 mapTrust :: W3.Address /\ D.Trust -> Trust
 mapTrust (a /\ t) =
-  { isIncoming: t.isIncoming
-  , isOutgoing: t.isOutgoing
+  { isOutgoing: t.isOutgoing
   , trustState: t.trustState
   , safeAddress: show a
   , user: toNullable t.user

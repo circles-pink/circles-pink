@@ -26,11 +26,12 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , Trusts
   , UserSearchResult
   , _dashboard
-  , _inSync
   , _loadingTrust
   , _loadingUntrust
   , _pendingTrust
   , _pendingUntrust
+  , _trusted
+  , _untrusted
   , initDashboard
   ) where
 
@@ -74,8 +75,7 @@ type DashboardState =
 type Trusts = Map W3.Address Trust
 
 type Trust =
-  { isIncoming :: Boolean
-  , isOutgoing :: Boolean
+  { isOutgoing :: Boolean
   , user :: Maybe User
   , trustState :: TrustState
   }
@@ -186,15 +186,19 @@ type RemoteReportV e a = RemoteReport (Variant e) a
 --------------------------------------------------------------------------------
 
 type TrustState = Variant
-  ( inSync :: Unit
-  , loadingTrust :: Unit
+  ( loadingTrust :: Unit
   , loadingUntrust :: Unit
   , pendingTrust :: Unit
   , pendingUntrust :: Unit
+  , trusted :: Unit
+  , untrusted :: Unit
   )
 
-_inSync :: TrustState
-_inSync = inj (Proxy :: _ "inSync") unit
+_trusted :: TrustState
+_trusted = inj (Proxy :: _ "trusted") unit
+
+_untrusted :: TrustState
+_untrusted = inj (Proxy :: _ "untrusted") unit
 
 _loadingTrust :: TrustState
 _loadingTrust = inj (Proxy :: _ "loadingTrust") unit

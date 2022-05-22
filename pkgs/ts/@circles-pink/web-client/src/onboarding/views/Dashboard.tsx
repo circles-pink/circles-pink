@@ -13,8 +13,9 @@ import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import {
   DashboardState,
-  _inSync,
   _loadingTrust,
+  _trusted,
+  _untrusted,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
@@ -140,14 +141,13 @@ export const Dashboard = ({
       const trusts = state.trusts;
       const mapped = state.userSearchResult.value.map(u => {
         const currentlyAdding =
-          u.safeAddress in state.trustAddResult ? _loadingTrust : _inSync;
+          u.safeAddress in state.trustAddResult ? _loadingTrust : _untrusted;
         const t = trusts.find(
           t => t.safeAddress.toLowerCase() === u.safeAddress.toLowerCase()
         );
 
         return {
           ...u,
-          isIncoming: t?.isIncoming || false,
           isOutgoing: t?.isOutgoing || false,
           trustState: t?.trustState || currentlyAdding,
           user: {

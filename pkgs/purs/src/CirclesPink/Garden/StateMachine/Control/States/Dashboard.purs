@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, _inSync, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust, _trusted, _untrusted)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -25,7 +25,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant, inj)
+import Data.Variant (Variant, default, inj, onMatch)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
@@ -128,15 +128,24 @@ dashboard env =
       mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
         where
         trustState = case lookup (convert t.safeAddress) oldTrusts of
-          Nothing -> _inSync
-          Just { isIncoming, trustState: oldTrustState } ->
-            if
-              isIncoming == t.isIncoming then oldTrustState
-            else _inSync
+          Nothing -> if t.isIncoming then _trusted else _untrusted
+          Just { trustState: oldTrustState } ->
+
+            if t.isIncoming then
+              ( default oldTrustState # onMatch
+                  { "pendingTrust": \_ -> _trusted
+                  , "loadingTrust": \_ -> _trusted
+                  }
+              ) oldTrustState
+            else
+              ( default oldTrustState # onMatch
+                  { "pendingUntrust": \_ -> _untrusted
+                  , "loadingUntrust": \_ -> _untrusted
+                  }
+              ) oldTrustState
 
         user =
-          { isIncoming: t.isIncoming
-          , isOutgoing: t.isOutgoing
+          { isOutgoing: t.isOutgoing
           , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
           , trustState
           }
@@ -178,9 +187,9 @@ dashboard env =
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingTrust }) (convert addr) st'.trusts }
-        _ <- syncTrusts set st
-          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
-          # dropError
+        -- _ <- syncTrusts set st
+        --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
+        --   # dropError
         pure unit
 
   removeTrustConnection set st u =
@@ -195,9 +204,9 @@ dashboard env =
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingUntrust }) (convert addr) st'.trusts }
-        _ <- syncTrusts set st
-          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
-          # dropError
+        -- _ <- syncTrusts set st
+        --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
+        --   # dropError
 
         pure unit
 
