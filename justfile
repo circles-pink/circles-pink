@@ -65,7 +65,7 @@ branchless-to-main:
 circles-garden:
 	cd {{GARDEN_PATH}} && \
 	nix-shell -p nodejs-12_x -p docker-compose --command \
-	"make clean && make up && make contracts && make subgraph"
+	"make down && make clean && make up && make contracts && make subgraph"
 
 circles-garden-fund-safe addr:
 	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools && \

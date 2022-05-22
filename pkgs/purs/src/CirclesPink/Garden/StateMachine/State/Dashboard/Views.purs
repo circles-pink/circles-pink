@@ -25,15 +25,21 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
+import Convertable (convert)
 import Data.Array (any)
+import Data.Map (lookup)
 import Data.Map as M
+import Data.Maybe (maybe)
+import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
+import Data.Tuple (uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant)
+import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
 import Network.Ethereum.Core.Signatures as W3
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
+import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- globalLoading
@@ -60,6 +66,7 @@ globalLoading d = any (_ == true) $ join checks
 --------------------------------------------------------------------------------
 type DefaultView =
   { trusts :: Trusts
+  , usersSearch :: Trusts
   , userSearchResult :: RemoteData Unit Unit ErrUserSearchResolved (Array User)
   , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
   , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
@@ -80,8 +87,8 @@ type Trust =
   , user :: Nullable User
   }
 
-mapTrust :: W3.Address /\ D.Trust -> Trust
-mapTrust (a /\ t) =
+mapTrust :: W3.Address -> D.Trust -> Trust
+mapTrust a t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
   , safeAddress: show a
@@ -89,21 +96,33 @@ mapTrust (a /\ t) =
   }
 
 mapTrusts :: D.Trusts -> Trusts
-mapTrusts xs = M.toUnfoldable xs <#> mapTrust
+mapTrusts xs = M.toUnfoldable xs <#> uncurry mapTrust
 
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts } =
-  { trusts: mapTrusts trusts
-  , userSearchResult: d.userSearchResult
-  , getUsersResult: d.getUsersResult
-  , trustsResult: d.trustsResult
-  , trustAddResult: d.trustAddResult
-  , trustRemoveResult: d.trustRemoveResult
-  , checkUBIPayoutResult: d.checkUBIPayoutResult
-  , getBalanceResult: d.getBalanceResult
-  , requestUBIPayoutResult: d.requestUBIPayoutResult
-  , transferResult: d.transferResult
-  }
+  let
+    usersSearch :: Trusts
+    usersSearch =
+      d.userSearchResult
+        # (unwrap >>> (default [] # onMatch { "success": \users -> users }))
+        <#>
+          ( \user -> lookup (convert user.safeAddress) trusts
+              # maybe undefined identity
+              # mapTrust (convert user.safeAddress)
+          )
+  in
+    { trusts: mapTrusts trusts
+    , usersSearch: []
+    , userSearchResult: d.userSearchResult
+    , getUsersResult: d.getUsersResult
+    , trustsResult: d.trustsResult
+    , trustAddResult: d.trustAddResult
+    , trustRemoveResult: d.trustRemoveResult
+    , checkUBIPayoutResult: d.checkUBIPayoutResult
+    , getBalanceResult: d.getBalanceResult
+    , requestUBIPayoutResult: d.requestUBIPayoutResult
+    , transferResult: d.transferResult
+    }
 
 --------------------------------------------------------------------------------
 -- Resolved Errors
