@@ -23,6 +23,7 @@ import Data.Int (floor, toNumber)
 import Data.Map (Map, lookup, update)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap, wrap)
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, inj, onMatch)
@@ -30,7 +31,7 @@ import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Partial.Unsafe (unsafePartial)
-import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteData (RemoteData(..), _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -243,14 +244,10 @@ dashboard env =
         pure unit
 
   userSearch set st options = do
-    set \st' -> S._dashboard st' { userSearchResult = _loading unit :: RemoteData _ _ _ _ }
-    let
-      task :: ExceptV (S.ErrUserSearch ()) _ _
-      task = env.userSearch st.privKey options
-    result <- runExceptT' $ task
-    case result of
-      Left e -> set \st' -> S._dashboard st' { userSearchResult = _failure e }
-      Right u -> set \st' -> S._dashboard st' { userSearchResult = _success u }
+    void do
+      runExceptT do
+        env.userSearch st.privKey options
+          # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { userSearchResult = r }) x 0)
 
   transfer set st { from, to, value, paymentNote } = do
     set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
@@ -290,13 +287,17 @@ subscribeRemoteReport
   -> ExceptT e m a
 subscribeRemoteReport { getTimestamp } setCb comp retry = ExceptT do
   startTime <- getTimestamp
-  setCb $ _loading { timestamp: startTime, retry }
+  setCb $ _loading { timestamp: startTime, retry, previousData: Nothing :: Maybe a }
   result :: Either e a <- runExceptT comp
   endTime <- getTimestamp
   setCb case result of
     Left e -> _failure { error: e, timestamp: endTime, retry }
     Right d -> _success { data: d, timestamp: endTime, retry }
   pure result
+
+addPreviousData :: forall e a. a -> RemoteReport e a -> RemoteReport e a
+addPreviousData pd rp =
+  (default rp # onMatch { loading: \x -> _loading $ x { previousData = Just pd } }) (unwrap rp)
 
 -- subscribeRemoteReport_
 --   :: forall e a m
