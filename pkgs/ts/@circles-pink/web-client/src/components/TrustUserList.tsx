@@ -17,7 +17,7 @@ import {
   mdiCashFast,
   mdiCashRemove,
   mdiAt,
-  mdiTimerSand,
+  mdiWeatherCloudyClock,
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
@@ -148,6 +148,10 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
   const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
   const isTrusted = c.trustState.type === 'trusted';
   const isUntrusted = c.trustState.type === 'untrusted';
+  const pendingTrust = c.trustState.type === 'pendingTrust';
+  const pendingUntrust = c.trustState.type === 'pendingUntrust';
+  const loadingTrust = c.trustState.type === 'loadingTrust';
+  const loadingUntrust = c.trustState.type === 'loadingUntrust';
   const inSync = isTrusted || isUntrusted;
 
   return (
@@ -162,9 +166,17 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
         <ReactTooltip />
         <JustifyBetweenCenter>
           <Icon
-            path={isTrusted ? mdiAccountArrowLeft : mdiAccountCancel}
+            path={
+              isTrusted || pendingUntrust || loadingUntrust
+                ? mdiAccountArrowLeft
+                : mdiAccountCancel
+            }
             size={1.6}
-            color={isTrusted ? theme.baseColor : 'white'}
+            color={
+              isTrusted || pendingUntrust || loadingUntrust
+                ? theme.baseColor
+                : 'white'
+            }
             data-tip={mapToolTipRelRec(isTrusted, userIdent)}
           />
           <Icon
@@ -219,7 +231,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 <LoadingCircles count={1} width={35} color={theme.baseColor} />
               ) : (
                 <Icon
-                  path={mdiTimerSand}
+                  path={mdiWeatherCloudyClock}
                   size={1.5}
                   color={theme.baseColor}
                   data-tip={mapToolTipTrust(isTrusted, userIdent)}
