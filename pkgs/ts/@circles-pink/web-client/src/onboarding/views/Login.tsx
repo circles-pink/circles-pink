@@ -44,7 +44,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
           <Input
             autoFocus
             // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
-            type="text"
+            type="password"
             value={state.magicWords}
             placeholder={t('login.magicWordsPlaceholder')}
             onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
