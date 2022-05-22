@@ -62,6 +62,7 @@ type CirclesAction = Variant
         , userSearch ::
             { query :: String
             }
+        , redeploySafeAndToken :: Unit
         )
   , login ::
       Variant
@@ -186,3 +187,6 @@ _transfer = inj (Proxy :: _ "transfer")
 
 _userSearch :: forall a v. a -> Variant (userSearch :: a | v)
 _userSearch = inj (Proxy :: _ "userSearch")
+
+_redeploySafeAndToken :: forall a v. a -> Variant (redeploySafeAndToken :: a | v)
+_redeploySafeAndToken = inj (Proxy :: _ "redeploySafeAndToken")

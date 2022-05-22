@@ -11,7 +11,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust, _trusted, _untrusted)
-import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
+import Control.Monad.Except (ExceptT(..), catchError, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
@@ -97,6 +97,7 @@ dashboard
            }
            S.DashboardState
            ("dashboard" :: S.DashboardState)
+     , redeploySafeAndToken :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      }
 dashboard env =
   { logout: \_ _ _ -> pure unit
@@ -107,6 +108,7 @@ dashboard env =
   , getUsers
   , transfer
   , userSearch
+  , redeploySafeAndToken
   }
   where
   getTrusts set st _ =
@@ -128,7 +130,6 @@ dashboard env =
         trustState = case lookup (convert t.safeAddress) oldTrusts of
           Nothing -> if t.isIncoming then _trusted else _untrusted
           Just { trustState: oldTrustState } ->
-
             if t.isIncoming then
               ( default oldTrustState # onMatch
                   { "pendingTrust": \_ -> _trusted
@@ -141,24 +142,20 @@ dashboard env =
                   , "loadingUntrust": \_ -> _untrusted
                   }
               ) oldTrustState
-
         user =
           { isOutgoing: t.isOutgoing
           , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
           , trustState
           }
-
     in
       do
         trusts <-
           env.trustGetNetwork st.privKey
             # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
             # dropError
-
         users <-
           fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
             # dropError
-
         let
           foundUsers = catMaybes $ map hush users
         lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers st'.trusts # M.fromFoldable }
@@ -188,6 +185,17 @@ dashboard env =
         -- _ <- syncTrusts set st
         --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
         --   # dropError
+        pure unit
+
+  redeploySafeAndToken _ st _ = void do
+    runExceptT
+      do
+        -- First deploy always fails
+        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
+        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
+        -- Second deploy works
+        _ <- env.deploySafe st.privKey
+        _ <- (env.deployToken st.privKey <#> const unit)
         pure unit
 
   removeTrustConnection set st u =
