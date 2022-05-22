@@ -117,7 +117,7 @@ type ErrGetUsers r = Env.ErrGetUsers + r
 --------------------------------------------------------------------------------
 -- UserSearchResult
 --------------------------------------------------------------------------------
-type UserSearchResult = RemoteData Unit Unit (Variant (ErrUserSearch + ())) (Array User)
+type UserSearchResult = RemoteReport (Variant (ErrUserSearch + ())) (Array User)
 
 type ErrUserSearch r = Env.ErrUserSearch + r
 
