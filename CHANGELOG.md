@@ -10,6 +10,7 @@ Please add new entries below.
 
 - Pagination for trust list
 - Scan address mvp in send circles overlay
+- Redeploy token and safe option for debug
 
 ### Changed
 
@@ -17,6 +18,7 @@ Please add new entries below.
 - Search is now triggered on change and pressing the button is obsolete
 - Removed extra search component and refactored search results, mapping is still not in sync with trustState from trusts
 - Fixed Tooltips
+- Trusts from search results now correctly mapped
 
 ## [1.0.26]
 

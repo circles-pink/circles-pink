@@ -52,6 +52,7 @@ type CirclesProtocol = P.Protocol
         , getUsers :: P.Action ("dashboard" :> Nil')
         , transfer :: P.Action ("dashboard" :> Nil')
         , userSearch :: P.Action ("dashboard" :> Nil')
+        , redeploySafeAndToken :: P.Action ("dashboard" :> Nil')
         )
   , login ::
       P.State

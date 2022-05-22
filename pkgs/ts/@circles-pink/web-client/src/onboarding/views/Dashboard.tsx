@@ -268,7 +268,16 @@ export const Dashboard = ({
           />
         ) : null
       }
-      debug={<StateMachineDebugger state={state} />}
+      debug={
+        <>
+          <StateMachineDebugger state={state} />
+          <Button
+            onClick={() => act(A._dashboard(A._redeploySafeAndToken(unit)))}
+          >
+            Redeploy!
+          </Button>
+        </>
+      }
     />
   );
 };
