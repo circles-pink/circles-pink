@@ -7,10 +7,10 @@ import Prelude
 
 import CirclesCore (User, TrustNode)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', runExceptT')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust, _trusted, _untrusted)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust, _trusted, _untrusted)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -23,19 +23,16 @@ import Data.Int (floor, toNumber)
 import Data.Map (Map, lookup, update)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap, wrap)
+import Data.Newtype (unwrap)
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant, default, inj, onMatch)
+import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
-import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Partial.Unsafe (unsafePartial)
-import RemoteData (RemoteData(..), _failure, _loading, _success)
+import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
-import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 

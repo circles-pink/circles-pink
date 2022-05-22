@@ -32,6 +32,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
+import Data.String (toLower)
 import Data.Tuple (uncurry)
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
@@ -39,6 +40,7 @@ import Foreign.Object as O
 import Network.Ethereum.Core.Signatures as W3
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
+import Wallet.PrivateKey (addrToString)
 
 --------------------------------------------------------------------------------
 -- globalLoading
@@ -104,7 +106,7 @@ defaultView d@{ trusts, trustAddResult } =
       { isOutgoing: false
       , user: Just user
       , trustState:
-          O.lookup (show user.safeAddress) trustAddResult
+          O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
             # maybe _untrusted
                 ( unwrap >>>
                     ( default _untrusted # onMatch
