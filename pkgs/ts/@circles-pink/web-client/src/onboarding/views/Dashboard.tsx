@@ -25,7 +25,6 @@ import {
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
-import { mapResult } from '../utils/mapResult';
 import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
@@ -45,9 +44,7 @@ import {
   TrustNode,
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
-import ReactTooltip from 'react-tooltip';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import { paginate } from '../utils/paginate';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -122,48 +119,12 @@ export const Dashboard = ({
   // Search Input
   const [search, setSearch] = useState<string>('');
 
-  // Mapped with trust data
-  const [mappedSearch, setMappedSearch] = useState<Trusts>([]);
-
   useEffect(() => {
     // Query on user input
     if (search !== '') {
       act(A._dashboard(A._userSearch({ query: search })));
     }
   }, [search]);
-
-  useEffect(() => {
-    // Map received userdata with users trusts for display
-    if (
-      state.userSearchResult.type === 'success' &&
-      state.trustsResult.type === 'success'
-    ) {
-      const trusts = state.trusts;
-      const mapped = state.userSearchResult.value.map(u => {
-        const currentlyAdding =
-          u.safeAddress in state.trustAddResult ? _loadingTrust : _untrusted;
-        const t = trusts.find(
-          t => t.safeAddress.toLowerCase() === u.safeAddress.toLowerCase()
-        );
-
-        return {
-          ...u,
-          isOutgoing: t?.isOutgoing || false,
-          trustState: t?.trustState || currentlyAdding,
-          user: {
-            username: u.username,
-            avatarUrl: u.avatarUrl,
-            id: u.id,
-            safeAddress: u.safeAddress,
-          },
-          // limitPercentageIn: t?.limitPercentageIn || 0,
-          // limitPercentageOut: t?.limitPercentageOut || 0,
-          // mutualConnections: t?.mutualConnections || [],
-        };
-      });
-      setMappedSearch(mapped);
-    }
-  }, [state.userSearchResult, state.trustsResult, state.trusts]);
 
   // -----------------------------------------------------------------------------
   // Transfer
@@ -173,10 +134,6 @@ export const Dashboard = ({
     if (state.transferResult.type === 'success') {
       // Close overlay
       setOverlay(['SEND', false]);
-      // Refresh balance - better be done in purs
-      setTimeout(() => {
-        act(A._dashboard(A._getBalance(unit)));
-      }, 2000);
     }
   }, [state.transferResult]);
 
@@ -256,7 +213,7 @@ export const Dashboard = ({
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TrustUserList
               title={t('dashboard.exploreTitle')}
-              trusts={mappedSearch}
+              trusts={state.usersSearch}
               theme={theme}
               icon={mdiMagnify}
               toggleOverlay={toggleOverlay}
