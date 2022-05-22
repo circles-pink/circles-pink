@@ -1,31 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
 import { Checkbox } from './forms';
 
-type StateMachineDebuggerProps = {
-  state: DefaultView;
+type StateMachineDebuggerProps<K extends string, V> = {
+  state: Record<K, V>;
 };
 
-export const StateMachineDebugger = ({ state }: StateMachineDebuggerProps) => {
-  const [filters, setFilters] = useState<{ [key: string]: boolean }>({});
-
+export const StateMachineDebugger = ({
+  state,
+}: StateMachineDebuggerProps<string, any>) => {
   const stateKeys = Object.keys(state).sort((a, b) => a.localeCompare(b));
 
-  useEffect(() => {
-    const newFilters = {};
-    stateKeys.forEach(k => (newFilters[k] = k in filters || true));
-    setFilters(newFilters);
-  }, []);
+  const [filters, setFilters] = useState<Record<string, boolean>>(
+    Object.fromEntries(stateKeys.map(k => [k, true])) as Record<string, boolean>
+  );
 
-  const updateFilter = (key: string) => {
-    const update = {
-      ...filters,
-    };
-    update[key] = !filters[key];
-    setFilters(update);
-  };
+  const updateFilter = (key: string) =>
+    setFilters({ ...filters, [key]: !filters[key] });
 
   return (
     <Frame>
