@@ -13,12 +13,14 @@ type OverlayProps = {
 export const Overlay = (props: OverlayProps) => {
   const { content, theme, closeOverlay } = props;
   return (
-    <Frame {...props}>
-      {content}
-      <IconContainer onClick={() => closeOverlay()}>
-        <Icon path={mdiCloseCircleOutline} size={2} color={theme.baseColor} />
-      </IconContainer>
-    </Frame>
+    <Envelope>
+      <Frame {...props}>
+        {content}
+        <IconContainer onClick={() => closeOverlay()}>
+          <Icon path={mdiCloseCircleOutline} size={2} color={theme.baseColor} />
+        </IconContainer>
+      </Frame>
+    </Envelope>
   );
 };
 
@@ -29,14 +31,12 @@ export const Overlay = (props: OverlayProps) => {
 type FrameProps = OverlayProps;
 
 const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
-  tw`absolute block p-8 shadow-xl rounded-xl`,
+  tw`absolute block p-8 shadow-xl rounded-xl lg:w-3/5 w-11/12 mx-auto`,
   css`
     background-color: ${'white'};
     border: 2px solid ${theme.baseColor};
     z-index: 100;
-    top: 20%;
-    width: 80%;
-    margin-left: 10%;
+    top: 22.5%;
     min-height: 6rem;
   `,
 ]);
@@ -45,4 +45,5 @@ const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
 // UI
 // -----------------------------------------------------------------------------
 
+const Envelope = tw.div`flex justify-center items-center`;
 const IconContainer = tw.div`absolute right-6 top-6 cursor-pointer`;

@@ -164,7 +164,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
       </TableData>
       <TableData>
         <ReactTooltip />
-        <JustifyBetweenCenter>
+        <JustifyAroundCenter>
           <Icon
             path={
               isTrusted || pendingUntrust || loadingUntrust
@@ -185,10 +185,10 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             color={c.isOutgoing ? theme.baseColor : 'white'}
             data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
           />
-        </JustifyBetweenCenter>
+        </JustifyAroundCenter>
       </TableData>
       <TableData>
-        <JustifyBetweenCenter>
+        <JustifyAroundCenter>
           <Clickable
             clickable={c.isOutgoing}
             onClick={() => {
@@ -239,7 +239,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
               )}
             </>
           )}
-        </JustifyBetweenCenter>
+        </JustifyAroundCenter>
       </TableData>
     </TableRow>
   );

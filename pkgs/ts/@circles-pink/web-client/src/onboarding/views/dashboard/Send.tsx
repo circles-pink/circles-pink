@@ -63,9 +63,10 @@ export const Send = ({
       )
     );
 
-  const handleScan = data => {
+  const handleScan = (data: string) => {
     if (data) {
       setTo(data);
+      setScannerOpen(false);
     }
   };
   const handleError = err => {

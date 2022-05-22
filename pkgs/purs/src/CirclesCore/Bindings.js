@@ -23,7 +23,7 @@ exports.strToBN = (str) => () => new BN(str);
 
 exports.intToBN = (int) => () => new BN(int);
 
-exports.bnToStr = (bn) => () => bn.toString();
+exports.bnToStr = (bn) => bn.toString();
 
 // CirclesCore
 

@@ -4,6 +4,7 @@ import { Claim, Text } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { DashboardProps } from '../Dashboard';
 import QrCode from 'react-qrcode-svg';
+import tw, { css, styled } from 'twin.macro';
 
 // -----------------------------------------------------------------------------
 // Receive Circles
@@ -29,8 +30,12 @@ export const Receive = ({ state, theme }: ReceiveProps) => {
         />
       </JustifyAround>
       <CenterText>
-        <Text>{state.user.safeAddress}</Text>
+        <Address>{state.user.safeAddress}</Address>
       </CenterText>
     </>
   );
 };
+
+const Address = styled.span(() => [
+  tw`text-gray-900 mb-2 lg:text-base text-sm`,
+]);

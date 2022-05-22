@@ -113,7 +113,7 @@ dashboard env =
     void do
       runExceptT do
         _ <- syncTrusts set st
-          # retryUntil env (const { delay: 5000 }) (\r _ -> isRight r) 0
+          # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
 
         _ <- syncTrusts set st
           # retryUntil env (const { delay: 15000 }) (\_ _ -> false) 0
@@ -221,9 +221,7 @@ dashboard env =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
 
-        let
-          payoutAmount = CC.bnToStr checkPayout
-        when ((length payoutAmount) >= 18) do
+        when ((length $ CC.bnToStr checkPayout) >= 18) do
           env.requestUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0

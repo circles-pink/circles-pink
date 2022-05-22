@@ -67,4 +67,9 @@ const Amount = styled.h2<AmountProps>(({ color }) => [
 // UI
 // -----------------------------------------------------------------------------
 
-const BalanceWrapper = tw.div`flex flex-row items-center`;
+const BalanceWrapper = styled.div(() => [
+  tw`flex flex-row items-center`,
+  css`
+    margin-top: 0.4rem;
+  `,
+]);
