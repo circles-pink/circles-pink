@@ -1,3 +1,5 @@
+export type Page = number | '<<' | '>>';
+
 export const paginate = (
   totalItems: number,
   currentPage = 1,
@@ -66,7 +68,7 @@ const RIGHT_PAGE = '>>';
 
 const range = (from: number, to: number | string, step = 1) => {
   let i = from;
-  const range: (number | string)[] = [];
+  const range: Page[] = [];
 
   while (i <= to) {
     range.push(i);
