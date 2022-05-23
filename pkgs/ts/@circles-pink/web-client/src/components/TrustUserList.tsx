@@ -22,22 +22,18 @@ import {
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
-import {
-  JustifyAroundCenter,
-  JustifyBetweenCenter,
-  JustifyStartCenter,
-} from './helper';
-import { RemoteReport } from '@circles-pink/state-machine/output/RemoteReport';
+import { JustifyAroundCenter, JustifyStartCenter } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   DefaultView,
-  ErrTrustAddConnectionResolved,
   Trust,
   Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { t } from 'i18next';
 import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
 import { PageSelector } from './PageSelector';
+import { TrustState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { FadeIn, getIncrementor } from 'anima-react';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -108,7 +104,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
           )}
 
           <TableBody>
-            {trusts.map((c, index) => {
+            {trusts.map(c => {
               return (
                 <ContentRow
                   key={addrToString(c.safeAddress)}
@@ -145,6 +141,9 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
     ReactTooltip.rebuild();
   }, [c]);
 
+  // animation
+  const getDelay = getIncrementor(0, 0.05);
+
   const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
   const isTrusted = c.trustState.type === 'trusted';
   const isUntrusted = c.trustState.type === 'untrusted';
@@ -154,80 +153,114 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
   const loadingUntrust = c.trustState.type === 'loadingUntrust';
   const inSync = isTrusted || isUntrusted;
 
+  if (inSync) {
+    return (
+      <TableRow theme={theme}>
+        <TableData>
+          <FadeIn orientation={'left'} delay={getDelay()}>
+            <JustifyStartCenter>
+              <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
+              <b>{userIdent}</b>
+            </JustifyStartCenter>
+          </FadeIn>
+        </TableData>
+        <TableData>
+          <ReactTooltip />
+          <JustifyAroundCenter>
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <Icon
+                path={
+                  isTrusted || pendingUntrust || loadingUntrust
+                    ? mdiAccountArrowLeft
+                    : mdiAccountCancel
+                }
+                size={1.6}
+                color={
+                  isTrusted || pendingUntrust || loadingUntrust
+                    ? theme.baseColor
+                    : 'white'
+                }
+                data-tip={mapToolTipRelRec(isTrusted, userIdent)}
+              />
+            </FadeIn>
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <Icon
+                path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
+                size={1.6}
+                color={c.isOutgoing ? theme.baseColor : 'white'}
+                data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+              />
+            </FadeIn>
+          </JustifyAroundCenter>
+        </TableData>
+        <TableData>
+          <JustifyAroundCenter>
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <Clickable
+                clickable={c.isOutgoing}
+                onClick={() => {
+                  if (c.isOutgoing) {
+                    if (toggleOverlay && setOverwriteTo) {
+                      setOverwriteTo(addrToString(c.safeAddress));
+                      toggleOverlay('SEND');
+                    }
+                  }
+                }}
+              >
+                <Icon
+                  path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+                  size={1.75}
+                  color={c.isOutgoing ? theme.baseColor : 'white'}
+                  data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
+                />
+              </Clickable>
+            </FadeIn>
+
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <Clickable
+                clickable={true}
+                onClick={() => {
+                  isUntrusted
+                    ? addTrust(addrToString(c.safeAddress))
+                    : removeTrust(addrToString(c.safeAddress));
+                }}
+              >
+                <Icon
+                  path={isTrusted ? mdiHeart : mdiHeartOutline}
+                  size={1.5}
+                  color={isTrusted ? theme.baseColor : 'white'}
+                  data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                />
+              </Clickable>
+            </FadeIn>
+          </JustifyAroundCenter>
+        </TableData>
+      </TableRow>
+    );
+  }
   return (
     <TableRow theme={theme}>
       <TableData>
-        <JustifyStartCenter>
-          <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
-          <b>{userIdent}</b>
-        </JustifyStartCenter>
+        <FadeIn orientation={'left'} delay={getDelay()}>
+          <JustifyStartCenter>
+            <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
+            <b>{userIdent}</b>
+          </JustifyStartCenter>
+        </FadeIn>
       </TableData>
-      <TableData>
-        <ReactTooltip />
-        <JustifyAroundCenter>
-          <Icon
-            path={
-              isTrusted || pendingUntrust || loadingUntrust
-                ? mdiAccountArrowLeft
-                : mdiAccountCancel
-            }
-            size={1.6}
-            color={
-              isTrusted || pendingUntrust || loadingUntrust
-                ? theme.baseColor
-                : 'white'
-            }
-            data-tip={mapToolTipRelRec(isTrusted, userIdent)}
-          />
-          <Icon
-            path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
-            size={1.6}
-            color={c.isOutgoing ? theme.baseColor : 'white'}
-            data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
-          />
-        </JustifyAroundCenter>
-      </TableData>
+      <TableData></TableData>
       <TableData>
         <JustifyAroundCenter>
-          <Clickable
-            clickable={c.isOutgoing}
-            onClick={() => {
-              if (c.isOutgoing) {
-                if (toggleOverlay && setOverwriteTo) {
-                  setOverwriteTo(addrToString(c.safeAddress));
-                  toggleOverlay('SEND');
-                }
-              }
-            }}
-          >
-            <Icon
-              path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-              size={1.75}
-              color={c.isOutgoing ? theme.baseColor : 'white'}
-              data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
-            />
-          </Clickable>
-
-          {inSync ? (
-            <Clickable
-              clickable={true}
-              onClick={() => {
-                isUntrusted
-                  ? addTrust(addrToString(c.safeAddress))
-                  : removeTrust(addrToString(c.safeAddress));
-              }}
-            >
-              <Icon
-                path={isTrusted ? mdiHeart : mdiHeartOutline}
-                size={1.5}
-                color={isTrusted ? theme.baseColor : 'white'}
-                data-tip={mapToolTipTrust(isTrusted, userIdent)}
-              />
-            </Clickable>
-          ) : (
+          <FadeIn orientation={'left'} delay={getDelay()}>
+            <TrustActionMessageContainer>
+              <TrustActionMessage>
+                {mapStatusMessage(c.trustState)}
+              </TrustActionMessage>
+            </TrustActionMessageContainer>
+          </FadeIn>
+          <FadeIn orientation={'left'} delay={getDelay()}>
             <>
-              {c.trustState.type === 'loadingTrust' ||
-              c.trustState.type === 'loadingUntrust' ? (
+              {loadingTrust || loadingUntrust ? (
                 <LoadingCircles count={1} width={35} color={theme.baseColor} />
               ) : (
                 <Icon
@@ -238,7 +271,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 />
               )}
             </>
-          )}
+          </FadeIn>
         </JustifyAroundCenter>
       </TableData>
     </TableRow>
@@ -269,7 +302,12 @@ const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
 const TableHeader = tw.thead`lg:px-4 md:px-4 px-2 lg:text-lg md:text-lg text-left whitespace-nowrap`;
 const TableHead = tw.th`lg:px-4 md:px-4 px-2 text-left whitespace-nowrap`;
 const TableBody = tw.tbody`divide-y divide-gray-100`;
-const TableData = tw.td`lg:px-4 md:px-4 px-2 py-2 text-lg whitespace-nowrap`;
+const TableData = styled.td(() => [
+  tw`lg:px-4 md:px-4 px-2 py-2 text-lg whitespace-nowrap`,
+  css`
+    height: 4.25rem;
+  `,
+]);
 
 type TableRowProps = {
   theme: Theme;
@@ -293,19 +331,23 @@ const Clickable = styled.div<ClickableProps>(({ clickable }) => [
 const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
 const JustifyAround = tw.div`flex justify-around`;
+const TrustActionMessageContainer = tw.div`relative w-6 h-6`;
+const TrustActionMessage = tw.span`absolute right-0 top-0`;
 
 // -----------------------------------------------------------------------------
 // Util
 // -----------------------------------------------------------------------------
 
-const trustIsLoading = (
-  result: RemoteReport<ErrTrustAddConnectionResolved, string>
-) => {
-  switch (result.type) {
-    case 'loading':
-      return true;
-    default:
-      return false;
+const mapStatusMessage = (trustState: TrustState) => {
+  switch (trustState.type) {
+    case 'loadingTrust':
+      return 'Trusting ...';
+    case 'loadingUntrust':
+      return 'Untrusting ...';
+    case 'pendingTrust':
+      return 'Confirming ...';
+    case 'pendingUntrust':
+      return 'Confirming ...';
   }
 };
 
