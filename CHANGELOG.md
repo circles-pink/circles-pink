@@ -4,13 +4,15 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
-## Unrelesed
+## [1.0.27]
 
 ### Added
 
 - Pagination for trust list
 - Scan address mvp in send circles overlay
 - Redeploy token and safe option for debug
+- Simple validation message for userinput (email, username)
+- Simple status message for trusting and pending state
 
 ### Changed
 

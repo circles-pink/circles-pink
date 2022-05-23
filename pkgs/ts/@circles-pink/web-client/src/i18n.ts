@@ -45,6 +45,11 @@ export const resources = {
         emailPlaceholder: 'Enter your E-Mail',
         termsLabel: 'Accept terms',
         privacyLabel: 'Accept privacy',
+        validation: {
+          email: 'Please enter a valid email address.',
+          terms: 'Please accept terms.',
+          privacy: 'Please accept privacy.',
+        },
       },
       infoSecurity: {
         claim: "Let's talk about Security",
@@ -96,6 +101,12 @@ export const resources = {
           relationNotSendable: '{{user}} does not accept your Circles',
           relationReceivable: 'You accept Circles from {{user}}',
           relationNotReceivable: 'You do not accept Circles from {{user}}',
+          message: {
+            loadingTrust: 'Trusting ...',
+            loadingUntrust: 'Untrusting ...',
+            pendingTrust: 'Confirming ...',
+            pendingUntrust: 'Confirming ...',
+          },
         },
       },
       debug: {
@@ -152,6 +163,11 @@ export const resources = {
         emailPlaceholder: 'Deine E-Mail Adresse',
         termsLabel: 'Stimme den Nutzungsbedingungen zu',
         privacyLabel: 'Akzeptiere die Datenschutzbestimmungen',
+        validation: {
+          email: 'Bitte gib eine gültige E-mail an.',
+          terms: '* Pflichtfeld',
+          privacy: '* Pflichtfeld',
+        },
       },
       infoSecurity: {
         claim: 'Gleich erhälst du deinen persönlichen Schlüssel',
@@ -207,6 +223,12 @@ export const resources = {
           relationNotSendable: '{{user}} akzeptiert deine Circles nicht',
           relationReceivable: 'Du akzeptierst Circles von {{user}}',
           relationNotReceivable: 'Du akzeptierst Circles von {{user}} nicht',
+          message: {
+            loadingTrust: 'Trusten ...',
+            loadingUntrust: 'Untrusten ...',
+            pendingTrust: 'Bestätige ...',
+            pendingUntrust: 'Bestätige ...',
+          },
         },
       },
       debug: {
