@@ -341,13 +341,13 @@ const TrustActionMessage = tw.span`absolute right-0 top-0`;
 const mapStatusMessage = (trustState: TrustState) => {
   switch (trustState.type) {
     case 'loadingTrust':
-      return 'Trusting ...';
+      return t('dashboard.trustList.message.loadingTrust');
     case 'loadingUntrust':
-      return 'Untrusting ...';
+      return t('dashboard.trustList.message.loadingUntrust');
     case 'pendingTrust':
-      return 'Confirming ...';
+      return t('dashboard.trustList.message.pendingTrust');
     case 'pendingUntrust':
-      return 'Confirming ...';
+      return t('dashboard.trustList.message.pendingUntrust');
   }
 };
 
