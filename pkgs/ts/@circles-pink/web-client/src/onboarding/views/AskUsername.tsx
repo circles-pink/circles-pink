@@ -1,4 +1,7 @@
-import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  UserData,
+  UsernameApiResult,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
@@ -15,6 +18,7 @@ import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
+import tw from 'twin.macro';
 
 type AskUsernameProps = {
   state: UserData;
@@ -42,17 +46,26 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       }
       interaction={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <Input
-            autoFocus
-            indicatorColor={mapIndicatorColors(state.usernameApiResult)}
-            type="text"
-            value={state.username}
-            placeholder={t('askUsername.usernamePlaceholder')}
-            onChange={e => act(A._askUsername(A._setUsername(e.target.value)))}
-            onKeyPress={e =>
-              e.key === 'Enter' && act(A._askUsername(A._next(unit)))
-            }
-          />
+          <>
+            <Input
+              autoFocus
+              indicatorColor={mapIndicatorColors(state.usernameApiResult)}
+              type="text"
+              value={state.username}
+              placeholder={t('askUsername.usernamePlaceholder')}
+              onChange={e =>
+                act(A._askUsername(A._setUsername(e.target.value)))
+              }
+              onKeyPress={e =>
+                e.key === 'Enter' && act(A._askUsername(A._next(unit)))
+              }
+            />
+            <StatusContainer>
+              <Status>
+                {mapStatusMessage(state.usernameApiResult, state.username)}
+              </Status>
+            </StatusContainer>
+          </>
         </FadeIn>
       }
       // debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
@@ -80,4 +93,34 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
       debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
     />
   );
+};
+
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
+
+const StatusContainer = tw.div`relative`;
+const Status = tw.div`absolute`;
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const mapStatusMessage = (trustState: UsernameApiResult, username: string) => {
+  switch (trustState.type) {
+    case 'loading':
+      return '';
+    case 'success':
+      return '';
+    case 'failure':
+      const regex = new RegExp(/[^A-Za-z0-9]+/);
+      if (regex.test(username)) {
+        return t('askUsername.validation.charFail');
+      } else if (username.length < 3 || username.length > 24) {
+        return t('askUsername.validation.lengthFail');
+      }
+      return t('askUsername.validation.availFail');
+    case 'notAsked':
+      return '';
+  }
 };

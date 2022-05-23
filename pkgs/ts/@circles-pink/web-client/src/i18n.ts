@@ -33,6 +33,11 @@ export const resources = {
         claim: 'Tell me your Name!',
         subClaim: 'Choose wisely, you can not change it later!',
         usernamePlaceholder: 'Your amazing username',
+        validation: {
+          charFail: 'Only letters from A-Z and numbers from 0-9 are allowed!',
+          lengthFail: 'Please use 3 - 24 letters.',
+          availFail: 'Username not available',
+        },
       },
       askEmail: {
         claim: 'How do you want to be notified?',
@@ -135,6 +140,11 @@ export const resources = {
         subClaim:
           'Das ist der Name, mit dem du im Circles Netzwerk gefunden wirst. Überlege gut, du kannst den Namen später nicht mehr ändern!',
         usernamePlaceholder: 'Dein einzigartiger Nutzername',
+        validation: {
+          charFail: 'Bitte nutze nur Buchstaben von A-Z und Zahlen von 0-9!',
+          lengthFail: 'Bitte nutze mindestens 3 und maximal 24 Buchstaben.',
+          availFail: 'Der Nutzer:innen-Name ist vergeben.',
+        },
       },
       askEmail: {
         claim: 'Wie möchtest du kontaktiert werden?',
