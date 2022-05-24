@@ -125,6 +125,8 @@ rec {
 
     ${pkgs.nodePackages.npm}/bin/npm version --include-workspace-root --no-git-tag-version \
       "$VERSION"
+
+    ${workspaces.dev-utils}/libexec/dev-utils/node_modules/prettier/cli.js --write .
   '';
 
   emptyWorkspaces = pipe
