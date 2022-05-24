@@ -18,6 +18,8 @@ export const JustifyBetweenCenter = tw.div`flex justify-between items-center`;
 // -----------------------------------------------------------------------------
 
 export const CenterText = tw.div`text-center`;
+export const StatusContainer = tw.div`relative`;
+export const Status = tw.div`absolute text-red-600`;
 
 // -----------------------------------------------------------------------------
 // Grid

@@ -87,6 +87,7 @@ export const resources = {
         searchButton: 'Search',
         trustNetworkTitle: 'Trust Network',
         exploreTitle: 'Explore',
+        userSearchPlaceholder: 'Search by username',
         trustList: {
           tableHead: {
             user: 'User',
@@ -208,6 +209,7 @@ export const resources = {
         searchButton: 'Suchen',
         trustNetworkTitle: 'Trust Netzwerk',
         exploreTitle: 'Erkunden',
+        userSearchPlaceholder: 'Nutzer:innen suchen',
         sendClaim: 'Circles überweisen',
         trustList: {
           tableHead: {
