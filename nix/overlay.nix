@@ -9,6 +9,8 @@
 
   depcruise = circles-pink.ts.bins.depcruise;
 
+  prettier = circles-pink.ts.bins.prettier;
+
   directus = circles-pink.ts.bins.circles-directus;
 
   graphql-zeus = circles-pink.ts.bins.graphql-zeus;

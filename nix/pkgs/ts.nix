@@ -189,6 +189,10 @@ rec {
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
     '';
 
+    prettier = pkgs.writeShellScriptBin "prettier" ''
+      ${workspaces.dev-utils}/libexec/dev-utils/node_modules/prettier/cli.js $@
+    '';
+
     circles-directus =
       let
         dir_patched = pkgs.runCommand "dir_patched" { } ''

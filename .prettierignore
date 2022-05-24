@@ -1,0 +1,11 @@
+output
+node_modules
+zeus-client
+dist
+.spago
+.spago2nix
+checkouts
+materialized
+ts-dist
+tmp
+result

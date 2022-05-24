@@ -56,6 +56,7 @@ branchless-put_:
 
 release: branchless-get
 	bump-npm-versions "patch"
+	prettier --write .
 	just branchless-put
 
 branchless-to-main:
