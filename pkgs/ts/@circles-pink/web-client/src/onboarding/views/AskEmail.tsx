@@ -17,7 +17,7 @@ import { ThemeContext } from '../../context/theme';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { OnboardingStepIndicator } from '../../components/layout';
-import { TwoButtonRow } from '../../components/helper';
+import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
@@ -131,13 +131,6 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
     />
   );
 };
-
-// -----------------------------------------------------------------------------
-// UI
-// -----------------------------------------------------------------------------
-
-const StatusContainer = tw.div`py-2`;
-const Status = tw.div``;
 
 // -----------------------------------------------------------------------------
 // Util

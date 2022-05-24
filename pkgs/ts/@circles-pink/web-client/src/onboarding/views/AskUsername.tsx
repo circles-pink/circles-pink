@@ -17,7 +17,7 @@ import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
-import { TwoButtonRow } from '../../components/helper';
+import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
@@ -95,13 +95,6 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
     />
   );
 };
-
-// -----------------------------------------------------------------------------
-// UI
-// -----------------------------------------------------------------------------
-
-const StatusContainer = tw.div`relative`;
-const Status = tw.div`absolute`;
 
 // -----------------------------------------------------------------------------
 // Util

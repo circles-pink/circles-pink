@@ -229,7 +229,7 @@ export const Dashboard = ({
                   <Input
                     type="text"
                     value={search}
-                    placeholder={'Search by username'}
+                    placeholder={t('dashboard.userSearchPlaceholder')}
                     onChange={e => setSearch(e.target.value)}
                   />
                   {/* <DebugButtonWrapper>
