@@ -1,6 +1,5 @@
 import { Chain } from "@circles-pink/zeus-client/src/admin/zeus";
 
-
 if (!process.env.DIRECTUS_ADMIN_TOKEN) {
   throw new Error();
 }
