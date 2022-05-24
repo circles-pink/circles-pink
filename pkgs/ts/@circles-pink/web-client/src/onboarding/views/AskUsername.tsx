@@ -19,6 +19,7 @@ import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
 import tw from 'twin.macro';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type AskUsernameProps = {
   state: UserData;
@@ -90,7 +91,7 @@ export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };
@@ -111,15 +112,18 @@ const mapStatusMessage = (trustState: UsernameApiResult, username: string) => {
     case 'loading':
       return '';
     case 'success':
-      return '';
+      if (trustState.value.isValid) {
+        return '';
+      }
+      return t('askUsername.validation.availFail');
     case 'failure':
       const regex = new RegExp(/[^A-Za-z0-9]+/);
       if (regex.test(username)) {
         return t('askUsername.validation.charFail');
-      } else if (username.length < 3 || username.length > 24) {
+      }
+      if (username.length < 3 || username.length > 24) {
         return t('askUsername.validation.lengthFail');
       }
-      return t('askUsername.validation.availFail');
     case 'notAsked':
       return '';
   }

@@ -21,6 +21,7 @@ import { lighten } from '../utils/colorUtils';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
 import { maybe } from '@circles-pink/state-machine/output/Data.Maybe';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type MagicWordsProps = {
   state: UserData;
@@ -131,7 +132,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
           </FadeIn>
         </>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

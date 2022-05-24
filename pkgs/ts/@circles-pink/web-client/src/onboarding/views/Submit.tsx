@@ -14,6 +14,7 @@ import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { mapResult } from '../utils/mapResult';
 import { TwoButtonRow } from '../../components/helper';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type SubmitProps = {
   state: UserData;
@@ -69,7 +70,7 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

@@ -152,8 +152,8 @@ export const resources = {
           'Das ist der Name, mit dem du im Circles Netzwerk gefunden wirst. Überlege gut, du kannst den Namen später nicht mehr ändern!',
         usernamePlaceholder: 'Dein einzigartiger Nutzername',
         validation: {
-          charFail: 'Bitte nutze nur Buchstaben von A-Z und Zahlen von 0-9!',
-          lengthFail: 'Bitte nutze mindestens 3 und maximal 24 Buchstaben.',
+          charFail: 'Bitte nutze nur Buchstaben und Zahlen!',
+          lengthFail: 'Bitte nutze 3 - 24 Zeichen.',
           availFail: 'Der Nutzer:innen-Name ist vergeben.',
         },
       },

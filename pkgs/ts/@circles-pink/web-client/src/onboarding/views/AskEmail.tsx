@@ -19,6 +19,7 @@ import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
 import tw from 'twin.macro';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type AskEmailProps = {
   state: UserData;
@@ -60,9 +61,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
                 }
               />
               {mapStatusMessage(state.emailApiResult) !== '' && (
-                <StatusContainer>
-                  <Status>{mapStatusMessage(state.emailApiResult)}</Status>
-                </StatusContainer>
+                <Status>{mapStatusMessage(state.emailApiResult)}</Status>
               )}
             </>
           </FadeIn>
@@ -128,7 +127,7 @@ export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };
