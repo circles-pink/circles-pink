@@ -115,6 +115,7 @@
         final.writeShellScriptBin "bump-npm-versions" ''
           RELEASE_TYPE="$1"
           ${final.nodePackages.npm}/bin/npm version ${workspaces'} "$RELEASE_TYPE"
+          ${final.prettier} --write .
           ${final.git}/bin/git add .
           ${final.nodePackages.npm}/bin/npm version --include-workspace-root --force "$RELEASE_TYPE"
         '';

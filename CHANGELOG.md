@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## [1.0.29]
+
+### Added
+
+- Prettier cli to ts.bins and overlay
+- Format codebase in bump-npm-versions release task
+
 ## [1.0.28]
 
 ### Fixed
