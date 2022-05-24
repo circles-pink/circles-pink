@@ -9,7 +9,7 @@
 
   depcruise = circles-pink.ts.bins.depcruise;
 
-  prettier = circles-pink.ts.bins.prettier;
+  prettier = circles-pink.ts.bins.prettier-cli;
 
   directus = circles-pink.ts.bins.circles-directus;
 
@@ -125,6 +125,7 @@
         pursOutput = purs.default;
         inherit assets;
         inherit zeus-client;
+        inherit prettier;
       });
 
       ts2 = (import ./pkgs/ts2.nix {

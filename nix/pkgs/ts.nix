@@ -1,4 +1,4 @@
-{ pkgs, pursOutput, assets, zeus-client, ... }:
+{ pkgs, pursOutput, assets, zeus-client, prettier, ... }:
 let
 
   inherit (pkgs) lib runCommand;
@@ -126,7 +126,7 @@ rec {
     ${pkgs.nodePackages.npm}/bin/npm version --include-workspace-root --no-git-tag-version \
       "$VERSION"
 
-    ${workspaces.dev-utils}/libexec/dev-utils/node_modules/prettier/cli.js --write .
+    ${prettier} --write .
   '';
 
   emptyWorkspaces = pipe
@@ -191,7 +191,7 @@ rec {
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
     '';
 
-    prettier = pkgs.writeShellScriptBin "prettier" ''
+    prettier-cli = pkgs.writeShellScriptBin "prettier-cli" ''
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/prettier/cli.js $@
     '';
 
