@@ -12,6 +12,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { TwoButtonRow } from '../../components/helper';
 import tw, { css, styled } from 'twin.macro';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type DebugProps = {
   state: DebugState;
@@ -64,7 +65,7 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
             </TwoButtonRow>
           </FadeIn>
         }
-        debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+        debug={<StateMachineDebugger state={state} />}
       />
     </Frame>
   );

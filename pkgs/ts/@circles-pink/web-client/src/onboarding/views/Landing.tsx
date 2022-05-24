@@ -13,6 +13,7 @@ import { ThemeContext } from '../../context/theme';
 import tw from 'twin.macro';
 import { LoadingCircles } from '../../components/LoadingCircles';
 import { TwoButtonRow } from '../../components/helper';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type LandingProps = {
   state: LandingState;
@@ -76,7 +77,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

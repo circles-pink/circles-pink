@@ -15,6 +15,7 @@ import { ButtonState } from '../../components/forms/Button';
 import { mapResult } from '../utils/mapResult';
 import { TwoButtonRow } from '../../components/helper';
 import tw from 'twin.macro';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type LoginProps = {
   state: LoginState;
@@ -73,7 +74,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

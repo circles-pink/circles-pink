@@ -45,7 +45,10 @@ trusts env =
         -- First deploy always fails
         _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
         _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
-        -- Second deploy works
+        -- Second deploy works most of the time
+        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
+        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
+        -- Make really sure, the token is deployed!
         _ <- env.deploySafe st.privKey
         _ <- (env.deployToken st.privKey <#> const unit)
         pure unit

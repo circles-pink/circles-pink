@@ -25,6 +25,7 @@ import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { mapResult } from '../utils/mapResult';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 // -----------------------------------------------------------------------------
 // Trusts
@@ -171,7 +172,7 @@ export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
           </FlexRow>
         </>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

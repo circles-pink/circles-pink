@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## [1.0.28]
+
+### Fixed
+
+- Theme for Pageselector and centered the buttons
+- Fix "Username not available" error
+
+### Changed
+
+- StatemachineDebugger on every view
+- Deploy token three times, instead of two, to make sure it is deployed after finalize
+
 ## [1.0.27]
 
 ### Added

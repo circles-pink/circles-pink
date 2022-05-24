@@ -119,6 +119,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
       {paginationInfo.totalPages > 1 && (
         <JustifyAroundCenter>
           <PageSelector
+            theme={theme}
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
             pageControls={pageControls}

@@ -12,6 +12,7 @@ import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type InfoGeneralProps = {
   state: UserData;
@@ -48,7 +49,7 @@ export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
           </Button>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };

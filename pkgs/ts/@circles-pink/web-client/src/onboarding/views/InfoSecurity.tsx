@@ -13,6 +13,7 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
+import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type InfoSecurityProps = {
   state: UserData;
@@ -62,7 +63,7 @@ export const InfoSecurity = ({
           </TwoButtonRow>
         </FadeIn>
       }
-      debug={<pre>{JSON.stringify(state, null, 2)}</pre>}
+      debug={<StateMachineDebugger state={state} />}
     />
   );
 };
