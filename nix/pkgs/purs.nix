@@ -5,13 +5,12 @@ let
   spago2nix-extra = import ./spago2nix-extra.nix { inherit pkgs; };
 in
 rec {
-  dependencies = spago2nix-extra.buildDependencies "circles" spagoPkgs;
-  projectDir = spago2nix-extra.mkProjectDir "circles" { inherit dependencies sources testSources; };
-  projectOut = spago2nix-extra.buildProject "circles" { inherit projectDir spagoPkgs; };
-  projectTests = spago2nix-extra.testProject "circles" { inherit projectOut spagoPkgs nodeModules; };
+  dependencies = spago2nix-extra.buildDependencies "state-machine" spagoPkgs;
+  projectDir = spago2nix-extra.mkProjectDir "state-machine" { inherit dependencies sources testSources; };
+  projectOut = spago2nix-extra.buildProject "state-machine" { inherit projectDir spagoPkgs; };
+  projectTests = spago2nix-extra.testProject "state-machine" { inherit projectOut spagoPkgs nodeModules; };
 
-  docs = spago2nix-extra.genDocs "circles" { inherit projectOut spagoPkgs projectDir; };
-
+  docs = spago2nix-extra.genDocs "state-machine" { inherit projectOut spagoPkgs projectDir; };
 
   sources = ../../pkgs/purs/src;
   testSources = ../../pkgs/purs/test;

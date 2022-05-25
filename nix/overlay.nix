@@ -1,6 +1,8 @@
 (final: prev: rec {
   chokidar-cli = circles-pink.yarn2nix.bins.chokidar-cli;
 
+  purescript-docs-search = circles-pink.yarn2nix.bins.purescript-docs-search;
+
   vscode = (import ./pkgs/vscode.nix { pkgs = final; });
 
   cspell = (import ./pkgs/ts-root.nix { pkgs = final; }).bins.cspell;

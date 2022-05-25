@@ -32,10 +32,11 @@ rec {
   yarnPkgs = {
     "@circles-pink/chokidar-cli" = mkYarnPkg ./chokidar-cli;
     "@circles-pink/change-case" = mkYarnPkg ./change-case;
+    "@circles-pink/purescript-docs-search" = mkYarnPkg ./purescript-docs-search;
   };
   bins = {
     chokidar-cli = mkYarnBins yarnPkgs "@circles-pink/chokidar-cli" [ "chokidar" ];
-
+    purescript-docs-search = mkYarnBins yarnPkgs "@circles-pink/purescript-docs-search" [ "purescript-docs-search" ];
   };
 }
  
