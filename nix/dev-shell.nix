@@ -44,6 +44,7 @@ pkgs.mkShell {
     (pkgs.circles-pink.bumpNpmVersions (builtins.attrNames pkgs.circles-pink.ts.publicWorkspaces))
     #nodePackages.webpack
     pkgs.purs-tidy
+    pkgs.purescript-docs-search
   ];
 
   # Change the prompt to show that you are in a devShell

@@ -74,22 +74,26 @@ let
       node -e 'require("${projectOut}/Test.Main").main()' > $out
     '';
 
-  genDocs = name: { projectOut, spagoPkgs, projectDir }:
-    pkgs.runCommand "${name}-purs-docs"
+  genDocs = name: { projectOut, spagoPkgs, projectDir }: pipe
+    (pkgs.runCommand "${name}-purs-docs"
       {
         buildInputs = [ spagoPkgs.installSpagoStyle ];
         nativeBuildInputs = [ pkgs.purescript ];
       }
-
       ''
-        tmp=`mktemp -d`
         mkdir $out
-
-        cd ${projectDir}
-        cp --preserve=all -r ${projectDir}/output/* -t $tmp
-        chmod -R +w $tmp
-        purs docs --compile-output $tmp --output $out ${getGlobs spagoPkgs.inputs} "src/**/*.purs"
-      '';
+        cp --preserve=all -r ${projectDir}/.spago/ $out/.spago
+        cp --preserve=all -r ${projectDir}/output/ $out/output
+        cp --preserve=all -r ${projectDir}/src/ $out/src
+        cp --preserve=all -r ${projectDir}/test/ $out/test
+        
+        cd $out
+        chmod -R +w $out/output
+        purs docs --output generated-docs/html ${getGlobs spagoPkgs.inputs} "src/**/*.purs"
+        ${pkgs.purescript-docs-search}/bin/purescript-docs-search build-index
+      '') [
+    (x: pkgs.runCommand "${name}-purs-docs" { } "ln -s ${x}/generated-docs/html $out")
+  ];
 
 in
 {
