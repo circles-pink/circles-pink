@@ -102,7 +102,7 @@ in
         };
         "${lib.mkDomain config.env.services.docs.url}" = {
           locations."/" = {
-            root = pkgs.circles-pink.purs.docs { inherit envVars; };
+            root = pkgs.circles-pink.purs.docs;
           };
         };
         "${lib.mkDomain config.env.services.tasks.url}" = {
