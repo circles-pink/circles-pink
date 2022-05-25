@@ -90,7 +90,8 @@ let
         cd $out
         chmod -R +w $out/output
         purs docs --output generated-docs/html ${getGlobs spagoPkgs.inputs} "src/**/*.purs"
-        ${pkgs.purescript-docs-search}/bin/purescript-docs-search build-index
+        ${pkgs.purescript-docs-search}/bin/purescript-docs-search build-index \
+          --package-name ${name}
       '') [
     (x: pkgs.runCommand "${name}-purs-docs" { } "ln -s ${x}/generated-docs/html $out")
   ];

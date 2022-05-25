@@ -124,8 +124,10 @@ run-garden_:
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
 
-spago-docs:
-	spago docs --format html
+purs-docs:
+	LINK=results/purs-docs/result; \
+	nix build .#purs.docs --out-link $LINK && \
+	miniserve --index index.html $LINK/
 
 # All Makefile tasks
 

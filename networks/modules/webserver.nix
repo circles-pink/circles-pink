@@ -42,6 +42,9 @@ in
       url = config.env.url;
       port = 80;
     };
+    docs = {
+      url = (config.env.url // { subdomain = "docs"; });
+    };
     tasks = {
       url = (config.env.url // { subdomain = "tasks"; });
       port = 5000;
@@ -95,6 +98,11 @@ in
         "${lib.mkDomain config.env.services.storybook.url}" = pkgs.lib.mkIf config.network-config.webserver.services.storybook.enable {
           locations."/" = {
             root = pkgs.circles-pink.publicDir { inherit envVars; };
+          };
+        };
+        "${lib.mkDomain config.env.services.docs.url}" = {
+          locations."/" = {
+            root = pkgs.circles-pink.purs.docs { inherit envVars; };
           };
         };
         "${lib.mkDomain config.env.services.tasks.url}" = {
