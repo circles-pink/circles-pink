@@ -19,3 +19,4 @@ account-report.json
 # solid state db from gun
 radata
 results/
+generated-docs/

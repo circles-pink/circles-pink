@@ -10,6 +10,8 @@ rec {
   projectOut = spago2nix-extra.buildProject "circles" { inherit projectDir spagoPkgs; };
   projectTests = spago2nix-extra.testProject "circles" { inherit projectOut spagoPkgs nodeModules; };
 
+  docs = spago2nix-extra.genDocs "circles" { inherit projectOut spagoPkgs projectDir; };
+
 
   sources = ../../pkgs/purs/src;
   testSources = ../../pkgs/purs/test;
