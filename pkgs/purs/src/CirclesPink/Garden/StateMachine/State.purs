@@ -39,7 +39,9 @@ module CirclesPink.Garden.StateMachine.State
 --------------------------------------------------------------------------------
 -- Re-exports
 --------------------------------------------------------------------------------
+
 import Prelude
+
 import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
@@ -50,16 +52,17 @@ import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetActio
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingState, ErrLandingStateResolved, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing) as Exp
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrTrustRemoveConnection, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
 import Data.Maybe (Maybe(..))
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
+import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey as P
 import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey as P
 
 type UsernameApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
@@ -141,9 +144,9 @@ type ErrTrustStateResolved = Variant
   , errInvalidUrl :: String
   )
 
-type TrustStateTrustsResult = RemoteData Unit Unit ErrTrustStateResolved Unit
+type TrustStateTrustsResult = RemoteReport ErrTrustStateResolved Unit
 
-type TrustState =
+_failure etype TrustState =
   { user :: CC.User
   , privKey :: P.PrivateKey
   , trusts :: Array TrustNode

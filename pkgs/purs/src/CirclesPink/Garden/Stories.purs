@@ -89,12 +89,10 @@ signUpUser env opts =
       <#>
         ( default (throwError $ err "Cannot sign up user.")
             # onMatch
-                { trusts:
-                    \x ->
-                      pure
-                        { privateKey: x.privKey
-                        , safeAddress: x.user.safeAddress
-                        }
+                { trusts: \x -> pure
+                      { privateKey: x.privKey
+                      , safeAddress: x.user.safeAddress
+                      }
                 }
         )
 
