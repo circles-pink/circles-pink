@@ -196,7 +196,7 @@
       publicDir = { envVars }: final.runCommand "output" { } ''
         cp -r ${ts.builds.storybook {inherit envVars;}} $out
         chmod -R +w $out
-        cp -r ${purs.docs}/ $out/purs-docs
+        ln -s ${purs.docs} $out/purs-docs
       '';
 
       runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
