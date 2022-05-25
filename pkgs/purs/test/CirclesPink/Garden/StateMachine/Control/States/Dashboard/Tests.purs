@@ -1,8 +1,9 @@
 module CirclesPink.Garden.StateMachine.Control.States.Dashboard.Tests where
 
 import Prelude
+
 import CirclesCore (User, _errNative)
-import CirclesPink.Garden.Env (testEnv)
+import CirclesPink.Garden.Env (TestEnvM, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
@@ -10,7 +11,6 @@ import Convertable (convert)
 import Data.Argonaut (decodeJson, fromString)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)
-import Data.Identity (Identity(..))
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromJust)
@@ -103,7 +103,7 @@ spec =
           # run
           # shouldEqual (Just [ Right userA, Right userB, Left addrC, Left addrD, Right userE ])
 
-mkGetUsers :: Map W3.Address User -> GetUsers Identity
+mkGetUsers :: Map W3.Address User -> GetUsers TestEnvM
 mkGetUsers db _ _ xs =
   let
     result = map (\k -> M.lookup (convert k) db) xs
@@ -125,5 +125,5 @@ unsafeMkAddr str =
         # fromJust
     )
 
-run :: forall t16 t17. ExceptT t16 Identity t17 -> Maybe t17
-run = runExceptT >>> (\(Identity x) -> x) >>> hush
+run :: forall t16 t17. ExceptT t16 TestEnvM t17 -> Maybe t17
+run = runExceptT >>> runTestEnvM >>> hush

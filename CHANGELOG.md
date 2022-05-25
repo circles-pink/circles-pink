@@ -9,6 +9,7 @@ Please add new entries below.
 - Generate PureScript docs and serve as folder in publicDir
 - Refactor finalizeRegisterAccount: token & safe deployment is re-tried until success
 - Add Tests for "finalize Account"
+- Change TestEnv to be statefule: Enables better simulation of services
 
 ## [1.0.28]
 

@@ -146,7 +146,7 @@ type ErrTrustStateResolved = Variant
 
 type TrustStateTrustsResult = RemoteReport ErrTrustStateResolved Unit
 
-_failure etype TrustState =
+type TrustState =
   { user :: CC.User
   , privKey :: P.PrivateKey
   , trusts :: Array TrustNode
