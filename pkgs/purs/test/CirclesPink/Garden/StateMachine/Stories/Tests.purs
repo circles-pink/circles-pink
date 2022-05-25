@@ -4,11 +4,11 @@ module CirclesPink.Garden.StateMachine.Stories.Tests
 
 import Prelude
 
-import CirclesPink.Garden.Env (liftEnv, testEnv)
+import CirclesPink.Garden.Env (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (ScriptT, finalizeAccount, runScripT, signUpUser)
-import Control.Monad.State (StateT)
+import Control.Monad.State (StateT, runState)
 import Data.Identity (Identity)
 import Data.Newtype (unwrap)
 import Data.Tuple (snd)
@@ -18,17 +18,17 @@ import Test.Spec.Assertions (shouldEqual)
 
 --------------------------------------------------------------------------------
 
-type AppM e a = ScriptT e Identity a
+type AppM e a = ScriptT e TestEnvM a
 
 execAppM :: forall e a. AppM e a -> CirclesState
-execAppM x = x # runScripT # unwrap # snd
+execAppM x = x # runScripT # runTestEnvM # snd
 
 --------------------------------------------------------------------------------
 
 spec :: Spec Unit
 spec =
   let
-    env' :: Env (StateT CirclesState Identity)
+    env' :: Env (StateT CirclesState TestEnvM)
     env' = liftEnv testEnv
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
