@@ -7,18 +7,14 @@ import Prelude
 import CirclesPink.Garden.Env (liftEnv, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.Stories (ScriptT, finalizeAccount, runScripT, signUpUser)
-import Control.Monad.Identity.Trans (runIdentityT)
-import Control.Monad.State (StateT(..))
-import Data.Bifunctor (lmap)
-import Data.Either (Either(..))
-import Data.Identity (Identity(..))
+import Control.Monad.State (StateT)
+import Data.Identity (Identity)
 import Data.Newtype (unwrap)
-import Data.Tuple (fst, snd)
+import Data.Tuple (snd)
 import Data.Variant.Extra (getLabel)
 import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual, shouldSatisfy)
+import Test.Spec.Assertions (shouldEqual)
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +34,7 @@ spec =
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do
         it "ends up in `trusts` state" do
-          ( signUpUser (liftEnv testEnv) { username: "Foo", email: "foo@bar.com" }
+          ( signUpUser env' { username: "Foo", email: "foo@bar.com" }
               # execAppM
               # getLabel
           )
@@ -46,8 +42,8 @@ spec =
       describe "A user can finalize the account" do
         it "ends up in `dashboard` state" do
           ( ( do
-                _ <- signUpUser (liftEnv testEnv) { username: "Foo", email: "foo@bar.com" }
-                _ <- finalizeAccount (liftEnv testEnv)
+                _ <- signUpUser env' { username: "Foo", email: "foo@bar.com" }
+                _ <- finalizeAccount env'
                 pure unit
             )
               # execAppM

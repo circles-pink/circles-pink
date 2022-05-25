@@ -389,6 +389,8 @@ getCirclesCore web3 ev =
     , databaseSource: "graph"
     }
 
+--------------------------------------------------------------------------------
+
 testEnv :: Env.Env Identity
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
