@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
-## [UNRELEASED]
+## [1.0.29]
 
 - Generate PureScript docs and serve as folder in publicDir
 - Refactor finalizeRegisterAccount: token & safe deployment is re-tried until success
