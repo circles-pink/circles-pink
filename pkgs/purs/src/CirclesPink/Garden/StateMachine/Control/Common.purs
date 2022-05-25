@@ -1,16 +1,21 @@
 module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
+
 import CirclesCore (SafeStatus, TrustNode, User)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
-import Data.Either (Either)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..), either)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
-import Data.Variant (Variant)
+import Data.Variant (Variant, default, onMatch)
 import Prim.Row (class Nub)
+import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteReport (RemoteReport)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Wallet.PrivateKey (PrivateKey)
@@ -57,3 +62,81 @@ loginTask env privKey = do
   pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
 
 --------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+type EitherV e a = Either (Variant e) a
+
+type RemoteDataV e a = RemoteData Unit Unit (Variant e) a
+
+subscribeRemoteData
+  :: forall e a m
+   . Monad m
+  => (RemoteDataV e a -> m Unit)
+  -> m (EitherV e a)
+  -> m (EitherV e a)
+subscribeRemoteData setCb comp = do
+  setCb $ _loading unit
+  result <- comp
+  setCb $ either _failure _success result
+  pure result
+
+--------------------------------------------------------------------------------
+subscribeRemoteReport
+  :: forall e a m
+   . Monad m
+  => Env.Env m
+  -> (RemoteReport e a -> m Unit)
+  -> ExceptT e m a
+  -> Int
+  -> ExceptT e m a
+subscribeRemoteReport { getTimestamp } setCb comp retry = ExceptT do
+  startTime <- getTimestamp
+  setCb $ _loading { timestamp: startTime, retry, previousData: Nothing :: Maybe a }
+  result :: Either e a <- runExceptT comp
+  endTime <- getTimestamp
+  setCb case result of
+    Left e -> _failure { error: e, timestamp: endTime, retry }
+    Right d -> _success { data: d, timestamp: endTime, retry }
+  pure result
+
+addPreviousData :: forall e a. a -> RemoteReport e a -> RemoteReport e a
+addPreviousData pd rp =
+  (default rp # onMatch { loading: \x -> _loading $ x { previousData = Just pd } }) (unwrap rp)
+
+-- subscribeRemoteReport_
+--   :: forall e a m
+--    . Monad m
+--   => Env.Env m
+--   -> (RemoteReport e a -> m Unit)
+--   -> m (Either e a)
+--   -> m (Either e a)
+-- subscribeRemoteReport_ env sub comp = subscribeRemoteReport env sub comp 0
+
+--------------------------------------------------------------------------------
+type RetryConfig =
+  { delay :: Int
+  }
+
+retryUntil
+  :: forall m e a
+   . Monad m
+  => Env.Env m
+  -> (Int -> RetryConfig)
+  -> (Either e a -> Int -> Boolean)
+  -> Int
+  -> (Int -> ExceptT e m a)
+  -> ExceptT e m a
+retryUntil env@{ sleep } getCfg pred retry mkCompu = ExceptT do
+  let
+    { delay } = getCfg retry
+  result <- runExceptT $ mkCompu retry
+  let
+    newRetry = retry + 1
+  if pred result retry then
+    pure result
+  else do
+    sleep delay
+    runExceptT $ retryUntil env getCfg pred newRetry mkCompu
+
+dropError :: ∀ (t320 ∷ Type -> Type) (t322 ∷ Type) (t331 ∷ Type). Functor t320 ⇒ ExceptT t331 t320 t322 → ExceptT Unit t320 t322
+dropError = mapExceptT (\x -> x <#> lmap (const unit))
