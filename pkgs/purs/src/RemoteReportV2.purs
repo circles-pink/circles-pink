@@ -50,7 +50,7 @@ type Success f a =
   , previousData :: f a
   }
 
-data RemoteReport f e a = RemoteReport
+newtype RemoteReport f e a = RemoteReport
   (RemoteData (NotAsked f a) (Loading f a) (Failure f e a) (Success f a))
 
 type RemoteReport_ e a = RemoteReport Identity e a

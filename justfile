@@ -125,7 +125,7 @@ run-garden_:
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
 
 spago-docs:
-	spago docs --output html
+	spago docs --format html
 
 # All Makefile tasks
 
