@@ -5,9 +5,20 @@ let
   spago2nix-extra = import ./spago2nix-extra.nix { inherit pkgs; };
 in
 rec {
+  censorCodes = [
+    "UnusedImport"
+    "UnusedExplicitImport"
+    "UnusedName"
+    "MissingKindDeclaration"
+    "UnusedDeclaration"
+    "UnusedDctorImport"
+    "UserDefinedWarning"
+    "UnusedTypeVar"
+  ];
+
   dependencies = spago2nix-extra.buildDependencies "state-machine" spagoPkgs;
   projectDir = spago2nix-extra.mkProjectDir "state-machine" { inherit dependencies sources testSources; };
-  projectOut = spago2nix-extra.buildProject "state-machine" { inherit projectDir spagoPkgs; };
+  projectOut = spago2nix-extra.buildProject "state-machine" { inherit projectDir spagoPkgs censorCodes; };
   projectTests = spago2nix-extra.testProject "state-machine" { inherit projectOut spagoPkgs nodeModules; };
 
   docs = spago2nix-extra.genDocs "state-machine" { inherit projectOut spagoPkgs projectDir; };

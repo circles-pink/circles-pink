@@ -42,22 +42,23 @@ let
       ln -s ${pkgs.lib.cleanSource testSources} $out/test
     '';
 
-  buildProject = name: { projectDir, spagoPkgs }: pkgs.runCommand "${name}-purs-project"
-    {
-      buildInputs = [
-        spagoPkgs.buildSpagoStyle
-      ];
-      nativeBuildInputs = [
-        pkgs.purescript
-      ];
-    }
-    ''
-      mkdir $out
-      cd ${projectDir}
-      cp --preserve=all -r ${projectDir}/output/* -t $out
-      chmod -R +w $out
-      build-spago-style "./src/**/*.purs" "./test/**/*.purs" --output $out
-    '';
+  buildProject =
+    let
+      s = pkgs.fp.string;
+    in
+    name: { projectDir, spagoPkgs, censorCodes ? [ ] }: pkgs.runCommand "${name}-purs-project"
+      { buildInputs = [ pkgs.purescript-psa pkgs.purescript ]; }
+      ''
+        mkdir $out
+        cd ${projectDir}
+        cp --preserve=all -r ${projectDir}/output/* -t $out
+        chmod -R +w $out
+        
+        psa \
+          --strict --censor-lib --censor-codes=${s.joinWith "," censorCodes} \
+          compile \
+          ${getGlobs spagoPkgs.inputs} "./src/**/*.purs" "./test/**/*.purs" --output $out
+      '';
 
   testProject = name: { projectOut, spagoPkgs, nodeModules ? [ ] }: pkgs.runCommand "${name}-purs-project"
     {

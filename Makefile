@@ -42,8 +42,7 @@ ifeq ($(PRUNE),true)
 endif
 
 spago-build: spago-clean
-	mkdir -p generated
-	spago build --purs-args '--output $(PURS_OUTPUT)'
+	just spago-build
 
 spago-test: spago-clean yarn-install
 	mkdir -p generated

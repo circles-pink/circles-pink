@@ -2,6 +2,7 @@ module PursDeps
   ( DepEntry
   , ErrParse
   , ModuleName
+  , Opts
   , PursDeps
   , main
   , parse
@@ -51,6 +52,7 @@ import Undefined (undefined)
 --------------------------------------------------------------------------------
 -- Opts
 --------------------------------------------------------------------------------
+
 type Opts = { depsJsonPath :: String }
 
 parseOpts :: Parser Opts
