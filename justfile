@@ -129,6 +129,10 @@ purs-docs:
 	nix build .#purs.docs --out-link $LINK && \
 	miniserve --index index.html $LINK/
 
+spago-build: spago-clean
+	mkdir -p generated
+	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
+
 # All Makefile tasks
 
 dev-browser:
@@ -160,9 +164,6 @@ clean-generate:
 
 spago-clean:
 	make spago-clean
-
-spago-build:
-	make spago-build
 
 spago-test:
 	make spago-test

@@ -45,6 +45,7 @@ pkgs.mkShell {
     #nodePackages.webpack
     pkgs.purs-tidy
     pkgs.purescript-docs-search
+    pkgs.purescript-psa
   ];
 
   # Change the prompt to show that you are in a devShell
