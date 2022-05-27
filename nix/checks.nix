@@ -35,7 +35,7 @@ in
 
 {
 
-  pursTests = pkgs.circles-pink.purs.projectTests;
+  pursTests = pkgs.circles-pink.purs.circles-pink-state-machine.tests;
 
   nixLint =
     let
