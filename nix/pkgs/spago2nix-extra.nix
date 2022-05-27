@@ -97,7 +97,21 @@ let
     (x: pkgs.runCommand "${name}-purs-docs" { } "ln -s ${x}/generated-docs/html $out")
   ];
 
+  build = { name, sources, testSources, spagoPkgs, censorCodes ? [ ], nodeModules }:
+    let
+      dependencies = buildDependencies name spagoPkgs;
+      projectDir = mkProjectDir name { inherit dependencies sources testSources; };
+      projectOut = buildProject name { inherit projectDir spagoPkgs censorCodes; };
+      projectTests = testProject name { inherit projectOut spagoPkgs nodeModules; };
+      docs = genDocs name { inherit projectOut spagoPkgs projectDir; };
+    in
+    {
+      inherit docs sources dependencies;
+      output = projectOut;
+      tests = projectTests;
+    };
+
 in
 {
-  inherit buildDependencies mkProjectDir buildProject testProject genDocs;
+  inherit build;
 }

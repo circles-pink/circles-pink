@@ -123,7 +123,7 @@
 
       ts = (import ./pkgs/ts.nix {
         pkgs = final;
-        pursOutput = purs.default;
+        pursOutput = purs.circles-pink-state-machine.default;
         inherit assets;
         inherit zeus-client;
       });
@@ -151,7 +151,7 @@
       stateMachineGraphDot = final.runCommand "stateMachineGraph"
         { buildInputs = [ final.nodejs ]; }
         ''
-          node -e 'require("${purs.default}/CirclesPink.Garden.GenGraph").main()' $out
+          node -e 'require("${purs.circles-pink-state-machine.default}/CirclesPink.Garden.GenGraph").main()' $out
         '';
 
       stateMachineGraphSvg = final.runCommand
@@ -198,7 +198,7 @@
       publicDir = { envVars }: final.runCommand "output" { } ''
         cp -r ${ts.builds.storybook {inherit envVars;}} $out
         chmod -R +w $out
-        ln -s ${purs.docs} $out/purs-docs
+        ln -s ${purs.circles-pink-state-machine.docs} $out/purs-docs
       '';
 
       runGarden = { envVars }: final.writeShellScriptBin "run-garden" ''
@@ -215,13 +215,17 @@
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 
-      purs-deps-json = final.runCommand
-        "purs-deps.json"
-        { buildInputs = [ final.purescript final.jq ]; }
-        ''
-          shopt -s globstar
-          purs graph  ${purs.sources}/**/*.purs ${purs.dependencies}/.spago/*/*/src/**/*.purs | jq > $out
-        '';
+      purs-deps-json =
+        let
+          inherit (purs.circles-pink-state-machine) sources dependencies;
+        in
+        final.runCommand
+          "purs-deps.json"
+          { buildInputs = [ final.purescript final.jq ]; }
+          ''
+            shopt -s globstar
+            purs graph  ${sources}/**/*.purs ${dependencies}/.spago/*/*/src/**/*.purs | jq > $out
+          '';
 
       purs-deps = final.runCommand
         "purs-deps"
@@ -230,7 +234,7 @@
           let
             src = final.writeText "purs-deps" ''
               #!${final.nodejs}/bin/node
-              require("${purs.pursOutput}/PursDeps").main()
+              require("${purs.circles-pink-state-machine.output}/PursDeps").main()
             '';
           in
           ''
