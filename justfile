@@ -144,24 +144,7 @@ spago-build: spago-clean
 	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
 
 spago2nix:
-	ROOT="../.."; \
-	DIR="$PWD/materialized/spago2nix"; \
-	rm -rf $DIR; \
-	mkdir -p $DIR; \
-	INDEX_FILE=""; \
-	HERE=$PWD; \
-	for d in pkgs/purs/*/ ; do \
-	  cd "$HERE/$d"; \
-	  NAME=`basename $PWD/$d`; \
-	  TARGET="$DIR/$NAME"; \
-	  mkdir -p "$TARGET"; \
-	  spago2nix generate; \
-	  mv spago-packages.nix -t "$TARGET"; \
-	  dhall-to-json --file spago.dhall | jq '{name, dependencies, sources}' > "$TARGET/meta.json"; \
-	  INDEX_FILE="$INDEX_FILE""  $NAME = { spagoPkgs = import ./$NAME/spago-packages.nix; meta = readJson ./$NAME/meta.json; sources = ""$ROOT/$d""src; testSources = ""$ROOT/$d""test;}; \n"; \
-	done ; \
-	LET_IN="let inherit (builtins) fromJSON readFile; readJson = x: fromJSON (readFile x); in"; \
-	echo -e "$LET_IN\n{\n$INDEX_FILE}" > "$DIR/default.nix"; \
+	spago2nix-extra pkgs/purs materialized/spago2nix ../..
 
 ################################################################################
 # All Makefile tasks
