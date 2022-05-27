@@ -1,4 +1,4 @@
-{ name = "circles-statemachine"
+{ name = "circles-pink-state-machine"
 , dependencies =
   [ "aff"
   , "aff-promise"
@@ -60,5 +60,8 @@
   , "web3"
   ]
 , packages = ./packages.dhall
-, sources = [ "./pkgs/purs/src/**/*.purs", "./pkgs/purs/test/**/*.purs" ]
+, sources =
+  [ "./pkgs/purs/circles-pink-state-machine/src/**/*.purs"
+  , "./pkgs/purs/circles-pink-state-machine/test/**/*.purs"
+  ]
 }
