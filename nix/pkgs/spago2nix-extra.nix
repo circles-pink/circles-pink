@@ -1,7 +1,8 @@
 { pkgs, ... }:
 let
   inherit (builtins) map concatStringsSep attrValues;
-  inherit (pkgs.lib) pipe;
+  inherit (pkgs.lib) pipe mapAttrs;
+
 
   getGlob = pkg: ''".spago/${pkg.name}/${pkg.version}/src/**/*.purs"'';
   getGlobs = x: pipe x [ attrValues (map getGlob) (concatStringsSep " ") ];
@@ -111,7 +112,18 @@ let
       tests = projectTests;
     };
 
+
+  buildMonorepo =
+    let
+      builts = (mapAttrs (_: { spagoPkgs, meta, sources, testSources, censorCodes ? [ ], nodeModules ? [ ] }: build {
+        name = meta.name;
+        spagoPkgs = spagoPkgs { inherit pkgs; };
+        inherit censorCodes nodeModules sources testSources;
+      }));
+    in
+    builts;
+
 in
 {
-  inherit build;
+  inherit buildMonorepo;
 }
