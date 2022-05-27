@@ -10,10 +10,6 @@ build-storybook: assets build-storybook_
 build-storybook_:
 	export OUTPUT_DIR=../../../dist; yarn workspace storybook run build
 
-spago2nix:
-	mkdir -p materialized;
-	spago2nix generate; mv spago-packages.nix -t materialized;
-
 yarn-install: clean-install
 	yarn install
 
@@ -30,6 +26,9 @@ ifeq ($(PRUNE),true)
 endif
 
 materialize: clean-materialized spago2nix
+
+spago2nix:
+	just spago2nix
 
 clean-generate:
 ifeq ($(PRUNE),true)
