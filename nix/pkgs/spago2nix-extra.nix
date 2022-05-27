@@ -144,19 +144,29 @@ let
 
   buildMonorepo = attrs:
     let
-      inherit (builtins) listToAttrs filter;
+      inherit (builtins) listToAttrs filter concatMap;
       inherit (pkgs.lib) nameValuePair;
 
-      mkLocalPkgs = deps: pipe
-        deps [
-        (filter (d: attrs ? ${d}))
-        (map (name: nameValuePair name (pkgs.stdenv.mkDerivation {
+      mkLocalPkg = name: pkgs.stdenv.mkDerivation
+        {
           inherit name;
           version = "local";
           src = attrs.${name}.location;
           phases = "installPhase";
           installPhase = "ln -s $src $out";
-        })))
+        };
+
+      mkLocalPkgs' = deps: pipe
+        deps [
+        (filter (d: attrs ? ${d}))
+        (concatMap (name:
+          [ (nameValuePair name (mkLocalPkg name)) ] ++ (mkLocalPkgs' attrs.${name}.meta.dependencies)
+        ))
+      ];
+
+      mkLocalPkgs = deps: pipe
+        deps [
+        mkLocalPkgs'
         listToAttrs
       ];
     in
