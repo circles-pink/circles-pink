@@ -800,7 +800,8 @@
         "nix-filter": "nix-filter",
         "nixops": "nixops",
         "nixpkgs": "nixpkgs_8",
-        "purescript-tsd-gen": "purescript-tsd-gen"
+        "purescript-tsd-gen": "purescript-tsd-gen",
+        "spago2nix": "spago2nix"
       }
     },
     "rust-analyzer-src": {
@@ -817,6 +818,23 @@
         "owner": "rust-analyzer",
         "ref": "nightly",
         "repo": "rust-analyzer",
+        "type": "github"
+      }
+    },
+    "spago2nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1653657485,
+        "narHash": "sha256-g4tgC81i5/9gVuscZX2SX9+U9cYxqR8gD/AcOam2QMM=",
+        "owner": "thought2",
+        "repo": "spago2nix",
+        "rev": "c7441eea27dd0faf9f9b9696c75c208900621d33",
+        "type": "github"
+      },
+      "original": {
+        "owner": "thought2",
+        "ref": "feature/local-pkgs",
+        "repo": "spago2nix",
         "type": "github"
       }
     },
