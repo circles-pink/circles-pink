@@ -23,8 +23,8 @@ rec {
 
   docs = spago2nix-extra.genDocs "state-machine" { inherit projectOut spagoPkgs projectDir; };
 
-  sources = ../../pkgs/purs/src;
-  testSources = ../../pkgs/purs/test;
+  sources = ../../pkgs/purs/circles-pink-state-machine/src;
+  testSources = ../../pkgs/purs/circles-pink-state-machine/test;
 
   pursOutput = projectOut;
 
