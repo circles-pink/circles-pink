@@ -5,7 +5,7 @@ dist/
 output/
 .spago/
 .psc-ide-port
-/.spago2nix
+.spago2nix/
 /tmp
 pkgs/ts/assets/src
 secrets.json

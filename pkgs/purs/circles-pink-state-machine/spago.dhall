@@ -33,7 +33,6 @@
   , "node-process"
   , "now"
   , "nullable"
-  , "option"
   , "optparse"
   , "ordered-collections"
   , "parallel"
@@ -58,6 +57,7 @@
   , "uri"
   , "variant"
   , "web3"
+  , "chance"
   ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]
