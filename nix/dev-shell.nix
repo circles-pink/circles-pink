@@ -47,6 +47,7 @@ pkgs.mkShell {
     pkgs.purescript-docs-search
     pkgs.purescript-psa
     pkgs.dhall-json
+    pkgs.spago2nix-extra.spago2nix-extra-cli
   ];
 
   # Change the prompt to show that you are in a devShell

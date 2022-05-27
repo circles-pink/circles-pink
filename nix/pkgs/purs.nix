@@ -3,7 +3,6 @@
 let
   inherit (pkgs.lib) recursiveUpdate pipe;
 
-  spagoPkgs = import ../../materialized/spago-packages.nix { inherit pkgs; };
   spago2nix-extra = import ./spago2nix-extra.nix { inherit pkgs; };
 
   withTS = pursOutput: pkgs.runCommand "pursOutputWithTS"

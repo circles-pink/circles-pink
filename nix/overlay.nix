@@ -1,4 +1,6 @@
 (final: prev: rec {
+  spago2nix-extra = import ./pkgs/spago2nix-extra.nix { pkgs = final; };
+
   chokidar-cli = circles-pink.yarn2nix.bins.chokidar-cli;
 
   purescript-docs-search = circles-pink.yarn2nix.bins.purescript-docs-search;

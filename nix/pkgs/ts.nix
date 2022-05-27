@@ -119,9 +119,7 @@ rec {
     cd $out
     chmod -R +w $out
     VERSION="1.0.0"
-    ${pkgs.nodePackages.npm}/bin/npm version \
-      ${concatMapStringsSep " " (w: "-w ${w}") (attrNames publicWorkspaces)} \
-      "$VERSION"
+    ${concatMapStringsSep "\n" (w: "${pkgs.nodePackages.npm}/bin/npm version -w ${w} $VERSION") (attrNames publicWorkspaces)} \
 
     ${pkgs.nodePackages.npm}/bin/npm version --include-workspace-root --no-git-tag-version \
       "$VERSION"
