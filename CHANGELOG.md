@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
-## [UNRELEASED]
+## [1.0.30]
 
+- Start to split PureScript codebase into local packages
 - Ensure all warnings are always reported on a `just spago-build` run
 - Turn PureScript Warnings into errors in the Nix Build
   (To slowly adopt to the stricter behavior, some warnings are whitelisted in, See `purs.nix`)
