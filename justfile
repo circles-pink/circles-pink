@@ -149,8 +149,9 @@ spago2nix:
 	rm -rf $DIR; \
 	mkdir -p $DIR; \
 	INDEX_FILE=""; \
+	HERE=$PWD; \
 	for d in pkgs/purs/*/ ; do \
-	  cd "$PWD/$d"; \
+	  cd "$HERE/$d"; \
 	  NAME=`basename $PWD/$d`; \
 	  TARGET="$DIR/$NAME"; \
 	  mkdir -p "$TARGET"; \

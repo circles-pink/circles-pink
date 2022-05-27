@@ -18,6 +18,11 @@
     flake = false;
   };
 
+  inputs.spago2nix = {
+    url = github:thought2/spago2nix/feature/local-pkgs;
+    flake = false;
+  };
+
   inputs.flake-compat = {
     url = github:edolstra/flake-compat;
     flake = false;
@@ -52,7 +57,8 @@
         overlay
         (prev: final: {
           purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
-          inherit (easy-purescript-nix) spago2nix purs-tidy;
+          inherit (easy-purescript-nix) purs-tidy;
+          inherit spago2nix;
           nix-filter = nix-filter.lib;
           nixopsLatest = inputs.nixops.defaultPackage.${system};
           circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
@@ -67,6 +73,7 @@
       nix-filter = inputs.nix-filter;
       purescript-tsd-gen = inputs.purescript-tsd-gen;
       easy-purescript-nix = import inputs.easy-purescript-nix { inherit pkgs; };
+      spago2nix = import inputs.spago2nix { inherit pkgs; };
       overlay = import ./nix/overlay.nix;
       checks = import ./nix/checks.nix { inherit pkgs; };
 
