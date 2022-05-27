@@ -46,6 +46,7 @@ pkgs.mkShell {
     pkgs.purs-tidy
     pkgs.purescript-docs-search
     pkgs.purescript-psa
+    pkgs.dhall-json
   ];
 
   # Change the prompt to show that you are in a devShell

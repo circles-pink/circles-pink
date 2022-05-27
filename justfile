@@ -35,6 +35,10 @@ version:
 vscode-toggle-purs-export-lens:
 	patch-json '(j) => ({...j, "purescript.exportsCodeLens": !j["purescript.exportsCodeLens"]})' .vscode/settings.json
 
+################################################################################
+# branchless
+################################################################################
+
 branchless-get:
 	[ $(git branch --show-current) == "$CIRCLES_DEV" ]
 	git fetch
@@ -53,6 +57,8 @@ branchless-put_:
 	git push --force
 	gh pr create --base main --body "" --title "Branchless Update"
 	gh pr merge --auto --rebase
+
+################################################################################
 
 release: branchless-get
 	bump-npm-versions "patch"
@@ -129,11 +135,35 @@ purs-docs:
 	nix build .#purs.docs --out-link $LINK && \
 	miniserve --index index.html $LINK/
 
+################################################################################
+# spago
+################################################################################
+
 spago-build: spago-clean
 	mkdir -p generated
 	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
 
+spago2nix:
+	DIR=./materialized/spago2nix; \
+	rm -rf $DIR; \
+	mkdir -p $DIR; \
+	INDEX_FILE=""; \
+	for d in "$PWD/pkgs/purs/*/" ; do \
+	  cd "$d"; \
+	  NAME=`basename $d`; \
+	  TARGET="$DIR/$NAME"; \
+	  mkdir -p $TARGET; \
+	  spago2nix generate; \
+	  mv spago-packages.nix -t "$TARGET"; \
+	  dhall-to-json --file spago.dhall | jq '{name, dependencies, sources}' > "$TARGET/meta.json"; \
+	  INDEX_FILE="  $INDEX_FILE""$NAME = { spagoPkgs = import ./$NAME/spago-packages.nix; meta = readJson ./$NAME/meta.json; }; "; \
+	done ; \
+	LET_IN="let inherit (builtins) fromJSON readFile; readJson = x: fromJSON (readFile x); in"; \
+	echo -e "$LET_IN\n{\n$INDEX_FILE\n}" > "$DIR/default.nix"; \
+
+################################################################################
 # All Makefile tasks
+################################################################################
 
 dev-browser:
 	make dev-browser
@@ -143,9 +173,6 @@ build-storybook:
 
 build-storybook_:
 	make build-storybook_
-
-spago2nix:
-	make spago2nix
 
 yarn-install:
 	make yarn-install
