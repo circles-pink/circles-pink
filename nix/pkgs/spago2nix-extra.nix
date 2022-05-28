@@ -181,40 +181,91 @@ let
           }))
     ];
 
-
   spago2nix-extra-cli =
     let
-      inherit (pkgs)
-        spago2nix
-        jq
-        dhall-json;
+      inherit (pkgs) dhall-json spago2nix;
     in
-    pkgs.writeShellScriptBin
-      "spago2nix-extra"
-      ''
-        PKGS_DIR=$1
-        TARGET_DIR=$2
-        REL=$3
-        rm -rf $TARGET_DIR
-        mkdir -p $TARGET_DIR
-        INDEX_FILE=""
+    pkgs.writers.writeJSBin "spago2nix-extra"
+      {
+        libraries = builtins.attrValues { inherit (pkgs.nodePackages) fp-ts yargs glob nijs; };
+      } ''
+      const { jsToNix, NixImport, NixFile, NixFunInvocation, NixExpression } = require("nijs");
+      const yargs = require('yargs/yargs')
+      const glob = require("glob")
+      const { hideBin } = require('yargs/helpers')
+      const { writeFileSync, rmSync, renameSync } = require("fs")
+      const { basename, join, relative } = require('path');
+      const { execSync } = require('child_process')
+      const { pipe, flow } = require('fp-ts/function')
+      const R = require('fp-ts/Record')
+      const S = require('fp-ts/string')
+      const A = require('fp-ts/Array')
 
-        for d in $PKGS_DIR/*/ ; do
-          PKG_NAME=`basename $d`
-          TARGET="$TARGET_DIR/$PKG_NAME"
-          mkdir -p "$TARGET"
-          ${spago2nix}/bin/spago2nix generate
-          mv spago-packages.nix -t "$TARGET"
-          # TODO: Add check that folder name equals name in spago.dhall
-          ${dhall-json}/bin/dhall-to-json --file $d/spago.dhall \
-            | ${jq}/bin/jq '{name, dependencies, sources}' \
-            > "$TARGET/meta.json"
-          INDEX_FILE="$INDEX_FILE""  $PKG_NAME = { spagoPkgs = import ./$PKG_NAME/spago-packages.nix; meta = readJson ./$PKG_NAME/meta.json; location = ""$REL/$d".";}; \n"
-        done
+      const metaFile = "meta.json"
+      const spagoPackagesFile = "spago-packages.nix"
+      const indexFile = "default.nix"
 
-        LET_IN="let inherit (builtins) fromJSON readFile; readJson = x: fromJSON (readFile x); in"
-        echo -e "$LET_IN\n{\n$INDEX_FILE}" > "$TARGET_DIR/default.nix"
-      '';
+      const parseOpts = () => yargs(hideBin(process.argv))
+        .option('pkgs-dir', { type: 'string', required: true })
+        .option('target-dir', { type: 'string', required: true })
+        .parse()
+    
+      const nixImport = value => new NixImport(new NixFile({ value }))
+      const nixFile = value => new NixFile({ value })
+
+      const nixReadFile = paramExpr => new NixFunInvocation({ funExpr : new NixExpression("builtins.readFile"), paramExpr})
+      const nixFromJSON = paramExpr => new NixFunInvocation({ funExpr : new NixExpression("builtins.fromJSON"), paramExpr})
+
+      const handleDir = ({ targetDir, pkgsDir }) => (path) => {
+        const dirName = basename(path);
+        const { name, dependencies, sources } = pipe(
+          execSync(`${dhall-json}/bin/dhall-to-json --file ''${path}/spago.dhall`),
+          x => x.toString(),
+          JSON.parse,
+          R.filterWithIndex((k,_) => A.elem(S.Eq)(k)(["name", "dependencies", "sources"]))
+        )
+        
+        if (!S.Eq.equals(dirName, name)) throw new Error(`''${dirName} does not equal ''${name}`)
+
+        const targetDir_ = join(targetDir, name)
+        execSync(`mkdir -p ''${targetDir_}`)
+
+        execSync("${spago2nix}/bin/spago2nix generate", { cwd: path })
+        renameSync(join(path, spagoPackagesFile), join(targetDir_, spagoPackagesFile))
+
+        pipe(
+          { name, dependencies, sources },
+          x => JSON.stringify(x, null, 2),
+          x => writeFileSync(join(targetDir_, metaFile), x)
+        )
+
+        const value = {
+          spagoPkgs: pipe(join(name, spagoPackagesFile), x => "./" + x, nixImport),
+          meta: pipe(join(name, metaFile), x => "./" + x, nixFile, nixReadFile, nixFromJSON),
+          location: pipe(join(pkgsDir, name), x => relative(targetDir, x), nixFile)
+        }
+
+        return [name, value]
+      }
+
+      const main = () => {
+        const opts = parseOpts()
+        const { pkgsDir, targetDir } = opts 
+        execSync(`mkdir -p ''${targetDir}`)
+        execSync(`rm -rf ''${targetDir}/*`)
+        const dirs = glob.sync(`''${pkgsDir}/*`)
+        
+        pipe(
+          dirs,
+          A.map(handleDir(opts)),
+          R.fromEntries,
+          x => jsToNix(x, true),
+          x => writeFileSync(join(targetDir, indexFile), x)
+        )
+      }
+
+      main()
+    '';
 in
 {
   inherit buildMonorepo spago2nix-extra-cli;

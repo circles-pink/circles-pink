@@ -161,7 +161,7 @@ let
         installPhase = "ln -s $src $out";
       };
 
-  # chance is a Local package in (Local "./pkgs/purs/chance")
+  # chance is a Local package in (Local "./../../../pkgs/purs/chance")
 
     "checked-exceptions" = pkgs.stdenv.mkDerivation {
         name = "checked-exceptions";
