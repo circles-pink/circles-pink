@@ -48,6 +48,9 @@ pkgs.mkShell {
     pkgs.purescript-psa
     pkgs.dhall-json
     pkgs.spago2nix-extra.spago2nix-extra-cli
+    (pkgs.writers.nodeRepl (builtins.attrValues {
+      inherit (pkgs.nodePackages) fp-ts nijs glob yargs;
+    }))
   ];
 
   # Change the prompt to show that you are in a devShell

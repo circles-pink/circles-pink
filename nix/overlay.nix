@@ -25,6 +25,37 @@
 
   miraculix = import ./pkgs/miraculix.nix { pkgs = final; };
 
+  nodePackages = prev.nodePackages // import ./pkgs/node2nix/default.nix { pkgs = final; };
+
+  writers = prev.writers // {
+    writeJSBin = name: { libraries ? [ ] }: content:
+      let
+        node-env = final.buildEnv {
+          name = "node";
+          paths = libraries;
+          pathsToLink = [ "/lib/node_modules" ];
+        };
+      in
+      final.writeShellScriptBin name ''
+        export NODE_PATH=${node-env}/lib/node_modules
+        ${final.nodejs}/bin/node ${final.writeText "${name}.js" content} $@
+      '';
+
+    nodeRepl = packages:
+      let
+        node-env = final.buildEnv {
+          name = "node";
+          paths = packages;
+          pathsToLink = [ "/lib/node_modules" ];
+        };
+      in
+      final.writeShellScriptBin "node-repl" ''
+        export NODE_PATH=${node-env}/lib/node_modules
+        ${final.nodejs}/bin/node $@
+      '';
+
+  };
+
   writeShellScriptBin' = name: { onPath ? [ ], env ? { } }: script:
     let
       exports = lib.mapAttrsToList (name: value: ''export ${name}="${value}"'') env;

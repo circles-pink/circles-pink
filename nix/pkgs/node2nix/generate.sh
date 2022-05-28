@@ -1,0 +1,1 @@
+node2nix --input node-packages.json --output node-packages.nix
