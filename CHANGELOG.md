@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 Please add new entries below.
 
+## [1.0.31]
+
+- Refactor spago2nix-extra-cli with JS
+
 ## [1.0.30]
 
 - Start to split PureScript codebase into local packages
