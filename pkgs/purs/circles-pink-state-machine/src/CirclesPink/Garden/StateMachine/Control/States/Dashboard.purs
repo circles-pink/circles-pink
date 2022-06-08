@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, _loadingTrust, _loadingUntrust, _pendingTrust, _pendingUntrust, _trusted, _untrusted)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, initTrusted, initUntrusted)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -25,6 +25,7 @@ import Data.Maybe (Maybe(..))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (default, onMatch)
+import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
@@ -120,42 +121,17 @@ dashboard env =
         pure unit
 
   syncTrusts set st i =
-    let
-      mapTrust :: Array User -> Map W3.Address Trust -> TrustNode -> W3.Address /\ Trust
-      mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
-        where
-        trustState = case lookup (convert t.safeAddress) oldTrusts of
-          Nothing -> if t.isIncoming then _trusted else _untrusted
-          Just { trustState: oldTrustState } ->
-            if t.isIncoming then
-              ( default oldTrustState # onMatch
-                  { "pendingTrust": \_ -> _trusted
-                  , "loadingTrust": \_ -> _trusted
-                  }
-              ) oldTrustState
-            else
-              ( default oldTrustState # onMatch
-                  { "pendingUntrust": \_ -> _untrusted
-                  , "loadingUntrust": \_ -> _untrusted
-                  }
-              ) oldTrustState
-        user =
-          { isOutgoing: t.isOutgoing
-          , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
-          , trustState
-          }
-    in
-      do
-        trusts <-
-          env.trustGetNetwork st.privKey
-            # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
-            # dropError
-        users <-
-          fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
-            # dropError
-        let
-          foundUsers = catMaybes $ map hush users
-        lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers st'.trusts # M.fromFoldable }
+    do
+      trusts <-
+        env.trustGetNetwork st.privKey
+          # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
+          # dropError
+      users <-
+        fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trusts)
+          # dropError
+      let
+        foundUsers = catMaybes $ map hush users
+      lift $ set \st' -> S._dashboard st' { trusts = trusts <#> mapTrust foundUsers st'.trusts # M.fromFoldable }
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -172,13 +148,13 @@ dashboard env =
       runExceptT do
         let addr = unsafePartial $ P.unsafeAddrFromString u
         lift $ set \st' ->
-          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _loadingTrust }) (convert addr) st'.trusts }
+          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
-        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingTrust }) (convert addr) st'.trusts }
+        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
         -- _ <- syncTrusts set st
         --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
         --   # dropError
@@ -200,13 +176,13 @@ dashboard env =
       runExceptT do
         let addr = unsafePartial $ P.unsafeAddrFromString u
         lift $ set \st' ->
-          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _loadingUntrust }) (convert addr) st'.trusts }
+          S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
         _ <-
           env.removeTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
-        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = _pendingUntrust }) (convert addr) st'.trusts }
+        lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
         -- _ <- syncTrusts set st
         --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
         --   # dropError
@@ -258,3 +234,16 @@ dashboard env =
     case result of
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
+
+mapTrust :: Array User -> Map W3.Address Trust -> TrustNode -> W3.Address /\ Trust
+mapTrust foundUsers oldTrusts t = convert t.safeAddress /\ user
+  where
+  trustState = case lookup (convert t.safeAddress) oldTrusts of
+    Nothing -> if t.isIncoming then initTrusted else initUntrusted
+    Just { trustState: oldTrustState } ->
+      oldTrustState
+  user =
+    { isOutgoing: t.isOutgoing
+    , user: find (\u -> u.safeAddress == t.safeAddress) foundUsers
+    , trustState
+    }
