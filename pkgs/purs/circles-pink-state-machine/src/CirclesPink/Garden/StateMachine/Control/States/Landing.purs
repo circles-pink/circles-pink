@@ -45,6 +45,8 @@ landing env =
                 , privKey
                 , safeStatus
                 , trustsResult: _notAsked unit
+                , deploySafeResult: _notAsked unit
+                , deployTokenResult: _notAsked unit
                 , isReady
                 }
   }

@@ -4,6 +4,8 @@ module CirclesPink.Garden.StateMachine.State
   , CirclesState
   , DebugState
   , EmailApiResult
+  , ErrDeploySafeResolved
+  , ErrDeployTokenResolved
   , ErrLoginState
   , ErrLoginStateResolved
   , ErrSubmit
@@ -18,6 +20,8 @@ module CirclesPink.Garden.StateMachine.State
   , SubmitState
   , TrustState
   , TrustStateTrustsResult
+  , TrustsDeploySafeResult
+  , TrustsDeployTokenResult
   , UserData
   , UserDataSubmitResult
   , UsernameApiResult
@@ -144,7 +148,23 @@ type ErrTrustStateResolved = Variant
   , errInvalidUrl :: String
   )
 
+type ErrDeploySafeResolved = Variant
+  ( errService :: Unit
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
+
+type ErrDeployTokenResolved = Variant
+  ( errService :: Unit
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
+
 type TrustStateTrustsResult = RemoteReport ErrTrustStateResolved Unit
+
+type TrustsDeploySafeResult = RemoteReport ErrDeploySafeResolved Unit
+
+type TrustsDeployTokenResult = RemoteReport ErrDeployTokenResolved String
 
 type TrustState =
   { user :: CC.User
@@ -153,6 +173,8 @@ type TrustState =
   , safeStatus :: SafeStatus
   , isReady :: Boolean
   , trustsResult :: TrustStateTrustsResult
+  , deploySafeResult :: TrustsDeploySafeResult
+  , deployTokenResult :: TrustsDeployTokenResult
   }
 
 --------------------------------------------------------------------------------

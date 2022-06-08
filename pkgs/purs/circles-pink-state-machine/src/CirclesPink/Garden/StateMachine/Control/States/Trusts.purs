@@ -7,11 +7,10 @@ import Prelude
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (catchError, lift, runExceptT)
+import Control.Monad.Except (lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..), isRight)
-import RemoteData (_failure, _loading)
-import Undefined (undefined)
+import RemoteData (_failure)
 
 trusts
   :: forall m
@@ -41,9 +40,11 @@ trusts env@{ deployToken, deploySafe } =
   finalizeRegisterUser set st _ =
     let
       doDeploys = do
-        _ <- (\_ -> deploySafe st.privKey)
+        _ <- deploySafe st.privKey
+          # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
           # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-        _ <- (\_ -> deployToken st.privKey)
+        _ <- deployToken st.privKey
+          # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
           # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         pure unit
     in
