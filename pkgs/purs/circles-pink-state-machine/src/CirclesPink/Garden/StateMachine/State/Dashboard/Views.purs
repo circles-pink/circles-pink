@@ -23,7 +23,7 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState, _loadingTrust, _pendingTrust, _untrusted)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
@@ -34,6 +34,7 @@ import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
 import Data.String (toLower)
 import Data.Tuple (uncurry)
+import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
 import Foreign.Object as O
@@ -105,16 +106,16 @@ defaultView d@{ trusts, trustAddResult } =
     initTrust user =
       { isOutgoing: false
       , user: Just user
-      , trustState:
-          O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
-            # maybe _untrusted
-                ( unwrap >>>
-                    ( default _untrusted # onMatch
-                        { loading: \_ -> _loadingTrust
-                        , success: \_ -> _pendingTrust
-                        }
-                    )
-                )
+      , trustState: undefined
+      -- O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
+      --   # maybe _untrusted
+      --       ( unwrap >>>
+      --           ( default _untrusted # onMatch
+      --               { loading: \_ -> _loadingTrust
+      --               , success: \_ -> _pendingTrust
+      --               }
+      --           )
+      --       )
 
       }
 

@@ -26,13 +26,10 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , Trusts
   , UserSearchResult
   , _dashboard
-  , _loadingTrust
-  , _loadingUntrust
-  , _pendingTrust
-  , _pendingUntrust
-  , _trusted
-  , _untrusted
   , initDashboard
+  , initTrusted
+  , initUntrusted
+  , next
   ) where
 
 import Prelude
@@ -43,7 +40,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Variant (Variant, inj)
+import Data.Variant (Variant, inj, match)
 import Foreign.Object (Object, empty)
 import Network.Ethereum.Core.Signatures as W3
 import Record as R
@@ -185,29 +182,30 @@ type RemoteReportV e a = RemoteReport (Variant e) a
 
 --------------------------------------------------------------------------------
 
-type TrustState = Variant
-  ( loadingTrust :: Unit
-  , loadingUntrust :: Unit
-  , pendingTrust :: Unit
-  , pendingUntrust :: Unit
-  , trusted :: Unit
-  , untrusted :: Unit
+newtype TrustState = TrustState
+  ( Variant
+      ( untrusted :: Unit -- 0
+      , loadingTrust :: Unit -- 1
+      , pendingTrust :: Unit -- 2
+      , trusted :: Unit -- 3
+      , loadingUntrust :: Unit -- 4
+      , pendingUntrust :: Unit -- 5
+      )
   )
 
-_trusted :: TrustState
-_trusted = inj (Proxy :: _ "trusted") unit
+initTrusted :: TrustState
+initTrusted = TrustState $ inj (Proxy :: _ "trusted") unit
 
-_untrusted :: TrustState
-_untrusted = inj (Proxy :: _ "untrusted") unit
+initUntrusted :: TrustState
+initUntrusted = TrustState $ inj (Proxy :: _ "untrusted") unit
 
-_loadingTrust :: TrustState
-_loadingTrust = inj (Proxy :: _ "loadingTrust") unit
-
-_loadingUntrust :: TrustState
-_loadingUntrust = inj (Proxy :: _ "loadingUntrust") unit
-
-_pendingTrust :: TrustState
-_pendingTrust = inj (Proxy :: _ "pendingTrust") unit
-
-_pendingUntrust :: TrustState
-_pendingUntrust = inj (Proxy :: _ "pendingUntrust") unit
+next :: TrustState -> TrustState
+next (TrustState ts) = TrustState $ match
+  { untrusted: \_ -> inj (Proxy :: _ "loadingTrust") unit
+  , loadingTrust: \_ -> inj (Proxy :: _ "pendingTrust") unit
+  , pendingTrust: \_ -> inj (Proxy :: _ "trusted") unit
+  , trusted: \_ -> inj (Proxy :: _ "loadingUntrust") unit
+  , loadingUntrust: \_ -> inj (Proxy :: _ "pendingUntrust") unit
+  , pendingUntrust: \_ -> inj (Proxy :: _ "untrusted") unit
+  }
+  ts
