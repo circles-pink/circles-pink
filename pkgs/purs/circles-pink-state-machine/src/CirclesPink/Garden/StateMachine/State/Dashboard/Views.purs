@@ -23,7 +23,7 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState, initUntrusted, next)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
@@ -106,16 +106,16 @@ defaultView d@{ trusts, trustAddResult } =
     initTrust user =
       { isOutgoing: false
       , user: Just user
-      , trustState: undefined
-      -- O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
-      --   # maybe _untrusted
-      --       ( unwrap >>>
-      --           ( default _untrusted # onMatch
-      --               { loading: \_ -> _loadingTrust
-      --               , success: \_ -> _pendingTrust
-      --               }
-      --           )
-      --       )
+      , trustState:
+          O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
+            # maybe initUntrusted
+                ( unwrap >>>
+                    ( default initUntrusted # onMatch
+                        { loading: \_ -> next initUntrusted
+                        , success: \_ -> next $ next initUntrusted
+                        }
+                    )
+                )
 
       }
 

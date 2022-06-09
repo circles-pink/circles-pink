@@ -16,6 +16,7 @@ module Wallet.PrivateKey
   , privKeyToAddress
   , sampleAddress
   , sampleKey
+  , sampleMnemonic
   , sampleSafeAddress
   , toEntropy
   , toString
@@ -124,6 +125,9 @@ sampleAddress = Address "0xfb7dc4d8f841af32d777e698d6c71409e85955d9"
 
 sampleSafeAddress :: Address
 sampleSafeAddress = Address "0x984501180D63335928eA7fb59c17d33e0398Ed39"
+
+sampleMnemonic :: Mnemonic
+sampleMnemonic = Mnemonic [ "gym", "onion", "turkey", "slice", "blue", "random", "goat", "live", "grit", "educate", "slam", "alone", "enroll", "print", "need", "certain", "stumble", "addict", "drive", "accident", "iron", "provide", "major", "next" ]
 
 isPrivateKey :: String -> Boolean
 isPrivateKey s = isPrivateKeyImpl s

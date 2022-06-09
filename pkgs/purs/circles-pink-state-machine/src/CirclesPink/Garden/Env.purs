@@ -411,7 +411,7 @@ testEnv =
   , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
   , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit
-  , isTrusted: \_ -> pure $ wrap { isTrusted: false, trustConnections: 0 }
+  , isTrusted: \_ -> pure $ wrap { isTrusted: true, trustConnections: 3 }
   , trustGetNetwork: \_ -> pure []
   , getSafeStatus: \_ -> pure { isCreated: false, isDeployed: false }
   , deploySafe: \_ -> pure unit
