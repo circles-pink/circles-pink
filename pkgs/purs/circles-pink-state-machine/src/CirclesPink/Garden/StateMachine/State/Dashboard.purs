@@ -193,6 +193,10 @@ newtype TrustState = TrustState
       )
   )
 
+derive instance trustStateEq :: Eq TrustState
+
+derive newtype instance showTrustState :: Show TrustState
+
 initTrusted :: TrustState
 initTrusted = TrustState $ inj (Proxy :: _ "trusted") unit
 

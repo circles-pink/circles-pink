@@ -2,66 +2,29 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard.Tests where
 
 import Prelude
 
-import CirclesCore (User, _errNative)
+import CirclesCore (User, TrustNode, _errNative)
 import CirclesPink.Garden.Env (TestEnvM, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
+import CirclesPink.Garden.StateMachine.Control.States.Dashboard (mapTrust)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Convertable (convert)
-import Data.Argonaut (decodeJson, fromString)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)
-import Data.Map (Map)
+import Data.Map (Map, fromFoldable)
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromJust)
-import Data.Tuple.Nested ((/\))
+import Data.Maybe (Maybe(..))
+import Data.Tuple.Nested (type (/\), (/\))
 import Network.Ethereum.Core.Signatures as W3
-import Partial.Unsafe (unsafePartial)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
+import Test.TestUtils (addrA, addrB, addrC, addrD, addrE, unsafeMkAddr, userA, userB, userE)
+import Undefined (undefined)
 import Wallet.PrivateKey as P
 
 safeFunderAddr :: W3.Address
 safeFunderAddr = unsafeMkAddr "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
-
---------------------------------------------------------------------------------
-addrA :: W3.Address
-addrA = unsafeMkAddr "0x0142e59D7e0744e984aCa46Bbe9A7eF5C3Fa50ba"
-
-userA :: User
-userA = mkDummyUser addrA
-
---
-addrB :: W3.Address
-addrB = unsafeMkAddr "0x01F19302779CfB177b1F928386FCd61eE6856057"
-
-userB :: User
-userB = mkDummyUser addrB
-
---
-addrC :: W3.Address
-addrC = unsafeMkAddr "0x02B50e87C577084b9659a625870b4A6e8a8E9238"
-
-userC :: User
-userC = mkDummyUser addrC
-
---
-addrD :: W3.Address
-addrD = unsafeMkAddr "0x041653a75c0238Fe4382Ed36A36BbD6F71C0f52B"
-
-userD :: User
-userD = mkDummyUser addrD
-
---
-addrE :: W3.Address
-addrE = unsafeMkAddr "0x07E23d9A3c09AD80aa9acF0bcEcF41cD3B06FdD0"
-
-userE :: User
-userE = mkDummyUser addrE
-
---
-mkDummyUser :: W3.Address -> User
-mkDummyUser a = { id: 1, username: "A", avatarUrl: "", safeAddress: convert $ a }
 
 --------------------------------------------------------------------------------
 spec :: Spec Unit
@@ -102,6 +65,9 @@ spec =
         D.fetchUsersBinarySearch testEnv' P.sampleKey [ addrA, addrB, addrC, addrD, addrE ]
           # run
           # shouldEqual (Just [ Right userA, Right userB, Left addrC, Left addrD, Right userE ])
+    describe "mapTrusts" do
+      it "runs" do
+        1 `shouldEqual` 2
 
 mkGetUsers :: Map W3.Address User -> GetUsers TestEnvM
 mkGetUsers db _ _ xs =
@@ -115,15 +81,43 @@ mkGetUsers db _ _ xs =
           Nothing -> pure $ catMaybes result
 
 --------------------------------------------------------------------------------
-unsafeMkAddr :: String -> W3.Address
-unsafeMkAddr str =
-  unsafePartial
-    ( str
-        # fromString
-        # decodeJson
-        # hush
-        # fromJust
-    )
 
 run :: forall t16 t17. ExceptT t16 TestEnvM t17 -> Maybe t17
 run = runExceptT >>> runTestEnvM >>> hush
+
+--
+
+-- users :: Array User
+-- users = [ { avatarUrl: "", id: 0, safeAddress: P.sampleAddress, username: "a" } ]
+
+-- trusts :: Map W3.Address Trust
+-- trusts = fromFoldable [ convert P.sampleAddress /\ { isOutgoing: true, trustState: initTrusted, user: Nothing } ]
+
+-- trustnode :: TrustNode
+-- trustnode = { isIncoming: true, isOutgoing: true, limitPercentageIn: 50, limitPercentageOut: 50, mutualConnections: [], safeAddress: P.sampleAddress }
+
+-- expectedResult :: W3.Address /\ Trust
+-- expectedResult = undefined
+
+trustedUser :: User
+trustedUser = { avatarUrl: "", id: 0, safeAddress: P.sampleAddress, username: "a" }
+
+checkMap :: Boolean
+checkMap =
+  let
+    users :: Array User
+    users = [ { avatarUrl: "", id: 0, safeAddress: P.sampleAddress, username: "a" } ]
+
+    trusts :: Map W3.Address Trust
+    trusts = fromFoldable [ convert P.sampleAddress /\ { isOutgoing: true, trustState: initTrusted, user: Nothing } ]
+
+    trustNode :: TrustNode
+    trustNode = { isIncoming: true, isOutgoing: true, limitPercentageIn: 50, limitPercentageOut: 50, mutualConnections: [], safeAddress: P.sampleAddress }
+
+    expectedResult :: W3.Address /\ Trust
+    expectedResult = undefined
+
+    actualResult :: W3.Address /\ Trust
+    actualResult = mapTrust users trusts trustNode
+  in
+    actualResult == expectedResult

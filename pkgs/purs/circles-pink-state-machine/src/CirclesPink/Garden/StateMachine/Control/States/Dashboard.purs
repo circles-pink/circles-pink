@@ -1,11 +1,12 @@
 module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ( dashboard
   , fetchUsersBinarySearch
+  , mapTrust
   ) where
 
 import Prelude
 
-import CirclesCore (User, TrustNode)
+import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -19,7 +20,7 @@ import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.Either (Either(..), hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (Map, lookup, update)
+import Data.Map (Map, fromFoldable, lookup, update)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.String (length)
@@ -31,6 +32,7 @@ import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
+import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
