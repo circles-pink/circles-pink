@@ -12,6 +12,7 @@
   , "dot-language"
   , "effect"
   , "either"
+  , "errors"
   , "eth-core"
   , "exceptions"
   , "foldable-traversable"
