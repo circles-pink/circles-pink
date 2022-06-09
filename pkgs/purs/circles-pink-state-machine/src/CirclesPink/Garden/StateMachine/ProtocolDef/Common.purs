@@ -8,5 +8,4 @@ type ErrLoginTask r = Env.ErrUserResolve
   + Env.ErrTrustGetNetwork
   + Env.ErrIsTrusted
   + Env.ErrIsFunded
-  + Env.ErrInvalidMnemonic
   + r

@@ -2,13 +2,16 @@ module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
 
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', TaskReturn, loginTask, runExceptT')
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, loginTask, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except.Checked (ExceptV)
-import Data.Either (Either(..))
-import RemoteData (_failure, _loading, _notAsked)
-import Undefined (undefined)
+import Control.Monad.Except (except, lift, runExceptT)
+import Data.Either (note)
+import Data.Tuple (fst)
+import Data.Tuple.Nested ((/\))
+import Data.Variant (inj)
+import RemoteData (_notAsked)
+import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey as P
 
 login
@@ -25,35 +28,42 @@ login env =
   , setMagicWords: \set _ words -> set \st -> S._login st { magicWords = words }
   }
   where
-  login' set st _ = do
-    set \st' -> S._login st' { loginResult = _loading unit }
-    let
-      mnemonic = P.getMnemonicFromString st.magicWords
-    results <-
-      (runExceptT' :: ExceptV (S.ErrLoginState) m TaskReturn -> _)
-        $ do
-            privKey <- undefined -- P.mnemonicToKey mnemonic
-            loginResult <- loginTask env privKey
-            _ <- env.saveSession privKey
-            pure loginResult
-    case results of
-      Left e -> set \st' -> S._login st' { loginResult = _failure e }
-      Right { user, safeStatus }
-        | safeStatus.isCreated && safeStatus.isDeployed -> do
-            set \_ ->
-              S.initDashboard
-                { user
-                , privKey
-                }
-      Right { user, trusts, safeStatus, isReady } -> do
-        set \_ ->
-          S._trusts
-            { user
-            , trusts
-            , privKey
-            , safeStatus
-            , trustsResult: _notAsked unit
-            , deploySafeResult: _notAsked unit
-            , deployTokenResult: _notAsked unit
-            , isReady
-            }
+
+  login' set st _ =
+    void do
+      runExceptT do
+        { safeStatus, user, trusts, isReady } /\ privKey <-
+          ( do
+              mnemonic <- P.getMnemonicFromString st.magicWords
+                # note (inj (Proxy :: _ "errInvalidMnemonic") unit)
+                # except
+
+              let privKey = P.mnemonicToKey mnemonic
+              taskReturn <- loginTask env privKey
+              _ <- env.saveSession privKey
+              pure (taskReturn /\ privKey)
+          )
+            #
+              ( \x -> do
+                  result <- x
+                  _ <- subscribeRemoteReport env (\r -> set \st' -> S._login st' { loginResult = r }) (map fst x) 0
+                  pure result
+              )
+            # dropError
+        if safeStatus.isCreated && safeStatus.isDeployed then
+          lift $ set \_ -> S.initDashboard { user, privKey }
+        else
+          lift $ set \_ ->
+            S._trusts
+              { user
+              , trusts
+              , privKey
+              , safeStatus
+              , trustsResult: _notAsked unit
+              , deploySafeResult: _notAsked unit
+              , deployTokenResult: _notAsked unit
+              , isReady
+              }
+
+        pure unit
+
