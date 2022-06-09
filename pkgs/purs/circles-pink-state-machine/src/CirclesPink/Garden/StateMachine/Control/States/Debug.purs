@@ -6,7 +6,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
-import Debug.Extra (todo)
+import Data.Maybe (Maybe(..))
 import Wallet.PrivateKey as P
 
 debug
@@ -23,8 +23,10 @@ debug env =
   where
   coreToWindow _ st _ = do
     let
-      mnemonic = P.getMnemonicFromString st.magicWords
+      maybeMnemonic = P.getMnemonicFromString st.magicWords
     let
-      privKey = todo -- P.mnemonicToKey mnemonic
-    _ <- runExceptT $ env.coreToWindow privKey
+      maybePrivKey = P.mnemonicToKey <$> maybeMnemonic
+    _ <- case maybePrivKey of
+      Just pk -> runExceptT $ env.coreToWindow pk
+      Nothing -> pure $ pure unit
     pure unit

@@ -6,6 +6,7 @@ module CirclesPink.Garden.StateMachine.Stories
   , loginUser
   , runScripT
   , signUpUser
+  , trustUser
   ) where
 
 import Prelude
@@ -15,22 +16,25 @@ import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
-import CirclesPink.Garden.StateMachine.State (CirclesState, init)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.Except (class MonadTrans, ExceptT(..), runExceptT)
+import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.State (StateT, get, runStateT)
+import Convertable (convert)
 import Data.Either (Either)
-import Data.Traversable (sequence_)
+import Data.Map (lookup)
+import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, default, inj, onMatch)
 import Data.Variant.Extra (getLabel)
 import Debug (spy)
-import Effect.Class (class MonadEffect)
 import Log.Class (class MonadLog, log)
+import Partial.Unsafe (unsafePartial)
 import Stadium.Control (toStateT)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Wallet.PrivateKey (sampleSafeAddress, unsafeAddrFromString)
 import Wallet.PrivateKey as CC
 
 type ScriptT e m a = ExceptV e (StateT CirclesState m) a
@@ -74,7 +78,7 @@ type SignUpUser =
   , safeAddress :: CC.Address
   }
 
-signUpUser :: forall t m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
+signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
   ExceptT do
     act env $ A._landing $ A._signUp unit
@@ -129,5 +133,30 @@ loginUser env { magicWords } =
         ( default (throwError $ err "Cannot login user.")
             # onMatch
                 { dashboard: \_ -> pure unit
+                }
+        )
+
+--------------------------------------------------------------------------------
+
+type TrustUserOpts =
+  { safeAddress :: String
+  }
+
+trustUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT (Err + r) m Unit
+trustUser env { safeAddress } =
+  ExceptT do
+    act env $ A._dashboard $ A._addTrustConnection safeAddress
+    get
+      <#>
+        ( default (throwError $ err "Invalid final state.")
+            # onMatch
+                { dashboard: \st ->
+                    let
+                      safeAddr = unsafePartial $ unsafeAddrFromString safeAddress
+                      maybeTrust = lookup (convert safeAddr) st.trusts
+                    in
+                      case maybeTrust of
+                        Nothing -> throwError $ err "No tust found"
+                        Just _ -> pure unit
                 }
         )
