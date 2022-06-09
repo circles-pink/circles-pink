@@ -163,10 +163,10 @@ dashboard env =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
-        lift $ set \st' -> S._dashboard st'
-          { trusts = st'.trusts
-              # update (\t -> pure $ t { trustState = initTrusted }) (convert addr)
-          }
+        -- lift $ set \st' -> S._dashboard st'
+        --   { trusts = st'.trusts
+        --       # update (\t -> pure $ t { trustState = initTrusted }) (convert addr)
+        --   }
         -- _ <- syncTrusts set st
         --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
         --   # dropError

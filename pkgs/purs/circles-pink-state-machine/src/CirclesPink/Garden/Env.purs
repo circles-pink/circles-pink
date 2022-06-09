@@ -16,14 +16,13 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (class MonadTrans, ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (State, evalState, runState)
+import Control.Monad.State (State, evalState)
 import Convertable (convert)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
-import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, wrap)
 import Data.Newtype.Extra ((-|))
@@ -36,11 +35,9 @@ import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
-import Record.Extra.CirclesPink (zipRecord)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Undefined (undefined)
-import Wallet.PrivateKey (sampleAddress, sampleKey)
+import Wallet.PrivateKey (sampleAddress, sampleKey, sampleSafeAddress)
 import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
@@ -408,7 +405,9 @@ testEnv =
   , userSearch: \_ _ -> pure []
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
-  , userResolve: \_ -> pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
+  , userResolve: \pk ->
+      if pk == sampleKey then pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
+      else throwError $ inj (Proxy :: _ "errUserNotFound") { safeAddress: sampleSafeAddress }
   , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure $ wrap { isTrusted: true, trustConnections: 3 }
