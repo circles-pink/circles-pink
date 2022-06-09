@@ -6,11 +6,10 @@ module CirclesPink.Garden.StateMachine.Stories
   , loginUser
   , runScripT
   , signUpUser
-  , trustUser
+  , trustUser,execScripT'
   ) where
 
 import Prelude
-
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
@@ -20,7 +19,7 @@ import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except (ExceptT(..), runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (StateT, get, runStateT)
+import Control.Monad.State (StateT, execStateT, get, runStateT)
 import Convertable (convert)
 import Data.Either (Either)
 import Data.Map (lookup)
@@ -37,16 +36,24 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (sampleSafeAddress, unsafeAddrFromString)
 import Wallet.PrivateKey as CC
 
-type ScriptT e m a = ExceptV e (StateT CirclesState m) a
+type ScriptT e m a
+  = ExceptV e (StateT CirclesState m) a
+
+type ScriptT' m a
+  = (StateT CirclesState m) a
 
 runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
 runScripT = flip runStateT initLanding <<< runExceptT
+
+execScripT' :: forall m a. Monad m => ScriptT' m a -> m CirclesState
+execScripT' = flip execStateT initLanding
 
 --------------------------------------------------------------------------------
 act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesAction -> StateT CirclesState m Unit
 act env =
   let
     z = circlesControl env
+
     ctl = toStateT (circlesControl env)
   in
     \ac -> do
@@ -60,23 +67,23 @@ act env =
 
 -- act' :: forall m a. MonadLog m => Env m -> (a -> CirclesAction) -> Array a -> StateT CirclesState m Unit
 -- act' env f xs = xs <#> (\x -> act env $ f x) # sequence_
-
 --------------------------------------------------------------------------------
-type Err r = (err :: String | r)
+type Err r
+  = ( err :: String | r )
 
-err :: forall r. String -> Variant (err :: String | r)
+err :: forall r. String -> Variant ( err :: String | r )
 err = inj (Proxy :: _ "err")
 
 --------------------------------------------------------------------------------
-type SignUpUserOpts =
-  { username :: String
-  , email :: String
-  }
+type SignUpUserOpts
+  = { username :: String
+    , email :: String
+    }
 
-type SignUpUser =
-  { privateKey :: CC.PrivateKey
-  , safeAddress :: CC.Address
-  }
+type SignUpUser
+  = { privateKey :: CC.PrivateKey
+    , safeAddress :: CC.Address
+    }
 
 signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
@@ -93,13 +100,14 @@ signUpUser env opts =
     act env $ A._magicWords $ A._next unit
     act env $ A._submit $ A._submit unit
     get
-      <#>
-        ( default (throwError $ err "Cannot sign up user.")
+      <#> ( default (throwError $ err "Cannot sign up user.")
             # onMatch
-                { trusts: \x -> pure
-                    { privateKey: x.privKey
-                    , safeAddress: x.user.safeAddress
-                    }
+                { trusts:
+                    \x ->
+                      pure
+                        { privateKey: x.privKey
+                        , safeAddress: x.user.safeAddress
+                        }
                 }
         )
 
@@ -109,54 +117,29 @@ finalizeAccount env =
   ExceptT do
     act env $ A._trusts $ A._finalizeRegisterUser unit
     get
-      <#>
-        ( default (throwError $ err "Cannot finalize register user.")
+      <#> ( default (throwError $ err "Cannot finalize register user.")
             # onMatch
                 { dashboard: \_ -> pure unit
                 }
         )
 
 --------------------------------------------------------------------------------
+type LoginUserOpts
+  = { magicWords :: String
+    }
 
-type LoginUserOpts =
-  { magicWords :: String
-  }
-
-loginUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> LoginUserOpts -> ScriptT (Err + r) m Unit
-loginUser env { magicWords } =
-  ExceptT do
-    act env $ A._landing $ A._signIn unit
-    act env $ A._login $ A._setMagicWords magicWords
-    act env $ A._login $ A._login unit
-    get
-      <#>
-        ( default (throwError $ err "Cannot login user.")
-            # onMatch
-                { dashboard: \_ -> pure unit
-                }
-        )
+loginUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> LoginUserOpts -> ScriptT' m Unit
+loginUser env { magicWords } = do
+  act env $ A._landing $ A._signIn unit
+  act env $ A._login $ A._setMagicWords magicWords
+  act env $ A._login $ A._login unit
 
 --------------------------------------------------------------------------------
+type TrustUserOpts
+  = { safeAddress :: String
+    }
 
-type TrustUserOpts =
-  { safeAddress :: String
-  }
-
-trustUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT (Err + r) m Unit
+trustUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
 trustUser env { safeAddress } =
-  ExceptT do
+  do
     act env $ A._dashboard $ A._addTrustConnection safeAddress
-    get
-      <#>
-        ( default (throwError $ err "Invalid final state.")
-            # onMatch
-                { dashboard: \st ->
-                    let
-                      safeAddr = unsafePartial $ unsafeAddrFromString safeAddress
-                      maybeTrust = lookup (convert safeAddr) st.trusts
-                    in
-                      case maybeTrust of
-                        Nothing -> throwError $ err "No tust found"
-                        Just _ -> pure unit
-                }
-        )
