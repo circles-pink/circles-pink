@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustState, initTrusted, initUntrusted)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted, initUntrusted)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -19,19 +19,16 @@ import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.Either (Either(..), hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (Map, fromFoldable, lookup, update)
+import Data.Map (update)
 import Data.Map as M
-import Data.Maybe (Maybe(..))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (default, onMatch)
-import Debug.Extra (todo)
+import Debug (spy)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
-import Undefined (undefined)
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
@@ -158,18 +155,20 @@ dashboard env =
       runExceptT do
         let addr = unsafePartial $ P.unsafeAddrFromString u
         -- lift $ set \st' ->  S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
+        let abc = spy "xyz2" addr
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
+        let aa = spy "xyz" addr
         -- lift $ set \st' -> S._dashboard st'
         --   { trusts = st'.trusts
         --       # update (\t -> pure $ t { trustState = initTrusted }) (convert addr)
         --   }
-        -- _ <- syncTrusts set st
-        --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
-        --   # dropError
+        _ <- syncTrusts set st
+          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
+          # dropError
         pure unit
 
   redeploySafeAndToken _ st _ = void do

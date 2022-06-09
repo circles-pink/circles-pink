@@ -7,10 +7,17 @@ import Prelude
 import CirclesPink.Garden.Env (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import CirclesPink.Garden.StateMachine.Stories (ScriptT, finalizeAccount, loginUser, runScripT, signUpUser, trustUser)
+import CirclesPink.Garden.StateMachine.Stories (ScriptT, execScripT', finalizeAccount, loginUser, runScripT, signUpUser, trustUser)
 import Control.Monad.State (StateT)
+import Convertable (convert)
+import Data.Map (lookup, toUnfoldable)
+import Data.Maybe (Maybe(..))
+import Data.String (toLower)
 import Data.Tuple (snd)
+import Data.Variant (default, onMatch)
 import Data.Variant.Extra (getLabel)
+import Debug (spy)
+import Debug.Extra (todo)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Wallet.PrivateKey (addrToString, sampleMnemonic, sampleSafeAddress)
@@ -55,7 +62,8 @@ spec =
                 _ <- loginUser env' { magicWords: "" }
                 pure unit
             )
-              # execAppM
+              # execScripT'
+              # runTestEnvM
               # getLabel
           )
             `shouldEqual` "login"
@@ -65,7 +73,8 @@ spec =
                 _ <- loginUser env' { magicWords: "volcano agree attack fiction firm chunk sweet private average undo pen core plunge choose vendor way liar depth romance enjoy hire rhythm little later" }
                 pure unit
             )
-              # execAppM
+              # execScripT'
+              # runTestEnvM
               # getLabel
           )
             `shouldEqual` "login"
@@ -75,7 +84,8 @@ spec =
                 _ <- loginUser env' { magicWords: show sampleMnemonic }
                 pure unit
             )
-              # execAppM
+              # execScripT'
+              # runTestEnvM
               # getLabel
           )
             `shouldEqual` "dashboard"
@@ -86,7 +96,21 @@ spec =
                 _ <- trustUser env' { safeAddress: addrToString sampleSafeAddress }
                 pure unit
             )
-              # execAppM
-              # getLabel
+              # (\x -> spy "b" x)
+              # execScripT'
+              # runTestEnvM
+              # (\x -> spy "a" x)
+              #
+                ( default Nothing
+                    # onMatch
+                        { dashboard: \st ->
+                            let
+                              x = spy "x" (addrToString sampleSafeAddress)
+                              y = spy "y" $ (toUnfoldable st.trusts :: Array _)
+                            in
+                              lookup (convert sampleSafeAddress) st.trusts
+                                <#> (const unit)
+                        }
+                )
           )
-            `shouldEqual` "dashboard"
+            `shouldEqual` (Just unit)
