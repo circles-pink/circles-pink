@@ -3,6 +3,7 @@ module CirclesPink.Garden.StateMachine.Stories
   , ScriptT
   , SignUpUserOpts
   , finalizeAccount
+  , loginUser
   , runScripT
   , signUpUser
   ) where
@@ -13,6 +14,7 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState, init)
 import Control.Monad.Error.Class (throwError)
 import Control.Monad.Except (class MonadTrans, ExceptT(..), runExceptT)
@@ -34,7 +36,7 @@ import Wallet.PrivateKey as CC
 type ScriptT e m a = ExceptV e (StateT CirclesState m) a
 
 runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
-runScripT = flip runStateT init <<< runExceptT
+runScripT = flip runStateT initLanding <<< runExceptT
 
 --------------------------------------------------------------------------------
 act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesAction -> StateT CirclesState m Unit
@@ -75,6 +77,7 @@ type SignUpUser =
 signUpUser :: forall t m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
   ExceptT do
+    act env $ A._landing $ A._signUp unit
     act env $ A._infoGeneral $ A._next unit
     act env $ A._askUsername $ A._setUsername opts.username
     act env $ A._askUsername $ A._next unit
@@ -90,9 +93,9 @@ signUpUser env opts =
         ( default (throwError $ err "Cannot sign up user.")
             # onMatch
                 { trusts: \x -> pure
-                      { privateKey: x.privKey
-                      , safeAddress: x.user.safeAddress
-                      }
+                    { privateKey: x.privKey
+                    , safeAddress: x.user.safeAddress
+                    }
                 }
         )
 
@@ -104,6 +107,26 @@ finalizeAccount env =
     get
       <#>
         ( default (throwError $ err "Cannot finalize register user.")
+            # onMatch
+                { dashboard: \_ -> pure unit
+                }
+        )
+
+--------------------------------------------------------------------------------
+
+type LoginUserOpts =
+  { magicWords :: String
+  }
+
+loginUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> LoginUserOpts -> ScriptT (Err + r) m Unit
+loginUser env { magicWords } =
+  ExceptT do
+    act env $ A._landing $ A._signIn unit
+    act env $ A._login $ A._setMagicWords magicWords
+    act env $ A._login $ A._login unit
+    get
+      <#>
+        ( default (throwError $ err "Cannot login user.")
             # onMatch
                 { dashboard: \_ -> pure unit
                 }

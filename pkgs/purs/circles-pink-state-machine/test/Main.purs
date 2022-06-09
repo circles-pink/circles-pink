@@ -2,8 +2,8 @@ module Test.Main where
 
 import Prelude
 import CirclesCore.Tests as CirclesCore.Tests
-import CirclesPink.Garden.StateMachine.Control.States.Dashboard.Tests as CirclesPink.Garden.StateMachine.Control.States.Dashboard.Tests
-import CirclesPink.Garden.StateMachine.Stories.Tests as CirclesPink.Garden.StateMachine.Stories.Tests
+import Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard as Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard
+import Test.CirclesPink.Garden.StateMachine.Stories as Test.CirclesPink.Garden.StateMachine.Stories
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import GunDB.Tests as GunDB.Tests
@@ -29,8 +29,8 @@ mainTestSpec =
     $ runSpec [ consoleReporter ] do
         CirclesCore.Tests.spec
         GunDB.Tests.spec
-        CirclesPink.Garden.StateMachine.Control.States.Dashboard.Tests.spec
-        CirclesPink.Garden.StateMachine.Stories.Tests.spec
+        Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard.spec
+        Test.CirclesPink.Garden.StateMachine.Stories.spec
 
 main :: Effect Unit
 main = do

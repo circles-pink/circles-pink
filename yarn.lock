@@ -2079,7 +2079,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.17.9":
+"@babel/runtime@^7.11.2":
   version "7.18.3"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.18.3.tgz#c7b654b57f6f63cf7f8b418ac9ca04408c4579f4"
   integrity sha512-38Y8f7YUhce/K7RMwTp7m0uCumpv9hZkitCbBClqQIow1qSbCvGkcegKOXpEWCQLfWmevgRiWokZ1GkpfhbZug==
@@ -2153,12 +2153,12 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@circles/core@^2.11.0":
-  version "2.11.0"
-  resolved "https://registry.yarnpkg.com/@circles/core/-/core-2.11.0.tgz#f19660a2b3df4d8d21b10a22a285a32134c088d5"
-  integrity sha512-tBcVcxrbF7ZfDJ0ad0Kq/YulAB6VoAHV4ZTULhskRidJt0MUzWS7AQf5AGLmQ99mpAdvdZ25aumNFEPwusSAWA==
+"@circles/core@2.10.10":
+  version "2.10.10"
+  resolved "https://registry.yarnpkg.com/@circles/core/-/core-2.10.10.tgz#c53c5ed96738b481d99223267a1278c32030b3af"
+  integrity sha512-0nX3nUSlzdYVPTlXc52x5bzD0ycbM4JLFILbOSHmndXLPAtFGHZZxMvQlIDIquC0+79ZLnFaXtKZAH7gFObsvQ==
   dependencies:
-    "@babel/runtime" "^7.17.9"
+    "@babel/runtime" "^7.11.2"
     "@circles/safe-contracts" "^1.0.17"
     circles-contracts "^2.3.1"
 
