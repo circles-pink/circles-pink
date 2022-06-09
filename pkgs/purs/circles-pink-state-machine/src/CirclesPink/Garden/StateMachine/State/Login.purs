@@ -2,12 +2,12 @@ module CirclesPink.Garden.StateMachine.State.Login where
 
 import Prelude
 
-import CirclesCore (ApiError, NativeError)
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.Common (TaskReturn)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
+import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -20,20 +20,12 @@ type LoginState =
   , loginResult :: LoginStateLoginResult
   }
 
-type ErrLoginState = ErrLoginTask
+type ErrLoginState r = ErrLoginTask
   + Env.ErrSaveSession
-  + ()
+  + Env.ErrInvalidMnemonic
+  + r
 
-type ErrLoginStateResolved = Variant
-  ( errApi :: ApiError
-  , errNative :: NativeError
-  , errUserNotFound :: UserNotFoundError
-  , errInvalidUrl :: String
-  , errSaveSession :: Unit
-  , errInvalidMnemonic :: Unit
-  )
-
-type LoginStateLoginResult = RemoteData Unit Unit ErrLoginStateResolved Unit
+type LoginStateLoginResult = RemoteReport (Variant (ErrLoginState + ())) TaskReturn
 
 --------------------------------------------------------------------------------
 -- InitLogin
