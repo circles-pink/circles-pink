@@ -7,7 +7,7 @@
     "chance": "^1.1.8",
     "ethereumjs-util": "^7.1.4",
     "ethereumjs-wallet": "^1.0.2",
-    "gun": "https://github.com/nmauersberg/gun.git",
+    "gun": "nmauersberg/gun.git",
     "isomorphic-fetch": "^3.0.0",
     "node-fetch": "^2.0.0",
     "web3": "^1.7.1"
