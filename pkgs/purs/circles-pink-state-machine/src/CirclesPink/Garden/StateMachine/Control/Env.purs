@@ -17,6 +17,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrGetSafeAddress
   , ErrGetSafeStatus
   , ErrGetUsers
+  , ErrInvalidMnemonic
   , ErrIsFunded
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
@@ -101,6 +102,8 @@ type IsTrusted m = forall r. PrivateKey -> ExceptV (ErrIsTrusted + r) m TrustIsT
 type ErrIsFunded r = ErrNative + ErrInvalidUrl + r
 
 type IsFunded m = forall r. PrivateKey -> ExceptV (ErrIsFunded + r) m Boolean
+--------------------------------------------------------------------------------
+type ErrInvalidMnemonic r = (errInvalidMnemonic :: Unit | r)
 
 --------------------------------------------------------------------------------
 type ErrTrustGetNetwork r = ErrNative + ErrInvalidUrl + r

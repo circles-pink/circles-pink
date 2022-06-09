@@ -25,18 +25,24 @@ module Wallet.PrivateKey
   ) where
 
 import Prelude
+
 import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Data.String (Pattern(..), joinWith)
 import Data.String as S
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
+import Data.Variant (inj)
 import Effect (Effect)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, throwError)
 import Effect.Class (liftEffect)
+import Partial.Unsafe (unsafePartial)
+import Type.Proxy (Proxy(..))
+import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -80,8 +86,10 @@ getWords (Mnemonic ws) = ws
 unsafeMkPrivateKey :: Partial => String -> PrivateKey
 unsafeMkPrivateKey hexString = PrivateKey $ S.drop 2 $ hexString
 
-getMnemonicFromString :: String -> Mnemonic
-getMnemonicFromString s = Mnemonic $ R.split (unsafeRegex " +" noFlags) $ S.trim s
+getMnemonicFromString :: String -> Maybe Mnemonic
+getMnemonicFromString s = map (\_ -> Mnemonic $ R.split (unsafeRegex " +" noFlags) $ S.trim s) pk
+  where
+  pk = mnemonicToEntropyImpl Nothing Just s
 
 toString :: PrivateKey -> String
 toString (PrivateKey k) = "0x" <> k
@@ -113,8 +121,12 @@ keyToMnemonic k =
 
 mnemonicToKey :: Mnemonic -> PrivateKey
 mnemonicToKey (Mnemonic ws) =
-  S.joinWith separator ws
-    # mnemonicToEntropyImpl
+  unsafePartial result
+  where
+  result :: Partial => PrivateKey
+  result = S.joinWith separator ws
+    # mnemonicToEntropyImpl Nothing Just
+    # fromJust
     # PrivateKey
 
 sampleKey :: PrivateKey
@@ -151,7 +163,7 @@ foreign import genPrivateKeyImpl :: Effect String
 
 foreign import entropyToMnemonicImpl :: String -> String
 
-foreign import mnemonicToEntropyImpl :: String -> String
+foreign import mnemonicToEntropyImpl :: Maybe String -> (String -> Maybe String) -> String -> Maybe String
 
 foreign import privKeyToAddressImpl :: String -> String
 

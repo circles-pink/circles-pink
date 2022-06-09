@@ -31,6 +31,11 @@ exports.entropyToMnemonicImpl = function (entropy) {
   return bip39.entropyToMnemonic(entropy);
 };
 
-exports.mnemonicToEntropyImpl = function (mnemonic) {
-  return bip39.mnemonicToEntropy(mnemonic);
+exports.mnemonicToEntropyImpl = (Nothing) => (Just) => (mnemonic) => {
+  try {
+    const entropy = bip39.mnemonicToEntropy(mnemonic);
+    return Just(entropy);
+  } catch (error) {
+    return Nothing;
+  }
 };

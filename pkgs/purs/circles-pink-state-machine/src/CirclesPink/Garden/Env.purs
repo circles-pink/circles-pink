@@ -413,10 +413,10 @@ testEnv =
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure $ wrap { isTrusted: true, trustConnections: 3 }
   , trustGetNetwork: \_ -> pure []
-  , getSafeStatus: \_ -> pure { isCreated: false, isDeployed: false }
+  , getSafeStatus: \_ -> pure { isCreated: true, isDeployed: true }
   , deploySafe: \_ -> pure unit
   , deployToken: \_ -> pure ""
-  , isFunded: \_ -> pure false
+  , isFunded: \_ -> pure true
   , addTrustConnection: \_ _ _ -> pure ""
   , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit

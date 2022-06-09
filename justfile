@@ -144,7 +144,7 @@ spago-build: spago-clean
 	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
 
 spago2nix:
-	spago2nix-extra pkgs/purs materialized/spago2nix ../..
+	spago2nix-extra --pkgs-dir ./pkgs/purs --target-dir ./materialized/spago2nix
 
 ################################################################################
 # All Makefile tasks
