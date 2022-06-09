@@ -6,16 +6,12 @@ module CirclesPink.Garden.StateMachine.State
   , EmailApiResult
   , ErrDeploySafeResolved
   , ErrDeployTokenResolved
-  , ErrLoginState
-  , ErrLoginStateResolved
   , ErrSubmit
   , ErrSubmitResolved
   , ErrTrustState
   , ErrTrustStateResolved
   , InfoGeneralState
   , InfoSecurityState
-  , LoginState
-  , LoginStateLoginResult
   , MagicWordsState
   , SubmitState
   , TrustState
@@ -30,19 +26,13 @@ module CirclesPink.Garden.StateMachine.State
   , _debug
   , _infoGeneral
   , _infoSecurity
-  , _login
   , _magicWords
   , _submit
   , _trusts
   , init
   , initDebug
-  , initLogin
   , module Exp
   ) where
-
---------------------------------------------------------------------------------
--- Re-exports
---------------------------------------------------------------------------------
 
 import Prelude
 
@@ -53,12 +43,13 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction, GetProtocol, GetState) as Exp
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingState, ErrLandingStateResolved, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrTrustRemoveConnection, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
+import CirclesPink.Garden.StateMachine.State.Login (LoginState)
+import CirclesPink.Garden.StateMachine.State.Login (LoginState, ErrLoginState, ErrLoginStateResolved, initLogin, _login) as Exp
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
@@ -118,26 +109,6 @@ type InfoSecurityState = UserData
 type MagicWordsState = UserData
 
 type SubmitState = UserData
-
---------------------------------------------------------------------------------
-type ErrLoginStateResolved = Variant
-  ( errApi :: ApiError
-  , errNative :: NativeError
-  , errUserNotFound :: UserNotFoundError
-  , errInvalidUrl :: String
-  , errSaveSession :: Unit
-  )
-
-type ErrLoginState = ErrLoginTask
-  + Env.ErrSaveSession
-  + ()
-
-type LoginStateLoginResult = RemoteData Unit Unit ErrLoginStateResolved Unit
-
-type LoginState =
-  { magicWords :: String
-  , loginResult :: LoginStateLoginResult
-  }
 
 --------------------------------------------------------------------------------
 type ErrTrustState = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
@@ -212,13 +183,6 @@ init =
     , submitResult: _notAsked unit
     }
 
-initLogin :: forall v. Variant (login :: LoginState | v)
-initLogin =
-  _login
-    { magicWords: ""
-    , loginResult: _notAsked unit
-    }
-
 initDebug :: forall v. Variant (debug :: DebugState | v)
 initDebug =
   _debug
@@ -243,9 +207,6 @@ _magicWords = inj (Proxy :: _ "magicWords")
 
 _submit :: forall a v. a -> Variant (submit :: a | v)
 _submit = inj (Proxy :: _ "submit")
-
-_login :: forall a v. a -> Variant (login :: a | v)
-_login = inj (Proxy :: _ "login")
 
 _trusts :: forall a v. a -> Variant (trusts :: a | v)
 _trusts = inj (Proxy :: _ "trusts")

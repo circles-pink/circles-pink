@@ -52,6 +52,16 @@ spec =
               # getLabel
           )
             `shouldEqual` "dashboard"
+      describe "A user can not login with wrong credentials" do
+        it "ends up in `dashboard` state" do
+          ( ( do
+                _ <- loginUser env' { magicWords: "" }
+                pure unit
+            )
+              # execAppM
+              # getLabel
+          )
+            `shouldEqual` "dashboard"
       describe "A user can login" do
         it "ends up in `dashboard` state" do
           ( ( do

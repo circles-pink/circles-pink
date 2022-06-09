@@ -8,6 +8,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import RemoteData (_failure, _loading, _notAsked)
+import Undefined (undefined)
 import Wallet.PrivateKey as P
 
 login
@@ -28,11 +29,10 @@ login env =
     set \st' -> S._login st' { loginResult = _loading unit }
     let
       mnemonic = P.getMnemonicFromString st.magicWords
-
-      privKey = P.mnemonicToKey mnemonic
     results <-
       (runExceptT' :: ExceptV (S.ErrLoginState) m TaskReturn -> _)
         $ do
+            privKey <- undefined -- P.mnemonicToKey mnemonic
             loginResult <- loginTask env privKey
             _ <- env.saveSession privKey
             pure loginResult
