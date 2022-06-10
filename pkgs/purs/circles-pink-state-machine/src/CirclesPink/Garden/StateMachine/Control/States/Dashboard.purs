@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted, initUntrusted, isPendingTrust, next)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isTrusted, isUntrusted, next)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -157,7 +157,7 @@ dashboard env =
         lift $ set \st' -> S._dashboard st'
           { trusts = st'.trusts
               # update
-                  (\t -> pure $ t { trustState = if t.trustState == initUntrusted then next t.trustState else t.trustState })
+                  (\t -> pure $ t { trustState = if isUntrusted t.trustState  then next t.trustState else t.trustState })
                   (convert addr)
           }
         _ <-
@@ -168,7 +168,7 @@ dashboard env =
         lift $ set \st' -> S._dashboard st'
           { trusts = st'.trusts
               # update
-                  (\t -> pure $ t { trustState = if t.trustState == isPendingTrust t.trustState then next t.trustState else t.trustState })
+                  (\t -> pure $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState })
                   (convert addr)
           }
         pure unit
@@ -180,7 +180,7 @@ dashboard env =
         lift $ set \st' -> S._dashboard st'
           { trusts = st'.trusts
               # update
-                  (\t -> pure $ t { trustState = if t.trustState == initTrusted then next t.trustState else t.trustState })
+                  (\t -> pure $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState })
                   (convert addr)
           }
         _ <-
@@ -188,6 +188,12 @@ dashboard env =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
+        lift $ set \st' -> S._dashboard st'
+          { trusts = st'.trusts
+              # update
+                  (\t -> pure $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState })
+                  (convert addr)
+          }
         pure unit
 
   getBalance set st _ =

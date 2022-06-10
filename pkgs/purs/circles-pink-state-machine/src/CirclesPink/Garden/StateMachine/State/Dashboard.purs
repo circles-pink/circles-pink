@@ -33,11 +33,13 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , isLoadingUntrust
   , isPendingTrust
   , isPendingUntrust
+  , isTrusted
+  , isUntrusted
   , next
-  ) where
+  )
+  where
 
 import Prelude
-
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -57,41 +59,43 @@ import Wallet.PrivateKey (PrivateKey)
 --------------------------------------------------------------------------------
 -- DashboardState
 --------------------------------------------------------------------------------
-type DashboardState =
-  { user :: CC.User
-  , privKey :: PrivateKey
-  , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: Trusts
-  , trustsResult :: TrustGetTrusts
-  , trustAddResult :: TrustAddResult
-  , trustRemoveResult :: TrustRemoveResult
-  , getBalanceResult :: TokenGetBalanceResult
-  , getUsersResult :: GetUsersResult
-  , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-  , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
-  , transferResult :: TokenTransferResult
-  , userSearchResult :: UserSearchResult
-  }
+type DashboardState
+  = { user :: CC.User
+    , privKey :: PrivateKey
+    , error :: Maybe (Variant (ErrDashboardState + ()))
+    , trusts :: Trusts
+    , trustsResult :: TrustGetTrusts
+    , trustAddResult :: TrustAddResult
+    , trustRemoveResult :: TrustRemoveResult
+    , getBalanceResult :: TokenGetBalanceResult
+    , getUsersResult :: GetUsersResult
+    , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+    , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
+    , transferResult :: TokenTransferResult
+    , userSearchResult :: UserSearchResult
+    }
 
-type Trusts = Map W3.Address Trust
+type Trusts
+  = Map W3.Address Trust
 
-type Trust =
-  { isOutgoing :: Boolean
-  , user :: Maybe User
-  , trustState :: TrustState
-  }
+type Trust
+  = { isOutgoing :: Boolean
+    , user :: Maybe User
+    , trustState :: TrustState
+    }
 
-type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
+type ErrDashboardState r
+  = ErrService + ErrNative + ErrInvalidUrl + r
 
 --------------------------------------------------------------------------------
 -- InitDashboard
 --------------------------------------------------------------------------------
-type InitDashboard =
-  { user :: CC.User
-  , privKey :: PrivateKey
-  }
+type InitDashboard
+  = { user :: CC.User
+    , privKey :: PrivateKey
+    }
 
-initDashboard :: InitDashboard -> forall v. Variant (dashboard :: DashboardState | v)
+initDashboard :: InitDashboard -> forall v. Variant ( dashboard :: DashboardState | v )
 initDashboard id =
   _dashboard
     $ R.disjointUnion id
@@ -111,82 +115,102 @@ initDashboard id =
 --------------------------------------------------------------------------------
 -- GetUsersResult
 --------------------------------------------------------------------------------
-type GetUsersResult = RemoteDataV_ (ErrGetUsers + ()) (Array User)
+type GetUsersResult
+  = RemoteDataV_ (ErrGetUsers + ()) (Array User)
 
-type ErrGetUsers r = Env.ErrGetUsers + r
+type ErrGetUsers r
+  = Env.ErrGetUsers + r
 
 --------------------------------------------------------------------------------
 -- UserSearchResult
 --------------------------------------------------------------------------------
-type UserSearchResult = RemoteReport (Variant (ErrUserSearch + ())) (Array User)
+type UserSearchResult
+  = RemoteReport (Variant (ErrUserSearch + ())) (Array User)
 
-type ErrUserSearch r = Env.ErrUserSearch + r
+type ErrUserSearch r
+  = Env.ErrUserSearch + r
 
 --------------------------------------------------------------------------------
 -- TrustGetTrusts
 --------------------------------------------------------------------------------
-type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
+type TrustGetTrusts
+  = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
 
-type ErrTrustGetTrusts r = Env.ErrAddTrustConnection + r
+type ErrTrustGetTrusts r
+  = Env.ErrAddTrustConnection + r
 
 --------------------------------------------------------------------------------
 -- TrustAddResult
 --------------------------------------------------------------------------------
-type TrustAddResult = Object (RemoteReportV (ErrTrustAddConnection + ()) String)
+type TrustAddResult
+  = Object (RemoteReportV (ErrTrustAddConnection + ()) String)
 
-type ErrTrustAddConnection r = Env.ErrAddTrustConnection + r
+type ErrTrustAddConnection r
+  = Env.ErrAddTrustConnection + r
 
 --------------------------------------------------------------------------------
 -- TrustRemoveResult
 --------------------------------------------------------------------------------
-type TrustRemoveResult = Object (RemoteReportV (ErrTrustRemoveConnection + ()) String)
+type TrustRemoveResult
+  = Object (RemoteReportV (ErrTrustRemoveConnection + ()) String)
 
-type ErrTrustRemoveConnection r = Env.ErrRemoveTrustConnection + r
+type ErrTrustRemoveConnection r
+  = Env.ErrRemoveTrustConnection + r
 
 --------------------------------------------------------------------------------
 -- TokenGetBalanceResult
 --------------------------------------------------------------------------------
-type TokenGetBalanceResult = RemoteReportV (ErrTokenGetBalance + ()) Balance
+type TokenGetBalanceResult
+  = RemoteReportV (ErrTokenGetBalance + ()) Balance
 
-type ErrTokenGetBalance r = Env.ErrGetBalance + r
+type ErrTokenGetBalance r
+  = Env.ErrGetBalance + r
 
 --------------------------------------------------------------------------------
 -- TokenCheckUBIPayoutResult
 --------------------------------------------------------------------------------
-type TokenCheckUBIPayoutResult = RemoteReportV (ErrTokenCheckUBIPayout + ()) Balance
+type TokenCheckUBIPayoutResult
+  = RemoteReportV (ErrTokenCheckUBIPayout + ()) Balance
 
-type ErrTokenCheckUBIPayout r = Env.ErrCheckUBIPayout + r
+type ErrTokenCheckUBIPayout r
+  = Env.ErrCheckUBIPayout + r
 
 --------------------------------------------------------------------------------
 -- TokenRequestUBIPayoutResult
 --------------------------------------------------------------------------------
-type TokenRequestUBIPayoutResult = RemoteReportV (ErrTokenRequestUBIPayout + ()) String
+type TokenRequestUBIPayoutResult
+  = RemoteReportV (ErrTokenRequestUBIPayout + ()) String
 
-type ErrTokenRequestUBIPayout r = Env.ErrRequestUBIPayout + r
+type ErrTokenRequestUBIPayout r
+  = Env.ErrRequestUBIPayout + r
 
 --------------------------------------------------------------------------------
 -- TokenTransferResult
 --------------------------------------------------------------------------------
-type TokenTransferResult = RemoteDataV_ (ErrTokenTransfer + ()) String
+type TokenTransferResult
+  = RemoteDataV_ (ErrTokenTransfer + ()) String
 
-type ErrTokenTransfer r = Env.ErrTransfer + r
+type ErrTokenTransfer r
+  = Env.ErrTransfer + r
 
 --------------------------------------------------------------------------------
 -- Constructors
 --------------------------------------------------------------------------------
-_dashboard :: forall a v. a -> Variant (dashboard :: a | v)
+_dashboard :: forall a v. a -> Variant ( dashboard :: a | v )
 _dashboard = inj (Proxy :: _ "dashboard")
 
 --------------------------------------------------------------------------------
 -- Utils
 --------------------------------------------------------------------------------
-type RemoteDataV_ e a = RemoteData Unit Unit (Variant e) a
+type RemoteDataV_ e a
+  = RemoteData Unit Unit (Variant e) a
 
-type RemoteReportV e a = RemoteReport (Variant e) a
+type RemoteReportV e a
+  = RemoteReport (Variant e) a
 
 --------------------------------------------------------------------------------
-
-newtype TrustState = TrustState
+newtype TrustState
+  = TrustState
   ( Variant
       ( untrusted :: Unit -- 0
       , loadingTrust :: Unit -- 1
@@ -201,11 +225,23 @@ derive instance trustStateEq :: Eq TrustState
 
 derive newtype instance showTrustState :: Show TrustState
 
+--------------------------------------------------------------------------------
+-- Constructors
+--------------------------------------------------------------------------------
 initTrusted :: TrustState
 initTrusted = TrustState $ inj (Proxy :: _ "trusted") unit
 
 initUntrusted :: TrustState
 initUntrusted = TrustState $ inj (Proxy :: _ "untrusted") unit
+
+--------------------------------------------------------------------------------
+-- Destructors
+--------------------------------------------------------------------------------
+isUntrusted :: TrustState -> Boolean
+isUntrusted (TrustState ts) = ts == (inj (Proxy :: _ "untrusted") unit)
+
+isTrusted :: TrustState -> Boolean
+isTrusted (TrustState ts) = ts == (inj (Proxy :: _ "trusted") unit)
 
 isLoadingTrust :: TrustState -> Boolean
 isLoadingTrust (TrustState ts) = ts == (inj (Proxy :: _ "loadingTrust") unit)
@@ -220,12 +256,14 @@ isPendingUntrust :: TrustState -> Boolean
 isPendingUntrust (TrustState ts) = ts == (inj (Proxy :: _ "pendingUntrust") unit)
 
 next :: TrustState -> TrustState
-next (TrustState ts) = TrustState $ match
-  { untrusted: \_ -> inj (Proxy :: _ "loadingTrust") unit
-  , loadingTrust: \_ -> inj (Proxy :: _ "pendingTrust") unit
-  , pendingTrust: \_ -> inj (Proxy :: _ "trusted") unit
-  , trusted: \_ -> inj (Proxy :: _ "loadingUntrust") unit
-  , loadingUntrust: \_ -> inj (Proxy :: _ "pendingUntrust") unit
-  , pendingUntrust: \_ -> inj (Proxy :: _ "untrusted") unit
-  }
-  ts
+next (TrustState ts) =
+  TrustState
+    $ match
+        { untrusted: \_ -> inj (Proxy :: _ "loadingTrust") unit
+        , loadingTrust: \_ -> inj (Proxy :: _ "pendingTrust") unit
+        , pendingTrust: \_ -> inj (Proxy :: _ "trusted") unit
+        , trusted: \_ -> inj (Proxy :: _ "loadingUntrust") unit
+        , loadingUntrust: \_ -> inj (Proxy :: _ "pendingUntrust") unit
+        , pendingUntrust: \_ -> inj (Proxy :: _ "untrusted") unit
+        }
+        ts
