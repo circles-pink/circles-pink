@@ -29,6 +29,10 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , initDashboard
   , initTrusted
   , initUntrusted
+  , isLoadingTrust
+  , isLoadingUntrust
+  , isPendingTrust
+  , isPendingUntrust
   , next
   ) where
 
@@ -202,6 +206,18 @@ initTrusted = TrustState $ inj (Proxy :: _ "trusted") unit
 
 initUntrusted :: TrustState
 initUntrusted = TrustState $ inj (Proxy :: _ "untrusted") unit
+
+isLoadingTrust :: TrustState -> Boolean
+isLoadingTrust (TrustState ts) = ts == (inj (Proxy :: _ "loadingTrust") unit)
+
+isLoadingUntrust :: TrustState -> Boolean
+isLoadingUntrust (TrustState ts) = ts == (inj (Proxy :: _ "loadingUntrust") unit)
+
+isPendingTrust :: TrustState -> Boolean
+isPendingTrust (TrustState ts) = ts == (inj (Proxy :: _ "pendingTrust") unit)
+
+isPendingUntrust :: TrustState -> Boolean
+isPendingUntrust (TrustState ts) = ts == (inj (Proxy :: _ "pendingUntrust") unit)
 
 next :: TrustState -> TrustState
 next (TrustState ts) = TrustState $ match

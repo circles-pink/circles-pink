@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted, initUntrusted)
+import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, initTrusted, initUntrusted, isPendingTrust, next)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -154,52 +154,40 @@ dashboard env =
     void do
       runExceptT do
         let addr = unsafePartial $ P.unsafeAddrFromString u
-        -- lift $ set \st' ->  S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
-        let abc = spy "xyz2" addr
+        lift $ set \st' -> S._dashboard st'
+          { trusts = st'.trusts
+              # update
+                  (\t -> pure $ t { trustState = if t.trustState == initUntrusted then next t.trustState else t.trustState })
+                  (convert addr)
+          }
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
-        let aa = spy "xyz" addr
-        -- lift $ set \st' -> S._dashboard st'
-        --   { trusts = st'.trusts
-        --       # update (\t -> pure $ t { trustState = initTrusted }) (convert addr)
-        --   }
-        _ <- syncTrusts set st
-          # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
-          # dropError
-        pure unit
-
-  redeploySafeAndToken _ st _ = void do
-    runExceptT
-      do
-        -- First deploy always fails
-        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
-        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
-        -- Second deploy works
-        _ <- env.deploySafe st.privKey
-        _ <- (env.deployToken st.privKey <#> const unit)
+        lift $ set \st' -> S._dashboard st'
+          { trusts = st'.trusts
+              # update
+                  (\t -> pure $ t { trustState = if t.trustState == isPendingTrust t.trustState then next t.trustState else t.trustState })
+                  (convert addr)
+          }
         pure unit
 
   removeTrustConnection set st u =
     void do
       runExceptT do
         let addr = unsafePartial $ P.unsafeAddrFromString u
-        -- lift $ set \st' -> S._dashboard st' { trusts = update (\t -> pure $ t { trustState = todo :: TrustState }) (convert addr) st'.trusts }
+        lift $ set \st' -> S._dashboard st'
+          { trusts = st'.trusts
+              # update
+                  (\t -> pure $ t { trustState = if t.trustState == initTrusted then next t.trustState else t.trustState })
+                  (convert addr)
+          }
         _ <-
           env.removeTrustConnection st.privKey addr st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
-        lift $ set \st' -> S._dashboard st'
-          { trusts = st'.trusts
-              # update (\t -> pure $ t { trustState = initUntrusted }) (convert addr)
-          }
-        -- _ <- syncTrusts set st
-        --   # retryUntil env (const { delay: 1500 }) (\_ n -> n == 10) 0
-        --   # dropError
-
         pure unit
 
   getBalance set st _ =
@@ -248,3 +236,13 @@ dashboard env =
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
 
+  redeploySafeAndToken _ st _ = void do
+    runExceptT
+      do
+        -- First deploy always fails
+        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
+        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
+        -- Second deploy works
+        _ <- env.deploySafe st.privKey
+        _ <- (env.deployToken st.privKey <#> const unit)
+        pure unit
