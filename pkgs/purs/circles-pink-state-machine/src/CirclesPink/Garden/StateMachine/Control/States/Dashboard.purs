@@ -4,6 +4,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import Prelude
+
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
@@ -18,7 +19,7 @@ import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.Either (Either(..), hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (lookup, update)
+import Data.Map (alter, lookup, update)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.String (length)
@@ -186,10 +187,14 @@ dashboard env =
                 st'
                   { trusts =
                     st'.trusts
-                      # update
-                          ( \te -> case te of
-                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
-                              TrustCandidate t -> todo
+                      # alter
+                          ( \maybeTrustEntry -> case maybeTrustEntry of
+                              Nothing -> Just $ TrustCandidate { isIncoming : false, trustState: initUntrusted, user: Nothing }
+                              Just (TrustConfirmed t) -> Just $ TrustConfirmed t 
+                              Just (TrustCandidate t) -> Just $ TrustConfirmed t
+
+--                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
+--                              TrustCandidate t -> todo
                           )
                           (convert addr)
                   }

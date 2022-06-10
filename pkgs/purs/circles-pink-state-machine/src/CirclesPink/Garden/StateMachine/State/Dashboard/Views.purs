@@ -137,7 +137,7 @@ defaultView d@{ trusts, trustAddResult } =
     --           # mapTrust (convert user.safeAddress)
     --       )
   --in
-    { trusts: mapTrusts trusts
+    { trusts: todo -- mapTrusts trusts
     , usersSearch: todo
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
