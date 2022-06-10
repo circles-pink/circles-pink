@@ -36,6 +36,7 @@ import Data.String (toLower)
 import Data.Tuple (uncurry)
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
+import Debug.Extra (todo)
 import Foreign.Object (Object, values)
 import Foreign.Object as O
 import Network.Ethereum.Core.Signatures as W3
@@ -102,42 +103,42 @@ mapTrusts xs = M.toUnfoldable xs <#> uncurry mapTrust
 
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts, trustAddResult } =
-  let
-    initTrust user =
-      { isOutgoing: false
-      , user: Just user
-      , trustState:
-          O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
-            # maybe initUntrusted
-                ( unwrap >>>
-                    ( default initUntrusted # onMatch
-                        { loading: \_ -> next initUntrusted
-                        , success: \_ -> next $ next initUntrusted
-                        }
-                    )
-                )
+--  let
+    -- initTrust user =
+    --   { isOutgoing: false
+    --   , user: Just user
+    --   , trustState:
+    --       O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
+    --         # maybe initUntrusted
+    --             ( unwrap >>>
+    --                 ( default initUntrusted # onMatch
+    --                     { loading: \_ -> next initUntrusted
+    --                     , success: \_ -> next $ next initUntrusted
+    --                     }
+    --                 )
+    --             )
 
-      }
+    --   }
 
-    usersSearch :: Trusts
-    usersSearch =
-      d.userSearchResult
-        #
-          ( unwrap >>>
-              ( default [] # onMatch
-                  { success: \{ data: data_ } -> data_
-                  , loading: \{ previousData } -> maybe [] identity previousData
-                  }
-              )
-          )
-        <#>
-          ( \user -> lookup (convert user.safeAddress) trusts
-              # maybe (initTrust user) identity
-              # mapTrust (convert user.safeAddress)
-          )
-  in
+    -- usersSearch :: Trusts
+    -- usersSearch =
+    --   d.userSearchResult
+    --     #
+    --       ( unwrap >>>
+    --           ( default [] # onMatch
+    --               { success: \{ data: data_ } -> data_
+    --               , loading: \{ previousData } -> maybe [] identity previousData
+    --               }
+    --           )
+    --       )
+    --     <#>
+    --       ( \user -> lookup (convert user.safeAddress) trusts
+    --           # maybe (initTrust user) identity
+    --           # mapTrust (convert user.safeAddress)
+    --       )
+  --in
     { trusts: mapTrusts trusts
-    , usersSearch
+    , usersSearch: todo
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
     , trustsResult: d.trustsResult

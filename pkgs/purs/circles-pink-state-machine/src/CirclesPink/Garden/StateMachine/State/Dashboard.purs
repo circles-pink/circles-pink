@@ -20,6 +20,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TokenTransferResult
   , Trust
   , TrustAddResult
+  , TrustEntry(..)
   , TrustGetTrusts
   , TrustRemoveResult
   , TrustState
@@ -63,7 +64,7 @@ type DashboardState
   = { user :: CC.User
     , privKey :: PrivateKey
     , error :: Maybe (Variant (ErrDashboardState + ()))
-    , trusts :: Trusts
+    , trusts :: Map W3.Address TrustEntry
     , trustsResult :: TrustGetTrusts
     , trustAddResult :: TrustAddResult
     , trustRemoveResult :: TrustRemoveResult
@@ -77,6 +78,8 @@ type DashboardState
 
 type Trusts
   = Map W3.Address Trust
+
+data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
 
 type Trust
   = { isOutgoing :: Boolean
