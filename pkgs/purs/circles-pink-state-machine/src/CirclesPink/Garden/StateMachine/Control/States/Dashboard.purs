@@ -33,8 +33,7 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
-type ErrFetchUsersBinarySearch r
-  = ( err :: Unit | r )
+type ErrFetchUsersBinarySearch r = (err :: Unit | r)
 
 splitArray :: forall a. Array a -> Array a /\ Array a
 splitArray xs =
@@ -49,10 +48,10 @@ fetchUsersBinarySearch _ _ xs
 
 fetchUsersBinarySearch env privKey xs
   | A.length xs == 1 = do
-    eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
-    case eitherUsers of
-      Left _ -> pure $ map Left xs
-      Right ok -> pure $ map Right ok
+      eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+      case eitherUsers of
+        Left _ -> pure $ map Left xs
+        Right ok -> pure $ map Right ok
 
 fetchUsersBinarySearch env privKey xs = do
   eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
@@ -64,39 +63,39 @@ fetchUsersBinarySearch env privKey xs = do
         fetchUsersBinarySearch env privKey ls <> fetchUsersBinarySearch env privKey rs
     Right ok -> pure $ map Right ok
 
-dashboard ::
-  forall m.
-  Monad m =>
-  Env.Env m ->
-  { logout :: ActionHandler' m Unit S.DashboardState ( "landing" :: S.LandingState )
-  , getTrusts :: ActionHandler' m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , addTrustConnection :: ActionHandler' m String S.DashboardState ( "dashboard" :: S.DashboardState )
-  , removeTrustConnection :: ActionHandler' m String S.DashboardState ( "dashboard" :: S.DashboardState )
-  , getBalance :: ActionHandler' m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  , transfer ::
-      ActionHandler' m
-        { from :: String
-        , to :: String
-        , value :: String
-        , paymentNote :: String
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  , getUsers ::
-      ActionHandler' m
-        { userNames :: Array String
-        , addresses :: Array P.Address
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  , userSearch ::
-      ActionHandler' m
-        { query :: String
-        }
-        S.DashboardState
-        ( "dashboard" :: S.DashboardState )
-  , redeploySafeAndToken :: ActionHandler' m Unit S.DashboardState ( "dashboard" :: S.DashboardState )
-  }
+dashboard
+  :: forall m
+   . Monad m
+  => Env.Env m
+  -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
+     , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     , addTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , removeTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     , transfer ::
+         ActionHandler' m
+           { from :: String
+           , to :: String
+           , value :: String
+           , paymentNote :: String
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     , getUsers ::
+         ActionHandler' m
+           { userNames :: Array String
+           , addresses :: Array P.Address
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     , userSearch ::
+         ActionHandler' m
+           { query :: String
+           }
+           S.DashboardState
+           ("dashboard" :: S.DashboardState)
+     , redeploySafeAndToken :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     }
 dashboard env =
   { logout: \_ _ _ -> pure unit
   , getTrusts
@@ -134,14 +133,20 @@ dashboard env =
                 initUntrusted
               else
                 oldTrustState
-            Just (TrustCandidate _) -> todo
+            Just (TrustCandidate { trustState: oldTrustState }) ->
+              if isPendingTrust oldTrustState && tn.isIncoming then
+                initTrusted
+              else if isPendingUntrust oldTrustState && not tn.isIncoming then
+                initUntrusted
+              else
+                oldTrustState
         in
           convert tn.safeAddress
             /\ TrustConfirmed
-                { isOutgoing: tn.isOutgoing
-                , user: maybeUser
-                , trustState
-                }
+              { isOutgoing: tn.isOutgoing
+              , user: maybeUser
+              , trustState
+              }
     trustNodes <-
       env.trustGetNetwork st.privKey
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
@@ -151,19 +156,25 @@ dashboard env =
         # dropError
     let
       foundUsers = catMaybes $ map hush users
+    let
+      isCandidate te = case te of
+        TrustCandidate _ -> true
+        _ -> false
     lift
       $ set \st' ->
           S._dashboard
             st'
               { trusts =
-                trustNodes
-                  <#> ( \tn ->
-                        mapTrust
-                          (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-                          (lookup (convert tn.safeAddress) st'.trusts)
-                          tn
-                    )
-                  # M.fromFoldable
+                  trustNodes
+                    <#>
+                      ( \tn ->
+                          mapTrust
+                            (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
+                            (lookup (convert tn.safeAddress) st'.trusts)
+                            tn
+                      )
+                    # M.fromFoldable
+                    # (\te -> M.intersection te (M.filter isCandidate st'.trusts))
               }
 
   getUsers set st { userNames, addresses } = do
@@ -186,17 +197,14 @@ dashboard env =
               S._dashboard
                 st'
                   { trusts =
-                    st'.trusts
-                      # alter
-                          ( \maybeTrustEntry -> case maybeTrustEntry of
-                              Nothing -> Just $ TrustCandidate { isIncoming : false, trustState: initUntrusted, user: Nothing }
-                              Just (TrustConfirmed t) -> Just $ TrustConfirmed t 
-                              Just (TrustCandidate t) -> Just $ TrustConfirmed t
-
---                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
---                              TrustCandidate t -> todo
-                          )
-                          (convert addr)
+                      st'.trusts
+                        # alter
+                            ( \maybeTrustEntry -> case maybeTrustEntry of
+                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: Nothing }
+                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
+                                Just (TrustCandidate t) -> Just $ TrustCandidate t
+                            )
+                            (convert addr)
                   }
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
@@ -208,13 +216,14 @@ dashboard env =
               S._dashboard
                 st'
                   { trusts =
-                    st'.trusts
-                      # update
-                          ( \te -> case te of
-                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
-                              TrustCandidate t -> todo
-                          )
-                          (convert addr)
+                      st'.trusts
+                        # alter
+                            ( \maybeTrustEntry -> case maybeTrustEntry of
+                                Nothing -> Nothing
+                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
+                                Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
+                            )
+                            (convert addr)
                   }
         pure unit
 
@@ -228,13 +237,14 @@ dashboard env =
               S._dashboard
                 st'
                   { trusts =
-                    st'.trusts
-                      # update
-                          ( \te -> case te of
-                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState }
-                              TrustCandidate t -> todo
-                          )
-                          (convert addr)
+                      st'.trusts
+                        # alter
+                            ( \maybeTrustEntry -> case maybeTrustEntry of
+                                Nothing -> Nothing
+                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState }
+                                Just (TrustCandidate t) -> Just $ TrustCandidate t
+                            )
+                            (convert addr)
                   }
         _ <-
           env.removeTrustConnection st.privKey addr st.user.safeAddress
@@ -246,13 +256,14 @@ dashboard env =
               S._dashboard
                 st'
                   { trusts =
-                    st'.trusts
-                      # update
-                          ( \te -> case te of
-                              TrustConfirmed t -> pure $ TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
-                              TrustCandidate t -> todo
-                          )
-                          (convert addr)
+                      st'.trusts
+                        # alter
+                            ( \maybeTrustEntry -> case maybeTrustEntry of
+                                Nothing -> Nothing
+                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
+                                Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
+                            )
+                            (convert addr)
                   }
         pure unit
 
