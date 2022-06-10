@@ -1,21 +1,18 @@
-module CirclesPink.Garden.ApiScript
-  ( fundAddress
-  , main
-  , safeFunderAddr
-  ) where
+module CirclesPink.Garden.ApiScript where
 
 import Prelude
-
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
 import CirclesPink.Garden.Env (env, liftEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import CirclesPink.Garden.StateMachine.Stories (Err, ScriptT, SignUpUserOpts, finalizeAccount, runScripT, signUpUser)
-import Control.Monad.Except (mapExceptT, runExceptT)
+import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
+import CirclesPink.Garden.StateMachine.Stories as S
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (StateT)
+import Control.Monad.State (StateT, get, runStateT)
 import Control.Monad.Trans.Class (lift)
 import Control.Parallel (parTraverse)
 import Convertable (convert)
@@ -30,12 +27,13 @@ import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\))
-import Data.Variant (Variant, default, onMatch)
+import Data.Variant (Variant, default, inj, onMatch)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
+import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
@@ -46,20 +44,37 @@ import Node.Process (exit)
 import Partial.Unsafe (unsafePartial)
 import Record as R
 import Sunde (spawn)
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
+import Wallet.PrivateKey as CC
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
-type ScriptM e a = ScriptT e Aff a
+type ScriptM e a
+  = ScriptT e Aff a
 
-type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
+type ScriptT e m a
+  = ExceptV e (StateT CirclesState m) a
+
+type ErrApp r
+  = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
 runScriptM :: forall e a. ScriptM e a -> Aff (Either (Variant e) a /\ CirclesState)
 runScriptM = runScripT
 
+runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
+runScripT = flip runStateT initLanding <<< runExceptT
+
+type Err r
+  = ( err :: String | r )
+
+err :: forall r. String -> Variant ( err :: String | r )
+err = inj (Proxy :: _ "err")
+
 --------------------------------------------------------------------------------
-type AppM r a = ExceptV (ErrApp + r) Aff a
+type AppM r a
+  = ExceptV (ErrApp + r) Aff a
 
 runAppM :: forall r a. AppM r a -> Effect Unit
 runAppM x =
@@ -111,15 +126,49 @@ genSignupOpts = do
   pure { username, email }
 
 --------------------------------------------------------------------------------
-type MkAccountReturn =
-  { username :: String
-  , email :: String
-  , privateKey :: PrivateKey
-  , safeAddress :: Address
-  , txHash :: HexString
-  , mnemonic :: String
-  }
+type MkAccountReturn
+  = { username :: String
+    , email :: String
+    , privateKey :: PrivateKey
+    , safeAddress :: Address
+    , txHash :: HexString
+    , mnemonic :: String
+    }
 
+--------------------------------------------------------------------------------
+type SignUpUser
+  = { privateKey :: CC.PrivateKey
+    , safeAddress :: CC.Address
+    }
+
+signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
+signUpUser env opts =
+  ExceptT do
+    S.signUpUser env opts
+    get
+      <#> ( default (throwError $ err "Cannot sign up user.")
+            # onMatch
+                { trusts:
+                    \x ->
+                      pure
+                        { privateKey: x.privKey
+                        , safeAddress: x.user.safeAddress
+                        }
+                }
+        )
+
+finalizeAccount :: forall m r. MonadLog m => Env (StateT CirclesState m) -> ScriptT (Err + r) m Unit
+finalizeAccount env =
+  ExceptT do
+    S.finalizeAccount env
+    get
+      <#> ( default (throwError $ err "Cannot finalize register user.")
+            # onMatch
+                { dashboard: \_ -> pure unit
+                }
+        )
+
+--------------------------------------------------------------------------------
 mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> ScriptM (ErrApp + r) MkAccountReturn
 mkAccount envVars env = do
   signupOpts <- genSignupOpts
