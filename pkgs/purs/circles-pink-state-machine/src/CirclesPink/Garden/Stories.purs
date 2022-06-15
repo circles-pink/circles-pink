@@ -9,6 +9,7 @@ module CirclesPink.Garden.StateMachine.Stories
   ) where
 
 import Prelude
+
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
@@ -18,6 +19,7 @@ import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.State (StateT, execStateT, get)
 import Data.Variant.Extra (getLabel)
 import Log.Class (class MonadLog, log)
+import Network.Ethereum.Core.Signatures as W3
 import Stadium.Control (toStateT)
 import Wallet.PrivateKey as CC
 
@@ -78,9 +80,12 @@ loginUser env { magicWords } = do
 
 --------------------------------------------------------------------------------
 type TrustUserOpts
-  = { safeAddress :: String
+  = { avatarUrl :: String
+    , id :: Int
+    , safeAddress :: CC.Address
+    , username :: String
     }
 
 trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
-trustUser env { safeAddress } = do
-  act env $ A._dashboard $ A._addTrustConnection safeAddress
+trustUser env u = do
+  act env $ A._dashboard $ A._addTrustConnection u

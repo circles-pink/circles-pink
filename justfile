@@ -69,9 +69,8 @@ branchless-to-main:
 	gh pr merge --rebase branchless
 
 circles-garden:
-	cd {{GARDEN_PATH}} && \
 	nix develop .#garden --command \
-	"make down && make clean && make up && make contracts && make subgraph"
+	"bash" "-c" "cd {{GARDEN_PATH}} && make down && make clean && make up && make contracts && make subgraph"
 
 circles-garden-fund-safe addr:
 	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools && \
