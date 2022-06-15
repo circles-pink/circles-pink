@@ -189,7 +189,7 @@ mkAccount envVars env = do
 app :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> AppM (ErrApp + r) Unit
 app ev env = do
   let
-    count = 50
+    count = 25
 
     maxPar = 5
 
@@ -228,8 +228,8 @@ main :: Effect Unit
 main = do
   envVars' <- getParsedEnv
   case envVars' of
-    Left err -> do
-      error ("ERROR: " <> show err)
+    Left err' -> do
+      error ("ERROR: " <> show err')
       exit 1
     Right envVars -> do
       let

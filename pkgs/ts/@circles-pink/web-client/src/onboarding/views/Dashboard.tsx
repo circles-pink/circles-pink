@@ -13,14 +13,10 @@ import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import {
   DashboardState,
-  _loadingTrust,
-  _trusted,
-  _untrusted,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
   defaultView,
-  Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
@@ -76,6 +72,8 @@ export const Dashboard = ({
     () => (defaultView as any)(stateRaw) as DefaultView,
     [stateRaw]
   );
+
+  const trusts = state.trustsConfirmed.concat(state.trustsCandidates)
 
   // Theme
   const [theme] = useContext(ThemeContext);
@@ -197,7 +195,7 @@ export const Dashboard = ({
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TrustUserList
               title={t('dashboard.trustNetworkTitle')}
-              trusts={state.trusts}
+              trusts={trusts}
               theme={theme}
               icon={mdiLan}
               toggleOverlay={toggleOverlay}

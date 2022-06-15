@@ -1,7 +1,8 @@
 module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
-import CirclesPink.Garden.StateMachine.ProtocolDef (CirclesProtocolDef, GetAction)
+
+import CirclesCore (User)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
@@ -46,8 +47,8 @@ type CirclesAction = Variant
       Variant
         ( logout :: Unit
         , getTrusts :: Unit
-        , addTrustConnection :: String
-        , removeTrustConnection :: String
+        , addTrustConnection :: User
+        , removeTrustConnection :: User
         , getBalance :: Unit
         , transfer ::
             { from :: String

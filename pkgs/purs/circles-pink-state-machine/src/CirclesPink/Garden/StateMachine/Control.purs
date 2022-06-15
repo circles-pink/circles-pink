@@ -7,9 +7,7 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (class MonadTrans)
 import Stadium.Control as C
-import Undefined (undefined)
 
 circlesControl
   :: forall m

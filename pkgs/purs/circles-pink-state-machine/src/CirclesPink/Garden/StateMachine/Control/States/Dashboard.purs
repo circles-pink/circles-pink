@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (Trust, TrustEntry(..), initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -19,12 +19,11 @@ import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.Either (Either(..), hush, isRight)
 import Data.Int (floor, toNumber)
-import Data.Map (alter, lookup, update)
+import Data.Map (alter, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
@@ -69,8 +68,8 @@ dashboard
   => Env.Env m
   -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
      , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
-     , addTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
-     , removeTrustConnection :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , addTrustConnection :: ActionHandler' m User S.DashboardState ("dashboard" :: S.DashboardState)
+     , removeTrustConnection :: ActionHandler' m User S.DashboardState ("dashboard" :: S.DashboardState)
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
          ActionHandler' m
@@ -174,7 +173,7 @@ dashboard env =
                             tn
                       )
                     # M.fromFoldable
-                    # (\te -> M.intersection te (M.filter isCandidate st'.trusts))
+                    # (\te -> M.union te (M.filter isCandidate st'.trusts))
               }
 
   getUsers set st { userNames, addresses } = do
@@ -191,7 +190,7 @@ dashboard env =
     void do
       runExceptT do
         let
-          addr = unsafePartial $ P.unsafeAddrFromString u
+          addr = u.safeAddress
         lift
           $ set \st' ->
               S._dashboard
@@ -208,7 +207,7 @@ dashboard env =
                   }
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert u r st.trustAddResult })
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show addr) r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift
@@ -231,7 +230,7 @@ dashboard env =
     void do
       runExceptT do
         let
-          addr = unsafePartial $ P.unsafeAddrFromString u
+           addr = u.safeAddress
         lift
           $ set \st' ->
               S._dashboard
@@ -248,7 +247,7 @@ dashboard env =
                   }
         _ <-
           env.removeTrustConnection st.privKey addr st.user.safeAddress
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert u r st.trustRemoveResult })
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show addr) r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift
