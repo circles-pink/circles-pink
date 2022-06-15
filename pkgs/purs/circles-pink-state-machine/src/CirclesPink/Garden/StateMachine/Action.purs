@@ -2,13 +2,11 @@ module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
 
-import CirclesCore (User)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
-import Data.Either (Either)
+import CirclesPink.Garden.StateMachine.State.Dashboard (UserIdent)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (Address)
-import Web3
 
 
 type CirclesAction = Variant
@@ -50,8 +48,8 @@ type CirclesAction = Variant
       Variant
         ( logout :: Unit
         , getTrusts :: Unit
-        , addTrustConnection :: Either Address User
-        , removeTrustConnection :: Either Address User
+        , addTrustConnection :: UserIdent
+        , removeTrustConnection :: UserIdent
         , getBalance :: Unit
         , transfer ::
             { from :: String

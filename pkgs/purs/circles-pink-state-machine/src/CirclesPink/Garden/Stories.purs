@@ -10,6 +10,7 @@ module CirclesPink.Garden.StateMachine.Stories
 
 import Prelude
 
+import CirclesCore (User)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
@@ -17,6 +18,7 @@ import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.State (StateT, execStateT, get)
+import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
 import Log.Class (class MonadLog, log)
 import Network.Ethereum.Core.Signatures as W3
