@@ -4,7 +4,7 @@ import { css } from 'twin.macro';
 import { Theme } from '../../context/theme';
 
 type LoadingTextProps = {
-  children: string;
+  children: string | undefined;
   theme: Theme;
   fontSize: number;
 };
@@ -13,20 +13,42 @@ export const LoadingText = (props: LoadingTextProps): ReactElement => {
   return <ShimmeringText {...props}>{props.children}</ShimmeringText>;
 };
 
-type ShimmeringTextProps = LoadingTextProps
+type ShimmeringTextProps = LoadingTextProps;
 
-const ShimmeringText = styled.p<ShimmeringTextProps>(({theme, fontSize}) => [
+const ShimmeringText = styled.p<ShimmeringTextProps>(({ theme, fontSize }) => [
   css`
     padding: 0;
     margin: 0;
+    box-sizing: border-box;
     font-size: ${fontSize}rem;
     color: rgba(255, 255, 255, 0.1);
-    background: -webkit-gradient(linear, left top, right top, from(${theme.baseColor}), to(${theme.baseColor}), color-stop(0.5, ${theme.textColorLight}));
-    background: -moz-gradient(linear, left top, right top, from(${theme.baseColor}), to(${theme.baseColor}), color-stop(0.5, ${theme.textColorLight}));
-    background: gradient(linear, left top, right top, from(${theme.baseColor}), to(${theme.baseColor}), color-stop(0.5, ${theme.textColorLight}));
-    -webkit-background-size: 125px 100%;
-    -moz-background-size: 125px 100%;
-    background-size: 125px 100%;
+    background: -webkit-gradient(
+      linear,
+      left top,
+      right top,
+      from(${theme.baseColor}),
+      to(${theme.baseColor}),
+      color-stop(0.5, ${theme.lightColor})
+    );
+    background: -moz-gradient(
+      linear,
+      left top,
+      right top,
+      from(${theme.baseColor}),
+      to(${theme.baseColor}),
+      color-stop(0.5, ${theme.lightColor})
+    );
+    background: gradient(
+      linear,
+      left top,
+      right top,
+      from(${theme.baseColor}),
+      to(${theme.baseColor}),
+      color-stop(0.5, ${theme.lightColor})
+    );
+    -webkit-background-size: 1200px 100%;
+    -moz-background-size: 1200px 100%;
+    background-size: 1200px 100%;
     -webkit-background-clip: text;
     -moz-background-clip: text;
     background-clip: text;
@@ -45,38 +67,38 @@ const ShimmeringText = styled.p<ShimmeringTextProps>(({theme, fontSize}) => [
 
     @-moz-keyframes shimmer {
       0% {
-          background-position: top left;
+        background-position: top left;
       }
       100% {
-          background-position: top right;
+        background-position: top right;
       }
     }
-    
+
     @-webkit-keyframes shimmer {
-        0% {
-            background-position: top left;
-        }
-        100% {
-            background-position: top right;
-        }
+      0% {
+        background-position: top left;
+      }
+      100% {
+        background-position: top right;
+      }
     }
-    
+
     @-o-keyframes shimmer {
-        0% {
-            background-position: top left;
-        }
-        100% {
-            background-position: top right;
-        }
+      0% {
+        background-position: top left;
+      }
+      100% {
+        background-position: top right;
+      }
     }
-    
+
     @keyframes shimmer {
-        0% {
-            background-position: top left;
-        }
-        100% {
-            background-position: top right;
-        }
+      0% {
+        background-position: top left;
+      }
+      100% {
+        background-position: top right;
+      }
     }
   `,
 ]);

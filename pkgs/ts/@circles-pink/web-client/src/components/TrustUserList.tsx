@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
-import { Claim } from './text';
+import { Claim, LoadingText } from './text';
 import ReactTooltip from 'react-tooltip';
 import {
   mdiAccountArrowLeft,
@@ -48,8 +48,8 @@ type TrustUserListProps = {
   actionRow?: ReactElement | ReactElement[] | string;
   toggleOverlay?: (type: Overlay) => void;
   setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
-  addTrust: (to: User) => void;
-  removeTrust: (to: User) => void;
+  addTrust: (to: D.UserIdent) => void;
+  removeTrust: (to: D.UserIdent) => void;
   trustAddResult: DefaultView['trustAddResult'];
   trustRemoveResult: DefaultView['trustRemoveResult'];
 };
@@ -70,19 +70,29 @@ export const TrustUserList = (props: TrustUserListProps) => {
   const trusts = [...allTrusts]
     // Sort by username and safeAddress
     .sort((a, b) => {
-      
+      const usernameA = pipe(
+        a.user,
+        either(() => '')(x => (x as User).username)
+      );
+      const usernameB = pipe(
+        b.user,
+        either(() => '')(x => (x as User).username)
+      );
 
-      const usernameA = pipe(a.user,  either(() => '')(x => (x as User).username));
-      const usernameB = pipe(b.user,  either(() => '')(x => (x as User).username));
-      
       const result = usernameA.localeCompare(usernameB);
 
-      if (result !== 0) return result
-      
-      const addressA = pipe(a.user, either((x) => x as string)(x => (x as User).safeAddress));
-      const addressB = pipe(b.user, either((x) => x as string)(x => (x as User).safeAddress));
-      
-      return addressA.localeCompare(addressB)
+      if (result !== 0) return result;
+
+      const addressA = pipe(
+        a.user,
+        either(x => x as string)(x => (x as User).safeAddress)
+      );
+      const addressB = pipe(
+        b.user,
+        either(x => x as string)(x => (x as User).safeAddress)
+      );
+
+      return addressA.localeCompare(addressB);
     })
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
@@ -158,7 +168,10 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
   // animation
   const getDelay = getIncrementor(0, 0.05);
 
-  const userIdent = c.user ? c.user.username : c.safeAddress.substring(0, 6);
+  const userIdent = pipe(
+    c.user,
+    either(x => (x as string).substring(0, 6))(x => (x as User).username)
+  );
   const isTrusted = D.isTrusted(c.trustState);
   const isUntrusted = D.isUntrusted(c.trustState);
   const pendingTrust = D.isPendingTrust(c.trustState);
@@ -266,7 +279,9 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
           <FadeIn orientation={'left'} delay={getDelay()}>
             <TrustActionMessageContainer>
               <TrustActionMessage>
-                {mapStatusMessage(c.trustState)}
+                <LoadingText theme={theme} fontSize={1.6}>
+                  {mapStatusMessage(c.trustState)}
+                </LoadingText>
               </TrustActionMessage>
             </TrustActionMessageContainer>
           </FadeIn>
