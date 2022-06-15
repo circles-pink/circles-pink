@@ -36,6 +36,7 @@ import * as D from '@circles-pink/state-machine/output/CirclesPink.Garden.StateM
 import { FadeIn, getIncrementor } from 'anima-react';
 import { User } from '@circles-pink/state-machine/output/CirclesCore';
 import { either } from '@circles-pink/state-machine/output/Data.Either';
+import { pipe } from 'fp-ts/lib/function';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -68,9 +69,20 @@ export const TrustUserList = (props: TrustUserListProps) => {
 
   const trusts = [...allTrusts]
     // Sort by username and safeAddress
-    .sort((a, b) =>{
-      const username = either(()=>"")((x)=>x.username)(a.user) ? a.user.username : "";
-      return a.user.username.localeCompare(b.user.username) : 0
+    .sort((a, b) => {
+      
+
+      const usernameA = pipe(a.user,  either(() => '')(x => (x as User).username));
+      const usernameB = pipe(b.user,  either(() => '')(x => (x as User).username));
+      
+      const result = usernameA.localeCompare(usernameB);
+
+      if (result !== 0) return result
+      
+      const addressA = pipe(a.user, either((x) => x as string)(x => (x as User).safeAddress));
+      const addressB = pipe(b.user, either((x) => x as string)(x => (x as User).safeAddress));
+      
+      return addressA.localeCompare(addressB)
     })
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
@@ -222,9 +234,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
               <Clickable
                 clickable={true}
                 onClick={() => {
-                  isUntrusted
-                    ? addTrust(c.user)
-                    : removeTrust(c.user);
+                  isUntrusted ? addTrust(c.user) : removeTrust(c.user);
                 }}
               >
                 <Icon
