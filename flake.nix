@@ -100,7 +100,19 @@
 
             checks = self.packages; # gets overwritten below. todo: change!
 
-            devShell = import ./nix/dev-shell.nix { inherit pkgs; };
+            devShells.default = import ./nix/dev-shell.nix { inherit pkgs; };
+
+            devShells.garden =
+              pkgs.mkShell {
+                nativeBuildInputs = [
+                  pkgs.nodejs-12_x
+                  pkgs.docker-compose
+                ];
+
+                # Change the prompt to show that you are in a devShell
+                shellHook = "";
+              };
+
 
           }));
 
