@@ -23,12 +23,12 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), TrustState, initUntrusted, next)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), TrustState, initUntrusted, isCandidate, isConfirmed, next, trustEntryToTrust)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
 import Data.Array as A
-import Data.Map (fromFoldable, lookup)
+import Data.Map (Map, fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
@@ -101,12 +101,10 @@ mapTrust a t =
   , user: toNullable t.user
   }
 
-mapTrusts :: D.Trusts -> Trusts
-mapTrusts xs = M.toUnfoldable xs <#> uncurry mapTrust
 
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts, trustAddResult } =
-  --  let
+   let
   -- initTrust user =
   --   { isOutgoing: false
   --   , user: Just user
@@ -123,35 +121,25 @@ defaultView d@{ trusts, trustAddResult } =
 
   --   }
 
-  -- usersSearch :: Trusts
-  -- usersSearch =
-  --   d.userSearchResult
-  --     #
-  --       ( unwrap >>>
-  --           ( default [] # onMatch
-  --               { success: \{ data: data_ } -> data_
-  --               , loading: \{ previousData } -> maybe [] identity previousData
-  --               }
-  --           )
-  --       )
-  --     <#>
-  --       ( \user -> lookup (convert user.safeAddress) trusts
-  --           # maybe (initTrust user) identity
-  --           # mapTrust (convert user.safeAddress)
-  --       )
-  --in
-  { trustsConfirmed: d.trusts
-      # M.toUnfoldable
-      # A.filter (\t -> isConfirmed $ snd t)
-      # map
-          ( \(Tuple addr trust) ->
-              { safeAddress: show addr
-              , isOutgoing: trust.isOutgoing
-              , trustState: trust.trustState
-              , user: toNullable trust.user
-              }
-          )
-  , trustsCandidates: d.trusts # M.toUnfoldable # A.filter (\t -> isUnconfirmed $ snd t)
+  usersSearch :: Trusts
+  usersSearch =
+    d.userSearchResult
+      #
+        ( unwrap >>>
+            ( default [] # onMatch
+                { success: \{ data: data_ } -> data_
+                , loading: \{ previousData } -> maybe [] identity previousData
+                }
+            )
+        )
+      <#>
+        ( \user -> lookup (convert user.safeAddress) trusts
+            # maybe (initTrust user) identity
+            # mapTrust (convert user.safeAddress)
+        )
+  in
+  { trustsConfirmed: mapTrusts isConfirmed d.trusts
+  , trustsCandidates: mapTrusts isCandidate d.trusts
   , usersSearch: todo
   , userSearchResult: d.userSearchResult
   , getUsersResult: d.getUsersResult
@@ -164,16 +152,17 @@ defaultView d@{ trusts, trustAddResult } =
   , transferResult: d.transferResult
   }
 
-isConfirmed :: TrustEntry -> Boolean
-isConfirmed te = match (\_ -> true) (\_ -> false) te
-
-isUnconfirmed :: TrustEntry -> Boolean
-isUnconfirmed te = match (\_ -> false) (\_ -> true) te
-
-match :: forall z. (D.Trust -> z) -> (D.Trust -> z) -> TrustEntry -> z
-match confirmed candidate te = case te of
-  TrustConfirmed t -> confirmed t
-  TrustCandidate t -> candidate t
+mapTrusts :: (TrustEntry -> Boolean) -> Map W3.Address TrustEntry -> Trusts
+mapTrusts pred x = x
+  # M.toUnfoldable
+  # A.filter (\t -> pred $ snd t)
+  # map
+      ( \(Tuple addr trustEntry) ->
+          let
+            trust = trustEntryToTrust trustEntry
+          in
+          mapTrust addr trust
+      )
 
 --------------------------------------------------------------------------------
 -- Resolved Errors
