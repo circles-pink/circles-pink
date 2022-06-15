@@ -6,15 +6,15 @@ let
     {
       name = "ide-purescript";
       publisher = "nwolverson";
-      version = "0.25.8";
-      sha256 = "sha256-z5/DO6XQSpHRzt0iDD6+CQ8ayFqYAw8lG5aigYPrN7A=";
+      version = "0.25.12";
+      sha256 = "sha256-tgZ0PnWrSDBNKBB5bKH/Fmq6UVNSRYZ8HJdzFDgxILk=";
     }
 
     {
       name = "language-purescript";
       publisher = "nwolverson";
-      version = "0.2.7";
-      sha256 = "sha256-cQnFWzqA4eBbjDiZGDFtg0/FUXf5weYOeZ1GiooYn9g=";
+      version = "0.2.8";
+      sha256 = "sha256-2uOwCHvnlQQM8s8n7dtvIaMgpW8ROeoUraM02rncH9o=";
     }
 
     {

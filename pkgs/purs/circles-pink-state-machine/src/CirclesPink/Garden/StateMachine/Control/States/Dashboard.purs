@@ -17,7 +17,7 @@ import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
-import Data.Either (Either(..), hush, isRight)
+import Data.Either (Either(..), either, hush, isRight)
 import Data.Int (floor, toNumber)
 import Data.Map (alter, lookup)
 import Data.Map as M
@@ -29,7 +29,7 @@ import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey, unsafeAddrFromString)
+import Wallet.PrivateKey (Address, PrivateKey, unsafeAddrFromString)
 import Wallet.PrivateKey as P
 
 type ErrFetchUsersBinarySearch r = (err :: Unit | r)
@@ -68,8 +68,8 @@ dashboard
   => Env.Env m
   -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
      , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
-     , addTrustConnection :: ActionHandler' m User S.DashboardState ("dashboard" :: S.DashboardState)
-     , removeTrustConnection :: ActionHandler' m User S.DashboardState ("dashboard" :: S.DashboardState)
+     , addTrustConnection :: ActionHandler' m (Either Address User) S.DashboardState ("dashboard" :: S.DashboardState)
+     , removeTrustConnection :: ActionHandler' m (Either Address User) S.DashboardState ("dashboard" :: S.DashboardState)
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
          ActionHandler' m
@@ -190,7 +190,7 @@ dashboard env =
     void do
       runExceptT do
         let
-          addr = u.safeAddress
+          addr = either identity _.safeAddress u
         lift
           $ set \st' ->
               S._dashboard
@@ -199,7 +199,7 @@ dashboard env =
                       st'.trusts
                         # alter
                             ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: u }
+                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: hush u }
                                 Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
                                 Just (TrustCandidate t) -> Just $ TrustCandidate t
                             )
@@ -230,7 +230,7 @@ dashboard env =
     void do
       runExceptT do
         let
-           addr = u.safeAddress
+           addr = either identity _.safeAddress u
         lift
           $ set \st' ->
               S._dashboard
