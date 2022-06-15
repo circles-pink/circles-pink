@@ -35,6 +35,7 @@ import { PageSelector } from './PageSelector';
 import * as D from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { User } from '@circles-pink/state-machine/output/CirclesCore';
+import { either } from '@circles-pink/state-machine/output/Data.Either';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -65,13 +66,12 @@ export const TrustUserList = (props: TrustUserListProps) => {
     pageNeighbours: 1,
   });
 
-  const trusts = allTrusts
-    // Sorty by safe address
-    .sort((a, b) => a.safeAddress.localeCompare(b.safeAddress))
-    // Sort by username and priorize users with username
-    .sort((a, b) =>
-      a.user && b.user ? a.user.username.localeCompare(b.user.username) : 0
-    )
+  const trusts = [...allTrusts]
+    // Sort by username and safeAddress
+    .sort((a, b) =>{
+      const username = either(()=>"")((x)=>x.username)(a.user) ? a.user.username : "";
+      return a.user.username.localeCompare(b.user.username) : 0
+    })
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
 
