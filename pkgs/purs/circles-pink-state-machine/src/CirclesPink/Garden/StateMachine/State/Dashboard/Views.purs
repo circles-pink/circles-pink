@@ -23,17 +23,19 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustState, initUntrusted, next)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), TrustState, initUntrusted, next)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
-import Data.Map (lookup)
+import Data.Array as A
+import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
 import Data.String (toLower)
-import Data.Tuple (uncurry)
+import Data.Tuple (Tuple(..), fst, snd, uncurry)
+import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant, default, onMatch)
 import Debug.Extra (todo)
@@ -68,7 +70,8 @@ globalLoading d = any (_ == true) $ join checks
 -- DefaultView
 --------------------------------------------------------------------------------
 type DefaultView =
-  { trusts :: Trusts
+  { trustsConfirmed :: Trusts
+  , trustsCandidates :: Trusts
   , usersSearch :: Trusts
   , userSearchResult :: RemoteReport ErrUserSearchResolved (Array User)
   , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
@@ -103,52 +106,74 @@ mapTrusts xs = M.toUnfoldable xs <#> uncurry mapTrust
 
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts, trustAddResult } =
---  let
-    -- initTrust user =
-    --   { isOutgoing: false
-    --   , user: Just user
-    --   , trustState:
-    --       O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
-    --         # maybe initUntrusted
-    --             ( unwrap >>>
-    --                 ( default initUntrusted # onMatch
-    --                     { loading: \_ -> next initUntrusted
-    --                     , success: \_ -> next $ next initUntrusted
-    --                     }
-    --                 )
-    --             )
+  --  let
+  -- initTrust user =
+  --   { isOutgoing: false
+  --   , user: Just user
+  --   , trustState:
+  --       O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
+  --         # maybe initUntrusted
+  --             ( unwrap >>>
+  --                 ( default initUntrusted # onMatch
+  --                     { loading: \_ -> next initUntrusted
+  --                     , success: \_ -> next $ next initUntrusted
+  --                     }
+  --                 )
+  --             )
 
-    --   }
+  --   }
 
-    -- usersSearch :: Trusts
-    -- usersSearch =
-    --   d.userSearchResult
-    --     #
-    --       ( unwrap >>>
-    --           ( default [] # onMatch
-    --               { success: \{ data: data_ } -> data_
-    --               , loading: \{ previousData } -> maybe [] identity previousData
-    --               }
-    --           )
-    --       )
-    --     <#>
-    --       ( \user -> lookup (convert user.safeAddress) trusts
-    --           # maybe (initTrust user) identity
-    --           # mapTrust (convert user.safeAddress)
-    --       )
+  -- usersSearch :: Trusts
+  -- usersSearch =
+  --   d.userSearchResult
+  --     #
+  --       ( unwrap >>>
+  --           ( default [] # onMatch
+  --               { success: \{ data: data_ } -> data_
+  --               , loading: \{ previousData } -> maybe [] identity previousData
+  --               }
+  --           )
+  --       )
+  --     <#>
+  --       ( \user -> lookup (convert user.safeAddress) trusts
+  --           # maybe (initTrust user) identity
+  --           # mapTrust (convert user.safeAddress)
+  --       )
   --in
-    { trusts: todo -- mapTrusts trusts
-    , usersSearch: todo
-    , userSearchResult: d.userSearchResult
-    , getUsersResult: d.getUsersResult
-    , trustsResult: d.trustsResult
-    , trustAddResult: d.trustAddResult
-    , trustRemoveResult: d.trustRemoveResult
-    , checkUBIPayoutResult: d.checkUBIPayoutResult
-    , getBalanceResult: d.getBalanceResult
-    , requestUBIPayoutResult: d.requestUBIPayoutResult
-    , transferResult: d.transferResult
-    }
+  { trustsConfirmed: d.trusts
+      # M.toUnfoldable
+      # A.filter (\t -> isConfirmed $ snd t)
+      # map
+          ( \(Tuple addr trust) ->
+              { safeAddress: show addr
+              , isOutgoing: trust.isOutgoing
+              , trustState: trust.trustState
+              , user: toNullable trust.user
+              }
+          )
+  , trustsCandidates: d.trusts # M.toUnfoldable # A.filter (\t -> isUnconfirmed $ snd t)
+  , usersSearch: todo
+  , userSearchResult: d.userSearchResult
+  , getUsersResult: d.getUsersResult
+  , trustsResult: d.trustsResult
+  , trustAddResult: d.trustAddResult
+  , trustRemoveResult: d.trustRemoveResult
+  , checkUBIPayoutResult: d.checkUBIPayoutResult
+  , getBalanceResult: d.getBalanceResult
+  , requestUBIPayoutResult: d.requestUBIPayoutResult
+  , transferResult: d.transferResult
+  }
+
+isConfirmed :: TrustEntry -> Boolean
+isConfirmed te = match (\_ -> true) (\_ -> false) te
+
+isUnconfirmed :: TrustEntry -> Boolean
+isUnconfirmed te = match (\_ -> false) (\_ -> true) te
+
+match :: forall z. (D.Trust -> z) -> (D.Trust -> z) -> TrustEntry -> z
+match confirmed candidate te = case te of
+  TrustConfirmed t -> confirmed t
+  TrustCandidate t -> candidate t
 
 --------------------------------------------------------------------------------
 -- Resolved Errors
