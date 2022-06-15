@@ -199,7 +199,7 @@ dashboard env =
                       st'.trusts
                         # alter
                             ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: Nothing }
+                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: u }
                                 Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
                                 Just (TrustCandidate t) -> Just $ TrustCandidate t
                             )
