@@ -80,11 +80,8 @@ loginUser env { magicWords } = do
 
 --------------------------------------------------------------------------------
 type TrustUserOpts
-  = { avatarUrl :: String
-    , id :: Int
-    , safeAddress :: CC.Address
-    , username :: String
-    }
+  = Either CC.Address User
+  
 
 trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
 trustUser env u = do

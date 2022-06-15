@@ -56,6 +56,7 @@
           nix-filter = nix-filter.lib;
           nixopsLatest = inputs.nixops.defaultPackage.${system};
           circles-pink-vendor = inputs.circles-pink-vendor.packages.${system};
+          purescript = easy-purescript-nix.purs-0_14_9;
         })
         inputs.deadnix.overlay
       ];
@@ -100,7 +101,7 @@
 
             checks = self.packages; # gets overwritten below. todo: change!
 
-            devShells.default = import ./nix/dev-shell.nix { inherit pkgs; };
+            devShell = import ./nix/dev-shell.nix { inherit pkgs; };
 
             devShells.garden =
               pkgs.mkShell {
