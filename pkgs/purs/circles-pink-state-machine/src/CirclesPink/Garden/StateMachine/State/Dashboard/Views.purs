@@ -15,7 +15,8 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   , Trusts
   , defaultView
   , globalLoading
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -23,16 +24,16 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry, TrustState, initUntrusted, isCandidate, isConfirmed, trustEntryToTrust)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry, TrustState, UserIdent, initUntrusted, isCandidate, isConfirmed, trustEntryToTrust)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
 import Data.Array as A
+import Data.Either (note)
 import Data.Map (Map, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
-import Data.Nullable (Nullable, toNullable)
 import Data.Tuple (Tuple(..), snd)
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
@@ -84,7 +85,7 @@ type Trust =
   { safeAddress :: String
   , trustState :: TrustState
   , isOutgoing :: Boolean
-  , user :: Nullable User
+  , user :: UserIdent
   }
 
 mapTrust :: W3.Address -> D.Trust -> Trust
@@ -92,7 +93,7 @@ mapTrust a t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
   , safeAddress: show a
-  , user: toNullable t.user
+  , user: note (convert a) t.user
   }
 
 

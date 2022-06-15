@@ -25,6 +25,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustRemoveResult
   , TrustState
   , Trusts
+  , UserIdent
   , UserSearchResult
   , _dashboard
   , initDashboard
@@ -41,12 +42,15 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , matchTrustEntry
   , next
   , trustEntryToTrust
-  ) where
+  )
+  where
   
 import Prelude
+
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import Data.Either (Either)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -58,7 +62,7 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
+import Wallet.PrivateKey (Address, PrivateKey)
 
 --------------------------------------------------------------------------------
 -- DashboardState
@@ -108,6 +112,8 @@ type Trust =
   }
 
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
+
+type UserIdent = Either Address User
 
 --------------------------------------------------------------------------------
 -- InitDashboard
