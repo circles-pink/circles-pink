@@ -23,28 +23,22 @@ import CirclesCore (ApiError, NativeError, User, TrustNode)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), TrustState, initUntrusted, isCandidate, isConfirmed, next, trustEntryToTrust)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry, TrustState, initUntrusted, isCandidate, isConfirmed, trustEntryToTrust)
 import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
 import Data.Array as A
-import Data.Map (Map, fromFoldable, lookup)
+import Data.Map (Map, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, toNullable)
-import Data.String (toLower)
-import Data.Tuple (Tuple(..), fst, snd, uncurry)
-import Data.Tuple.Nested (type (/\))
-import Data.Typelevel.Undefined (undefined)
+import Data.Tuple (Tuple(..), snd)
 import Data.Variant (Variant, default, onMatch)
-import Debug.Extra (todo)
 import Foreign.Object (Object, values)
-import Foreign.Object as O
 import Network.Ethereum.Core.Signatures as W3
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
-import Wallet.PrivateKey (addrToString)
 
 --------------------------------------------------------------------------------
 -- globalLoading
@@ -103,23 +97,14 @@ mapTrust a t =
 
 
 defaultView :: DashboardState -> DefaultView
-defaultView d@{ trusts, trustAddResult } =
+defaultView d@{ trusts } =
    let
-  -- initTrust user =
-  --   { isOutgoing: false
-  --   , user: Just user
-  --   , trustState:
-  --       O.lookup (toLower $ addrToString user.safeAddress) trustAddResult
-  --         # maybe initUntrusted
-  --             ( unwrap >>>
-  --                 ( default initUntrusted # onMatch
-  --                     { loading: \_ -> next initUntrusted
-  --                     , success: \_ -> next $ next initUntrusted
-  --                     }
-  --                 )
-  --             )
+  initUntrust user =
+    { isOutgoing: false
+    , user: Just user
+    , trustState: initUntrusted
 
-  --   }
+    }
 
   usersSearch :: Trusts
   usersSearch =
@@ -134,13 +119,14 @@ defaultView d@{ trusts, trustAddResult } =
         )
       <#>
         ( \user -> lookup (convert user.safeAddress) trusts
-            # maybe (initTrust user) identity
+            <#> trustEntryToTrust
+            # maybe (initUntrust user) identity
             # mapTrust (convert user.safeAddress)
         )
   in
   { trustsConfirmed: mapTrusts isConfirmed d.trusts
   , trustsCandidates: mapTrusts isCandidate d.trusts
-  , usersSearch: todo
+  , usersSearch: usersSearch
   , userSearchResult: d.userSearchResult
   , getUsersResult: d.getUsersResult
   , trustsResult: d.trustsResult
