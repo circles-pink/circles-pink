@@ -16,7 +16,7 @@ type CirclesProtocol = P.Protocol
       P.State
         ( prev :: P.Action ("infoGeneral" :> Nil')
         , setUsername :: P.Action ("askUsername" :> Nil')
-        , next :: P.Action ("askUsername" :> "askEmail" :> Nil')
+        , next :: P.Action ("askUsername" :> "askEmail" :> "infoSecurity" :> Nil')
         )
   , askEmail ::
       P.State
