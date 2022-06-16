@@ -49,6 +49,7 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
 import Wallet.PrivateKey as CC
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 
 --------------------------------------------------------------------------------
 type ScriptM e a = ScriptT e Aff a
@@ -136,10 +137,10 @@ type SignUpUser =
   , safeAddress :: CC.Address
   }
 
-signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
-signUpUser env opts =
+signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
+signUpUser env cfg opts =
   ExceptT do
-    S.signUpUser env opts
+    S.signUpUser env cfg opts
     get
       <#>
         ( default (throwError $ err "Cannot sign up user.")
@@ -153,10 +154,10 @@ signUpUser env opts =
                 }
         )
 
-finalizeAccount :: forall m r. MonadLog m => Env (StateT CirclesState m) -> ScriptT (Err + r) m Unit
-finalizeAccount env =
+finalizeAccount :: forall m r. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> ScriptT (Err + r) m Unit
+finalizeAccount env cfg =
   ExceptT do
-    S.finalizeAccount env
+    S.finalizeAccount env cfg
     get
       <#>
         ( default (throwError $ err "Cannot finalize register user.")
