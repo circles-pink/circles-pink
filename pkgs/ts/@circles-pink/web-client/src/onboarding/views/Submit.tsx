@@ -1,4 +1,7 @@
-import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  CirclesState,
+  UserData,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { Button } from '../../components/forms';
@@ -19,16 +22,17 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 type SubmitProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
-export const Submit = ({ state, act }: SubmitProps): ReactElement => {
+export const Submit = ({ state, act, skip }: SubmitProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -40,12 +44,13 @@ export const Submit = ({ state, act }: SubmitProps): ReactElement => {
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>
-              Username: {state.username}
-              <br />
-              Email: {state.email}
-            </SubClaim>
+            <SubClaim>Username: {state.username}</SubClaim>
           </FadeIn>
+          {state.email && (
+            <FadeIn orientation={orientation} delay={getDelay()}>
+              <SubClaim>Email: {state.email}</SubClaim>
+            </FadeIn>
+          )}
         </Text>
       }
       control={

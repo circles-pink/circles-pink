@@ -1,33 +1,59 @@
 import React from 'react';
 import tw from 'twin.macro';
-import { StepIndicator } from '../StepIndicator';
-import { stateToIndex, useAnimContext } from '../../context/anim';
+import { Step, StepIndicator } from '../StepIndicator';
+import { useAnimContext } from '../../context/anim';
 import { useContext } from 'react';
 import { ThemeContext } from '../../context/theme';
+import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import * as NEA from 'fp-ts/lib/NonEmptyArray';
+import { identity, pipe } from 'fp-ts/lib/function';
+import * as O from 'fp-ts/lib/Option';
 
 const StepIndicatorContainer = tw.div`p-4`;
 
-export const OnboardingStepIndicator = () => {
+const circlesStates: CirclesState['type'][] = [
+  'infoGeneral',
+  'askUsername',
+  'askEmail',
+  'infoSecurity',
+  'magicWords',
+  'submit',
+];
+
+type OnboardingStepIndicatorProps = {
+  skipStates?: CirclesState['type'][];
+};
+
+export const OnboardingStepIndicator = ({
+  skipStates,
+}: OnboardingStepIndicatorProps) => {
   const [theme] = useContext(ThemeContext);
   const anim = useAnimContext();
+
+  const states = skipStates
+    ? circlesStates.filter(state => !skipStates.includes(state))
+    : circlesStates;
+
+  const steps: Step[] = states.map(s => {
+    return { label: s };
+  });
+
+  const nonEmptySteps = pipe(
+    steps,
+    NEA.fromArray,
+    O.match(() => undefined, identity)
+  );
 
   return (
     <StepIndicatorContainer>
       <StepIndicator
         height={24}
         speed={0.0004}
-        selected={stateToIndex(anim.selected)}
-        prevSelected={stateToIndex(anim.prevSelected)}
+        selected={states.indexOf(anim.selected)}
+        prevSelected={states.indexOf(anim.prevSelected)}
         lastAction={anim.lastAction}
         theme={{ active: theme.baseColor, inActive: '#ebebeb' }}
-        steps={[
-          { label: '1' },
-          { label: '2' },
-          { label: '3' },
-          { label: '4' },
-          { label: '5' },
-          { label: '6' },
-        ]}
+        steps={nonEmptySteps}
       />
     </StepIndicatorContainer>
   );

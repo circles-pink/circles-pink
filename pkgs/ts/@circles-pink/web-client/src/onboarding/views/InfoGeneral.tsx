@@ -6,7 +6,10 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  CirclesState,
+  UserData,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
@@ -17,16 +20,21 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 type InfoGeneralProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
-export const InfoGeneral = ({ state, act }: InfoGeneralProps): ReactElement => {
+export const InfoGeneral = ({
+  state,
+  act,
+  skip,
+}: InfoGeneralProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

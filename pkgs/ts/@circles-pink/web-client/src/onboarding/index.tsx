@@ -53,12 +53,16 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
-const cfg: CirclesConfig = {
+const cfgExample: CirclesConfig = {
   extractEmail: (email: string) => () => {
     // Save the email somewhere...
     console.log(email);
     return unit;
   },
+};
+
+const cfg: CirclesConfig = {
+  extractEmail: null,
 };
 
 const control = mkControl(env)(cfg);
@@ -67,6 +71,16 @@ type ViewProps = {
   state: CirclesState;
   act: (m: CirclesAction) => void;
 };
+
+const getSkipStates = (): CirclesState['type'][] => {
+  const toSkip: CirclesState['type'][] = [];
+  if (!cfg.extractEmail) {
+    toSkip.push('askEmail');
+  }
+  return toSkip;
+};
+
+const skip = getSkipStates();
 
 const View = ({ state, act }: ViewProps): ReactElement | null => {
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -81,17 +95,17 @@ const View = ({ state, act }: ViewProps): ReactElement | null => {
     case 'landing':
       return <Landing state={state.value} act={act} />;
     case 'infoGeneral':
-      return <InfoGeneral state={state.value} act={act} />;
+      return <InfoGeneral state={state.value} act={act} skip={skip} />;
     case 'askUsername':
-      return <AskUsername state={state.value} act={act} />;
+      return <AskUsername state={state.value} act={act} skip={skip} />;
     case 'askEmail':
-      return <AskEmail state={state.value} act={act} />;
+      return <AskEmail state={state.value} act={act} skip={skip} />;
     case 'infoSecurity':
-      return <InfoSecurity state={state.value} act={act} />;
+      return <InfoSecurity state={state.value} act={act} skip={skip} />;
     case 'magicWords':
-      return <MagicWords state={state.value} act={act} />;
+      return <MagicWords state={state.value} act={act} skip={skip} />;
     case 'submit':
-      return <Submit state={state.value} act={act} />;
+      return <Submit state={state.value} act={act} skip={skip} />;
     case 'login':
       return <Login state={state.value} act={act} />;
     case 'trusts':

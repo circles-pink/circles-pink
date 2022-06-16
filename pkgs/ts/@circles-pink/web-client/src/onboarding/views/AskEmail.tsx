@@ -1,4 +1,5 @@
 import {
+  CirclesState,
   EmailApiResult,
   UserData,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
@@ -18,22 +19,22 @@ import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
-import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type AskEmailProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
-export const AskEmail = ({ state, act }: AskEmailProps): ReactElement => {
+export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
   const [theme] = useContext(ThemeContext);
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

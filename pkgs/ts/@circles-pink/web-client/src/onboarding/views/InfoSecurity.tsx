@@ -1,4 +1,7 @@
-import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  CirclesState,
+  UserData,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { Button } from '../../components/forms';
@@ -18,11 +21,13 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 type InfoSecurityProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
 export const InfoSecurity = ({
   state,
   act,
+  skip,
 }: InfoSecurityProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
@@ -30,7 +35,7 @@ export const InfoSecurity = ({
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

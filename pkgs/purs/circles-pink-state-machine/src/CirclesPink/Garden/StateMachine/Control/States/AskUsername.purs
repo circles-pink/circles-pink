@@ -10,7 +10,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Newtype.Extra ( (-|))
+import Data.Newtype.Extra ((-|))
 import Data.Variant (default, onMatch)
 import RemoteData (_failure, _loading, _success)
 
@@ -48,8 +48,8 @@ askUsername env cfg =
             # onMatch
                 { success: (\r -> r.isValid) }
       in
-        if  st.usernameApiResult -| usernameValid then
-          case  cfg -| _.extractEmail of
+        if st.usernameApiResult -| usernameValid then
+          case cfg -| _.extractEmail of
             Nothing -> S._infoSecurity st { direction = D._forwards }
             Just _ -> S._askEmail st { direction = D._forwards }
         else

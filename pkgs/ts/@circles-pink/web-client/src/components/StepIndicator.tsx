@@ -15,7 +15,7 @@ import * as G from '@no-day/fp-ts-generators';
 
 type StepExtra = { position: number };
 
-type Step = { label: string };
+export type Step = { label: string };
 
 type StepIndicatorTheme = {
   active: string;
