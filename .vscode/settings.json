@@ -13,6 +13,5 @@
     "editor.defaultFormatter": "dhall.vscode-dhall-lsp-server"
   },
   "terminal.integrated.persistentSessionReviveProcess": "never",
-  "purescript.formatter": "purs-tidy",
-  "editor.formatOnSave": true
+  "purescript.formatter": "purs-tidy"
 }
