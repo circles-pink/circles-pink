@@ -13,6 +13,7 @@ import Prelude
 import CirclesCore (User)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
@@ -21,21 +22,19 @@ import Control.Monad.State (StateT, execStateT, get)
 import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
 import Log.Class (class MonadLog, log)
-import Network.Ethereum.Core.Signatures as W3
 import Stadium.Control (toStateT)
 import Wallet.PrivateKey as CC
 
-type ScriptT' m a
-  = (StateT CirclesState m) a
+type ScriptT' m a = (StateT CirclesState m) a
 
 execScripT' :: forall m a. Monad m => ScriptT' m a -> m CirclesState
 execScripT' = flip execStateT initLanding
 
 --------------------------------------------------------------------------------
-act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesAction -> ScriptT' m Unit
-act env =
+act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> CirclesAction -> ScriptT' m Unit
+act env cfg =
   let
-    ctl = toStateT (circlesControl env)
+    ctl = toStateT (circlesControl env cfg)
   in
     \ac -> do
       log ("ACTION: " <> show ac)
@@ -45,46 +44,44 @@ act env =
       log ""
 
 --------------------------------------------------------------------------------
-type SignUpUserOpts
-  = { username :: String
-    , email :: String
-    }
+type SignUpUserOpts =
+  { username :: String
+  , email :: String
+  }
 
-signUpUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT' m Unit
-signUpUser env opts = do
-  act env $ A._landing $ A._signUp unit
-  act env $ A._infoGeneral $ A._next unit
-  act env $ A._askUsername $ A._setUsername opts.username
-  act env $ A._askUsername $ A._next unit
-  act env $ A._askEmail $ A._setEmail opts.email
-  act env $ A._askEmail $ A._setTerms unit
-  act env $ A._askEmail $ A._setPrivacy unit
-  act env $ A._askEmail $ A._next unit
-  act env $ A._infoSecurity $ A._next unit
-  act env $ A._magicWords $ A._next unit
-  act env $ A._submit $ A._submit unit
-
---------------------------------------------------------------------------------
-finalizeAccount :: forall m. MonadLog m => Env (StateT CirclesState m) -> ScriptT' m Unit
-finalizeAccount env = do
-  act env $ A._trusts $ A._finalizeRegisterUser unit
+signUpUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> SignUpUserOpts -> ScriptT' m Unit
+signUpUser env cfg opts = do
+  act env cfg $ A._landing $ A._signUp unit
+  act env cfg $ A._infoGeneral $ A._next unit
+  act env cfg $ A._askUsername $ A._setUsername opts.username
+  act env cfg $ A._askUsername $ A._next unit
+  act env cfg $ A._askEmail $ A._setEmail opts.email
+  act env cfg $ A._askEmail $ A._setTerms unit
+  act env cfg $ A._askEmail $ A._setPrivacy unit
+  act env cfg $ A._askEmail $ A._next unit
+  act env cfg $ A._infoSecurity $ A._next unit
+  act env cfg $ A._magicWords $ A._next unit
+  act env cfg $ A._submit $ A._submit unit
 
 --------------------------------------------------------------------------------
-type LoginUserOpts
-  = { magicWords :: String
-    }
-
-loginUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> LoginUserOpts -> ScriptT' m Unit
-loginUser env { magicWords } = do
-  act env $ A._landing $ A._signIn unit
-  act env $ A._login $ A._setMagicWords magicWords
-  act env $ A._login $ A._login unit
+finalizeAccount :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> ScriptT' m Unit
+finalizeAccount env cfg = do
+  act env cfg $ A._trusts $ A._finalizeRegisterUser unit
 
 --------------------------------------------------------------------------------
-type TrustUserOpts
-  = Either CC.Address User
-  
+type LoginUserOpts =
+  { magicWords :: String
+  }
 
-trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
-trustUser env u = do
-  act env $ A._dashboard $ A._addTrustConnection u
+loginUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> LoginUserOpts -> ScriptT' m Unit
+loginUser env cfg { magicWords } = do
+  act env cfg $ A._landing $ A._signIn unit
+  act env cfg $ A._login $ A._setMagicWords magicWords
+  act env cfg $ A._login $ A._login unit
+
+--------------------------------------------------------------------------------
+type TrustUserOpts = Either CC.Address User
+
+trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
+trustUser env cfg u = do
+  act env cfg $ A._dashboard $ A._addTrustConnection u
