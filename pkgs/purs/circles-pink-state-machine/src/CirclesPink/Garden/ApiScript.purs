@@ -1,10 +1,12 @@
 module CirclesPink.Garden.ApiScript where
 
 import Prelude
+
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
 import CirclesPink.Garden.Env (env, liftEnv)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
@@ -21,7 +23,7 @@ import Data.Array ((..))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush)
 import Data.Int (floor, toNumber)
-import Data.Maybe (fromJust)
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Newtype.Extra ((-|))
 import Data.String (joinWith)
 import Data.Traversable (traverse)
@@ -49,7 +51,6 @@ import Type.Row (type (+))
 import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
 import Wallet.PrivateKey as CC
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
-import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 
 --------------------------------------------------------------------------------
 type ScriptM e a = ScriptT e Aff a
@@ -167,12 +168,12 @@ finalizeAccount env cfg =
         )
 
 --------------------------------------------------------------------------------
-mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> ScriptM (ErrApp + r) MkAccountReturn
-mkAccount envVars env = do
+mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> CirclesConfig (StateT CirclesState Aff) -> ScriptM (ErrApp + r) MkAccountReturn
+mkAccount envVars env cfg = do
   signupOpts <- genSignupOpts
-  { privateKey, safeAddress } <- signUpUser env signupOpts
+  { privateKey, safeAddress } <- signUpUser env cfg signupOpts
   txHash <- fundAddress envVars $ convert safeAddress
-  finalizeAccount env
+  finalizeAccount env cfg
   let
     mnemonic = keyToMnemonic privateKey
   pure
@@ -184,8 +185,8 @@ mkAccount envVars env = do
         }
 
 --------------------------------------------------------------------------------
-app :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> AppM (ErrApp + r) Unit
-app ev env = do
+app :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> CirclesConfig (StateT CirclesState Aff) -> AppM (ErrApp + r) Unit
+app ev env cfg = do
   let
     count = 25
 
@@ -211,7 +212,7 @@ app ev env = do
   pure unit
   where
   mkAccount' :: Aff (Either (Variant (ErrApp + r)) MkAccountReturn)
-  mkAccount' = mkAccount ev env # runScriptM <#> fst
+  mkAccount' = mkAccount ev env cfg # runScriptM <#> fst
 
 --------------------------------------------------------------------------------
 printErrApp :: forall r. Variant (ErrApp + r) -> String
@@ -234,4 +235,6 @@ main = do
         request = milkisRequest nodeFetch
 
         env'' = liftEnv $ env { envVars: convert envVars, request }
-      runAppM $ app envVars env''
+
+        cfg = CirclesConfig { extractEmail : Nothing  }
+      runAppM $ app envVars env'' cfg
