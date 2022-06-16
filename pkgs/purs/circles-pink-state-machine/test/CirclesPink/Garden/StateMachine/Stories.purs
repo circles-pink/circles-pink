@@ -22,7 +22,7 @@ spec =
     env' :: Env (StateT CirclesState TestEnvM)
     env' = liftEnv testEnv
 
-    cfg = CirclesConfig { extractEmail: Nothing }
+    cfg = CirclesConfig { extractEmail: Just $ \_ -> pure unit  }
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do
