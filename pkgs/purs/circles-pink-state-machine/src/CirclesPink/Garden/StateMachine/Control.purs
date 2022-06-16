@@ -24,8 +24,8 @@ circlesControl env cfg =
     _circlesStateMachine
     { landing: States.landing $ env
     , infoGeneral: States.infoGeneral env
-    , askUsername: States.askUsername env
-    , askEmail: States.askEmail env
+    , askUsername: States.askUsername env cfg
+    , askEmail: States.askEmail env cfg
     , infoSecurity: States.infoSecurity env
     , magicWords: States.magicWords env
     , submit: States.submit env
