@@ -1,4 +1,5 @@
 import {
+  CirclesState,
   UserData,
   UsernameApiResult,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
@@ -18,22 +19,26 @@ import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
-import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type AskUsernameProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
-export const AskUsername = ({ state, act }: AskUsernameProps): ReactElement => {
+export const AskUsername = ({
+  state,
+  act,
+  skip,
+}: AskUsernameProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

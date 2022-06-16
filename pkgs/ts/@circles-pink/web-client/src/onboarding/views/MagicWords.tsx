@@ -1,5 +1,8 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { UserData } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  CirclesState,
+  UserData,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import {
   getWords,
@@ -26,9 +29,14 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 type MagicWordsProps = {
   state: UserData;
   act: (ac: A.CirclesAction) => void;
+  skip: CirclesState['type'][];
 };
 
-export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
+export const MagicWords = ({
+  state,
+  act,
+  skip,
+}: MagicWordsProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = directionToOrientation(state.direction);
   const getDelay = getIncrementor(0, 0.05);
@@ -51,7 +59,7 @@ export const MagicWords = ({ state, act }: MagicWordsProps): ReactElement => {
 
   return (
     <DialogCard
-      header={<OnboardingStepIndicator />}
+      header={<OnboardingStepIndicator skipStates={skip} />}
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>

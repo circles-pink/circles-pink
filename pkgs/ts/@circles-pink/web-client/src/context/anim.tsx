@@ -57,28 +57,3 @@ const useAnimState = (state: CirclesState): AnimState => {
 
   return animState;
 };
-
-// -----------------------------------------------------------------------------
-// Utils
-// -----------------------------------------------------------------------------
-
-export const stateToIndex = (
-  stateType: CirclesState['type']
-): number | undefined => {
-  switch (stateType) {
-    case 'infoGeneral':
-      return 0;
-    case 'askUsername':
-      return 1;
-    case 'askEmail':
-      return 2;
-    case 'infoSecurity':
-      return 3;
-    case 'magicWords':
-      return 4;
-    case 'submit':
-      return 5;
-    default:
-      return undefined;
-  }
-};
