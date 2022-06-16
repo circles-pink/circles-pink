@@ -1,8 +1,11 @@
 module CirclesPink.Garden.StateMachine.Config
   ( CirclesConfig(..)
-  )
-  where
+  ) where
 
 import Prelude
 
-newtype CirclesConfig = CirclesConfig {}
+import Data.Maybe (Maybe)
+
+newtype CirclesConfig m = CirclesConfig
+  { extractEmail :: Maybe (String -> m Unit)
+  }

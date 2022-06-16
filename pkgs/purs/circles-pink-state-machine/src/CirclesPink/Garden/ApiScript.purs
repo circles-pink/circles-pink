@@ -51,14 +51,11 @@ import Wallet.PrivateKey as CC
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
-type ScriptM e a
-  = ScriptT e Aff a
+type ScriptM e a = ScriptT e Aff a
 
-type ScriptT e m a
-  = ExceptV e (StateT CirclesState m) a
+type ScriptT e m a = ExceptV e (StateT CirclesState m) a
 
-type ErrApp r
-  = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
+type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
 runScriptM :: forall e a. ScriptM e a -> Aff (Either (Variant e) a /\ CirclesState)
 runScriptM = runScripT
@@ -66,15 +63,13 @@ runScriptM = runScripT
 runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
 runScripT = flip runStateT initLanding <<< runExceptT
 
-type Err r
-  = ( err :: String | r )
+type Err r = (err :: String | r)
 
-err :: forall r. String -> Variant ( err :: String | r )
+err :: forall r. String -> Variant (err :: String | r)
 err = inj (Proxy :: _ "err")
 
 --------------------------------------------------------------------------------
-type AppM r a
-  = ExceptV (ErrApp + r) Aff a
+type AppM r a = ExceptV (ErrApp + r) Aff a
 
 runAppM :: forall r a. AppM r a -> Effect Unit
 runAppM x =
@@ -126,27 +121,28 @@ genSignupOpts = do
   pure { username, email }
 
 --------------------------------------------------------------------------------
-type MkAccountReturn
-  = { username :: String
-    , email :: String
-    , privateKey :: PrivateKey
-    , safeAddress :: Address
-    , txHash :: HexString
-    , mnemonic :: String
-    }
+type MkAccountReturn =
+  { username :: String
+  , email :: String
+  , privateKey :: PrivateKey
+  , safeAddress :: Address
+  , txHash :: HexString
+  , mnemonic :: String
+  }
 
 --------------------------------------------------------------------------------
-type SignUpUser
-  = { privateKey :: CC.PrivateKey
-    , safeAddress :: CC.Address
-    }
+type SignUpUser =
+  { privateKey :: CC.PrivateKey
+  , safeAddress :: CC.Address
+  }
 
 signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
 signUpUser env opts =
   ExceptT do
     S.signUpUser env opts
     get
-      <#> ( default (throwError $ err "Cannot sign up user.")
+      <#>
+        ( default (throwError $ err "Cannot sign up user.")
             # onMatch
                 { trusts:
                     \x ->
@@ -162,7 +158,8 @@ finalizeAccount env =
   ExceptT do
     S.finalizeAccount env
     get
-      <#> ( default (throwError $ err "Cannot finalize register user.")
+      <#>
+        ( default (throwError $ err "Cannot finalize register user.")
             # onMatch
                 { dashboard: \_ -> pure unit
                 }

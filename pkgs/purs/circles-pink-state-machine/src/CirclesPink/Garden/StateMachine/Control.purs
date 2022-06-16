@@ -10,16 +10,15 @@ import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
 import Stadium.Control as C
 
-
-circlesControl ::
-  forall m.
-  Monad m =>
-  Env.Env m ->
-  CirclesConfig ->
-  ((S.CirclesState -> S.CirclesState) -> m Unit) ->
-  S.CirclesState ->
-  CirclesAction ->
-  m Unit
+circlesControl
+  :: forall m
+   . Monad m
+  => Env.Env m
+  -> CirclesConfig m
+  -> ((S.CirclesState -> S.CirclesState) -> m Unit)
+  -> S.CirclesState
+  -> CirclesAction
+  -> m Unit
 circlesControl env cfg =
   C.mkControl
     _circlesStateMachine
