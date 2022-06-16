@@ -6,7 +6,7 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { LoginState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { LoginState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
