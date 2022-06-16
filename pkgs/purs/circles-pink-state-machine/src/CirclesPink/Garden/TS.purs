@@ -4,18 +4,29 @@ import Prelude
 
 import CirclesPink.Garden.Env as Garden
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
-import CirclesPink.Garden.StateMachine.Config (CirclesConfig, mapCirclesConfig)
+import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
+import Data.Nullable (Nullable, toMaybe)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
-import Effect.Class (liftEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Window (windowFetch)
 
-mkControl :: Garden.EnvVars -> CirclesConfig Effect -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+type CirclesConfig =
+  { extractEmail :: Nullable (String -> Effect Unit)
+  }
+
+convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
+convertConfig cfg = C.CirclesConfig
+  { extractEmail: map (map liftEffect) $ (toMaybe cfg.extractEmail)
+  }
+
+mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControl envVars cfg setState s a =
-  (circlesControl env (mapCirclesConfig liftEffect cfg) (liftEffect <<< setState) s a)
+  (circlesControl env (C.mapCirclesConfig liftEffect (convertConfig cfg)) (liftEffect <<< setState) s a)
     # launchAff_
   where
   request = milkisRequest windowFetch

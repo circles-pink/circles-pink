@@ -1,7 +1,10 @@
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
-import { mkControl } from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
+import {
+  CirclesConfig,
+  mkControl,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
   init,
@@ -27,6 +30,7 @@ import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Ga
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
+import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 
 type Language = 'en' | 'de';
 
@@ -49,7 +53,15 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
-const control = mkControl(env);
+const cfg: CirclesConfig = {
+  extractEmail: (email: string) => () => {
+    // Save the email somewhere...
+    console.log(email);
+    return unit;
+  },
+};
+
+const control = mkControl(env)(cfg);
 
 type ViewProps = {
   state: CirclesState;
