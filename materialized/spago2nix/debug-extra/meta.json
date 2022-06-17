@@ -1,0 +1,11 @@
+{
+  "name": "debug-extra",
+  "dependencies": [
+    "prelude",
+    "undefined"
+  ],
+  "sources": [
+    "./src/**/*.purs",
+    "./test/**/*.purs"
+  ]
+}

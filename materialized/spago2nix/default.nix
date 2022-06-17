@@ -9,9 +9,19 @@
     meta = builtins.fromJSON (builtins.readFile ./circles-pink-state-machine/meta.json);
     location = ../../pkgs/purs/circles-pink-state-machine;
   };
+  debug-extra = {
+    spagoPkgs = import ./debug-extra/spago-packages.nix;
+    meta = builtins.fromJSON (builtins.readFile ./debug-extra/meta.json);
+    location = ../../pkgs/purs/debug-extra;
+  };
   fp-ts = {
     spagoPkgs = import ./fp-ts/spago-packages.nix;
     meta = builtins.fromJSON (builtins.readFile ./fp-ts/meta.json);
     location = ../../pkgs/purs/fp-ts;
+  };
+  indexed-graph = {
+    spagoPkgs = import ./indexed-graph/spago-packages.nix;
+    meta = builtins.fromJSON (builtins.readFile ./indexed-graph/meta.json);
+    location = ../../pkgs/purs/indexed-graph;
   };
 }
