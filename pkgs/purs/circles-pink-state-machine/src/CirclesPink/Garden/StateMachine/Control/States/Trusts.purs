@@ -42,7 +42,7 @@ trusts env@{ deployToken, deploySafe } =
       doDeploys = do
         _ <- deploySafe st.privKey
           # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
-          # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+          # retryUntil env (const { delay: 250 }) (\_ n -> n == 5) 0
         _ <- deployToken st.privKey
           # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
           # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
