@@ -15,8 +15,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   , Trusts
   , defaultView
   , globalLoading
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -29,10 +28,11 @@ import CirclesPink.Garden.StateMachine.State.Dashboard as D
 import Convertable (convert)
 import Data.Array (any)
 import Data.Array as A
-import Data.Either (note)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..))
 import Data.Map (Map, lookup)
 import Data.Map as M
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (maybe)
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
 import Data.Variant (Variant, default, onMatch)
@@ -93,51 +93,50 @@ mapTrust a t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
   , safeAddress: show a
-  , user: note (convert a) t.user
+  , user: lmap convert t.user
   }
-
 
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts } =
-   let
-  initUntrust user =
-    { isOutgoing: false
-    , user: Just user
-    , trustState: initUntrusted
+  let
+    initUntrust user =
+      { isOutgoing: false
+      , user: Right user
+      , trustState: initUntrusted
 
-    }
+      }
 
-  usersSearch :: Trusts
-  usersSearch =
-    d.userSearchResult
-      #
-        ( unwrap >>>
-            ( default [] # onMatch
-                { success: \{ data: data_ } -> data_
-                , loading: \{ previousData } -> maybe [] identity previousData
-                }
-            )
-        )
-      <#>
-        ( \user -> lookup (convert user.safeAddress) trusts
-            <#> trustEntryToTrust
-            # maybe (initUntrust user) identity
-            # mapTrust (convert user.safeAddress)
-        )
+    usersSearch :: Trusts
+    usersSearch =
+      d.userSearchResult
+        #
+          ( unwrap >>>
+              ( default [] # onMatch
+                  { success: \{ data: data_ } -> data_
+                  , loading: \{ previousData } -> maybe [] identity previousData
+                  }
+              )
+          )
+        <#>
+          ( \user -> lookup (convert user.safeAddress) trusts
+              <#> trustEntryToTrust
+              # maybe (initUntrust user) identity
+              # mapTrust (convert user.safeAddress)
+          )
   in
-  { trustsConfirmed: mapTrusts isConfirmed d.trusts
-  , trustsCandidates: mapTrusts isCandidate d.trusts
-  , usersSearch: usersSearch
-  , userSearchResult: d.userSearchResult
-  , getUsersResult: d.getUsersResult
-  , trustsResult: d.trustsResult
-  , trustAddResult: d.trustAddResult
-  , trustRemoveResult: d.trustRemoveResult
-  , checkUBIPayoutResult: d.checkUBIPayoutResult
-  , getBalanceResult: d.getBalanceResult
-  , requestUBIPayoutResult: d.requestUBIPayoutResult
-  , transferResult: d.transferResult
-  }
+    { trustsConfirmed: mapTrusts isConfirmed d.trusts
+    , trustsCandidates: mapTrusts isCandidate d.trusts
+    , usersSearch: usersSearch
+    , userSearchResult: d.userSearchResult
+    , getUsersResult: d.getUsersResult
+    , trustsResult: d.trustsResult
+    , trustAddResult: d.trustAddResult
+    , trustRemoveResult: d.trustRemoveResult
+    , checkUBIPayoutResult: d.checkUBIPayoutResult
+    , getBalanceResult: d.getBalanceResult
+    , requestUBIPayoutResult: d.requestUBIPayoutResult
+    , transferResult: d.transferResult
+    }
 
 mapTrusts :: (TrustEntry -> Boolean) -> Map W3.Address TrustEntry -> Trusts
 mapTrusts pred x = x
@@ -148,7 +147,7 @@ mapTrusts pred x = x
           let
             trust = trustEntryToTrust trustEntry
           in
-          mapTrust addr trust
+            mapTrust addr trust
       )
 
 --------------------------------------------------------------------------------
