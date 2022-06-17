@@ -20,6 +20,7 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight, note)
 import Data.Int (floor, toNumber)
+import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Map (alter, lookup)
 import Data.Map as M
@@ -164,25 +165,18 @@ dashboard env =
 
     lift
       $ set \st' ->
-          -- trusts = trustNodes
-          --   <#>
-          --     ( \tn ->
-          --         mapTrust
-          --           (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-          --           (lookup (convert tn.safeAddress) st'.trusts)
-          --           tn
-          --     )
-          --   # M.fromFoldable
-          --   # (\te -> M.union te (M.filter isCandidate st'.trusts))
           let
             newNodes = trustNodes
-              -- <#>
-              --   ( \tn ->
-              --       mapTrust
-              --         (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-              --         (G.getNode (convert tn.safeAddress) st'.trusts)
-              --         tn
-              --   )
+              <#>
+                ( \tn ->
+                    mapTrust
+                      (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
+                      (G.getNode (convert tn.safeAddress) st'.trusts)
+                      tn
+                )
+
+            newEdges = newNodes
+              <#> (\n -> convert st'.user.safeAddress /\ getIndex n /\ {})
           in
 
             S._dashboard
@@ -195,15 +189,16 @@ dashboard env =
                             , trustState: initTrusted
                             }
                         )
-                    -- #
-                    --   ( \g ->
-                    --       let
-                    --         ids = G.getOutgoingIds (either identity (_.safeAddress >>> convert) st'.user) g
-                    --           # S.filter (\id -> G.getNode id g # maybe false isConfirmed)
-                    --       in
-                    --         G.removeAtIds ids g
-                    --   )
-                    -- # G.insertNodes newNodes
+                    #
+                      ( \g ->
+                          let
+                            ids = G.getOutgoingIds (convert st'.user.safeAddress) g
+                              # S.filter (\id -> G.getNode id g # maybe false isConfirmed)
+                          in
+                            G.removeAtIds ids g
+                      )
+                    # G.insertNodes newNodes
+                    # G.insertEdges newEdges
                 }
 
   getUsers set st { userNames, addresses } = do
