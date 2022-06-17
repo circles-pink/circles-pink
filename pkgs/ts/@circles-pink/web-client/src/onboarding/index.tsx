@@ -38,11 +38,16 @@ type Language = 'en' | 'de';
 
 type Content = {};
 
+type UserConfig = {
+  email?: string | ((email: string) => void);
+};
+
 export type OnboardingProps = {
   initState?: CirclesState;
   lang?: Language;
   baseColor?: string;
   content?: Content;
+  userConfig?: UserConfig;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -58,7 +63,7 @@ export const Onboarding = (props: OnboardingProps) => {
 const fromFpTsEither = <A, B>(e: E.Either<A, B>): Either<A, B> =>
   e as unknown as Either<string, (_: string) => () => Unit>;
 
-const cfgExample: CirclesConfig = {
+const cfgDefaultRight: CirclesConfig = {
   extractEmail: fromFpTsEither(
     E.right((email: string) => () => {
       // Save the email somewhere...
@@ -68,28 +73,31 @@ const cfgExample: CirclesConfig = {
   ),
 };
 
-const cfg: CirclesConfig = {
-  extractEmail: fromFpTsEither(E.left('hello')),
+const cfgDefaultLeft: CirclesConfig = {
+  extractEmail: fromFpTsEither(E.left('hello@world.de')),
 };
 
-const control = mkControl(env)(cfg);
+type CirclesConfigResolved =
+  | { extractEmail: { _tag: 'Left'; left: string } }
+  | { extractEmail: { _tag: 'Right'; right: (_: string) => () => Unit } };
 
-type ViewProps = {
-  state: CirclesState;
-  act: (m: CirclesAction) => void;
-};
-
-const getSkipStates = (): CirclesState['type'][] => {
+const getSkipStates = (cfg: CirclesConfig): CirclesState['type'][] => {
   const toSkip: CirclesState['type'][] = [];
-  if (!cfg.extractEmail) {
+  if ((cfg as unknown as CirclesConfigResolved).extractEmail._tag === 'Left') {
     toSkip.push('askEmail');
   }
   return toSkip;
 };
 
-const skip = getSkipStates();
+type ViewProps = {
+  state: CirclesState;
+  act: (m: CirclesAction) => void;
+  cfg: CirclesConfig;
+};
 
-const View = ({ state, act }: ViewProps): ReactElement | null => {
+const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
+  const skip = getSkipStates(cfg);
+
   const [debugContext, setDebugContext] = useContext(DebugContext);
 
   if (typeof window !== 'undefined') {
@@ -124,12 +132,38 @@ const View = ({ state, act }: ViewProps): ReactElement | null => {
   }
 };
 
+const mkCfg = (userCfg: UserConfig): CirclesConfig => {
+  if (!userCfg.email) {
+    return cfgDefaultRight;
+  } else if (typeof userCfg.email === 'string') {
+    return {
+      extractEmail: fromFpTsEither(E.left(userCfg.email)),
+    };
+  } else {
+    return {
+      extractEmail: fromFpTsEither(
+        E.right((email: string) => () => {
+          if (userCfg && userCfg.email && typeof userCfg.email !== 'string') {
+            userCfg.email(email);
+          }
+          return unit;
+        })
+      ),
+    };
+  }
+};
+
 const OnboardingContent = ({
   initState,
   lang = 'en',
   baseColor,
   content = {},
+  userConfig,
 }: OnboardingProps): ReactElement => {
+  const cfg = userConfig ? mkCfg(userConfig) : cfgDefaultRight;
+
+  const control = mkControl(env)(cfg);
+
   const [state, act] = (useStateMachine as any)(
     (initState as unknown as CirclesState) || (init as unknown as CirclesState),
     control
@@ -146,7 +180,7 @@ const OnboardingContent = ({
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
         <DebugProvider>
-          <View state={state} act={act} />
+          <View state={state} act={act} cfg={cfg} />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>
