@@ -42,17 +42,18 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , matchTrustEntry
   , next
   , trustEntryToTrust
-  )
-  where
-  
+  ) where
+
 import Prelude
 
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import Data.Either (Either)
+import Convertable (convert)
+import Data.Either (Either, either)
+import Data.IxGraph (class Indexed, IxGraph)
+import Data.IxGraph as G
 import Data.Map (Map)
-import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj, match)
 import Foreign.Object (Object, empty)
@@ -71,7 +72,7 @@ type DashboardState =
   { user :: CC.User
   , privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts ::  Map W3.Address TrustEntry -- IxGraph W3.Address {} TrustEntry
+  , trusts :: IxGraph W3.Address {} TrustEntry
   , trustsResult :: TrustGetTrusts
   , trustAddResult :: TrustAddResult
   , trustRemoveResult :: TrustRemoveResult
@@ -88,6 +89,10 @@ type Trusts = Map W3.Address Trust
 --------------------------------------------------------------------------------
 
 data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
+
+instance indexedTrustEntry :: Indexed W3.Address TrustEntry  where
+  getIndex (TrustCandidate { user }) = either identity (_.safeAddress >>> convert) user
+  getIndex (TrustConfirmed { user }) = either identity (_.safeAddress >>> convert) user
 
 isConfirmed :: TrustEntry -> Boolean
 isConfirmed te = matchTrustEntry (\_ -> true) (\_ -> false) te
@@ -128,7 +133,7 @@ initDashboard id =
   _dashboard
     $ R.disjointUnion id
         { error: Nothing
-        , trusts: M.empty :: Map _ _
+        , trusts: G.empty :: IxGraph _ _ _
         , trustAddResult: empty :: Object _
         , trustRemoveResult: empty :: Object _
         , trustsResult: _notAsked unit
