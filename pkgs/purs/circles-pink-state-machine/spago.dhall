@@ -5,6 +5,7 @@
   , "argonaut"
   , "arrays"
   , "bifunctors"
+  , "chance"
   , "checked-exceptions"
   , "console"
   , "datetime"
@@ -18,6 +19,7 @@
   , "foldable-traversable"
   , "foreign"
   , "foreign-object"
+  , "fp-ts"
   , "functions"
   , "heterogeneous"
   , "http-methods"
@@ -58,7 +60,6 @@
   , "uri"
   , "variant"
   , "web3"
-  , "chance"
   ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]
