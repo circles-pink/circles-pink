@@ -236,5 +236,5 @@ main = do
 
         env'' = liftEnv $ env { envVars: convert envVars, request }
 
-        cfg = CirclesConfig { extractEmail : Nothing  }
+        cfg = CirclesConfig { extractEmail : Right (\_ -> pure unit)  }
       runAppM $ app envVars env'' cfg

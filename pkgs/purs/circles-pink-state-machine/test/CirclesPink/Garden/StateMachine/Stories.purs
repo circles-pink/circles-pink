@@ -3,17 +3,18 @@ module Test.CirclesPink.Garden.StateMachine.Stories
   ) where
 
 import Prelude
+
 import CirclesPink.Garden.Env (TestEnvM, liftEnv, runTestEnvM, testEnv)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (execScripT', finalizeAccount, loginUser, signUpUser)
 import Control.Monad.State (StateT)
-import Data.Maybe (Maybe(..))
+import Data.Either (Either(..))
 import Data.Variant.Extra (getLabel)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Wallet.PrivateKey (sampleMnemonic)
-import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 
 --------------------------------------------------------------------------------
 spec :: Spec Unit
@@ -22,7 +23,7 @@ spec =
     env' :: Env (StateT CirclesState TestEnvM)
     env' = liftEnv testEnv
 
-    cfg = CirclesConfig { extractEmail: Just $ \_ -> pure unit  }
+    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do

@@ -9,7 +9,6 @@ import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
 import Data.Newtype.Extra ((-|))
 import Data.Variant (default, onMatch)
 import RemoteData (_failure, _loading, _success)
@@ -40,17 +39,18 @@ askUsername env cfg =
       else
         S._askUsername st
 
-  next set _ _ =
-    set \st ->
-      let
-        usernameValid =
-          default false
-            # onMatch
-                { success: (\r -> r.isValid) }
-      in
-        if st.usernameApiResult -| usernameValid then
-          case cfg -| _.extractEmail of
-            Nothing -> S._infoSecurity st { direction = D._forwards }
-            Just _ -> S._askEmail st { direction = D._forwards }
-        else
-          S._askUsername st { direction = D._forwards }
+  next set st _ =
+    let
+      usernameValid =
+        default false
+          # onMatch
+              { success: (\r -> r.isValid) }
+    in
+      if st.usernameApiResult -| usernameValid then
+        case cfg -| _.extractEmail of
+          Left e -> do
+            set \st' -> S._askUsername st' { email = e }
+            set \st' -> S._infoSecurity st' { direction = D._forwards }
+          Right _ -> set \st' -> S._askEmail st' { direction = D._forwards }
+      else
+        set \st' -> S._askUsername st' { direction = D._forwards }

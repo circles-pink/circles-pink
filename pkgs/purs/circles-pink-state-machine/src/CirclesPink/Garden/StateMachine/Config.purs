@@ -5,11 +5,11 @@ module CirclesPink.Garden.StateMachine.Config
 
 import Prelude
 
-import Data.Maybe (Maybe)
+import Data.Either (Either)
 import Data.Newtype (class Newtype)
 
 newtype CirclesConfig m = CirclesConfig
-  { extractEmail :: Maybe (String -> m Unit)
+  { extractEmail :: Either String (String -> m Unit)
   }
 
 derive instance newtypeCirclesConfig :: Newtype (CirclesConfig m) _

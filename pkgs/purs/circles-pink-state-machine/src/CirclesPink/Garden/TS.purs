@@ -7,8 +7,7 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import Data.Nullable (Nullable, toMaybe)
-import Debug.Extra (todo)
+import Data.Either (Either)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -16,12 +15,12 @@ import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Window (windowFetch)
 
 type CirclesConfig =
-  { extractEmail :: Nullable (String -> Effect Unit)
+  { extractEmail :: Either String (String -> Effect Unit)
   }
 
 convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
 convertConfig cfg = C.CirclesConfig
-  { extractEmail: map (map liftEffect) $ (toMaybe cfg.extractEmail)
+  { extractEmail: map (map liftEffect) $ cfg.extractEmail
   }
 
 mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
