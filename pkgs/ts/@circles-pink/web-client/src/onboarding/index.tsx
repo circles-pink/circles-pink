@@ -133,24 +133,22 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
 };
 
 const mkCfg = (userCfg: UserConfig): CirclesConfig => {
-  if (!userCfg.email) {
-    return cfgDefaultRight;
-  } else if (typeof userCfg.email === 'string') {
+  if (typeof userCfg.email === 'string') {
     return {
       extractEmail: fromFpTsEither(E.left(userCfg.email)),
     };
-  } else {
-    return {
-      extractEmail: fromFpTsEither(
-        E.right((email: string) => () => {
-          if (userCfg && userCfg.email && typeof userCfg.email !== 'string') {
-            userCfg.email(email);
-          }
-          return unit;
-        })
-      ),
-    };
   }
+
+  return {
+    extractEmail: fromFpTsEither(
+      E.right((email: string) => () => {
+        if (userCfg && userCfg.email && typeof userCfg.email !== 'string') {
+          userCfg.email(email);
+        }
+        return unit;
+      })
+    ),
+  };
 };
 
 const OnboardingContent = ({
@@ -160,7 +158,8 @@ const OnboardingContent = ({
   content = {},
   userConfig,
 }: OnboardingProps): ReactElement => {
-  const cfg = userConfig ? mkCfg(userConfig) : cfgDefaultRight;
+  const cfg =
+    userConfig && userConfig.email ? mkCfg(userConfig) : cfgDefaultRight;
 
   const control = mkControl(env)(cfg);
 
