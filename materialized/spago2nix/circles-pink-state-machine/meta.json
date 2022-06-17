@@ -6,6 +6,7 @@
     "argonaut",
     "arrays",
     "bifunctors",
+    "chance",
     "checked-exceptions",
     "console",
     "datetime",
@@ -19,6 +20,7 @@
     "foldable-traversable",
     "foreign",
     "foreign-object",
+    "fp-ts",
     "functions",
     "heterogeneous",
     "http-methods",
@@ -58,8 +60,7 @@
     "unsafe-coerce",
     "uri",
     "variant",
-    "web3",
-    "chance"
+    "web3"
   ],
   "sources": [
     "./src/**/*.purs",
