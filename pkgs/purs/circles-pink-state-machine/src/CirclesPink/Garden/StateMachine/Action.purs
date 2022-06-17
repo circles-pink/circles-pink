@@ -8,7 +8,6 @@ import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (Address)
 
-
 type CirclesAction = Variant
   ( infoGeneral ::
       Variant

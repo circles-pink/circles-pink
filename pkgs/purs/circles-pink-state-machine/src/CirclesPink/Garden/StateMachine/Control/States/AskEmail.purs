@@ -6,14 +6,12 @@ import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
-import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Data.Either (Either(..))
-import Data.Maybe (Maybe(..))
 import Data.Newtype.Extra ((-|), (|-))
 import Data.Variant (default, onMatch)
-import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteData (_failure, _loading, _success)
 
 askEmail
   :: forall m
@@ -43,15 +41,15 @@ askEmail env cfg =
     in
       if emailValid |- st.emailApiResult && st.terms && st.privacy then do
         case cfg -| _.extractEmail of
-          Just cb -> cb st.email
-          Nothing -> pure unit
+          Left _ -> pure unit
+          Right cb -> cb st.email
         set \st' -> S._infoSecurity st' { direction = D._forwards }
       else
         set \st' -> S._askEmail st' { direction = D._forwards }
 
   setEmail set _ email = do
     set \st -> S._askEmail st { email = email }
-    set \st -> S._askEmail st { emailApiResult = _loading unit  }
+    set \st -> S._askEmail st { emailApiResult = _loading unit }
     result <- runExceptT $ env.apiCheckEmail email
     set \st ->
       if email == st.email then case result of
