@@ -30,14 +30,12 @@ import Data.Array (any)
 import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Map (Map, lookup)
-import Data.Map as M
+import Data.IxGraph as G
 import Data.Maybe (maybe)
 import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..), snd)
+import Data.Set as S
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
-import Network.Ethereum.Core.Signatures as W3
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
 
@@ -82,17 +80,15 @@ type DefaultView =
 type Trusts = Array Trust
 
 type Trust =
-  { safeAddress :: String
-  , trustState :: TrustState
+  { trustState :: TrustState
   , isOutgoing :: Boolean
   , user :: UserIdent
   }
 
-mapTrust :: W3.Address -> D.Trust -> Trust
-mapTrust a t =
+mapTrust ::  D.Trust -> Trust
+mapTrust t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
-  , safeAddress: show a
   , user: lmap convert t.user
   }
 
@@ -117,14 +113,15 @@ defaultView d@{ trusts } =
               )
           )
         <#>
-          ( \user -> lookup (convert user.safeAddress) trusts
+          ( \user -> trusts
+              # G.getNode (convert user.safeAddress)
               <#> trustEntryToTrust
               # maybe (initUntrust user) identity
-              # mapTrust (convert user.safeAddress)
+              # mapTrust
           )
   in
-    { trustsConfirmed: mapTrusts isConfirmed d.trusts
-    , trustsCandidates: mapTrusts isCandidate d.trusts
+    { trustsConfirmed: d.trusts # G.getOutgoinNodes (convert d.user.safeAddress) # S.toUnfoldable # mapTrusts isConfirmed
+    , trustsCandidates: d.trusts # G.getOutgoinNodes (convert d.user.safeAddress) #  S.toUnfoldable # mapTrusts isCandidate
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
@@ -137,16 +134,15 @@ defaultView d@{ trusts } =
     , transferResult: d.transferResult
     }
 
-mapTrusts :: (TrustEntry -> Boolean) -> Map W3.Address TrustEntry -> Trusts
-mapTrusts pred x = x
-  # M.toUnfoldable
-  # A.filter (\t -> pred $ snd t)
+mapTrusts :: (TrustEntry -> Boolean) -> Array TrustEntry -> Trusts
+mapTrusts pred xs = xs
+  # A.filter pred
   # map
-      ( \(Tuple addr trustEntry) ->
+      ( \ trustEntry ->
           let
             trust = trustEntryToTrust trustEntry
           in
-            mapTrust addr trust
+            mapTrust trust
       )
 
 --------------------------------------------------------------------------------
