@@ -2,7 +2,7 @@ result
 *.key
 node_modules/
 dist/
-output/
+pkgs/ts/@circles-pink/state-machine/output/
 .spago/
 .psc-ide-port
 .spago2nix/

@@ -1,0 +1,13 @@
+{
+  "name": "fp-ts",
+  "dependencies": [
+    "maybe",
+    "prelude",
+    "undefined",
+    "unsafe-coerce"
+  ],
+  "sources": [
+    "./src/**/*.purs",
+    "./test/**/*.purs"
+  ]
+}
