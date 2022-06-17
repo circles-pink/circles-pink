@@ -17,7 +17,8 @@ import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
-import Data.Either (Either(..), either, hush, isRight)
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..), either, hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.Map (alter, lookup)
 import Data.Map as M
@@ -143,7 +144,7 @@ dashboard env =
           convert tn.safeAddress
             /\ TrustConfirmed
               { isOutgoing: tn.isOutgoing
-              , user: maybeUser
+              , user: note (convert tn.safeAddress) maybeUser
               , trustState
               }
     trustNodes <-
@@ -199,7 +200,7 @@ dashboard env =
                       st'.trusts
                         # alter
                             ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: hush u }
+                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u }
                                 Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
                                 Just (TrustCandidate t) -> Just $ TrustCandidate t
                             )

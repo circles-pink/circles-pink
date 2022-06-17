@@ -71,7 +71,7 @@ type DashboardState =
   { user :: CC.User
   , privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: Map W3.Address TrustEntry
+  , trusts ::  Map W3.Address TrustEntry -- IxGraph W3.Address {} TrustEntry
   , trustsResult :: TrustGetTrusts
   , trustAddResult :: TrustAddResult
   , trustRemoveResult :: TrustRemoveResult
@@ -107,7 +107,7 @@ trustEntryToTrust = matchTrustEntry identity identity
 
 type Trust =
   { isOutgoing :: Boolean
-  , user :: Maybe User
+  , user :: Either W3.Address User
   , trustState :: TrustState
   }
 
