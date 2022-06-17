@@ -2,6 +2,7 @@ module CirclesPink.Garden.StateMachine.Steps
   ( askEmail
   , askUsername
   , infoGeneral
+  , infoSecurity
   , magicWords
   , submit
   ) where
