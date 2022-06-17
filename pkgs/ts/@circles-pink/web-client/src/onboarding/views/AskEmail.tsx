@@ -20,6 +20,7 @@ import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { OnboardingStepIndicator } from '../../components/layout';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import tw, { styled } from 'twin.macro';
 
 type AskEmailProps = {
   state: UserData;
@@ -49,7 +50,7 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
       interaction={
         <>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <>
+            <InputContainer>
               <Input
                 autoFocus
                 indicatorColor={mapIndicatorColors(state.emailApiResult)}
@@ -62,9 +63,11 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
                 }
               />
               {mapStatusMessage(state.emailApiResult) !== '' && (
-                <Status>{mapStatusMessage(state.emailApiResult)}</Status>
+                <StatusContainer>
+                  <Status>{mapStatusMessage(state.emailApiResult)}</Status>
+                </StatusContainer>
               )}
-            </>
+            </InputContainer>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
@@ -132,6 +135,12 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
     />
   );
 };
+
+// -----------------------------------------------------------------------------
+// UI
+// -----------------------------------------------------------------------------
+
+const InputContainer = styled.div(() => [tw`mb-2`]);
 
 // -----------------------------------------------------------------------------
 // Util
