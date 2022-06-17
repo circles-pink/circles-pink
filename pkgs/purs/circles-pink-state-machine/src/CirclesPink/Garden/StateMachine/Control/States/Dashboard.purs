@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), UserIdent, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
+import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), UserIdent, initTrusted, initUntrusted, isConfirmed, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -20,9 +20,11 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight, note)
 import Data.Int (floor, toNumber)
+import Data.IxGraph as G
 import Data.Map (alter, lookup)
 import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), maybe)
+import Data.Set as S
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
@@ -121,7 +123,7 @@ dashboard env =
 
   syncTrusts set st i = do
     let
-      mapTrust :: Maybe User -> Maybe TrustEntry -> TrustNode -> W3.Address /\ TrustEntry
+      mapTrust :: Maybe User -> Maybe TrustEntry -> TrustNode -> TrustEntry
       mapTrust maybeUser maybeOldTrust tn =
         let
           trustState = case maybeOldTrust of
@@ -141,12 +143,11 @@ dashboard env =
               else
                 oldTrustState
         in
-          convert tn.safeAddress
-            /\ TrustConfirmed
-              { isOutgoing: tn.isOutgoing
-              , user: note (convert tn.safeAddress) maybeUser
-              , trustState
-              }
+          TrustConfirmed
+            { isOutgoing: tn.isOutgoing
+            , user: note (convert tn.safeAddress) maybeUser
+            , trustState
+            }
     trustNodes <-
       env.trustGetNetwork st.privKey
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
@@ -156,26 +157,54 @@ dashboard env =
         # dropError
     let
       foundUsers = catMaybes $ map hush users
-    let
+
       isCandidate te = case te of
         TrustCandidate _ -> true
         _ -> false
+
     lift
       $ set \st' ->
-          S._dashboard
-            st'
-              { trusts =
-                  trustNodes
-                    <#>
-                      ( \tn ->
-                          mapTrust
-                            (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-                            (lookup (convert tn.safeAddress) st'.trusts)
-                            tn
-                      )
-                    # M.fromFoldable
-                    # (\te -> M.union te (M.filter isCandidate st'.trusts))
-              }
+          -- trusts = trustNodes
+          --   <#>
+          --     ( \tn ->
+          --         mapTrust
+          --           (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
+          --           (lookup (convert tn.safeAddress) st'.trusts)
+          --           tn
+          --     )
+          --   # M.fromFoldable
+          --   # (\te -> M.union te (M.filter isCandidate st'.trusts))
+          let
+            newNodes = trustNodes
+              -- <#>
+              --   ( \tn ->
+              --       mapTrust
+              --         (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
+              --         (G.getNode (convert tn.safeAddress) st'.trusts)
+              --         tn
+              --   )
+          in
+
+            S._dashboard
+              st'
+                { trusts = st'.trusts
+                    # G.insertNode
+                        ( TrustConfirmed
+                            { isOutgoing: false
+                            , user: Right $ st'.user
+                            , trustState: initTrusted
+                            }
+                        )
+                    -- #
+                    --   ( \g ->
+                    --       let
+                    --         ids = G.getOutgoingIds (either identity (_.safeAddress >>> convert) st'.user) g
+                    --           # S.filter (\id -> G.getNode id g # maybe false isConfirmed)
+                    --       in
+                    --         G.removeAtIds ids g
+                    --   )
+                    -- # G.insertNodes newNodes
+                }
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -198,13 +227,13 @@ dashboard env =
                 st'
                   { trusts =
                       st'.trusts
-                        # alter
-                            ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u }
-                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
-                                Just (TrustCandidate t) -> Just $ TrustCandidate t
-                            )
-                            (convert addr)
+                  -- # alter
+                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
+                  --         Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u }
+                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
+                  --         Just (TrustCandidate t) -> Just $ TrustCandidate t
+                  --     )
+                  --     (convert addr)
                   }
         _ <-
           env.addTrustConnection st.privKey addr st.user.safeAddress
@@ -217,13 +246,13 @@ dashboard env =
                 st'
                   { trusts =
                       st'.trusts
-                        # alter
-                            ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Nothing
-                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
-                                Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
-                            )
-                            (convert addr)
+                  -- # alter
+                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
+                  --         Nothing -> Nothing
+                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
+                  --         Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
+                  --     )
+                  --     (convert addr)
                   }
         pure unit
 
@@ -231,20 +260,20 @@ dashboard env =
     void do
       runExceptT do
         let
-           addr = either identity _.safeAddress u
+          addr = either identity _.safeAddress u
         lift
           $ set \st' ->
               S._dashboard
                 st'
                   { trusts =
                       st'.trusts
-                        # alter
-                            ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Nothing
-                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState }
-                                Just (TrustCandidate t) -> Just $ TrustCandidate t
-                            )
-                            (convert addr)
+                  -- # alter
+                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
+                  --         Nothing -> Nothing
+                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState }
+                  --         Just (TrustCandidate t) -> Just $ TrustCandidate t
+                  --     )
+                  --     (convert addr)
                   }
         _ <-
           env.removeTrustConnection st.privKey addr st.user.safeAddress
@@ -257,13 +286,13 @@ dashboard env =
                 st'
                   { trusts =
                       st'.trusts
-                        # alter
-                            ( \maybeTrustEntry -> case maybeTrustEntry of
-                                Nothing -> Nothing
-                                Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
-                                Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
-                            )
-                            (convert addr)
+                  -- # alter
+                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
+                  --         Nothing -> Nothing
+                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
+                  --         Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
+                  --     )
+                  --     (convert addr)
                   }
         pure unit
 
