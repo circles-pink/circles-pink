@@ -295,6 +295,8 @@ let
         installPhase = "ln -s $src $out";
       };
 
+  # debug-extra is a Local package in (Local "./../../../pkgs/purs/debug-extra")
+
     "distributive" = pkgs.stdenv.mkDerivation {
         name = "distributive";
         version = "v5.0.0";

@@ -1,0 +1,11 @@
+{
+  "name": "indexed-graph",
+  "dependencies": [
+    "prelude",
+    "debug-extra"
+  ],
+  "sources": [
+    "./src/**/*.purs",
+    "./test/**/*.purs"
+  ]
+}

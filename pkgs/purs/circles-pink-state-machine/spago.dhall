@@ -10,6 +10,7 @@
   , "console"
   , "datetime"
   , "debug"
+  , "debug-extra"
   , "dot-language"
   , "effect"
   , "either"
