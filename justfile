@@ -139,7 +139,6 @@ purs-docs:
 ################################################################################
 
 spago-build: spago-clean
-	mkdir -p generated
 	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
 
 spago2nix:

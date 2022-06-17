@@ -44,11 +44,9 @@ spago-build: spago-clean
 	just spago-build
 
 spago-test: spago-clean yarn-install
-	mkdir -p generated
 	spago test --purs-args '--output $(PURS_OUTPUT)'
 
 spago-test-watch: spago-clean yarn-install
-	mkdir -p generated
 	spago test --watch --purs-args '--output $(PURS_OUTPUT)'
 
 purs-tsd-gen:

@@ -30,7 +30,9 @@ import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Ga
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
+import { Unit, unit } from '@circles-pink/state-machine/output/Data.Unit';
+import * as E from 'fp-ts/Either';
+import { Either } from '@circles-pink/state-machine/output/Data.FpTs.Either';
 
 type Language = 'en' | 'de';
 
@@ -53,16 +55,21 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
+const fromFpTsEither = <A, B>(e: E.Either<A, B>): Either<A, B> =>
+  e as unknown as Either<string, (_: string) => () => Unit>;
+
 const cfgExample: CirclesConfig = {
-  extractEmail: (email: string) => () => {
-    // Save the email somewhere...
-    console.log(email);
-    return unit;
-  },
+  extractEmail: fromFpTsEither(
+    E.right((email: string) => () => {
+      // Save the email somewhere...
+      console.log(email);
+      return unit;
+    })
+  ),
 };
 
 const cfg: CirclesConfig = {
-  extractEmail: null,
+  extractEmail: fromFpTsEither(E.left('hello')),
 };
 
 const control = mkControl(env)(cfg);
