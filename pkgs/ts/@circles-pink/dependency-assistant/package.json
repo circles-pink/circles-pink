@@ -1,0 +1,14 @@
+{
+    "name": "@circles-pink/dependency-assistant",
+    "version": "1.0.0",
+    "scripts": {},
+    "type": "module",
+    "dependencies": {
+        "fp-ts": "^2.12.1",
+        "glob": "^8.0.3",
+        "typescript": "^4.7.4"
+    },
+    "devDependencies": {
+        "ts-node": "^10.8.1"
+    }
+}

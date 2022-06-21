@@ -14,7 +14,8 @@
     "isolatedModules": true,
     "outDir": "ts-dist",
     "jsx": "react",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "downlevelIteration": true
   },
   "exclude": ["node_modules"]
 }

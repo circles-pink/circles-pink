@@ -6,6 +6,7 @@
     "pkgs/ts/@circles-pink/content",
     "pkgs/ts/@circles-pink/zeus-client",
     "pkgs/ts/@circles-pink/state-machine",
+    "pkgs/ts/@circles-pink/dependency-assistant",
     "pkgs/ts/dev-utils",
     "pkgs/ts/common",
     "pkgs/ts/storybook",
