@@ -189,10 +189,13 @@ rec {
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
     '';
 
-    # dependency-assistant = pkgs.writeShellScriptBin "dependency-assistant" ''
-    #   export PATH=${pkgs.nodejs}:$PATH
-    #   ${workspaces.${"@circles-pink/dependency-assistant"}}/bin/circles-pink-dependency-assistant $@
-    # '';
+    dependency-assistant =
+      pkgs.runCommand "dependency-assistant" { } ''
+        cp -r ${workspaces.${"@circles-pink/dependency-assistant"}} $out
+        chmod -R +w $out
+        export PATH=${pkgs.nodejs}/bin:$PATH
+        patchShebangs `readlink -f $out/bin/dependency-assistant`
+      '';
 
     circles-directus =
       let
