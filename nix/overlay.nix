@@ -307,5 +307,7 @@
           zeus ${../materialized/directus-dump/directus-api-admin.graphql} $out/admin --node
           zeus ${../materialized/directus-dump/directus-api-public.graphql} $out/public
         '';
+
+      dependency-assistant = ts.bins.dependency-assistant;
     };
 })
