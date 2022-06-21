@@ -28,6 +28,8 @@ rec {
         chmod -R +w $out
         cp -r ${zeus-client} $out/src
       '';
+      "@circles-pink/dependency-assistant" =
+        cleanSource ../../pkgs/ts/${"@"}circles-pink/dependency-assistant;
       dev-utils =
         cleanSource ../../pkgs/ts/dev-utils;
       common =
@@ -186,6 +188,11 @@ rec {
     depcruise = pkgs.writeShellScriptBin "depcruise" ''
       ${workspaces.dev-utils}/libexec/dev-utils/node_modules/dependency-cruiser/bin/dependency-cruise.js $@
     '';
+
+    # dependency-assistant = pkgs.writeShellScriptBin "dependency-assistant" ''
+    #   export PATH=${pkgs.nodejs}:$PATH
+    #   ${workspaces.${"@circles-pink/dependency-assistant"}}/bin/circles-pink-dependency-assistant $@
+    # '';
 
     circles-directus =
       let
