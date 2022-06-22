@@ -150,7 +150,7 @@ spago-test: spago-clean yarn-install
 spago-test_:
 	for path in "pkgs/purs/"*"/test/Main.purs"; do \
 	  TEST_MAIN_MODULE=`cat $path | grep '^module' | sed -E 's/module ([^ ]*) .*/\1/'`; \
-	  spago test --main "$TEST_MAIN_MODULE" || exit 1; \
+	  spago test --main "$TEST_MAIN_MODULE" --purs-args '--output {{PURS_OUTPUT}}' || exit 1; \
 	done \
 	
 ################################################################################

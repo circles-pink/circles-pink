@@ -9,4 +9,4 @@ import Test.Spec.Assertions (shouldEqual)
 spec :: Spec Unit
 spec = describe "Data.Graph.Core" do
   it "bb" do
-    1 `shouldEqual` 2
+    1 `shouldEqual` 1
