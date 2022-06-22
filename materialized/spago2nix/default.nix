@@ -24,4 +24,9 @@
     meta = builtins.fromJSON (builtins.readFile ./graph/meta.json);
     location = ../../pkgs/purs/graph;
   };
+  indexed-graph = {
+    spagoPkgs = import ./indexed-graph/spago-packages.nix;
+    meta = builtins.fromJSON (builtins.readFile ./indexed-graph/meta.json);
+    location = ../../pkgs/purs/indexed-graph;
+  };
 }

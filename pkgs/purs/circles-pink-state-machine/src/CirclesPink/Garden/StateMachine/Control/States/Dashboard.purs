@@ -25,7 +25,7 @@ import Data.IxGraph as G
 import Data.Map (alter, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
-import Data.Set as S
+import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
@@ -193,7 +193,7 @@ dashboard env =
                       ( \g ->
                           let
                             ids = G.getOutgoingIds (convert st'.user.safeAddress) g
-                              # S.filter (\id -> G.getNode id g # maybe false isConfirmed)
+                              # Set.filter (\id -> G.getNode id g # maybe false isConfirmed)
                           in
                             G.removeAtIds ids g
                       )

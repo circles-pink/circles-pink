@@ -1,4 +1,4 @@
-module Test.Main where
+module Test.CirclesPinkStateMachine.Main where
 
 import Prelude
 import CirclesCore.Tests as CirclesCore.Tests

@@ -1,7 +1,22 @@
 { pkgs, ... }:
 let
-  inherit (builtins) map concatStringsSep attrValues;
-  inherit (pkgs.lib) pipe mapAttrs;
+  inherit (builtins) map concatStringsSep attrValues replaceStrings;
+  inherit (pkgs.lib) pipe mapAttrs stringToCharacters imap0 toUpper splitString;
+
+  packageNameToModuleName =
+    let
+      mapSegment = x: pipe x [
+        stringToCharacters
+        (imap0 (i: x: if i == 0 then toUpper x else x))
+        (concatStringsSep "")
+      ];
+    in
+    s: pipe s [
+      (splitString "-")
+      (map mapSegment)
+      (concatStringsSep "")
+    ];
+
 
   cpPackage = pkg:
     let
@@ -101,7 +116,7 @@ let
     }
     ''
       export NODE_PATH=${builtins.concatStringsSep ":" nodeModules}
-      node -e 'require("${projectOut}/Test.Main").main()' > $out
+      node -e 'require("${projectOut}/Test.${packageNameToModuleName name}.Main").main()' > $out
     '';
 
   genDocs = name: { projectOut, spagoPkgs, projectDir }: pipe

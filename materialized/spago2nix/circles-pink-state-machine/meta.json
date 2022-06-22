@@ -61,7 +61,8 @@
     "unsafe-coerce",
     "uri",
     "variant",
-    "web3"
+    "web3",
+    "indexed-graph"
   ],
   "sources": [
     "./src/**/*.purs",

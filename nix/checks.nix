@@ -35,8 +35,6 @@ in
 
 {
 
-  pursTests = pkgs.circles-pink.purs.circles-pink-state-machine.tests;
-
   nixLint =
     let
       # This is only the beginning, in the end all nix files should be linted
@@ -58,4 +56,5 @@ in
 
 
 } // pkgs.circles-pink.ts.publicWorkspaces
-  // (doTestSuite pkgs.nix-fp-lite.tests)
+// (doTestSuite pkgs.nix-fp-lite.tests)
+  // (mapAttrs (_: x: x.tests) pkgs.circles-pink.purs)
