@@ -4,20 +4,12 @@ module CirclesPink.Garden.StateMachine.State
   , CirclesState
   , DebugState
   , EmailApiResult
-  , ErrDeploySafeResolved
-  , ErrDeployTokenResolved
   , ErrSubmit
   , ErrSubmitResolved
-  , ErrTrustState
-  , ErrTrustStateResolved
   , InfoGeneralState
   , InfoSecurityState
   , MagicWordsState
   , SubmitState
-  , TrustState
-  , TrustStateTrustsResult
-  , TrustsDeploySafeResult
-  , TrustsDeployTokenResult
   , UserData
   , UserDataSubmitResult
   , UsernameApiResult
@@ -28,7 +20,6 @@ module CirclesPink.Garden.StateMachine.State
   , _infoSecurity
   , _magicWords
   , _submit
-  , _trusts
   , init
   , initDebug
   , module Exp
@@ -36,8 +27,7 @@ module CirclesPink.Garden.StateMachine.State
 
 import Prelude
 
-import CirclesCore (ApiError, NativeError, SafeStatus, TrustNode)
-import CirclesCore as CC
+import CirclesCore (ApiError, NativeError)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -50,14 +40,14 @@ import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrTrustRemoveConnection, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
 import CirclesPink.Garden.StateMachine.State.Login (LoginState)
 import CirclesPink.Garden.StateMachine.State.Login (LoginState, ErrLoginState, initLogin, _login) as Exp
+import CirclesPink.Garden.StateMachine.State.Trusts (TrustState)
+import CirclesPink.Garden.StateMachine.State.Trusts (TrustState, ErrTrustState, TrustsDeploySafeResult, TrustsDeployTokenResult, _trusts) as Exp
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
-import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
-import Wallet.PrivateKey as P
 
 type UsernameApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 
@@ -109,44 +99,6 @@ type InfoSecurityState = UserData
 type MagicWordsState = UserData
 
 type SubmitState = UserData
-
---------------------------------------------------------------------------------
-type ErrTrustState = Env.ErrGetSafeStatus + Env.ErrIsTrusted + Env.ErrIsFunded + Env.ErrDeploySafe + Env.ErrDeployToken + ()
-
-type ErrTrustStateResolved = Variant
-  ( errService :: Unit
-  , errNative :: NativeError
-  , errInvalidUrl :: String
-  )
-
-type ErrDeploySafeResolved = Variant
-  ( errService :: Unit
-  , errNative :: NativeError
-  , errInvalidUrl :: String
-  )
-
-type ErrDeployTokenResolved = Variant
-  ( errService :: Unit
-  , errNative :: NativeError
-  , errInvalidUrl :: String
-  )
-
-type TrustStateTrustsResult = RemoteReport ErrTrustStateResolved Unit
-
-type TrustsDeploySafeResult = RemoteReport ErrDeploySafeResolved Unit
-
-type TrustsDeployTokenResult = RemoteReport ErrDeployTokenResolved String
-
-type TrustState =
-  { user :: CC.User
-  , privKey :: P.PrivateKey
-  , trusts :: Array TrustNode
-  , safeStatus :: SafeStatus
-  , isReady :: Boolean
-  , trustsResult :: TrustStateTrustsResult
-  , deploySafeResult :: TrustsDeploySafeResult
-  , deployTokenResult :: TrustsDeployTokenResult
-  }
 
 --------------------------------------------------------------------------------
 type CirclesState = Variant
@@ -207,9 +159,6 @@ _magicWords = inj (Proxy :: _ "magicWords")
 
 _submit :: forall a v. a -> Variant (submit :: a | v)
 _submit = inj (Proxy :: _ "submit")
-
-_trusts :: forall a v. a -> Variant (trusts :: a | v)
-_trusts = inj (Proxy :: _ "trusts")
 
 _debug :: forall a v. a -> Variant (debug :: a | v)
 _debug = inj (Proxy :: _ "debug")

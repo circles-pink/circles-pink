@@ -103,7 +103,6 @@ defaultView d@{ trusts } =
       { isOutgoing: false
       , user: Right user
       , trustState: initUntrusted
-
       }
 
     usersSearch :: Trusts

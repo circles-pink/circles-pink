@@ -25,7 +25,9 @@ type ErrLoginState r = ErrLoginTask
   + Env.ErrInvalidMnemonic
   + r
 
-type LoginStateLoginResult = RemoteReport (Variant (ErrLoginState + ())) TaskReturn
+type LoginStateLoginResult = RemoteReport
+  (Variant (ErrLoginState + ()))
+  TaskReturn
 
 --------------------------------------------------------------------------------
 -- InitLogin
