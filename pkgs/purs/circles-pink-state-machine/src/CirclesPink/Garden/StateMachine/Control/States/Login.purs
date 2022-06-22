@@ -7,10 +7,11 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (except, lift, runExceptT)
 import Data.Either (note)
+import Data.Maybe (Maybe(..))
 import Data.Tuple (fst)
 import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
-import RemoteData (_notAsked)
+import RemoteData (_loading, _notAsked)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey as P
 
@@ -31,6 +32,7 @@ login env =
 
   login' set st _ =
     void do
+      _ <- set \st' -> S._login st' { loginResult = _loading { previousData: Nothing, retry: 0, timestamp: bottom } }
       runExceptT do
         { safeStatus, user, trusts, isReady } /\ privKey <-
           ( do
