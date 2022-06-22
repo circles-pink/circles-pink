@@ -8,9 +8,10 @@ export const resources = {
       nextButton: 'Next',
       prevButton: 'Back',
       submitButton: 'Submit',
-      signUpButton: 'Sign Up',
-      signInButton: 'Sign In',
-      signUpInsteadButton: 'SignUp instead',
+      signUpButton: 'Create Wallet',
+      signInButton: 'Restore Wallet',
+      signUpInsteadButton: 'Create Wallet instead',
+      signInSubmitButton: 'Restore Wallet',
       finalizeButton: 'Finalize Account',
       safeStateButton: 'Get Safe State',
       getTrustsButton: 'Get Trust Network',
@@ -123,9 +124,10 @@ export const resources = {
       nextButton: 'Weiter',
       prevButton: 'Zurück',
       submitButton: 'Abschicken',
-      signUpButton: 'Wallet erstellen',
-      signInButton: 'Anmelden',
+      signUpButton: 'Neue Wallet erstellen',
+      signInButton: 'Bestehende Wallet öffnen',
       signUpInsteadButton: 'Neue Wallet erstellen',
+      signInSubmitButton: 'Wiederherstellen',
       finalizeButton: 'Account erstellen',
       safeStateButton: 'Safe State abfragen',
       getTrustsButton: 'Vertrauensnetzwerk abfragen',
@@ -134,7 +136,7 @@ export const resources = {
       landing: {
         claim: 'Probier das Grundeinkommen auf der Blockchain!',
         subClaim:
-          'Um Teil des Circles Netzwerks zu werden, kannst du hier eine neue Wallet erstellen, oder dich einloggen, wenn du schon eine hast.',
+          'Um Teil des Circles Netzwerks zu werden, kannst du hier eine neue Wallet erstellen, oder wiederherstellen, wenn du schon eine hast.',
       },
       login: {
         claim: 'Willkommen zurück!',
@@ -171,9 +173,9 @@ export const resources = {
         },
       },
       infoSecurity: {
-        claim: 'Gleich erhälst du deinen persönlichen Schlüssel',
+        claim: 'Gleich erhältst du deinen persönlichen Schlüssel',
         subClaim:
-          'Dieser Schlüssel ist deine Eintrittskarte ins Circles Netzwerk. Damit kannst du dein Vertrauensnetzwerk aufbauen und als einer der ersten das Grundeinkommen auf der Blockchain testen!',
+          'Dieser Schlüssel ist deine Eintrittskarte ins Circles Netzwerk. Damit kannst du dein Vertrauensnetzwerk aufbauen und als eine:r der Ersten das Grundeinkommen auf der Blockchain testen!',
       },
       magicWords: {
         claim: 'Der eine Schlüssel...',
@@ -193,8 +195,7 @@ export const resources = {
       trusts: {
         claim: 'Hallöchen!',
         greet: 'Hallo',
-        subClaim:
-          'Dein Account ist noch nicht aktiviert. Da Interkationen mit deinem Vertrauensnetzwerk in die Blockchain geschrieben werden, was prinzipiell nicht kostenlos sind, brauchst du drei Trusts von Nutzer:innen, die bereits im Circles Netzwerk sind. Natürlich musst du diese Transaktionen nicht selber zahlen, aber es muss ausgeschlossen sein, dass Bots sich diverse Accounts anlegen.',
+        subClaim: 'Dein Account ist noch nicht aktiviert.',
         getMoreTruts:
           'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen, oder lass sie diesen Code scannen.',
         fundYourSafe:
