@@ -1,8 +1,10 @@
 {
-  "name": "indexed-graph",
+  "name": "graph",
   "dependencies": [
+    "debug-extra",
     "prelude",
-    "debug-extra"
+    "spec",
+    "spec-discovery"
   ],
   "sources": [
     "./src/**/*.purs",

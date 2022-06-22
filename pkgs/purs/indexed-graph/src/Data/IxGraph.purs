@@ -22,7 +22,6 @@ import Data.Map as M
 import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Data.Tuple.Nested (type (/\))
-import Data.Typelevel.Undefined (undefined)
 import Debug.Extra (todo)
 
 class Indexed k v | v -> k where

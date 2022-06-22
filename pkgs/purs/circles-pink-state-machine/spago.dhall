@@ -61,6 +61,7 @@
   , "uri"
   , "variant"
   , "web3"
+  , "indexed-graph"
   ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]
