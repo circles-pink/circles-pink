@@ -12,6 +12,7 @@
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.16.7",
     "@circles-pink/state-machine": "*",
+    "@circles/timecircles": "^1.0.6",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mdi/js": "^6.6.96",

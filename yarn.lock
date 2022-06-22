@@ -2173,6 +2173,11 @@
     shelljs "^0.8.3"
     solc "^0.5.9"
 
+"@circles/timecircles@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@circles/timecircles/-/timecircles-1.0.6.tgz#beae5e026b1e20b240f80c77213cb875d666916a"
+  integrity sha512-a9UWdyHXxSij2X57E0y8o/VgkryZnGJtqBPgxq4N7aLufkr8ZyaiqdyuUoOA03yMJhRLC8jUg359uGgKY5Iqiw==
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/@cnakazawa/watch/-/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
