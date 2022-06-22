@@ -1,6 +1,6 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useEffect } from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
@@ -26,6 +26,10 @@ import {
   TrustState,
   _trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts';
+import {
+  defaultView,
+  DefaultView,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
 
 // -----------------------------------------------------------------------------
 // Trusts
@@ -36,7 +40,12 @@ type TrustsProps = {
   act: (ac: A.CirclesAction) => void;
 };
 
-export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
+export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
+  const state = useMemo<DefaultView>(
+    () => (defaultView as any)(stateRaw) as DefaultView,
+    [stateRaw]
+  );
+
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
