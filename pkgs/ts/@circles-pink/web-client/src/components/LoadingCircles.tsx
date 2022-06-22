@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
-import { count } from 'console';
-import React, { ReactElement, ReactNode } from 'react';
+import React from 'react';
 import { css } from 'twin.macro';
 import { range } from 'fp-ts/lib/NonEmptyArray';
 import { keyframes } from '@emotion/react';

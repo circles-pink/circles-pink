@@ -1,8 +1,7 @@
-import { TokenGetBalanceResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
-import { CirclesCurrency } from '../../../assets/CirclesCurrency';
+import { CurrencySymbol } from '../../../components/CurrencySymbol';
 import { Theme } from '../../../context/theme';
 import { displayBalance } from '../../utils/timeCircles';
 
@@ -14,18 +13,33 @@ type BalanceProps = {
 export const Balance = ({ theme, balance }: BalanceProps) => {
   // a state is needed here, to avoid flickering balance display
   const [resBalance, setResBalance] = useState<string>('0');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const disableLoading = () => {
+    // Disable loading after 2 seconds
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  };
 
   useEffect(() => {
     if (balance.type == 'success') {
       setResBalance(balance.value.data.toString());
+      disableLoading();
+    } else if (balance.type == 'loading') {
+      setIsLoading(true);
+    } else {
+      disableLoading();
     }
   }, [balance]);
 
   return (
-    <BalanceWrapper>
-      <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
-      <CirclesCurrency color={theme.baseColor} />
-    </BalanceWrapper>
+    <>
+      <BalanceWrapper>
+        <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
+        <CurrencySymbol color={theme.baseColor} isLoading={isLoading} />
+      </BalanceWrapper>
+    </>
   );
 
   // switch (balance.type) {
