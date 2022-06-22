@@ -1,5 +1,5 @@
 {
-  "name": "indexed-graph",
+  "name": "graph",
   "dependencies": [
     "prelude",
     "debug-extra"
