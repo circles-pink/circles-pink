@@ -7,6 +7,8 @@ let fp-ts = ./pkgs/purs/fp-ts/spago.dhall
 
 let graph = ./pkgs/purs/graph/spago.dhall
 
+let indexed-graph = ./pkgs/purs/indexed-graph/spago.dhall
+
 let debug-extra = ./pkgs/purs/debug-extra/spago.dhall
 
 in  { name = "circles-pink"
@@ -15,6 +17,9 @@ in  { name = "circles-pink"
         # chance.dependencies
         # fp-ts.dependencies
         # graph.dependencies
+        # indexed-graph.dependencies
+        # debug-extra.dependencies
+        
     , packages = ./packages.dhall
     , sources =
       [ "./pkgs/purs/circles-pink-state-machine/src/**/*.purs"
@@ -25,6 +30,8 @@ in  { name = "circles-pink"
       , "./pkgs/purs/fp-ts/test/**/*.purs"
       , "./pkgs/purs/graph/src/**/*.purs"
       , "./pkgs/purs/graph/test/**/*.purs"
+      , "./pkgs/purs/indexed-graph/src/**/*.purs"
+      , "./pkgs/purs/indexed-graph/test/**/*.purs"
       , "./pkgs/purs/debug-extra/src/**/*.purs"
       , "./pkgs/purs/debug-extra/test/**/*.purs"
       ]

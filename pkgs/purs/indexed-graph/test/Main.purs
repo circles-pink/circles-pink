@@ -1,4 +1,4 @@
-module Test.IxGraph.Main where
+module Test.IndexedGraph.Main where
 
 import Prelude
 import Effect (Effect)
