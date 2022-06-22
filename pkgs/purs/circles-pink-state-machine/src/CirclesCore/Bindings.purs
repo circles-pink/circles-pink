@@ -7,6 +7,7 @@ module CirclesCore.Bindings
   , CoreToken(..)
   , CoreTrust(..)
   , CoreUser(..)
+  , CoreUtils(..)
   , Fn2Promise
   , Fn3Promise
   , Options
@@ -124,6 +125,7 @@ newtype CirclesCore_ = CirclesCore_
   , trust :: CoreTrust
   , safe :: CoreSafe
   , token :: CoreToken
+  , utiles :: CoreUtils
   }
 
 derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
@@ -222,6 +224,22 @@ newtype CoreTrust = CoreTrust
 derive instance newtypeCoreTrust :: Newtype CoreTrust _
 
 derive newtype instance structuralCoreTrust :: Structural CoreTrust
+
+--------------------------------------------------------------------------------
+newtype CoreUtils = CoreUtils
+  { toFreckles ::
+      Fn2Promise Account
+        { value :: String }
+        String
+  , fromFreckles ::
+      Fn2Promise Account
+        { value :: String }
+        String
+  }
+
+derive instance newtypeCoreUtils :: Newtype CoreUtils _
+
+derive newtype instance structuralCoreUtils :: Structural CoreUtils
 
 --------------------------------------------------------------------------------
 foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_
