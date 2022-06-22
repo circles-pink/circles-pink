@@ -1,6 +1,16 @@
 { name = "graph"
 , dependencies =
-  [ "aff", "debug-extra", "effect", "prelude", "spec", "spec-discovery" ]
+  [ "aff"
+  , "debug-extra"
+  , "effect"
+  , "foldable-traversable"
+  , "maybe"
+  , "ordered-collections"
+  , "prelude"
+  , "spec"
+  , "spec-discovery"
+  , "tuples"
+  ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]
 }

@@ -8,6 +8,7 @@ module Data.Graph.Core
   , insertNode
   , lookupEdge
   , lookupNode
+  , nodeIds
   , outgoingIds
   ) where
 
@@ -36,6 +37,9 @@ outgoingIds id (Graph nodes) = M.lookup id nodes <#> _.outEdges >>> M.keys
 
 incomingIds :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)
 incomingIds id (Graph nodes) = M.lookup id nodes <#> _.inIds
+
+nodeIds :: forall id e n. Graph id e n -> Set id
+nodeIds (Graph nodes) = M.keys nodes
 
 lookupNode :: forall id e n. Ord id => id -> Graph id e n -> Maybe n
 lookupNode id (Graph nodes) = M.lookup id nodes <#> _.data
