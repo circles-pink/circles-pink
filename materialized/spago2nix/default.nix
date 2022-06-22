@@ -19,9 +19,9 @@
     meta = builtins.fromJSON (builtins.readFile ./fp-ts/meta.json);
     location = ../../pkgs/purs/fp-ts;
   };
-  indexed-graph = {
-    spagoPkgs = import ./indexed-graph/spago-packages.nix;
-    meta = builtins.fromJSON (builtins.readFile ./indexed-graph/meta.json);
-    location = ../../pkgs/purs/indexed-graph;
+  graph = {
+    spagoPkgs = import ./graph/spago-packages.nix;
+    meta = builtins.fromJSON (builtins.readFile ./graph/meta.json);
+    location = ../../pkgs/purs/graph;
   };
 }
