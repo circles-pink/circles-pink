@@ -6,10 +6,6 @@ import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import {
-  TrustState,
-  _trusts,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -26,6 +22,10 @@ import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { mapResult } from '../utils/mapResult';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import {
+  TrustState,
+  _trusts,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts';
 
 // -----------------------------------------------------------------------------
 // Trusts
