@@ -11,6 +11,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (ExceptT(..), lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..), isRight)
+import Debug.Extra (todo)
 import RemoteData (_failure)
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
@@ -41,22 +42,22 @@ trusts env@{ deployToken, deploySafe } =
 
   finalizeRegisterUser set st _ =
     let
-      doDeploys :: forall r. ExceptT Unit m Unit
-      doDeploys = dropError do
-        _ <- deploySafe' env st.privKey
-          # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
-          # retryUntil env (const { delay: 250 }) (\r _ -> isRight r) 0
-        _ <- deployToken st.privKey
-          # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
-          # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-        pure unit
+      doDeploys =
+        do
+          _ <- deploySafe' env st.privKey
+            # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
+            # retryUntil env (const { delay: 250 }) (\r _ -> isRight r) 0
+            # dropError
+          _ <- deployToken st.privKey
+            # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
+            # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+            # dropError
+          pure unit
+
     in
       void do
         runExceptT do
           _ <- doDeploys
-            # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { trustsResult = r })
-            # (\x -> x 0)
-            # dropError
           lift $ set \_ -> S.initDashboard
             { user: st.user, privKey: st.privKey }
 

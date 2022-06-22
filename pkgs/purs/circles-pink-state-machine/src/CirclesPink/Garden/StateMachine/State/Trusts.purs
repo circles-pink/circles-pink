@@ -31,7 +31,7 @@ type TrustStateTrustsResult = RemoteReport
   Unit
 
 type TrustsDeploySafeResult = RemoteReport
-  (Variant (Env.ErrDeploySafe + ()))
+  (Variant (Env.ErrDeploySafe + Env.ErrGetSafeStatus + ()))
   SafeStatus
 
 type TrustsDeployTokenResult = RemoteReport
