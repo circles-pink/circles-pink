@@ -1,4 +1,13 @@
-module CirclesPink.Garden.StateMachine.State.Trusts.Views where
+module CirclesPink.Garden.StateMachine.State.Trusts.Views
+  ( DefaultView
+  , ErrDeploySafeResolved
+  , ErrDeployTokenResolved
+  , ErrTrustStateResolved
+  , TrustStateTrustsResult
+  , TrustsDeploySafeResult
+  , TrustsDeployTokenResult
+  , defaultView
+  ) where
 
 import Prelude
 
