@@ -145,8 +145,14 @@ spago2nix:
 	spago2nix-extra --pkgs-dir ./pkgs/purs --target-dir ./materialized/spago2nix
 
 spago-test: spago-clean yarn-install
-	spago test --purs-args '--output $(PURS_OUTPUT)'
+	just spago-test_
 
+spago-test_:
+	for path in "pkgs/purs/"*"/test/Main.purs"; do \
+	  TEST_MAIN_MODULE=`cat $path | grep '^module' | sed -E 's/module ([^ ]*) .*/\1/'`; \
+	  spago test --main "$TEST_MAIN_MODULE" || exit 1; \
+	done \
+	
 ################################################################################
 # All Makefile tasks
 ################################################################################

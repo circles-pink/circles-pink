@@ -9,5 +9,5 @@ import Test.Spec.Runner (runSpec)
 
 main :: Effect Unit
 main = launchAff_ do
-  specs <- discover ".*"
+  specs <- discover """(Test\.IxGraph\..*|Test\.Data\.IxGraph\..*)"""
   runSpec [consoleReporter] specs
