@@ -4,14 +4,13 @@ module CirclesPink.Garden.StateMachine.Control.States.Trusts
 
 import Prelude
 
-import CirclesCore (ErrSafeGetSafeStatus, SafeStatus)
+import CirclesCore (SafeStatus)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (ExceptT(..), lift, runExceptT)
+import Control.Monad.Except (lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..), isRight)
-import Debug.Extra (todo)
 import RemoteData (_failure)
 import Type.Row (type (+))
 import Wallet.PrivateKey (PrivateKey)
@@ -23,7 +22,7 @@ trusts
   -> { getSafeStatus :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState)
      , finalizeRegisterUser :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
      }
-trusts env@{ deployToken, deploySafe } =
+trusts env@{ deployToken } =
   { getSafeStatus
   , finalizeRegisterUser
   }
@@ -46,7 +45,12 @@ trusts env@{ deployToken, deploySafe } =
         do
           _ <- deploySafe' env st.privKey
             # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
-            # retryUntil env (const { delay: 250 }) (\r _ -> isRight r) 0
+            # retryUntil env (const { delay: 250 })
+                ( \r _ -> case r of
+                    Right res -> res.isCreated && res.isDeployed
+                    Left _ -> false
+                )
+                0
             # dropError
           _ <- deployToken st.privKey
             # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
