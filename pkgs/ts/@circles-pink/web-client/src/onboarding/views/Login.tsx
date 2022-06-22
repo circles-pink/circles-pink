@@ -62,7 +62,7 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               state={mapResult(state.loginResult)}
               onClick={() => act(A._login(A._login(unit)))}
             >
-              {t('signInButton')}
+              {t('signInSubmitButton')}
             </Button>
             <Button
               prio={'medium'}
