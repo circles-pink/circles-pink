@@ -44,7 +44,7 @@ spago-build: spago-clean
 	just spago-build
 
 spago-test: spago-clean yarn-install
-	spago test --purs-args '--output $(PURS_OUTPUT)'
+	just spago-test
 
 spago-test-watch: spago-clean yarn-install
 	spago test --watch --purs-args '--output $(PURS_OUTPUT)'
