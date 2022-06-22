@@ -6,10 +6,9 @@ import Prelude
 
 import CirclesCore (ErrSafeGetSafeStatus, SafeStatus)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.Env (ErrDeploySafe)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (lift, runExceptT)
+import Control.Monad.Except (ExceptT(..), lift, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..), isRight)
 import RemoteData (_failure)
@@ -42,7 +41,8 @@ trusts env@{ deployToken, deploySafe } =
 
   finalizeRegisterUser set st _ =
     let
-      doDeploys = do
+      doDeploys :: forall r. ExceptT Unit m Unit
+      doDeploys = dropError do
         _ <- deploySafe' env st.privKey
           # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
           # retryUntil env (const { delay: 250 }) (\r _ -> isRight r) 0
@@ -62,7 +62,7 @@ trusts env@{ deployToken, deploySafe } =
 
 --------------------------------------------------------------------------------
 
-type ErrDeploySafe' r = ErrDeploySafe + ErrSafeGetSafeStatus + r
+type ErrDeploySafe' r = Env.ErrDeploySafe + Env.ErrGetSafeStatus + r
 
 deploySafe' :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrDeploySafe' r) m SafeStatus
 deploySafe' { deploySafe, getSafeStatus } privKey = do
