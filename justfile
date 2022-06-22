@@ -144,6 +144,9 @@ spago-build: spago-clean
 spago2nix:
 	spago2nix-extra --pkgs-dir ./pkgs/purs --target-dir ./materialized/spago2nix
 
+spago-test: spago-clean yarn-install
+	spago test --purs-args '--output $(PURS_OUTPUT)'
+
 ################################################################################
 # All Makefile tasks
 ################################################################################
@@ -174,9 +177,6 @@ clean-generate:
 
 spago-clean:
 	make spago-clean
-
-spago-test:
-	make spago-test
 
 spago-test-watch:
 	make spago-test-watch

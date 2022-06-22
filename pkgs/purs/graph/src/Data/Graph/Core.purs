@@ -18,7 +18,7 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set (Set)
-import Data.Set (delete, empty) as S
+import Data.Set as S
 
 newtype Graph id e n = Graph
   ( Map id

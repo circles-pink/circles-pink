@@ -1,4 +1,4 @@
-module Test.IxGraph.Main where
+module Test.Chance.Main where
 
 import Prelude
 import Effect (Effect)
@@ -9,5 +9,5 @@ import Test.Spec.Runner (runSpec)
 
 main :: Effect Unit
 main = launchAff_ do
-  specs <- discover ".*"
+  specs <- discover """Test\.Chance\..*"""
   runSpec [consoleReporter] specs
