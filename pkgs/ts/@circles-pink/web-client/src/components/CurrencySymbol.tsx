@@ -21,33 +21,45 @@ export const CurrencySymbol = (_props: _CurrencySymbolProps) => {
 
   const props = {
     color: _props.color || 'black',
-    isLoading: _props.isLoading || false,
-    isRequesting: _props.isRequesting || false,
+    isLoading: isAnimPulse,
+    isRequesting: isAnimRotate,
     size: _props.size || 2.5,
   };
 
   useEffect(() => {
-    if (props.isLoading) {
+    if (_props.isLoading) {
       setIsAnimPulse(true);
       setTimeout(() => {
         setIsAnimPulse(false);
       }, 2000);
     }
-  }, [props.isLoading, isAnimPulse]);
+  }, [_props.isLoading, isAnimPulse]);
 
   useEffect(() => {
-    if (props.isRequesting) {
+    if (_props.isRequesting) {
       setIsAnimRotate(true);
       setTimeout(() => {
         setIsAnimRotate(false);
       }, 2000);
     }
-  }, [props.isRequesting, isAnimRotate]);
+  }, [_props.isRequesting, isAnimRotate]);
 
   return (
     <ArcWrapper {...props}>
-      <Arc className="start" {...props} />
-      <Arc className="end" {...props} />
+      <Arc
+        className="start"
+        isLoading={isAnimPulse}
+        isRequesting={isAnimRotate}
+        color={props.color}
+        size={props.size}
+      />
+      <Arc
+        className="end"
+        isLoading={isAnimPulse}
+        isRequesting={isAnimRotate}
+        color={props.color}
+        size={props.size}
+      />
       <Dot {...props} />
     </ArcWrapper>
   );
