@@ -152,7 +152,10 @@ spago-test_:
 	  TEST_MAIN_MODULE=`cat $path | grep '^module' | sed -E 's/module ([^ ]*) .*/\1/'`; \
 	  spago test --main "$TEST_MAIN_MODULE" --purs-args '--output {{PURS_OUTPUT}}' || exit 1; \
 	done \
-	
+
+spago-test-fast:
+	spago test --main "Test.AllTests.Main" --purs-args '--output {{PURS_OUTPUT}}'
+
 ################################################################################
 # All Makefile tasks
 ################################################################################

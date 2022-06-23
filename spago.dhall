@@ -11,6 +11,8 @@ let indexed-graph = ./pkgs/purs/indexed-graph/spago.dhall
 
 let debug-extra = ./pkgs/purs/debug-extra/spago.dhall
 
+let all-tests = ./pkgs/purs/all-tests/spago.dhall
+
 in  { name = "circles-pink"
     , dependencies =
           circles-pink-state-machine.dependencies
@@ -19,6 +21,8 @@ in  { name = "circles-pink"
         # graph.dependencies
         # indexed-graph.dependencies
         # debug-extra.dependencies
+        # all-tests.dependencies
+        
         
     , packages = ./packages.dhall
     , sources =
@@ -34,5 +38,7 @@ in  { name = "circles-pink"
       , "./pkgs/purs/indexed-graph/test/**/*.purs"
       , "./pkgs/purs/debug-extra/src/**/*.purs"
       , "./pkgs/purs/debug-extra/test/**/*.purs"
+      , "./pkgs/purs/all-tests/src/**/*.purs"
+      , "./pkgs/purs/all-tests/test/**/*.purs"
       ]
     }
