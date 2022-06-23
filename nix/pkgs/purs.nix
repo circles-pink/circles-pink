@@ -39,6 +39,12 @@ let
           "UnusedDeclaration"
         ];
       };
+
+      indexed-graph = {
+        censorCodes = [
+          "UserDefinedWarning"
+        ];
+      };
     })
     spago2nix-extra.buildMonorepo
     (x: recursiveUpdate x

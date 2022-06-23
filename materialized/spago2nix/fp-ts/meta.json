@@ -1,8 +1,12 @@
 {
   "name": "fp-ts",
   "dependencies": [
+    "aff",
+    "effect",
     "maybe",
     "prelude",
+    "spec",
+    "spec-discovery",
     "undefined",
     "unsafe-coerce"
   ],
