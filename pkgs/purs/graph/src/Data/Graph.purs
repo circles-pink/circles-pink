@@ -1,5 +1,8 @@
 module Data.Graph
-  ( fromFoldables
+  ( deleteNodes
+  , fromFoldables
+  , insertEdges
+  , insertNodes
   , maybeInsertEdge
   , memberEdge
   , memberNode
@@ -14,7 +17,8 @@ import Data.Graph.Core (Graph)
 import Data.Graph.Core (Graph, deleteEdge, deleteNode, empty, incomingIds, insertEdge, insertNode, lookupEdge, lookupNode, outgoingIds) as Exp
 import Data.Graph.Core as G
 import Data.Maybe (Maybe(..), isJust)
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple.Nested (type (/\), uncurry2, (/\))
+import Debug.Extra (todo)
 
 fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (id /\ id /\ e) -> Graph id e n
 fromFoldables nodes edges = G.empty
@@ -31,3 +35,12 @@ maybeInsertEdge :: forall id e n. Ord id => id -> id -> e -> Graph id e n -> May
 maybeInsertEdge from _ _ g | not (memberNode from g) = Nothing
 maybeInsertEdge _ to _ g | not (memberNode to g) = Nothing
 maybeInsertEdge from to edge g = Just $ G.insertEdge from to edge g
+
+deleteNodes :: forall f id e n. Ord id => Foldable f => f id -> Graph id e n -> Graph id e n
+deleteNodes ids g = foldr G.deleteNode g ids
+
+insertEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id /\ e) -> Graph id e n -> Graph id e n
+insertEdges edges g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges
+
+insertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> Graph id e n
+insertNodes nodes g = foldr (\(id /\ node) -> G.insertNode id node) g nodes
