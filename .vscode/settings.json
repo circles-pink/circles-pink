@@ -1,6 +1,6 @@
 {
   "purescript.outputDirectory": "pkgs/ts/@circles-pink/state-machine/output/",
-  "purescript.buildCommand": "spago build --purs-args '--json-errors --output pkgs/ts/@circles-pink/state-machine/output'",
+  "purescript.buildCommand": "just spago-build-ide",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[nix]": {
     "editor.defaultFormatter": "jnoortheen.nix-ide"
