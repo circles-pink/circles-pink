@@ -8,7 +8,7 @@ import Prelude
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
-import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isPendingTrust, isPendingUntrust, isUntrusted, next)
+import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent, getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -20,7 +20,7 @@ import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..), either, hush, isRight, note)
+import Data.Either (Either(..), hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
@@ -29,7 +29,6 @@ import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
-import Network.Ethereum.Core.Signatures (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
@@ -160,10 +159,6 @@ dashboard env =
     let
       foundUsers = catMaybes $ map hush users
 
-      isCandidate te = case te of
-        TrustCandidate _ -> true
-        _ -> false
-
     lift
       $ set \st' ->
           let
@@ -217,96 +212,98 @@ dashboard env =
     void do
       runExceptT do
         let
-          addr = either identity _.safeAddress u
+          targetAddress = getAddress u
+          targetAddress' = convert targetAddress
         lift
           $ set \st' ->
               let
                 ownAddress = convert $ st'.user.safeAddress
-                
-                targetAddress :: Address
-                targetAddress = convert $ getAddress u 
               in
-              S._dashboard
-                st'
-                  { trusts =
-                      case G.lookupNode ownAddress st'.trusts of
-                        Nothing -> st'.trusts
-                          # G.insertNode (TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u })
-                          # G.insertEdge ownAddress targetAddress {} 
-                        Just (TrustConfirmed t) -> st'.trusts
-                          # G.insertNode (TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState })
-                          # G.insertEdge ownAddress targetAddress {}
-                        Just (TrustCandidate t) -> st'.trusts
-                          # G.insertNode (TrustCandidate t)
-                          # G.insertEdge ownAddress targetAddress {}
-
-                  -- # alter
-                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
-                  --         Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u }
-                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState }
-                  --         Just (TrustCandidate t) -> Just $ TrustCandidate t
-                  --     )
-                  --     (convert addr)
-                  }
+                S._dashboard
+                  st'
+                    { trusts =
+                        case G.lookupNode ownAddress st'.trusts of
+                          Nothing -> st'.trusts
+                            # G.insertNode (TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u })
+                            # G.insertEdge ownAddress targetAddress' {}
+                          Just (TrustConfirmed t) -> st'.trusts
+                            # G.insertNode (TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+                          Just (TrustCandidate t) -> st'.trusts
+                            # G.insertNode (TrustCandidate t)
+                            # G.insertEdge ownAddress targetAddress' {}
+                    }
         _ <-
-          env.addTrustConnection st.privKey addr st.user.safeAddress
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show addr) r st.trustAddResult })
+          env.addTrustConnection st.privKey targetAddress st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift
           $ set \st' ->
-              S._dashboard
-                st'
-                  { trusts =
-                      st'.trusts
-                  -- # alter
-                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
-                  --         Nothing -> Nothing
-                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
-                  --         Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState }
-                  --     )
-                  --     (convert addr)
-                  }
+              let
+                ownAddress = convert $ st'.user.safeAddress
+              in
+                S._dashboard
+                  st'
+                    { trusts =
+                        case G.lookupNode ownAddress st'.trusts of
+                          Nothing -> st'.trusts
+                          Just (TrustConfirmed t) -> st'.trusts
+                            # G.insertNode (TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+                          Just (TrustCandidate t) -> st'.trusts
+                            # G.insertNode (TrustCandidate $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+                    }
         pure unit
 
   removeTrustConnection set st u =
     void do
       runExceptT do
         let
-          addr = either identity _.safeAddress u
+          targetAddress = getAddress u
+          targetAddress' = convert targetAddress
         lift
           $ set \st' ->
-              S._dashboard
-                st'
-                  { trusts =
-                      st'.trusts
-                  -- # alter
-                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
-                  --         Nothing -> Nothing
-                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState }
-                  --         Just (TrustCandidate t) -> Just $ TrustCandidate t
-                  --     )
-                  --     (convert addr)
-                  }
+              let
+                ownAddress = convert $ st'.user.safeAddress
+              in
+                S._dashboard
+                  st'
+                    { trusts =
+                        case G.lookupNode ownAddress st'.trusts of
+                          Nothing -> st'.trusts
+                          Just (TrustConfirmed t) -> st'.trusts
+                            # G.insertNode (TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+                          Just (TrustCandidate t) -> st'.trusts
+                            # G.insertNode (TrustCandidate t)
+                            # G.insertEdge ownAddress targetAddress' {}
+
+                    }
         _ <-
-          env.removeTrustConnection st.privKey addr st.user.safeAddress
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show addr) r st.trustRemoveResult })
+          env.removeTrustConnection st.privKey targetAddress st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
         lift
           $ set \st' ->
-              S._dashboard
-                st'
-                  { trusts =
-                      st'.trusts
-                  -- # alter
-                  --     ( \maybeTrustEntry -> case maybeTrustEntry of
-                  --         Nothing -> Nothing
-                  --         Just (TrustConfirmed t) -> Just $ TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
-                  --         Just (TrustCandidate t) -> Just $ TrustCandidate $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState }
-                  --     )
-                  --     (convert addr)
-                  }
+              let
+                ownAddress = convert $ st'.user.safeAddress
+              in
+                S._dashboard
+                  st'
+                    { trusts =
+                        case G.lookupNode ownAddress st'.trusts of
+                          Nothing -> st'.trusts
+                          Just (TrustConfirmed t) -> st'.trusts
+                            # G.insertNode (TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+                          Just (TrustCandidate t) -> st'.trusts
+                            # G.insertNode (TrustCandidate $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState })
+                            # G.insertEdge ownAddress targetAddress' {}
+
+                    }
         pure unit
 
   getBalance set st _ =
