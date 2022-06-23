@@ -61,3 +61,16 @@ insertEdges = todo
 
 insertNodes :: forall id e n. Array n -> IxGraph id e n -> IxGraph id e n
 insertNodes = todo
+
+
+
+-- newtype IxGraph id e n = IxGraph (Graph id e n)
+
+-- empty :: forall id e n. IxGraph id e n
+-- empty = IxGraph G.empty
+
+-- outgoingIds :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Set id)
+-- outgoingIds id (IxGraph graph) = G.outgoingIds id graph
+
+-- insertNode :: forall id e n. Ord id => Indexed id n => n -> IxGraph id e n -> IxGraph id e n
+-- insertNode node (IxGraph graph) = IxGraph $ G.insertNode (getIndex node) node graph
