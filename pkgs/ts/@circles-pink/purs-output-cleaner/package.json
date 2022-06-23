@@ -1,0 +1,19 @@
+{
+  "name": "@circles-pink/purs-output-cleaner",
+  "version": "1.0.0",
+  "scripts": {},
+  "type": "module",
+  "dependencies": {
+    "@types/yargs": "^17.0.10",
+    "fp-ts": "^2.12.1",
+    "glob": "^8.0.3",
+    "typescript": "^4.7.4",
+    "yargs": "^17.5.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.8.1"
+  },
+  "bin": {
+    "dependency-assistant": "./bin/purs-output-cleaner"
+  }
+}
