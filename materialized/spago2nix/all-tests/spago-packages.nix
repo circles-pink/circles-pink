@@ -307,8 +307,6 @@ let
         installPhase = "ln -s $src $out";
       };
 
-  # graph is a Local package in (Local "./../../../pkgs/purs/graph")
-
     "identity" = pkgs.stdenv.mkDerivation {
         name = "identity";
         version = "v5.0.0";

@@ -539,6 +539,8 @@ let
         installPhase = "ln -s $src $out";
       };
 
+  # graph is a Local package in (Local "./../../../pkgs/purs/graph")
+
     "heterogeneous" = pkgs.stdenv.mkDerivation {
         name = "heterogeneous";
         version = "v0.5.1";
