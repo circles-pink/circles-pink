@@ -59,6 +59,12 @@ rec {
       tasks-explorer-server = cleanSource ../../pkgs/ts/tasks-explorer-server;
     };
 
+  standalone = {
+    "@circles-pink/purs-output-cleaner" = pkgs.yarn2nix-moretea.mkYarnPackage {
+      src = cleanSource ../../pkgs/ts/${"@"}circles-pink/purs-output-cleaner;
+    };
+  };
+
   publicWorkspaces = {
     "@circles-pink/state-machine" = let name = "@circles-pink/state-machine"; in
       pipe

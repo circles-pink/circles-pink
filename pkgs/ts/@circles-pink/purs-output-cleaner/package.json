@@ -14,6 +14,6 @@
     "ts-node": "^10.8.1"
   },
   "bin": {
-    "dependency-assistant": "./bin/purs-output-cleaner"
+    "purs-output-cleaner": "./bin/purs-output-cleaner"
   }
 }
