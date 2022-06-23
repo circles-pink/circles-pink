@@ -13,9 +13,4 @@ export default {
   },
 } as ComponentMeta<typeof CurrencySymbol>;
 
-export const Default = (args): ReactElement => (
-  <CurrencySymbol
-    color={args.color ? args.color : "hotpink"}
-    isLoading={args.isLoading}
-  />
-);
+export const Default = (args): ReactElement => <CurrencySymbol {...args} />;

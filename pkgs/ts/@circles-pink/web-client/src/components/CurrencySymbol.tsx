@@ -3,53 +3,52 @@ import React, { useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 
 // -----------------------------------------------------------------------------
-// Constants
-// -----------------------------------------------------------------------------
-
-const width = 2.25;
-const height = 2.25;
-
-// -----------------------------------------------------------------------------
 // CurrencySymbol
 // -----------------------------------------------------------------------------
 
-type CurrencySymbolProps = {
+type _CurrencySymbolProps = {
   color?: string;
   isLoading?: boolean;
   isRequesting?: boolean;
+  size?: number;
 };
 
-export const CurrencySymbol = ({
-  color = 'black',
-  isLoading = false,
-  isRequesting = false,
-}: CurrencySymbolProps) => {
+type CurrencySymbolProps = Required<_CurrencySymbolProps>;
+
+export const CurrencySymbol = (_props: _CurrencySymbolProps) => {
   const [isAnimPulse, setIsAnimPulse] = useState(false);
   const [isAnimRotate, setIsAnimRotate] = useState(false);
 
+  const props = {
+    color: _props.color || 'black',
+    isLoading: _props.isLoading || false,
+    isRequesting: _props.isRequesting || false,
+    size: _props.size || 2.5,
+  };
+
   useEffect(() => {
-    if (isLoading) {
+    if (props.isLoading) {
       setIsAnimPulse(true);
       setTimeout(() => {
         setIsAnimPulse(false);
       }, 2000);
     }
-  }, [isLoading, isAnimPulse]);
+  }, [props.isLoading, isAnimPulse]);
 
   useEffect(() => {
-    if (isRequesting) {
+    if (props.isRequesting) {
       setIsAnimRotate(true);
       setTimeout(() => {
         setIsAnimRotate(false);
       }, 2000);
     }
-  }, [isRequesting, isAnimRotate]);
+  }, [props.isRequesting, isAnimRotate]);
 
   return (
-    <ArcWrapper isRequesting={isAnimRotate}>
-      <Arc className="start" color={color} />
-      <Arc className="end" color={color} />
-      <Dot color={color} isLoading={isAnimPulse} />
+    <ArcWrapper {...props}>
+      <Arc className="start" {...props} />
+      <Arc className="end" {...props} />
+      <Dot {...props} />
     </ArcWrapper>
   );
 };
@@ -58,11 +57,7 @@ export const CurrencySymbol = ({
 // Arc
 // -----------------------------------------------------------------------------
 
-type ArcWrapperProps = {
-  isRequesting?: boolean;
-};
-
-const ArcWrapper = styled.div<ArcWrapperProps>(({ isRequesting }) => {
+const ArcWrapper = styled.div<CurrencySymbolProps>(({ isRequesting, size }) => {
   const rotate = isRequesting
     ? keyframes(
         css`
@@ -80,8 +75,8 @@ const ArcWrapper = styled.div<ArcWrapperProps>(({ isRequesting }) => {
   return css`
     position: relative;
     margin: 0;
-    width: ${width}rem;
-    height: ${height}rem;
+    width: ${size}rem;
+    height: ${size}rem;
 
     animation: ${rotate} 2s infinite ease-in-out;
     animation-delay: 0s;
@@ -89,18 +84,13 @@ const ArcWrapper = styled.div<ArcWrapperProps>(({ isRequesting }) => {
   `;
 });
 
-type ArcProps = {
-  color: string;
-};
-
-const Arc = styled.div<ArcProps>(({ color }) => {
+const Arc = styled.div<CurrencySymbolProps>(({ color, size }) => {
   return css`
     position: absolute;
-    width: ${width}rem;
-    height: ${height}rem;
+    width: ${size}rem;
+    height: ${size}rem;
     border-radius: 100%;
-    border: 1px solid;
-    border: 4px solid;
+    border: ${size / 7.5}rem solid;
     border-color: ${color};
 
     &.start {
@@ -127,12 +117,7 @@ const Arc = styled.div<ArcProps>(({ color }) => {
 // Dot
 // -----------------------------------------------------------------------------
 
-type DotProps = {
-  color: string;
-  isLoading: boolean;
-};
-
-const Dot = styled.div<DotProps>(({ color, isLoading }) => {
+const Dot = styled.div<CurrencySymbolProps>(({ color, isLoading, size }) => {
   const pulse = isLoading
     ? keyframes(
         css`
@@ -148,8 +133,8 @@ const Dot = styled.div<DotProps>(({ color, isLoading }) => {
     : keyframes(css``);
 
   return css`
-    width: ${width / 3}rem;
-    height: ${height / 3}rem;
+    width: ${size / 3}rem;
+    height: ${size / 3}rem;
     background-color: ${color};
     border-radius: 50%;
     position: absolute;
@@ -161,36 +146,3 @@ const Dot = styled.div<DotProps>(({ color, isLoading }) => {
     animation-direction: alternate;
   `;
 });
-
-// const Dot = styled.div<DotProps>(({ color, isLoading }) => {
-//   const dotWidth = width / 3;
-//   const dotHeight = height / 3;
-
-//   const pulse = isLoading
-//     ? keyframes(
-//         css`
-//           0%,
-//           100% {
-//             transform: scale(1);
-//           }
-//           100% {
-//             transform: scale(0);
-//           }
-//         `
-//       )
-//     : keyframes(css``);
-
-//   return css`
-//     width: ${dotWidth}rem;
-//     height: ${dotHeight}rem;
-//     background-color: ${color};
-//     border-radius: 50%;
-//     position: absolute;
-//     top: calc(50% - ${dotWidth / 4}rem);
-//     left: calc(50% - ${dotHeight / 4}rem);
-//     transform: scale(1);
-//     animation: ${pulse} 1s infinite ease-in-out;
-//     animation-delay: 0s;
-//     animation-direction: alternate;
-//   `;
-// });
