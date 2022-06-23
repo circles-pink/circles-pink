@@ -116,14 +116,14 @@ defaultView d@{ trusts } =
           )
         <#>
           ( \user -> trusts
-              # G.getNode (convert user.safeAddress)
+              # G.lookupNode (convert user.safeAddress)
               <#> trustEntryToTrust
               # maybe (initUntrust user) identity
               # mapTrust
           )
   in
-    { trustsConfirmed: d.trusts # G.getOutgoinNodes (convert d.user.safeAddress) # S.toUnfoldable # mapTrusts isConfirmed
-    , trustsCandidates: d.trusts # G.getOutgoinNodes (convert d.user.safeAddress) #  S.toUnfoldable # mapTrusts isCandidate
+    { trustsConfirmed: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity # S.toUnfoldable # mapTrusts isConfirmed
+    , trustsCandidates: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity #  S.toUnfoldable # mapTrusts isCandidate
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult

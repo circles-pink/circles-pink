@@ -10,6 +10,7 @@ module Data.IxGraph
   , insertNodes
   , lookupNode
   , outgoingIds
+  , outgoingNodes
   ) where
 
 import Prelude
@@ -49,3 +50,6 @@ insertNodes nodes ixGraph = foldr insertNode ixGraph nodes
 
 insertEdge :: forall id e n. Ord id => id -> id -> e -> IxGraph id e n -> IxGraph id e n
 insertEdge from to edge (IxGraph graph) = IxGraph $ G.insertEdge from to edge graph
+
+outgoingNodes :: forall id e n. Ord id => Ord n => id -> IxGraph id e n -> Maybe (Set n)
+outgoingNodes id (IxGraph graph) = G.outgoingNodes id graph

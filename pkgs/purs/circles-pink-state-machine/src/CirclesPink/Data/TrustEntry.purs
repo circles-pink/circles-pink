@@ -17,6 +17,10 @@ import Network.Ethereum.Core.Signatures as W3
 
 data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
 
+derive instance ordTrustEntry :: Ord TrustEntry
+
+derive instance eqTrustEntry :: Eq TrustEntry
+
 instance indexedTrustEntry :: Indexed W3.Address TrustEntry  where
   getIndex (TrustCandidate { user }) = either identity (_.safeAddress >>> convert) user
   getIndex (TrustConfirmed { user }) = either identity (_.safeAddress >>> convert) user

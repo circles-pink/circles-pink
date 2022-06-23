@@ -17,6 +17,19 @@
     "description": "80 column wide section to organize source files",
     "scope": "purescript"
   },
+  "PursTest": {
+    "prefix": ["descr"],
+    "body": [
+      "describe \"${1:describe}\"",
+      "  let",
+      "    x = 1",
+      "  in",
+      "    it \"${2:it}\" do",
+      "      x `shouldEqual` 2"
+    ],
+    "description": "80 column wide section to organize source files",
+    "scope": "purescript"
+  },
   "importPlus": {
     "prefix": ["+", "importPlus"],
     "body": ["import Type.Row (type (+))"],

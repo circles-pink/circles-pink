@@ -7,6 +7,7 @@ module Data.Graph
   , memberEdge
   , memberNode
   , module Exp
+  , outgoingNodes
   )
   where
 
@@ -16,9 +17,12 @@ import Data.Foldable (class Foldable, foldr)
 import Data.Graph.Core (Graph)
 import Data.Graph.Core (Graph, deleteEdge, deleteNode, empty, incomingIds, insertEdge, insertNode, lookupEdge, lookupNode, outgoingIds) as Exp
 import Data.Graph.Core as G
-import Data.Maybe (Maybe(..), isJust)
+import Data.Maybe (Maybe(..), fromJust, isJust)
+import Data.Set (Set)
+import Data.Set as S
 import Data.Tuple.Nested (type (/\), uncurry2, (/\))
 import Debug.Extra (todo)
+import Partial.Unsafe (unsafePartial)
 
 fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (id /\ id /\ e) -> Graph id e n
 fromFoldables nodes edges = G.empty
@@ -44,3 +48,9 @@ insertEdges edges g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge)
 
 insertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> Graph id e n
 insertNodes nodes g = foldr (\(id /\ node) -> G.insertNode id node) g nodes
+
+outgoingNodes :: forall id e n. Ord id => Ord n => id -> Graph id e n -> Maybe (Set n)
+outgoingNodes id graph = G.outgoingIds id graph <#> S.map (\id' -> unsafeLookup id' graph)
+  where
+  unsafeLookup :: id -> Graph id e n -> n
+  unsafeLookup id' g = unsafePartial (fromJust $ G.lookupNode id' g)
