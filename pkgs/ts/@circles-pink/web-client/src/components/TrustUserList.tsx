@@ -32,11 +32,12 @@ import {
 import { t } from 'i18next';
 import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
 import { PageSelector } from './PageSelector';
-import * as D from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import * as TrustState from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { User } from '@circles-pink/state-machine/output/CirclesCore';
 import { either } from '@circles-pink/state-machine/output/Data.Either';
 import { pipe } from 'fp-ts/lib/function';
+import { getAddress, UserIdent } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -48,8 +49,8 @@ type TrustUserListProps = {
   actionRow?: ReactElement | ReactElement[] | string;
   toggleOverlay?: (type: Overlay) => void;
   setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
-  addTrust: (to: D.UserIdent) => void;
-  removeTrust: (to: D.UserIdent) => void;
+  addTrust: (to: UserIdent) => void;
+  removeTrust: (to: UserIdent) => void;
   trustAddResult: DefaultView['trustAddResult'];
   trustRemoveResult: DefaultView['trustRemoveResult'];
 };
@@ -130,7 +131,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
             {trusts.map(c => {
               return (
                 <ContentRow
-                  key={addrToString(c.safeAddress)}
+                  key={addrToString(getAddress(c.user))}
                   c={c}
                   {...props}
                 />
@@ -172,12 +173,12 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
     c.user,
     either(x => (x as string).substring(0, 6))(x => (x as User).username)
   );
-  const isTrusted = D.isTrusted(c.trustState);
-  const isUntrusted = D.isUntrusted(c.trustState);
-  const pendingTrust = D.isPendingTrust(c.trustState);
-  const pendingUntrust = D.isPendingUntrust(c.trustState);
-  const loadingTrust = D.isLoadingTrust(c.trustState);
-  const loadingUntrust = D.isLoadingUntrust(c.trustState);
+  const isTrusted = TrustState.isTrusted(c.trustState);
+  const isUntrusted = TrustState.isUntrusted(c.trustState);
+  const pendingTrust = TrustState.isPendingTrust(c.trustState);
+  const pendingUntrust = TrustState.isPendingUntrust(c.trustState);
+  const loadingTrust = TrustState.isLoadingTrust(c.trustState);
+  const loadingUntrust = TrustState.isLoadingUntrust(c.trustState);
   const inSync = isTrusted || isUntrusted;
 
   if (inSync) {
@@ -228,7 +229,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 onClick={() => {
                   if (c.isOutgoing) {
                     if (toggleOverlay && setOverwriteTo) {
-                      setOverwriteTo(addrToString(c.safeAddress));
+                      setOverwriteTo(addrToString(getAddress(c.user)));
                       toggleOverlay('SEND');
                     }
                   }
@@ -365,14 +366,14 @@ const TrustActionMessage = tw.span`absolute right-0 top-0`;
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (trustState: D.TrustState) => {
-  if (D.isLoadingTrust(trustState)) {
+const mapStatusMessage = (trustState: TrustState.TrustState) => {
+  if (TrustState.isLoadingTrust(trustState)) {
     return t('dashboard.trustList.message.loadingTrust');
-  } else if (D.isLoadingUntrust(trustState)) {
+  } else if (TrustState.isLoadingUntrust(trustState)) {
     return t('dashboard.trustList.message.loadingUntrust');
-  } else if (D.isPendingTrust(trustState)) {
+  } else if (TrustState.isPendingTrust(trustState)) {
     return t('dashboard.trustList.message.pendingTrust');
-  } else if (D.isPendingUntrust(trustState)) {
+  } else if (TrustState.isPendingUntrust(trustState)) {
     return t('dashboard.trustList.message.pendingUntrust');
   }
 };
