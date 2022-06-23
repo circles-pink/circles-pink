@@ -4,6 +4,7 @@ module Data.IxGraph
   , deleteNodes
   , empty
   , getIndex
+  , insertEdge
   , insertEdges
   , insertNode
   , insertNodes
@@ -46,3 +47,5 @@ insertEdges edges (IxGraph graph) = IxGraph $ G.insertEdges edges graph
 insertNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> IxGraph id e n
 insertNodes nodes ixGraph = foldr insertNode ixGraph nodes
 
+insertEdge :: forall id e n. Ord id => id -> id -> e -> IxGraph id e n -> IxGraph id e n
+insertEdge from to edge (IxGraph graph) = IxGraph $ G.insertEdge from to edge graph

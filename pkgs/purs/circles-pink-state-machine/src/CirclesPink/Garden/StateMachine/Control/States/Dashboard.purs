@@ -8,8 +8,8 @@ import Prelude
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
-import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isPendingTrust, isPendingUntrust)
-import CirclesPink.Data.UserIdent (UserIdent)
+import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isPendingTrust, isPendingUntrust, isUntrusted, next)
+import CirclesPink.Data.UserIdent (UserIdent, getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -19,6 +19,7 @@ import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
@@ -28,6 +29,7 @@ import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
+import Network.Ethereum.Core.Signatures (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
@@ -218,10 +220,26 @@ dashboard env =
           addr = either identity _.safeAddress u
         lift
           $ set \st' ->
+              let
+                ownAddress = convert $ st'.user.safeAddress
+                
+                targetAddress :: Address
+                targetAddress = convert $ getAddress u 
+              in
               S._dashboard
                 st'
                   { trusts =
-                      st'.trusts
+                      case G.lookupNode ownAddress st'.trusts of
+                        Nothing -> st'.trusts
+                          # G.insertNode (TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u })
+                          # G.insertEdge ownAddress targetAddress {} 
+                        Just (TrustConfirmed t) -> st'.trusts
+                          # G.insertNode (TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState })
+                          # G.insertEdge ownAddress targetAddress {}
+                        Just (TrustCandidate t) -> st'.trusts
+                          # G.insertNode (TrustCandidate t)
+                          # G.insertEdge ownAddress targetAddress {}
+
                   -- # alter
                   --     ( \maybeTrustEntry -> case maybeTrustEntry of
                   --         Nothing -> Just $ TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u }
