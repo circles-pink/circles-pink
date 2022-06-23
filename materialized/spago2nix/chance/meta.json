@@ -5,6 +5,8 @@
     "effect",
     "option",
     "prelude",
+    "spec",
+    "spec-discovery",
     "unsafe-coerce"
   ],
   "sources": [

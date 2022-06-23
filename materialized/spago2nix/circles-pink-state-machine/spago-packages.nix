@@ -1165,6 +1165,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "spec-discovery" = pkgs.stdenv.mkDerivation {
+        name = "spec-discovery";
+        version = "v6.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-spec/purescript-spec-discovery.git";
+          rev = "d62f3625861efc9cd61f5fba55c1fdc38b276684";
+          sha256 = "11048rrxgr7bgcbrpna6k3zak1h40i2b2arjam7aypbz15ik1v4s";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "st" = pkgs.stdenv.mkDerivation {
         name = "st";
         version = "v5.0.1";

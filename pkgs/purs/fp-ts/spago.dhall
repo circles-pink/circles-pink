@@ -1,5 +1,14 @@
 { name = "fp-ts"
-, dependencies = [ "maybe", "prelude", "undefined", "unsafe-coerce" ]
+, dependencies =
+  [ "aff"
+  , "effect"
+  , "maybe"
+  , "prelude"
+  , "spec"
+  , "spec-discovery"
+  , "undefined"
+  , "unsafe-coerce"
+  ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]
 }

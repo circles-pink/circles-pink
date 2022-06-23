@@ -1,10 +1,16 @@
 {
   "name": "graph",
   "dependencies": [
+    "aff",
     "debug-extra",
+    "effect",
+    "foldable-traversable",
+    "maybe",
+    "ordered-collections",
     "prelude",
     "spec",
-    "spec-discovery"
+    "spec-discovery",
+    "tuples"
   ],
   "sources": [
     "./src/**/*.purs",

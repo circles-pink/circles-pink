@@ -14,9 +14,7 @@ module Data.IxGraph
   )
   where
 
-import Prelude
 
-import Control.Error.Util (note)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe)
