@@ -8,36 +8,52 @@ import { displayBalance } from '../../utils/timeCircles';
 type BalanceProps = {
   theme: Theme;
   balance: DefaultView['getBalanceResult'];
+  checkUBIPayoutResult: DefaultView['checkUBIPayoutResult'];
+  requestUBIPayoutResult: DefaultView['requestUBIPayoutResult'];
 };
 
-export const Balance = ({ theme, balance }: BalanceProps) => {
+export const Balance = ({
+  theme,
+  balance,
+  checkUBIPayoutResult,
+  requestUBIPayoutResult,
+}: BalanceProps) => {
   // a state is needed here, to avoid flickering balance display
   const [resBalance, setResBalance] = useState<string>('0');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const disableLoading = () => {
-    // Disable loading after 2 seconds
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  };
+  const [isRequesting, setIsRequesting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (balance.type == 'success') {
+    if (balance.type === 'success') {
       setResBalance(balance.value.data.toString());
-      disableLoading();
-    } else if (balance.type == 'loading') {
+      setIsLoading(false);
+    } else if (balance.type === 'loading') {
       setIsLoading(true);
     } else {
-      disableLoading();
+      setIsLoading(false);
     }
   }, [balance]);
+
+  useEffect(() => {
+    if (
+      checkUBIPayoutResult.type === 'loading' ||
+      requestUBIPayoutResult.type === 'loading'
+    ) {
+      setIsRequesting(true);
+    } else {
+      setIsRequesting(false);
+    }
+  }, [checkUBIPayoutResult, requestUBIPayoutResult]);
 
   return (
     <>
       <BalanceWrapper>
         <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
-        <CurrencySymbol color={theme.baseColor} isLoading={isLoading} />
+        <CurrencySymbol
+          color={theme.baseColor}
+          isLoading={isLoading}
+          isRequesting={isRequesting}
+        />
       </BalanceWrapper>
     </>
   );
