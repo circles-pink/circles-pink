@@ -10,7 +10,8 @@ module Data.Graph.Core
   , lookupNode
   , nodeIds
   , outgoingIds
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -32,7 +33,7 @@ newtype Graph id e n = Graph
 empty :: forall id e n. Graph id e n
 empty = Graph M.empty
 
-outgoingIds :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)
+outgoingIds :: forall id e n. Ord id => id -> Graph id e n ->  Maybe (Set id)
 outgoingIds id (Graph nodes) = M.lookup id nodes <#> _.outEdges >>> M.keys
 
 incomingIds :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)

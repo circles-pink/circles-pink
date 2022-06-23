@@ -36,13 +36,10 @@ import Data.String as S
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
-import Data.Variant (inj)
 import Effect (Effect)
-import Effect.Aff (Aff, throwError)
+import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Partial.Unsafe (unsafePartial)
-import Type.Proxy (Proxy(..))
-import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- Types
@@ -51,6 +48,8 @@ type Entropy = String
 
 --------------------------------------------------------------------------------
 newtype Address = Address String
+
+derive instance ordAddress :: Ord Address
 
 derive newtype instance showAddress :: Show Address
 

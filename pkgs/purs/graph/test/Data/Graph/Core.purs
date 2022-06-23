@@ -21,7 +21,7 @@ spec =
         graph :: Graph_
         graph = C.empty
       in
-        it "an empty graph has no nodeIds" do
+        it "retrieves no node ids" do
           (graph # C.nodeIds) `shouldEqual` S.empty
     describe "outgoingIds"
       let
@@ -30,7 +30,7 @@ spec =
           # C.insertNode "n2" unit
           # C.insertEdge "n1" "n2" unit
       in
-        it ".." do
+        it "retrieves all outgoing ids at a given id" do
           (C.outgoingIds "n1" graph) `shouldEqual` (Just $ S.fromFoldable [ "n2" ])
     describe "incomingIds"
       let
@@ -39,7 +39,7 @@ spec =
           # C.insertNode "n2" unit
           # C.insertEdge "n1" "n2" unit
       in
-        it ".." do
+        it "retrieves all imcoming ids at a given id" do
           (C.incomingIds "n2" graph) `shouldEqual` (Just $ S.fromFoldable [ "n1" ])
     describe "nodeIds"
       let
@@ -47,5 +47,28 @@ spec =
           # C.insertNode "n1" unit
           # C.insertNode "n2" unit
       in
-        it ".." do
+        it "retrieves all node ids in the graph" do
           (C.nodeIds graph) `shouldEqual` (S.fromFoldable [ "n1", "n2" ])
+    describe "lookupNode"
+      let
+        graph = C.empty
+          # C.insertNode "n1" 1
+          # C.insertNode "n2" 2
+      in
+        it "retrieves the node at the given id" do
+          (C.lookupNode "n1" graph) `shouldEqual` (Just 1)
+    describe "lookupEdge"
+      let
+        graph = C.empty
+          # C.insertNode "n1" 1
+          # C.insertNode "n2" 2
+          # C.insertEdge "n1" "n2" 11
+      in
+        it "retrieves the edge at from the given source and target ids" do
+          (C.lookupEdge "n1" "n2" graph ) `shouldEqual` (Just 11)
+    -- describe "insertNode"
+    --   let
+    --     graph = C.empty
+    --   in
+    --     it "it" do
+    --       (C.insertNode "n1" graph # C. ) `shouldEqual` 2

@@ -30,6 +30,8 @@ newtype TrustState = TrustState
 
 derive instance trustStateEq :: Eq TrustState
 
+derive instance ordTrustState :: Ord TrustState
+
 derive newtype instance showTrustState :: Show TrustState
 
 --------------------------------------------------------------------------------
