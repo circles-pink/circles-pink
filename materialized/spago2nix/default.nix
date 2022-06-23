@@ -1,4 +1,9 @@
 {
+  all-tests = {
+    spagoPkgs = import ./all-tests/spago-packages.nix;
+    meta = builtins.fromJSON (builtins.readFile ./all-tests/meta.json);
+    location = ../../pkgs/purs/all-tests;
+  };
   chance = {
     spagoPkgs = import ./chance/spago-packages.nix;
     meta = builtins.fromJSON (builtins.readFile ./chance/meta.json);
