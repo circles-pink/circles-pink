@@ -174,7 +174,6 @@ dashboard env =
             newEdges = newNodes
               <#> (\n -> convert st'.user.safeAddress /\ getIndex n /\ {})
           in
-
             S._dashboard
               st'
                 { trusts = st'.trusts
@@ -222,7 +221,7 @@ dashboard env =
                 S._dashboard
                   st'
                     { trusts =
-                        case G.lookupNode ownAddress st'.trusts of
+                        case G.lookupNode targetAddress' st'.trusts of
                           Nothing -> st'.trusts
                             # G.insertNode (TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u })
                             # G.insertEdge ownAddress targetAddress' {}
@@ -246,7 +245,7 @@ dashboard env =
                 S._dashboard
                   st'
                     { trusts =
-                        case G.lookupNode ownAddress st'.trusts of
+                        case G.lookupNode targetAddress' st'.trusts of
                           Nothing -> st'.trusts
                           Just (TrustConfirmed t) -> st'.trusts
                             # G.insertNode (TrustConfirmed $ t { trustState = if isLoadingTrust t.trustState then next t.trustState else t.trustState })
@@ -271,7 +270,7 @@ dashboard env =
                 S._dashboard
                   st'
                     { trusts =
-                        case G.lookupNode ownAddress st'.trusts of
+                        case G.lookupNode targetAddress' st'.trusts of
                           Nothing -> st'.trusts
                           Just (TrustConfirmed t) -> st'.trusts
                             # G.insertNode (TrustConfirmed $ t { trustState = if isTrusted t.trustState then next t.trustState else t.trustState })
@@ -294,7 +293,7 @@ dashboard env =
                 S._dashboard
                   st'
                     { trusts =
-                        case G.lookupNode ownAddress st'.trusts of
+                        case G.lookupNode targetAddress' st'.trusts of
                           Nothing -> st'.trusts
                           Just (TrustConfirmed t) -> st'.trusts
                             # G.insertNode (TrustConfirmed $ t { trustState = if isLoadingUntrust t.trustState then next t.trustState else t.trustState })
