@@ -51,6 +51,7 @@ pkgs.mkShell {
     (pkgs.writers.nodeRepl (builtins.attrValues {
       inherit (pkgs.nodePackages) fp-ts nijs glob yargs;
     }))
+    pkgs.circles-pink.purs-output-cleaner
   ];
 
   # Change the prompt to show that you are in a devShell
