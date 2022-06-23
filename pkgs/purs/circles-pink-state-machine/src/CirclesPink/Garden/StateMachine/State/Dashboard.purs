@@ -18,44 +18,27 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TokenGetBalanceResult
   , TokenRequestUBIPayoutResult
   , TokenTransferResult
-  , Trust
   , TrustAddResult
-  , TrustEntry(..)
   , TrustGetTrusts
   , TrustRemoveResult
-  , TrustState
   , Trusts
-  , UserIdent
   , UserSearchResult
   , _dashboard
   , initDashboard
-  , initTrusted
-  , initUntrusted
-  , isCandidate
-  , isConfirmed
-  , isLoadingTrust
-  , isLoadingUntrust
-  , isPendingTrust
-  , isPendingUntrust
-  , isTrusted
-  , isUntrusted
-  , matchTrustEntry
-  , next
-  , trustEntryToTrust
   ) where
 
 import Prelude
 
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
 import CirclesCore as CC
+import CirclesPink.Data.Trust (Trust)
+import CirclesPink.Data.TrustEntry (TrustEntry)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import Convertable (convert)
-import Data.Either (Either, either)
-import Data.IxGraph (class Indexed, IxGraph)
+import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import Data.Variant (Variant, inj, match)
+import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Network.Ethereum.Core.Signatures as W3
 import Record as R
@@ -63,7 +46,7 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, PrivateKey)
+import Wallet.PrivateKey (PrivateKey)
 
 --------------------------------------------------------------------------------
 -- DashboardState
@@ -88,37 +71,9 @@ type Trusts = Map W3.Address Trust
 
 --------------------------------------------------------------------------------
 
-data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
-
-instance indexedTrustEntry :: Indexed W3.Address TrustEntry  where
-  getIndex (TrustCandidate { user }) = either identity (_.safeAddress >>> convert) user
-  getIndex (TrustConfirmed { user }) = either identity (_.safeAddress >>> convert) user
-
-isConfirmed :: TrustEntry -> Boolean
-isConfirmed te = matchTrustEntry (\_ -> true) (\_ -> false) te
-
-isCandidate :: TrustEntry -> Boolean
-isCandidate te = matchTrustEntry (\_ -> false) (\_ -> true) te
-
-matchTrustEntry :: forall z. (Trust -> z) -> (Trust -> z) -> TrustEntry -> z
-matchTrustEntry confirmed candidate te = case te of
-  TrustConfirmed t -> confirmed t
-  TrustCandidate t -> candidate t
-
-trustEntryToTrust :: TrustEntry -> Trust
-trustEntryToTrust = matchTrustEntry identity identity
-
---------------------------------------------------------------------------------
-
-type Trust =
-  { isOutgoing :: Boolean
-  , user :: Either W3.Address User
-  , trustState :: TrustState
-  }
 
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
 
-type UserIdent = Either Address User
 
 --------------------------------------------------------------------------------
 -- InitDashboard
@@ -220,62 +175,3 @@ _dashboard = inj (Proxy :: _ "dashboard")
 type RemoteDataV_ e a = RemoteData Unit Unit (Variant e) a
 
 type RemoteReportV e a = RemoteReport (Variant e) a
-
---------------------------------------------------------------------------------
-newtype TrustState = TrustState
-  ( Variant
-      ( untrusted :: Unit -- 0
-      , loadingTrust :: Unit -- 1
-      , pendingTrust :: Unit -- 2
-      , trusted :: Unit -- 3
-      , loadingUntrust :: Unit -- 4
-      , pendingUntrust :: Unit -- 5
-      )
-  )
-
-derive instance trustStateEq :: Eq TrustState
-
-derive newtype instance showTrustState :: Show TrustState
-
---------------------------------------------------------------------------------
--- Constructors
---------------------------------------------------------------------------------
-initTrusted :: TrustState
-initTrusted = TrustState $ inj (Proxy :: _ "trusted") unit
-
-initUntrusted :: TrustState
-initUntrusted = TrustState $ inj (Proxy :: _ "untrusted") unit
-
---------------------------------------------------------------------------------
--- Destructors
---------------------------------------------------------------------------------
-isUntrusted :: TrustState -> Boolean
-isUntrusted (TrustState ts) = ts == (inj (Proxy :: _ "untrusted") unit)
-
-isTrusted :: TrustState -> Boolean
-isTrusted (TrustState ts) = ts == (inj (Proxy :: _ "trusted") unit)
-
-isLoadingTrust :: TrustState -> Boolean
-isLoadingTrust (TrustState ts) = ts == (inj (Proxy :: _ "loadingTrust") unit)
-
-isLoadingUntrust :: TrustState -> Boolean
-isLoadingUntrust (TrustState ts) = ts == (inj (Proxy :: _ "loadingUntrust") unit)
-
-isPendingTrust :: TrustState -> Boolean
-isPendingTrust (TrustState ts) = ts == (inj (Proxy :: _ "pendingTrust") unit)
-
-isPendingUntrust :: TrustState -> Boolean
-isPendingUntrust (TrustState ts) = ts == (inj (Proxy :: _ "pendingUntrust") unit)
-
-next :: TrustState -> TrustState
-next (TrustState ts) =
-  TrustState
-    $ match
-        { untrusted: \_ -> inj (Proxy :: _ "loadingTrust") unit
-        , loadingTrust: \_ -> inj (Proxy :: _ "pendingTrust") unit
-        , pendingTrust: \_ -> inj (Proxy :: _ "trusted") unit
-        , trusted: \_ -> inj (Proxy :: _ "loadingUntrust") unit
-        , loadingUntrust: \_ -> inj (Proxy :: _ "pendingUntrust") unit
-        , pendingUntrust: \_ -> inj (Proxy :: _ "untrusted") unit
-        }
-        ts

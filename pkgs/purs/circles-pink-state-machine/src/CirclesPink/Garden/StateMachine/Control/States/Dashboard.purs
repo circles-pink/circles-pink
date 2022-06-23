@@ -7,23 +7,22 @@ import Prelude
 
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
+import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
+import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isPendingTrust, isPendingUntrust)
+import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (TrustEntry(..), UserIdent, initTrusted, initUntrusted, isConfirmed, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
 import Control.Monad.Except (catchError, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
-import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either, hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
-import Data.Map (alter, lookup)
-import Data.Map as M
 import Data.Maybe (Maybe(..), maybe)
 import Data.Set as Set
 import Data.String (length)

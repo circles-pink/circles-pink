@@ -2,8 +2,8 @@ module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
 
+import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
-import CirclesPink.Garden.StateMachine.State.Dashboard (UserIdent)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Wallet.PrivateKey (Address)
