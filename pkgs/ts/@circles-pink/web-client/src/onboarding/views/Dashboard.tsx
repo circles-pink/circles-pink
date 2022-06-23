@@ -11,9 +11,7 @@ import { Button, Input } from '../../components/forms';
 import { Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import {
-  DashboardState,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
   DefaultView,
   defaultView,
@@ -73,7 +71,7 @@ export const Dashboard = ({
     [stateRaw]
   );
 
-  const trusts = state.trustsConfirmed.concat(state.trustsCandidates)
+  const trusts = state.trustsConfirmed.concat(state.trustsCandidates);
 
   // Theme
   const [theme] = useContext(ThemeContext);
@@ -159,7 +157,12 @@ export const Dashboard = ({
       text={
         <Text>
           <FadeIn orientation={'up'} delay={getDelay()}>
-            <Balance theme={theme} balance={state.getBalanceResult} />
+            <Balance
+              theme={theme}
+              balance={state.getBalanceResult}
+              checkUBIPayoutResult={state.checkUBIPayoutResult}
+              requestUBIPayoutResult={state.requestUBIPayoutResult}
+            />
           </FadeIn>
 
           {/* <FadeIn orientation={orientation} delay={getDelay()}>

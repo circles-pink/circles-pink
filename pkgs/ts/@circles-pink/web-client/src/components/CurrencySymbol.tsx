@@ -1,5 +1,5 @@
 import { keyframes } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 
 // -----------------------------------------------------------------------------
@@ -14,16 +14,42 @@ const height = 2.25;
 // -----------------------------------------------------------------------------
 
 type CurrencySymbolProps = {
-  color: string;
-  isLoading: boolean;
+  color?: string;
+  isLoading?: boolean;
+  isRequesting?: boolean;
 };
 
-export const CurrencySymbol = ({ color, isLoading }: CurrencySymbolProps) => {
+export const CurrencySymbol = ({
+  color = 'black',
+  isLoading = false,
+  isRequesting = false,
+}: CurrencySymbolProps) => {
+  const [isAnimPulse, setIsAnimPulse] = useState(false);
+  const [isAnimRotate, setIsAnimRotate] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsAnimPulse(true);
+      setTimeout(() => {
+        setIsAnimPulse(false);
+      }, 2000);
+    }
+  }, [isLoading, isAnimPulse]);
+
+  useEffect(() => {
+    if (isRequesting) {
+      setIsAnimRotate(true);
+      setTimeout(() => {
+        setIsAnimRotate(false);
+      }, 2000);
+    }
+  }, [isRequesting, isAnimRotate]);
+
   return (
-    <ArcWrapper>
+    <ArcWrapper isRequesting={isAnimRotate}>
       <Arc className="start" color={color} />
       <Arc className="end" color={color} />
-      <Dot color={color} isLoading={isLoading} />
+      <Dot color={color} isLoading={isAnimPulse} />
     </ArcWrapper>
   );
 };
@@ -32,21 +58,43 @@ export const CurrencySymbol = ({ color, isLoading }: CurrencySymbolProps) => {
 // Arc
 // -----------------------------------------------------------------------------
 
-const ArcWrapper = styled.div(() => [
-  css`
+type ArcWrapperProps = {
+  isRequesting?: boolean;
+};
+
+const ArcWrapper = styled.div<ArcWrapperProps>(({ isRequesting }) => {
+  const rotate = isRequesting
+    ? keyframes(
+        css`
+          0%,
+          50% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
+        `
+      )
+    : keyframes(css``);
+
+  return css`
     position: relative;
     margin: 0;
     width: ${width}rem;
     height: ${height}rem;
-  `,
-]);
+
+    animation: ${rotate} 2s infinite ease-in-out;
+    animation-delay: 0s;
+    animation-direction: forwards;
+  `;
+});
 
 type ArcProps = {
   color: string;
 };
 
-const Arc = styled.div<ArcProps>(({ color }) => [
-  css`
+const Arc = styled.div<ArcProps>(({ color }) => {
+  return css`
     position: absolute;
     width: ${width}rem;
     height: ${height}rem;
@@ -72,8 +120,8 @@ const Arc = styled.div<ArcProps>(({ color }) => [
       -o-transform: rotate(90deg);
       transform: rotate(90deg);
     }
-  `,
-]);
+  `;
+});
 
 // -----------------------------------------------------------------------------
 // Dot
@@ -113,3 +161,36 @@ const Dot = styled.div<DotProps>(({ color, isLoading }) => {
     animation-direction: alternate;
   `;
 });
+
+// const Dot = styled.div<DotProps>(({ color, isLoading }) => {
+//   const dotWidth = width / 3;
+//   const dotHeight = height / 3;
+
+//   const pulse = isLoading
+//     ? keyframes(
+//         css`
+//           0%,
+//           100% {
+//             transform: scale(1);
+//           }
+//           100% {
+//             transform: scale(0);
+//           }
+//         `
+//       )
+//     : keyframes(css``);
+
+//   return css`
+//     width: ${dotWidth}rem;
+//     height: ${dotHeight}rem;
+//     background-color: ${color};
+//     border-radius: 50%;
+//     position: absolute;
+//     top: calc(50% - ${dotWidth / 4}rem);
+//     left: calc(50% - ${dotHeight / 4}rem);
+//     transform: scale(1);
+//     animation: ${pulse} 1s infinite ease-in-out;
+//     animation-delay: 0s;
+//     animation-direction: alternate;
+//   `;
+// });
