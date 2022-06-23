@@ -170,7 +170,7 @@ dashboard env =
                 ( \tn ->
                     mapTrust
                       (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-                      (G.getNode (convert tn.safeAddress) st'.trusts)
+                      (G.lookupNode (convert tn.safeAddress) st'.trusts)
                       tn
                 )
 
@@ -191,10 +191,11 @@ dashboard env =
                     #
                       ( \g ->
                           let
-                            ids = G.getOutgoingIds (convert st'.user.safeAddress) g
-                              # Set.filter (\id -> G.getNode id g # maybe false isConfirmed)
+                            ids = G.outgoingIds (convert st'.user.safeAddress) g
+                              # maybe Set.empty identity
+                              # Set.filter (\id -> G.lookupNode id g # maybe false isConfirmed)
                           in
-                            G.removeAtIds ids g
+                            G.deleteNodes ids g
                       )
                     # G.insertNodes newNodes
                     # G.insertEdges newEdges
