@@ -37,7 +37,7 @@ import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (ErrLandingState, ErrLandingStateResolved, LandingAction, LandingState, LandingStateCheckSessionResult, LandingTransitions, _landing) as Exp
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
-import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrTrustRemoveConnection, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, TrustRemoveResult, _dashboard, initDashboard) as Exp
+import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, _dashboard, initDashboard) as Exp
 import CirclesPink.Garden.StateMachine.State.Login (LoginState)
 import CirclesPink.Garden.StateMachine.State.Login (LoginState, ErrLoginState, initLogin, _login) as Exp
 import CirclesPink.Garden.StateMachine.State.Trusts (TrustState)
