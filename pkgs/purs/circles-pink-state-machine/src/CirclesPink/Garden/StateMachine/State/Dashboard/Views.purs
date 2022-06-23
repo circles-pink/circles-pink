@@ -87,7 +87,7 @@ type Trust =
   , user :: UserIdent
   }
 
-mapTrust ::  T.Trust -> Trust
+mapTrust :: T.Trust -> Trust
 mapTrust t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
@@ -123,7 +123,7 @@ defaultView d@{ trusts } =
           )
   in
     { trustsConfirmed: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity # S.toUnfoldable # mapTrusts isConfirmed
-    , trustsCandidates: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity #  S.toUnfoldable # mapTrusts isCandidate
+    , trustsCandidates: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity # S.toUnfoldable # mapTrusts isCandidate
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
@@ -140,7 +140,7 @@ mapTrusts :: (TrustEntry -> Boolean) -> Array TrustEntry -> Trusts
 mapTrusts pred xs = xs
   # A.filter pred
   # map
-      ( \ trustEntry ->
+      ( \trustEntry ->
           let
             trust = trustEntryToTrust trustEntry
           in

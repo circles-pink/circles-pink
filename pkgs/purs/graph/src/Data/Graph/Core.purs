@@ -10,15 +10,14 @@ module Data.Graph.Core
   , lookupNode
   , nodeIds
   , outgoingIds
-  )
-  where
+  ) where
 
 import Prelude
 
 import Data.Foldable (foldr)
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Set (Set)
 import Data.Set as S
 
@@ -30,10 +29,13 @@ newtype Graph id e n = Graph
       }
   )
 
+instance showGraph :: (Show id, Show e, Show n) => Show (Graph id e n) where
+  show (Graph g) = show g
+
 empty :: forall id e n. Graph id e n
 empty = Graph M.empty
 
-outgoingIds :: forall id e n. Ord id => id -> Graph id e n ->  Maybe (Set id)
+outgoingIds :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)
 outgoingIds id (Graph nodes) = M.lookup id nodes <#> _.outEdges >>> M.keys
 
 incomingIds :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)
@@ -57,6 +59,7 @@ insertNode id node (Graph nodes) = Graph $ M.alter f id nodes
   f (Just x) = Just $ x { data = node }
 
 insertEdge :: forall id e n. Ord id => id -> id -> e -> Graph id e n -> Graph id e n
+insertEdge from to _ graph | isNothing (lookupNode from graph) || isNothing (lookupNode to graph) = graph
 insertEdge from to edge (Graph nodes) = Graph $ nodes
   # M.update updateFromNode from
   # M.update updateToNode to
@@ -65,12 +68,15 @@ insertEdge from to edge (Graph nodes) = Graph $ nodes
   updateToNode x = Just $ x { inIds = S.insert from x.inIds }
 
 deleteNode :: forall id e n. Ord id => id -> Graph id e n -> Graph id e n
-deleteNode id graph@(Graph nodes) = Graph $ outIds
-  # foldr (M.update updateToNode) nodes
+deleteNode id graph@(Graph nodes) = Graph $ nodes
+  # (\nodes' -> foldr (M.update updateToNode) nodes' outIds)
+  # (\nodes' -> foldr (M.update updateFromNode) nodes' inIds)
   # M.delete id
   where
   outIds = maybe S.empty identity $ outgoingIds id graph
+  inIds = maybe S.empty identity $ incomingIds id graph
   updateToNode x = Just $ x { inIds = S.delete id x.inIds }
+  updateFromNode x = Just $ x { outEdges = M.delete id x.outEdges }
 
 deleteEdge :: forall id e n. Ord id => id -> id -> Graph id e n -> Graph id e n
 deleteEdge from to (Graph nodes) = Graph $ nodes

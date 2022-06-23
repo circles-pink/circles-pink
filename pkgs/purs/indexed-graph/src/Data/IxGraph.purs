@@ -27,6 +27,9 @@ class Indexed k v | v -> k where
 
 newtype IxGraph id e n = IxGraph (Graph id e n)
 
+instance showIxGraph :: (Show id, Show e, Show n) => Show (IxGraph id e n) where
+  show (IxGraph g) = show g
+
 empty :: forall id e n. IxGraph id e n
 empty = IxGraph G.empty
 
