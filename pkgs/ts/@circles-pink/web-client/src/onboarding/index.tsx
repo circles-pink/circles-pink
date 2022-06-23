@@ -190,7 +190,7 @@ const OnboardingContent = ({
 // Frame
 // -----------------------------------------------------------------------------
 
-const Frame = styled.div(() => [
+export const Frame = styled.div(() => [
   tw`box-border`,
   css`
     * {
