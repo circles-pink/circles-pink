@@ -15,14 +15,12 @@ type TcDate = Date | number;
 // Circles / Timecircles conversion
 // -----------------------------------------------------------------------------
 
-export const convertTimeCirclesToCircles = (amount: number, date?: TcDate) => {
-  const dateTime = date || new Date();
-  return mapCircles(amount, dateTime, 'FROM-TIME-CIRCLES');
+export const convertTcToCrc = (amount: number, date: TcDate = new Date()) => {
+  return mapCircles(amount, date, 'FROM-TIME-CIRCLES');
 };
 
-export const convertCirclesToTimeCircles = (amount: number, date?: TcDate) => {
-  const dateTime = date || new Date();
-  return mapCircles(amount, dateTime, 'TO-TIME-CIRCLES');
+export const convertCrcToTc = (amount: number, date: TcDate = new Date()) => {
+  return mapCircles(amount, date, 'TO-TIME-CIRCLES');
 };
 
 const mapCircles = (amount: number, date: TcDate, type: Conversion) => {
@@ -41,27 +39,20 @@ const mapCircles = (amount: number, date: TcDate, type: Conversion) => {
 export function displayBalance(
   amount: string,
   currency: Currency = 'TIME-CIRCLES',
-  date?: TcDate
+  date: TcDate = new Date()
 ) {
-  const dateTime = date || new Date();
-  return mapCurrency(amount, dateTime, currency).toFixed(2);
+  return mapCurrency(amount, date, currency).toFixed(2);
 }
 
-const mapCurrency = (amount: string, dateTime: TcDate, type: Currency) => {
+const mapCurrency = (amount: string, date: TcDate, type: Currency) => {
+  const freckles = Number.parseFloat(Web3.utils.fromWei(amount, 'ether'));
+
   switch (type) {
     case 'CIRCLES':
-      return Number.parseFloat(Web3.utils.fromWei(amount, 'ether'));
+      return freckles;
     case 'TIME-CIRCLES':
-      return convertCirclesToTimeCircles(
-        Number.parseFloat(Web3.utils.fromWei(amount, 'ether')),
-        dateTime
-      );
+      return convertCrcToTc(freckles, date);
     case 'EURO':
-      return (
-        convertCirclesToTimeCircles(
-          Number.parseFloat(Web3.utils.fromWei(amount, 'ether')),
-          dateTime
-        ) / 10
-      );
+      return convertCrcToTc(freckles, date) / 10;
   }
 };

@@ -8,7 +8,7 @@ import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
-import { convertTimeCirclesToCircles } from '../../utils/timeCircles';
+import { convertTcToCrc } from '../../utils/timeCircles';
 import { DashboardProps } from '../Dashboard';
 import QrScanner from 'eth-qr-scanner';
 import { t } from 'i18next';
@@ -52,11 +52,7 @@ export const Send = ({
           from,
           to,
           value: mapBalanceToBN(
-            parseFloat(
-              convertTimeCirclesToCircles(value, new Date().toString()).toFixed(
-                2
-              )
-            )
+            parseFloat(convertTcToCrc(value, new Date().toString()).toFixed(2))
           ),
           paymentNote,
         })
