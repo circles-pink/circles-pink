@@ -2,6 +2,7 @@
 
 let
   inherit (pkgs.lib) recursiveUpdate pipe;
+  inherit (builtins) removeAttrs;
 
   spago2nix-extra = import ./spago2nix-extra.nix { inherit pkgs; };
 
@@ -46,6 +47,7 @@ let
         ];
       };
     })
+    (x: removeAttrs x ["all-tests"])
     spago2nix-extra.buildMonorepo
     (x: recursiveUpdate x
       { circles-pink-state-machine.default = withTS x.circles-pink-state-machine.output; }
