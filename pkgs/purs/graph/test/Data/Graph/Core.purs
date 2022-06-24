@@ -22,7 +22,7 @@ spec =
         graph = C.empty
       in
         it "retrieves no node ids" do
-          (graph # C.nodeIds) `shouldEqual` S.empty
+          (graph # C.nodeIds) `shouldEqual` (Tuple [] [])
     describe "outgoingIds"
       let
         graph = C.empty
@@ -31,7 +31,16 @@ spec =
           # C.insertEdge "n1" "n2" unit
       in
         it "retrieves all outgoing ids at a given id" do
-          (C.outgoingIds "n1" graph) `shouldEqual` (Just $ S.fromFoldable [ "n2" ])
+          (C.outgoingIds "n1" graph) `shouldEqual`
+            { nodes:
+                [ "n1" /\ unit
+                , "n2" /\ unit
+                ]
+            , edges:
+                [ "n1" --> "n2" /\ unit
+                , "n1" --> "n2" /\ unit
+                ]
+            }
     describe "incomingIds"
       let
         graph = C.empty
@@ -65,10 +74,10 @@ spec =
           # C.insertEdge "n1" "n2" 11
       in
         it "retrieves the edge at from the given source and target ids" do
-          (C.lookupEdge "n1" "n2" graph ) `shouldEqual` (Just 11)
-    -- describe "insertNode"
-    --   let
-    --     graph = C.empty
-    --   in
-    --     it "it" do
-    --       (C.insertNode "n1" graph # C. ) `shouldEqual` 2
+          (C.lookupEdge "n1" "n2" graph) `shouldEqual` (Just 11)
+-- describe "insertNode"
+--   let
+--     graph = C.empty
+--   in
+--     it "it" do
+--       (C.insertNode "n1" graph # C. ) `shouldEqual` 2

@@ -1,5 +1,8 @@
 module Data.Graph
   ( deleteNodes
+  , edgeIds
+  , foldrEdges
+  , foldrNodes
   , fromFoldables
   , insertEdges
   , insertNodes
@@ -8,20 +11,20 @@ module Data.Graph
   , memberNode
   , module Exp
   , outgoingNodes
-  )
-  where
+  , toUnfoldables
+  ) where
 
 import Prelude
 
 import Data.Foldable (class Foldable, foldr)
-import Data.Graph.Core (Graph)
 import Data.Graph.Core (Graph, deleteEdge, deleteNode, empty, incomingIds, insertEdge, insertNode, lookupEdge, lookupNode, outgoingIds) as Exp
+import Data.Graph.Core (Graph)
 import Data.Graph.Core as G
-import Data.Maybe (Maybe(..), fromJust, isJust)
+import Data.Maybe (Maybe(..), fromJust, isJust, maybe)
 import Data.Set (Set)
 import Data.Set as S
-import Data.Tuple.Nested (type (/\), uncurry2, (/\))
-import Debug.Extra (todo)
+import Data.Tuple.Nested (type (/\), (/\))
+import Data.Unfoldable (class Unfoldable)
 import Partial.Unsafe (unsafePartial)
 
 fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (id /\ id /\ e) -> Graph id e n
@@ -50,7 +53,33 @@ insertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id 
 insertNodes nodes g = foldr (\(id /\ node) -> G.insertNode id node) g nodes
 
 outgoingNodes :: forall id e n. Ord id => Ord n => id -> Graph id e n -> Maybe (Set n)
-outgoingNodes id graph = G.outgoingIds id graph <#> S.map (\id' -> unsafeLookup id' graph)
-  where
-  unsafeLookup :: id -> Graph id e n -> n
-  unsafeLookup id' g = unsafePartial (fromJust $ G.lookupNode id' g)
+outgoingNodes id graph = G.outgoingIds id graph <#> S.map (\id' -> unsafePartial $ unsafeLookupNode id' graph)
+
+edgeIds :: forall id e n. Ord id => Graph id e n -> Set (id /\ id)
+edgeIds g = g
+  # G.nodeIds
+  # S.map (\from -> G.outgoingIds from g # maybe mempty identity # S.map (\to -> from /\ to))
+  # S.unions
+
+nodes :: forall id e n. Ord id => Ord n => Graph id e n -> Set n
+nodes g = g # G.nodeIds # S.map (\id -> unsafePartial $ unsafeLookupNode id g)
+
+edges :: forall id e n. Ord id => Ord e => Graph id e n -> Set e
+edges g = g # edgeIds # S.map (\(from /\ to) -> unsafePartial $ unsafeLookupEdge from to g)
+
+foldrEdges :: forall id e n z. Ord id => Ord e => (e -> z -> z) -> z -> Graph id e n -> z
+foldrEdges f x g = edges g # foldr f x
+
+foldrNodes :: forall id e n z. Ord id => Ord n => (n -> z -> z) -> z -> Graph id e n -> z
+foldrNodes f x g = nodes g # foldr f x
+
+toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: Array (id /\ n), edges :: f (id /\ id /\ e) }
+toUnfoldables g = { nodes: G.nodesToUnfoldable g, edges: G.edgesToUnfoldable g }
+
+--------------------------------------------------------------------------------
+
+unsafeLookupNode :: forall id e n. Partial => Ord id => id -> Graph id e n -> n
+unsafeLookupNode id' g = fromJust $ G.lookupNode id' g
+
+unsafeLookupEdge :: forall id e n. Partial => Ord id => id -> id -> Graph id e n -> e
+unsafeLookupEdge from to g = fromJust $ G.lookupEdge from to g
