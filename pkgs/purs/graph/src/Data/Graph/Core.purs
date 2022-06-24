@@ -23,16 +23,13 @@ import Prelude
 import Data.Array as A
 import Data.Foldable (class Foldable, foldMap, foldl, foldr)
 import Data.FoldableWithIndex as F
-import Data.FunctorWithIndex (class FunctorWithIndex, mapWithIndex)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Set (Set)
 import Data.Set as S
-import Data.Tuple (Tuple(..))
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
-import Debug.Extra (todo)
 
 newtype Graph id e n = Graph
   ( Map id
