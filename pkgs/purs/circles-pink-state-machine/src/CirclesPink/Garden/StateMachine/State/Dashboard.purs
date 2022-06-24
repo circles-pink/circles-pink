@@ -33,6 +33,8 @@ import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, Us
 import CirclesCore as CC
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustEntry (TrustEntry)
+import CirclesPink.Data.TrustState (TrustState)
+import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
@@ -55,7 +57,7 @@ type DashboardState =
   { user :: CC.User
   , privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: IxGraph W3.Address {} TrustEntry
+  , trusts :: IxGraph W3.Address TrustState UserIdent
   , trustsResult :: TrustGetTrusts
   , trustAddResult :: TrustAddResult
   , trustRemoveResult :: TrustRemoveResult

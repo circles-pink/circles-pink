@@ -15,6 +15,7 @@ module Data.IxGraph
 
 import Prelude
 
+import Data.Either (Either(..))
 import Data.Foldable (class Foldable, foldr)
 import Data.Graph (Graph)
 import Data.Graph as G
@@ -24,6 +25,10 @@ import Data.Tuple.Nested (type (/\))
 
 class Indexed k v | v -> k where
   getIndex :: v -> k
+
+instance indexedEither :: (Indexed k a, Indexed k b) => Indexed k (Either a b) where
+  getIndex (Left x) = getIndex x
+  getIndex (Right x) = getIndex x
 
 newtype IxGraph id e n = IxGraph (Graph id e n)
 
