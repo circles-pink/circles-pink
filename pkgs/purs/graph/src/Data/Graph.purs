@@ -73,7 +73,7 @@ foldrEdges f x g = edges g # foldr f x
 foldrNodes :: forall id e n z. Ord id => Ord n => (n -> z -> z) -> z -> Graph id e n -> z
 foldrNodes f x g = nodes g # foldr f x
 
-toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: Array (id /\ n), edges :: f (id /\ id /\ e) }
+toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: f (id /\ n), edges :: f (id /\ id /\ e) }
 toUnfoldables g = { nodes: G.nodesToUnfoldable g, edges: G.edgesToUnfoldable g }
 
 --------------------------------------------------------------------------------
