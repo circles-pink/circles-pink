@@ -1,5 +1,6 @@
 module Data.Graph
-  ( deleteNodes
+  ( deleteEdges
+  , deleteNodes
   , edgeIds
   , foldrEdges
   , foldrNodes
@@ -12,7 +13,8 @@ module Data.Graph
   , module Exp
   , outgoingNodes
   , toUnfoldables
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -45,6 +47,10 @@ maybeInsertEdge from to edge g = Just $ G.insertEdge from to edge g
 
 deleteNodes :: forall f id e n. Ord id => Foldable f => f id -> Graph id e n -> Graph id e n
 deleteNodes ids g = foldr G.deleteNode g ids
+
+
+deleteEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id) -> Graph id e n -> Graph id e n
+deleteEdges ids g = foldr (\(from /\ to) -> G.deleteEdge from to) g ids
 
 insertEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id /\ e) -> Graph id e n -> Graph id e n
 insertEdges edges g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges

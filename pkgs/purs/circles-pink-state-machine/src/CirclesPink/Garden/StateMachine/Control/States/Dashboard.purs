@@ -9,7 +9,7 @@ import CirclesCore (TrustNode, User)
 import CirclesCore as CC
 import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
-import CirclesPink.Data.UserIdent (UserIdent, getAddress)
+import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -126,37 +126,17 @@ dashboard env =
 
   syncTrusts set st i = do
     let
-      getNode :: Maybe User -> Maybe UserIdent -> TrustNode -> UserIdent
-      getNode = todo
+      getNode :: Maybe User -> TrustNode -> UserIdent
+      getNode maybeUser tn = UserIdent $ note tn.safeAddress maybeUser
 
-      getEdge :: Maybe User -> Maybe UserIdent -> TrustNode -> TrustState
-      getEdge = todo
+      getEdge :: Maybe TrustState -> TrustNode -> TrustState
+      getEdge maybeOldTrustState tn = case maybeOldTrustState of
+        Nothing | tn.isIncoming -> initTrusted
+        Nothing -> initUntrusted
+        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> initTrusted
+        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> initUntrusted
+        Just oldTrustState -> oldTrustState
 
-      mapTrust :: Maybe User -> Maybe TrustEntry -> TrustNode -> TrustEntry
-      mapTrust maybeUser maybeOldTrust tn =
-        let
-          trustState = case maybeOldTrust of
-            Nothing -> if tn.isIncoming then initTrusted else initUntrusted
-            Just (TrustConfirmed { trustState: oldTrustState }) ->
-              if isPendingTrust oldTrustState && tn.isIncoming then
-                initTrusted
-              else if isPendingUntrust oldTrustState && not tn.isIncoming then
-                initUntrusted
-              else
-                oldTrustState
-            Just (TrustCandidate { trustState: oldTrustState }) ->
-              if isPendingTrust oldTrustState && tn.isIncoming then
-                initTrusted
-              else if isPendingUntrust oldTrustState && not tn.isIncoming then
-                initUntrusted
-              else
-                oldTrustState
-        in
-          TrustConfirmed
-            { isOutgoing: tn.isOutgoing
-            , user: note (convert tn.safeAddress) maybeUser
-            , trustState
-            }
     trustNodes <-
       env.trustGetNetwork st.privKey
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
@@ -170,41 +150,36 @@ dashboard env =
     lift
       $ set \st' ->
           let
+            ownAddress = convert st'.user.safeAddress
+
             newNodes = trustNodes
-              <#>
-                ( \tn ->
-                    getNode
-                      (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-                      (G.lookupNode (convert tn.safeAddress) st'.trusts)
-                      tn
-                )
+              <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
             newEdges :: Array (Address /\ Address /\ TrustState)
             newEdges = A.zip trustNodes newNodes
               <#>
-                ( \(tn /\ n) -> convert st'.user.safeAddress /\ getIndex n /\
-                    ( getEdge
-                        (find (\u -> u.safeAddress == tn.safeAddress) foundUsers)
-                        (G.lookupNode (convert tn.safeAddress) st'.trusts)
-                        tn
-                    )
+                ( \(tn /\ n) ->
+                    convert st'.user.safeAddress /\ getIndex n /\
+                      (tn # getEdge (G.lookupEdge ownAddress (convert tn.safeAddress) st'.trusts))
                 )
           in
             S._dashboard
               st'
                 { trusts = st'.trusts
-                    -- # G.insertNode ( Right $ st'.user)
-                    -- #
-                    --   ( \g ->
-                    --       let
-                    --         ids = G.outgoingIds (convert st'.user.safeAddress) g
-                    --           # maybe Set.empty identity
-                    --           # Set.filter (\id -> G.lookupNode id g # maybe false isConfirmed)
-                    --       in
-                    --         G.deleteNodes ids g
-                    --   )
-                    -- # G.insertNodes newNodes
-                    -- # G.insertEdges newEdges
+                    # G.insertNode (UserIdent $ Right $ st'.user)
+                    #
+                      ( \g ->
+                          let
+                            ids = g
+                              # G.outgoingIds ownAddress
+                              # maybe Set.empty identity
+                              # Set.filter (\id -> g # G.lookupEdge ownAddress id # maybe false isTrusted)
+                              # Set.map (\to -> ownAddress /\ to)
+                          in
+                            G.deleteEdges ids g
+                      )
+                    # G.insertNodes newNodes
+                    # G.insertEdges newEdges
                 }
 
   getUsers set st { userNames, addresses } = do
@@ -270,8 +245,8 @@ dashboard env =
     void do
       runExceptT do
         --let
-          --targetAddress = getAddress u
-          --targetAddress' = convert targetAddress
+        --targetAddress = getAddress u
+        --targetAddress' = convert targetAddress
         -- lift
         --   $ set \st' ->
         --       let
