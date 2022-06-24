@@ -1,12 +1,11 @@
 import { mdiCashFast, mdiQrcodeScan } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button, Input } from '../../../components/forms';
 import { JustifyEnd } from '../../../components/helper';
 import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
-import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
 import Web3 from 'web3';
@@ -20,7 +19,6 @@ import {
 import Icon from '@mdi/react';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
-import { tcToCrc } from '@circles/timecircles';
 
 // -----------------------------------------------------------------------------
 // Send Circles

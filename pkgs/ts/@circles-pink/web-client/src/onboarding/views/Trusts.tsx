@@ -20,7 +20,6 @@ import {
 import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
-import { mapResult } from '../utils/mapResult';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import {
   TrustState,
@@ -83,12 +82,10 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
               <Button
                 theme={theme}
                 onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
-                state={
-                  mapResult(state.deploySafeResult) === 'enabled' &&
-                  mapResult(state.deployTokenResult) === 'enabled'
-                    ? 'enabled'
-                    : 'loading'
-                }
+                state={mapResults(
+                  state.deploySafeResult,
+                  state.deployTokenResult
+                )}
               >
                 {t('finalizeButton')}
               </Button>
@@ -211,3 +208,22 @@ const TrustIndicatorRow = tw.div`flex flex-row justify-between mx-16 my-4 gap-4`
 const CenterText = tw.div`text-center`;
 const CenterElement = tw.div`flex justify-around`;
 const Text = tw.p`mt-4 text-lg font-medium text-gray-500`;
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+type Result = {
+  type: 'notAsked' | 'loading' | 'failure' | 'success';
+};
+
+const mapResults = (res1: Result, res2: Result) => {
+  if (res1.type === 'notAsked' && res2.type === 'notAsked') {
+    return 'enabled';
+  } else if (res1.type === 'success' && res2.type === 'success') {
+    return 'enabled';
+  } else if (res1.type === 'failure' || res2.type === 'failure') {
+    return 'enabled';
+  }
+  return 'loading';
+};
