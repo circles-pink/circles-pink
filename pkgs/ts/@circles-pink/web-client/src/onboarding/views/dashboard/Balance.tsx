@@ -15,7 +15,7 @@ type BalanceProps = {
 export const Balance = ({
   theme,
   balance,
-  checkUBIPayoutResult,
+  // checkUBIPayoutResult,
   requestUBIPayoutResult,
 }: BalanceProps) => {
   // a state is needed here, to avoid flickering balance display
@@ -35,15 +35,20 @@ export const Balance = ({
   }, [balance]);
 
   useEffect(() => {
+    // When requesting a UBI payout, we want to indicate
+    // that to the user with a rotation animation
     if (
-      checkUBIPayoutResult.type === 'loading' ||
+      // checkUBIPayoutResult.type === 'loading' ||
       requestUBIPayoutResult.type === 'loading'
     ) {
       setIsRequesting(true);
     } else {
       setIsRequesting(false);
     }
-  }, [checkUBIPayoutResult, requestUBIPayoutResult]);
+  }, [
+    // checkUBIPayoutResult,
+    requestUBIPayoutResult,
+  ]);
 
   return (
     <>
