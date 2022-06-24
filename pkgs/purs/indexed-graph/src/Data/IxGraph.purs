@@ -1,6 +1,7 @@
 module Data.IxGraph
   ( IxGraph
   , class Indexed
+  , deleteEdges
   , deleteNodes
   , empty
   , getIndex
@@ -8,10 +9,12 @@ module Data.IxGraph
   , insertEdges
   , insertNode
   , insertNodes
+  , lookupEdge
   , lookupNode
   , outgoingIds
   , outgoingNodes
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -50,6 +53,10 @@ outgoingIds id (IxGraph graph) = G.outgoingIds id graph
 deleteNodes :: forall f id e n. Ord id => Foldable f => f id -> IxGraph id e n -> IxGraph id e n
 deleteNodes ids (IxGraph graph) = IxGraph $ G.deleteNodes ids graph
 
+deleteEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id) -> IxGraph id e n -> IxGraph id e n
+deleteEdges ids (IxGraph graph) = IxGraph $ G.deleteEdges ids graph
+
+
 insertEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id /\ e) -> IxGraph id e n -> IxGraph id e n
 insertEdges edges (IxGraph graph) = IxGraph $ G.insertEdges edges graph
 
@@ -61,3 +68,6 @@ insertEdge from to edge (IxGraph graph) = IxGraph $ G.insertEdge from to edge gr
 
 outgoingNodes :: forall id e n. Ord id => Ord n => id -> IxGraph id e n -> Maybe (Set n)
 outgoingNodes id (IxGraph graph) = G.outgoingNodes id graph
+
+lookupEdge :: forall id e n. Ord id => id -> id -> IxGraph id e n -> Maybe e
+lookupEdge from to (IxGraph graph) = G.lookupEdge from to graph 
