@@ -9,6 +9,7 @@ import { Theme } from '../../../context/theme';
 import { mapBalanceToBN } from '../../utils/balance';
 import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
+import Web3 from 'web3';
 import { DashboardProps } from '../Dashboard';
 import QrScanner from 'eth-qr-scanner';
 import { t } from 'i18next';
@@ -19,6 +20,7 @@ import {
 import Icon from '@mdi/react';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
+import { tcToCrc } from '@circles/timecircles';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -51,9 +53,7 @@ export const Send = ({
         A._transfer({
           from,
           to,
-          value: mapBalanceToBN(
-            parseFloat(convertTcToCrc(value, new Date().toString()).toFixed(2))
-          ),
+          value: Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether'),
           paymentNote,
         })
       )
