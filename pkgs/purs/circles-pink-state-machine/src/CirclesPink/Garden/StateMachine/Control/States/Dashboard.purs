@@ -193,33 +193,38 @@ dashboard env =
   addTrustConnection set st u =
     void do
       runExceptT do
-        -- let
-        --   targetAddress = getAddress u
-        --   targetAddress' = convert targetAddress
-        -- lift
-        --   $ set \st' ->
-        --       let
-        --         ownAddress = convert $ st'.user.safeAddress
-        --       in
-        --         S._dashboard
-        --           st'
-        --             { trusts =
-        --                 case G.lookupNode targetAddress' st'.trusts of
-        --                   Nothing -> st'.trusts
-        --                     # G.insertNode (TrustCandidate { isOutgoing: false, trustState: next initUntrusted, user: lmap convert u })
-        --                     # G.insertEdge ownAddress targetAddress' {}
-        --                   Just (TrustConfirmed t) -> st'.trusts
-        --                     # G.insertNode (TrustConfirmed $ t { trustState = if isUntrusted t.trustState then next t.trustState else t.trustState })
-        --                     # G.insertEdge ownAddress targetAddress' {}
-        --                   Just (TrustCandidate t) -> st'.trusts
-        --                     # G.insertNode (TrustCandidate t)
-        --                     # G.insertEdge ownAddress targetAddress' {}
-        --             }
-        -- _ <-
-        --   env.addTrustConnection st.privKey targetAddress st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
-        --     # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
-        --     # dropError
+        let
+          targetAddress = getAddress u
+          targetAddress' = convert targetAddress
+        lift
+          $ set \st' ->
+              let
+                ownAddress = convert $ st'.user.safeAddress
+              in
+                S._dashboard
+                  st'
+                    { trusts =
+                        let
+                          maybeNode = G.lookupNode targetAddress' st'.trusts
+                          maybeEdge = G.lookupEdge ownAddress targetAddress' st'.trusts
+                        in
+                          case maybeNode, maybeEdge of
+                            Nothing, Nothing -> st'.trusts
+                              # G.insertNode u
+                              # G.insertEdge ownAddress targetAddress' (next initUntrusted)
+                            Just _, Nothing -> st'.trusts
+                              # G.insertEdge ownAddress targetAddress' (next initUntrusted)
+                            Just _, Just edge -> st'.trusts
+                              # G.insertEdge ownAddress targetAddress' (if isUntrusted edge then next edge else edge)
+                            Nothing, Just edge -> st'.trusts
+                              # G.insertNode u
+                              # G.insertEdge ownAddress targetAddress' (if isUntrusted edge then next edge else edge)
+                    }
+        _ <-
+          env.addTrustConnection st.privKey targetAddress st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
+            # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
+            # dropError
         -- lift
         --   $ set \st' ->
         --       let
