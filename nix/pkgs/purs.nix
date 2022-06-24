@@ -41,13 +41,20 @@ let
         ];
       };
 
+      graph = {
+        censorCodes = [
+          "UnusedExplicitImport"
+          "ShadowedName"
+        ];
+      };
+
       indexed-graph = {
         censorCodes = [
           "UserDefinedWarning"
         ];
       };
     })
-    (x: removeAttrs x ["all-tests"])
+    (x: removeAttrs x [ "all-tests" ])
     spago2nix-extra.buildMonorepo
     (x: recursiveUpdate x
       { circles-pink-state-machine.default = withTS x.circles-pink-state-machine.output; }
