@@ -83,7 +83,12 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
               <Button
                 theme={theme}
                 onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
-                state={mapResult(state.trustsResult)}
+                state={
+                  mapResult(state.deploySafeResult) === 'loading' ||
+                  mapResult(state.deployTokenResult) === 'loading'
+                    ? 'loading'
+                    : 'enabled'
+                }
               >
                 {t('finalizeButton')}
               </Button>

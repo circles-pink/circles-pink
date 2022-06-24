@@ -48,7 +48,9 @@ export const Balance = ({
   return (
     <>
       <BalanceWrapper>
-        <Amount color={theme.baseColor}>{displayBalance(resBalance)}</Amount>
+        <Amount color={theme.baseColor}>
+          {displayBalance(resBalance, 'TIME-CIRCLES')}
+        </Amount>
         <CurrencySymbol
           color={theme.baseColor}
           isLoading={isLoading}
