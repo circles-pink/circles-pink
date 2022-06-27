@@ -1,6 +1,6 @@
 {
   "name": "@circles-pink/state-machine",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "dependencies": {
     "@circles/core": "2.11.1",
     "bip39": "^3.0.4",
