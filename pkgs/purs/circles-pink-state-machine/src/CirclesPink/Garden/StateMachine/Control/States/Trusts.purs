@@ -4,16 +4,12 @@ module CirclesPink.Garden.StateMachine.Control.States.Trusts
 
 import Prelude
 
-import CirclesCore (SafeStatus)
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (lift, runExceptT)
-import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..), isRight)
 import RemoteData (_failure)
-import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
 
 trusts
   :: forall m
@@ -65,12 +61,3 @@ trusts env@{ deployToken } =
           lift $ set \_ -> S.initDashboard
             { user: st.user, privKey: st.privKey }
 
---------------------------------------------------------------------------------
-
-type ErrDeploySafe' r = Env.ErrDeploySafe + Env.ErrGetSafeStatus + r
-
-deploySafe' :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrDeploySafe' r) m SafeStatus
-deploySafe' { deploySafe, getSafeStatus } privKey = do
-  _ <- deploySafe privKey
-  safeStatus <- getSafeStatus privKey
-  pure safeStatus

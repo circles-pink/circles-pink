@@ -10,10 +10,10 @@ import CirclesCore as CC
 import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent, getAddress)
-import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, retryUntil, subscribeRemoteReport)
+import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (catchError, runExceptT)
+import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Convertable (convert)
@@ -347,13 +347,20 @@ dashboard env =
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }
       Right h -> set \st' -> S._dashboard st' { transferResult = _success h }
 
-  redeploySafeAndToken _ st _ =
+  redeploySafeAndToken set st _ = do
     void do
       runExceptT do
-        -- First deploy always fails
-        _ <- env.deploySafe st.privKey `catchError` \_ -> pure unit
-        _ <- (env.deployToken st.privKey <#> const unit) `catchError` \_ -> pure unit
-        -- Second deploy works
-        _ <- env.deploySafe st.privKey
-        _ <- (env.deployToken st.privKey <#> const unit)
+        _ <- deploySafe' env st.privKey
+          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { redeploySafeResult = r })
+          # retryUntil env (const { delay: 250 })
+              ( \r _ -> case r of
+                  Right res -> res.isCreated && res.isDeployed
+                  Left _ -> false
+              )
+              0
+          # dropError
+        _ <- env.deployToken st.privKey
+          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { redeployTokenResult = r })
+          # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+          # dropError
         pure unit

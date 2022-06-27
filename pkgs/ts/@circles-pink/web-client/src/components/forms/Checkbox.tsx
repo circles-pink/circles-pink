@@ -64,6 +64,7 @@ const CheckboxInternal = ({
 
 const Label = styled.label`
   cursor: pointer;
+  color: black;
 `;
 
 const HiddenCheckbox = styled.input`
