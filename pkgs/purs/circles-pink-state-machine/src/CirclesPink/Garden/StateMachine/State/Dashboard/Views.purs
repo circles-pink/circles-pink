@@ -1,6 +1,8 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   ( DefaultView
   , ErrDashboardStateResolved
+  , ErrDeploySafeResolved
+  , ErrDeployTokenResolved
   , ErrGetUsersResolved
   , ErrTokenCheckUBIPayoutResolved
   , ErrTokenGetBalanceResolved
@@ -19,7 +21,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 
 import Prelude
 
-import CirclesCore (ApiError, NativeError, User, TrustNode)
+import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustEntry (TrustEntry, isCandidate, isConfirmed, trustEntryToTrust)
@@ -27,6 +29,7 @@ import CirclesPink.Data.TrustState (TrustState, initUntrusted)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
+import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Convertable (convert)
 import Data.Array (any)
 import Data.Array as A
@@ -77,6 +80,8 @@ type DefaultView =
   , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved Balance
   , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
   , transferResult :: RemoteData_ ErrTokenTransferResolved String
+  , redeploySafeResult :: RemoteReport ErrDeploySafeResolved SafeStatus
+  , redeployTokenResult :: RemoteReport ErrDeployTokenResolved String
   }
 
 type Trusts = Array Trust
@@ -134,6 +139,8 @@ defaultView d@{ trusts } =
     , getBalanceResult: d.getBalanceResult
     , requestUBIPayoutResult: d.requestUBIPayoutResult
     , transferResult: d.transferResult
+    , redeploySafeResult: nubRemoteReport d.redeploySafeResult
+    , redeployTokenResult: nubRemoteReport d.redeployTokenResult
     }
 
 mapTrusts :: (TrustEntry -> Boolean) -> Array TrustEntry -> Trusts
@@ -199,6 +206,18 @@ type ErrTokenTransferResolved = Variant
   )
 
 type ErrDashboardStateResolved = Variant
+  ( errService :: Unit
+  , errNative :: NativeError
+  , errInvalidUrl :: String
+  )
+
+type ErrDeploySafeResolved = Variant
+  ( errInvalidUrl :: String
+  , errNative :: NativeError
+  , errService :: Unit
+  )
+
+type ErrDeployTokenResolved = Variant
   ( errService :: Unit
   , errNative :: NativeError
   , errInvalidUrl :: String

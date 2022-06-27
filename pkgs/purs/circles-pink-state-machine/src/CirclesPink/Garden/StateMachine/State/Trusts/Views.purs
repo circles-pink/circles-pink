@@ -3,9 +3,6 @@ module CirclesPink.Garden.StateMachine.State.Trusts.Views
   , ErrDeploySafeResolved
   , ErrDeployTokenResolved
   , ErrTrustStateResolved
-  , TrustStateTrustsResult
-  , TrustsDeploySafeResult
-  , TrustsDeployTokenResult
   , defaultView
   ) where
 
@@ -23,16 +20,10 @@ type DefaultView =
   , trusts :: Array TrustNode
   , safeStatus :: SafeStatus
   , isReady :: Boolean
-  , trustsResult :: TrustStateTrustsResult
-  , deploySafeResult :: TrustsDeploySafeResult
-  , deployTokenResult :: TrustsDeployTokenResult
+  , trustsResult :: RemoteReport ErrTrustStateResolved Unit
+  , deploySafeResult :: RemoteReport ErrDeploySafeResolved SafeStatus
+  , deployTokenResult :: RemoteReport ErrDeployTokenResolved String
   }
-
-type TrustStateTrustsResult = RemoteReport ErrTrustStateResolved Unit
-
-type TrustsDeploySafeResult = RemoteReport ErrDeploySafeResolved SafeStatus
-
-type TrustsDeployTokenResult = RemoteReport ErrDeployTokenResolved String
 
 type ErrTrustStateResolved = Variant
   ( errService :: Unit
