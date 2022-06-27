@@ -109,6 +109,22 @@ export const Dashboard = ({
   }, []);
 
   // -----------------------------------------------------------------------------
+  // Redeploy, if token is not deployed
+  // -----------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (
+      state.checkUBIPayoutResult.type === 'failure' &&
+      state.checkUBIPayoutResult.value.error.type === 'errNative' &&
+      state.checkUBIPayoutResult.value.error.value.name === 'CoreError' &&
+      state.checkUBIPayoutResult.value.error.value.message ===
+        'Invalid Token address. Did you forget to deploy the Token?'
+    ) {
+      act(A._dashboard(A._redeploySafeAndToken(unit)));
+    }
+  }, [state.checkUBIPayoutResult]);
+
+  // -----------------------------------------------------------------------------
   // User Search
   // -----------------------------------------------------------------------------
 

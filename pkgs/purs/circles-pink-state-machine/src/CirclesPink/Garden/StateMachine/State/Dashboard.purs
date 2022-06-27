@@ -12,6 +12,8 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , ErrUserSearch
   , GetUsersResult
   , InitDashboard
+  , RedeploySafeResult
+  , RedeployTokenResult
   , RemoteDataV_
   , RemoteReportV
   , TokenCheckUBIPayoutResult
@@ -29,7 +31,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
 
 import Prelude
 
-import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User)
+import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User, SafeStatus)
 import CirclesCore as CC
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustEntry (TrustEntry)
@@ -65,15 +67,23 @@ type DashboardState =
   , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
   , transferResult :: TokenTransferResult
   , userSearchResult :: UserSearchResult
+  , redeploySafeResult :: RedeploySafeResult
+  , redeployTokenResult :: RedeployTokenResult
   }
 
 type Trusts = Map W3.Address Trust
 
 --------------------------------------------------------------------------------
 
-
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
 
+type RedeploySafeResult = RemoteReport
+  (Variant (Env.ErrDeploySafe + Env.ErrGetSafeStatus + ()))
+  SafeStatus
+
+type RedeployTokenResult = RemoteReport
+  (Variant (Env.ErrDeployToken + ()))
+  String
 
 --------------------------------------------------------------------------------
 -- InitDashboard
@@ -98,6 +108,8 @@ initDashboard id =
         , getUsersResult: _notAsked unit
         , transferResult: _notAsked unit
         , userSearchResult: _notAsked unit
+        , redeploySafeResult: _notAsked unit
+        , redeployTokenResult: _notAsked unit
         }
 
 --------------------------------------------------------------------------------

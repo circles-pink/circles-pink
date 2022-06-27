@@ -140,3 +140,13 @@ retryUntil env@{ sleep } getCfg pred retry mkCompu = ExceptT do
 
 dropError :: ∀ (t320 ∷ Type -> Type) (t322 ∷ Type) (t331 ∷ Type). Functor t320 ⇒ ExceptT t331 t320 t322 → ExceptT Unit t320 t322
 dropError = mapExceptT (\x -> x <#> lmap (const unit))
+
+--------------------------------------------------------------------------------
+
+type ErrDeploySafe' r = Env.ErrDeploySafe + Env.ErrGetSafeStatus + r
+
+deploySafe' :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrDeploySafe' r) m SafeStatus
+deploySafe' { deploySafe, getSafeStatus } privKey = do
+  _ <- deploySafe privKey
+  safeStatus <- getSafeStatus privKey
+  pure safeStatus
