@@ -158,5 +158,5 @@ const WordGrid = styled.div((props: WordGridProps) => {
   ];
 });
 const WordContainer = tw.div`py-1 mr-2`;
-const Word = tw.div`p-2 bg-white w-full text-center rounded-full relative`;
+const Word = tw.div`p-2 bg-white w-full text-center text-black rounded-full relative`;
 const WordNumber = tw.span`select-none text-sm absolute left-2 text-gray-400`;
