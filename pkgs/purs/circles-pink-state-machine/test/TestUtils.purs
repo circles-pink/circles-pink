@@ -4,7 +4,6 @@ import Prelude
 
 import CirclesCore (User)
 import Control.Error.Util (hush)
-import Convertable (convert)
 import Data.Argonaut (decodeJson, fromString)
 import Data.Maybe (fromJust)
 import Network.Ethereum.Core.Signatures as W3
@@ -47,7 +46,7 @@ userE = mkDummyUser addrE
 
 --
 mkDummyUser :: W3.Address -> User
-mkDummyUser a = { id: 1, username: "A", avatarUrl: "", safeAddress: convert $ a }
+mkDummyUser a = { id: 1, username: "A", avatarUrl: "", safeAddress: a }
 
 --
 

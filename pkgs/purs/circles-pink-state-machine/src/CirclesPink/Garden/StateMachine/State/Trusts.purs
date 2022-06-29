@@ -12,11 +12,11 @@ import Prelude
 import CirclesCore (SafeStatus, TrustNode)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
 type ErrTrustState r = Env.ErrGetSafeStatus
@@ -40,7 +40,7 @@ type TrustsDeployTokenResult = RemoteReport
 
 type TrustState =
   { user :: CC.User
-  , privKey :: P.PrivateKey
+  , privKey :: PrivateKey
   , trusts :: Array TrustNode
   , safeStatus :: SafeStatus
   , isReady :: Boolean

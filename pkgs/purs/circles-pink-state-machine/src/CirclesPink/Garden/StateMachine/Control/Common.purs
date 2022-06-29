@@ -12,13 +12,14 @@ import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
+import Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, default, onMatch)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
-import Wallet.PrivateKey (PrivateKey)
+
 
 run :: forall t m e a. MonadTrans t => Monad m => ExceptV e m a -> t m (Either (Variant e) a)
 run = lift <<< runExceptT

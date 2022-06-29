@@ -5,6 +5,7 @@ module CirclesCore
   , ErrNative
   , ErrNewCirclesCore
   , ErrNewWebSocketProvider
+  , ErrParseAddress
   , ErrPrivKeyToAccount
   , ErrSafeDeploy
   , ErrSafeGetSafeStatus
@@ -86,16 +87,14 @@ import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, Trus
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
-import Control.Monad.Except (ExceptT(..), except, lift)
+import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
-import Data.Newtype (unwrap)
 import Data.Newtype.Extra ((-|))
-import Data.PrivateKey (PrivateKey(..))
+import Data.PrivateKey (PrivateKey)
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
@@ -103,7 +102,6 @@ import Effect.Exception (Error, message, name, try)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (Address, mkAddress)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
-import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Wallet.PrivateKey (Nonce, nonceToBigInt)
@@ -212,14 +210,14 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
-  mapOk :: Array _ -> Result
   mapOk = traverse mapTrustNode
 
   mapTrustNode tn = do
-    address <- except $ note (_errParseAddress tn.safeAddress) (mkAddress =<< mkHexString tn.safeAddress)
+    safeAddress <- parseAddr tn.safeAddress
+    mutualConnections <- traverse parseAddr tn.mutualConnections
     pure tn
-      { safeAddress = address
-      , mutualConnections = todo
+      { safeAddress = safeAddress
+      , mutualConnections = mutualConnections
       }
 
 --------------------------------------------------------------------------------
@@ -294,7 +292,7 @@ type User =
   , avatarUrl :: String
   }
 
-type ErrUserResolve r = ErrNative + ErrApi + r
+type ErrUserResolve r = ErrNative + ErrParseAddress + ErrApi + r
 
 userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrUserResolve r) (Array User)
 userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
@@ -309,7 +307,7 @@ userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 
   mapOk x = case apiResultToEither x of
     Left apiError -> Left $ _errApi apiError
-    Right data_ -> pure $ map userToUser data_
+    Right data_ -> traverse userToUser data_
 
 --------------------------------------------------------------------------------
 -- API / userRegister
@@ -318,7 +316,7 @@ type SearchOptions =
   { query :: String
   }
 
-type ErrSearch r = ErrNative + ErrApi + r
+type ErrSearch r = ErrNative + ErrParseAddress + ErrApi + r
 
 userSearch :: forall r. B.CirclesCore -> B.Account -> SearchOptions -> Result (ErrSearch r) (Array User)
 userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
@@ -327,7 +325,7 @@ userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
 
   mapOk x = case apiResultToEither x of
     Left apiError -> Left $ _errApi apiError
-    Right data_ -> pure $ map userToUser data_
+    Right data_ -> traverse userToUser data_
 
 --------------------------------------------------------------------------------
 -- API / safeDeploy
@@ -348,30 +346,30 @@ safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 --------------------------------------------------------------------------------
 -- API / safePredictAddress
 --------------------------------------------------------------------------------
-type ErrSafePredictAddress r = ErrNative + r
+type ErrSafePredictAddress r = ErrNative + ErrParseAddress + r
 
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) Address
-safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
+safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -| _.safe -| _.predictAddress
 
   mapArg2 x = x { nonce = nonceToBigInt x.nonce }
 
-  mapOk x = todo -- unsafePartial $ P.unsafeAddrFromString x
+  mapOk = parseAddr
 
 --------------------------------------------------------------------------------
 -- API / safePrepareDeploy
 --------------------------------------------------------------------------------
-type ErrSafePrepareDeploy r = ErrNative + r
+type ErrSafePrepareDeploy r = ErrNative + ErrParseAddress + r
 
 safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) Address
-safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
+safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -| _.safe -| _.prepareDeploy
 
   mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
 
-  mapOk x = todo -- unsafePartial $ P.unsafeAddrFromString x
+  mapOk = parseAddr
 
 --------------------------------------------------------------------------------
 -- API / safeIsFunded
@@ -548,8 +546,10 @@ type NativeError =
 --------------------------------------------------------------------------------
 -- Util
 --------------------------------------------------------------------------------
-userToUser :: B.User -> User
-userToUser = todo -- unwrap >>> \x -> x { safeAddress = unsafePartial $ P.unsafeAddrFromString x.safeAddress }
+userToUser :: forall r. B.User -> Either (Variant (ErrParseAddress r)) User
+userToUser (B.User x) = do
+  safeAddress <- parseAddr x.safeAddress
+  pure $ x { safeAddress = safeAddress }
 
 unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> Result (ErrNative + r) Unit
 unsafeSampleCore x1 x2 =
@@ -564,5 +564,10 @@ mkErrorNative e = _errNative { message: message e, name: name e }
 
 mapBoolean :: forall r. Boolean -> Either (Variant (ErrService + r)) Unit
 mapBoolean true = Right unit
-
 mapBoolean false = Left $ _errService unit
+
+parseAddr :: forall r. String -> Either (Variant (ErrParseAddress r)) Address
+parseAddr s = s
+  # mkHexString
+  >>= mkAddress
+  # note (_errParseAddress s)
