@@ -26,7 +26,7 @@ import CirclesCore.Bindings (Balance)
 import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustEntry (TrustEntry, isCandidate, isConfirmed, trustEntryToTrust)
 import CirclesPink.Data.TrustState (TrustState, initUntrusted)
-import CirclesPink.Data.UserIdent (UserIdent)
+import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
@@ -96,7 +96,7 @@ mapTrust :: T.Trust -> Trust
 mapTrust t =
   { isOutgoing: t.isOutgoing
   , trustState: t.trustState
-  , user: lmap convert t.user
+  , user: t.user
   }
 
 defaultView :: DashboardState -> DefaultView

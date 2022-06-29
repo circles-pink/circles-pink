@@ -1,16 +1,12 @@
 module CirclesPink.Data.Trust
   ( Trust
-  )
-  where
+  ) where
 
-
-import CirclesCore (User)
-import Data.Either (Either)
-import Network.Ethereum.Core.Signatures as W3
 import CirclesPink.Data.TrustState (TrustState)
+import CirclesPink.Data.UserIdent (UserIdent)
 
 type Trust =
   { isOutgoing :: Boolean
-  , user :: Either W3.Address User
+  , user :: UserIdent
   , trustState :: TrustState
   }
