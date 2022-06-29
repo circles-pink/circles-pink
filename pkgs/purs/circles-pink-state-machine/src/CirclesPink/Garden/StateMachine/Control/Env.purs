@@ -87,7 +87,7 @@ type ApiCheckUserName m = String -> ExceptT CirclesError m { isValid :: Boolean 
 type ApiCheckEmail m = String -> ExceptT CirclesError m { isValid :: Boolean }
 
 --------------------------------------------------------------------------------
-type ErrGetSafeAddress r = ErrNative + ErrInvalidUrl + r
+type ErrGetSafeAddress r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type GetSafeAddress m = forall r. PrivateKey -> ExceptV (ErrGetSafeAddress + r) m Address
 
@@ -114,22 +114,22 @@ type ErrTrustGetNetwork r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 type TrustGetNetwork m = forall r. PrivateKey -> ExceptV (ErrTrustGetNetwork + r) m (Array TrustNode)
 
 --------------------------------------------------------------------------------
-type ErrGetSafeStatus r = ErrNative + ErrInvalidUrl + r
+type ErrGetSafeStatus r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type GetSafeStatus m = forall r. PrivateKey -> ExceptV (ErrGetSafeStatus + r) m SafeStatus
 
 --------------------------------------------------------------------------------
-type ErrDeploySafe r = ErrService + ErrInvalidUrl + ErrNative + r
+type ErrDeploySafe r = ErrService + ErrInvalidUrl + ErrNative + ErrParseAddress + r
 
 type DeploySafe m = forall r. PrivateKey -> ExceptV (ErrDeploySafe + r) m Unit
 
 --------------------------------------------------------------------------------
-type ErrDeployToken r = ErrService + ErrInvalidUrl + ErrNative + r
+type ErrDeployToken r = ErrService + ErrInvalidUrl + ErrNative + ErrParseAddress + r
 
 type DeployToken m = forall r. PrivateKey -> ExceptV (ErrDeployToken + r) m String
 
 --------------------------------------------------------------------------------
-type ErrUserResolve r = ErrNative + ErrInvalidUrl + ErrApi + (errUserNotFound :: UserNotFoundError | r)
+type ErrUserResolve r = ErrNative + ErrInvalidUrl + ErrApi + ErrParseAddress + ErrParseAddress + (errUserNotFound :: UserNotFoundError | r)
 
 type UserResolve m = forall r. PrivateKey -> ExceptV (ErrUserResolve + r) m User
 
@@ -139,7 +139,7 @@ type ErrUserSearch r = ErrInvalidUrl + ErrNative + ErrApi + ErrParseAddress + r
 type UserSearch m = forall r. PrivateKey -> { query :: String } -> ExceptV (ErrUserSearch + r) m (Array User)
 
 --------------------------------------------------------------------------------
-type ErrGetUsers r = ErrNative + ErrInvalidUrl + ErrApi + (errUserNotFound :: UserNotFoundError | r)
+type ErrGetUsers r = ErrNative + ErrInvalidUrl + ErrApi + ErrParseAddress + (errUserNotFound :: UserNotFoundError | r)
 
 type GetUsers m = forall r. PrivateKey -> (Array String) -> (Array Address) -> ExceptV (ErrGetUsers + r) m (Array User)
 

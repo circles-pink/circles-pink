@@ -29,18 +29,21 @@ type ErrTrustStateResolved = Variant
   ( errService :: Unit
   , errNative :: NativeError
   , errInvalidUrl :: String
+  , errParseAddress :: String
   )
 
 type ErrDeploySafeResolved = Variant
   ( errInvalidUrl :: String
   , errNative :: NativeError
   , errService :: Unit
+  , errParseAddress :: String
   )
 
 type ErrDeployTokenResolved = Variant
   ( errService :: Unit
   , errNative :: NativeError
   , errInvalidUrl :: String
+  , errParseAddress :: String
   )
 
 defaultView :: TrustState -> DefaultView

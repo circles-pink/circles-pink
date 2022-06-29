@@ -7,8 +7,7 @@ import Prelude
 
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
-import CirclesPink.Data.TrustEntry (TrustEntry(..), isConfirmed)
-import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, isUntrusted, next)
+import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -16,23 +15,19 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Convertable (convert)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
-import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
+import Data.PrivateKey (PrivateKey)
 import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Network.Ethereum.Core.Signatures (Address)
-import Network.Ethereum.Core.Signatures as W3
-import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
 
@@ -45,19 +40,19 @@ splitArray xs =
   in
     take count xs /\ drop count xs
 
-fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array W3.Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array (Either W3.Address User))
+fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array (Either Address User))
 fetchUsersBinarySearch _ _ xs
   | A.length xs == 0 = pure []
 
 fetchUsersBinarySearch env privKey xs
   | A.length xs == 1 = do
-      eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+      eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
       case eitherUsers of
         Left _ -> pure $ map Left xs
         Right ok -> pure $ map Right ok
 
 fetchUsersBinarySearch env privKey xs = do
-  eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] (map convert xs)
+  eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
   case eitherUsers of
     Left _ ->
       let
@@ -77,8 +72,8 @@ dashboard
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
          ActionHandler' m
-           { from :: String
-           , to :: String
+           { from :: Address
+           , to :: Address
            , value :: String
            , paymentNote :: String
            }
@@ -87,7 +82,7 @@ dashboard
      , getUsers ::
          ActionHandler' m
            { userNames :: Array String
-           , addresses :: Array P.Address
+           , addresses :: Array Address
            }
            S.DashboardState
            ("dashboard" :: S.DashboardState)
@@ -140,7 +135,7 @@ dashboard env =
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
     users <-
-      fetchUsersBinarySearch env st.privKey (map (convert <<< _.safeAddress) trustNodes)
+      fetchUsersBinarySearch env st.privKey (map _.safeAddress trustNodes)
         # dropError
     let
       foundUsers = catMaybes $ map hush users
@@ -148,7 +143,7 @@ dashboard env =
     lift
       $ set \st' ->
           let
-            ownAddress = convert st'.user.safeAddress
+            ownAddress = st'.user.safeAddress
 
             newNodes = trustNodes
               <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
@@ -157,8 +152,8 @@ dashboard env =
             newEdges = A.zip trustNodes newNodes
               <#>
                 ( \(tn /\ n) ->
-                    convert st'.user.safeAddress /\ getIndex n /\
-                      (tn # getEdge (G.lookupEdge ownAddress (convert tn.safeAddress) st'.trusts))
+                    st'.user.safeAddress /\ getIndex n /\
+                      (tn # getEdge (G.lookupEdge ownAddress tn.safeAddress st'.trusts))
                 )
           in
             S._dashboard
@@ -195,25 +190,25 @@ dashboard env =
       runExceptT do
         let
           targetAddress = getAddress u
-          targetAddress' = convert targetAddress
+
         lift
           $ set \st' ->
               let
-                ownAddress = convert $ st'.user.safeAddress
+                ownAddress = st'.user.safeAddress
               in
                 S._dashboard
                   st'
                     { trusts =
                         let
-                          maybeNode = G.lookupNode targetAddress' st'.trusts
-                          maybeEdge = G.lookupEdge ownAddress targetAddress' st'.trusts
+                          maybeNode = G.lookupNode targetAddress st'.trusts
+                          maybeEdge = G.lookupEdge ownAddress targetAddress st'.trusts
                         in
                           case maybeNode, maybeEdge of
                             Nothing, Nothing -> st'.trusts
                               # G.insertNode u
-                              # G.insertEdge ownAddress targetAddress' (next initUntrusted)
+                              # G.insertEdge ownAddress targetAddress (next initUntrusted)
                             Just _, Nothing -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress' (next initUntrusted)
+                              # G.insertEdge ownAddress targetAddress (next initUntrusted)
                             _, _ -> st'.trusts
                     }
         _ <-
@@ -225,18 +220,18 @@ dashboard env =
         lift
           $ set \st' ->
               let
-                ownAddress = convert $ st'.user.safeAddress
+                ownAddress = st'.user.safeAddress
               in
                 S._dashboard
                   st'
                     { trusts =
                         let
-                          maybeNode = G.lookupNode targetAddress' st'.trusts
-                          maybeEdge = G.lookupEdge ownAddress targetAddress' st'.trusts
+                          maybeNode = G.lookupNode targetAddress st'.trusts
+                          maybeEdge = G.lookupEdge ownAddress targetAddress st'.trusts
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress' (if isLoadingTrust edge then next edge else edge)
+                              # G.insertEdge ownAddress targetAddress (if isLoadingTrust edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         pure unit
@@ -246,22 +241,22 @@ dashboard env =
       runExceptT do
         let
           targetAddress = getAddress u
-          targetAddress' = convert targetAddress
+
         lift
           $ set \st' ->
               let
-                ownAddress = convert $ st'.user.safeAddress
+                ownAddress = st'.user.safeAddress
               in
                 S._dashboard
                   st'
                     { trusts =
                         let
-                          maybeNode = G.lookupNode targetAddress' st'.trusts
-                          maybeEdge = G.lookupEdge ownAddress targetAddress' st'.trusts
+                          maybeNode = G.lookupNode targetAddress st'.trusts
+                          maybeEdge = G.lookupEdge ownAddress targetAddress st'.trusts
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress' (if isTrusted edge then next edge else edge)
+                              # G.insertEdge ownAddress targetAddress (if isTrusted edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         _ <-
@@ -273,18 +268,18 @@ dashboard env =
         lift
           $ set \st' ->
               let
-                ownAddress = convert $ st'.user.safeAddress
+                ownAddress = st'.user.safeAddress
               in
                 S._dashboard
                   st'
                     { trusts =
                         let
-                          maybeNode = G.lookupNode targetAddress' st'.trusts
-                          maybeEdge = G.lookupEdge ownAddress targetAddress' st'.trusts
+                          maybeNode = G.lookupNode targetAddress st'.trusts
+                          maybeEdge = G.lookupEdge ownAddress targetAddress st'.trusts
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress' (if isLoadingUntrust edge then next edge else edge)
+                              # G.insertEdge ownAddress targetAddress (if isLoadingUntrust edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         pure unit
@@ -325,7 +320,7 @@ dashboard env =
     set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
     let
       task :: ExceptV (S.ErrTokenTransfer + ()) _ _
-      task = env.transfer st.privKey (unsafePartial $ unsafeAddrFromString from) (unsafePartial $ unsafeAddrFromString to) value paymentNote
+      task = env.transfer st.privKey from to value paymentNote
     result <- runExceptT $ task
     case result of
       Left e -> set \st' -> S._dashboard st' { transferResult = _failure e }

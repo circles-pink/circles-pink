@@ -9,12 +9,11 @@ module CirclesPink.Data.TrustEntry
 import Prelude
 
 import CirclesPink.Data.Trust (Trust)
-import Convertable (convert)
-import Data.Either (either)
+import CirclesPink.Data.UserIdent (getAddress)
 import Data.Generic.Rep (class Generic)
 import Data.IxGraph (class Indexed)
 import Data.Show.Generic (genericShow)
-import Network.Ethereum.Core.Signatures as W3
+import Network.Ethereum.Core.Signatures (Address)
 
 data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
 
@@ -27,9 +26,9 @@ derive instance genericTrustEntry :: Generic TrustEntry _
 instance showTrustEntry :: Show TrustEntry where
   show = genericShow
 
-instance indexedTrustEntry :: Indexed W3.Address TrustEntry where
-  getIndex (TrustCandidate { user }) = either identity (_.safeAddress >>> convert) user
-  getIndex (TrustConfirmed { user }) = either identity (_.safeAddress >>> convert) user
+instance indexedTrustEntry :: Indexed Address TrustEntry where
+  getIndex (TrustCandidate { user }) = getAddress user
+  getIndex (TrustConfirmed { user }) = getAddress user
 
 isConfirmed :: TrustEntry -> Boolean
 isConfirmed te = matchTrustEntry (\_ -> true) (\_ -> false) te

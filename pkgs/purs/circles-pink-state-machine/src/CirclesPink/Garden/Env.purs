@@ -187,7 +187,7 @@ env { request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
-      address = privateToAddress privKey
+      address = privateToAddress $ unwrap privKey
     let
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
@@ -273,7 +273,7 @@ env { request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
-      address = privateToAddress privKey
+      address = privateToAddress $ unwrap privKey
     let
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
@@ -285,7 +285,7 @@ env { request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
-      address = privateToAddress privKey
+      address = privateToAddress $ unwrap privKey
     let
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
@@ -297,7 +297,7 @@ env { request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
-      address = privateToAddress privKey
+      address = privateToAddress $ unwrap privKey
     let
       nonce = P.addressToNonce address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }

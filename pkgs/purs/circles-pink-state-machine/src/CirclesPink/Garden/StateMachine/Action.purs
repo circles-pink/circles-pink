@@ -5,8 +5,8 @@ import Prelude
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
 import Data.Variant (Variant, inj)
+import Network.Ethereum.Core.Signatures (Address)
 import Type.Proxy (Proxy(..))
-import Wallet.PrivateKey (Address)
 
 type CirclesAction = Variant
   ( infoGeneral ::
@@ -51,8 +51,8 @@ type CirclesAction = Variant
         , removeTrustConnection :: UserIdent
         , getBalance :: Unit
         , transfer ::
-            { from :: String
-            , to :: String
+            { from :: Address
+            , to :: Address
             , value :: String
             , paymentNote :: String
             }

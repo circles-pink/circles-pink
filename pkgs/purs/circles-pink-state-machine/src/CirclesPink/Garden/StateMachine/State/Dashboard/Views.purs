@@ -173,6 +173,7 @@ type ErrGetUsersResolved = Variant
 type ErrTrustGetTrustsResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
+  , errParseAddress :: String
   )
 
 type ErrTrustAddConnectionResolved = Variant

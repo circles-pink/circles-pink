@@ -43,11 +43,11 @@ import CirclesPink.Garden.StateMachine.State.Login (LoginState, ErrLoginState, i
 import CirclesPink.Garden.StateMachine.State.Trusts (TrustState)
 import CirclesPink.Garden.StateMachine.State.Trusts (TrustState, ErrTrustState, TrustsDeploySafeResult, TrustsDeployTokenResult, _trusts) as Exp
 import Data.Maybe (Maybe(..))
+import Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import RemoteData (RemoteData, _notAsked)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
 
 type UsernameApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 

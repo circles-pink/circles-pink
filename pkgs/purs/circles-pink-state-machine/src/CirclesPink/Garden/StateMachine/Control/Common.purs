@@ -2,7 +2,7 @@ module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
 
-import CirclesCore (SafeStatus, TrustNode, User)
+import CirclesCore (SafeStatus, TrustNode, User, ErrParseAddress)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
@@ -19,7 +19,6 @@ import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
-
 
 run :: forall t m e a. MonadTrans t => Monad m => ExceptV e m a -> t m (Either (Variant e) a)
 run = lift <<< runExceptT

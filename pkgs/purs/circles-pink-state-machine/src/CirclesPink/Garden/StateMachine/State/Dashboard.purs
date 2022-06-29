@@ -31,10 +31,9 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
 
 import Prelude
 
-import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, TrustNode, User, SafeStatus)
+import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, User, ErrParseAddress)
 import CirclesCore as CC
 import CirclesPink.Data.Trust (Trust)
-import CirclesPink.Data.TrustEntry (TrustEntry)
 import CirclesPink.Data.TrustState (TrustState)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
@@ -42,6 +41,7 @@ import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
+import Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Network.Ethereum.Core.Signatures as W3
@@ -50,7 +50,6 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (PrivateKey)
 
 --------------------------------------------------------------------------------
 -- DashboardState
@@ -133,7 +132,7 @@ type ErrUserSearch r = Env.ErrUserSearch + r
 --------------------------------------------------------------------------------
 type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
 
-type ErrTrustGetTrusts r = Env.ErrAddTrustConnection + r
+type ErrTrustGetTrusts r = Env.ErrAddTrustConnection + ErrParseAddress + r
 
 --------------------------------------------------------------------------------
 -- TrustAddResult
