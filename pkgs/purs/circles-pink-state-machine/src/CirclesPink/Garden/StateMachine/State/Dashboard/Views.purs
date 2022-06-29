@@ -24,22 +24,19 @@ import Prelude
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Data.Trust as T
-import CirclesPink.Data.TrustEntry (TrustEntry, isCandidate, isConfirmed, trustEntryToTrust)
-import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted)
+import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
-import Convertable (convert)
-import Data.Array (any)
-import Data.Array as A
-import Data.Bifunctor (lmap)
+import Data.Array (any, filter)
 import Data.Either (Either(..))
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
-import Data.Set as S
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, onMatch)
+import Debug.Extra (todo)
 import Foreign.Object (Object, values)
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
@@ -129,8 +126,8 @@ defaultView d@{ trusts } =
                 Just _, Just _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
           )
   in
-    { trustsConfirmed: d.trusts # G.outgoingNodes d.user.safeAddress # maybe mempty identity # S.toUnfoldable # mapTrusts isConfirmed
-    , trustsCandidates: d.trusts # G.outgoingNodes d.user.safeAddress # maybe mempty identity # S.toUnfoldable # mapTrusts isCandidate
+    { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # filter (\(e /\ _) -> isTrusted e) <#> mapTrust'
+    , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # filter (\(e /\ _) -> not $ isTrusted e) <#> mapTrust'
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
@@ -145,17 +142,8 @@ defaultView d@{ trusts } =
     , redeployTokenResult: nubRemoteReport d.redeployTokenResult
     }
 
-mapTrusts :: (TrustEntry -> Boolean) -> Array UserIdent -> Trusts
-mapTrusts pred xs = xs
-  <#> user
-  # A.filter pred
-  # map
-      ( \trustEntry ->
-          let
-            trust = trustEntryToTrust trustEntry
-          in
-            mapTrust trust
-      )
+mapTrust' :: (TrustState /\ UserIdent) -> Trust
+mapTrust' = todo
 
 --------------------------------------------------------------------------------
 -- Resolved Errors
@@ -164,6 +152,7 @@ type ErrUserSearchResolved = Variant
   ( errApi :: ApiError
   , errNative :: NativeError
   , errInvalidUrl :: String
+  , errParseAddress :: String
   )
 
 type ErrGetUsersResolved = Variant
@@ -171,6 +160,7 @@ type ErrGetUsersResolved = Variant
   , errNative :: NativeError
   , errInvalidUrl :: String
   , errUserNotFound :: UserNotFoundError
+  , errParseAddress :: String
   )
 
 type ErrTrustGetTrustsResolved = Variant
@@ -219,12 +209,14 @@ type ErrDeploySafeResolved = Variant
   ( errInvalidUrl :: String
   , errNative :: NativeError
   , errService :: Unit
+  , errParseAddress :: String
   )
 
 type ErrDeployTokenResolved = Variant
   ( errService :: Unit
   , errNative :: NativeError
   , errInvalidUrl :: String
+  , errParseAddress :: String
   )
 
 --------------------------------------------------------------------------------

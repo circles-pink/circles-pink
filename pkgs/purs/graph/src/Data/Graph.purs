@@ -13,14 +13,13 @@ module Data.Graph
   , module Exp
   , outgoingNodes
   , toUnfoldables
-  )
-  where
+  ) where
 
 import Prelude
 
 import Data.Foldable (class Foldable, foldr)
-import Data.Graph.Core (Graph, deleteEdge, deleteNode, empty, incomingIds, insertEdge, insertNode, lookupEdge, lookupNode, outgoingIds) as Exp
 import Data.Graph.Core (Graph)
+import Data.Graph.Core (Graph, deleteEdge, deleteNode, empty, incomingIds, insertEdge, insertNode, lookupEdge, lookupNode, outgoingIds) as Exp
 import Data.Graph.Core as G
 import Data.Maybe (Maybe(..), fromJust, isJust, maybe)
 import Data.Set (Set)
@@ -48,7 +47,6 @@ maybeInsertEdge from to edge g = Just $ G.insertEdge from to edge g
 deleteNodes :: forall f id e n. Ord id => Foldable f => f id -> Graph id e n -> Graph id e n
 deleteNodes ids g = foldr G.deleteNode g ids
 
-
 deleteEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id) -> Graph id e n -> Graph id e n
 deleteEdges ids g = foldr (\(from /\ to) -> G.deleteEdge from to) g ids
 
@@ -58,8 +56,11 @@ insertEdges edges g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge)
 insertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> Graph id e n
 insertNodes nodes g = foldr (\(id /\ node) -> G.insertNode id node) g nodes
 
-outgoingNodes :: forall id e n. Ord id => Ord n => id -> Graph id e n -> Maybe (Set n)
-outgoingNodes id graph = G.outgoingIds id graph <#> S.map (\id' -> unsafePartial $ unsafeLookupNode id' graph)
+outgoingNodes :: forall id e n. Ord id => Ord n => id -> Graph id e n -> Maybe (Array n)
+outgoingNodes id graph = graph
+  # G.outgoingIds id
+  <#> S.toUnfoldable
+  <#> map (\id' -> unsafePartial $ unsafeLookupNode id' graph)
 
 edgeIds :: forall id e n. Ord id => Graph id e n -> Set (id /\ id)
 edgeIds g = g
