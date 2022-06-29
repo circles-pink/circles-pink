@@ -57,16 +57,19 @@ module CirclesPink.Garden.StateMachine.Control.Env
   ) where
 
 import Prelude
-import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, Balance)
+
+import CirclesCore (Balance, ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrParseAddress)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (JsonDecodeError)
 import Data.DateTime.Instant (Instant)
+import Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
+import Network.Ethereum.Core.Signatures (Address)
+import PursDeps (ErrParse)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, PrivateKey)
 
 --------------------------------------------------------------------------------
 -- Error
@@ -94,19 +97,19 @@ type ErrCoreToWindow r = ErrNative + ErrInvalidUrl + r
 type CoreToWindow m = forall r. PrivateKey -> ExceptV (ErrCoreToWindow + r) m Unit
 
 --------------------------------------------------------------------------------
-type ErrIsTrusted r = ErrNative + ErrInvalidUrl + r
+type ErrIsTrusted r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type IsTrusted m = forall r. PrivateKey -> ExceptV (ErrIsTrusted + r) m TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
-type ErrIsFunded r = ErrNative + ErrInvalidUrl + r
+type ErrIsFunded r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type IsFunded m = forall r. PrivateKey -> ExceptV (ErrIsFunded + r) m Boolean
 --------------------------------------------------------------------------------
 type ErrInvalidMnemonic r = (errInvalidMnemonic :: Unit | r)
 
 --------------------------------------------------------------------------------
-type ErrTrustGetNetwork r = ErrNative + ErrInvalidUrl + r
+type ErrTrustGetNetwork r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type TrustGetNetwork m = forall r. PrivateKey -> ExceptV (ErrTrustGetNetwork + r) m (Array TrustNode)
 
@@ -131,7 +134,7 @@ type ErrUserResolve r = ErrNative + ErrInvalidUrl + ErrApi + (errUserNotFound ::
 type UserResolve m = forall r. PrivateKey -> ExceptV (ErrUserResolve + r) m User
 
 --------------------------------------------------------------------------------
-type ErrUserSearch r = ErrInvalidUrl + ErrNative + ErrApi + r
+type ErrUserSearch r = ErrInvalidUrl + ErrNative + ErrApi + ErrParseAddress + r
 
 type UserSearch m = forall r. PrivateKey -> { query :: String } -> ExceptV (ErrUserSearch + r) m (Array User)
 
@@ -141,7 +144,7 @@ type ErrGetUsers r = ErrNative + ErrInvalidUrl + ErrApi + (errUserNotFound :: Us
 type GetUsers m = forall r. PrivateKey -> (Array String) -> (Array Address) -> ExceptV (ErrGetUsers + r) m (Array User)
 
 --------------------------------------------------------------------------------
-type ErrPrepareSafeDeploy r = ErrNative + ErrInvalidUrl + r
+type ErrPrepareSafeDeploy r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
 type PrepareSafeDeploy m = forall r. PrivateKey -> ExceptV (ErrPrepareSafeDeploy + r) m Address
 
