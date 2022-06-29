@@ -9,6 +9,8 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
+import Network.Ethereum.Core.Signatures (privateToAddress)
 import RemoteData (_failure, _loading, _notAsked)
 import Wallet.PrivateKey as P
 
@@ -30,7 +32,7 @@ submit env =
       Nothing -> pure unit
       Just privateKey -> do
         let
-          address = P.privKeyToAddress privateKey
+          address = privateToAddress $ unwrap privateKey
 
           nonce = P.addressToNonce address
 

@@ -24,6 +24,7 @@ type ErrLoginStateResolved = Variant
   , errInvalidUrl :: String
   , errSaveSession :: Unit
   , errInvalidMnemonic :: Unit
+  , errParseAddress :: String
   )
 
 defaultView :: LoginState -> DefaultView
