@@ -42,6 +42,7 @@ module CirclesCore
   , _errApi
   , _errInvalidUrl
   , _errNative
+  , _errParseAddress
   , _errService
   , bnToStr
   , intToBN
@@ -85,22 +86,27 @@ import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, Trus
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
-import Control.Monad.Except (ExceptT(..))
+import Control.Monad.Except (ExceptT(..), except, lift)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..))
+import Data.Either (Either(..), note)
 import Data.Newtype (unwrap)
 import Data.Newtype.Extra ((-|))
+import Data.PrivateKey (PrivateKey(..))
+import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
+import Network.Ethereum.Core.HexString (mkHexString)
+import Network.Ethereum.Core.Signatures (Address, mkAddress)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, Nonce, PrivateKey, addrToString, nonceToBigInt)
+import Wallet.PrivateKey (Nonce, nonceToBigInt)
 import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
@@ -153,7 +159,7 @@ type ErrPrivKeyToAccount r = ErrNative + r
 
 privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Effect B.Account
 privKeyToAccount w3 pk =
-  B.privKeyToAccount w3 (P.toString pk)
+  B.privKeyToAccount w3 (show pk)
     # try
     <#> lmap mkErrorNative
     # ExceptT
@@ -163,7 +169,7 @@ type ErrSendTransaction r = ErrNative + r
 
 sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrSendTransaction r) Effect Unit
 sendTransaction w3 f t =
-  B.sendTransaction w3 (P.addrToString f) (P.addrToString t)
+  B.sendTransaction w3 (show f) (show t)
     # try
     <#> lmap mkErrorNative
     # ExceptT
@@ -183,7 +189,7 @@ trustIsTrusted cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.trust -| _.isTrusted
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / trustGetNetwork
@@ -197,21 +203,23 @@ type TrustNode =
   , safeAddress :: Address
   }
 
-type ErrTrustGetNetwork r = ErrNative + r
+type ErrTrustGetNetwork r = ErrNative + ErrParseAddress + r
 
-trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: P.Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
-trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
+trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
+trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -| _.trust -| _.getNetwork
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
-  mapOk = map mapTrustNode
+  mapOk :: Array _ -> Result
+  mapOk = traverse mapTrustNode
 
-  mapTrustNode tn =
-    tn
-      { safeAddress = unsafePartial $ P.unsafeAddrFromString tn.safeAddress
-      , mutualConnections = unsafePartial $ map P.unsafeAddrFromString tn.mutualConnections
+  mapTrustNode tn = do
+    address <- except $ note (_errParseAddress tn.safeAddress) (mkAddress =<< mkHexString tn.safeAddress)
+    pure tn
+      { safeAddress = address
+      , mutualConnections = todo
       }
 
 --------------------------------------------------------------------------------
@@ -268,7 +276,7 @@ userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   mapArg2 x =
     x
       { nonce = nonceToBigInt x.nonce
-      , safeAddress = addrToString x.safeAddress
+      , safeAddress = show x.safeAddress
       }
 
 --------------------------------------------------------------------------------
@@ -295,7 +303,7 @@ userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 
   mapArg2 x =
     x
-      { addresses = map addrToString x.addresses
+      { addresses = map show x.addresses
       , userNames = x.userNames
       }
 
@@ -335,35 +343,35 @@ safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
   fn = convertCore cc -| _.safe -| _.deploy
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / safePredictAddress
 --------------------------------------------------------------------------------
 type ErrSafePredictAddress r = ErrNative + r
 
-safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) P.Address
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) Address
 safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
   where
   fn = convertCore cc -| _.safe -| _.predictAddress
 
-  mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
+  mapArg2 x = x { nonce = nonceToBigInt x.nonce }
 
-  mapOk x = unsafePartial $ P.unsafeAddrFromString x
+  mapOk x = todo -- unsafePartial $ P.unsafeAddrFromString x
 
 --------------------------------------------------------------------------------
 -- API / safePrepareDeploy
 --------------------------------------------------------------------------------
 type ErrSafePrepareDeploy r = ErrNative + r
 
-safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) P.Address
+safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) Address
 safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative (mapOk >>> pure)
   where
   fn = convertCore cc -| _.safe -| _.prepareDeploy
 
   mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
 
-  mapOk x = unsafePartial $ P.unsafeAddrFromString x
+  mapOk x = todo -- unsafePartial $ P.unsafeAddrFromString x
 
 --------------------------------------------------------------------------------
 -- API / safeIsFunded
@@ -379,7 +387,7 @@ safeIsFunded cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.safe -| _.isFunded
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / safeGetSafeStatus
@@ -400,7 +408,7 @@ safeGetSafeStatus cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.safe -| _.getSafeStatus
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / tokenDeploy
@@ -416,7 +424,7 @@ tokenDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.deploy
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / tokenGetBalance
@@ -432,7 +440,7 @@ tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.getBalance
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / tokenCheckUBIPayout
@@ -448,7 +456,7 @@ tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.checkUBIPayout
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / tokenRequestUBIPayout
@@ -464,7 +472,7 @@ tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.requestUBIPayout
 
-  mapArg2 x = x { safeAddress = addrToString x.safeAddress }
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / tokenTransfer
@@ -496,6 +504,8 @@ type ErrApi r = (errApi :: ApiError | r)
 
 type ErrService r = (errService :: Unit | r)
 
+type ErrParseAddress r = (errParseAddress :: String | r)
+
 --------------------------------------------------------------------------------
 -- Err constructors
 --------------------------------------------------------------------------------
@@ -510,6 +520,9 @@ _errApi = inj (Proxy :: _ "errApi")
 
 _errService :: forall r. Unit -> Variant (ErrService r)
 _errService = inj (Proxy :: _ "errService")
+
+_errParseAddress :: forall r. String -> Variant (ErrParseAddress r)
+_errParseAddress = inj (Proxy :: _ "errParseAddress")
 
 --------------------------------------------------------------------------------
 -- Err composition
@@ -536,7 +549,7 @@ type NativeError =
 -- Util
 --------------------------------------------------------------------------------
 userToUser :: B.User -> User
-userToUser = unwrap >>> \x -> x { safeAddress = unsafePartial $ P.unsafeAddrFromString x.safeAddress }
+userToUser = todo -- unwrap >>> \x -> x { safeAddress = unsafePartial $ P.unsafeAddrFromString x.safeAddress }
 
 unsafeSampleCore :: forall r. B.CirclesCore -> B.Account -> Result (ErrNative + r) Unit
 unsafeSampleCore x1 x2 =
