@@ -9,7 +9,7 @@ import Data.Graph.Core (Graph)
 import Data.Graph.Core as C
 import Data.Maybe (Maybe(..))
 import Data.Set as S
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple.Nested ((/\))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
