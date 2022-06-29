@@ -70,7 +70,7 @@ spec =
 mkGetUsers :: Map W3.Address User -> GetUsers TestEnvM
 mkGetUsers db _ _ xs =
   let
-    result = map (\k -> M.lookup (convert k) db) xs
+    result = map (\k -> M.lookup k db) xs
   in
     result
       # find (\x -> x == Nothing)

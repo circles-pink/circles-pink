@@ -23,8 +23,9 @@ import Data.Array ((..))
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush)
 import Data.Int (floor, toNumber)
-import Data.Maybe (Maybe(..), fromJust)
+import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
+import Data.PrivateKey (PrivateKey)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (fst)
@@ -37,6 +38,7 @@ import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
 import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
+import Network.Ethereum.Core.Signatures (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
@@ -48,8 +50,7 @@ import Record as R
 import Sunde (spawn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Address, PrivateKey, getWords, keyToMnemonic)
-import Wallet.PrivateKey as CC
+import Wallet.PrivateKey (getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------
@@ -134,8 +135,8 @@ type MkAccountReturn =
 
 --------------------------------------------------------------------------------
 type SignUpUser =
-  { privateKey :: CC.PrivateKey
-  , safeAddress :: CC.Address
+  { privateKey :: PrivateKey
+  , safeAddress :: Address
   }
 
 signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
@@ -172,7 +173,7 @@ mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> CirclesConfig
 mkAccount envVars env cfg = do
   signupOpts <- genSignupOpts
   { privateKey, safeAddress } <- signUpUser env cfg signupOpts
-  txHash <- fundAddress envVars $ convert safeAddress
+  txHash <- fundAddress envVars safeAddress
   finalizeAccount env cfg
   let
     mnemonic = keyToMnemonic privateKey

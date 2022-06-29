@@ -25,6 +25,7 @@
   , "heterogeneous"
   , "http-methods"
   , "identity"
+  , "indexed-graph"
   , "integers"
   , "js-timers"
   , "maybe"
@@ -57,11 +58,11 @@
   , "typelevel-lists"
   , "typelevel-prelude"
   , "undefined"
+  , "unfoldable"
   , "unsafe-coerce"
   , "uri"
   , "variant"
   , "web3"
-  , "indexed-graph"
   ]
 , packages = ../../../packages.dhall
 , sources = [ "./src/**/*.purs", "./test/**/*.purs" ]

@@ -52,7 +52,6 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenEthereumNodeWebSocket: U.print
       }
       env
-      # (spy "env")
       # E.EnvVars
 
 --------------------------------------------------------------------------------

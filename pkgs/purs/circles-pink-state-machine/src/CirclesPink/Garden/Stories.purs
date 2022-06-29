@@ -18,6 +18,7 @@ import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Data.UserIdent (UserIdent)
 import Control.Monad.State (StateT, execStateT, get)
 import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
@@ -80,7 +81,7 @@ loginUser env cfg { magicWords } = do
   act env cfg $ A._login $ A._login unit
 
 --------------------------------------------------------------------------------
-type TrustUserOpts = Either Address User
+type TrustUserOpts = UserIdent
 
 trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
 trustUser env cfg u = do
