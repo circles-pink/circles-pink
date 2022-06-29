@@ -25,7 +25,7 @@ import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesCore.Bindings (Balance)
 import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustEntry (TrustEntry, isCandidate, isConfirmed, trustEntryToTrust)
-import CirclesPink.Data.TrustState (TrustState, initUntrusted)
+import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
@@ -36,7 +36,7 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.IxGraph as G
-import Data.Maybe (maybe)
+import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
 import Data.Set as S
 import Data.Variant (Variant, default, onMatch)
@@ -104,7 +104,7 @@ defaultView d@{ trusts } =
   let
     initUntrust user =
       { isOutgoing: false
-      , user: Right user
+      , user: UserIdent $ Right user
       , trustState: initUntrusted
       }
 
@@ -120,15 +120,17 @@ defaultView d@{ trusts } =
               )
           )
         <#>
-          ( \user -> trusts
-              # G.lookupNode (convert user.safeAddress)
-              <#> trustEntryToTrust
-              # maybe (initUntrust user) identity
-              # mapTrust
+          ( \user -> mapTrust $ case trusts # G.lookupNode user.safeAddress of
+              Nothing -> initUntrust user
+              Just n -> case trusts # G.lookupEdge user.safeAddress d.user.safeAddress, trusts # G.lookupEdge d.user.safeAddress user.safeAddress of
+                Nothing, Nothing -> initUntrust user
+                Just _, Nothing -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
+                Nothing, Just _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initTrusted }
+                Just _, Just _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
           )
   in
-    { trustsConfirmed: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity # S.toUnfoldable # mapTrusts isConfirmed
-    , trustsCandidates: d.trusts # G.outgoingNodes (convert d.user.safeAddress) # maybe mempty identity # S.toUnfoldable # mapTrusts isCandidate
+    { trustsConfirmed: d.trusts # G.outgoingNodes d.user.safeAddress # maybe mempty identity # S.toUnfoldable # mapTrusts isConfirmed
+    , trustsCandidates: d.trusts # G.outgoingNodes d.user.safeAddress # maybe mempty identity # S.toUnfoldable # mapTrusts isCandidate
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
@@ -143,8 +145,9 @@ defaultView d@{ trusts } =
     , redeployTokenResult: nubRemoteReport d.redeployTokenResult
     }
 
-mapTrusts :: (TrustEntry -> Boolean) -> Array TrustEntry -> Trusts
+mapTrusts :: (TrustEntry -> Boolean) -> Array UserIdent -> Trusts
 mapTrusts pred xs = xs
+  <#> user
   # A.filter pred
   # map
       ( \trustEntry ->
