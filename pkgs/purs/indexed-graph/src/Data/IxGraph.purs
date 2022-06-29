@@ -26,7 +26,6 @@ import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\))
-import Debug.Extra (todo)
 
 class Indexed k v | v -> k where
   getIndex :: v -> k
@@ -73,5 +72,5 @@ outgoingNodes id (IxGraph graph) = S.fromFoldable <$> G.outgoingNodes id graph
 lookupEdge :: forall id e n. Ord id => id -> id -> IxGraph id e n -> Maybe e
 lookupEdge from to (IxGraph graph) = G.lookupEdge from to graph
 
-outgoingEdgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Array (e /\ n)
-outgoingEdgesWithNodes = todo
+outgoingEdgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Array (e /\ n))
+outgoingEdgesWithNodes id (IxGraph graph) = G.outgoingEdgesWithNodes id graph

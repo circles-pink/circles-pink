@@ -127,8 +127,8 @@ defaultView d@{ trusts } =
                 Just _, Just _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
           )
   in
-    { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
-    , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
+    { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
+    , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
