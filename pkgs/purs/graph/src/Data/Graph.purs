@@ -11,6 +11,7 @@ module Data.Graph
   , memberEdge
   , memberNode
   , module Exp
+  , outgoingEdgesWithNodes
   , outgoingNodes
   , toUnfoldables
   ) where
@@ -82,6 +83,18 @@ foldrNodes f x g = nodes g # foldr f x
 
 toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: f (id /\ n), edges :: f (id /\ id /\ e) }
 toUnfoldables g = { nodes: G.nodesToUnfoldable g, edges: G.edgesToUnfoldable g }
+
+outgoingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
+outgoingEdgesWithNodes fromId graph = graph
+  # G.outgoingIds fromId
+  <#> mapSet
+  where
+  mapSet :: Set id -> Array (e /\ n)
+  mapSet x = S.toUnfoldable x
+    <#> getTuple
+
+  getTuple :: id -> (e /\ n)
+  getTuple toId = (unsafePartial $ unsafeLookupEdge fromId toId graph) /\ (unsafePartial $ unsafeLookupNode toId graph)
 
 --------------------------------------------------------------------------------
 

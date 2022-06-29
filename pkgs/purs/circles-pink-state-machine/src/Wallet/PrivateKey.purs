@@ -18,10 +18,9 @@ module Wallet.PrivateKey
 
 import Prelude
 
-import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError(..), decodeJson, encodeJson)
+import Data.Argonaut (class EncodeJson)
 import Data.BigInt (BigInt)
 import Data.BigInt as B
-import Data.Either (Either(..), hush)
 import Data.Maybe (Maybe(..), fromJust)
 import Data.Newtype (wrap)
 import Data.PrivateKey (PrivateKey(..))
@@ -30,7 +29,6 @@ import Data.String as S
 import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -77,30 +75,26 @@ nonceToString (Nonce n) = B.toString n
 nonceToBigInt :: Nonce -> BigInt
 nonceToBigInt (Nonce n) = n
 
--- toEntropy :: PrivateKey -> Entropy
--- toEntropy (PrivateKey e) = e
+toEntropy :: PrivateKey -> Entropy
+toEntropy (PrivateKey e) = show e
 
 genPrivateKey :: Aff PrivateKey
 genPrivateKey = liftEffect genPrivateKeyImpl <#> unsafeMkPrivateKey
 
 keyToMnemonic :: PrivateKey -> Mnemonic
-keyToMnemonic k = todo
-
--- toEntropy k
---   # entropyToMnemonicImpl
---   # S.split (Pattern separator)
---   # Mnemonic
+keyToMnemonic k = toEntropy k
+  # entropyToMnemonicImpl
+  # S.split (Pattern separator)
+  # Mnemonic
 
 mnemonicToKey :: Mnemonic -> PrivateKey
-mnemonicToKey (Mnemonic ws) = todo
-
--- unsafePartial result
--- where
--- result :: Partial => PrivateKey
--- result = S.joinWith separator ws
---   # mnemonicToEntropyImpl Nothing Just
---   # fromJust
---   # PrivateKey
+mnemonicToKey (Mnemonic ws) = unsafePartial result
+  where
+  result :: Partial => PrivateKey
+  result = S.joinWith separator ws
+    # mnemonicToEntropyImpl Nothing Just
+    # fromJust
+    # unsafeMkPrivateKey
 
 addressToNonce :: W3.Address -> Nonce
 addressToNonce addr = Nonce $ addressToNonceImpl $ show addr
