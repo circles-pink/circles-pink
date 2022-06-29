@@ -1,21 +1,22 @@
 module Test.Wallet.PrivateKey where
 
 import Prelude
+
 import Data.Argonaut (Json, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Array as Arr
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
+import Data.PrivateKey (PrivateKey(..))
 import Data.String as S
 import Test.Unit as T
 import Test.Unit.Assert as A
-import Wallet.PrivateKey (PrivateKey)
 import Wallet.PrivateKey as P
 
 tests :: T.TestSuite
 tests =
   T.suite "PrivateKey" do
     T.test "genPrivateKey" do
-      key <- P.genPrivateKey <#> P.toString
+      key <- P.genPrivateKey <#> show
       A.equal 66 (S.length key)
     T.test "keyToMnemonic" do
       key <- P.genPrivateKey
@@ -28,15 +29,13 @@ tests =
         mnemonic = P.keyToMnemonic key
       let
         recoveredKey = P.mnemonicToKey mnemonic
-      A.equal (P.toString key) (P.toString recoveredKey)
+      A.equal (show key) (show recoveredKey)
     T.suite "zeroKey" do
       T.test "has correct length" do
-        A.equal (P.sampleKey # P.toString # S.length) 66
+        A.equal (P.sampleKey # show # S.length) 66
       T.test "produces right mnemonic" do
         A.equal (P.sampleKey # P.keyToMnemonic # P.getWords)
           [ "gym", "onion", "turkey", "slice", "blue", "random", "goat", "live", "grit", "educate", "slam", "alone", "enroll", "print", "need", "certain", "stumble", "addict", "drive", "accident", "iron", "provide", "major", "next" ]
-    T.test "privKeyToAddress" do
-      A.equal (P.addrToString $ P.privKeyToAddress P.sampleKey) (P.addrToString P.sampleAddress)
     T.test "addressToNonce" do
       A.equal (P.nonceToString $ P.addressToNonce P.sampleAddress) "22032785429977"
     T.test "isPrivateKey" do
