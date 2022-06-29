@@ -23,7 +23,7 @@ import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
 import Log.Class (class MonadLog, log)
 import Stadium.Control (toStateT)
-import Wallet.PrivateKey as CC
+import Network.Ethereum.Core.Signatures (Address)
 
 type ScriptT' m a = (StateT CirclesState m) a
 
@@ -80,7 +80,7 @@ loginUser env cfg { magicWords } = do
   act env cfg $ A._login $ A._login unit
 
 --------------------------------------------------------------------------------
-type TrustUserOpts = Either CC.Address User
+type TrustUserOpts = Either Address User
 
 trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
 trustUser env cfg u = do
