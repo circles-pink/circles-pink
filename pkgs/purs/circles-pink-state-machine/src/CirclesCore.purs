@@ -88,6 +88,7 @@ import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
 import CirclesPink.Data.Address (Address, mkAddress)
+import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
@@ -347,7 +348,7 @@ safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 --------------------------------------------------------------------------------
 type ErrSafePredictAddress r = ErrNative + ErrParseAddress + r
 
-safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePredictAddress r) Address
+safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: Nonce } -> Result (ErrSafePredictAddress r) Address
 safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -| _.safe -| _.predictAddress
@@ -361,12 +362,12 @@ safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 --------------------------------------------------------------------------------
 type ErrSafePrepareDeploy r = ErrNative + ErrParseAddress + r
 
-safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: P.Nonce } -> Result (ErrSafePrepareDeploy r) Address
+safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: Nonce } -> Result (ErrSafePrepareDeploy r) Address
 safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -| _.safe -| _.prepareDeploy
 
-  mapArg2 x = x { nonce = P.nonceToBigInt x.nonce }
+  mapArg2 x = x { nonce = nonceToBigInt x.nonce }
 
   mapOk = parseAddr
 

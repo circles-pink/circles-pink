@@ -3,23 +3,23 @@ module Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard where
 import Prelude
 
 import CirclesCore (User, _errNative)
+import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Garden.Env (TestEnvM, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
-import Convertable (convert)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
-import Network.Ethereum.Core.Signatures as W3
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC, addrD, addrE, unsafeMkAddr, userA, userB, userE)
 
-safeFunderAddr :: W3.Address
+safeFunderAddr :: Address
 safeFunderAddr = unsafeMkAddr "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
 
 --------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ spec =
   describe "CirclesPink.Garden.StateMachine.Control.States.Dashboard" do
     describe "fetchUsersBinarySearch" do
       it "empty array" do
-        D.fetchUsersBinarySearch testEnv P.sampleKey []
+        D.fetchUsersBinarySearch testEnv sampleKey []
           # run
           # shouldEqual (Just [])
       it "one element not in db" do
@@ -38,7 +38,7 @@ spec =
               [ addrA /\ userA ]
 
           testEnv' = testEnv { getUsers = mkGetUsers db }
-        D.fetchUsersBinarySearch testEnv' P.sampleKey [ addrB ]
+        D.fetchUsersBinarySearch testEnv' sampleKey [ addrB ]
           # run
           # shouldEqual (Just [ Left addrB ])
       it "one element in db" do
@@ -48,7 +48,7 @@ spec =
               [ addrA /\ userA ]
 
           testEnv' = testEnv { getUsers = mkGetUsers db }
-        D.fetchUsersBinarySearch testEnv' P.sampleKey [ addrA ]
+        D.fetchUsersBinarySearch testEnv' sampleKey [ addrA ]
           # run
           # shouldEqual (Just [ Right userA ])
       it "many elements in db" do
@@ -58,7 +58,7 @@ spec =
               [ addrA /\ userA, addrB /\ userB, addrE /\ userE ]
 
           testEnv' = testEnv { getUsers = mkGetUsers db }
-        D.fetchUsersBinarySearch testEnv' P.sampleKey [ addrA, addrB, addrC, addrD, addrE ]
+        D.fetchUsersBinarySearch testEnv' sampleKey [ addrA, addrB, addrC, addrD, addrE ]
           # run
           # shouldEqual (Just [ Right userA, Right userB, Left addrC, Left addrD, Right userE ])
 
@@ -66,7 +66,7 @@ spec =
 --   it "runs" do
 --     D.mapTrust [] (fromFoldable [])  `shouldEqual` 2
 
-mkGetUsers :: Map W3.Address User -> GetUsers TestEnvM
+mkGetUsers :: Map Address User -> GetUsers TestEnvM
 mkGetUsers db _ _ xs =
   let
     result = map (\k -> M.lookup k db) xs

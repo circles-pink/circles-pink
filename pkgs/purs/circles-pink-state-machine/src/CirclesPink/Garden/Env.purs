@@ -11,6 +11,10 @@ import Prelude
 
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
+import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
+import CirclesPink.Data.Nonce (addressToNonce)
+import CirclesPink.Data.PrivateKey (genPrivateKey, sampleKey)
+import CirclesPink.Data.PrivateKey as P
 import CirclesPink.Garden.StateMachine.Control.Env (_errDecode, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
@@ -150,7 +154,7 @@ env { request, envVars } =
         # ExceptT
 
   generatePrivateKey :: Env.GeneratePrivateKey Aff
-  generatePrivateKey = P.genPrivateKey
+  generatePrivateKey = genPrivateKey
 
   userRegister :: Env.UserRegister Aff
   userRegister privKey options = do
@@ -187,7 +191,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
@@ -199,7 +203,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     CC.safePrepareDeploy circlesCore account { nonce: nonce }
 
   userResolve :: Env.UserResolve Aff
@@ -237,7 +241,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustIsTrusted circlesCore account { safeAddress, limit: 3 }
 
@@ -249,7 +253,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeIsFunded circlesCore account { safeAddress }
 
@@ -261,7 +265,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustGetNetwork circlesCore account { safeAddress }
 
@@ -273,7 +277,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeGetSafeStatus circlesCore account { safeAddress }
 
@@ -285,7 +289,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeDeploy circlesCore account { safeAddress }
 
@@ -297,7 +301,7 @@ env { request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
     let
-      nonce = P.addressToNonce address
+      nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.tokenDeploy circlesCore account { safeAddress }
 

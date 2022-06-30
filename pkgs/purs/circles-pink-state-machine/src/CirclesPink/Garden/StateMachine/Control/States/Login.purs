@@ -2,6 +2,8 @@ module CirclesPink.Garden.StateMachine.Control.States.Login where
 
 import Prelude
 
+import CirclesPink.Data.Mnemonic (getMnemonicFromString)
+import CirclesPink.Data.PrivateKey (mnemonicToKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, loginTask, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -35,11 +37,11 @@ login env =
       runExceptT do
         { safeStatus, user, trusts, isReady } /\ privKey <-
           ( do
-              mnemonic <- P.getMnemonicFromString st.magicWords
+              mnemonic <- getMnemonicFromString st.magicWords
                 # note (inj (Proxy :: _ "errInvalidMnemonic") unit)
                 # except
 
-              let privKey = P.mnemonicToKey mnemonic
+              let privKey = mnemonicToKey mnemonic
               taskReturn <- loginTask env privKey
               _ <- env.saveSession privKey
               pure (taskReturn /\ privKey)
