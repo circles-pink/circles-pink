@@ -15,11 +15,14 @@ import {
   DefaultView,
   defaultView,
   addrToString,
+  parseAddress,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import Icon from '@mdi/react';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { Option } from 'fp-ts/lib/Option';
+import { toFpTsOption } from '../../../utils/fpTs';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -40,20 +43,22 @@ export const Send = ({
 
   // State
   const [from, _] = useState<Address>(stateRaw.user.safeAddress);
-  const [to, setTo] = useState<string>(overwriteTo ? addrToString(overwriteTo) : "");
+  const [to, setTo] = useState<string>(
+    overwriteTo ? addrToString(overwriteTo) : ''
+  );
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
 
-  //const toAddr : null | Address = parseAddress(to)
+  const optionAddr: Option<Address> = toFpTsOption(parseAddress(to));
 
   // Util
-  const transact = () =>
+  const transact = (fromAddr: Address, toAddr: Address) =>
     act(
       A._dashboard(
         A._transfer({
-          from,
-          to,
+          from: fromAddr,
+          to: toAddr,
           value: Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether'),
           paymentNote,
         })
@@ -91,7 +96,11 @@ export const Send = ({
           value={to}
           placeholder={'To'}
           onChange={e => setTo(e.target.value)}
-          onKeyPress={e => e.key === 'Enter' && transact()}
+          onKeyPress={e =>
+            e.key === 'Enter' &&
+            optionAddr._tag === 'Some' &&
+            transact(from, optionAddr.value)
+          }
         />
         <IconContainer onClick={() => setScannerOpen(!scannerOpen)}>
           <Icon path={mdiQrcodeScan} size={1.5} color={theme.baseColor} />
@@ -106,14 +115,22 @@ export const Send = ({
           const twoDecimals = parseFloat(e.target.value).toFixed(2);
           setValue(parseFloat(twoDecimals));
         }}
-        onKeyPress={e => e.key === 'Enter' && transact()}
+        onKeyPress={e =>
+          e.key === 'Enter' &&
+          optionAddr._tag === 'Some' &&
+          transact(from, optionAddr.value)
+        }
       />
       <Input
         type="string"
         value={paymentNote}
         placeholder={'Payment Note'}
         onChange={e => setPaymentNote(e.target.value)}
-        onKeyPress={e => e.key === 'Enter' && transact()}
+        onKeyPress={e =>
+          e.key === 'Enter' &&
+          optionAddr._tag === 'Some' &&
+          transact(from, optionAddr.value)
+        }
       />
       <JustifyEnd>
         <Button
@@ -121,7 +138,9 @@ export const Send = ({
           theme={theme}
           state={mapResult(state.transferResult)}
           icon={mdiCashFast}
-          onClick={() => transact()}
+          onClick={() =>
+            optionAddr._tag === 'Some' && transact(from, optionAddr.value)
+          }
         >
           {t('dashboard.sendButton')}
         </Button>

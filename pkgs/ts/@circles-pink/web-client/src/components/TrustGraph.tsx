@@ -7,7 +7,7 @@ import Cytoscape, {
 } from 'cytoscape';
 // import COSEBilkent from 'cytoscape-cose-bilkent';
 import { TrustNode } from '@circles-pink/state-machine/output/CirclesCore';
-import { Address } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
+import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 
 // -----------------------------------------------------------------------------
 // Constants
