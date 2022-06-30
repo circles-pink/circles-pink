@@ -39,6 +39,7 @@ import {
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -93,7 +94,7 @@ export const Dashboard = ({
 
   // User Interaction
   // Set transfer target, when clicking on contact action
-  const [overwriteTo, setOverwriteTo] = useState<string>('');
+  const [overwriteTo, setOverwriteTo] = useState<Address | undefined>();
 
   // animation
   const getDelay = getIncrementor(0, 0.05);

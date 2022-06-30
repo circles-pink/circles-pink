@@ -21,10 +21,10 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import { JustifyAroundCenter, JustifyStartCenter } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
+  addrToString,
   DefaultView,
   Trust,
   Trusts,
@@ -37,7 +37,11 @@ import { FadeIn, getIncrementor } from 'anima-react';
 import { User } from '@circles-pink/state-machine/output/CirclesCore';
 import { either } from '@circles-pink/state-machine/output/Data.Either';
 import { pipe } from 'fp-ts/lib/function';
-import { getAddress, UserIdent } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+import {
+  getAddress,
+  UserIdent,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -48,7 +52,7 @@ type TrustUserListProps = {
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
   toggleOverlay?: (type: Overlay) => void;
-  setOverwriteTo?: React.Dispatch<SetStateAction<string>>;
+  setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
   trustAddResult: DefaultView['trustAddResult'];
@@ -86,14 +90,14 @@ export const TrustUserList = (props: TrustUserListProps) => {
 
       const addressA = pipe(
         a.user,
-        either(x => x as string)(x => (x as User).safeAddress)
+        either(x => x as Address)(x => (x as User).safeAddress)
       );
       const addressB = pipe(
         b.user,
-        either(x => x as string)(x => (x as User).safeAddress)
+        either(x => x as Address)(x => (x as User).safeAddress)
       );
 
-      return addressA.localeCompare(addressB);
+      return addrToString(addressA).localeCompare(addrToString(addressB));
     })
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
@@ -229,7 +233,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 onClick={() => {
                   if (c.isOutgoing) {
                     if (toggleOverlay && setOverwriteTo) {
-                      setOverwriteTo(addrToString(getAddress(c.user)));
+                      setOverwriteTo(getAddress(c.user));
                       toggleOverlay('SEND');
                     }
                   }

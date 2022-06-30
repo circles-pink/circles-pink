@@ -7,8 +7,7 @@ import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import {
   getWords,
   keyToMnemonic,
-  PrivateKey,
-} from '@circles-pink/state-machine/output/Wallet.PrivateKey';
+} from '@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic';
 import React, { ReactElement, useContext, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { FadeIn, ZoomIn } from 'anima-react';
@@ -25,6 +24,7 @@ import { OnboardingStepIndicator } from '../../components/layout';
 import { TwoButtonRow } from '../../components/helper';
 import { maybe } from '@circles-pink/state-machine/output/Data.Maybe';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { PrivateKey } from '@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey.Type';
 
 type MagicWordsProps = {
   state: UserData;

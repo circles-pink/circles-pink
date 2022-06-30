@@ -31,8 +31,8 @@ import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
 import { Unit, unit } from '@circles-pink/state-machine/output/Data.Unit';
+import { fromFpTsEither } from '../utils/fpTs';
 import * as E from 'fp-ts/Either';
-import { Either } from '@circles-pink/state-machine/output/Data.FpTs.Either';
 
 type Language = 'en' | 'de';
 
@@ -59,9 +59,6 @@ export const Onboarding = (props: OnboardingProps) => {
     </ThemeProvider>
   );
 };
-
-const fromFpTsEither = <A, B>(e: E.Either<A, B>): Either<A, B> =>
-  e as unknown as Either<string, (_: string) => () => Unit>;
 
 const cfgDefaultRight: CirclesConfig = {
   extractEmail: fromFpTsEither(
