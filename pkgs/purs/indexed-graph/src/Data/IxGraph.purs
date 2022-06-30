@@ -14,6 +14,7 @@ module Data.IxGraph
   , outgoingEdgesWithNodes
   , outgoingIds
   , outgoingNodes
+  , toUnfoldables
   ) where
 
 import Prelude
@@ -26,6 +27,7 @@ import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\))
+import Data.Unfoldable (class Unfoldable)
 
 class Indexed k v | v -> k where
   getIndex :: v -> k
@@ -74,3 +76,6 @@ lookupEdge from to (IxGraph graph) = G.lookupEdge from to graph
 
 outgoingEdgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Array (e /\ n))
 outgoingEdgesWithNodes id (IxGraph graph) = G.outgoingEdgesWithNodes id graph
+
+toUnfoldables :: forall id e n f. Unfoldable f => Ord id => IxGraph id e n -> { nodes :: f (id /\ n), edges :: f (id /\ id /\ e) }
+toUnfoldables (IxGraph graph) = G.toUnfoldables graph
