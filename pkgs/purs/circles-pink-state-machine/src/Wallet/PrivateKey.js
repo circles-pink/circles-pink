@@ -4,9 +4,7 @@ var ethWallet = require("ethereumjs-wallet").default;
 var ethUtils = require("ethereumjs-util");
 var bip39 = require("bip39");
 
-exports.genPrivateKeyImpl = function () {
-  return ethWallet.generate().getPrivateKeyString();
-};
+
 
 exports.privKeyToAddressImpl = function (privKey) {
   return ethWallet
@@ -31,11 +29,4 @@ exports.entropyToMnemonicImpl = function (entropy) {
   return bip39.entropyToMnemonic(entropy);
 };
 
-exports.mnemonicToEntropyImpl = (Nothing) => (Just) => (mnemonic) => {
-  try {
-    const entropy = bip39.mnemonicToEntropy(mnemonic);
-    return Just(entropy);
-  } catch (error) {
-    return Nothing;
-  }
-};
+
