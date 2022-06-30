@@ -18,7 +18,6 @@ import Network.Ethereum.Core.Signatures as W3
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC, addrD, addrE, unsafeMkAddr, userA, userB, userE)
-import Wallet.PrivateKey as P
 
 safeFunderAddr :: W3.Address
 safeFunderAddr = unsafeMkAddr "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"

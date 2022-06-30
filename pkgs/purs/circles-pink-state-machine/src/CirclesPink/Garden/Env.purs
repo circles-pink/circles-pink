@@ -38,8 +38,6 @@ import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (sampleAddress, sampleKey, sampleSafeAddress)
-import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars

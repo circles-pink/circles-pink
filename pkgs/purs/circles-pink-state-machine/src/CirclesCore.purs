@@ -105,8 +105,6 @@ import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (Nonce, nonceToBigInt)
-import Wallet.PrivateKey as P
 
 --------------------------------------------------------------------------------
 -- Web3
