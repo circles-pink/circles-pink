@@ -176,7 +176,7 @@ sendTransaction w3 f t =
 -- API / trustIsTrusted
 --------------------------------------------------------------------------------
 type TrustIsTrustedOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   , limit :: Int
   }
 
@@ -259,7 +259,7 @@ trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 type UserOptions =
   { nonce :: Nonce
-  , safeAddress :: Address
+  , safeAddress :: ChecksumAddress
   , username :: String
   , email :: String
   }
@@ -281,7 +281,7 @@ userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 -- API / userResolve
 --------------------------------------------------------------------------------
 type ResolveOptions =
-  { addresses :: Array Address
+  { addresses :: Array ChecksumAddress
   , userNames :: Array String
   }
 
@@ -331,7 +331,7 @@ userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
 -- API / safeDeploy
 --------------------------------------------------------------------------------
 type SafeDeployOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrSafeDeploy r = ErrService + ErrNative + r
@@ -375,7 +375,7 @@ safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 -- API / safeIsFunded
 --------------------------------------------------------------------------------
 type SafeIsFundedOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrSafeIsFunded r = ErrNative + r
@@ -391,7 +391,7 @@ safeIsFunded cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / safeGetSafeStatus
 --------------------------------------------------------------------------------
 type SafeGetSafeStatusOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type SafeStatus =
@@ -412,7 +412,7 @@ safeGetSafeStatus cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / tokenDeploy
 --------------------------------------------------------------------------------
 type TokenDeployOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrTokenDeploy r = ErrService + ErrNative + r
@@ -428,7 +428,7 @@ tokenDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / tokenGetBalance
 --------------------------------------------------------------------------------
 type TokenGetBalanceOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrTokenGetBalance r = ErrNative + r
@@ -444,7 +444,7 @@ tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / tokenCheckUBIPayout
 --------------------------------------------------------------------------------
 type TokenCheckUBIPayoutOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrTokenCheckUBIPayout r = ErrNative + r
@@ -460,7 +460,7 @@ tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 -- API / tokenRequestUBIPayout
 --------------------------------------------------------------------------------
 type TokenRequestUBIPayoutOptions =
-  { safeAddress :: Address
+  { safeAddress :: ChecksumAddress
   }
 
 type ErrTokenRequestUBIPayout r = ErrNative + r

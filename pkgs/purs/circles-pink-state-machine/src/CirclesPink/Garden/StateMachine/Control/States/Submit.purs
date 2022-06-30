@@ -8,6 +8,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
+import Convertable (convert)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap, wrap)
@@ -44,7 +45,7 @@ submit env =
               privateKey
               { email: st.email
               , nonce
-              , safeAddress
+              , safeAddress: convert safeAddress
               , username: st.username
               }
             safeStatus <- env.getSafeStatus privateKey

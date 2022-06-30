@@ -10,6 +10,7 @@ import CirclesPink.Data.Address (sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import Control.Monad.Except (lift, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Convertable (convert)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Variant (Variant)
@@ -71,7 +72,7 @@ spec =
                     , databaseSource: ""
                     }
             account <- effToAff $ CC.privKeyToAccount web3 sampleKey
-            CC.safeDeploy core account { safeAddress: sampleSafeAddress }
+            CC.safeDeploy core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Left unit)
@@ -93,7 +94,7 @@ spec =
                     , databaseSource: ""
                     }
             account <- effToAff $ CC.privKeyToAccount web3 sampleKey
-            CC.safeIsFunded core account { safeAddress: sampleSafeAddress }
+            CC.safeIsFunded core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Right false)
@@ -115,7 +116,7 @@ spec =
                     , databaseSource: ""
                     }
             account <- effToAff $ CC.privKeyToAccount web3 sampleKey
-            CC.tokenDeploy core account { safeAddress: sampleSafeAddress }
+            CC.tokenDeploy core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Left unit)

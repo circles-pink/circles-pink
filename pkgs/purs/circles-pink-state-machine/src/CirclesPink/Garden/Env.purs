@@ -212,7 +212,7 @@ env { request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     safeAddress <- getSafeAddress privKey
-    users <- CC.userResolve circlesCore account { userNames: [], addresses: [ safeAddress ] }
+    users <- CC.userResolve circlesCore account { userNames: [], addresses: [ convert safeAddress ] }
     case head users of
       Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
       Just u -> pure u
@@ -222,7 +222,7 @@ env { request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    CC.userResolve circlesCore account { userNames, addresses }
+    CC.userResolve circlesCore account { userNames, addresses: map convert addresses }
 
   coreToWindow :: Env.CoreToWindow Aff
   coreToWindow privKey = do
@@ -243,7 +243,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.trustIsTrusted circlesCore account { safeAddress, limit: 3 }
+    CC.trustIsTrusted circlesCore account { safeAddress: convert safeAddress, limit: 3 }
 
   isFunded :: Env.IsFunded Aff
   isFunded privKey = do
@@ -255,7 +255,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.safeIsFunded circlesCore account { safeAddress }
+    CC.safeIsFunded circlesCore account { safeAddress: convert safeAddress }
 
   trustGetNetwork :: Env.TrustGetNetwork Aff
   trustGetNetwork privKey = do
@@ -279,7 +279,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.safeGetSafeStatus circlesCore account { safeAddress }
+    CC.safeGetSafeStatus circlesCore account { safeAddress: convert safeAddress }
 
   deploySafe :: Env.DeploySafe Aff
   deploySafe privKey = do
@@ -291,7 +291,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.safeDeploy circlesCore account { safeAddress }
+    CC.safeDeploy circlesCore account { safeAddress: convert safeAddress }
 
   deployToken :: Env.DeployToken Aff
   deployToken privKey = do
@@ -303,7 +303,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.tokenDeploy circlesCore account { safeAddress }
+    CC.tokenDeploy circlesCore account { safeAddress: convert safeAddress }
 
   addTrustConnection :: Env.AddTrustConnection Aff
   addTrustConnection pk other us = do
@@ -337,21 +337,21 @@ env { request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-    CC.tokenGetBalance circlesCore account { safeAddress }
+    CC.tokenGetBalance circlesCore account { safeAddress: convert safeAddress }
 
   checkUBIPayout :: Env.CheckUBIPayout Aff
   checkUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-    CC.tokenCheckUBIPayout circlesCore account { safeAddress }
+    CC.tokenCheckUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
   requestUBIPayout :: Env.RequestUBIPayout Aff
   requestUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-    CC.tokenRequestUBIPayout circlesCore account { safeAddress }
+    CC.tokenRequestUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
   transfer :: Env.Transfer Aff
   transfer privKey from to value paymentNote = do
