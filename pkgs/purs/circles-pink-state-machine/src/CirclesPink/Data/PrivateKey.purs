@@ -1,4 +1,4 @@
-module Data.PrivateKey
+module CirclesPink.Data.PrivateKey
   ( PrivateKey(..)
   ) where
 

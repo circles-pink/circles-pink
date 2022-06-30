@@ -6,7 +6,7 @@ import Prelude
 -- import Control.Monad.State (class MonadState, get)
 -- import Data.Map (Map)
 -- import Data.Typelevel.Undefined (undefined)
--- import Network.Ethereum.Core.Signatures (Address)
+-- import CirclesPink.Data.Address (Address)
 
 -- type SimulationState =
 --   { users ::

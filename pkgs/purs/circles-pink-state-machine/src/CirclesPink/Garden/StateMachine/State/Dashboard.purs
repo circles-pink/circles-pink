@@ -41,7 +41,7 @@ import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Network.Ethereum.Core.Signatures as W3

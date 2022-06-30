@@ -23,7 +23,7 @@ import Data.BigInt (BigInt)
 import Data.BigInt as B
 import Data.Maybe (Maybe(..), fromJust)
 import Data.Newtype (wrap)
-import Data.PrivateKey (PrivateKey(..))
+import CirclesPink.Data.PrivateKey (PrivateKey(..))
 import Data.String (Pattern(..), joinWith)
 import Data.String as S
 import Data.String.Regex as R

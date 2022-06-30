@@ -25,7 +25,7 @@ import Data.Either (Either(..), hush)
 import Data.Int (floor, toNumber)
 import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
-import Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (fst)
@@ -38,7 +38,7 @@ import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
 import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
@@ -237,5 +237,5 @@ main = do
 
         env'' = liftEnv $ env { envVars: convert envVars, request }
 
-        cfg = CirclesConfig { extractEmail : Right (\_ -> pure unit)  }
+        cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
       runAppM $ app envVars env'' cfg

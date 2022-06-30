@@ -40,7 +40,7 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
 import FpTs.Class (toFpTs)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
 
@@ -71,9 +71,9 @@ type DefaultView =
   { trustsConfirmed :: Trusts
   , trustsCandidates :: Trusts
   , graph :: Array (Address FPT./\ UserIdent)
-      -- { nodes :: Array (Address FPT./\ UserIdent)
-      -- , edges :: Array { from :: Address, to :: Address, data :: UserIdent }
-      -- }
+  -- { nodes :: Array (Address FPT./\ UserIdent)
+  -- , edges :: Array { from :: Address, to :: Address, data :: UserIdent }
+  -- }
   , usersSearch :: Trusts
   , userSearchResult :: RemoteReport ErrUserSearchResolved (Array User)
   , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
@@ -135,7 +135,7 @@ defaultView d@{ trusts } =
   in
     { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
     , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
-    , graph: d.trusts # G.toUnfoldables # (_.nodes :: _ -> Array _) # toFpTs   -- { nodes: [], edges: [] }
+    , graph: d.trusts # G.toUnfoldables # (_.nodes :: _ -> Array _) # toFpTs -- { nodes: [], edges: [] }
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult

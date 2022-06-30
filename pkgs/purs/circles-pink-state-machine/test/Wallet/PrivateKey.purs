@@ -2,11 +2,10 @@ module Test.Wallet.PrivateKey where
 
 import Prelude
 
-import Data.Argonaut (Json, JsonDecodeError(..), decodeJson, encodeJson)
+import Data.Argonaut (JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Array as Arr
-import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.PrivateKey (PrivateKey(..))
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.String as S
 import Test.Unit as T
 import Test.Unit.Assert as A

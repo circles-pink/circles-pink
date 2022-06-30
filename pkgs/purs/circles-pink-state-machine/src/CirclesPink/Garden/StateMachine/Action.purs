@@ -5,7 +5,7 @@ import Prelude
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
 import Data.Variant (Variant, inj)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 import Type.Proxy (Proxy(..))
 
 type CirclesAction = Variant
