@@ -13,7 +13,7 @@ import CirclesPink.Data.UserIdent (getAddress)
 import Data.Generic.Rep (class Generic)
 import Data.IxGraph (class Indexed)
 import Data.Show.Generic (genericShow)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 
 data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
 

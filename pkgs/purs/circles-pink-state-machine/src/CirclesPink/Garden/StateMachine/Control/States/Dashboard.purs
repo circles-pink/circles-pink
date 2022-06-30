@@ -22,12 +22,12 @@ import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
-import Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
 

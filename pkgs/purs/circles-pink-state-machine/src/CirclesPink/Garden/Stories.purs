@@ -24,7 +24,7 @@ import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
 import Log.Class (class MonadLog, log)
 import Stadium.Control (toStateT)
-import Network.Ethereum.Core.Signatures (Address)
+import CirclesPink.Data.Address (Address)
 
 type ScriptT' m a = (StateT CirclesState m) a
 

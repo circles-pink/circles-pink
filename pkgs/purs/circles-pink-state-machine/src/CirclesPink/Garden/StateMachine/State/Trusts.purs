@@ -12,7 +12,7 @@ import Prelude
 import CirclesCore (SafeStatus, TrustNode)
 import CirclesCore as CC
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
