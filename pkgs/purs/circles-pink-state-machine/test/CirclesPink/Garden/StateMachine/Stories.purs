@@ -14,7 +14,6 @@ import Data.Either (Either(..))
 import Data.Variant.Extra (getLabel)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import Wallet.PrivateKey (sampleMnemonic)
 
 --------------------------------------------------------------------------------
 spec :: Spec Unit

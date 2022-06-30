@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Data.Maybe (Maybe(..))
-import Wallet.PrivateKey as P
 
 debug
   :: forall m

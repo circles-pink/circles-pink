@@ -50,7 +50,6 @@ import Record as R
 import Sunde (spawn)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Wallet.PrivateKey (getWords, keyToMnemonic)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
 --------------------------------------------------------------------------------

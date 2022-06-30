@@ -12,7 +12,6 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import RemoteData (_failure, _loading, _notAsked)
-import Wallet.PrivateKey as P
 
 submit
   :: forall m

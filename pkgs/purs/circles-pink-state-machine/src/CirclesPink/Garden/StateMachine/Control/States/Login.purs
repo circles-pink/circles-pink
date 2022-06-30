@@ -13,7 +13,6 @@ import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
 import RemoteData (_loading, _notAsked)
 import Type.Proxy (Proxy(..))
-import Wallet.PrivateKey as P
 
 login
   :: forall m

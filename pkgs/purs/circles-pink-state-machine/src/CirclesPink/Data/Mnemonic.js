@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 var bip39 = require("bip39");
 
@@ -9,4 +9,8 @@ exports.mnemonicToEntropyImpl = (Nothing) => (Just) => (mnemonic) => {
   } catch (error) {
     return Nothing;
   }
+};
+
+exports.entropyToMnemonicImpl = function (entropy) {
+  return bip39.entropyToMnemonic(entropy);
 };

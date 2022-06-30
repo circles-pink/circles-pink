@@ -15,7 +15,6 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import Wallet.PrivateKey as P
 
 spec :: Spec Unit
 spec =
