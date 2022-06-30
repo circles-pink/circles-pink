@@ -1,25 +1,26 @@
 module CirclesPink.Data.PrivateKey
-  ( PrivateKey(..)
+  ( genPrivateKey
   , mnemonicToKey
-  , sampleKey
   , module Exp
-  ) where
+  , sampleKey
+  )
+  where
 
 import Prelude
 
 import CirclesPink.Data.Mnemonic (Mnemonic)
-import Control.Error.Util (note)
-import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError(..), decodeJson, encodeJson)
-import Data.Maybe (fromJust)
-import Data.Newtype (class Newtype, wrap)
+import CirclesPink.Data.Mnemonic as M
+import CirclesPink.Data.PrivateKey.Type (PrivateKey)
+import CirclesPink.Data.PrivateKey.Type (PrivateKey(..)) as Exp
+import Data.Maybe (Maybe(..), fromJust)
+import Data.Newtype (wrap)
+import Data.String as S
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkPrivateKey)
-import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
-import CirclesPink.Data.PrivateKey.Type as Exp
 
 genPrivateKey :: Aff PrivateKey
 genPrivateKey = liftEffect genPrivateKeyImpl <#> unsafeMkPrivateKey
@@ -36,10 +37,12 @@ unsafeMkHexString :: String -> HexString
 unsafeMkHexString s = unsafePartial $ fromJust $ mkHexString s
 
 mnemonicToKey :: Mnemonic -> PrivateKey
-mnemonicToKey (Mnemonic ws) = unsafePartial result
+mnemonicToKey mn = unsafePartial result
   where
   result :: Partial => PrivateKey
-  result = S.joinWith separator ws
+  result = mn
+    # M.getWords
+    # S.joinWith " "
     # mnemonicToEntropyImpl Nothing Just
     # fromJust
     # unsafeMkPrivateKey
@@ -48,5 +51,4 @@ sampleKey :: PrivateKey
 sampleKey =
   unsafeMkPrivateKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
 
-isPrivateKey :: String -> Boolean
-isPrivateKey s = isPrivateKeyImpl s
+foreign import mnemonicToEntropyImpl :: Maybe String -> (String -> Maybe String) -> String -> Maybe String

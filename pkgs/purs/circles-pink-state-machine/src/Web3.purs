@@ -9,6 +9,8 @@ module Web3
   ) where
 
 import Prelude
+
+import CirclesPink.Data.Address (Address(..))
 import CirclesPink.URI (URI)
 import CirclesPink.URI as U
 import Control.Monad.Except (ExceptT(..))
@@ -49,7 +51,7 @@ _errNative = inj (Proxy :: _ "errNative")
 --------------------------------------------------------------------------------
 type ErrSendTransaction r = ErrNative + r
 
-sendTransaction :: forall r. B.Web3 -> { from :: W3.Address, to :: W3.Address, value :: String } -> ExceptV (ErrSendTransaction + r) Aff HexString
+sendTransaction :: forall r. B.Web3 -> { from :: Address, to :: Address, value :: String } -> ExceptV (ErrSendTransaction + r) Aff HexString
 sendTransaction web3 opts =
   unsafePartial
     ( B.sendTransaction web3 { from: show opts.from, to: show opts.to, value: opts.value }

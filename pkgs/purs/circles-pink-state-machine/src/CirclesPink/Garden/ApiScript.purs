@@ -4,6 +4,9 @@ import Prelude
 
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
+import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Mnemonic (getWords, keyToMnemonic)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
 import CirclesPink.Garden.Env (env, liftEnv)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
@@ -25,7 +28,6 @@ import Data.Either (Either(..), hush)
 import Data.Int (floor, toNumber)
 import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
-import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.String (joinWith)
 import Data.Traversable (traverse)
 import Data.Tuple (fst)
@@ -38,7 +40,6 @@ import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
 import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
-import CirclesPink.Data.Address (Address)
 import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
@@ -85,7 +86,7 @@ runAppM x =
         )
 
 --------------------------------------------------------------------------------
-safeFunderAddr :: W3.Address
+safeFunderAddr :: Address
 safeFunderAddr =
   unsafePartial
     ( "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
@@ -96,7 +97,7 @@ safeFunderAddr =
     )
 
 --------------------------------------------------------------------------------
-fundAddress :: forall r. EnvVars -> W3.Address -> ScriptM (ErrApp + r) HexString
+fundAddress :: forall r. EnvVars -> Address -> ScriptM (ErrApp + r) HexString
 fundAddress envVars safeAddress =
   mapExceptT lift do
     provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket

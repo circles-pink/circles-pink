@@ -2,6 +2,8 @@ module CirclesPink.Garden.StateMachine.Control.States.Debug where
 
 import Prelude
 
+import CirclesPink.Data.Mnemonic (getMnemonicFromString)
+import CirclesPink.Data.PrivateKey (mnemonicToKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -22,9 +24,9 @@ debug env =
   where
   coreToWindow _ st _ = do
     let
-      maybeMnemonic = P.getMnemonicFromString st.magicWords
+      maybeMnemonic = getMnemonicFromString st.magicWords
     let
-      maybePrivKey = P.mnemonicToKey <$> maybeMnemonic
+      maybePrivKey = mnemonicToKey <$> maybeMnemonic
     _ <- case maybePrivKey of
       Just pk -> runExceptT $ env.coreToWindow pk
       Nothing -> pure $ pure unit

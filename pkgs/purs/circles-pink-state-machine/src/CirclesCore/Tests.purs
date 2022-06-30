@@ -4,7 +4,10 @@ module CirclesCore.Tests
   ) where
 
 import Prelude
+
 import CirclesCore as CC
+import CirclesPink.Data.Address (sampleSafeAddress)
+import CirclesPink.Data.PrivateKey (sampleKey)
 import Control.Monad.Except (lift, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
@@ -67,8 +70,8 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 P.sampleKey
-            CC.safeDeploy core account { safeAddress: P.sampleSafeAddress }
+            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            CC.safeDeploy core account { safeAddress: sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Left unit)
@@ -89,8 +92,8 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 P.sampleKey
-            CC.safeIsFunded core account { safeAddress: P.sampleSafeAddress }
+            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            CC.safeIsFunded core account { safeAddress: sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Right false)
@@ -111,8 +114,8 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 P.sampleKey
-            CC.tokenDeploy core account { safeAddress: P.sampleSafeAddress }
+            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            CC.tokenDeploy core account { safeAddress: sampleSafeAddress }
         )
           <#> lmap (const unit)
           >>= shouldEqual (Left unit)

@@ -11,6 +11,7 @@ import Prelude
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Maybe (fromJust)
 import Data.Newtype (class Newtype, wrap)
+import FpTs.Class (class FpTs)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
@@ -30,6 +31,9 @@ derive newtype instance decodeJson :: DecodeJson Address
 
 derive newtype instance encodeJson :: EncodeJson Address
 
+instance fpTs :: FpTs Address Address where
+  toFpTs = identity
+  fromFpTs = identity
 
 sampleAddress :: Address
 sampleAddress = unsafeMkAddress "fb7dc4d8f841af32d777e698d6c71409e85955d9"

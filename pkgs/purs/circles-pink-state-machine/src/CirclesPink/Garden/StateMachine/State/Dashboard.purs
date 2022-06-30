@@ -33,6 +33,8 @@ import Prelude
 
 import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, User, ErrParseAddress)
 import CirclesCore as CC
+import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustState (TrustState)
 import CirclesPink.Data.UserIdent (UserIdent)
@@ -41,7 +43,6 @@ import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Network.Ethereum.Core.Signatures as W3
@@ -58,7 +59,7 @@ type DashboardState =
   { user :: CC.User
   , privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: IxGraph W3.Address TrustState UserIdent
+  , trusts :: IxGraph Address TrustState UserIdent
   , trustsResult :: TrustGetTrusts
   , trustAddResult :: TrustAddResult
   , trustRemoveResult :: TrustRemoveResult
@@ -72,7 +73,7 @@ type DashboardState =
   , redeployTokenResult :: RedeployTokenResult
   }
 
-type Trusts = Map W3.Address Trust
+type Trusts = Map Address Trust
 
 --------------------------------------------------------------------------------
 

@@ -2,6 +2,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Submit where
 
 import Prelude
 
+import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', readyForDeployment, runExceptT')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -9,7 +10,7 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
+import Data.Newtype (unwrap, wrap)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import RemoteData (_failure, _loading, _notAsked)
 
@@ -33,7 +34,7 @@ submit env =
         let
           address = privateToAddress $ unwrap privateKey
 
-          nonce = P.addressToNonce address
+          nonce = addressToNonce $ wrap address
 
           task :: ExceptV S.ErrSubmit _ _
           task = do

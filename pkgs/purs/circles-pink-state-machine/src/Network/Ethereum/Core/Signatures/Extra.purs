@@ -5,12 +5,14 @@ module Network.Ethereum.Core.Signatures.Extra
   ) where
 
 import Prelude
-import Convertable (class Convertible, convert)
+
+import CirclesPink.Data.Address (Address)
+import Convertable (class Convertible)
 import Data.Maybe (fromJust)
-import Network.Ethereum.Core.HexString (mkHexString, unHex)
+import Data.Newtype (unwrap, wrap)
+import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress)
 import Network.Ethereum.Core.Signatures as W3
-import Partial.Unsafe (unsafePartial)
 import TypedEnv (class ParseValue)
 import Web3.Bindings (web3static)
 
@@ -22,22 +24,13 @@ instance showChecksumAddress :: Show ChecksumAddress where
 unsafeFromString :: Partial => String -> ChecksumAddress
 unsafeFromString x = mkHexString x >>= W3.mkAddress # fromJust # ChecksumAddress
 
--- unChecksumAddress :: ChecksumAddress -> HexString
--- unChecksumAddress (ChecksumAddress a) = h
 instance parseValueAddress :: ParseValue ChecksumAddress where
-  parseValue x = mkHexString x >>= mkAddress <#> convert
+  parseValue x = mkHexString x >>= mkAddress <#> ChecksumAddress
 
 --------------------------------------------------------------------------------
 
-instance convertible_ChecksumAddress_W3Address :: Convertible ChecksumAddress W3.Address where
-  convert (ChecksumAddress a) = a
+instance convertible_ChecksumAddress_W3Address :: Convertible ChecksumAddress Address where
+  convert (ChecksumAddress a) = wrap a
 
-instance convertible_W3Address_ChecksumAddress :: Convertible W3.Address ChecksumAddress where
-  convert p =
-    unsafePartial
-      ( p
-          # W3.unAddress
-          # unHex
-          # unsafeFromString
-      )
-
+instance convertible_W3Address_ChecksumAddress :: Convertible Address ChecksumAddress where
+  convert = unwrap >>> ChecksumAddress
