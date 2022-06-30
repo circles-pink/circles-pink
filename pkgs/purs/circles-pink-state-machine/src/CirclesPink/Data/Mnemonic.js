@@ -12,5 +12,5 @@ exports.mnemonicToEntropyImpl = (Nothing) => (Just) => (mnemonic) => {
 };
 
 exports.entropyToMnemonicImpl = function (entropy) {
-  return bip39.entropyToMnemonic(entropy);
+  return bip39.entropyToMnemonic(entropy.slice(2));
 };
