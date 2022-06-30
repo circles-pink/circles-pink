@@ -15,15 +15,18 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   , RemoteData_
   , Trust
   , Trusts
+  , addrToString
   , defaultView
   , globalLoading
+  , parseAddress
   ) where
 
 import Prelude
 
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesCore.Bindings (Balance)
-import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address as A
 import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
@@ -32,6 +35,7 @@ import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Array (any, filter)
 import Data.Either (Either(..))
+import Data.FpTs.Option as FpTs
 import Data.FpTs.Tuple as FPT
 import Data.IxGraph (IxGraph, getIndex)
 import Data.IxGraph as G
@@ -135,7 +139,13 @@ defaultView d@{ trusts } =
   in
     { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
     , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
-    , graph: d.trusts # (G.toUnfoldables :: _ -> { nodes :: Array _, edges :: Array _ }) # toFpTs
+    , graph:
+        let
+          entries = d.trusts # (G.toUnfoldables :: _ -> { nodes :: Array _, edges :: Array _ })
+        in
+          { nodes: toFpTs entries.nodes
+          , edges: toFpTs entries.edges
+          }
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
@@ -237,3 +247,9 @@ type ErrDeployTokenResolved = Variant
 type RemoteData_ e a = RemoteData Unit Unit e a
 
 type RemoteReportV e a = RemoteReport (Variant e) a
+
+addrToString :: Address -> String
+addrToString = show
+
+parseAddress :: String -> FpTs.Option Address
+parseAddress = A.parseAddress >>> toFpTs

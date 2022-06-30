@@ -13,7 +13,7 @@ import Data.FpTs.Union (type (-|-))
 import Data.FpTs.Union as U
 import Data.Maybe (Maybe(..))
 import Data.Maybe as M
-import FpTs.Class (class FpTs)
+import FpTs.Class (class FpTs, fromFpTs, toFpTs)
 import Type.Data.String (String', mkString')
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
@@ -25,9 +25,9 @@ newtype Some a = Some { _tag :: String' "Some", value :: a }
 
 newtype Option a = Option (None -|- Some a)
 
-instance fpTsOption :: FpTs (Maybe a) (Option a) where
-  toFpTs = M.maybe none some
-  fromFpTs = match (const Nothing) Just
+instance fpTsOption :: FpTs a b => FpTs (Maybe a) (Option b) where
+  toFpTs = M.maybe none (toFpTs >>> some)
+  fromFpTs = match (const Nothing) (fromFpTs >>> Just)
 
 --------------------------------------------------------------------------------
 
