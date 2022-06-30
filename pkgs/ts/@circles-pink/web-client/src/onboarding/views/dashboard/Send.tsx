@@ -1,6 +1,5 @@
 import { mdiCashFast, mdiQrcodeScan } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { addrToString } from '@circles-pink/state-machine/output/Wallet.PrivateKey';
 import React, { useState } from 'react';
 import { Button, Input } from '../../../components/forms';
 import { JustifyEnd } from '../../../components/helper';
@@ -15,10 +14,12 @@ import { t } from 'i18next';
 import {
   DefaultView,
   defaultView,
+  addrToString,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import Icon from '@mdi/react';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
+import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 
 // -----------------------------------------------------------------------------
 // Send Circles
@@ -26,7 +27,7 @@ import tw from 'twin.macro';
 
 export type SendProps = DashboardProps & {
   theme: Theme;
-  overwriteTo?: string;
+  overwriteTo?: Address;
 };
 
 export const Send = ({
@@ -38,11 +39,13 @@ export const Send = ({
   const state = (defaultView as any)(stateRaw) as DefaultView;
 
   // State
-  const [from, _] = useState<string>(addrToString(stateRaw.user.safeAddress));
-  const [to, setTo] = useState<string>(overwriteTo || '');
+  const [from, _] = useState<Address>(stateRaw.user.safeAddress);
+  const [to, setTo] = useState<string>(overwriteTo ? addrToString(overwriteTo) : "");
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
+
+  //const toAddr : null | Address = parseAddress(to)
 
   // Util
   const transact = () =>

@@ -1,5 +1,5 @@
 module CirclesPink.Data.TrustState
-  ( TrustState
+  ( TrustState(..)
   , initTrusted
   , initUntrusted
   , isLoadingTrust
@@ -14,6 +14,7 @@ module CirclesPink.Data.TrustState
 import Prelude
 
 import Data.Variant (Variant, inj, match)
+import FpTs.Class (class FpTs)
 import Type.Proxy (Proxy(..))
 
 --------------------------------------------------------------------------------
@@ -33,6 +34,10 @@ derive instance trustStateEq :: Eq TrustState
 derive instance ordTrustState :: Ord TrustState
 
 derive newtype instance showTrustState :: Show TrustState
+
+instance fpTs :: FpTs TrustState TrustState where
+  toFpTs = identity
+  fromFpTs = identity
 
 --------------------------------------------------------------------------------
 -- Constructors

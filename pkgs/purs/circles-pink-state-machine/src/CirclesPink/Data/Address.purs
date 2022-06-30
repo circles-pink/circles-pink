@@ -1,15 +1,15 @@
 module CirclesPink.Data.Address
   ( Address(..)
   , module Exp
+  , parseAddress
   , sampleAddress
   , sampleSafeAddress
-  )
-  where
+  ) where
 
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
-import Data.Maybe (fromJust)
+import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype, wrap)
 import FpTs.Class (class FpTs)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
@@ -41,6 +41,11 @@ sampleAddress = unsafeMkAddress "fb7dc4d8f841af32d777e698d6c71409e85955d9"
 sampleSafeAddress :: Address
 sampleSafeAddress = unsafeMkAddress "984501180D63335928eA7fb59c17d33e0398Ed39"
 
+parseAddress :: String -> Maybe Address
+parseAddress x = x
+  # mkHexString
+  >>= W3.mkAddress
+  <#> wrap
 
 unsafeMkAddress :: String -> Address
 unsafeMkAddress s = unsafePartial
