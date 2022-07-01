@@ -1,12 +1,13 @@
 module Test.CirclesPinkStateMachine.Main where
 
 import Prelude
+
 import CirclesCore.Tests as CirclesCore.Tests
-import Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard as Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import GunDB.Tests as GunDB.Tests
 import PursDeps.Tests as PursDeps.Tests
+import Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard as Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import Test.Data.BigInt as Test.Data.BigInt
 import Test.Spec.Reporter (consoleReporter)
 import Test.Spec.Runner (runSpec)
@@ -29,7 +30,10 @@ mainTestSpec =
         CirclesCore.Tests.spec
         GunDB.Tests.spec
         Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard.spec
-        --Test.CirclesPink.Garden.StateMachine.Stories.spec
+
+--Test.CirclesPink.Garden.StateMachine.Stories.spec
+
+-- Test.EncryptedStorage.spec
 
 main :: Effect Unit
 main = do

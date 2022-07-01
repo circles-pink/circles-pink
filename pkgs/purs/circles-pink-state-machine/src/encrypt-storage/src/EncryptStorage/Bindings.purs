@@ -1,4 +1,4 @@
-module Storage.EncryptStorage.Bindings where
+module EncryptStorage.Bindings where
 
 import Prelude
 

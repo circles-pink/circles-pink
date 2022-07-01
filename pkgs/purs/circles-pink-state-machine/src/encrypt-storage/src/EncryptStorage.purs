@@ -1,8 +1,11 @@
-module Storage.EncryptStorage
+module EncryptStorage
   ( ErrGetItem
   , ErrItemNotFound
   , ErrParse
   , ErrParseJson
+  , _errItemNotFound
+  , _errParse
+  , _errParseJson
   , getItem
   , module Exp
   , newEs
@@ -20,8 +23,8 @@ import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Storage.EncryptStorage.Bindings (EsOptions, SecretKey, ES) as Exp
-import Storage.EncryptStorage.Bindings as B
+import EncryptStorage.Bindings (EsOptions, SecretKey, ES) as Exp
+import EncryptStorage.Bindings as B
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
