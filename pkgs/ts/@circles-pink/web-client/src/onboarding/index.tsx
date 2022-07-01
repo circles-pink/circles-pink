@@ -4,6 +4,7 @@ import i18n from '../i18n';
 import {
   CirclesConfig,
   mkControl,
+  mkControlTestEnv,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
@@ -48,6 +49,7 @@ export type OnboardingProps = {
   baseColor?: string;
   content?: Content;
   userConfig?: UserConfig;
+  testEnv? : Boolean
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -154,11 +156,12 @@ const OnboardingContent = ({
   baseColor,
   content = {},
   userConfig,
+  testEnv = false
 }: OnboardingProps): ReactElement => {
   const cfg =
     userConfig && userConfig.email ? mkCfg(userConfig) : cfgDefaultRight;
 
-  const control = mkControl(env)(cfg);
+  const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);
 
   const [state, act] = (useStateMachine as any)(
     (initState as unknown as CirclesState) || (init as unknown as CirclesState),
