@@ -4,17 +4,18 @@ import Prelude
 
 import Chance as C
 import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Mnemonic (getWords, keyToMnemonic)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
-import CirclesPink.Garden.Env (env, liftEnv)
+import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
 import CirclesPink.Garden.StateMachine.Stories as S
+import CirclesPink.Garden.TestEnv (liftEnv)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.State (StateT, get, runStateT)
@@ -40,7 +41,6 @@ import Effect.Class.Console (error, log)
 import HTTP.Milkis (milkisRequest)
 import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
-import Network.Ethereum.Core.Signatures as W3
 import Network.Ethereum.Web3 (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
 import Node.Encoding (Encoding(..))

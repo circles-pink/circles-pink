@@ -5,7 +5,7 @@ import Prelude
 import CirclesCore (User, _errNative)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (sampleKey)
-import CirclesPink.Garden.Env (TestEnvM, runTestEnvM, testEnv)
+import CirclesPink.Garden.TestEnv (TestEnvM, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
 import Control.Monad.Except (ExceptT, runExceptT, throwError)

@@ -6,13 +6,12 @@ module CirclesPink.Garden.TS
 
 import Prelude
 
-import CirclesPink.Garden.Env (runTestEnvT, testEnv)
+import CirclesPink.Garden.TestEnv (runTestEnvT, testEnv)
 import CirclesPink.Garden.Env as Garden
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import Control.Monad.Trans.Class (lift)
 import Data.Either (Either(..))
 import Data.FpTs.Either as FP
 import Effect (Effect)
