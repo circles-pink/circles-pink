@@ -24,7 +24,6 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 import Prelude
 
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
-import CirclesCore.Bindings (Balance)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.Trust as T
@@ -34,6 +33,7 @@ import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Array (any, filter)
+import Data.BN (BN)
 import Data.Either (Either(..))
 import Data.FpTs.Option as FpTs
 import Data.FpTs.Tuple as FPT
@@ -84,8 +84,8 @@ type DefaultView =
   , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
   , trustRemoveResult :: Object (RemoteReport ErrTrustRemoveConnectionResolved String)
   , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
-  , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved Balance
-  , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved Balance
+  , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved BN
+  , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved BN
   , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
   , transferResult :: RemoteData_ ErrTokenTransferResolved String
   , redeploySafeResult :: RemoteReport ErrDeploySafeResolved SafeStatus

@@ -3,11 +3,10 @@ module Test.TestUtils where
 import Prelude
 
 import CirclesCore (User)
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import Control.Error.Util (hush)
 import Data.Argonaut (decodeJson, fromString)
 import Data.Maybe (fromJust)
-import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 
 --------------------------------------------------------------------------------

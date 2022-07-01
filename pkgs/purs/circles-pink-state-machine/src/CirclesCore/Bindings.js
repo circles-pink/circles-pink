@@ -15,16 +15,6 @@ exports.privKeyToAccount = (web3) => (privKey) => () =>
 exports.sendTransaction = (web3) => (from) => (to) => () =>
   web3.eth.sendTransaction({ from, to, value: web3.utils.toWei("1", "ether") });
 
-// Web3 Utils
-
-var BN = Web3.utils.BN;
-
-exports.strToBN = (str) => () => new BN(str);
-
-exports.intToBN = (int) => () => new BN(int);
-
-exports.bnToStr = (bn) => bn.toString();
-
 // CirclesCore
 
 var CirclesCore = require("@circles/core");

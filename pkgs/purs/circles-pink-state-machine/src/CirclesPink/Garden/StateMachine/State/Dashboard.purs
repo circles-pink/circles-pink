@@ -31,21 +31,21 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
 
 import Prelude
 
-import CirclesCore (Balance, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, User, ErrParseAddress)
+import CirclesCore (ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, User, ErrParseAddress)
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustState (TrustState)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
+import Data.BN (BN)
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
-import Network.Ethereum.Core.Signatures as W3
 import Record as R
 import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
@@ -152,14 +152,14 @@ type ErrTrustRemoveConnection r = Env.ErrRemoveTrustConnection + r
 --------------------------------------------------------------------------------
 -- TokenGetBalanceResult
 --------------------------------------------------------------------------------
-type TokenGetBalanceResult = RemoteReportV (ErrTokenGetBalance + ()) Balance
+type TokenGetBalanceResult = RemoteReportV (ErrTokenGetBalance + ()) BN
 
 type ErrTokenGetBalance r = Env.ErrGetBalance + r
 
 --------------------------------------------------------------------------------
 -- TokenCheckUBIPayoutResult
 --------------------------------------------------------------------------------
-type TokenCheckUBIPayoutResult = RemoteReportV (ErrTokenCheckUBIPayout + ()) Balance
+type TokenCheckUBIPayoutResult = RemoteReportV (ErrTokenCheckUBIPayout + ()) BN
 
 type ErrTokenCheckUBIPayout r = Env.ErrCheckUBIPayout + r
 

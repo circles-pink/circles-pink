@@ -58,16 +58,16 @@ module CirclesPink.Garden.StateMachine.Control.Env
 
 import Prelude
 
-import CirclesCore (Balance, ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrParseAddress)
+import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrParseAddress)
+import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (JsonDecodeError)
+import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
-import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
-import CirclesPink.Data.Address (Address)
-import PursDeps (ErrParse)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -186,12 +186,12 @@ type RestoreSession m = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
 --------------------------------------------------------------------------------
 type ErrGetBalance r = ErrNative + ErrInvalidUrl + r
 
-type GetBalance m = forall r. PrivateKey -> Address -> ExceptV (ErrGetBalance + r) m Balance
+type GetBalance m = forall r. PrivateKey -> Address -> ExceptV (ErrGetBalance + r) m BN
 
 --------------------------------------------------------------------------------
 type ErrCheckUBIPayout r = ErrNative + ErrInvalidUrl + r
 
-type CheckUBIPayout m = forall r. PrivateKey -> Address -> ExceptV (ErrCheckUBIPayout + r) m Balance
+type CheckUBIPayout m = forall r. PrivateKey -> Address -> ExceptV (ErrCheckUBIPayout + r) m BN
 
 --------------------------------------------------------------------------------
 type ErrRequestUBIPayout r = ErrNative + ErrInvalidUrl + r
@@ -201,7 +201,7 @@ type RequestUBIPayout m = forall r. PrivateKey -> Address -> ExceptV (ErrRequest
 --------------------------------------------------------------------------------
 type ErrTransfer r = ErrNative + ErrInvalidUrl + r
 
-type Transfer m = forall r. PrivateKey -> Address -> Address -> String -> String -> ExceptV (ErrTransfer + r) m String
+type Transfer m = forall r. PrivateKey -> Address -> Address -> BN -> String -> ExceptV (ErrTransfer + r) m String
 
 type GetTimestamp :: forall k. (Type -> k) -> k
 type GetTimestamp m = m Instant

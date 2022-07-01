@@ -1,6 +1,5 @@
 module CirclesCore.Bindings
   ( Account
-  , Balance(..)
   , CirclesCore
   , CirclesCore_(..)
   , CoreSafe(..)
@@ -15,29 +14,30 @@ module CirclesCore.Bindings
   , TrustIsTrustedResult(..)
   , User(..)
   , Web3
-  , bnToStr
-  , checkResult
+  
+
   , convertCore
-  , intToBN
+  
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  , strToBN
+  
   , unsafeSampleCore
   ) where
 
 import Prelude
+
 import CirclesCore.ApiResult (ApiResult)
 import Control.Promise (Promise)
+import Data.BN (BN)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3)
 import Data.Newtype (class Newtype)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
-import Structural (class Structural, checkStructural)
-import Type.Proxy (Proxy(..))
+import Structural (class Structural)
 import Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
@@ -76,18 +76,6 @@ derive instance newtypeTrustIsTrustedResult :: Newtype TrustIsTrustedResult _
 derive newtype instance structuralTrustIsTrustedResult :: Structural TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
-newtype Balance = Balance
-  { length :: Int
-  , negative :: Int
-  , red :: Boolean
-  , words :: Array Int
-  }
-
-derive instance newtypeBalance :: Newtype Balance _
-
-derive newtype instance structuralBalance :: Structural Balance
-
---------------------------------------------------------------------------------
 -- FFI
 --------------------------------------------------------------------------------
 foreign import newWebSocketProvider :: String -> Effect Provider
@@ -97,12 +85,6 @@ foreign import newWeb3 :: Provider -> Effect Web3
 foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 
 foreign import sendTransaction :: Web3 -> String -> String -> Effect Unit
-
-foreign import strToBN :: String -> Effect Balance
-
-foreign import intToBN :: Int -> Effect Balance
-
-foreign import bnToStr :: Balance -> String
 
 --------------------------------------------------------------------------------
 -- FFI / newCirclesCore
@@ -129,8 +111,6 @@ newtype CirclesCore_ = CirclesCore_
   }
 
 derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
-
-derive newtype instance structuralCirclesCore_ :: Structural CirclesCore_
 
 --------------------------------------------------------------------------------
 newtype CoreUser = CoreUser
@@ -177,22 +157,20 @@ derive newtype instance structuralCoreSafe :: Structural CoreSafe
 --------------------------------------------------------------------------------
 newtype CoreToken = CoreToken
   { deploy :: Fn2Promise Account { safeAddress :: String } String
-  , getBalance :: Fn2Promise Account { safeAddress :: String } Balance
-  , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } Balance
+  , getBalance :: Fn2Promise Account { safeAddress :: String } BN
+  , checkUBIPayout :: Fn2Promise Account { safeAddress :: String } BN
   , requestUBIPayout :: Fn2Promise Account { safeAddress :: String } String
   , transfer ::
       Fn2Promise Account
         { from :: String
         , to :: String
-        , value :: Balance
+        , value :: BN
         , paymentNote :: String
         }
         String
   }
 
 derive instance newtypeCoreToken :: Newtype CoreToken _
-
-derive newtype instance structuralCoreToken :: Structural CoreToken
 
 --------------------------------------------------------------------------------
 newtype CoreTrust = CoreTrust
@@ -257,5 +235,3 @@ type Fn2Promise a1 a2 b = Fn2 a1 a2 (Promise b)
 type Fn3Promise a1 a2 a3 b = Fn3 a1 a2 a3 (Promise b)
 
 --------------------------------------------------------------------------------
-checkResult :: Unit
-checkResult = checkStructural (Proxy :: _ CirclesCore_)
