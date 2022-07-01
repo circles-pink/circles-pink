@@ -1,9 +1,11 @@
 module CirclesPink.Garden.Env
   ( EnvVars(..)
   , TestEnvM
+  , TestEnvT
   , env
   , liftEnv
   , runTestEnvM
+  , runTestEnvT
   , testEnv
   ) where
 
@@ -20,17 +22,19 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (class MonadTrans, ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (State, evalState)
+import Control.Monad.State (State, StateT(..), evalState, evalStateT)
 import Convertable (convert)
 import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
+import Data.Identity (Identity)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-|))
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Class (liftEffect)
@@ -394,12 +398,17 @@ getCirclesCore web3 ev =
 
 --------------------------------------------------------------------------------
 
-type TestEnvM = State {}
+type TestEnvT m = StateT {} m
+
+type TestEnvM = TestEnvT Identity
 
 runTestEnvM :: forall a. TestEnvM a -> a
 runTestEnvM x = evalState x {}
 
-testEnv :: Env.Env TestEnvM
+runTestEnvT :: forall m a. Monad m => TestEnvT m a -> m a
+runTestEnvT x = evalStateT x {}
+
+testEnv :: forall m. Monad m => Env.Env (TestEnvT m)
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }

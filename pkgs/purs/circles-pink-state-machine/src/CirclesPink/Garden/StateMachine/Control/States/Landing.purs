@@ -7,6 +7,7 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
+import Debug.Extra (todo)
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 
 landing
@@ -22,31 +23,34 @@ landing env =
   , signIn: \set _ _ -> set \_ -> S.initLogin
   , checkForSession:
       \set _ _ -> do
-        set \st' -> S._landing st' { checkSessionResult = _loading unit :: RemoteData Unit Unit S.ErrLandingStateResolved Unit }
-        result <-
-          (runExceptT' :: ExceptV S.ErrLandingState _ _ -> _) do
-            privKey <- env.restoreSession
-            loginResult <- loginTask env privKey
-            pure { privKey, loginResult }
-        case result of
-          Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
-          Right { privKey, loginResult: { user, safeStatus } }
-            | safeStatus.isCreated && safeStatus.isDeployed -> do
-                set \_ ->
-                  S.initDashboard
-                    { user
-                    , privKey
-                    }
-          Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
-            set \_ ->
-              S._trusts
-                { user
-                , trusts
-                , privKey
-                , safeStatus
-                , trustsResult: _notAsked unit
-                , deploySafeResult: _notAsked unit
-                , deployTokenResult: _notAsked unit
-                , isReady
-                }
+        set \st -> S._landing st { checkSessionResult = _failure todo }
+        pure unit
+
+        -- set \st' -> S._landing st' { checkSessionResult = _loading unit :: RemoteData Unit Unit S.ErrLandingStateResolved Unit }
+        -- result <-
+        --   (runExceptT' :: ExceptV S.ErrLandingState _ _ -> _) do
+        --     privKey <- env.restoreSession
+        --     loginResult <- loginTask env privKey
+        --     pure { privKey, loginResult }
+        -- case result of
+        --   Left e -> set \st -> S._landing st { checkSessionResult = _failure e }
+        --   Right { privKey, loginResult: { user, safeStatus } }
+        --     | safeStatus.isCreated && safeStatus.isDeployed -> do
+        --         set \_ ->
+        --           S.initDashboard
+        --             { user
+        --             , privKey
+        --             }
+        --   Right { privKey, loginResult: { user, trusts, safeStatus, isReady } } -> do
+        --     set \_ ->
+        --       S._trusts
+        --         { user
+        --         , trusts
+        --         , privKey
+        --         , safeStatus
+        --         , trustsResult: _notAsked unit
+        --         , deploySafeResult: _notAsked unit
+        --         , deployTokenResult: _notAsked unit
+        --         , isReady
+        --         }
   }

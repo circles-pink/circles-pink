@@ -1,12 +1,19 @@
-module CirclesPink.Garden.TS where
+module CirclesPink.Garden.TS
+  ( convertConfig
+  , mkControl
+  , mkControlTestEnv
+  ) where
 
 import Prelude
 
+import CirclesPink.Garden.Env (runTestEnvT, testEnv)
 import CirclesPink.Garden.Env as Garden
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
+import Control.Monad.Trans.Class (lift)
+import Data.Either (Either(..))
 import Data.FpTs.Either as FP
 import Effect (Effect)
 import Effect.Aff (launchAff_)
@@ -32,3 +39,14 @@ mkControl envVars cfg setState s a =
   request = milkisRequest windowFetch
 
   env = Garden.env { request, envVars }
+
+mkControlTestEnv :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+mkControlTestEnv setState st ac =
+  circlesControl testEnv cfg (setState >>> liftEffect) st ac
+    # runTestEnvT
+  where
+  cfg = C.CirclesConfig
+    { extractEmail:
+        --Left "my@email.com"
+        Right (\_ -> pure unit)
+    }

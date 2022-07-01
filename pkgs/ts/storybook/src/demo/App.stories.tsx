@@ -19,15 +19,19 @@ export default {
 export const GardenAPI = (args): ReactElement => {
   const [content, setContent] = useState<{}>();
 
-  // useEffect(() => {
-  //   getContent({ endpoint: process.env.STORYBOOK_DIRECTUS_URL }).then(
-  //     setContent
-  //   );
-  // }, []);
-
   return (
     <>
       <Onboarding content={content} {...args} initState={initLanding} />
+    </>
+  );
+};
+
+export const TestEnv = (args): ReactElement => {
+  const [content, setContent] = useState<{}>();
+
+  return (
+    <>
+      <Onboarding content={content} {...args} initState={initLanding} testEnv />
     </>
   );
 };
