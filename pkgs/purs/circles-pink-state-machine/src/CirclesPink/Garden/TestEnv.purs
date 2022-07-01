@@ -16,6 +16,7 @@ import CirclesPink.Data.PrivateKey as P
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, mapExceptT, throwError)
 import Control.Monad.State (StateT, evalState, evalStateT)
+import Data.BN as B
 import Data.Identity (Identity)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
@@ -57,8 +58,8 @@ testEnv =
   , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
-  , getBalance: \_ _ -> pure $ wrap { length: 0, negative: 0, red: false, words: [] }
-  , checkUBIPayout: \_ _ -> pure $ wrap { length: 0, negative: 0, red: false, words: [] }
+  , getBalance: \_ _ -> pure $ B.fromDecimalStr "341411231"
+  , checkUBIPayout: \_ _ -> pure $ B.fromDecimalStr "23879"
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom

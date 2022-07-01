@@ -2,10 +2,11 @@ module CirclesPink.Garden.StateMachine.Action where
 
 import Prelude
 
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
+import Data.BN (BN)
 import Data.Variant (Variant, inj)
-import CirclesPink.Data.Address (Address)
 import Type.Proxy (Proxy(..))
 
 type CirclesAction = Variant
@@ -53,7 +54,7 @@ type CirclesAction = Variant
         , transfer ::
             { from :: Address
             , to :: Address
-            , value :: String
+            , value :: BN
             , paymentNote :: String
             }
         , getUsers ::

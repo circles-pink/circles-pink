@@ -7,6 +7,8 @@ import Prelude
 
 import CirclesCore (TrustNode, User)
 import CirclesCore as CC
+import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
@@ -17,17 +19,16 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
+import Data.BN (BN)
 import Data.Either (Either(..), hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
-import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (insert)
-import CirclesPink.Data.Address (Address)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
 
@@ -74,7 +75,7 @@ dashboard
          ActionHandler' m
            { from :: Address
            , to :: Address
-           , value :: String
+           , value :: BN
            , paymentNote :: String
            }
            S.DashboardState

@@ -45,8 +45,6 @@ module CirclesCore
   , _errNative
   , _errParseAddress
   , _errService
-  , bnToStr
-  , intToBN
   , module Exp
   , newCirclesCore
   , newWeb3
@@ -59,7 +57,6 @@ module CirclesCore
   , safePredictAddress
   , safePrepareDeploy
   , sendTransaction
-  , strToBN
   , tokenCheckUBIPayout
   , tokenDeploy
   , tokenGetBalance
@@ -83,7 +80,7 @@ import Prelude
 
 import CirclesCore.ApiResult (ApiError) as Exp
 import CirclesCore.ApiResult (apiResultToEither, ApiError)
-import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult, Balance) as Exp
+import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn2)
@@ -92,6 +89,7 @@ import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
+import Data.BN (BN)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
 import Data.Newtype (wrap)
@@ -127,18 +125,6 @@ newWebSocketProvider x1 =
 
 newWeb3 :: B.Provider -> Effect B.Web3
 newWeb3 = B.newWeb3
-
---------------------------------------------------------------------------------
--- Web3 Utils
---------------------------------------------------------------------------------
-strToBN :: String -> Effect B.Balance
-strToBN = B.strToBN
-
-intToBN :: Int -> Effect B.Balance
-intToBN = B.intToBN
-
-bnToStr :: B.Balance -> String
-bnToStr = B.bnToStr
 
 --------------------------------------------------------------------------------
 -- API
@@ -433,7 +419,7 @@ type TokenGetBalanceOptions =
 
 type ErrTokenGetBalance r = ErrNative + r
 
-tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) B.Balance
+tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) BN
 tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.getBalance
@@ -449,7 +435,7 @@ type TokenCheckUBIPayoutOptions =
 
 type ErrTokenCheckUBIPayout r = ErrNative + r
 
-tokenCheckUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenCheckUBIPayoutOptions -> Result (ErrTokenCheckUBIPayout r) B.Balance
+tokenCheckUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenCheckUBIPayoutOptions -> Result (ErrTokenCheckUBIPayout r) BN
 tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -| _.token -| _.checkUBIPayout
@@ -478,7 +464,7 @@ tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 type TokenTransferOptions =
   { from :: ChecksumAddress
   , to :: ChecksumAddress
-  , value :: B.Balance
+  , value :: BN
   , paymentNote :: String
   }
 
