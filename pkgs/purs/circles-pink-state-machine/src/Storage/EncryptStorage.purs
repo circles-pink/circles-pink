@@ -11,41 +11,39 @@ module Storage.EncryptStorage
 
 import Prelude
 
-import Control.Monad.Except (ExceptT(..))
-import Control.Monad.Except.Checked (ExceptV)
-import Data.Argonaut (class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson, jsonParser, stringify)
+import Control.Monad.Except (ExceptT(..), except, mapExceptT)
+import Control.Monad.Except.Checked (safe)
+import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError, decodeJson, encodeJson, jsonParser, stringify)
 import Data.Bifunctor (lmap)
-import Data.Either (Either, note)
-import Data.Maybe (Maybe(..), fromJust)
+import Data.Either (note)
+import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import Debug.Extra (todo)
-import Effect (Effect)
+import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Storage.EncryptStorage.Bindings (EsOptions, SecretKey, ES) as Exp
 import Storage.EncryptStorage.Bindings as B
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
-newEs :: B.SecretKey -> B.EsOptions -> Effect B.ES
-newEs = B.newEs
+newEs :: forall r. B.SecretKey -> B.EsOptions -> ExceptT (Variant r) Aff B.ES
+newEs sk o = B.newEs sk o # liftEffect
 
-setItem :: forall k v. EncodeJson k => EncodeJson v => B.ES -> k -> v -> Effect Unit
+setItem :: forall r k v. EncodeJson k => EncodeJson v => B.ES -> k -> v -> ExceptT (Variant r) Aff Unit
 setItem es k v = B.setItem es (stringify $ encodeJson k) (stringify $ encodeJson v)
+  # liftEffect
 
+--------------------------------------------------------------------------------
 type ErrGetItem r = ErrItemNotFound + ErrParseJson + ErrParse + r
 
-getItem :: forall k v r. EncodeJson k => EncodeJson v => B.ES -> k -> ExceptT (Variant (ErrGetItem r)) Effect Json
+getItem :: forall k v r. EncodeJson k => DecodeJson v => B.ES -> k -> ExceptT (Variant (ErrGetItem r)) Aff v
 getItem es k =
   let
     key = stringify $ encodeJson k
   in
-    B.getItem Nothing Just es key
-      <#> note (_errItemNotFound key)
-      <#> (\et -> et >>= jsonParser # lmap _errParseJson)
-      # ExceptT
-
---   # decodeJson
---   # stringify
+    (B.getItem Nothing Just es key <#> note (_errItemNotFound key) # ExceptT)
+      >>= (jsonParser >>> lmap _errParseJson >>> except)
+      >>= (decodeJson >>> lmap _errParse >>> except)
+      # mapExceptT liftEffect
 
 --------------------------------------------------------------------------------
 -- Error Types
@@ -66,3 +64,6 @@ _errItemNotFound = inj (Proxy :: _ "errItemNotFound")
 
 _errParseJson :: forall r. String -> Variant (ErrParseJson r)
 _errParseJson = inj (Proxy :: _ "errParseJson")
+
+_errParse :: forall r. JsonDecodeError -> Variant (ErrParse r)
+_errParse = inj (Proxy :: _ "errParse")
