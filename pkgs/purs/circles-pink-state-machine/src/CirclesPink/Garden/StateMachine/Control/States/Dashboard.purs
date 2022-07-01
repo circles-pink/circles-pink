@@ -20,6 +20,7 @@ import Control.Monad.Trans.Class (lift)
 import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.BN (BN)
+import Data.BN as BN
 import Data.Either (Either(..), hush, isRight, note)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex)
@@ -107,16 +108,16 @@ dashboard env =
   , redeploySafeAndToken
   }
   where
-  getTrusts set st _ = pure unit
-    -- void do
-    --   runExceptT do
-    --     _ <-
-    --       syncTrusts set st
-    --         # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-    --     _ <-
+  getTrusts set st _ =
+    void do
+      runExceptT do
+        _ <-
+          syncTrusts set st
+            # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+    --    _ <-
     --       syncTrusts set st
     --         # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
-    --     pure unit
+        pure unit
 
   syncTrusts set st i = do
     let
@@ -288,23 +289,23 @@ dashboard env =
   getBalance set st _ =
     void do
       runExceptT do
-        -- _ <-
-        --   env.getBalance st.privKey st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-        --     # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
-        -- -- checkPayout <-
-        --   env.checkUBIPayout st.privKey st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
-        --     # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
-        -- when ((length $ CC.bnToStr checkPayout) >= 18) do
-        --   env.requestUBIPayout st.privKey st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
-        --     # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
-        --     # void
-        -- _ <-
-        --   env.getBalance st.privKey st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-        --     # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
+        _ <-
+          env.getBalance st.privKey st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
+        checkPayout <-
+          env.checkUBIPayout st.privKey st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+            # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
+        when ((length $ BN.toDecimalStr checkPayout) >= 18) do
+          env.requestUBIPayout st.privKey st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
+            # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
+            # void
+        _ <-
+          env.getBalance st.privKey st.user.safeAddress
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
         -- _ <-
         --   env.getBalance st.privKey st.user.safeAddress
         --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
