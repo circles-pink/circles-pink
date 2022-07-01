@@ -305,6 +305,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "heterogeneous" = pkgs.stdenv.mkDerivation {
+        name = "heterogeneous";
+        version = "v0.5.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/natefaubion/purescript-heterogeneous.git";
+          rev = "550445cf7932e158395423fc087cdc05bab41c40";
+          sha256 = "08bpgm9p8ib1jzrmssqpa1bqqzfmba43lsih1xvr3pf1jfizayxg";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "identity" = pkgs.stdenv.mkDerivation {
         name = "identity";
         version = "v5.0.0";
@@ -605,6 +617,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "record" = pkgs.stdenv.mkDerivation {
+        name = "record";
+        version = "v3.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-record.git";
+          rev = "091495d61fcaa9d8d8232e7b800f403a3165a38f";
+          sha256 = "0yidfvwiajiv8xflfsi2p8dqnp0qmmcz9jry58jyn9ga82z2pqn6";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "refs" = pkgs.stdenv.mkDerivation {
         name = "refs";
         version = "v5.0.0";
@@ -756,6 +780,18 @@ let
           url = "https://github.com/purescript/purescript-unsafe-coerce.git";
           rev = "ee24f0d3b94bf925d9c50fcc2b449579580178c0";
           sha256 = "0l2agnm1k910v4yp1hz19wrsrywsr5scb397762y7pigm3frzs8r";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "variant" = pkgs.stdenv.mkDerivation {
+        name = "variant";
+        version = "v7.0.3";
+        src = pkgs.fetchgit {
+          url = "https://github.com/natefaubion/purescript-variant.git";
+          rev = "3f12411ede5edd342d25340c1babce9ae81d6793";
+          sha256 = "1q2pky3gf177ihy2zjzqvp1cj18ycaki9vm4ghw18p7hf256lqmc";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
