@@ -58,8 +58,8 @@ testEnv =
   , removeTrustConnection: \_ _ _ -> pure ""
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
-  , getBalance: \_ _ -> pure $ B.fromDecimalStr "341411231"
-  , checkUBIPayout: \_ _ -> pure $ B.fromDecimalStr "23879"
+  , getBalance: \_ _ -> pure $ B.fromDecimalStr "34141123134632464543156"
+  , checkUBIPayout: \_ _ -> pure $ B.fromDecimalStr "8943789342768937829897"
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom
