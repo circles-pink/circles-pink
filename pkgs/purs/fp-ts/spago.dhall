@@ -2,6 +2,7 @@
 , dependencies =
   [ "aff"
   , "effect"
+  , "heterogeneous"
   , "maybe"
   , "prelude"
   , "spec"

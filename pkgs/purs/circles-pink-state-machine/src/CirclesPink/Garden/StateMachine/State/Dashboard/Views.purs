@@ -25,7 +25,7 @@ import Prelude
 
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesCore.Bindings (Balance)
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
@@ -139,13 +139,7 @@ defaultView d@{ trusts } =
   in
     { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
     , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
-    , graph:
-        let
-          entries = d.trusts # (G.toUnfoldables :: _ -> { nodes :: Array _, edges :: Array _ })
-        in
-          { nodes: toFpTs entries.nodes
-          , edges: toFpTs entries.edges
-          }
+    , graph: d.trusts # (G.toUnfoldables :: _ -> { nodes :: Array _, edges :: Array _ }) # toFpTs
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult
     , getUsersResult: d.getUsersResult
