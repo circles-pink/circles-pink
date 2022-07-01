@@ -162,6 +162,13 @@ spago-test_:
 spago-test-fast:
 	spago test --main "Test.AllTests.Main" --purs-args '--output {{PURS_OUTPUT}}'
 
+spago-docs:
+	ln -fs {{PURS_OUTPUT}} output
+	spago docs
+
+doc-search:
+	just spago-docs; purescript-docs-search
+
 ################################################################################
 # All Makefile tasks
 ################################################################################

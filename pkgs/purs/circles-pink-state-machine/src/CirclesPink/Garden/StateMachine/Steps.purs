@@ -9,7 +9,7 @@ module CirclesPink.Garden.StateMachine.Steps
 
 import Prelude
 
-import CirclesPink.Garden.Env (TestEnvM, liftEnv, runTestEnvM, testEnv)
+import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)

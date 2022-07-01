@@ -5,7 +5,7 @@ module Test.CirclesPink.Garden.StateMachine.Stories
 import Prelude
 
 import CirclesPink.Data.Mnemonic (sampleMnemonic)
-import CirclesPink.Garden.Env (TestEnvM, liftEnv, runTestEnvM, testEnv)
+import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
