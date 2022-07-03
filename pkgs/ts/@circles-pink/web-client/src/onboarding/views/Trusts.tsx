@@ -29,6 +29,7 @@ import {
   defaultView,
   DefaultView,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
+import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 
 // -----------------------------------------------------------------------------
 // Trusts
@@ -44,6 +45,8 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
     () => (defaultView as any)(stateRaw) as DefaultView,
     [stateRaw]
   );
+
+  const safeAddress = addrToString(state.user.safeAddress);
 
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
@@ -109,13 +112,18 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
                   <FadeIn orientation={orientation} delay={getDelay()}>
                     <CenterElement>
                       <QrCode
-                        data={state.user.safeAddress}
+                        data={safeAddress}
                         height="200"
                         width="200"
                         fgColor="gray"
                         bgColor="white"
                       />
                     </CenterElement>
+                  </FadeIn>
+                  <FadeIn orientation={orientation} delay={getDelay()}>
+                    <CenterText>
+                      <Text>{safeAddress}</Text>
+                    </CenterText>
                   </FadeIn>
                   <TrustIndicatorRow>
                     <FadeIn orientation={orientation} delay={getDelay()}>
@@ -162,7 +170,7 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
                   <FadeIn orientation={orientation} delay={getDelay()}>
                     <CenterElement>
                       <QrCode
-                        data={state.user.safeAddress}
+                        data={safeAddress}
                         height="200"
                         width="200"
                         fgColor="gray"
@@ -172,7 +180,7 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
                   </FadeIn>
                   <FadeIn orientation={orientation} delay={getDelay()}>
                     <CenterText>
-                      <Text>{state.user.safeAddress}</Text>
+                      <Text>{safeAddress}</Text>
                     </CenterText>
                   </FadeIn>
                 </>
