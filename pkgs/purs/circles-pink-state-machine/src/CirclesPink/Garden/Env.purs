@@ -260,7 +260,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.trustGetNetwork circlesCore account { safeAddress }
+    CC.trustGetNetwork circlesCore account { safeAddress: convert safeAddress }
 
   getSafeStatus :: Env.GetSafeStatus Aff
   getSafeStatus privKey = do

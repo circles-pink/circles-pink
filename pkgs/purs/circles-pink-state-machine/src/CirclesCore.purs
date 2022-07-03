@@ -189,7 +189,7 @@ type TrustNode =
 
 type ErrTrustGetNetwork r = ErrNative + ErrParseAddress + r
 
-trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
+trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: ChecksumAddress } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
 trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.trust -# _.getNetwork
@@ -296,7 +296,7 @@ userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
     Right data_ -> traverse userToUser data_
 
 --------------------------------------------------------------------------------
--- API / userRegister
+-- API / userSearch
 --------------------------------------------------------------------------------
 type SearchOptions =
   { query :: String
