@@ -24,7 +24,7 @@ spec :: Spec Unit
 spec =
   let
     env' :: Env (TestScriptT Identity)
-    env' =  testEnv
+    env' = testEnv
 
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
@@ -85,28 +85,28 @@ spec =
             `shouldEqual`
               "dashboard"
 
--- -- describe "A user can trust" do
--- --   it "can trust another user" do
--- --     ( ( do
--- --           _ <- loginUser env' { magicWords: show sampleMnemonic }
--- --           _ <- trustUser env' { safeAddress: addrToString sampleSafeAddress }
--- --           pure unit
--- --       )
--- --         # (\x -> spy "b" x)
--- --         # execScripT'
--- --         # runTestEnvM
--- --         # (\x -> spy "a" x)
--- --         #
--- --           ( default Nothing
--- --               # onMatch
--- --                   { dashboard: \st ->
--- --                       let
--- --                         x = spy "x" (addrToString sampleSafeAddress)
--- --                         y = spy "y" $ (toUnfoldable st.trusts :: Array _)
--- --                       in
--- --                         lookup (convert sampleSafeAddress) st.trusts
--- --                           <#> (const unit)
--- --                   }
--- --           )
--- --     )
--- --       `shouldEqual` (Just unit)
+-- describe "A user can trust" do
+--   it "can trust another user" do
+--     ( ( do
+--           _ <- loginUser env' { magicWords: show sampleMnemonic }
+--           _ <- trustUser env' { safeAddress: addrToString sampleSafeAddress }
+--           pure unit
+--       )
+--         # (\x -> spy "b" x)
+--         # execScripT'
+--         # runTestEnvM
+--         # (\x -> spy "a" x)
+--         #
+--           ( default Nothing
+--               # onMatch
+--                   { dashboard: \st ->
+--                       let
+--                         x = spy "x" (addrToString sampleSafeAddress)
+--                         y = spy "y" $ (toUnfoldable st.trusts :: Array _)
+--                       in
+--                         lookup (sampleSafeAddress) st.trusts
+--                           <#> (const unit)
+--                   }
+--           )
+--     )
+--       `shouldEqual` (Just unit)
