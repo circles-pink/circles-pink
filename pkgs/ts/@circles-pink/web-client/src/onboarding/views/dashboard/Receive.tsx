@@ -5,6 +5,7 @@ import { Theme } from '../../../context/theme';
 import { DashboardProps } from '../Dashboard';
 import QrCode from 'react-qrcode-svg';
 import tw, { css, styled } from 'twin.macro';
+import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 
 // -----------------------------------------------------------------------------
 // Receive Circles
@@ -13,6 +14,7 @@ import tw, { css, styled } from 'twin.macro';
 type ReceiveProps = DashboardProps & { theme: Theme };
 
 export const Receive = ({ state, theme }: ReceiveProps) => {
+  const safeAddress = addrToString(state.user.safeAddress);
   return (
     <>
       <Claim color={theme.baseColor}>Receive Circles</Claim>
@@ -22,7 +24,7 @@ export const Receive = ({ state, theme }: ReceiveProps) => {
       </CenterText>
       <JustifyAround>
         <QrCode
-          data={state.user.safeAddress}
+          data={safeAddress}
           height="200"
           width="200"
           fgColor="gray"
@@ -30,7 +32,7 @@ export const Receive = ({ state, theme }: ReceiveProps) => {
         />
       </JustifyAround>
       <CenterText>
-        <Address>{state.user.safeAddress}</Address>
+        <Address>{safeAddress}</Address>
       </CenterText>
     </>
   );
