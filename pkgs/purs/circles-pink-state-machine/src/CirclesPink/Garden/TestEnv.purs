@@ -13,6 +13,7 @@ import Prelude
 import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (class MonadTrans, ExceptT, lift, mapExceptT, throwError)
 import Control.Monad.State (StateT, evalState, evalStateT)
@@ -20,19 +21,31 @@ import Data.BN as B
 import Data.Identity (Identity)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
+import Debug.Extra (todo)
+import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
 
 --------------------------------------------------------------------------------
 
-type TestEnvT m = StateT {} m
+newtype TestEnvT m a = TestEnvT (StateT {} m a)
+
+derive newtype instance monadTestEnvT :: Monad m => Monad (TestEnvT m)
+
+derive newtype instance applicativeTestEnvT :: Monad m => Applicative (TestEnvT m)
+
+derive newtype instance monadEffectTestEnvT :: MonadEffect m => MonadEffect (TestEnvT m)
+
+
+instance monadCircles :: Monad m => MonadCircles (TestEnvT m) where
+  sleep _ = todo
 
 type TestEnvM = TestEnvT Identity
 
 runTestEnvM :: forall a. TestEnvM a -> a
-runTestEnvM x = evalState x {}
+runTestEnvM (TestEnvT x) = evalState x {}
 
 runTestEnvT :: forall m a. Monad m => TestEnvT m a -> m a
-runTestEnvT x = evalStateT x {}
+runTestEnvT (TestEnvT x) = evalStateT x {}
 
 testEnv :: forall m. Monad m => Env.Env (TestEnvT m)
 testEnv =

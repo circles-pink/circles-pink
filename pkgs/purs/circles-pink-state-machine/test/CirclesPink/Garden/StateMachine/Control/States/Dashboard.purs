@@ -5,12 +5,13 @@ import Prelude
 import CirclesCore (User, _errNative)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (sampleKey)
-import CirclesPink.Garden.TestEnv (TestEnvM, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
+import CirclesPink.Garden.TestEnv (TestEnvM, TestEnvT, runTestEnvM, testEnv)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)
+import Data.Identity (Identity)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -66,7 +67,7 @@ spec =
 --   it "runs" do
 --     D.mapTrust [] (fromFoldable [])  `shouldEqual` 2
 
-mkGetUsers :: Map Address User -> GetUsers TestEnvM
+mkGetUsers :: Map Address User -> GetUsers (TestEnvT Identity)
 mkGetUsers db _ _ xs =
   let
     result = map (\k -> M.lookup k db) xs
@@ -79,7 +80,7 @@ mkGetUsers db _ _ xs =
 
 --------------------------------------------------------------------------------
 
-run :: forall t16 t17. ExceptT t16 TestEnvM t17 -> Maybe t17
+run :: forall t16 t17. ExceptT t16 (TestEnvT Identity) t17 -> Maybe t17
 run = runExceptT >>> runTestEnvM >>> hush
 
 -- trustedUser :: User

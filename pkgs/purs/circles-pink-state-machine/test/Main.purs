@@ -30,7 +30,7 @@ mainTestSpec =
         CirclesCore.Tests.spec
         GunDB.Tests.spec
         Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard.spec
-        Test.CirclesPink.Garden.StateMachine.Stories.spec
+        --Test.CirclesPink.Garden.StateMachine.Stories.spec
 
 main :: Effect Unit
 main = do

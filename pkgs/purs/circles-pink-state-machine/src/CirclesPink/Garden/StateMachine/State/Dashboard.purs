@@ -84,7 +84,7 @@ type RedeploySafeResult = RemoteReport
   SafeStatus
 
 type RedeployTokenResult = RemoteReport
-  (Variant (Env.ErrDeployToken + ()))
+  (Variant (Env.ErrDeployToken  + () ))
   String
 
 --------------------------------------------------------------------------------
