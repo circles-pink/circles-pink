@@ -1,17 +1,16 @@
 module CirclesPink.Garden.StateMachine.Stories
-  ( ScriptT'
-  , SignUpUserOpts
-  , execScripT'
-  , finalizeAccount
-  , loginUser
-  , signUpUser
-  , trustUser
-  ) where
+  -- ( ScriptT'
+  -- , SignUpUserOpts
+  -- , execScripT'
+  -- , finalizeAccount
+  -- , loginUser
+  -- , signUpUser
+  -- , trustUser
+  -- ) 
+  where
 
 import Prelude
 
-import CirclesCore (User)
-import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
@@ -19,42 +18,32 @@ import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import Control.Monad.State (class MonadState, StateT, execStateT, get)
-import Data.Either (Either)
+import Control.Monad.State (class MonadState, get)
 import Data.Variant.Extra (getLabel)
-import Debug.Extra (todo)
 import Log.Class (class MonadLog, log)
-import Stadium.Control (toStateT)
+import Stadium.Control (toMonadState)
 
-newtype ScriptT' m a = ScriptT' ((StateT CirclesState m) a)
+class
+  ( MonadCircles m
+  , MonadLog m
+  , MonadState CirclesState m
+  ) <=
+  MonadScript m
 
-instance _MonadState :: MonadState CirclesState (ScriptT' m) where
-  state = todo
-
-instance _MonadLog :: MonadLog m => MonadLog (ScriptT' m) where
-  log = todo
-
-instance _MonadCircles :: MonadCircles m => MonadCircles (ScriptT' m) where
-  sleep = todo
-
-
-execScripT' :: forall m a. Monad m => ScriptT' m a -> m CirclesState
-execScripT' (ScriptT' x) = flip execStateT initLanding x
 
 --------------------------------------------------------------------------------
-act :: forall m. MonadLog (ScriptT' m) => Env (ScriptT' m) -> CirclesConfig (ScriptT' m) -> CirclesAction -> ScriptT' m Unit
+act :: forall m. MonadScript m => Env m -> CirclesConfig m -> CirclesAction -> m Unit
 act env cfg =
   let
-    ctl ac = toStateT (circlesControl env cfg) ac
+    ctl ac = toMonadState (circlesControl env cfg) ac
   in
     \ac -> do
-      --log ("ACTION: " <> show ac)
+      log ("ACTION: " <> show ac)
       ctl ac
       st <- get
-      --log ("STATE: " <> getLabel st)
-      --log ""
+      log ("STATE: " <> getLabel st)
+      log ""
       pure unit
 
 --------------------------------------------------------------------------------
@@ -63,7 +52,7 @@ type SignUpUserOpts =
   , email :: String
   }
 
-signUpUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> SignUpUserOpts -> ScriptT' m Unit
+signUpUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> SignUpUserOpts -> m Unit
 signUpUser env cfg opts = do
   act env cfg $ A._landing $ A._signUp unit
   act env cfg $ A._infoGeneral $ A._next unit
@@ -78,7 +67,7 @@ signUpUser env cfg opts = do
   act env cfg $ A._submit $ A._submit unit
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> ScriptT' m Unit
+finalizeAccount :: forall m. MonadScript m => MonadLog m => Env m -> CirclesConfig m -> m Unit
 finalizeAccount env cfg = do
   act env cfg $ A._trusts $ A._finalizeRegisterUser unit
 
@@ -87,7 +76,7 @@ type LoginUserOpts =
   { magicWords :: String
   }
 
-loginUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> LoginUserOpts -> ScriptT' m Unit
+loginUser :: forall m. MonadScript m => MonadLog m => Env m -> CirclesConfig m -> LoginUserOpts -> m Unit
 loginUser env cfg { magicWords } = do
   act env cfg $ A._landing $ A._signIn unit
   act env cfg $ A._login $ A._setMagicWords magicWords
@@ -96,6 +85,6 @@ loginUser env cfg { magicWords } = do
 --------------------------------------------------------------------------------
 type TrustUserOpts = UserIdent
 
-trustUser :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> TrustUserOpts -> ScriptT' m Unit
+trustUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> TrustUserOpts -> m Unit
 trustUser env cfg u = do
   act env cfg $ A._dashboard $ A._addTrustConnection u
