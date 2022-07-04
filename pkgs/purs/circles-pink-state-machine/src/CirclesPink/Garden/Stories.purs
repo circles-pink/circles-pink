@@ -11,38 +11,51 @@ module CirclesPink.Garden.StateMachine.Stories
 import Prelude
 
 import CirclesCore (User)
+import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
-import CirclesPink.Data.UserIdent (UserIdent)
-import Control.Monad.State (StateT, execStateT, get)
+import Control.Monad.State (class MonadState, StateT, execStateT, get)
 import Data.Either (Either)
 import Data.Variant.Extra (getLabel)
+import Debug.Extra (todo)
 import Log.Class (class MonadLog, log)
 import Stadium.Control (toStateT)
-import CirclesPink.Data.Address (Address)
 
-type ScriptT' m a = (StateT CirclesState m) a
+newtype ScriptT' m a = ScriptT' ((StateT CirclesState m) a)
+
+instance _MonadState :: MonadState CirclesState (ScriptT' m) where
+  state = todo
+
+instance _MonadLog :: MonadLog m => MonadLog (ScriptT' m) where
+  log = todo
+
+instance _MonadCircles :: MonadCircles m => MonadCircles (ScriptT' m) where
+  sleep = todo
+
 
 execScripT' :: forall m a. Monad m => ScriptT' m a -> m CirclesState
-execScripT' = flip execStateT initLanding
+execScripT' (ScriptT' x) = flip execStateT initLanding x
 
 --------------------------------------------------------------------------------
-act :: forall m. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> CirclesAction -> ScriptT' m Unit
+act :: forall m. MonadLog (ScriptT' m) => Env (ScriptT' m) -> CirclesConfig (ScriptT' m) -> CirclesAction -> ScriptT' m Unit
 act env cfg =
   let
-    ctl = toStateT (circlesControl env cfg)
+    ctl ac = toStateT (circlesControl env cfg) ac
   in
     \ac -> do
-      log ("ACTION: " <> show ac)
+      --log ("ACTION: " <> show ac)
       ctl ac
       st <- get
-      log ("STATE: " <> getLabel st)
-      log ""
+      --log ("STATE: " <> getLabel st)
+      --log ""
+      pure unit
 
 --------------------------------------------------------------------------------
 type SignUpUserOpts =

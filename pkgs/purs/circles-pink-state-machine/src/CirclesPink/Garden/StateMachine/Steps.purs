@@ -9,23 +9,32 @@ module CirclesPink.Garden.StateMachine.Steps
 
 import Prelude
 
-import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
+import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
 import Control.Monad.State (StateT, execStateT)
+import Debug.Extra (todo)
 import Stadium.Control (toStateT)
 
-type TestConfig = CirclesConfig (StateT CirclesState TestEnvM)
+type TestConfig = CirclesConfig  (StateT CirclesState TestEnvM)
 
-act :: TestConfig -> CirclesAction -> StateT CirclesState TestEnvM Unit
-act cfg = toStateT $ circlesControl (liftEnv testEnv) cfg
+newtype StepM a = StepM (StateT CirclesState TestEnvM a)
 
-execFrom :: CirclesState -> StateT CirclesState TestEnvM Unit -> CirclesState
-execFrom st m = runTestEnvM $ execStateT m st
+derive newtype instance monad :: Monad StepM 
+
+instance monadCircles :: MonadCircles StepM where
+  sleep _ = pure unit
+
+act :: TestConfig -> CirclesAction -> StepM Unit
+act cfg ac = StepM $ (toStateT $ circlesControl (liftEnv testEnv) cfg) ac
+
+execFrom :: CirclesState -> StepM Unit -> CirclesState
+execFrom st (StepM m) = runTestEnvM $ execStateT m st
 
 --------------------------------------------------------------------------------
 -- Steps
