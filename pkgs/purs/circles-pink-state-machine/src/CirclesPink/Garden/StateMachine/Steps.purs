@@ -22,6 +22,9 @@ import Control.Monad.State (StateT, execStateT)
 import Debug.Extra (todo)
 import Stadium.Control (toStateT)
 
+
+x = todo
+
 -- type TestConfig = CirclesConfig  (StateT CirclesState TestEnvM)
 
 -- newtype StepM a = StepM (StateT CirclesState TestEnvM a)

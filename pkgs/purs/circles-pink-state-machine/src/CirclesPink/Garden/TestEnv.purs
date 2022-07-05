@@ -5,8 +5,7 @@ module CirclesPink.Garden.TestEnv
   , runTestEnvM
   , runTestEnvT
   , testEnv
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -15,13 +14,14 @@ import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import Control.Monad.Except (class MonadTrans, ExceptT, lift, mapExceptT, throwError)
+import Control.Monad.Except (mapExceptT, throwError)
 import Control.Monad.State (StateT, evalState, evalStateT)
 import Data.BN as B
 import Data.Identity (Identity)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
 import Debug.Extra (todo)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
 
@@ -31,10 +31,13 @@ newtype TestEnvT m a = TestEnvT (StateT {} m a)
 
 derive newtype instance monadTestEnvT :: Monad m => Monad (TestEnvT m)
 
+derive newtype instance functorTestEnvT :: Functor m => Functor (TestEnvT m)
+
 derive newtype instance applicativeTestEnvT :: Monad m => Applicative (TestEnvT m)
 
 derive newtype instance monadEffectTestEnvT :: MonadEffect m => MonadEffect (TestEnvT m)
 
+derive newtype instance monadAffTestEnvT :: MonadAff m => MonadAff (TestEnvT m)
 
 instance monadCircles :: Monad m => MonadCircles (TestEnvT m) where
   sleep _ = todo
@@ -81,52 +84,42 @@ testEnv =
 
 --------------------------------------------------------------------------------
 
-liftVal :: forall e m a t. MonadTrans t => Monad m => ExceptT e m a -> ExceptT e (t m) a
-liftVal f = f # mapExceptT lift
+compose2 :: forall a1 a2 z z'. (z -> z') -> (a1 -> a2 -> z) -> (a1 -> a2 -> z')
+compose2 g f x1 x2 = f x1 x2 # g
 
-liftFn1 :: forall a1 e m a t. MonadTrans t => Monad m => (a1 -> ExceptT e m a) -> a1 -> (ExceptT e (t m) a)
-liftFn1 f x1 = f x1 # mapExceptT lift
+compose3 :: forall a1 a2 a3 z z'. (z -> z') -> (a1 -> a2 -> a3 -> z) -> (a1 -> a2 -> a3 -> z')
+compose3 g f x1 x2 x3 = f x1 x2 x3 # g
 
-liftFn2 :: forall a1 a2 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> ExceptT e m a) -> a1 -> a2 -> (ExceptT e (t m) a)
-liftFn2 f x1 x2 = f x1 x2 # mapExceptT lift
+compose5 :: forall a1 a2 a3 a4 a5 z z'. (z -> z') -> (a1 -> a2 -> a3 -> a4 -> a5 -> z) -> (a1 -> a2 -> a3 -> a4 -> a5 -> z')
+compose5 g f x1 x2 x3 x4 x5 = f x1 x2 x3 x4 x5 # g
 
-liftFn3 :: forall a1 a2 a3 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> ExceptT e m a) -> a1 -> a2 -> a3 -> (ExceptT e (t m) a)
-liftFn3 f x1 x2 x3 = f x1 x2 x3 # mapExceptT lift
-
-liftFn4 :: forall a1 a2 a3 a4 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> a4 -> ExceptT e m a) -> a1 -> a2 -> a3 -> a4 -> (ExceptT e (t m) a)
-liftFn4 f x1 x2 x3 x4 = f x1 x2 x3 x4 # mapExceptT lift
-
-liftFn5 :: forall a1 a2 a3 a4 a5 e m a t. MonadTrans t => Monad m => (a1 -> a2 -> a3 -> a4 -> a5 -> ExceptT e m a) -> a1 -> a2 -> a3 -> a4 -> a5 -> (ExceptT e (t m) a)
-liftFn5 f x1 x2 x3 x4 x5 = f x1 x2 x3 x4 x5 # mapExceptT lift
-
-liftEnv :: forall t m. MonadTrans t => Monad m => Env.Env m -> Env.Env (t m)
-liftEnv e =
-  { apiCheckUserName: liftFn1 e.apiCheckUserName
-  , apiCheckEmail: liftFn1 e.apiCheckEmail
-  , generatePrivateKey: lift e.generatePrivateKey
-  , userRegister: liftFn2 e.userRegister
-  , userSearch: liftFn2 e.userSearch
-  , getSafeAddress: liftFn1 e.getSafeAddress
-  , safePrepareDeploy: liftFn1 e.safePrepareDeploy
-  , userResolve: liftFn1 e.userResolve
-  , getUsers: liftFn3 e.getUsers
-  , coreToWindow: liftFn1 e.coreToWindow
-  , isTrusted: liftFn1 e.isTrusted
-  , trustGetNetwork: liftFn1 e.trustGetNetwork
-  , getSafeStatus: liftFn1 e.getSafeStatus
-  , deploySafe: liftFn1 e.deploySafe
-  , deployToken: liftFn1 e.deployToken
-  , isFunded: liftFn1 e.isFunded
-  , addTrustConnection: liftFn3 e.addTrustConnection
-  , removeTrustConnection: liftFn3 e.removeTrustConnection
-  , saveSession: liftFn1 e.saveSession
-  , restoreSession: liftVal e.restoreSession
-  , getBalance: liftFn2 e.getBalance
-  , checkUBIPayout: liftFn2 e.checkUBIPayout
-  , requestUBIPayout: liftFn2 e.requestUBIPayout
-  , transfer: liftFn5 e.transfer
-  , getTimestamp: lift e.getTimestamp
-  , sleep: lift <<< e.sleep
+liftEnv :: forall m n. (m ~> n) -> Env.Env m -> Env.Env n
+liftEnv f e =
+  { apiCheckUserName: compose (mapExceptT f) e.apiCheckUserName
+  , apiCheckEmail: compose (mapExceptT f) e.apiCheckEmail
+  , generatePrivateKey: f e.generatePrivateKey
+  , userRegister: compose2 (mapExceptT f) e.userRegister
+  , userSearch: compose2 (mapExceptT f) e.userSearch
+  , getSafeAddress: compose (mapExceptT f) e.getSafeAddress
+  , safePrepareDeploy: compose (mapExceptT f) e.safePrepareDeploy
+  , userResolve: compose (mapExceptT f) e.userResolve
+  , getUsers: compose3 (mapExceptT f) e.getUsers
+  , coreToWindow: compose (mapExceptT f) e.coreToWindow
+  , isTrusted: compose (mapExceptT f) e.isTrusted
+  , trustGetNetwork: compose (mapExceptT f) e.trustGetNetwork
+  , getSafeStatus: compose (mapExceptT f) e.getSafeStatus
+  , deploySafe: compose (mapExceptT f) e.deploySafe
+  , deployToken: compose (mapExceptT f) e.deployToken
+  , isFunded: compose (mapExceptT f) e.isFunded
+  , addTrustConnection: compose3 (mapExceptT f) e.addTrustConnection
+  , removeTrustConnection: compose3 (mapExceptT f) e.removeTrustConnection
+  , saveSession: compose (mapExceptT f) e.saveSession
+  , restoreSession: (mapExceptT f) e.restoreSession
+  , getBalance: compose2 (mapExceptT f) e.getBalance
+  , checkUBIPayout: compose2 (mapExceptT f) e.checkUBIPayout
+  , requestUBIPayout: compose2 (mapExceptT f) e.requestUBIPayout
+  , transfer: compose5 (mapExceptT f) e.transfer
+  , getTimestamp: f e.getTimestamp
+  , sleep: compose f e.sleep
   }
-
---------------------------------------------------------------------------------
+  
