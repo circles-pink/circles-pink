@@ -4,21 +4,26 @@ import Prelude
 
 import CirclesCore (User, _errNative)
 import CirclesPink.Data.Address (Address)
-import CirclesPink.Data.PrivateKey (sampleKey)
-import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
+import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, evalTestScriptT)
+import CirclesPink.Garden.StateMachine.Control.Env (ErrGetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
-import CirclesPink.Garden.TestEnv (TestEnvT, runTestEnvM, testEnv)
+import CirclesPink.Garden.StateMachine.State (initLanding)
+import CirclesPink.Garden.TestEnv (testEnv)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
+import Control.Monad.Except.Checked (ExceptV)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)
 import Data.Identity (Identity)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.Tuple.Nested ((/\))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC, addrD, addrE, unsafeMkAddr, userA, userB, userE)
+import Type.Row (type (+))
 
 safeFunderAddr :: Address
 safeFunderAddr = unsafeMkAddr "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
@@ -67,7 +72,7 @@ spec =
 --   it "runs" do
 --     D.mapTrust [] (fromFoldable [])  `shouldEqual` 2
 
-mkGetUsers :: Map Address User -> GetUsers (TestEnvT Identity)
+mkGetUsers :: Map Address User -> forall r. PrivateKey -> (Array String) -> (Array Address) -> ExceptV (ErrGetUsers + r) (TestScriptT Identity) (Array User)
 mkGetUsers db _ _ xs =
   let
     result = map (\k -> M.lookup k db) xs
@@ -80,8 +85,8 @@ mkGetUsers db _ _ xs =
 
 --------------------------------------------------------------------------------
 
-run :: forall t16 t17. ExceptT t16 (TestEnvT Identity) t17 -> Maybe t17
-run = runExceptT >>> runTestEnvM >>> hush
+run :: forall t16 t17. ExceptT t16 (TestScriptT Identity) t17 -> Maybe t17
+run = runExceptT >>> evalTestScriptT initLanding >>> unwrap >>> hush
 
 -- trustedUser :: User
 -- trustedUser = { avatarUrl: "", id: 0, safeAddress: P.sampleAddress, username: "a" }

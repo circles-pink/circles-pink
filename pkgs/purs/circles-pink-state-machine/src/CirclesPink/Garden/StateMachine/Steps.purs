@@ -14,11 +14,14 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
-import CirclesPink.Garden.StateMachine.Control.Class.TestScriptM (TestScriptM, execTestScriptM, liftTestEnvM)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.TestEnv (liftEnv, testEnv)
+import CirclesPink.Garden.TestEnv (testEnv)
 import Data.Either (Either(..))
+import Data.Identity (Identity)
+import Data.Newtype (unwrap)
+import Data.Tuple (fst)
 import Stadium.Control (toMonadState)
 
 testConfig :: forall m. Monad m => CirclesConfig m
@@ -26,12 +29,16 @@ testConfig = CirclesConfig
   { extractEmail: Right $ const $ pure unit
   }
 
-act :: CirclesAction -> TestScriptM Unit
-act ac = (toMonadState $ circlesControl (liftEnv liftTestEnvM testEnv) testConfig) ac
+act :: CirclesAction -> (TestScriptT Identity) Unit
+act ac = (toMonadState $ circlesControl testEnv testConfig) ac
 
 --------------------------------------------------------------------------------
 -- Steps
 --------------------------------------------------------------------------------
+
+execTestScriptM :: forall a. CirclesState -> TestScriptT Identity a -> CirclesState
+execTestScriptM x1 x2 = execTestScriptT x1 x2 <#> fst # unwrap
+
 infoGeneral :: CirclesState
 infoGeneral = S.init
 

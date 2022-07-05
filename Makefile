@@ -37,6 +37,7 @@ endif
 
 spago-clean:
 ifeq ($(PRUNE),true)
+	rm .psa-stash
 	rm -rf .spago $(PURS_OUTPUT)
 endif
 

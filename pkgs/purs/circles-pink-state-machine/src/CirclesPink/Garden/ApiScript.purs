@@ -1,9 +1,4 @@
-module CirclesPink.Garden.ApiScript
-  ( ScriptM'
-  , ScriptM(..)
-  , main
-  , runScriptM
-  ) where
+module CirclesPink.Garden.ApiScript where
 
 import Prelude
 
@@ -15,15 +10,14 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
 import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
+import CirclesPink.Garden.StateMachine.Control.Class.ScriptM (ScriptM, evalScriptM)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
-import CirclesPink.Garden.StateMachine.State (CirclesState, initLanding)
-import CirclesPink.Garden.StateMachine.Stories (class MonadScript, SignUpUserOpts)
+import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
 import CirclesPink.Garden.StateMachine.Stories as S
-import CirclesPink.Garden.TestEnv (TestEnvT, liftEnv, runTestEnvT)
+import CirclesPink.Garden.TestEnv (liftEnv)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (class MonadState, StateT, get, state, runStateT)
+import Control.Monad.State (get)
 import Control.Monad.Trans.Class (lift)
 import Control.Parallel (class Parallel, parTraverse)
 import Convertable (convert)
@@ -36,17 +30,13 @@ import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
 import Data.String (joinWith)
 import Data.Traversable (traverse)
-import Data.Tuple (fst)
-import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, default, inj, onMatch)
 import Effect (Effect)
 import Effect.Aff (Aff, message, runAff_)
-import Effect.Aff.Class (class MonadAff, liftAff)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Aff.Class (liftAff)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (error)
-import Effect.Class.Console as E
 import HTTP.Milkis (milkisRequest)
-import Log.Class (class MonadLog)
 import Milkis.Impl.Node (nodeFetch)
 import Network.Ethereum.Web3 (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
@@ -194,7 +184,7 @@ main' = do
   envVars <- ExceptT $ map (lmap show) $ liftEffect getParsedEnv
   let
     request = milkisRequest nodeFetch
-    env'' = liftEnv (ScriptM <<< liftAff) $ env { envVars: convert envVars, request }
+    env'' = liftEnv liftAff $ env { envVars: convert envVars, request }
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM)
@@ -218,50 +208,3 @@ main = runExceptT main' # runAff_ handler
 runJq :: String -> Aff String
 runJq str = spawn { cmd: "jq", args: [], stdin: pure str } defaultSpawnOptions
   <#> _.stdout
-
---------------------------------------------------------------------------------
-
-type ScriptM' a = (StateT CirclesState (TestEnvT Aff) a)
-newtype ScriptM a = ScriptM (ScriptM' a)
-
-instance monadCirclesScriptM :: MonadCircles ScriptM where
-  sleep _ = pure unit
-
-instance monadScriptScriptM :: MonadScript ScriptM
-
-instance monadLogScriptM :: MonadLog ScriptM where
-  log = E.log >>> ScriptM
-
-instance monadStateScriptM :: MonadState CirclesState ScriptM where
-  state = ScriptM <<< state
-
-instance monadEffectScriptM :: MonadEffect ScriptM where
-  liftEffect = liftEffect >>> ScriptM
-
-instance monadAffScriptM :: MonadAff ScriptM where
-  liftAff = liftAff >>> ScriptM
-
--- Cannot derive because of '[1/1 PartiallyAppliedSynonym] (unknown module)' error
--- May be fixed in v15
-unwrapScriptM :: forall a. ScriptM a -> ScriptM' a
-unwrapScriptM (ScriptM x) = x
-
-instance applyScriptM :: Apply ScriptM where
-  apply (ScriptM f) (ScriptM x) = ScriptM $ apply f x
-
-instance bindScriptM :: Bind ScriptM where
-  bind (ScriptM x) f = ScriptM $ bind x (f >>> unwrapScriptM)
-
-instance applicativeScriptM :: Applicative ScriptM where
-  pure x = ScriptM $ pure x
-
-instance monadScriptM :: Monad ScriptM
-
-instance functorScriptM :: Functor ScriptM where
-  map f (ScriptM x) = ScriptM $ map f x
-
-runScriptM :: forall a. ScriptM a -> Aff (a /\ CirclesState)
-runScriptM (ScriptM x) = runStateT x initLanding # runTestEnvT
-
-evalScriptM :: forall a. ScriptM a -> Aff a
-evalScriptM = runScriptM >>> map fst
