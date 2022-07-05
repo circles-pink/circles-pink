@@ -2,9 +2,8 @@ module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
 
-import CirclesCore (SafeStatus, TrustNode, User, ErrParseAddress)
+import CirclesCore (SafeStatus, TrustNode, User)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
@@ -51,6 +50,13 @@ type TaskReturn =
   , safeStatus :: SafeStatus
   , isReady :: Boolean
   }
+
+type ErrLoginTask r = Env.ErrUserResolve
+  + Env.ErrGetSafeStatus
+  + Env.ErrTrustGetNetwork
+  + Env.ErrIsTrusted
+  + Env.ErrIsFunded
+  + r
 
 loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
 loginTask env privKey = do

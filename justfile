@@ -145,7 +145,7 @@ spago-build: spago-clean spago-clean-output
 	spago build --purs-args "--stash --censor-lib --output {{PURS_OUTPUT}}"
 
 spago-build-ide: spago-clean spago-clean-output
-	spago build --purs-args "--json-errors --output {{PURS_OUTPUT}}"
+	spago build --purs-args "--stash --censor-lib --json-errors --output {{PURS_OUTPUT}}"
 
 spago2nix:
 	spago2nix-extra --pkgs-dir ./pkgs/purs --target-dir ./materialized/spago2nix

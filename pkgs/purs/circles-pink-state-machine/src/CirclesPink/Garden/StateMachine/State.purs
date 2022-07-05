@@ -35,11 +35,11 @@ import Prelude
 
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Garden.StateMachine.Control.Common (ErrLoginTask)
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
-import CirclesPink.Garden.StateMachine.ProtocolDef.Common (ErrLoginTask)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState, ErrGetUsers, ErrTokenCheckUBIPayout, ErrTokenGetBalance, ErrTokenRequestUBIPayout, ErrTokenTransfer, ErrTrustAddConnection, ErrTrustGetTrusts, ErrUserSearch, GetUsersResult, InitDashboard, TokenCheckUBIPayoutResult, TokenGetBalanceResult, TokenRequestUBIPayoutResult, TokenTransferResult, TrustAddResult, TrustGetTrusts, _dashboard, initDashboard) as Exp
 import CirclesPink.Garden.StateMachine.State.Login (LoginState)

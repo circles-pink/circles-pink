@@ -5,8 +5,10 @@ module Chance
   , first
   , integer
   , name
+  , string
   , stringPool
-  ) where
+  )
+  where
 
 import Prelude
 import Chance.Bindings (chance, inj1of2, inj2of2, string')

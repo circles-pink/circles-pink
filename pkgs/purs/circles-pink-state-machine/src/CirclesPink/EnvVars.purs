@@ -11,7 +11,6 @@ import CirclesPink.URI as U
 import Convertable (class Convertible)
 import Data.Either (Either)
 import Data.Newtype (class Newtype)
-import Debug (spy)
 import Effect (Effect)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Node.Process (getEnv)

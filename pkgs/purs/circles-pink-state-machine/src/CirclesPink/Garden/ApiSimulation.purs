@@ -1,6 +1,5 @@
 module CirclesPink.Garden.ApiSimulation where
 
-import Prelude
 
 -- import Control.Monad.Gen (class MonadGen, chooseInt)
 -- import Control.Monad.State (class MonadState, get)
