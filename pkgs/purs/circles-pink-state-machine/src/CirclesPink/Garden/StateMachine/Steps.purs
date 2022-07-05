@@ -1,76 +1,65 @@
 module CirclesPink.Garden.StateMachine.Steps
-  -- ( askEmail
-  -- , askUsername
-  -- , infoGeneral
-  -- , infoSecurity
-  -- , magicWords
-  -- , submit
-  -- )
-   where
+  ( askEmail
+  , askUsername
+  , infoGeneral
+  , infoSecurity
+  , magicWords
+  , submit
+  )
+  where
 
 import Prelude
 
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Action as A
-import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptM (TestScriptM, execTestScriptM, liftTestEnvM)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
-import Control.Monad.State (StateT, execStateT)
-import Debug.Extra (todo)
-import Stadium.Control (toStateT)
+import CirclesPink.Garden.TestEnv (liftEnv, testEnv)
+import Data.Either (Either(..))
+import Stadium.Control (toMonadState)
 
+testConfig :: forall m. Monad m => CirclesConfig m
+testConfig = CirclesConfig
+  { extractEmail: Right $ const $ pure unit
+  }
 
-x = todo
+act :: CirclesAction -> TestScriptM Unit
+act ac = (toMonadState $ circlesControl (liftEnv liftTestEnvM testEnv) testConfig) ac
 
--- type TestConfig = CirclesConfig  (StateT CirclesState TestEnvM)
+--------------------------------------------------------------------------------
+-- Steps
+--------------------------------------------------------------------------------
+infoGeneral :: CirclesState
+infoGeneral = S.init
 
--- newtype StepM a = StepM (StateT CirclesState TestEnvM a)
+askUsername :: CirclesState
+askUsername =
+  execTestScriptM infoGeneral do
+    act $ A._infoGeneral $ A._next unit
+    act $ A._askUsername $ A._setUsername "fooo"
 
--- derive newtype instance monad :: Monad StepM 
+askEmail :: CirclesState
+askEmail =
+  execTestScriptM askUsername do
+    act $ A._askUsername $ A._next unit
+    act $ A._askEmail $ A._setEmail "helloworld@helloworld.com"
+    act $ A._askEmail $ A._setTerms unit
+    act $ A._askEmail $ A._setPrivacy unit
 
--- instance monadCircles :: MonadCircles StepM where
---   sleep _ = pure unit
+infoSecurity :: CirclesState
+infoSecurity =
+  execTestScriptM askEmail do
+    act $ A._askEmail $ A._next unit
 
--- act :: TestConfig -> CirclesAction -> StepM Unit
--- act cfg ac = StepM $ (toStateT $ circlesControl (liftEnv testEnv) cfg) ac
+magicWords :: CirclesState
+magicWords =
+  execTestScriptM infoSecurity do
+    act $ A._infoSecurity $ A._next unit
 
--- execFrom :: CirclesState -> StepM Unit -> CirclesState
--- execFrom st (StepM m) = runTestEnvM $ execStateT m st
-
--- --------------------------------------------------------------------------------
--- -- Steps
--- --------------------------------------------------------------------------------
--- infoGeneral :: CirclesState
--- infoGeneral = S.init
-
--- askUsername :: TestConfig -> CirclesState
--- askUsername cfg =
---   execFrom infoGeneral do
---     act cfg $ A._infoGeneral $ A._next unit
---     act cfg $ A._askUsername $ A._setUsername "fooo"
-
--- askEmail :: TestConfig -> CirclesState
--- askEmail cfg =
---   execFrom (askUsername cfg) do
---     act cfg $ A._askUsername $ A._next unit
---     act cfg $ A._askEmail $ A._setEmail "helloworld@helloworld.com"
---     act cfg $ A._askEmail $ A._setTerms unit
---     act cfg $ A._askEmail $ A._setPrivacy unit
-
--- infoSecurity :: TestConfig -> CirclesState
--- infoSecurity cfg =
---   execFrom (askEmail cfg) do
---     act cfg $ A._askEmail $ A._next unit
-
--- magicWords :: TestConfig -> CirclesState
--- magicWords cfg =
---   execFrom (infoSecurity cfg) do
---     act cfg $ A._infoSecurity $ A._next unit
-
--- submit :: TestConfig -> CirclesState
--- submit cfg =
---   execFrom (magicWords cfg) do
---     act cfg $ A._magicWords $ A._next unit
+submit :: CirclesState
+submit =
+  execTestScriptM magicWords do
+    act $ A._magicWords $ A._next unit
