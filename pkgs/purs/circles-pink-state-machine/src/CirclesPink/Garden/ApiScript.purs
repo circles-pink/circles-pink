@@ -1,241 +1,278 @@
-module CirclesPink.Garden.ApiScript where
+module CirclesPink.Garden.ApiScript
+  ( ScriptM'
+  , ScriptM(..)
+  , main
+  , runScriptM
+  ) where
 
--- import Prelude
+import Prelude
 
--- import Chance as C
--- import CirclesCore (ErrSendTransaction, ErrNewWebSocketProvider)
--- import CirclesPink.Data.Address (Address)
--- import CirclesPink.Data.Mnemonic (getWords, keyToMnemonic)
--- import CirclesPink.Data.PrivateKey (PrivateKey)
--- import CirclesPink.EnvVars (EnvVars, getParsedEnv)
--- import CirclesPink.Garden.Env (env)
--- import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
--- import CirclesPink.Garden.StateMachine.Control.Env (Env)
--- import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
--- import CirclesPink.Garden.StateMachine.State (CirclesState)
--- import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
--- import CirclesPink.Garden.StateMachine.Stories as S
--- import CirclesPink.Garden.TestEnv (liftEnv)
--- import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
--- import Control.Monad.Except.Checked (ExceptV)
--- import Control.Monad.State (StateT, get, runStateT)
--- import Control.Monad.Trans.Class (lift)
--- import Control.Parallel (parTraverse)
--- import Convertable (convert)
--- import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
--- import Data.Array ((..))
--- import Data.Bifunctor (lmap)
--- import Data.Either (Either(..), hush)
--- import Data.Int (floor, toNumber)
--- import Data.Maybe (fromJust)
--- import Data.Newtype.Extra ((-|))
--- import Data.String (joinWith)
--- import Data.Traversable (traverse)
--- import Data.Tuple (fst)
--- import Data.Tuple.Nested (type (/\))
--- import Data.Variant (Variant, default, inj, onMatch)
--- import Effect (Effect)
--- import Effect.Aff (Aff, runAff_)
--- import Effect.Class (liftEffect)
--- import Effect.Class.Console (error, log)
--- import HTTP.Milkis (milkisRequest)
--- import Log.Class (class MonadLog)
--- import Milkis.Impl.Node (nodeFetch)
--- import Network.Ethereum.Web3 (HexString)
--- import Node.ChildProcess (defaultSpawnOptions)
--- import Node.Encoding (Encoding(..))
--- import Node.FS.Aff (writeTextFile)
--- import Node.Process (exit)
--- import Partial.Unsafe (unsafePartial)
--- import Record as R
--- import Sunde (spawn)
--- import Type.Proxy (Proxy(..))
--- import Type.Row (type (+))
--- import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
+import Chance as C
+import CirclesCore (ErrNewWebSocketProvider, ErrSendTransaction)
+import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Mnemonic (getWords, keyToMnemonic)
+import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.EnvVars (EnvVars, getParsedEnv)
+import CirclesPink.Garden.Env (env)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
+import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (initLanding)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
+import CirclesPink.Garden.StateMachine.Stories (class MonadScript)
+import CirclesPink.Garden.StateMachine.Stories as S
+import CirclesPink.Garden.TestEnv (TestEnvT, liftEnv, runTestEnvT)
+import CirclesPink.Garden.TestEnv (liftEnv)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
+import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.State (StateT, get, runStateT)
+import Control.Monad.State (class MonadState, StateT, get, runStateT, state)
+import Control.Monad.Trans.Class (lift)
+import Control.Parallel (class Parallel, parTraverse)
+import Convertable (convert)
+import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
+import Data.Argonaut (decodeJson, fromString)
+import Data.Array ((..))
+import Data.Bifunctor (lmap)
+import Data.Either (Either(..), hush)
+import Data.Either (hush)
+import Data.Int (floor, toNumber)
+import Data.Maybe (fromJust)
+import Data.Newtype.Extra ((-|))
+import Data.String (joinWith)
+import Data.Traversable (traverse)
+import Data.Tuple (fst)
+import Data.Tuple (snd)
+import Data.Tuple.Nested (type (/\))
+import Data.Variant (Variant, default, inj, onMatch)
+import Effect (Effect)
+import Effect.Aff (Aff, message, runAff_)
+import Effect.Aff (Aff, runAff_)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (error)
+import Effect.Class.Console as E
+import HTTP.Milkis (milkisRequest)
+import Log.Class (class MonadLog)
+import Milkis.Impl.Node (nodeFetch)
+import Network.Ethereum.Web3 (HexString)
+import Node.ChildProcess (defaultSpawnOptions)
+import Node.Encoding (Encoding(..))
+import Node.FS.Aff (writeTextFile)
+import Node.Process (exit)
+import Partial.Unsafe (unsafePartial)
+import Record as R
+import Sunde (spawn)
+import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
+import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 
--- --------------------------------------------------------------------------------
--- type ScriptM e a = ScriptT e Aff a
+type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
--- type ScriptT e m a = ExceptV e (StateT CirclesState m) a
+type Err r = (err :: String | r)
 
--- type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
+err :: forall r. String -> Variant (err :: String | r)
+err = inj (Proxy :: _ "err")
 
--- runScriptM :: forall e a. ScriptM e a -> Aff (Either (Variant e) a /\ CirclesState)
--- runScriptM = runScripT
+--------------------------------------------------------------------------------
+safeFunderAddr :: Address
+safeFunderAddr =
+  unsafePartial
+    ( "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
+        # fromString
+        # decodeJson
+        # hush
+        # fromJust
+    )
 
--- runScripT :: forall e m a. ScriptT e m a -> m (Either (Variant e) a /\ CirclesState)
--- runScripT = flip runStateT initLanding <<< runExceptT
+--------------------------------------------------------------------------------
+fundAddress :: forall r. EnvVars -> Address -> ExceptV (ErrApp + r) ScriptM HexString
+fundAddress envVars safeAddress =
+  mapExceptT liftAff do
+    provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket
+    web3 <- lift $ newWeb3 provider
+    sendTransaction web3
+      { from: safeFunderAddr
+      , to: safeAddress
+      , value: "1000000000000000000"
+      }
 
--- type Err r = (err :: String | r)
+--------------------------------------------------------------------------------
+genUsername :: forall r. ExceptV r ScriptM String
+genUsername =
+  liftAff ado
+    n <- C.first {}
+    i <- C.integer { min: 1, max: 99 }
+    in n <> show i
 
--- err :: forall r. String -> Variant (err :: String | r)
--- err = inj (Proxy :: _ "err")
+--------------------------------------------------------------------------------
+genSignupOpts :: forall r. ExceptV r ScriptM SignUpUserOpts
+genSignupOpts = do
+  username <- genUsername
+  email <- pure (username <> "@bar.com")
+  pure { username, email }
 
--- --------------------------------------------------------------------------------
--- type AppM r a = ExceptV (ErrApp + r) Aff a
+--------------------------------------------------------------------------------
+type MkAccountReturn =
+  { username :: String
+  , email :: String
+  , privateKey :: PrivateKey
+  , safeAddress :: Address
+  , txHash :: HexString
+  , mnemonic :: String
+  }
 
--- runAppM :: forall r a. AppM r a -> Effect Unit
--- runAppM x =
---   x
---     # runExceptT
---     # runAff_
---         ( case _ of
---             Left e -> log ("Native error: " <> show e)
---             Right (Left e) -> log ("Error: " <> printErrApp e)
---             _ -> pure unit
---         )
+--------------------------------------------------------------------------------
+type SignUpUser =
+  { privateKey :: PrivateKey
+  , safeAddress :: Address
+  }
 
--- --------------------------------------------------------------------------------
--- safeFunderAddr :: Address
--- safeFunderAddr =
---   unsafePartial
---     ( "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1"
---         # fromString
---         # decodeJson
---         # hush
---         # fromJust
---     )
+signUpUser :: forall r. Env ScriptM -> CirclesConfig ScriptM -> SignUpUserOpts -> ExceptV (Err + r) ScriptM SignUpUser
+signUpUser env cfg opts =
+  ExceptT do
+    S.signUpUser env cfg opts
+    get
+      <#>
+        ( default (throwError $ err "Cannot sign up user.")
+            # onMatch
+                { trusts:
+                    \x ->
+                      pure
+                        { privateKey: x.privKey
+                        , safeAddress: x.user.safeAddress
+                        }
+                }
+        )
 
--- --------------------------------------------------------------------------------
--- fundAddress :: forall r. EnvVars -> Address -> ScriptM (ErrApp + r) HexString
--- fundAddress envVars safeAddress =
---   mapExceptT lift do
---     provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket
---     web3 <- lift $ newWeb3 provider
---     sendTransaction web3
---       { from: safeFunderAddr
---       , to: safeAddress
---       , value: "1000000000000000000"
---       }
+finalizeAccount :: forall r. Env ScriptM -> CirclesConfig ScriptM -> ExceptV (Err + r) ScriptM Unit
+finalizeAccount env cfg =
+  ExceptT do
+    S.finalizeAccount env cfg
+    get
+      <#>
+        ( default (throwError $ err "Cannot finalize register user.")
+            # onMatch
+                { dashboard: \_ -> pure unit
+                }
+        )
 
--- --------------------------------------------------------------------------------
--- genUsername :: forall r. ScriptM r String
--- genUsername =
---   (lift <<< lift) ado
---     n <- C.first {}
---     i <- C.integer { min: 1, max: 99 }
---     in n <> show i
+--------------------------------------------------------------------------------
+mkAccount :: forall r. EnvVars -> Env ScriptM -> CirclesConfig ScriptM -> ExceptV (ErrApp + r) ScriptM MkAccountReturn
+mkAccount envVars env cfg = do
+  signupOpts <- genSignupOpts
+  { privateKey, safeAddress } <- signUpUser env cfg signupOpts
+  txHash <- fundAddress envVars safeAddress
+  finalizeAccount env cfg
+  let
+    mnemonic = keyToMnemonic privateKey
+  pure
+    $ R.merge signupOpts
+        { privateKey
+        , safeAddress
+        , txHash
+        , mnemonic: getWords mnemonic # joinWith " "
+        }
 
--- --------------------------------------------------------------------------------
--- genSignupOpts :: forall r. ScriptM r SignUpUserOpts
--- genSignupOpts = do
---   username <- genUsername
---   email <- pure (username <> "@bar.com")
---   pure { username, email }
+--------------------------------------------------------------------------------
 
--- --------------------------------------------------------------------------------
--- type MkAccountReturn =
---   { username :: String
---   , email :: String
---   , privateKey :: PrivateKey
---   , safeAddress :: Address
---   , txHash :: HexString
---   , mnemonic :: String
---   }
+traverse' :: forall m p a. Applicative m => Parallel p m => { count :: Int, maxPar :: Int } -> m a -> m (Array a)
+traverse' { maxPar, count } f = parTraverse (const sequential) (1 .. parCount) <#> join
+  where
+  sequential = traverse (const f) (1 .. batchCount)
+  parCount = min maxPar count
+  batchCount = floor (toNumber count / toNumber maxPar)
 
--- --------------------------------------------------------------------------------
--- type SignUpUser =
---   { privateKey :: PrivateKey
---   , safeAddress :: Address
---   }
+--------------------------------------------------------------------------------
+printErrApp :: forall r. Variant (ErrApp + r) -> String
+printErrApp =
+  default "Unknown Error"
+    # onMatch
+        { err: \str -> str
+        }
 
--- signUpUser :: forall m r. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> SignUpUserOpts -> ScriptT (Err + r) m SignUpUser
--- signUpUser env cfg opts =
---   ExceptT do
---     S.signUpUser env cfg opts
---     get
---       <#>
---         ( default (throwError $ err "Cannot sign up user.")
---             # onMatch
---                 { trusts:
---                     \x ->
---                       pure
---                         { privateKey: x.privKey
---                         , safeAddress: x.user.safeAddress
---                         }
---                 }
---         )
+--------------------------------------------------------------------------------
 
--- finalizeAccount :: forall m r. MonadLog m => Env (StateT CirclesState m) -> CirclesConfig (StateT CirclesState m) -> ScriptT (Err + r) m Unit
--- finalizeAccount env cfg =
---   ExceptT do
---     S.finalizeAccount env cfg
---     get
---       <#>
---         ( default (throwError $ err "Cannot finalize register user.")
---             # onMatch
---                 { dashboard: \_ -> pure unit
---                 }
---         )
+reportFilePath :: String
+reportFilePath = "account-report.json"
 
--- --------------------------------------------------------------------------------
--- mkAccount :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> CirclesConfig (StateT CirclesState Aff) -> ScriptM (ErrApp + r) MkAccountReturn
--- mkAccount envVars env cfg = do
---   signupOpts <- genSignupOpts
---   { privateKey, safeAddress } <- signUpUser env cfg signupOpts
---   txHash <- fundAddress envVars safeAddress
---   finalizeAccount env cfg
---   let
---     mnemonic = keyToMnemonic privateKey
---   pure
---     $ R.merge signupOpts
---         { privateKey
---         , safeAddress
---         , txHash
---         , mnemonic: getWords mnemonic # joinWith " "
---         }
+main' :: ExceptT String Aff Unit
+main' = do
+  envVars <- ExceptT $ map (lmap show) $ liftEffect getParsedEnv
+  let
+    request = milkisRequest nodeFetch
+    env'' = liftEnv (ScriptM <<< liftAff) $ env { envVars: convert envVars, request }
+    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
--- --------------------------------------------------------------------------------
--- app :: forall r. EnvVars -> Env (StateT CirclesState Aff) -> CirclesConfig (StateT CirclesState Aff) -> AppM (ErrApp + r) Unit
--- app ev env cfg = do
---   let
---     count = 25
+  (mkAccount envVars env'' cfg # runExceptT # evalScriptM)
+    # traverse' { count: 20, maxPar: 5 }
+    <#> (map (lmap printErrApp) >>> encodeJson >>> stringify)
+    >>= runJq
+    >>= writeTextFile UTF8 reportFilePath
+    # lift
 
---     maxPar = 5
+main :: Effect Unit
+main = runExceptT main' # runAff_ handler
+  where
+  handler (Left errNat) = do
+    error ("UNKNOWN ERROR: " <> message errNat)
+    exit 1
+  handler (Right (Left err')) = do
+    error ("ERROR: " <> err')
+    exit 1
+  handler (Right (Right _)) = pure unit
 
---     reportFilePath = "account-report.json"
+runJq :: String -> Aff String
+runJq str = spawn { cmd: "jq", args: [], stdin: pure str } defaultSpawnOptions
+  <#> _.stdout
 
---     jqPath = "jq"
+--------------------------------------------------------------------------------
 
---     batchCount = floor (toNumber count / toNumber maxPar)
---   report <-
---     (parTraverse (const mkAccount') (1 .. min maxPar count))
---       # (\m -> traverse (const m) (1 .. batchCount))
---       <#> join
---       <#> map (lmap printErrApp)
---       # lift
---   report
---     # encodeJson
---     # stringify
---     # (\r -> do lift $ spawn { cmd: jqPath, args: [], stdin: pure r } defaultSpawnOptions)
---     >>= (\{ stdout } -> lift $ writeTextFile UTF8 reportFilePath stdout)
---   _ <- liftEffect $ exit 0
---   pure unit
---   where
---   mkAccount' :: Aff (Either (Variant (ErrApp + r)) MkAccountReturn)
---   mkAccount' = mkAccount ev env cfg # runScriptM <#> fst
+type ScriptM' a = (StateT CirclesState (TestEnvT Aff) a)
+newtype ScriptM a = ScriptM (ScriptM' a)
 
--- --------------------------------------------------------------------------------
--- printErrApp :: forall r. Variant (ErrApp + r) -> String
--- printErrApp =
---   default "Unknown Error"
---     # onMatch
---         { err: \str -> str
---         }
+instance monadCirclesScriptM :: MonadCircles ScriptM where
+  sleep _ = pure unit
 
--- --------------------------------------------------------------------------------
--- main :: Effect Unit
--- main = do
---   envVars' <- getParsedEnv
---   case envVars' of
---     Left err' -> do
---       error ("ERROR: " <> show err')
---       exit 1
---     Right envVars -> do
---       let
---         request = milkisRequest nodeFetch
+instance monadScriptScriptM :: MonadScript ScriptM
 
---         env'' = liftEnv $ env { envVars: convert envVars, request }
+instance monadLogScriptM :: MonadLog ScriptM where
+  log = E.log >>> ScriptM
 
---         cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
---       runAppM $ app envVars env'' cfg
+instance monadStateScriptM :: MonadState CirclesState ScriptM where
+  state = ScriptM <<< state
+
+instance monadEffectScriptM :: MonadEffect ScriptM where
+  liftEffect = liftEffect >>> ScriptM
+
+instance monadAffScriptM :: MonadAff ScriptM where
+  liftAff = liftAff >>> ScriptM
+
+-- Cannot derive because of '[1/1 PartiallyAppliedSynonym] (unknown module)' error
+-- May be fixed in v15
+unwrapScriptM :: forall a. ScriptM a -> ScriptM' a
+unwrapScriptM (ScriptM x) = x
+
+instance applyScriptM :: Apply ScriptM where
+  apply (ScriptM f) (ScriptM x) = ScriptM $ apply f x
+
+instance bindScriptM :: Bind ScriptM where
+  bind (ScriptM x) f = ScriptM $ bind x (f >>> unwrapScriptM)
+
+instance applicativeScriptM :: Applicative ScriptM where
+  pure x = ScriptM $ pure x
+
+instance monadScriptM :: Monad ScriptM
+
+instance functorScriptM :: Functor ScriptM where
+  map f (ScriptM x) = ScriptM $ map f x
+
+runScriptM :: forall a. ScriptM a -> Aff (a /\ CirclesState)
+runScriptM (ScriptM x) = runStateT x initLanding # runTestEnvT
+
+execScriptM :: forall a. ScriptM a -> Aff CirclesState
+execScriptM = runScriptM >>> map snd
+
+evalScriptM :: forall a. ScriptM a -> Aff a
+evalScriptM = runScriptM >>> map fst
