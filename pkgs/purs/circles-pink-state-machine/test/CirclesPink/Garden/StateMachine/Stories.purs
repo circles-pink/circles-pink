@@ -6,12 +6,15 @@ import Prelude
 
 import CirclesPink.Data.Mnemonic (sampleMnemonic)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
-import CirclesPink.Garden.StateMachine.Control.Class.TestScriptM (TestScriptM, execTestScriptM, liftTestEnvM)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.State (initLanding)
 import CirclesPink.Garden.StateMachine.Stories (finalizeAccount, loginUser, signUpUser)
-import CirclesPink.Garden.TestEnv (liftEnv, testEnv)
+import CirclesPink.Garden.TestEnv (testEnv)
 import Data.Either (Either(..))
+import Data.Identity (Identity)
+import Data.Newtype (unwrap)
+import Data.Tuple (fst)
 import Data.Variant.Extra (getLabel)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
@@ -20,12 +23,12 @@ import Test.Spec.Assertions (shouldEqual)
 spec :: Spec Unit
 spec =
   let
-    env' :: Env TestScriptM
-    env' = liftEnv liftTestEnvM testEnv
+    env' :: Env (TestScriptT Identity)
+    env' =  testEnv
 
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
-    execTestScriptM_ = execTestScriptM initLanding 
+    execTestScriptM_ = execTestScriptT initLanding >>> unwrap >>> fst
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do

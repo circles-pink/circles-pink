@@ -6,12 +6,13 @@ module CirclesPink.Garden.TS
 
 import Prelude
 
-import CirclesPink.Garden.TestEnv (runTestEnvT, testEnv)
 import CirclesPink.Garden.Env as Garden
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
-import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (evalTestScriptT)
+import CirclesPink.Garden.StateMachine.State (CirclesState, initLanding)
+import CirclesPink.Garden.TestEnv (testEnv)
 import Data.Either (Either(..))
 import Data.FpTs.Either as FP
 import Effect (Effect)
@@ -40,9 +41,9 @@ mkControl envVars cfg setState s a =
   env = Garden.env { request, envVars }
 
 mkControlTestEnv :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
-mkControlTestEnv setState st ac =
+mkControlTestEnv setState st ac = 
   circlesControl testEnv cfg (setState >>> liftEffect) st ac
-    # runTestEnvT
+    # evalTestScriptT initLanding
   where
   cfg = C.CirclesConfig
     { extractEmail:

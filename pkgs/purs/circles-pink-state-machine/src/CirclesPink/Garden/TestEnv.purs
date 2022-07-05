@@ -1,61 +1,28 @@
 module CirclesPink.Garden.TestEnv
-  ( TestEnvM
-  , TestEnvT
-  , liftEnv
-  , runTestEnvM
-  , runTestEnvT
-  , testEnv
-  ) where
+  -- ( TestEnvM
+  -- , TestEnvT
+  -- , liftEnv
+  -- , runTestEnvM
+  -- , runTestEnvT
+  -- , testEnv
+  -- ) 
+  where
 
 import Prelude
 
 import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles, class MonadSleep, sleep)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (mapExceptT, throwError)
-import Control.Monad.State (StateT, evalState, evalStateT)
 import Data.BN as B
-import Data.Identity (Identity)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
-import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
 
---------------------------------------------------------------------------------
 
-newtype TestEnvT m a = TestEnvT (StateT {} m a)
-
-derive newtype instance monadTestEnvT :: Monad m => Monad (TestEnvT m)
-
-derive newtype instance bindTestEnvT :: Monad m => Bind (TestEnvT m)
-
-derive newtype instance applyTestEnvT :: Monad m => Apply (TestEnvT m)
-
-derive newtype instance functorTestEnvT :: Functor m => Functor (TestEnvT m)
-
-derive newtype instance applicativeTestEnvT :: Monad m => Applicative (TestEnvT m)
-
-derive newtype instance monadEffectTestEnvT :: MonadEffect m => MonadEffect (TestEnvT m)
-
-derive newtype instance monadAffTestEnvT :: MonadAff m => MonadAff (TestEnvT m)
-
-instance monadSleep :: MonadSleep m => MonadSleep (TestEnvT m) where
-  sleep = sleep
-
-instance monadCircles :: MonadSleep m => MonadCircles (TestEnvT m)
-
-type TestEnvM = TestEnvT Identity
-
-runTestEnvM :: forall a. TestEnvM a -> a
-runTestEnvM (TestEnvT x) = evalState x {}
-
-runTestEnvT :: forall m a. Monad m => TestEnvT m a -> m a
-runTestEnvT (TestEnvT x) = evalStateT x {}
-
-testEnv :: forall m. Monad m => Env.Env (TestEnvT m)
+testEnv :: forall m. Monad m => Env.Env (TestScriptT m)
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
