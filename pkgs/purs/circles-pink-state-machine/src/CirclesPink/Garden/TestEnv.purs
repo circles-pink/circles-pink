@@ -12,7 +12,7 @@ import Prelude
 import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles, class MonadSleep, sleep)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (mapExceptT, throwError)
 import Control.Monad.State (StateT, evalState, evalStateT)
@@ -20,7 +20,6 @@ import Data.BN as B
 import Data.Identity (Identity)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
-import Debug.Extra (todo)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
@@ -31,6 +30,10 @@ newtype TestEnvT m a = TestEnvT (StateT {} m a)
 
 derive newtype instance monadTestEnvT :: Monad m => Monad (TestEnvT m)
 
+derive newtype instance bindTestEnvT :: Monad m => Bind (TestEnvT m)
+
+derive newtype instance applyTestEnvT :: Monad m => Apply (TestEnvT m)
+
 derive newtype instance functorTestEnvT :: Functor m => Functor (TestEnvT m)
 
 derive newtype instance applicativeTestEnvT :: Monad m => Applicative (TestEnvT m)
@@ -39,8 +42,10 @@ derive newtype instance monadEffectTestEnvT :: MonadEffect m => MonadEffect (Tes
 
 derive newtype instance monadAffTestEnvT :: MonadAff m => MonadAff (TestEnvT m)
 
-instance monadCircles :: Monad m => MonadCircles (TestEnvT m) where
-  sleep _ = todo
+instance monadSleep :: MonadSleep m => MonadSleep (TestEnvT m) where
+  sleep = sleep
+
+instance monadCircles :: MonadSleep m => MonadCircles (TestEnvT m)
 
 type TestEnvM = TestEnvT Identity
 
