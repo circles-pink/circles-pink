@@ -6,7 +6,6 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import Prelude
 
 import CirclesCore (TrustNode, User)
-import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)

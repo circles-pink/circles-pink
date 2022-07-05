@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
-import Debug.Extra (todo)
 import RemoteData (RemoteData, _failure, _loading, _notAsked)
 
 landing

@@ -1,10 +1,46 @@
-module CirclesPink.Garden.StateMachine.Action where
+module CirclesPink.Garden.StateMachine.Action
+  ( CirclesAction
+  , _addTrustConnection
+  , _askEmail
+  , _checkForSession
+  , _checkUBIPayout
+  , _coreToWindow
+  , _dashboard
+  , _debug
+  , _finalizeRegisterUser
+  , _getBalance
+  , _getSafeStatus
+  , _getTrusts
+  , _getUsers
+  , _infoGeneral
+  , _infoSecurity
+  , _landing
+  , _login
+  , _magicWords
+  , _newPrivKey
+  , _next
+  , _prev
+  , _redeploySafeAndToken
+  , _removeTrustConnection
+  , _requestUBIPayout
+  , _setEmail
+  , _setMagicWords
+  , _setPrivacy
+  , _setTerms
+  , _setUsername
+  , _signIn
+  , _signUp
+  , _submit
+  , _transfer
+  , _trusts
+  , _userSearch
+  )
+  where
 
 import Prelude
 
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.UserIdent (UserIdent)
-import CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing (LandingAction)
 import Data.BN (BN)
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
@@ -82,8 +118,11 @@ type CirclesAction = Variant
         ( coreToWindow :: Unit
         , setMagicWords :: String
         )
-  -- | CirclesProtocolDef GetAction
-  , landing :: LandingAction
+  , landing :: Variant
+        ( signUp :: Unit
+        , signIn :: Unit
+        , checkForSession :: Unit
+        )
   )
 
 ----
