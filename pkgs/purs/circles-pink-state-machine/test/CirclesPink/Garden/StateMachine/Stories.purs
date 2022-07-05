@@ -6,17 +6,13 @@ import Prelude
 
 import CirclesPink.Data.Mnemonic (sampleMnemonic)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
+import CirclesPink.Garden.StateMachine.Control.Class.TestScriptM (TestScriptM, execTestScriptM, liftTestEnvM)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
-import CirclesPink.Garden.StateMachine.State (CirclesState, initLanding)
-import CirclesPink.Garden.StateMachine.Stories (class MonadScript, finalizeAccount, loginUser, signUpUser)
-import CirclesPink.Garden.TestEnv (TestEnvM, liftEnv, runTestEnvM, testEnv)
-import Control.Monad.State (class MonadState, StateT, lift, runStateT, state)
+import CirclesPink.Garden.StateMachine.State (initLanding)
+import CirclesPink.Garden.StateMachine.Stories (finalizeAccount, loginUser, signUpUser)
+import CirclesPink.Garden.TestEnv (liftEnv, testEnv)
 import Data.Either (Either(..))
-import Data.Tuple (snd)
-import Data.Tuple.Nested (type (/\))
 import Data.Variant.Extra (getLabel)
-import Log.Class (class MonadLog)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -25,15 +21,17 @@ spec :: Spec Unit
 spec =
   let
     env' :: Env TestScriptM
-    env' = liftEnv (TestScriptM <<< lift) testEnv
+    env' = liftEnv liftTestEnvM testEnv
 
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
+
+    execTestScriptM_ = execTestScriptM initLanding 
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do
         it "ends up in `trusts` state" do
           ( signUpUser env' cfg { username: "Foo", email: "foo@bar.com" }
-              # execTestScriptM
+              # execTestScriptM_
               # getLabel
           )
             `shouldEqual`
@@ -45,7 +43,7 @@ spec =
                 _ <- finalizeAccount env' cfg
                 pure unit
             )
-              # execTestScriptM
+              # execTestScriptM_
               # getLabel
           )
             `shouldEqual`
@@ -56,7 +54,7 @@ spec =
                 _ <- loginUser env' cfg { magicWords: "" }
                 pure unit
             )
-              # execTestScriptM
+              # execTestScriptM_
               # getLabel
           )
             `shouldEqual`
@@ -67,7 +65,7 @@ spec =
                 _ <- loginUser env' cfg { magicWords: "volcano agree attack fiction firm chunk sweet private average undo pen core plunge choose vendor way liar depth romance enjoy hire rhythm little later" }
                 pure unit
             )
-              # execTestScriptM
+              # execTestScriptM_
               # getLabel
           )
             `shouldEqual`
@@ -78,7 +76,7 @@ spec =
                 _ <- loginUser env' cfg { magicWords: show sampleMnemonic }
                 pure unit
             )
-              # execTestScriptM
+              # execTestScriptM_
               # getLabel
           )
             `shouldEqual`
@@ -109,43 +107,3 @@ spec =
 -- --           )
 -- --     )
 -- --       `shouldEqual` (Just unit)
-
-
---------------------------------------------------------------------------------
-newtype TestScriptM a = TestScriptM (StateT CirclesState TestEnvM a)
-
-instance monadCirclesTestScriptM :: MonadCircles TestScriptM where
-  sleep _ = pure unit 
-
-instance monadScriptTestScriptM :: MonadScript TestScriptM
-
-instance monadLogTestScriptM :: MonadLog TestScriptM where
-  log _ = pure unit
-
-instance monadStateTestScriptM :: MonadState CirclesState TestScriptM where
-  state = TestScriptM <<< state
-
--- Cannot derive because of '[1/1 PartiallyAppliedSynonym] (unknown module)' error
--- May be fixed in v15
-unwrapTestScriptM :: forall a. TestScriptM a -> (StateT CirclesState TestEnvM a)
-unwrapTestScriptM (TestScriptM x) = x
-
-instance applyTestScriptM :: Apply TestScriptM where
-  apply (TestScriptM f) (TestScriptM x) = TestScriptM $ apply f x
-
-instance bindTestScriptM :: Bind TestScriptM where
-  bind (TestScriptM x) f = TestScriptM $ bind x (f >>> unwrapTestScriptM)
-
-instance applicativeTestScriptM :: Applicative TestScriptM where
-  pure x = TestScriptM $ pure x
-
-instance monadTestScriptM :: Monad TestScriptM
-
-instance functorTestScriptM :: Functor TestScriptM where
-  map f (TestScriptM x) = TestScriptM $ map f x
-
-runTestScriptM :: forall a. TestScriptM a -> a /\ CirclesState
-runTestScriptM (TestScriptM x) = runStateT x initLanding # runTestEnvM
-
-execTestScriptM :: forall a. TestScriptM a -> CirclesState
-execTestScriptM = runTestScriptM >>> snd
