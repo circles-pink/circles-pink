@@ -39,8 +39,8 @@ spec =
       describe "A user can finalize the account" do
         it "ends up in `dashboard` state" do
           ( ( do
-                _ <- signUpUser env' cfg { username: "Foo", email: "foo@bar.com" }
-                _ <- finalizeAccount env' cfg
+                signUpUser env' cfg { username: "Foo", email: "foo@bar.com" }
+                finalizeAccount env' cfg
                 pure unit
             )
               # execTestScriptM_
@@ -51,7 +51,7 @@ spec =
       describe "A user can not login with invalid mnemonic" do
         it "stays in `login` state" do
           ( ( do
-                _ <- loginUser env' cfg { magicWords: "" }
+                loginUser env' cfg { magicWords: "" }
                 pure unit
             )
               # execTestScriptM_
@@ -62,7 +62,7 @@ spec =
       describe "A user can not login with unregistered account" do
         it "stays in `login` state" do
           ( ( do
-                _ <- loginUser env' cfg { magicWords: "volcano agree attack fiction firm chunk sweet private average undo pen core plunge choose vendor way liar depth romance enjoy hire rhythm little later" }
+                loginUser env' cfg { magicWords: "volcano agree attack fiction firm chunk sweet private average undo pen core plunge choose vendor way liar depth romance enjoy hire rhythm little later" }
                 pure unit
             )
               # execTestScriptM_
@@ -73,7 +73,7 @@ spec =
       describe "A user can login" do
         it "ends up in `dashboard` state" do
           ( ( do
-                _ <- loginUser env' cfg { magicWords: show sampleMnemonic }
+                loginUser env' cfg { magicWords: show sampleMnemonic }
                 pure unit
             )
               # execTestScriptM_

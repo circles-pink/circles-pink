@@ -139,6 +139,7 @@ purs-docs:
 ################################################################################
 
 spago-clean-output:
+	rm .psa-stash
 	purs-output-cleaner --output {{PURS_OUTPUT}}
 
 spago-build: spago-clean spago-clean-output
