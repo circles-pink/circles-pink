@@ -2,13 +2,9 @@ module GunDB.Tests (spec) where
 
 import Prelude
 import Data.Argonaut (encodeJson)
-import Data.Maybe (Maybe(..))
-import Debug (spy)
-import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import GunDB (get, offline, once, put)
 import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (fail, shouldEqual)
 
 spec :: Spec Unit
 spec =
@@ -16,10 +12,8 @@ spec =
     describe "Put" do
       it "Puts data" do
         gundb <- liftEffect $ offline
-        ctx <- liftEffect $ gundb # get "users" # put (encodeJson { name: "Jane", surname: "Doe" })
-        result <- (gundb # get "users" # once)
-        let
-          r = spy "res" result
+        _ <- liftEffect $ gundb # get "users" # put (encodeJson { name: "Jane", surname: "Doe" })
+        _ <- (gundb # get "users" # once)
         pure unit
 
 -- assertGunResult :: forall a b. Aff (Maybe { data :: { name :: String | a } | b }) -> String -> Aff Unit

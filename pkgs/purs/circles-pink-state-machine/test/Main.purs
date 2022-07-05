@@ -3,7 +3,6 @@ module Test.CirclesPinkStateMachine.Main where
 import Prelude
 import CirclesCore.Tests as CirclesCore.Tests
 import Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard as Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard
-import Test.CirclesPink.Garden.StateMachine.Stories as Test.CirclesPink.Garden.StateMachine.Stories
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import GunDB.Tests as GunDB.Tests

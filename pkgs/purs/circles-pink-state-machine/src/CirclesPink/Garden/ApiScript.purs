@@ -36,7 +36,7 @@ import Data.Maybe (fromJust)
 import Data.Newtype.Extra ((-|))
 import Data.String (joinWith)
 import Data.Traversable (traverse)
-import Data.Tuple (fst, snd)
+import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, default, inj, onMatch)
 import Effect (Effect)
@@ -262,9 +262,6 @@ instance functorScriptM :: Functor ScriptM where
 
 runScriptM :: forall a. ScriptM a -> Aff (a /\ CirclesState)
 runScriptM (ScriptM x) = runStateT x initLanding # runTestEnvT
-
-execScriptM :: forall a. ScriptM a -> Aff CirclesState
-execScriptM = runScriptM >>> map snd
 
 evalScriptM :: forall a. ScriptM a -> Aff a
 evalScriptM = runScriptM >>> map fst

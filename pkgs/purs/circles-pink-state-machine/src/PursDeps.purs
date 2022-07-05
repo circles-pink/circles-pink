@@ -47,7 +47,6 @@ import Options.Applicative (Parser, ParserInfo, (<**>))
 import Options.Applicative (execParser, fullDesc, helper, info, long, strOption) as O
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Undefined (undefined)
 
 --------------------------------------------------------------------------------
 -- Opts

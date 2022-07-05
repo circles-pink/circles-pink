@@ -30,9 +30,9 @@ import Data.Unfoldable (class Unfoldable)
 import Partial.Unsafe (unsafePartial)
 
 fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (id /\ id /\ e) -> Graph id e n
-fromFoldables nodes edges = G.empty
-  # (\g -> foldr (\(id /\ node) -> G.insertNode id node) g nodes)
-  # (\g -> foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges)
+fromFoldables nodes' edges' = G.empty
+  # (\g -> foldr (\(id /\ node) -> G.insertNode id node) g nodes')
+  # (\g -> foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges')
 
 memberNode :: forall id e n. Ord id => id -> Graph id e n -> Boolean
 memberNode id g = isJust $ G.lookupNode id g
@@ -52,10 +52,10 @@ deleteEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id) -> Graph id
 deleteEdges ids g = foldr (\(from /\ to) -> G.deleteEdge from to) g ids
 
 insertEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id /\ e) -> Graph id e n -> Graph id e n
-insertEdges edges g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges
+insertEdges edges' g = foldr (\(from /\ to /\ edge) -> G.insertEdge from to edge) g edges'
 
 insertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> Graph id e n
-insertNodes nodes g = foldr (\(id /\ node) -> G.insertNode id node) g nodes
+insertNodes nodes' g = foldr (\(id /\ node) -> G.insertNode id node) g nodes'
 
 outgoingNodes :: forall id e n. Ord id => Ord n => id -> Graph id e n -> Maybe (Array n)
 outgoingNodes id graph = graph
