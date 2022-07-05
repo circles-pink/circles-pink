@@ -7,7 +7,7 @@ import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Garden.StateMachine.Control.Env (GetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
-import CirclesPink.Garden.TestEnv (TestEnvM, TestEnvT, runTestEnvM, testEnv)
+import CirclesPink.Garden.TestEnv (TestEnvT, runTestEnvM, testEnv)
 import Control.Monad.Except (ExceptT, runExceptT, throwError)
 import Data.Array (catMaybes, find)
 import Data.Either (Either(..), hush)

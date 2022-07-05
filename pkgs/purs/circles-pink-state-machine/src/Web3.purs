@@ -10,7 +10,7 @@ module Web3
 
 import Prelude
 
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import CirclesPink.URI (URI)
 import CirclesPink.URI as U
 import Control.Monad.Except (ExceptT(..))
@@ -18,7 +18,6 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Maybe (fromJust)
 import Data.Variant (Variant, inj)
-import Effect (Effect)
 import Effect.Aff (Aff, Error, attempt, message, try)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Class (liftEffect)
