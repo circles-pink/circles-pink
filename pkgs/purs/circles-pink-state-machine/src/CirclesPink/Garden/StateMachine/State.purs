@@ -27,6 +27,7 @@ module CirclesPink.Garden.StateMachine.State
   , _submit
   , init
   , initDebug
+  , initLanding
   , module Exp
   )
   where

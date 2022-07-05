@@ -2,6 +2,7 @@ module CirclesPink.Garden.StateMachine.Action
   ( CirclesAction
   , _addTrustConnection
   , _askEmail
+  , _askUsername
   , _checkForSession
   , _checkUBIPayout
   , _coreToWindow

@@ -17,7 +17,7 @@ import CirclesPink.Garden.Env (env)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
-import CirclesPink.Garden.StateMachine.State (CirclesState)
+import CirclesPink.Garden.StateMachine.State (CirclesState, initLanding)
 import CirclesPink.Garden.StateMachine.Stories (class MonadScript, SignUpUserOpts)
 import CirclesPink.Garden.StateMachine.Stories as S
 import CirclesPink.Garden.TestEnv (TestEnvT, liftEnv, runTestEnvT)
