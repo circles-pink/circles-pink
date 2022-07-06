@@ -1,4 +1,4 @@
-import { initLanding } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing';
+import { initLanding } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import React from 'react';
 import { Onboarding, OnboardingProps } from './onboarding';
 

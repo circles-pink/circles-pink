@@ -1,8 +1,10 @@
 module CirclesPink.Garden.TS
-  ( convertConfig
+  ( CirclesConfig
+  , convertConfig
   , mkControl
   , mkControlTestEnv
-  ) where
+  )
+  where
 
 import Prelude
 
