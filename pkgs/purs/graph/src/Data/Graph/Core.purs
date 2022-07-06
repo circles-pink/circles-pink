@@ -123,5 +123,5 @@ deleteEdge from to (Graph nodes) = Graph $ nodes
   # M.update updateFromNode from
   # M.update updateToNode to
   where
-  updateFromNode x = Just $ x { outEdges = M.delete from x.outEdges }
-  updateToNode x = Just $ x { inIds = S.delete to x.inIds }
+  updateFromNode x = Just $ x { outEdges = M.delete to x.outEdges }
+  updateToNode x = Just $ x { inIds = S.delete from x.inIds }
