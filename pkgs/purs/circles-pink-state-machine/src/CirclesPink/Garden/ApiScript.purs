@@ -1,6 +1,6 @@
 module CirclesPink.Garden.ApiScript where
 
-import Prelude
+import CirclesPink.Prelude
 
 import Chance as C
 import CirclesCore (ErrNewWebSocketProvider, ErrSendTransaction)
@@ -15,40 +15,25 @@ import CirclesPink.Garden.StateMachine.Control.Env (Env)
 import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
 import CirclesPink.Garden.StateMachine.Stories as S
 import CirclesPink.Garden.TestEnv (liftEnv)
-import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError)
-import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.State (get)
-import Control.Monad.Trans.Class (lift)
 import Control.Parallel (class Parallel, parTraverse)
 import Convertable (convert)
-import Data.Argonaut (decodeJson, encodeJson, fromString, stringify)
 import Data.Array ((..))
-import Data.Bifunctor (lmap)
-import Data.Either (Either(..), hush)
-import Data.Int (floor, toNumber)
-import Data.Maybe (fromJust)
+import Data.Int (floor)
+import Data.Int as M
 import Data.Newtype.Extra ((-|))
 import Data.String (joinWith)
-import Data.Traversable (traverse)
-import Data.Variant (Variant, default, inj, onMatch)
-import Effect (Effect)
-import Effect.Aff (Aff, message, runAff_)
-import Effect.Aff.Class (liftAff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (error)
+import Effect.Class.Console as E
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
-import Network.Ethereum.Web3 (HexString)
+import Network.Ethereum.Core.HexString (HexString)
 import Node.ChildProcess (defaultSpawnOptions)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (writeTextFile)
 import Node.Process (exit)
-import Partial.Unsafe (unsafePartial)
 import Record as R
 import Sunde (spawn)
-import Type.Proxy (Proxy(..))
-import Type.Row (type (+))
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
+
 
 type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
@@ -164,7 +149,7 @@ traverse' { maxPar, count } f = parTraverse (const sequential) (1 .. parCount) <
   where
   sequential = traverse (const f) (1 .. batchCount)
   parCount = min maxPar count
-  batchCount = floor (toNumber count / toNumber maxPar)
+  batchCount = floor (M.toNumber count / M.toNumber maxPar)
 
 --------------------------------------------------------------------------------
 printErrApp :: forall r. Variant (ErrApp + r) -> String
@@ -198,10 +183,10 @@ main :: Effect Unit
 main = runExceptT main' # runAff_ handler
   where
   handler (Left errNat) = do
-    error ("UNKNOWN ERROR: " <> message errNat)
+    E.error ("UNKNOWN ERROR: " <> message errNat)
     exit 1
   handler (Right (Left err')) = do
-    error ("ERROR: " <> err')
+    E.error ("ERROR: " <> err')
     exit 1
   handler (Right (Right _)) = pure unit
 

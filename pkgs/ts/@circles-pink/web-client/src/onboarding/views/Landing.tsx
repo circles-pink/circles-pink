@@ -6,7 +6,6 @@ import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { LandingState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.ProtocolDef.States.Landing';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
@@ -14,6 +13,7 @@ import tw from 'twin.macro';
 import { LoadingCircles } from '../../components/LoadingCircles';
 import { TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { LandingState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 
 type LandingProps = {
   state: LandingState;
