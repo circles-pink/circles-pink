@@ -124,13 +124,25 @@ dashboard env =
       getNode :: Maybe User -> TrustNode -> UserIdent
       getNode maybeUser tn = UserIdent $ note tn.safeAddress maybeUser
 
-      getEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
-      getEdge maybeOldTrustState tn = case maybeOldTrustState of
+      getOutgoingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
+      getOutgoingEdge maybeOldTrustState tn = case maybeOldTrustState of
+        Nothing | tn.isOutgoing -> Just initTrusted
+        Nothing -> Nothing
+        _ -> todo
+
+      -- Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
+      -- Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
+      -- Just oldTrustState -> Just oldTrustState
+
+      getIncomingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
+      getIncomingEdge maybeOldTrustState tn = case maybeOldTrustState of
         Nothing | tn.isIncoming -> Just initTrusted
         Nothing -> Nothing
-        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
-        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
-        Just oldTrustState -> Just oldTrustState
+        _ -> todo
+
+    -- Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
+    -- Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
+    -- Just oldTrustState -> Just oldTrustState
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -156,24 +168,18 @@ dashboard env =
                 ( \tn ->
                     let
                       otherAddress = tn.safeAddress
-                      maybeOutgoing = G.lookupEdge ownAddress otherAddress st'.trusts # (\e -> getEdge e tn)
-                      maybeIncoming = G.lookupEdge otherAddress ownAddress st'.trusts
+                      outgoingEdges = st'.trusts
+                        # G.lookupEdge ownAddress otherAddress
+                        # (\e -> getOutgoingEdge e tn)
+                        # maybe [] (\x -> [ ownAddress /\ otherAddress /\ x ])
 
-                      outgoing = case maybeOutgoing of
-                        Nothing -> []
-                        Just oT -> [ ownAddress /\ otherAddress /\ oT ]
-                      incoming = case maybeIncoming of
-                        Nothing -> []
-                        Just iT -> [ otherAddress /\ ownAddress /\ iT ]
+                      incomingEdges = st'.trusts
+                        # G.lookupEdge otherAddress ownAddress
+                        # (\e -> getIncomingEdge e tn)
+                        # maybe [] (\x -> [ otherAddress /\ ownAddress /\ x ])
+
                     in
-                      (spy "newEdges" (outgoing <> incoming))
-                --  <>
-                --   ( G.lookupEdge otherAddress ownAddress st'.trusts # maybe []
-                --       ( \_ ->
-                --           [ otherAddress /\ ownAddress /\ initTrusted ]
-                --       )
-                --   )
-
+                      (spy "newEdges" (outgoingEdges <> incomingEdges))
                 )
           in
             S._dashboard
