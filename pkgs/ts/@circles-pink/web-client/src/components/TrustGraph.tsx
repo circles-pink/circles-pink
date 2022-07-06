@@ -105,8 +105,6 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
 
   const elements = getElementsFromData(graph);
 
-  console.log(elements);
-
   const stylesheets = [
     {
       selector: 'node',

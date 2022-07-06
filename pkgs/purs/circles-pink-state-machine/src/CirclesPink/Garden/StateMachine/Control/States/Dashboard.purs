@@ -28,6 +28,7 @@ import Data.Maybe (Maybe(..), maybe)
 import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
+import Debug (spy)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
@@ -123,13 +124,13 @@ dashboard env =
       getNode :: Maybe User -> TrustNode -> UserIdent
       getNode maybeUser tn = UserIdent $ note tn.safeAddress maybeUser
 
-      getEdge :: Maybe TrustState -> TrustNode -> TrustState
+      getEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
       getEdge maybeOldTrustState tn = case maybeOldTrustState of
-        Nothing | tn.isIncoming -> initTrusted
-        Nothing -> initUntrusted
-        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> initTrusted
-        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> initUntrusted
-        Just oldTrustState -> oldTrustState
+        Nothing | tn.isIncoming -> Just initTrusted
+        Nothing -> Nothing
+        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
+        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
+        Just oldTrustState -> Just oldTrustState
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -147,24 +148,31 @@ dashboard env =
             ownAddress = st'.user.safeAddress
 
             newNodes = trustNodes
-              <#> (\tn ->  tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
+              <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
             newEdges :: Array (Address /\ Address /\ TrustState)
-            newEdges = A.zip trustNodes newNodes
+            newEdges = trustNodes
               >>=
-                ( \(tn /\ n) ->
-                  let
-                    otherAddress = tn.safeAddress
-                  in
-                    [ ownAddress /\ otherAddress /\
-                        (tn # getEdge (G.lookupEdge ownAddress otherAddress st'.trusts))
+                ( \tn ->
+                    let
+                      otherAddress = tn.safeAddress
+                      maybeOutgoing = G.lookupEdge ownAddress otherAddress st'.trusts # (\e -> getEdge e tn)
+                      maybeIncoming = G.lookupEdge otherAddress ownAddress st'.trusts
 
-                    ] <>
-                      ( G.lookupEdge otherAddress ownAddress st'.trusts # maybe []
-                          ( \_ ->
-                              [ otherAddress /\ ownAddress /\ initTrusted ]
-                          )
-                      )
+                      outgoing = case maybeOutgoing of
+                        Nothing -> []
+                        Just oT -> [ ownAddress /\ otherAddress /\ oT ]
+                      incoming = case maybeIncoming of
+                        Nothing -> []
+                        Just iT -> [ otherAddress /\ ownAddress /\ iT ]
+                    in
+                      (spy "newEdges" (outgoing <> incoming))
+                --  <>
+                --   ( G.lookupEdge otherAddress ownAddress st'.trusts # maybe []
+                --       ( \_ ->
+                --           [ otherAddress /\ ownAddress /\ initTrusted ]
+                --       )
+                --   )
 
                 )
           in
