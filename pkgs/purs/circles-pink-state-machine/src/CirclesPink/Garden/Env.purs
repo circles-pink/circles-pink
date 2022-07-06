@@ -22,7 +22,7 @@ import Data.Either (Either(..), note)
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
-import Data.Newtype.Extra ((-|))
+import Data.Newtype.Extra ((-#))
 import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
@@ -94,7 +94,7 @@ env { request, envVars } =
       pure { isValid: false }
     else
       request
-        { url: envVars -| _.gardenApiUsers
+        { url: envVars -# _.gardenApiUsers
         , method: POST
         , body: encodeJson { username }
         }
@@ -123,7 +123,7 @@ env { request, envVars } =
       pure { isValid: false }
     else
       request
-        { url: envVars -| _.gardenApiUsers
+        { url: envVars -# _.gardenApiUsers
         , method: POST
         , body: encodeJson { email }
         }
@@ -367,19 +367,19 @@ privateKeyStore = "session"
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
-  provider <- CC.newWebSocketProvider $ ev -| _.gardenEthereumNodeWebSocket
+  provider <- CC.newWebSocketProvider $ ev -# _.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
 getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV (ErrNative + r) Effect CirclesCore
 getCirclesCore web3 ev =
   CC.newCirclesCore web3
-    { apiServiceEndpoint: ev -| _.gardenApi
-    , graphNodeEndpoint: ev -| _.gardenGraphApi
-    , hubAddress: ev -| _.gardenHubAddress
-    , proxyFactoryAddress: ev -| _.gardenProxyFactoryAddress
-    , relayServiceEndpoint: ev -| _.gardenRelay
-    , safeMasterAddress: ev -| _.gardenSafeMasterAddress
-    , subgraphName: ev -| _.gardenSubgraphName
+    { apiServiceEndpoint: ev -# _.gardenApi
+    , graphNodeEndpoint: ev -# _.gardenGraphApi
+    , hubAddress: ev -# _.gardenHubAddress
+    , proxyFactoryAddress: ev -# _.gardenProxyFactoryAddress
+    , relayServiceEndpoint: ev -# _.gardenRelay
+    , safeMasterAddress: ev -# _.gardenSafeMasterAddress
+    , subgraphName: ev -# _.gardenSubgraphName
     , databaseSource: "graph"
     }

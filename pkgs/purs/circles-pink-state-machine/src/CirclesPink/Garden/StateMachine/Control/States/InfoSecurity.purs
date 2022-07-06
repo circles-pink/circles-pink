@@ -9,7 +9,7 @@ import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), isNothing)
-import Data.Newtype.Extra ((-|))
+import Data.Newtype.Extra ((-#))
 
 infoSecurity
   :: forall m
@@ -32,6 +32,6 @@ infoSecurity env cfg =
       else
         S._magicWords st { direction = D._forwards }
 
-  prev set _ _ = set \st -> case cfg -| _.extractEmail of
+  prev set _ _ = set \st -> case cfg -# _.extractEmail of
     Left _ -> S._askUsername st { direction = D._backwards }
     Right _ -> S._askEmail st { direction = D._backwards }

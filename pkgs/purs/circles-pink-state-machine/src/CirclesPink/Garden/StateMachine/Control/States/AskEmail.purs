@@ -9,7 +9,7 @@ import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
 import Data.Either (Either(..))
-import Data.Newtype.Extra ((-|), (|-))
+import Data.Newtype.Extra ((-#), ($-))
 import Data.Variant (default, onMatch)
 import RemoteData (_failure, _loading, _success)
 
@@ -39,8 +39,8 @@ askEmail env cfg =
           # onMatch
               { success: (\r -> r.isValid) }
     in
-      if emailValid |- st.emailApiResult && st.terms && st.privacy then do
-        case cfg -| _.extractEmail of
+      if (emailValid $- st.emailApiResult) && st.terms && st.privacy then do
+        case cfg -# _.extractEmail of
           Left _ -> pure unit
           Right cb -> cb st.email
         set \st' -> S._infoSecurity st' { direction = D._forwards }
