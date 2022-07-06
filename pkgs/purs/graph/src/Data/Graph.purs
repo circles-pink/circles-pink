@@ -99,18 +99,8 @@ ids id graph =
       _, _ -> Nothing
 
 outgoingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
-outgoingEdgesWithNodes = edgesWithNodesHelper G.outgoingIds
-
-incomingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
-incomingEdgesWithNodes = edgesWithNodesHelper G.incomingIds
-
-edgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
-edgesWithNodes = edgesWithNodesHelper ids
-
---------------------------------------------------------------------------------
-edgesWithNodesHelper :: forall id e n. Ord id => (id -> Graph id e n -> Maybe (Set id)) -> id -> Graph id e n -> Maybe (Array (e /\ n))
-edgesWithNodesHelper getIds fromId graph = graph
-  # getIds fromId
+outgoingEdgesWithNodes fromId graph = graph
+  # G.outgoingIds fromId
   <#> mapSet
   where
   mapSet :: Set id -> Array (e /\ n)
@@ -119,6 +109,21 @@ edgesWithNodesHelper getIds fromId graph = graph
 
   getTuple :: id -> (e /\ n)
   getTuple toId = (unsafePartial $ unsafeLookupEdge fromId toId graph) /\ (unsafePartial $ unsafeLookupNode toId graph)
+
+incomingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
+incomingEdgesWithNodes fromId graph = graph
+  # G.incomingIds fromId
+  <#> mapSet
+  where
+  mapSet :: Set id -> Array (e /\ n)
+  mapSet x = S.toUnfoldable x
+    <#> getTuple
+
+  getTuple :: id -> (e /\ n)
+  getTuple toId = (unsafePartial $ unsafeLookupEdge toId fromId graph) /\ (unsafePartial $ unsafeLookupNode toId graph)
+
+edgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
+edgesWithNodes id g = (<>) <$> incomingEdgesWithNodes id g <*> outgoingEdgesWithNodes id g
 
 --------------------------------------------------------------------------------
 
