@@ -37,7 +37,7 @@ act ac = (toMonadState $ circlesControl testEnv testConfig) ac
 --------------------------------------------------------------------------------
 
 execTestScriptM :: forall a. CirclesState -> TestScriptT Identity a -> CirclesState
-execTestScriptM x1 x2 = execTestScriptT x1 x2 <#> fst # unwrap
+execTestScriptM x1 x2 = execTestScriptT testConfig x1 x2 <#> fst # unwrap
 
 infoGeneral :: CirclesState
 infoGeneral = S.init

@@ -172,7 +172,7 @@ main' = do
     env'' = liftEnv liftAff $ env { envVars: convert envVars, request }
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
-  (mkAccount envVars env'' cfg # runExceptT # evalScriptM)
+  (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)
     # traverse' { count: 20, maxPar: 5 }
     <#> (map (lmap printErrApp) >>> encodeJson >>> stringify)
     >>= runJq

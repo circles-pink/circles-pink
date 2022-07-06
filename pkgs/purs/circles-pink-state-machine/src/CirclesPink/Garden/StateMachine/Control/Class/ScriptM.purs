@@ -3,14 +3,15 @@ module CirclesPink.Garden.StateMachine.Control.Class.ScriptM
   , evalScriptM
   , execScriptM
   , runScriptM
-  )
-  where
+  ) where
 
 import Prelude
 
+import CirclesPink.Garden.StateMachine (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.State (CirclesState, initLanding)
 import CirclesPink.Garden.StateMachine.Stories (class MonadScript)
+import Control.Monad.Reader (class MonadAsk, ReaderT, ask, runReaderT)
 import Control.Monad.State (class MonadState, StateT, runStateT, state)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
@@ -20,12 +21,22 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console as E
 import Log.Class (class MonadLog)
 
-type ScriptM' a = (StateT CirclesState (StateT {} Aff) a)
+type ScriptM' a =
+  ReaderT (CirclesConfig ScriptM)
+    ( StateT CirclesState
+        (StateT {} Aff)
+    )
+    a
+
 newtype ScriptM a = ScriptM (ScriptM' a)
 
 instance monadCirclesScriptM :: MonadCircles ScriptM where
   sleep _ = pure unit
-  -- getSafeAddress x1 = getSafeAddress x1 # mapExceptT (ScriptM <<< liftAff)
+
+-- getSafeAddress x1 = getSafeAddress x1 # mapExceptT (ScriptM <<< liftAff)
+
+instance monadAsk :: MonadAsk (CirclesConfig ScriptM) ScriptM where
+  ask = ScriptM $ ask
 
 instance monadScriptScriptM :: MonadScript ScriptM
 
@@ -60,13 +71,15 @@ instance monadScriptM :: Monad ScriptM
 instance functorScriptM :: Functor ScriptM where
   map f (ScriptM x) = ScriptM $ map f x
 
-runScriptM :: forall a. ScriptM a -> Aff (a /\ CirclesState /\ {})
-runScriptM (ScriptM x) = runStateT x initLanding
-  # (\y -> runStateT y {})
+runScriptM :: forall a. CirclesConfig ScriptM -> ScriptM a -> Aff (a /\ CirclesState /\ {})
+runScriptM cfg (ScriptM x) = x
+  # flip runReaderT cfg
+  # flip runStateT initLanding
+  # flip runStateT {}
   <#> (\((a /\ cs) /\ ts) -> a /\ cs /\ ts)
 
-execScriptM :: forall a. ScriptM a -> Aff (CirclesState /\ {})
-execScriptM x = runScriptM x <#> snd
+execScriptM :: forall a. CirclesConfig ScriptM -> ScriptM a -> Aff (CirclesState /\ {})
+execScriptM cfg x = runScriptM cfg x <#> snd
 
-evalScriptM :: forall a. ScriptM a -> Aff a
-evalScriptM = runScriptM >>> map fst
+evalScriptM :: forall a. CirclesConfig ScriptM -> ScriptM a -> Aff a
+evalScriptM cfg = runScriptM cfg >>> map fst

@@ -2,14 +2,13 @@ module CirclesPink.Garden.StateMachine.Control.Class where
 
 import Prelude
 
-import Data.Int (toNumber)
-import Effect.Aff (Aff, Milliseconds(..), delay)
+import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
+import Control.Monad.Reader (class MonadAsk)
 
-
-class Monad m <= MonadCircles m where
+class
+  ( Monad m
+  , MonadAsk (CirclesConfig m) m
+  ) <=
+  MonadCircles m where
   sleep :: Int -> m Unit
-  --getSafeAddress :: forall r. String -> ExceptV (ErrGetSafeAddress r) m { isValid :: Boolean }
 
-instance monadCirclesAff :: MonadCircles Aff where
-  sleep i = delay $ Milliseconds $ toNumber i
-  --getSafeAddress = todo

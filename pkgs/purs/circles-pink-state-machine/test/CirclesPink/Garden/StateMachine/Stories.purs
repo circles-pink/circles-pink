@@ -28,7 +28,7 @@ spec =
 
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
-    execTestScriptM_ = execTestScriptT initLanding >>> unwrap >>> fst
+    execTestScriptM_ = execTestScriptT cfg initLanding >>> unwrap >>> fst
   in
     describe "CirclesPink.Garden.StateMachine.Stories" do
       describe "A user can signup" do
