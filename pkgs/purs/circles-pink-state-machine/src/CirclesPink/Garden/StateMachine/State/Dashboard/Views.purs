@@ -139,9 +139,21 @@ defaultView d@{ trusts } =
                 Nothing, Just _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initTrusted }
                 Just _, Just _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
           )
+
+    trustsConfirmed = d.trusts
+      # G.edgesWithNodes d.user.safeAddress
+      # maybe [] identity
+      # filter (\(e /\ _) -> isTrusted e)
+      <#> (mapTrust' d.user.safeAddress d.trusts)
+
+    trustsCandidates = d.trusts
+      # G.outgoingEdgesWithNodes d.user.safeAddress
+      # maybe [] identity
+      # filter (\(e /\ _) -> not $ isTrusted e)
+      <#> (mapTrust' d.user.safeAddress d.trusts)
   in
-    { trustsConfirmed: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
-    , trustsCandidates: d.trusts # G.outgoingEdgesWithNodes d.user.safeAddress # maybe [] identity # filter (\(e /\ _) -> not $ isTrusted e) <#> (mapTrust' d.user.safeAddress d.trusts)
+    { trustsConfirmed
+    , trustsCandidates
     , graph: d.trusts # (G.toUnfoldables :: _ -> { nodes :: Array _, edges :: Array _ }) # toFpTs
     , usersSearch: usersSearch
     , userSearchResult: d.userSearchResult

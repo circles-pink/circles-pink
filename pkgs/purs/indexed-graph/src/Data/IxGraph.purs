@@ -3,8 +3,10 @@ module Data.IxGraph
   , class Indexed
   , deleteEdges
   , deleteNodes
+  , edgesWithNodes
   , empty
   , getIndex
+  , incomingEdgesWithNodes
   , insertEdge
   , insertEdges
   , insertNode
@@ -76,6 +78,12 @@ lookupEdge from to (IxGraph graph) = G.lookupEdge from to graph
 
 outgoingEdgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Array (e /\ n))
 outgoingEdgesWithNodes id (IxGraph graph) = G.outgoingEdgesWithNodes id graph
+
+incomingEdgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Array (e /\ n))
+incomingEdgesWithNodes id (IxGraph graph) = G.incomingEdgesWithNodes id graph
+
+edgesWithNodes :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (Array (e /\ n))
+edgesWithNodes id (IxGraph graph) = G.edgesWithNodes id graph
 
 toUnfoldables :: forall id e n f. Unfoldable f => Ord id => IxGraph id e n -> { nodes :: f (id /\ n), edges :: f (id /\ id /\ e) }
 toUnfoldables (IxGraph graph) = G.toUnfoldables graph
