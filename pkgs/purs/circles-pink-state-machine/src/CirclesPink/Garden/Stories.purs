@@ -67,7 +67,7 @@ signUpUser env cfg opts = do
   act env cfg $ A._submit $ A._submit unit
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m. MonadScript m => MonadLog m => Env m -> CirclesConfig m -> m Unit
+finalizeAccount :: forall m. MonadScript m => Env m -> CirclesConfig m -> m Unit
 finalizeAccount env cfg = do
   act env cfg $ A._trusts $ A._finalizeRegisterUser unit
 
@@ -76,7 +76,7 @@ type LoginUserOpts =
   { magicWords :: String
   }
 
-loginUser :: forall m. MonadScript m => MonadLog m => Env m -> CirclesConfig m -> LoginUserOpts -> m Unit
+loginUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> LoginUserOpts -> m Unit
 loginUser env cfg { magicWords } = do
   act env cfg $ A._landing $ A._signIn unit
   act env cfg $ A._login $ A._setMagicWords magicWords
