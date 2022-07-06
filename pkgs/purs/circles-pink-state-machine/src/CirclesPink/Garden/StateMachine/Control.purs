@@ -2,7 +2,7 @@ module CirclesPink.Garden.StateMachine.Control (circlesControl) where
 
 import Prelude
 
-import CirclesPink.Garden.StateMachine (_circlesStateMachine)
+import CirclesPink.Garden.StateMachine.Type (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
