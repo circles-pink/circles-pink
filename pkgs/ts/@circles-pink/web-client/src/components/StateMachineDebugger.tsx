@@ -13,7 +13,10 @@ export const StateMachineDebugger = ({
   const stateKeys = Object.keys(state).sort((a, b) => a.localeCompare(b));
 
   const [filters, setFilters] = useState<Record<string, boolean>>(
-    Object.fromEntries(stateKeys.map(k => [k, true])) as Record<string, boolean>
+    Object.fromEntries(stateKeys.map(k => [k, false])) as Record<
+      string,
+      boolean
+    >
   );
 
   const updateFilter = (key: string) =>
