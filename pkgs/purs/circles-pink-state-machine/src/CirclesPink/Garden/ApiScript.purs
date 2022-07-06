@@ -20,7 +20,7 @@ import Convertable (convert)
 import Data.Array ((..))
 import Data.Int (floor)
 import Data.Int as M
-import Data.Newtype.Extra ((-|))
+import Data.Newtype.Extra ((-#))
 import Data.String (joinWith)
 import Effect.Class.Console as E
 import HTTP.Milkis (milkisRequest)
@@ -57,7 +57,7 @@ safeFunderAddr =
 fundAddress :: forall r. EnvVars -> Address -> ExceptV (ErrApp + r) ScriptM HexString
 fundAddress envVars safeAddress =
   mapExceptT liftAff do
-    provider <- newWebSocketProvider $ envVars -| _.gardenEthereumNodeWebSocket
+    provider <- newWebSocketProvider $ envVars -# _.gardenEthereumNodeWebSocket
     web3 <- lift $ newWeb3 provider
     sendTransaction web3
       { from: safeFunderAddr

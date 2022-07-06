@@ -1,24 +1,22 @@
 module Data.Newtype.Extra
-  ( (-|)
-  , (|-)
-  , applyAndUnwrap
-  , unwrapAndApply
-  )
-  where
+  ( ($-)
+  , (-#)
+  , applyUnwrapped
+  , applyUnwrappedFlipped
+  ) where
 
 import Prelude
 import Data.Newtype (class Newtype, unwrap)
 
 --------------------------------------------------------------------------------
-unwrapAndApply :: forall t a b. Newtype t a => t -> (a -> b) -> b
-unwrapAndApply x f = f $ unwrap x
+applyUnwrappedFlipped :: forall t a b. Newtype t a => t -> (a -> b) -> b
+applyUnwrappedFlipped x f = unwrap x # f
 
-
-infixl 9 unwrapAndApply as -|
+infixl 1 applyUnwrappedFlipped as -#
 
 --------------------------------------------------------------------------------
 
-applyAndUnwrap :: forall t a b. Newtype t a => (a -> b) -> t  -> b
-applyAndUnwrap = flip unwrapAndApply 
+applyUnwrapped :: forall t a b. Newtype t a => (a -> b) -> t -> b
+applyUnwrapped f x = f $ unwrap x
 
-infixr 9 applyAndUnwrap as |-
+infixr 0 applyUnwrapped as $-

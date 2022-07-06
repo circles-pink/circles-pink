@@ -23,3 +23,4 @@ import Data.Bifunctor (class Bifunctor, bimap, lmap, rmap) as Exp
 import Effect.Class (class MonadEffect, liftEffect) as Exp
 import Effect (Effect, forE, foreachE, untilE, whileE) as Exp
 import Data.Traversable (class Foldable, class Traversable, Accum, all, and, any, elem, find, fold, foldMap, foldMapDefaultL, foldMapDefaultR, foldl, foldlDefault, foldr, foldrDefault, for, for_, intercalate, mapAccumL, mapAccumR, maximum, maximumBy, minimum, minimumBy, notElem, oneOf, or, scanl, scanr, sequence, sequenceDefault, sequence_, sum, traverse, traverseDefault, traverse_) as Exp
+import Data.Newtype.Extra (applyUnwrapped, applyUnwrappedFlipped, ($-), (-#)) as Exp

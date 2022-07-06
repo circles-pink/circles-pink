@@ -93,7 +93,7 @@ import Data.BN (BN)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
 import Data.Newtype (wrap)
-import Data.Newtype.Extra ((-|))
+import Data.Newtype.Extra ((-#))
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
@@ -171,7 +171,7 @@ type ErrTrustIsTrusted r = ErrNative + r
 trustIsTrusted :: forall r. B.CirclesCore -> B.Account -> TrustIsTrustedOptions -> Result (ErrTrustIsTrusted r) B.TrustIsTrustedResult
 trustIsTrusted cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.trust -| _.isTrusted
+  fn = convertCore cc -# _.trust -# _.isTrusted
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -192,7 +192,7 @@ type ErrTrustGetNetwork r = ErrNative + ErrParseAddress + r
 trustGetNetwork :: forall r. B.CirclesCore -> B.Account -> { safeAddress :: Address } -> Result (ErrTrustGetNetwork r) (Array TrustNode)
 trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  fn = convertCore cc -| _.trust -| _.getNetwork
+  fn = convertCore cc -# _.trust -# _.getNetwork
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -219,7 +219,7 @@ type ErrTrustAddConnection r = ErrNative + r
 trustAddConnection :: forall r. B.CirclesCore -> B.Account -> TrustAddConnectionOptions -> Result (ErrTrustAddConnection r) String
 trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.trust -| _.addConnection
+  fn = convertCore cc -# _.trust -# _.addConnection
 
   mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
 
@@ -236,7 +236,7 @@ type ErrTrustRemoveConnection r = ErrNative + r
 trustRemoveConnection :: forall r. B.CirclesCore -> B.Account -> TrustRemoveConnectionOptions -> Result (ErrTrustRemoveConnection r) String
 trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.trust -| _.removeConnection
+  fn = convertCore cc -# _.trust -# _.removeConnection
 
   mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
 
@@ -255,7 +255,7 @@ type ErrUserRegister r = ErrService + ErrNative + r
 userRegister :: forall r. B.CirclesCore -> B.Account -> UserOptions -> Result (ErrUserRegister r) Unit
 userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
-  fn = convertCore cc -| _.user -| _.register
+  fn = convertCore cc -# _.user -# _.register
 
   mapArg2 x =
     x
@@ -283,7 +283,7 @@ type ErrUserResolve r = ErrNative + ErrParseAddress + ErrApi + r
 userResolve :: forall r. B.CirclesCore -> B.Account -> ResolveOptions -> Result (ErrUserResolve r) (Array User)
 userResolve cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  fn = convertCore cc -| _.user -| _.resolve
+  fn = convertCore cc -# _.user -# _.resolve
 
   mapArg2 x =
     x
@@ -307,7 +307,7 @@ type ErrSearch r = ErrNative + ErrParseAddress + ErrApi + r
 userSearch :: forall r. B.CirclesCore -> B.Account -> SearchOptions -> Result (ErrSearch r) (Array User)
 userSearch cc = mapFn2 fn pure pure mkErrorNative mapOk
   where
-  fn = convertCore cc -| _.user -| _.search
+  fn = convertCore cc -# _.user -# _.search
 
   mapOk x = case apiResultToEither x of
     Left apiError -> Left $ _errApi apiError
@@ -325,7 +325,7 @@ type ErrSafeDeploy r = ErrService + ErrNative + r
 safeDeploy :: forall r. B.CirclesCore -> B.Account -> SafeDeployOptions -> Result (ErrSafeDeploy r) Unit
 safeDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
   where
-  fn = convertCore cc -| _.safe -| _.deploy
+  fn = convertCore cc -# _.safe -# _.deploy
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -337,7 +337,7 @@ type ErrSafePredictAddress r = ErrNative + ErrParseAddress + r
 safePredictAddress :: forall r. B.CirclesCore -> B.Account -> { nonce :: Nonce } -> Result (ErrSafePredictAddress r) Address
 safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  fn = convertCore cc -| _.safe -| _.predictAddress
+  fn = convertCore cc -# _.safe -# _.predictAddress
 
   mapArg2 x = x { nonce = nonceToBigInt x.nonce }
 
@@ -351,7 +351,7 @@ type ErrSafePrepareDeploy r = ErrNative + ErrParseAddress + r
 safePrepareDeploy :: forall r. B.CirclesCore -> B.Account -> { nonce :: Nonce } -> Result (ErrSafePrepareDeploy r) Address
 safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
-  fn = convertCore cc -| _.safe -| _.prepareDeploy
+  fn = convertCore cc -# _.safe -# _.prepareDeploy
 
   mapArg2 x = x { nonce = nonceToBigInt x.nonce }
 
@@ -369,7 +369,7 @@ type ErrSafeIsFunded r = ErrNative + r
 safeIsFunded :: forall r. B.CirclesCore -> B.Account -> SafeIsFundedOptions -> Result (ErrSafeIsFunded r) Boolean
 safeIsFunded cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.safe -| _.isFunded
+  fn = convertCore cc -# _.safe -# _.isFunded
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -390,7 +390,7 @@ type ErrSafeGetSafeStatus r = ErrNative + r
 safeGetSafeStatus :: forall r. B.CirclesCore -> B.Account -> SafeGetSafeStatusOptions -> Result (ErrSafeGetSafeStatus r) SafeStatus
 safeGetSafeStatus cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.safe -| _.getSafeStatus
+  fn = convertCore cc -# _.safe -# _.getSafeStatus
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -406,7 +406,7 @@ type ErrTokenDeploy r = ErrService + ErrNative + r
 tokenDeploy :: forall r. B.CirclesCore -> B.Account -> TokenDeployOptions -> Result (ErrTokenDeploy r) String
 tokenDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.token -| _.deploy
+  fn = convertCore cc -# _.token -# _.deploy
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -422,7 +422,7 @@ type ErrTokenGetBalance r = ErrNative + r
 tokenGetBalance :: forall r. B.CirclesCore -> B.Account -> TokenGetBalanceOptions -> Result (ErrTokenGetBalance r) BN
 tokenGetBalance cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.token -| _.getBalance
+  fn = convertCore cc -# _.token -# _.getBalance
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -438,7 +438,7 @@ type ErrTokenCheckUBIPayout r = ErrNative + r
 tokenCheckUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenCheckUBIPayoutOptions -> Result (ErrTokenCheckUBIPayout r) BN
 tokenCheckUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.token -| _.checkUBIPayout
+  fn = convertCore cc -# _.token -# _.checkUBIPayout
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -454,7 +454,7 @@ type ErrTokenRequestUBIPayout r = ErrNative + r
 tokenRequestUBIPayout :: forall r. B.CirclesCore -> B.Account -> TokenRequestUBIPayoutOptions -> Result (ErrTokenRequestUBIPayout r) String
 tokenRequestUBIPayout cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.token -| _.requestUBIPayout
+  fn = convertCore cc -# _.token -# _.requestUBIPayout
 
   mapArg2 x = x { safeAddress = show x.safeAddress }
 
@@ -473,7 +473,7 @@ type ErrTokenTransfer r = ErrNative + r
 tokenTransfer :: forall r. B.CirclesCore -> B.Account -> TokenTransferOptions -> Result (ErrTokenTransfer r) String
 tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
-  fn = convertCore cc -| _.token -| _.transfer
+  fn = convertCore cc -# _.token -# _.transfer
 
   mapArg2 x = x { from = show x.from, to = show x.to }
 
