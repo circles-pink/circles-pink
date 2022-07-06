@@ -2,24 +2,24 @@ module CirclesPink.Garden.StateMachine.Control.States.InfoSecurity where
 
 import Prelude
 
-import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
+import Control.Monad.Reader (ask)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), isNothing)
 import Data.Newtype.Extra ((-#))
 
 infoSecurity
   :: forall m
-   . Monad m
+   . MonadCircles m
   => Env.Env m
-  -> CirclesConfig m
   -> { prev :: ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData, "askUsername" :: S.UserData)
      , next :: ActionHandler' m Unit S.UserData ("magicWords" :: S.UserData)
      }
-infoSecurity env cfg =
+infoSecurity env =
   { prev
   , next
   }
@@ -32,6 +32,8 @@ infoSecurity env cfg =
       else
         S._magicWords st { direction = D._forwards }
 
-  prev set _ _ = set \st -> case cfg -# _.extractEmail of
-    Left _ -> S._askUsername st { direction = D._backwards }
-    Right _ -> S._askEmail st { direction = D._backwards }
+  prev set _ _ = do
+    cfg <- ask
+    set \st -> case cfg -# _.extractEmail of
+      Left _ -> S._askUsername st { direction = D._backwards }
+      Right _ -> S._askEmail st { direction = D._backwards }

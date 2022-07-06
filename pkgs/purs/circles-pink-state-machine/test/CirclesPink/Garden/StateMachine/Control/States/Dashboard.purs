@@ -5,6 +5,7 @@ import Prelude
 import CirclesCore (User, _errNative)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
+import CirclesPink.Garden.StateMachine (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, evalTestScriptT)
 import CirclesPink.Garden.StateMachine.Control.Env (ErrGetUsers)
 import CirclesPink.Garden.StateMachine.Control.States.Dashboard as D
@@ -86,7 +87,9 @@ mkGetUsers db _ _ xs =
 --------------------------------------------------------------------------------
 
 run :: forall t16 t17. ExceptT t16 (TestScriptT Identity) t17 -> Maybe t17
-run = runExceptT >>> evalTestScriptT initLanding >>> unwrap >>> hush
+run = runExceptT >>> evalTestScriptT mockConfig initLanding >>> unwrap >>> hush
+  where
+  mockConfig = CirclesConfig { extractEmail: Left "" }
 
 -- trustedUser :: User
 -- trustedUser = { avatarUrl: "", id: 0, safeAddress: P.sampleAddress, username: "a" }
