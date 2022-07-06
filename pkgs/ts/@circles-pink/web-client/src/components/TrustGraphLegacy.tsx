@@ -6,17 +6,8 @@ import Cytoscape, {
   LayoutOptions,
 } from 'cytoscape';
 // import COSEBilkent from 'cytoscape-cose-bilkent';
+import { TrustNode } from '@circles-pink/state-machine/output/CirclesCore';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import {
-  addrToString,
-  Graph,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import {
-  getIdentifier,
-  UserIdent,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import { TrustState } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { toFpTsTuple } from '../utils/fpTs';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -44,37 +35,30 @@ const layout: Partial<CircleLayoutOptions> & Pick<CircleLayoutOptions, 'name'> =
 
 const getNode = (
   key: Address,
-  value: UserIdent
+  value: Array<TrustNode>
 ): Cytoscape.ElementDefinition => ({
   data: {
-    id: addrToString(key),
-    label: getIdentifier(value),
+    id: key as unknown as string,
+    label: (key as unknown as string).substring(0, 6),
   },
 });
 
 const getEdge = (
   source: Address,
-  target: Address,
-  value: TrustState
-): Cytoscape.ElementDefinition => ({
-  data: {
-    source: addrToString(source),
-    target: addrToString(target),
-  },
-});
+  value: TrustNode[]
+): Cytoscape.ElementDefinition[] =>
+  value.map(target => ({
+    data: {
+      source,
+      target: target.safeAddress,
+    },
+  }));
 
 const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
-  data_.nodes.map(n => {
-    const [key, value] = toFpTsTuple(n);
-    return getNode(key, value);
-  });
+  Array.from(data_.entries()).map(([k, v]) => getNode(k, v));
 
 const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] =>
-  data_.edges.map(n => {
-    const [from, vt] = toFpTsTuple(n);
-    const [to, value] = toFpTsTuple(vt);
-    return getEdge(from, to, value);
-  });
+  Array.from(data_.entries()).flatMap(([k, v]) => getEdge(k, v));
 
 const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
   ...getNodes(data_),
@@ -84,6 +68,8 @@ const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
+
+export type Graph = Map<Address, Array<TrustNode>>;
 
 type TrustGraphProps = { graph: Graph };
 

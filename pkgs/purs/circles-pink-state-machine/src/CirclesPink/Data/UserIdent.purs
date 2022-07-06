@@ -1,15 +1,16 @@
 module CirclesPink.Data.UserIdent
   ( UserIdent(..)
   , getAddress
+  , getIdentifier
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 
 import CirclesCore (User)
-import Data.Either (Either(..))
-import Data.IxGraph (class Indexed)
-import FpTs.Class (class FpTs)
 import CirclesPink.Data.Address (Address)
+import Data.IxGraph (class Indexed)
+import Data.String as S
+import FpTs.Class (class FpTs)
 
 newtype UserIdent = UserIdent (Either Address User)
 
@@ -30,3 +31,10 @@ instance ftTsUserIdent :: FpTs UserIdent UserIdent where
 getAddress :: UserIdent -> Address
 getAddress (UserIdent (Left addr)) = addr
 getAddress (UserIdent (Right { safeAddress })) = safeAddress
+
+shortenAddrBy ∷ Int
+shortenAddrBy = 6
+
+getIdentifier :: UserIdent -> String
+getIdentifier (UserIdent (Left addr)) = S.take shortenAddrBy $ show addr
+getIdentifier (UserIdent (Right { username })) = username
