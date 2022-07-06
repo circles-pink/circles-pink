@@ -13,10 +13,11 @@ import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
+import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (catMaybes, drop, find, take)
+import Data.Array (catMaybes, drop, find, foldr, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
@@ -117,8 +118,8 @@ dashboard env =
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         let x = todo
         _ <-
-              syncTrusts set st
-                # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
+          syncTrusts set st
+            # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
         pure unit
 
   syncTrusts set st i = do
@@ -126,19 +127,23 @@ dashboard env =
       getNode :: Maybe User -> TrustNode -> UserIdent
       getNode maybeUser tn = UserIdent $ note tn.safeAddress maybeUser
 
-      getOutgoingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
-      getOutgoingEdge maybeOldTrustState tn = case maybeOldTrustState of
-        Nothing | tn.isIncoming -> Just initTrusted
-        Nothing -> Nothing
-        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
-        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
-        Just oldTrustState -> Just oldTrustState
+      getOutgoingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
+      getOutgoingEdge maybeOldTrustState tn = todo
 
-      getIncomingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
-      getIncomingEdge maybeOldTrustState tn = case maybeOldTrustState of
-        Nothing | tn.isOutgoing -> Just initTrusted
-        Nothing -> Nothing
-        _ -> Just initTrusted
+      -- case maybeOldTrustState of
+      --   Nothing | tn.isIncoming -> Just initTrusted
+      --   Nothing -> Nothing
+      --   Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
+      --   Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
+      --   Just oldTrustState -> Just oldTrustState
+
+      getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
+      getIncomingEdge maybeOldTrustState tn = todo
+
+    -- case maybeOldTrustState of
+    --   Nothing | tn.isOutgoing -> Just initTrusted
+    --   Nothing -> Nothing
+    --   _ -> Just initTrusted
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -158,43 +163,60 @@ dashboard env =
             newNodes = trustNodes
               <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
-            newEdges :: Array (Address /\ Address /\ TrustState)
-            newEdges = trustNodes
-              >>=
-                ( \tn ->
-                    let
-                      otherAddress = tn.safeAddress
-                      outgoingEdges = st'.trusts
-                        # G.lookupEdge ownAddress otherAddress
-                        # (\e -> getOutgoingEdge e tn)
-                        # maybe [] (\x -> [ ownAddress /\ otherAddress /\ x ])
+            foo :: TrustNode -> CirclesGraph -> CirclesGraph
+            foo tn g =
+              let
+                otherAddress = tn.safeAddress
+                outgoingEdges = st'.trusts
+                  # G.lookupEdge ownAddress otherAddress
+                  # (\e -> getOutgoingEdge e tn)
+                  # maybe [] (\x -> [ ownAddress /\ otherAddress /\ x ])
 
-                      incomingEdges = st'.trusts
-                        # G.lookupEdge otherAddress ownAddress
-                        # (\e -> getIncomingEdge e tn)
-                        # maybe [] (\x -> [ otherAddress /\ ownAddress /\ x ])
+                incomingEdges = st'.trusts
+                  # G.lookupEdge otherAddress ownAddress
+                  # (\e -> getIncomingEdge e tn)
+                  # maybe [] (\x -> [ otherAddress /\ ownAddress /\ x ])
 
-                    in
-                      (spy "newEdges" (outgoingEdges <> incomingEdges))
-                )
+              in
+                outgoingEdges <> incomingEdges
+
+          -- newEdges :: Array (Address /\ Address /\ TrustState)
+          -- newEdges = trustNodes
+          --   >>=
+          --     ( \tn ->
+          --         let
+          --           otherAddress = tn.safeAddress
+          --           outgoingEdges = st'.trusts
+          --             # G.lookupEdge ownAddress otherAddress
+          --             # (\e -> getOutgoingEdge e tn)
+          --             # maybe [] (\x -> [ ownAddress /\ otherAddress /\ x ])
+
+          --           incomingEdges = st'.trusts
+          --             # G.lookupEdge otherAddress ownAddress
+          --             # (\e -> getIncomingEdge e tn)
+          --             # maybe [] (\x -> [ otherAddress /\ ownAddress /\ x ])
+
+          --         in
+          --           outgoingEdges <> incomingEdges
+          --     )
           in
             S._dashboard
               st'
                 { trusts = st'.trusts
                     # G.insertNode (UserIdent $ Right $ st'.user)
-                    #
-                      ( \g ->
-                          let
-                            ids = g
-                              # G.outgoingIds ownAddress
-                              # maybe Set.empty identity
-                              # Set.filter (\id -> g # G.lookupEdge ownAddress id # maybe false isTrusted)
-                              # Set.map (\to -> ownAddress /\ to)
-                          in
-                            G.deleteEdges ids g
-                      )
+                    -- #
+                    --   ( \g ->
+                    --       let
+                    --         ids = g
+                    --           # G.outgoingIds ownAddress
+                    --           # maybe Set.empty identity
+                    --           # Set.filter (\id -> g # G.lookupEdge ownAddress id # maybe false isTrusted)
+                    --           # Set.map (\to -> ownAddress /\ to)
+                    --       in
+                    --         G.deleteEdges ids g
+                    --   )
                     # G.insertNodes newNodes
-                    # G.insertEdges newEdges
+                    # (\g -> foldr foo g trustNodes)
                 }
 
   getUsers set st { userNames, addresses } = do

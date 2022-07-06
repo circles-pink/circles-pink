@@ -1,5 +1,6 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard
-  ( DashboardState
+  ( CirclesGraph
+  , DashboardState
   , ErrDashboardState
   , ErrGetUsers
   , ErrTokenCheckUBIPayout
@@ -59,7 +60,7 @@ type DashboardState =
   { user :: CC.User
   , privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: IxGraph Address TrustState UserIdent
+  , trusts :: CirclesGraph
   , trustsResult :: TrustGetTrusts
   , trustAddResult :: TrustAddResult
   , trustRemoveResult :: TrustRemoveResult
@@ -75,6 +76,8 @@ type DashboardState =
 
 type Trusts = Map Address Trust
 
+type CirclesGraph = IxGraph Address TrustState UserIdent
+
 --------------------------------------------------------------------------------
 
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
@@ -84,7 +87,7 @@ type RedeploySafeResult = RemoteReport
   SafeStatus
 
 type RedeployTokenResult = RemoteReport
-  (Variant (Env.ErrDeployToken  + () ))
+  (Variant (Env.ErrDeployToken + ()))
   String
 
 --------------------------------------------------------------------------------
