@@ -133,30 +133,30 @@ dashboard env =
       getOutgoingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
       getOutgoingEdge maybeOldTrustState tn g =
         let
-          x = spy "sa" tn.safeAddress 
+          x = spy "sa" tn.safeAddress
         in
-        case maybeOldTrustState of
-          Nothing | tn.isIncoming -> 
-            spyWith "1" (const "1") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
-          Nothing ->  
-            spyWith "2" (const "2") $ g
-          Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> 
-            spyWith "3" (const "3") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
-          Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> 
-            g 
-              # spyWith "4 A" (toUnfoldables :: _ -> {nodes:: Array _ | _}) 
-              # G.deleteEdges [ ownAddress /\ tn.safeAddress ]
-              # spyWith "4 B" (toUnfoldables :: _ -> {nodes:: Array _ | _})
-              
-          _ ->
-            spyWith "5" (const "5") $ g
+          case maybeOldTrustState of
+            Nothing | tn.isIncoming ->
+              spyWith "1" (const "1") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
+            Nothing ->
+              spyWith "2" (const "2") $ g
+            Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming ->
+              spyWith "3" (const "3") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
+            Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming ->
+              g
+                # spyWith "4 A" (toUnfoldables :: _ -> { nodes :: Array _ | _ })
+                # G.deleteEdge (spy "own" ownAddress) (spy "other" tn.safeAddress)
+                # spyWith "4 B" (toUnfoldables :: _ -> { nodes :: Array _ | _ })
+
+            _ ->
+              spyWith "5" (const "5") $ g
 
       getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
       getIncomingEdge maybeOldTrustState tn g =
         case maybeOldTrustState of
-          Nothing | tn.isOutgoing -> G.insertEdge tn.safeAddress ownAddress  initTrusted g
-          Nothing -> G.deleteEdges [ tn.safeAddress /\ ownAddress  ] g
-          _ -> G.insertEdge tn.safeAddress ownAddress  initTrusted g
+          Nothing | tn.isOutgoing -> G.insertEdge tn.safeAddress ownAddress initTrusted g
+          Nothing -> G.deleteEdges [ tn.safeAddress /\ ownAddress ] g
+          _ -> G.insertEdge tn.safeAddress ownAddress initTrusted g
 
     trustNodes <-
       env.trustGetNetwork st.privKey

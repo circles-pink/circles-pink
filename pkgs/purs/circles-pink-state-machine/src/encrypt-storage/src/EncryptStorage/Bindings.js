@@ -1,6 +1,6 @@
 "use strict";
 
-const EncryptedStorage = require("encrypt-storage");
+// const EncryptedStorage = require("encrypt-storage");
 
 exports.newEs = (secretKey) => (options) => () =>
   new EncryptedStorage(secretKey, options);

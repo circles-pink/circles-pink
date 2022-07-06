@@ -4,6 +4,7 @@ module Test.Data.Graph.Core
 
 import Prelude
 
+import Data.Graph (toUnfoldables)
 import Data.Graph as G
 import Data.Graph.Core (Graph)
 import Data.Graph.Core as C
@@ -84,8 +85,22 @@ spec =
           # C.insertNode "n1" 1
           # C.insertNode "n2" 2
       in
-        it "it.." do
-          (graph # G.toUnfoldables) `shouldEqual`
+        it "it.."
+          do
+            (graph # G.toUnfoldables) `shouldEqual`
+              { nodes: [ "n1" /\ 1, "n2" /\ 2 ]
+              , edges: []
+              }
+    describe
+      "deleteEdge"
+      let
+        graph = C.empty
+          # C.insertNode "n1" 1
+          # C.insertNode "n2" 2
+          # C.insertEdge "n1" "n2" 11
+      in
+        it "retrieves the edge at from the given source and target ids" do
+          (C.deleteEdge "n1" "n2" graph # toUnfoldables) `shouldEqual`
             { nodes: [ "n1" /\ 1, "n2" /\ 2 ]
             , edges: []
             }

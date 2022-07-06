@@ -1,6 +1,7 @@
 module Data.IxGraph
   ( IxGraph
   , class Indexed
+  , deleteEdge
   , deleteEdges
   , deleteNodes
   , edgesWithNodes
@@ -60,6 +61,9 @@ deleteNodes ids (IxGraph graph) = IxGraph $ G.deleteNodes ids graph
 
 deleteEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id) -> IxGraph id e n -> IxGraph id e n
 deleteEdges ids (IxGraph graph) = IxGraph $ G.deleteEdges ids graph
+
+deleteEdge :: forall id e n. Ord id => id -> id -> IxGraph id e n -> IxGraph id e n
+deleteEdge from to (IxGraph graph) = IxGraph $ G.deleteEdge from to graph
 
 insertEdges :: forall f id e n. Ord id => Foldable f => f (id /\ id /\ e) -> IxGraph id e n -> IxGraph id e n
 insertEdges edges (IxGraph graph) = IxGraph $ G.insertEdges edges graph
