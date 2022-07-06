@@ -2,9 +2,11 @@ module Data.Graph
   ( deleteEdges
   , deleteNodes
   , edgeIds
+  , edgesWithNodes
   , foldrEdges
   , foldrNodes
   , fromFoldables
+  , incomingEdgesWithNodes
   , insertEdges
   , insertNodes
   , maybeInsertEdge
@@ -27,6 +29,7 @@ import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
+import Debug.Extra (todo)
 import Partial.Unsafe (unsafePartial)
 
 fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (id /\ id /\ e) -> Graph id e n
@@ -84,9 +87,30 @@ foldrNodes f x g = nodes g # foldr f x
 toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: f (id /\ n), edges :: f (id /\ id /\ e) }
 toUnfoldables g = { nodes: G.nodesToUnfoldable g, edges: G.edgesToUnfoldable g }
 
+ids :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Set id)
+ids id graph =
+  let
+    maybeOutgoing = G.outgoingIds id graph
+    maybeIncoming = G.incomingIds id graph
+    x = todo
+  in
+    case maybeOutgoing, maybeIncoming of
+      Just o, Just i -> Just $ S.union o i
+      _, _ -> Nothing
+
 outgoingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
-outgoingEdgesWithNodes fromId graph = graph
-  # G.outgoingIds fromId
+outgoingEdgesWithNodes = edgesWithNodesHelper G.outgoingIds
+
+incomingEdgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
+incomingEdgesWithNodes = edgesWithNodesHelper G.incomingIds
+
+edgesWithNodes :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (e /\ n))
+edgesWithNodes = edgesWithNodesHelper ids
+
+--------------------------------------------------------------------------------
+edgesWithNodesHelper :: forall id e n. Ord id => (id -> Graph id e n -> Maybe (Set id)) -> id -> Graph id e n -> Maybe (Array (e /\ n))
+edgesWithNodesHelper getIds fromId graph = graph
+  # getIds fromId
   <#> mapSet
   where
   mapSet :: Set id -> Array (e /\ n)
