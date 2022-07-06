@@ -40,6 +40,7 @@ import {
 } from '@circles-pink/state-machine/output/CirclesCore';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { TrustGraph } from '../../components/TrustGraph';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -211,46 +212,47 @@ export const Dashboard = ({
         </ControlContent>
       }
       mainContent={
-        <MainContent>
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <TrustUserList
-              title={t('dashboard.trustNetworkTitle')}
-              trusts={trusts}
-              theme={theme}
-              icon={mdiLan}
-              toggleOverlay={toggleOverlay}
-              setOverwriteTo={setOverwriteTo}
-              addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-              trustAddResult={state.trustAddResult}
-              removeTrust={to =>
-                act(A._dashboard(A._removeTrustConnection(to)))
-              }
-              trustRemoveResult={state.trustRemoveResult}
-            />
-          </FadeIn>
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <TrustUserList
-              title={t('dashboard.exploreTitle')}
-              trusts={state.usersSearch}
-              theme={theme}
-              icon={mdiMagnify}
-              toggleOverlay={toggleOverlay}
-              setOverwriteTo={setOverwriteTo}
-              addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-              trustAddResult={state.trustAddResult}
-              removeTrust={to =>
-                act(A._dashboard(A._removeTrustConnection(to)))
-              }
-              trustRemoveResult={state.trustRemoveResult}
-              actionRow={
-                <JustifyBetweenCenter>
-                  <Input
-                    type="text"
-                    value={search}
-                    placeholder={t('dashboard.userSearchPlaceholder')}
-                    onChange={e => setSearch(e.target.value)}
-                  />
-                  {/* <DebugButtonWrapper>
+        <>
+          <MainContent>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TrustUserList
+                title={t('dashboard.trustNetworkTitle')}
+                trusts={trusts}
+                theme={theme}
+                icon={mdiLan}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                trustAddResult={state.trustAddResult}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                trustRemoveResult={state.trustRemoveResult}
+              />
+            </FadeIn>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TrustUserList
+                title={t('dashboard.exploreTitle')}
+                trusts={state.usersSearch}
+                theme={theme}
+                icon={mdiMagnify}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                trustAddResult={state.trustAddResult}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                trustRemoveResult={state.trustRemoveResult}
+                actionRow={
+                  <JustifyBetweenCenter>
+                    <Input
+                      type="text"
+                      value={search}
+                      placeholder={t('dashboard.userSearchPlaceholder')}
+                      onChange={e => setSearch(e.target.value)}
+                    />
+                    {/* <DebugButtonWrapper>
                       <Button
                         prio={'high'}
                         theme={theme}
@@ -262,11 +264,13 @@ export const Dashboard = ({
                         {t('dashboard.searchButton')}
                       </Button>
                     </DebugButtonWrapper> */}
-                </JustifyBetweenCenter>
-              }
-            />
-          </FadeIn>
-        </MainContent>
+                  </JustifyBetweenCenter>
+                }
+              />
+            </FadeIn>
+          </MainContent>
+          <TrustGraph graph={state.graph} />
+        </>
       }
       overlay={
         overlay[1] ? (

@@ -5,10 +5,10 @@ module Test.CirclesPink.Garden.StateMachine.Stories
 import Prelude
 
 import CirclesPink.Data.Mnemonic (sampleMnemonic)
+import CirclesPink.Garden.StateMachine (initLanding)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
 import CirclesPink.Garden.StateMachine.Control.Env (Env)
-import CirclesPink.Garden.StateMachine.State (initLanding)
 import CirclesPink.Garden.StateMachine.Stories (finalizeAccount, loginUser, signUpUser)
 import CirclesPink.Garden.TestEnv (testEnv)
 import Data.Either (Either(..))

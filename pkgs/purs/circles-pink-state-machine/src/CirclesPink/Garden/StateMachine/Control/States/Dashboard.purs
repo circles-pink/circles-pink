@@ -113,9 +113,9 @@ dashboard env =
         _ <-
           syncTrusts set st
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-    --    _ <-
-    --       syncTrusts set st
-    --         # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
+        --    _ <-
+        --       syncTrusts set st
+        --         # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
         pure unit
 
   syncTrusts set st i = do
@@ -151,10 +151,11 @@ dashboard env =
 
             newEdges :: Array (Address /\ Address /\ TrustState)
             newEdges = A.zip trustNodes newNodes
-              <#>
+              >>=
                 ( \(tn /\ n) ->
-                    st'.user.safeAddress /\ getIndex n /\
-                      (tn # getEdge (G.lookupEdge ownAddress tn.safeAddress st'.trusts))
+                    [ st'.user.safeAddress /\ getIndex n /\
+                        (tn # getEdge (G.lookupEdge ownAddress tn.safeAddress st'.trusts))
+                    ]
                 )
           in
             S._dashboard

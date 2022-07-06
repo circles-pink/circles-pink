@@ -12,6 +12,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   , ErrTrustGetTrustsResolved
   , ErrTrustRemoveConnectionResolved
   , ErrUserSearchResolved
+  , Graph
   , RemoteData_
   , Trust
   , Trusts
@@ -74,10 +75,7 @@ globalLoading d = any (_ == true) $ join checks
 type DefaultView =
   { trustsConfirmed :: Trusts
   , trustsCandidates :: Trusts
-  , graph ::
-      { nodes :: Array (Address FPT./\ UserIdent)
-      , edges :: Array (Address FPT./\ Address FPT./\ TrustState)
-      }
+  , graph :: Graph
   , usersSearch :: Trusts
   , userSearchResult :: RemoteReport ErrUserSearchResolved (Array User)
   , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
@@ -90,6 +88,11 @@ type DefaultView =
   , transferResult :: RemoteData_ ErrTokenTransferResolved String
   , redeploySafeResult :: RemoteReport ErrDeploySafeResolved SafeStatus
   , redeployTokenResult :: RemoteReport ErrDeployTokenResolved String
+  }
+
+type Graph =
+  { nodes :: Array (Address FPT./\ UserIdent)
+  , edges :: Array (Address FPT./\ Address FPT./\ TrustState)
   }
 
 type Trusts = Array Trust
