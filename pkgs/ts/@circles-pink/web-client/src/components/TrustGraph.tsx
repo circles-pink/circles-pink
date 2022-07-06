@@ -15,7 +15,12 @@ import {
   getIdentifier,
   UserIdent,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import { TrustState } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+import {
+  isLoadingTrust,
+  isLoadingUntrust,
+  isTrusted,
+  TrustState,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
 import { toFpTsTuple } from '../utils/fpTs';
 
 // -----------------------------------------------------------------------------
@@ -60,6 +65,7 @@ const getEdge = (
   data: {
     source: addrToString(source),
     target: addrToString(target),
+    value,
   },
 });
 
@@ -133,6 +139,20 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
         'curve-style': 'bezier',
         'target-arrow-shape': 'triangle',
         width: 1,
+        'line-style': s => {
+          const trustState = s._private.data.value as TrustState;
+
+          if (isTrusted(trustState)) {
+            return 'solid';
+          } else if (
+            isLoadingTrust(trustState) ||
+            isLoadingUntrust(trustState)
+          ) {
+            return 'dotted';
+          } else {
+            return 'dashed';
+          }
+        },
       },
     },
   ];

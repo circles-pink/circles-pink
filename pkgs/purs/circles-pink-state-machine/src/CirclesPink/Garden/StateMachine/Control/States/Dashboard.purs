@@ -115,9 +115,10 @@ dashboard env =
         _ <-
           syncTrusts set st
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-        --    _ <-
-        --       syncTrusts set st
-        --         # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
+        let x = todo
+        _ <-
+              syncTrusts set st
+                # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
         pure unit
 
   syncTrusts set st i = do
@@ -127,23 +128,17 @@ dashboard env =
 
       getOutgoingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
       getOutgoingEdge maybeOldTrustState tn = case maybeOldTrustState of
-        Nothing | tn.isOutgoing -> Just initTrusted
+        Nothing | tn.isIncoming -> Just initTrusted
         Nothing -> Nothing
-        _ -> todo
-
-      -- Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
-      -- Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
-      -- Just oldTrustState -> Just oldTrustState
+        Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
+        Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
+        Just oldTrustState -> Just oldTrustState
 
       getIncomingEdge :: Maybe TrustState -> TrustNode -> Maybe TrustState
       getIncomingEdge maybeOldTrustState tn = case maybeOldTrustState of
-        Nothing | tn.isIncoming -> Just initTrusted
+        Nothing | tn.isOutgoing -> Just initTrusted
         Nothing -> Nothing
-        _ -> todo
-
-    -- Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming -> Just initTrusted
-    -- Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming -> Nothing
-    -- Just oldTrustState -> Just oldTrustState
+        _ -> Just initTrusted
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -331,6 +326,7 @@ dashboard env =
           env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
+        let x = todo
         -- _ <-
         --   env.getBalance st.privKey st.user.safeAddress
         --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
