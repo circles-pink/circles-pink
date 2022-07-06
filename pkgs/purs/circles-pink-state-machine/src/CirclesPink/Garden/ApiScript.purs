@@ -1,4 +1,23 @@
-module CirclesPink.Garden.ApiScript where
+module CirclesPink.Garden.ApiScript
+  ( Err
+  , MkAccountReturn
+  , SignUpUser
+  , err
+  , finalizeAccount
+  , fundAddress
+  , genSignupOpts
+  , genUsername
+  , main
+  , main'
+  , mkAccount
+  , printErrApp
+  , reportFilePath
+  , runJq
+  , safeFunderAddr
+  , signUpUser
+  , traverse'
+  )
+  where
 
 import CirclesPink.Prelude
 
@@ -33,6 +52,7 @@ import Node.Process (exit)
 import Record as R
 import Sunde (spawn)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
+
 
 
 type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
@@ -188,7 +208,7 @@ main = runExceptT main' # runAff_ handler
   handler (Right (Left err')) = do
     E.error ("ERROR: " <> err')
     exit 1
-  handler (Right (Right _)) = pure unit
+  handler (Right (Right _)) = exit 0
 
 runJq :: String -> Aff String
 runJq str = spawn { cmd: "jq", args: [], stdin: pure str } defaultSpawnOptions

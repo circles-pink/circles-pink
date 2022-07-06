@@ -147,15 +147,25 @@ dashboard env =
             ownAddress = st'.user.safeAddress
 
             newNodes = trustNodes
-              <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
+              <#> (\tn ->  tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
             newEdges :: Array (Address /\ Address /\ TrustState)
             newEdges = A.zip trustNodes newNodes
               >>=
                 ( \(tn /\ n) ->
-                    [ st'.user.safeAddress /\ getIndex n /\
-                        (tn # getEdge (G.lookupEdge ownAddress tn.safeAddress st'.trusts))
-                    ]
+                  let
+                    otherAddress = tn.safeAddress
+                  in
+                    [ ownAddress /\ otherAddress /\
+                        (tn # getEdge (G.lookupEdge ownAddress otherAddress st'.trusts))
+
+                    ] <>
+                      ( G.lookupEdge otherAddress ownAddress st'.trusts # maybe []
+                          ( \_ ->
+                              [ otherAddress /\ ownAddress /\ initTrusted ]
+                          )
+                      )
+
                 )
           in
             S._dashboard
