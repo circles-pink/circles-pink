@@ -40,6 +40,7 @@
   , "nullable"
   , "optparse"
   , "ordered-collections"
+  , "pairs"
   , "parallel"
   , "parsing"
   , "partial"
