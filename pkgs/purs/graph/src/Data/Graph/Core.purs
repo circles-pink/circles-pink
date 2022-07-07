@@ -1,15 +1,16 @@
 module Data.Graph.Core
   ( Graph
-  , deleteEdge
-  , deleteNode
+  , attemptDeleteEdge
+  , attemptDeleteNode
+  , attemptInsertEdge
+  , attemptInsertNode
+  , attemptUpdateEdge
   , edgesToUnfoldable
   , empty
   , foldMapWithIndex
   , foldlWithIndex
   , foldrWithIndex
   , incomingIds
-  , insertEdge
-  , insertNode
   , lookupEdge
   , lookupNode
   , nodeIds
@@ -31,6 +32,7 @@ import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
+import Debug.Extra (todo)
 
 newtype Graph id e n = Graph
   ( Map id
@@ -82,31 +84,39 @@ incomingIds id (Graph nodes) = M.lookup id nodes <#> _.inIds
 nodeIds :: forall id e n. Graph id e n -> Set id
 nodeIds (Graph nodes) = M.keys nodes
 
+
+
+
+-- attemptInsertNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Graph id e n
+-- attemptInsertNode id node (Graph nodes) = Graph $ M.alter f id nodes
+--   where
+--   f Nothing = Just { data: node, outEdges: M.empty, inIds: S.empty }
+--   f (Just x) = Just $ x { data = node }
+
+
+
+
+-- insertEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Graph id e n
+-- insertEdge (from ~ to) _ graph | isNothing (lookupNode from graph) || isNothing (lookupNode to graph) = graph
+-- insertEdge (from ~ to) edge (Graph nodes) = Graph $ nodes
+--   # M.update updateFromNode from
+--   # M.update updateToNode to
+--   where
+--   updateFromNode x = Just $ x { outEdges = M.insert to edge x.outEdges }
+--   updateToNode x = Just $ x { inIds = S.insert from x.inIds }
+
+--------------------------------------------------------------------------------
+-- Node API
+--------------------------------------------------------------------------------
+attemptAddNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Graph id e n
+attemptAddNode = todo
+
 lookupNode :: forall id e n. Ord id => id -> Graph id e n -> Maybe n
 lookupNode id (Graph nodes) = M.lookup id nodes <#> _.data
 
-lookupEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe e
-lookupEdge (from ~ to) (Graph nodes) = nodes
-  # M.lookup from
-  >>= _.outEdges >>> M.lookup to
 
-insertNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Graph id e n
-insertNode id node (Graph nodes) = Graph $ M.alter f id nodes
-  where
-  f Nothing = Just { data: node, outEdges: M.empty, inIds: S.empty }
-  f (Just x) = Just $ x { data = node }
-
-insertEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Graph id e n
-insertEdge (from ~ to) _ graph | isNothing (lookupNode from graph) || isNothing (lookupNode to graph) = graph
-insertEdge (from ~ to) edge (Graph nodes) = Graph $ nodes
-  # M.update updateFromNode from
-  # M.update updateToNode to
-  where
-  updateFromNode x = Just $ x { outEdges = M.insert to edge x.outEdges }
-  updateToNode x = Just $ x { inIds = S.insert from x.inIds }
-
-deleteNode :: forall id e n. Ord id => id -> Graph id e n -> Graph id e n
-deleteNode id graph@(Graph nodes) = Graph $ nodes
+attemptDeleteNode :: forall id e n. Ord id => id -> Graph id e n -> Graph id e n
+attemptDeleteNode id graph@(Graph nodes) = Graph $ nodes
   # (\nodes' -> foldr (M.update updateToNode) nodes' outIds)
   # (\nodes' -> foldr (M.update updateFromNode) nodes' inIds)
   # M.delete id
@@ -116,8 +126,29 @@ deleteNode id graph@(Graph nodes) = Graph $ nodes
   updateToNode x = Just $ x { inIds = S.delete id x.inIds }
   updateFromNode x = Just $ x { outEdges = M.delete id x.outEdges }
 
-deleteEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Graph id e n
-deleteEdge (from ~ to) (Graph nodes) = Graph $ nodes
+
+attemptUpdateNode :: forall id e n. Ord id => id -> (n -> n) -> Graph id e n -> Graph id e n
+attemptUpdateNode = todo
+
+
+
+--------------------------------------------------------------------------------
+-- Edge API
+--------------------------------------------------------------------------------
+
+attemptAddEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Graph id e n
+attemptAddEdge = todo
+
+lookupEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe e
+lookupEdge (from ~ to) (Graph nodes) = nodes
+  # M.lookup from
+  >>= _.outEdges >>> M.lookup to
+
+attemptUpdateEdge :: forall id e n. Ord id => Pair id -> (e -> e) -> Graph id e n -> Graph id e n
+attemptUpdateEdge = todo
+
+attemptDeleteEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Graph id e n
+attemptDeleteEdge (from ~ to) (Graph nodes) = Graph $ nodes
   # M.update updateFromNode from
   # M.update updateToNode to
   where

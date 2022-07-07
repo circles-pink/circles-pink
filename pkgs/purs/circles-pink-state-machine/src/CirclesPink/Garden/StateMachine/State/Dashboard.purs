@@ -37,7 +37,7 @@ import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
-import CirclesPink.Data.TrustState (TrustState)
+import CirclesPink.Data.TrustConnection (TrustConnection)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Data.BN (BN)
@@ -76,7 +76,7 @@ type DashboardState =
 
 type Trusts = Map Address Trust
 
-type CirclesGraph = IxGraph Address TrustState UserIdent
+type CirclesGraph = IxGraph Address TrustConnection UserIdent
 
 --------------------------------------------------------------------------------
 
