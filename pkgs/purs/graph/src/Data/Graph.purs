@@ -1,5 +1,6 @@
 module Data.Graph
-  ( addNode
+  ( addEdge
+  , addNode
   , deleteEdge
   , deleteNode
   , edgeIds
@@ -17,7 +18,8 @@ module Data.Graph
   , toUnfoldables
   , updateEdge
   , updateNode
-  ) where
+  )
+  where
 
 import Prelude
 
