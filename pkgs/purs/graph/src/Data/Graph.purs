@@ -7,6 +7,7 @@ module Data.Graph
   , incomingEdgesWithNodes
   , insertEdges
   , insertNodes
+  , maybeDeleteEdge
   , maybeInsertEdge
   , memberEdge
   , memberNode
@@ -49,10 +50,20 @@ memberNode id g = isJust $ G.lookupNode id g
 memberEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Boolean
 memberEdge conn g = isJust $ G.lookupEdge conn g
 
+--------------------------------------------------------------------------------
+-- Maybe API
+--------------------------------------------------------------------------------
+
+maybeDeleteEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe (Graph id e n)
+maybeDeleteEdge conn g | memberEdge conn g = Just $ G.deleteEdge conn g
+maybeDeleteEdge _ _ = Nothing
+
 maybeInsertEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Maybe (Graph id e n)
 maybeInsertEdge (from ~ _) _ g | not (memberNode from g) = Nothing
 maybeInsertEdge (_ ~ to) _ g | not (memberNode to g) = Nothing
 maybeInsertEdge conn edge g = Just $ G.insertEdge conn edge g
+
+--------------------------------------------------------------------------------
 
 deleteNodes :: forall f id e n. Ord id => Foldable f => f id -> Graph id e n -> Graph id e n
 deleteNodes ids g = foldr G.deleteNode g ids
@@ -82,7 +93,7 @@ nodes :: forall id e n. Ord id => Graph id e n -> Array (id /\ n)
 nodes g = g # G.nodeIds # S.toUnfoldable <#> (\id -> id /\ (unsafePartial $ partLookupNode id g))
 
 edges :: forall id e n. Ord id => Graph id e n -> Array (Pair id /\ e)
-edges g = g # edgeIds # S.toUnfoldable <#>  (\conn -> conn /\ (unsafePartial $ partLookupEdge conn g))
+edges g = g # edgeIds # S.toUnfoldable <#> (\conn -> conn /\ (unsafePartial $ partLookupEdge conn g))
 
 toUnfoldables :: forall id e n f. Unfoldable f => Ord id => Graph id e n -> { nodes :: f (id /\ n), edges :: f (Pair id /\ e) }
 toUnfoldables g = { nodes: G.nodesToUnfoldable g, edges: G.edgesToUnfoldable g }
