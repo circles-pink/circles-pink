@@ -8,6 +8,7 @@ import Prelude
 import CirclesCore (TrustNode, User)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustEntry (isConfirmed)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress, getIdentifier)
@@ -27,6 +28,7 @@ import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex, toUnfoldables)
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
+import Data.Pair ((~))
 import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
@@ -137,7 +139,7 @@ dashboard env =
         in
           case maybeOldTrustState of
             Nothing | tn.isIncoming ->
-              spyWith "1" (const "1") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
+              spyWith "1" (const "1") $ G.insertEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
             Nothing ->
               spyWith "2" (const "2") $ g
             Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming ->

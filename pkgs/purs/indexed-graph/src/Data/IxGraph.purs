@@ -13,6 +13,8 @@ module Data.IxGraph
   , insertNodes
   , lookupEdge
   , lookupNode
+  , maybeDeleteEdge
+  , maybeInsertEdge
   , neighborEdgesWithNodes
   , outgoingEdgesWithNodes
   , outgoingIds
@@ -43,6 +45,19 @@ instance indexedEither :: (Indexed k a, Indexed k b) => Indexed k (Either a b) w
   getIndex (Right x) = getIndex x
 
 newtype IxGraph id e n = IxGraph (Graph id e n)
+
+--------------------------------------------------------------------------------
+-- Maybe API
+--------------------------------------------------------------------------------
+
+maybeDeleteEdge :: forall id e n. Ord id => Pair id -> IxGraph id e n -> Maybe (IxGraph id e n)
+maybeDeleteEdge conn (IxGraph graph) = IxGraph <$> G.maybeDeleteEdge conn graph
+
+maybeInsertEdge :: forall id e n. Ord id => Indexed (Pair id) e => e -> IxGraph id e n -> Maybe (IxGraph id e n)
+maybeInsertEdge edge (IxGraph graph) = IxGraph <$> G.maybeInsertEdge (getIndex edge) edge graph
+
+
+--------------------------------------------------------------------------------
 
 empty :: forall id e n. IxGraph id e n
 empty = IxGraph G.empty
