@@ -1,9 +1,11 @@
 module Data.Graph
-  ( edgeIds
+  ( addNode
+  , deleteEdge
+  , deleteNode
+  , edgeIds
   , edges
   , fromFoldables
   , incomingEdgesWithNodes
-  , deleteEdge
   , memberEdge
   , memberNode
   , module Exp
@@ -13,13 +15,15 @@ module Data.Graph
   , outgoingEdgesWithNodes
   , outgoingNodes
   , toUnfoldables
+  , updateEdge
+  , updateNode
   ) where
 
 import Prelude
 
-import Data.Foldable (class Foldable, fold, foldM, foldr)
+import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (Graph)
-import Data.Graph.Core (Graph, attemptDeleteEdge, attemptDeleteNode, empty, incomingIds, attemptInsertEdge, attemptInsertNode, lookupEdge, lookupNode, outgoingIds) as Exp
+import Data.Graph.Core (Graph, empty, incomingIds, lookupEdge, lookupNode, outgoingIds) as Exp
 import Data.Graph.Core as G
 import Data.Maybe (Maybe(..), fromJust, isJust)
 import Data.Pair (Pair, (~))
@@ -27,7 +31,6 @@ import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
-import Debug.Extra (todo)
 import Partial.Unsafe (unsafePartial)
 
 type IxNode id n = id /\ n
@@ -67,13 +70,17 @@ outgoingNodes id graph = graph
   <#> map (\id' -> id' /\ (unsafePartial $ partLookupNode id' graph))
 
 addNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Maybe (Graph id e n)
-addNode = todo
+addNode id _ g | isJust (G.lookupNode id g) = Nothing
+addNode id n g = Just $ G.insertNode id n g
 
-updateNode :: forall id e n. Ord id => id -> (n -> n) -> Graph id e n -> Maybe (Graph id e n)
-updateNode = todo
+updateNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Maybe (Graph id e n)
+updateNode id node g = do
+  _ <- G.lookupNode id g
+  Just $ G.insertNode id node g
 
 deleteNode :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Graph id e n)
-deleteNode = todo
+deleteNode id g | not (memberNode id g) = Nothing
+deleteNode id g = Just $ G.attemptDeleteNode id g
 
 --------------------------------------------------------------------------------
 -- Edge API
@@ -89,37 +96,17 @@ edgeIds g = g
   # S.unions
 
 addEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Maybe (Graph id e n)
-addEdge = todo
+addEdge conn _ g | memberEdge conn g = Nothing
+addEdge conn e g = G.insertEdge conn e g
 
-updateEdge :: forall id e n. Ord id => Pair id -> (e -> e) -> Graph id e n -> Maybe (Graph id e n)
-updateEdge = todo
+updateEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Maybe (Graph id e n)
+updateEdge conn e g = do
+  _ <- G.lookupEdge conn g
+  G.insertEdge conn e g
 
 deleteEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe (Graph id e n)
 deleteEdge conn g | memberEdge conn g = Just $ G.attemptDeleteEdge conn g
 deleteEdge _ _ = Nothing
-
---------------------------------------------------------------------------------
-
---insertNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Maybe Graph id e n
-
--- insertEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Maybe (Graph id e n)
--- insertEdge (from ~ _) _ g | not (memberNode from g) = Nothing
--- insertEdge (_ ~ to) _ g | not (memberNode to g) = Nothing
--- insertEdge conn edge g = Just $ G.insertEdge conn edge g
-
--- attemptDeleteNodes :: forall f id e n. Ord id => Foldable f => f id -> Graph id e n -> Graph id e n
--- attemptDeleteNodes ids g = foldr G.deleteNode g ids
-
--- attemptDeleteEdges :: forall f id e n. Ord id => Foldable f => f (Pair id) -> Graph id e n -> Graph id e n
--- attemptDeleteEdges ids g = foldr G.deleteEdge g ids
-
--- attemptInsertEdges :: forall f id e n. Ord id => Foldable f => f (Pair id /\ e) -> Graph id e n -> Graph id e n
--- attemptInsertEdges edges' g = foldr (\(conn /\ edge) -> G.insertEdge conn edge) g edges'
-
--- attemptInsertNodes :: forall f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> Graph id e n
--- attemptInsertNodes nodes' g = foldr (\(id /\ node) -> G.insertNode id node) g nodes'
-
---outgoingEdges :: forall id e n. Ord id => id -> Graph id e n -> Maybe (Array (Pair id /\ e))
 
 --------------------------------------------------------------------------------
 
