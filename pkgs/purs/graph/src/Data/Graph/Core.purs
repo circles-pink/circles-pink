@@ -26,6 +26,7 @@ import Data.FoldableWithIndex as F
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..), isNothing, maybe)
+import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
@@ -38,9 +39,6 @@ newtype Graph id e n = Graph
       , inIds :: Set id
       }
   )
-
-instance showGraph :: (Show id, Show e, Show n) => Show (Graph id e n) where
-  show (Graph g) = show g
 
 instance functorGraph :: Functor (Graph id e) where
   map f (Graph nodes) = Graph $ map (\x -> x { data = f x.data }) nodes
@@ -62,7 +60,7 @@ foldMapWithIndex f (Graph nodes) = F.foldMapWithIndex (\id n -> f id n.data) nod
 nodesToUnfoldable :: forall id e n f. Unfoldable f => Graph id e n -> f (id /\ n)
 nodesToUnfoldable (Graph nodes) = nodes <#> _.data # M.toUnfoldable
 
-edgesToUnfoldable :: forall id e n f. Ord id => Unfoldable f => Graph id e n -> f (id /\ id /\ e)
+edgesToUnfoldable :: forall id e n f. Ord id => Unfoldable f => Graph id e n -> f (Pair id /\ e)
 edgesToUnfoldable (Graph nodes) = nodes
   # (M.toUnfoldable :: _ -> Array _)
   >>= f
@@ -70,7 +68,7 @@ edgesToUnfoldable (Graph nodes) = nodes
   where
   f (from /\ { outEdges }) = outEdges
     # (M.toUnfoldable :: _ -> Array _)
-    <#> (\(to /\ e) -> from /\ to /\ e)
+    <#> (\(to /\ e) -> (from ~ to) /\ e)
 
 empty :: forall id e n. Graph id e n
 empty = Graph M.empty
@@ -87,8 +85,8 @@ nodeIds (Graph nodes) = M.keys nodes
 lookupNode :: forall id e n. Ord id => id -> Graph id e n -> Maybe n
 lookupNode id (Graph nodes) = M.lookup id nodes <#> _.data
 
-lookupEdge :: forall id e n. Ord id => id -> id -> Graph id e n -> Maybe e
-lookupEdge from to (Graph nodes) = nodes
+lookupEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe e
+lookupEdge (from ~ to) (Graph nodes) = nodes
   # M.lookup from
   >>= _.outEdges >>> M.lookup to
 
@@ -98,9 +96,9 @@ insertNode id node (Graph nodes) = Graph $ M.alter f id nodes
   f Nothing = Just { data: node, outEdges: M.empty, inIds: S.empty }
   f (Just x) = Just $ x { data = node }
 
-insertEdge :: forall id e n. Ord id => id -> id -> e -> Graph id e n -> Graph id e n
-insertEdge from to _ graph | isNothing (lookupNode from graph) || isNothing (lookupNode to graph) = graph
-insertEdge from to edge (Graph nodes) = Graph $ nodes
+insertEdge :: forall id e n. Ord id => Pair id -> e -> Graph id e n -> Graph id e n
+insertEdge (from ~ to) _ graph | isNothing (lookupNode from graph) || isNothing (lookupNode to graph) = graph
+insertEdge (from ~ to) edge (Graph nodes) = Graph $ nodes
   # M.update updateFromNode from
   # M.update updateToNode to
   where
@@ -118,10 +116,11 @@ deleteNode id graph@(Graph nodes) = Graph $ nodes
   updateToNode x = Just $ x { inIds = S.delete id x.inIds }
   updateFromNode x = Just $ x { outEdges = M.delete id x.outEdges }
 
-deleteEdge :: forall id e n. Ord id => id -> id -> Graph id e n -> Graph id e n
-deleteEdge from to (Graph nodes) = Graph $ nodes
+deleteEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Graph id e n
+deleteEdge (from ~ to) (Graph nodes) = Graph $ nodes
   # M.update updateFromNode from
   # M.update updateToNode to
   where
   updateFromNode x = Just $ x { outEdges = M.delete to x.outEdges }
   updateToNode x = Just $ x { inIds = S.delete from x.inIds }
+
