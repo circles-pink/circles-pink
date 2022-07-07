@@ -68,8 +68,8 @@ deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g
 
 --
 
-addNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> IxGraph id e n
-addNodes nodes ixGraph = foldM addNode ixGraph nodes
+addNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> Maybe (IxGraph id e n)
+addNodes nodes ixGraph = foldM (flip addNode) ixGraph nodes
 
 --------------------------------------------------------------------------------
 -- Edge API
