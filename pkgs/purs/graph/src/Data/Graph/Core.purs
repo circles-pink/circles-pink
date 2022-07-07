@@ -15,8 +15,7 @@ module Data.Graph.Core
   , nodeIds
   , nodesToUnfoldable
   , outgoingIds
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -82,13 +81,9 @@ incomingIds id (Graph nodes) = M.lookup id nodes <#> _.inIds
 nodeIds :: forall id e n. Graph id e n -> Set id
 nodeIds (Graph nodes) = M.keys nodes
 
-
-
-
 --------------------------------------------------------------------------------
 -- Node API 
 --------------------------------------------------------------------------------
-
 
 lookupNode :: forall id e n. Ord id => id -> Graph id e n -> Maybe n
 lookupNode id (Graph nodes) = M.lookup id nodes <#> _.data
@@ -104,20 +99,15 @@ attemptDeleteNode id graph@(Graph nodes) = Graph $ nodes
   updateToNode x = Just $ x { inIds = S.delete id x.inIds }
   updateFromNode x = Just $ x { outEdges = M.delete id x.outEdges }
 
-
 insertNode :: forall id e n. Ord id => id -> n -> Graph id e n -> Graph id e n
 insertNode id node (Graph nodes) = Graph $ M.alter f id nodes
   where
   f Nothing = Just { data: node, outEdges: M.empty, inIds: S.empty }
   f (Just x) = Just $ x { data = node }
 
-
 --------------------------------------------------------------------------------
 -- Edge API
 --------------------------------------------------------------------------------
-
-
-
 
 lookupEdge :: forall id e n. Ord id => Pair id -> Graph id e n -> Maybe e
 lookupEdge (from ~ to) (Graph nodes) = nodes
