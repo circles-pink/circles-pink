@@ -11,4 +11,4 @@ class
   ) <=
   MonadCircles m where
   sleep :: Int -> m Unit
-  throwException :: String -> m Unit
+  throwException :: forall a. String -> m a
