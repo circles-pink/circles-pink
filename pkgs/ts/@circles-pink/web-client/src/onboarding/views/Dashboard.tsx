@@ -28,7 +28,7 @@ import {
   mdiLogout,
   mdiMagnify,
 } from '@mdi/js';
-import { TrustUserList } from '../../components/TrustUserList';
+import { LightColorFrame, TrustUserList } from '../../components/TrustUserList';
 import { Overlay } from '../../components/Overlay';
 import { JustifyBetweenCenter, TwoButtonRow } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
@@ -41,6 +41,7 @@ import {
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { TrustGraph } from '../../components/TrustGraph';
+import { UserSearch } from '../../components/UserSearch';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -74,6 +75,8 @@ export const Dashboard = ({
   );
 
   const trusts = state.trustsConfirmed.concat(state.trustsCandidates);
+
+  console.log(state.graph);
 
   // Theme
   const [theme] = useContext(ThemeContext);
@@ -217,7 +220,8 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
                 title={t('dashboard.trustNetworkTitle')}
-                trusts={trusts}
+                graph={state.graph}
+                ownAddress={stateRaw.user.safeAddress}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
@@ -231,7 +235,7 @@ export const Dashboard = ({
               />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
+              <UserSearch
                 title={t('dashboard.exploreTitle')}
                 trusts={state.usersSearch}
                 theme={theme}
@@ -252,24 +256,20 @@ export const Dashboard = ({
                       placeholder={t('dashboard.userSearchPlaceholder')}
                       onChange={e => setSearch(e.target.value)}
                     />
-                    {/* <DebugButtonWrapper>
-                      <Button
-                        prio={'high'}
-                        theme={theme}
-                        state={mapResult(state.userSearchResult)}
-                        onClick={() =>
-                          act(A._dashboard(A._userSearch({ query: search })))
-                        }
-                      >
-                        {t('dashboard.searchButton')}
-                      </Button>
-                    </DebugButtonWrapper> */}
                   </JustifyBetweenCenter>
                 }
               />
             </FadeIn>
           </MainContent>
-          <TrustGraph graph={state.graph} />
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <>
+              <br />
+              <br />
+              <LightColorFrame theme={theme}>
+                <TrustGraph graph={state.graph} />
+              </LightColorFrame>
+            </>
+          </FadeIn>
         </>
       }
       overlay={
