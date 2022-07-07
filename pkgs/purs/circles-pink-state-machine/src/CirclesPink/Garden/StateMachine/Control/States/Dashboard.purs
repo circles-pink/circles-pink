@@ -12,6 +12,7 @@ import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustEntry (isConfirmed)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress, getIdentifier)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles, throwException)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
@@ -24,6 +25,7 @@ import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
 import Data.Either (Either(..), hush, isRight, note)
+import Data.Foldable (foldM)
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex, toUnfoldables)
 import Data.IxGraph as G
@@ -70,7 +72,7 @@ fetchUsersBinarySearch env privKey xs = do
 
 dashboard
   :: forall m
-   . Monad m
+   . MonadCircles m
   => Env.Env m
   -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
      , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
@@ -132,33 +134,36 @@ dashboard env =
 
       ownAddress = st.user.safeAddress
 
-      getOutgoingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
+      getOutgoingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> m CirclesGraph
       getOutgoingEdge maybeOldTrustState tn g =
         let
           x = spy "sa" tn.safeAddress
         in
           case maybeOldTrustState of
             Nothing | tn.isIncoming ->
-              spyWith "1" (const "1") $ G.insertEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-            Nothing ->
-              spyWith "2" (const "2") $ g
+              G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+                # maybe (throwException $ "Could not add Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) pure
+            Nothing -> pure g
             Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming ->
-              spyWith "3" (const "3") $ G.insertEdge ownAddress tn.safeAddress initTrusted g
+              G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+                # maybe (throwException $ "Could not add Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) pure
             Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming ->
               g
-                # spyWith "4 A" (toUnfoldables :: _ -> { nodes :: Array _ | _ })
-                # G.deleteEdge (spy "own" ownAddress) (spy "other" tn.safeAddress)
-                # spyWith "4 B" (toUnfoldables :: _ -> { nodes :: Array _ | _ })
+                # G.deleteEdge (ownAddress ~ tn.safeAddress)
+                # maybe (throwException $ "Could not delete Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) pure
+            _ -> pure g
 
-            _ ->
-              spyWith "5" (const "5") $ g
-
-      getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> CirclesGraph
+      getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> m CirclesGraph
       getIncomingEdge maybeOldTrustState tn g =
         case maybeOldTrustState of
-          Nothing | tn.isOutgoing -> G.insertEdge tn.safeAddress ownAddress initTrusted g
-          Nothing -> G.deleteEdges [ tn.safeAddress /\ ownAddress ] g
-          _ -> G.insertEdge tn.safeAddress ownAddress initTrusted g
+          Nothing | tn.isOutgoing ->
+            G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+              # maybe (throwException $ "Could not add Edge " <> show tn.safeAddress <> " -> " <> show ownAddress) pure
+          Nothing ->
+            G.deleteEdge (tn.safeAddress ~ ownAddress) g
+              # maybe (throwException $ "Could not delete Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) pure
+          _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+            # maybe (throwException $ "Could not add Edge " <> show tn.safeAddress <> " -> " <> show ownAddress) pure
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -178,59 +183,28 @@ dashboard env =
             newNodes = trustNodes
               <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
-            foo :: TrustNode -> CirclesGraph -> CirclesGraph
-            foo tn g =
+            neigborEdges :: TrustNode -> CirclesGraph -> m CirclesGraph
+            neigborEdges tn g =
               let
                 otherAddress = tn.safeAddress
 
                 outgoingEdge g' = st'.trusts
-                  # G.lookupEdge ownAddress otherAddress
+                  # G.lookupEdge (ownAddress ~ otherAddress)
                   # (\e -> getOutgoingEdge e tn g')
 
                 incomingEdge g' = st'.trusts
-                  # G.lookupEdge otherAddress ownAddress
+                  # G.lookupEdge (ownAddress ~ otherAddress)
                   # (\e -> getIncomingEdge e tn g')
-
               in
-                g # outgoingEdge # incomingEdge
-
-          -- newEdges :: Array (Address /\ Address /\ TrustState)
-          -- newEdges = trustNodes
-          --   >>=
-          --     ( \tn ->
-          --         let
-          --           otherAddress = tn.safeAddress
-          --           outgoingEdges = st'.trusts
-          --             # G.lookupEdge ownAddress otherAddress
-          --             # (\e -> getOutgoingEdge e tn)
-          --             # maybe [] (\x -> [ ownAddress /\ otherAddress /\ x ])
-
-          --           incomingEdges = st'.trusts
-          --             # G.lookupEdge otherAddress ownAddress
-          --             # (\e -> getIncomingEdge e tn)
-          --             # maybe [] (\x -> [ otherAddress /\ ownAddress /\ x ])
-
-          --         in
-          --           outgoingEdges <> incomingEdges
-          --     )
+                g # outgoingEdge >>= incomingEdge
           in
             S._dashboard
               st'
                 { trusts = st'.trusts
-                    # G.insertNode (UserIdent $ Right $ st'.user)
-                    -- #
-                    --   ( \g ->
-                    --       let
-                    --         ids = g
-                    --           # G.outgoingIds ownAddress
-                    --           # maybe Set.empty identity
-                    --           # Set.filter (\id -> g # G.lookupEdge ownAddress id # maybe false isTrusted)
-                    --           # Set.map (\to -> ownAddress /\ to)
-                    --       in
-                    --         G.deleteEdges ids g
-                    --   )
-                    # G.insertNodes newNodes
-                    # (\g -> foldr foo g trustNodes)
+                    # G.addNode (UserIdent $ Right $ st'.user)
+                    # maybe (throwException $ "Could not add Node") pure
+                    # G.addNode newNodes
+                    # (\g -> foldM neigborEdges g trustNodes)
                 }
 
   getUsers set st { userNames, addresses } = do
@@ -263,10 +237,10 @@ dashboard env =
                         in
                           case maybeNode, maybeEdge of
                             Nothing, Nothing -> st'.trusts
-                              # G.insertNode u
-                              # G.insertEdge ownAddress targetAddress (next initUntrusted)
+                              # G.addNode u
+                              # G.addEdge ownAddress targetAddress (next initUntrusted)
                             Just _, Nothing -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress (next initUntrusted)
+                              # G.addEdge ownAddress targetAddress (next initUntrusted)
                             _, _ -> st'.trusts
                     }
         _ <-
@@ -289,7 +263,7 @@ dashboard env =
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress (if isLoadingTrust edge then next edge else edge)
+                              # G.addEdge ownAddress targetAddress (if isLoadingTrust edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         pure unit
@@ -314,7 +288,7 @@ dashboard env =
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress (if isTrusted edge then next edge else edge)
+                              # G.updateEdge ownAddress targetAddress (if isTrusted edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         _ <-
@@ -337,7 +311,7 @@ dashboard env =
                         in
                           case maybeNode, maybeEdge of
                             Just _, Just edge -> st'.trusts
-                              # G.insertEdge ownAddress targetAddress (if isLoadingUntrust edge then next edge else edge)
+                              # G.updateEdge ownAddress targetAddress (if isLoadingUntrust edge then next edge else edge)
                             _, _ -> st'.trusts
                     }
         pure unit

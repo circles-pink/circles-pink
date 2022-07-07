@@ -2,6 +2,7 @@ module Data.IxGraph
   ( IxGraph
   , addEdge
   , addNode
+  , addNodes
   , class Indexed
   , deleteEdge
   , deleteNode
@@ -23,6 +24,7 @@ import Prelude
 
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
+import Data.Foldable (class Foldable, foldM)
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe)
@@ -63,6 +65,11 @@ updateNode n (IxGraph g) = IxGraph <$> G.updateNode (getIndex n) n g
 
 deleteNode :: forall id e n. Ord id => id -> IxGraph id e n -> Maybe (IxGraph id e n)
 deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g
+
+--
+
+addNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> IxGraph id e n
+addNodes nodes ixGraph = foldM addNode ixGraph nodes
 
 --------------------------------------------------------------------------------
 -- Edge API
