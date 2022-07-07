@@ -42,8 +42,8 @@ type IxEdgeWithNode id e n = IxEdge id e /\ IxNode id n
 -- Graph API
 --------------------------------------------------------------------------------
 
-fromFoldables :: forall f id e n. Ord id => Foldable f => f (id /\ n) -> f (Pair id /\ e) -> Maybe (Graph id e n)
-fromFoldables nodes' edges' = G.empty
+fromFoldables :: forall f id e n. Ord id => Foldable f => { nodes :: f (id /\ n), edges :: f (Pair id /\ e) } -> Maybe (Graph id e n)
+fromFoldables { nodes: nodes', edges: edges' } = G.empty
   # (\g -> foldM (\g' (id /\ node) -> addNode id node g') g nodes')
   >>= (\g -> foldM (\g' (conn /\ edge) -> addEdge conn edge g') g edges')
 
