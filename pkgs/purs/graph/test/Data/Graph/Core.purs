@@ -4,11 +4,12 @@ module Test.Data.Graph.Core
 
 import Prelude
 
-import Data.Graph (toUnfoldables)
+import Data.Graph (fromFoldables, toUnfoldables)
 import Data.Graph as G
 import Data.Graph.Core (Graph)
 import Data.Graph.Core as C
 import Data.Maybe (Maybe(..))
+import Data.Pair ((~))
 import Data.Set as S
 import Data.Tuple.Nested ((/\))
 import Test.Spec (Spec, describe, it)
@@ -94,13 +95,16 @@ spec =
     describe
       "deleteEdge"
       let
-        graph = C.empty
-          # C.insertNode "n1" 1
-          # C.insertNode "n2" 2
-          # C.insertEdge "n1" "n2" 11
+        graph = fromFoldables
+          { nodes: [ "n1" /\ 1, "n2" /\ 2 ]
+          , edges: [ ("n1" ~ "n2") /\ 11 ]
+          }
       in
         it "retrieves the edge at from the given source and target ids" do
-          (C.deleteEdge "n1" "n2" graph # toUnfoldables) `shouldEqual`
-            { nodes: [ "n1" /\ 1, "n2" /\ 2 ]
-            , edges: []
-            }
+          (graph <#> C.attemptDeleteEdge "n1" "n2" graph)
+          `shouldEqual`
+            ( fromFoldables
+                { nodes: [ "n1" /\ 1, "n2" /\ 2 ]
+                , edges: []
+                }
+            )
