@@ -26,7 +26,6 @@ import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,
   DefaultView,
-  Graph,
   Trust,
   Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
@@ -43,17 +42,12 @@ import {
   UserIdent,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { toFpTsTuple } from '../utils/fpTs';
-import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
-import * as O from 'fp-ts/Option';
-import { outgoingIds } from '@circles-pink/state-machine/output/Data.IxGraph';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
-type TrustUserListProps = {
+type UserSearchProps = {
   title?: string;
-  graph: Graph;
-  ownAddress: Address;
+  trusts: Trusts;
   theme: Theme;
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
@@ -65,53 +59,12 @@ type TrustUserListProps = {
   trustRemoveResult: DefaultView['trustRemoveResult'];
 };
 
-type TsNode = [Address, UserIdent];
-
-type TsEdge = [Address, [Address, TrustState.TrustState]];
-
-type TsGraph = {
-  nodes: TsNode[];
-  edges: TsEdge[];
-};
-
-// This is going to be replaced with the real graph module
-const G = {
-  outgoingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
-    const outgoingIds = graph.edges.filter(e => e[0] === id).map(e => e[0]);
-    return outgoingIds.length > 0 ? O.some(outgoingIds) : O.none;
-  },
-  incomingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
-    const incomingIds = graph.edges.filter(e => e[1][0] === id).map(e => e[0]);
-    return incomingIds.length > 0 ? O.some(incomingIds) : O.none;
-  },
-  lookupEdge: (
-    from: Address,
-    to: Address,
-    graph: TsGraph
-  ): O.Option<TsEdge> => {
-    const optionEdge = graph.edges.find(e => e[0] === from && e[1][0] === to);
-    return optionEdge ? O.some(optionEdge) : O.none;
-  },
-};
-
-const tsTupleEdge = (
-  _edge: Tuple<Address, Tuple<Address, TrustState.TrustState>>
-): [Address, [Address, TrustState.TrustState]] => {
-  const edge = toFpTsTuple(_edge);
-  return [edge[0], toFpTsTuple(edge[1])];
-};
-
-export const TrustUserList = (props: TrustUserListProps) => {
-  const { title, graph: _graph, ownAddress, theme, icon, actionRow } = props;
-
-  const graph = {
-    nodes: _graph.nodes.map(toFpTsTuple),
-    edges: _graph.edges.map(tsTupleEdge),
-  };
+export const UserSearch = (props: UserSearchProps) => {
+  const { title, trusts: allTrusts, theme, icon, actionRow } = props;
 
   // Paginate trusts
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const paginationInfo = paginate(graph.nodes.length, currentPage);
+  const paginationInfo = paginate(allTrusts.length, currentPage);
 
   const pageControls = fetchPageNumbers({
     currentPage,
@@ -119,15 +72,15 @@ export const TrustUserList = (props: TrustUserListProps) => {
     pageNeighbours: 1,
   });
 
-  const trusts: Trust[] = [...graph.nodes]
+  const trusts = [...allTrusts]
     // Sort by username and safeAddress
     .sort((a, b) => {
       const usernameA = pipe(
-        a[1],
+        a.user,
         either(() => '')(x => (x as User).username)
       );
       const usernameB = pipe(
-        b[1],
+        b.user,
         either(() => '')(x => (x as User).username)
       );
 
@@ -136,34 +89,21 @@ export const TrustUserList = (props: TrustUserListProps) => {
       if (result !== 0) return result;
 
       const addressA = pipe(
-        a[1],
+        a.user,
         either(x => x as Address)(x => (x as User).safeAddress)
       );
       const addressB = pipe(
-        b[1],
+        b.user,
         either(x => x as Address)(x => (x as User).safeAddress)
       );
 
       return addrToString(addressA).localeCompare(addrToString(addressB));
     })
-    .filter(n => n[0] !== ownAddress)
-    .map(n => {
-      const outgoingEdge = G.lookupEdge(ownAddress, n[0], graph);
-      const incomingEdge = G.lookupEdge(n[0], ownAddress, graph);
-      return {
-        trustState:
-          outgoingEdge._tag === 'Some'
-            ? outgoingEdge.value[1][1]
-            : TrustState.initUntrusted,
-        isOutgoing: incomingEdge._tag === 'Some' ? true : false,
-        user: n[1],
-      };
-    })
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
 
   return (
-    <LightColorFrame theme={theme}>
+    <Frame theme={theme}>
       <Title>
         <JustifyBetween>
           <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
@@ -214,7 +154,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
           />
         </JustifyAroundCenter>
       )}
-    </LightColorFrame>
+    </Frame>
   );
 };
 
@@ -222,7 +162,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
 // UI / ContentRow
 // -----------------------------------------------------------------------------
 
-const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
+const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
   const { c, theme, toggleOverlay, setOverwriteTo, addTrust, removeTrust } =
     props;
 
@@ -371,14 +311,14 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
 };
 
 // -----------------------------------------------------------------------------
-// UI / LightColorFrame
+// UI / Frame
 // -----------------------------------------------------------------------------
 
 type FameProps = {
   theme: Theme;
 };
 
-export const LightColorFrame = styled.div<FameProps>(({ theme }: FameProps) => [
+const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
   tw`block lg:p-8 md:p-8 p-4 border border-gray-800 shadow-xl rounded-xl`,
   css`
     background-color: ${theme.lightColor};

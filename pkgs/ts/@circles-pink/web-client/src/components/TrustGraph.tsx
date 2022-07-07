@@ -1,9 +1,13 @@
 import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, {
+  BreadthFirstLayoutOptions,
   CircleLayoutOptions,
+  ConcentricLayoutOptions,
   CoseLayoutOptions,
+  GridLayoutOptions,
   LayoutOptions,
+  RandomLayoutOptions,
 } from 'cytoscape';
 // import COSEBilkent from 'cytoscape-cose-bilkent';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
@@ -27,21 +31,21 @@ import { toFpTsTuple } from '../utils/fpTs';
 // Constants
 // -----------------------------------------------------------------------------
 
-const layout: Partial<CircleLayoutOptions> & Pick<CircleLayoutOptions, 'name'> =
-  {
-    name: 'circle',
-    animate: true,
-    // other options
-    // padding: 75,
-    // nodeDimensionsIncludeLabels: true,
-    // idealEdgeLength: n => 100,
-    // edgeElasticity: 0.1,
-    animationDuration: 550,
-    // refresh: 1,
-    // randomize: false,
-    // componentSpacing: 7000,
-    // nodeRepulsion: () => 2000,
-  };
+const layout: Partial<ConcentricLayoutOptions> &
+  Pick<ConcentricLayoutOptions, 'name'> = {
+  name: 'concentric',
+  animate: true,
+  // other options
+  // padding: 75,
+  // nodeDimensionsIncludeLabels: true,
+  // idealEdgeLength: n => 100,
+  // edgeElasticity: 0.1,
+  animationDuration: 550,
+  // refresh: 1,
+  // randomize: false,
+  // componentSpacing: 7000,
+  // nodeRepulsion: () => 2000,
+};
 
 // -----------------------------------------------------------------------------
 // Utils
