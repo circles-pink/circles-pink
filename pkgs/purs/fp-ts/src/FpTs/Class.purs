@@ -4,7 +4,7 @@ import Prelude
 
 import Heterogeneous.Mapping (class HMap, class Mapping, hmap)
 
-class FpTs a b | a -> b where
+class FpTs a b where
   toFpTs :: a -> b
   fromFpTs :: b -> a
 

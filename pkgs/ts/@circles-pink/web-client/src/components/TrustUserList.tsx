@@ -47,6 +47,10 @@ import { toFpTsTuple } from '../utils/fpTs';
 import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
 import * as O from 'fp-ts/Option';
 import { outgoingIds } from '@circles-pink/state-machine/output/Data.IxGraph';
+import {
+  TrustConnection,
+  TsTrustConnection,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -67,7 +71,7 @@ type TrustUserListProps = {
 
 type TsNode = [Address, UserIdent];
 
-type TsEdge = [Address, [Address, TrustState.TrustState]];
+type TsEdge = [[Address, Address], TsTrustConnection];
 
 type TsGraph = {
   nodes: TsNode[];
@@ -77,11 +81,15 @@ type TsGraph = {
 // This is going to be replaced with the real graph module
 const G = {
   outgoingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
-    const outgoingIds = graph.edges.filter(e => e[0] === id).map(e => e[0]);
+    const outgoingIds = graph.edges
+      .filter(e => e[0][0] === id)
+      .map(e => e[0][0]);
     return outgoingIds.length > 0 ? O.some(outgoingIds) : O.none;
   },
   incomingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
-    const incomingIds = graph.edges.filter(e => e[1][0] === id).map(e => e[0]);
+    const incomingIds = graph.edges
+      .filter(e => e[0][1] === id)
+      .map(e => e[0][0]);
     return incomingIds.length > 0 ? O.some(incomingIds) : O.none;
   },
   lookupEdge: (
@@ -89,16 +97,18 @@ const G = {
     to: Address,
     graph: TsGraph
   ): O.Option<TsEdge> => {
-    const optionEdge = graph.edges.find(e => e[0] === from && e[1][0] === to);
+    const optionEdge = graph.edges.find(
+      e => e[0][0] === from && e[0][1] === to
+    );
     return optionEdge ? O.some(optionEdge) : O.none;
   },
 };
 
 const tsTupleEdge = (
-  _edge: Tuple<Address, Tuple<Address, TrustState.TrustState>>
-): [Address, [Address, TrustState.TrustState]] => {
+  _edge: Tuple<Tuple<Address, Address>, TsTrustConnection>
+): [[Address, Address], TsTrustConnection] => {
   const edge = toFpTsTuple(_edge);
-  return [edge[0], toFpTsTuple(edge[1])];
+  return [toFpTsTuple(edge[0]), edge[1]];
 };
 
 export const TrustUserList = (props: TrustUserListProps) => {
@@ -153,7 +163,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
       return {
         trustState:
           outgoingEdge._tag === 'Some'
-            ? outgoingEdge.value[1][1]
+            ? outgoingEdge.value[1].trustState
             : TrustState.initUntrusted,
         isOutgoing: incomingEdge._tag === 'Some' ? true : false,
         user: n[1],

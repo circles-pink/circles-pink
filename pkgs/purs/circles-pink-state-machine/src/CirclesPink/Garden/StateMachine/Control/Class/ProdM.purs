@@ -1,8 +1,7 @@
 module CirclesPink.Garden.StateMachine.Control.Class.ProdM
   ( ProdM
   , runProdM
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -34,12 +33,11 @@ derive newtype instance monadAff :: MonadAff ProdM
 
 derive newtype instance monadAsk :: MonadAsk (CirclesConfig ProdM) ProdM
 
-
 instance monadCircles :: MonadCircles ProdM where
-  sleep i = liftAff $ delay $ Milliseconds $ I.toNumber i 
+  sleep i = liftAff $ delay $ Milliseconds $ I.toNumber i
 
 instance monadLog :: MonadLog ProdM where
-  log x = liftAff $ A.log x  
+  log x = liftAff $ A.log x
 
 runProdM :: forall a. CirclesConfig ProdM -> ProdM a -> Aff a
 runProdM cfg (ProdM x) = runReaderT x cfg

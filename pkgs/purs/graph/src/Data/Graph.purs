@@ -59,8 +59,8 @@ addNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e
 addNodes nodes' g = foldM (flip $ uncurry C.addNode) g nodes'
 
 insertNode :: forall r id e n. Ord id => id -> n -> Graph id e n -> EitherV (ErrInsertNode r) (Graph id e n)
-insertNode id node graph | C.memberNode id graph = C.updateNode id node graph # lmap (unsafePartial $ crashWith "impossible")
-insertNode id node graph = C.addNode id node graph # lmap (unsafePartial $ crashWith "impossible")
+insertNode id node graph | C.memberNode id graph = C.updateNode id node graph # lmap (\_ -> unsafePartial $ crashWith "impossible")
+insertNode id node graph = C.addNode id node graph # lmap (\_ -> unsafePartial $ crashWith "impossible")
 
 insertNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrInsertNodes r) (Graph id e n)
 insertNodes nodes' g = foldM (flip $ uncurry insertNode) g nodes'
@@ -102,13 +102,13 @@ neighborEdgesWithNodes id g = (<>) <$> incomingEdgesWithNodes id g <*> outgoingE
 --------------------------------------------------------------------------------
 
 partLookupNode :: forall id e n. Partial => Ord id => id -> Graph id e n -> n
-partLookupNode id' g = fromRight' (crashWith "Inconsistency: Node not found") $ C.lookupNode id' g
+partLookupNode id' g = fromRight' (\_ -> crashWith "Inconsistency: Node not found") $ C.lookupNode id' g
 
 partLookupNodeIx :: forall id e n. Partial => Ord id => id -> Graph id e n -> IxNode id n
 partLookupNodeIx id' g = id' /\ partLookupNode id' g
 
 partLookupEdge :: forall id e n. Partial => Ord id => Pair id -> Graph id e n -> e
-partLookupEdge conn g = fromRight' (crashWith "Inconsistency: Edge not found") $ C.lookupEdge conn g
+partLookupEdge conn g = fromRight' (\_ -> crashWith "Inconsistency: Edge not found") $ C.lookupEdge conn g
 
 partLookupEdgeIx :: forall id e n. Partial => Ord id => Pair id -> Graph id e n -> IxEdge id e
 partLookupEdgeIx conn g = conn /\ partLookupEdge conn g

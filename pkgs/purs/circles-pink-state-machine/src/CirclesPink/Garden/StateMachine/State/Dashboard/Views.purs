@@ -25,10 +25,10 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 import Prelude
 
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.Trust as T
-import CirclesPink.Data.TrustConnection (TrustConnection(..))
+import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
@@ -39,11 +39,11 @@ import Data.BN (BN)
 import Data.Either (Either(..), either)
 import Data.Foldable (fold)
 import Data.FpTs.Option as FpTs
-import Data.FpTs.Pair as FPT
-import Data.FpTs.Tuple as FPT
+import Data.FpTs.Pair (Pair) as FPT
+import Data.FpTs.Tuple (type (/\)) as FPT
 import Data.IxGraph (IxGraph, getIndex)
 import Data.IxGraph as G
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (maybe)
 import Data.Newtype (unwrap)
 import Data.Pair ((~))
 import Data.Tuple.Nested (type (/\), (/\))
@@ -96,7 +96,7 @@ type DefaultView =
 
 type Graph =
   { nodes :: Array (Address FPT./\ UserIdent)
-  , edges :: Array (FPT.Pair Address FPT./\ TrustConnection)
+  , edges :: Array (FPT.Pair Address FPT./\ TsTrustConnection)
   }
 
 type Trusts = Array Trust
