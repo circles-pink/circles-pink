@@ -188,6 +188,7 @@ addEdge (from ~ to) edge (Graph nodes) = Right $ Graph $ nodes
   updateToNode x = Just $ x { inIds = S.insert from x.inIds }
 
 lookupEdge :: forall r id e n. Ord id => Pair id -> Graph id e n -> EitherV (ErrLookupEdge id r) e
+lookupEdge (from ~ _) g | not $ memberNode from g = Left $ inj _startNodeNotFound from
 lookupEdge (_ ~ to) g | not $ memberNode to g = Left $ inj _endNodeNotFound to
 lookupEdge conn@(from ~ to) (Graph nodes) = nodes
   # (M.lookup from >>> note (inj _startNodeNotFound from))
@@ -195,7 +196,7 @@ lookupEdge conn@(from ~ to) (Graph nodes) = nodes
 
 deleteEdge :: forall r id e n. Ord id => Pair id -> Graph id e n -> EitherV (ErrDeleteEdge id r) (Graph id e n)
 deleteEdge (from ~ _) g | not $ memberNode from g = Left $ inj _startNodeNotFound from
-deleteEdge (_ ~ to) g | not $ memberNode to g = Left $ inj _startNodeNotFound to
+deleteEdge (_ ~ to) g | not $ memberNode to g = Left $ inj _endNodeNotFound to
 deleteEdge conn g | not $ memberEdge conn g = Left $ inj _edgeNotFound conn
 deleteEdge (from ~ to) (Graph nodes) = Right $ Graph $ nodes
   # M.update updateFromNode from

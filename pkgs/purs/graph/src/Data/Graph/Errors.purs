@@ -1,6 +1,11 @@
 module Data.Graph.Errors where
 
-import Data.Pair (Pair)
+import Prelude
+
+import Data.Pair (Pair, (~))
+import Data.Variant (Variant)
+import Data.Variant (case_, onMatch)
+import Debug.Extra (todo)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -19,6 +24,15 @@ type EndNodeNotFound (id :: Type) r = (endNodeNotFound :: id | r)
 type EdgeNotFound id r = (edgeNotFound :: Pair id | r)
 
 type EdgeExists id r = (edgeExists :: Pair id | r)
+
+type ErrAll id r =
+  NodeNotFound id
+    + NodeExists id
+    + StartNodeNotFound id
+    + EndNodeNotFound id
+    + EdgeNotFound id
+    + EdgeExists id
+    + r
 
 --------------------------------------------------------------------------------
 -- Proxies
@@ -67,20 +81,22 @@ type ErrIncomingIds id r = NodeNotFound id + r
 
 type ErrFromFoldables id r = ErrAddNode id + ErrAddEdge id + r
 
-type ErrAll id r =
-   ErrLookupNode id
-    + ErrAddNode id
-    + ErrUpdateNode id
-    + ErrDeleteNode id
-    + ErrLookupEdge id
-    + ErrLookupEdge id
-    + ErrAddEdge id
-    + ErrUpdateEdge id
-    + ErrDeleteEdge id
-    + ErrOutgoingIds id
-    + ErrIncomingIds id
-    + ErrFromFoldables id
-    + r
+type ErrAddNodes id r = ErrAddNode id + r
+
+--------------------------------------------------------------------------------
+-- Pretty Print
+--------------------------------------------------------------------------------
+
+printError :: forall id. Show id => Variant (ErrAll id ()) -> String
+printError = case_
+  # onMatch
+      { nodeNotFound: \id -> "Node with id `" <> show id <> "` not found."
+      , nodeExists: \id -> "Node with id `" <> show id <> "` already exists."
+      , startNodeNotFound: \id -> "Start node with id `" <> show id <> "` not found."
+      , endNodeNotFound: \id -> "End node with id `" <> show id <> "` not found."
+      , edgeNotFound: \(from ~ to) -> "Edge from node id `" <> show from <> "` to node id `" <> show to <> " ` not found."
+      , edgeExists: \(from ~ to) -> "Edge from node id `" <> show from <> "` to node id `" <> show to <> " ` already exists."
+      }
 
 --------------------------------------------------------------------------------
 -- Function Errors / Graph
