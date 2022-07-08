@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "outDir": "dist",
     "jsx": "react",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "declaration": true
   },
   "include": ["src", "types"],

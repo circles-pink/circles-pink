@@ -43,7 +43,7 @@ import {
   UserIdent,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { toFpTsTuple } from '../utils/fpTs';
+import { toFpTsPair, toFpTsTuple } from '../utils/fpTs';
 import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
 import * as O from 'fp-ts/Option';
 import { outgoingIds } from '@circles-pink/state-machine/output/Data.IxGraph';
@@ -51,6 +51,7 @@ import {
   TrustConnection,
   TsTrustConnection,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
+import { Pair } from '@circles-pink/state-machine/output/Data.FpTs.Pair';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -105,10 +106,10 @@ const G = {
 };
 
 const tsTupleEdge = (
-  _edge: Tuple<Tuple<Address, Address>, TsTrustConnection>
+  _edge: Tuple<Pair<Address>, TsTrustConnection>
 ): [[Address, Address], TsTrustConnection] => {
   const edge = toFpTsTuple(_edge);
-  return [toFpTsTuple(edge[0]), edge[1]];
+  return [toFpTsPair(edge[0]), edge[1]];
 };
 
 export const TrustUserList = (props: TrustUserListProps) => {
@@ -131,31 +132,31 @@ export const TrustUserList = (props: TrustUserListProps) => {
 
   const trusts: Trust[] = [...graph.nodes]
     // Sort by username and safeAddress
-    .sort((a, b) => {
-      const usernameA = pipe(
-        a[1],
-        either(() => '')(x => (x as User).username)
-      );
-      const usernameB = pipe(
-        b[1],
-        either(() => '')(x => (x as User).username)
-      );
+    // .sort((a, b) => {
+    //   const usernameA = pipe(
+    //     a[1],
+    //     either(() => '')(x => (x as User).username)
+    //   );
+    //   const usernameB = pipe(
+    //     b[1],
+    //     either(() => '')(x => (x as User).username)
+    //   );
 
-      const result = usernameA.localeCompare(usernameB);
+    //   const result = usernameA.localeCompare(usernameB);
 
-      if (result !== 0) return result;
+    //   if (result !== 0) return result;
 
-      const addressA = pipe(
-        a[1],
-        either(x => x as Address)(x => (x as User).safeAddress)
-      );
-      const addressB = pipe(
-        b[1],
-        either(x => x as Address)(x => (x as User).safeAddress)
-      );
+    //   const addressA = pipe(
+    //     a[1],
+    //     either(x => x as Address)(x => (x as User).safeAddress)
+    //   );
+    //   const addressB = pipe(
+    //     b[1],
+    //     either(x => x as Address)(x => (x as User).safeAddress)
+    //   );
 
-      return addrToString(addressA).localeCompare(addrToString(addressB));
-    })
+    //   return addrToString(addressA).localeCompare(addrToString(addressB));
+    // })
     .filter(n => n[0] !== ownAddress)
     .map(n => {
       const outgoingEdge = G.lookupEdge(ownAddress, n[0], graph);
@@ -482,3 +483,4 @@ const mapToolTipRelRec = (receivable: boolean, username: string) => {
     ? replaceUsername(t('dashboard.trustList.relationReceivable'), username)
     : replaceUsername(t('dashboard.trustList.relationNotReceivable'), username);
 };
+

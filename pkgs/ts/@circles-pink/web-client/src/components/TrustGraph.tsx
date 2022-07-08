@@ -25,7 +25,7 @@ import {
   isTrusted,
   TrustState,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { toFpTsTuple } from '../utils/fpTs';
+import { toFpTsPair, toFpTsTuple } from '../utils/fpTs';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -81,9 +81,9 @@ const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
 
 const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] =>
   data_.edges.map(n => {
-    const [from, vt] = toFpTsTuple(n);
-    const [to, value] = toFpTsTuple(vt);
-    return getEdge(from, to, value);
+    const [conn, value] = toFpTsTuple(n);
+    const [from, to] = toFpTsPair(conn);
+    return getEdge(from, to, value.trustState);
   });
 
 const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
@@ -143,7 +143,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
         'curve-style': 'bezier',
         'target-arrow-shape': 'triangle',
         width: 1,
-        'line-style': s => {
+        'line-style': (s: any) => {
           const trustState = s._private.data.value as TrustState;
 
           if (isTrusted(trustState)) {
