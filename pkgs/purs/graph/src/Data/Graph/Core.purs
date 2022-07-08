@@ -20,9 +20,11 @@ module Data.Graph.Core
   , nodeIds
   , nodesToUnfoldable
   , outgoingIds
+  , toUnfoldables
   , updateEdge
   , updateNode
-  ) where
+  )
+  where
 
 import Prelude
 
