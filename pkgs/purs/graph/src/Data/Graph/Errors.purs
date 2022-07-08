@@ -84,6 +84,27 @@ type ErrFromFoldables id r = ErrAddNode id + ErrAddEdge id + r
 type ErrAddNodes id r = ErrAddNode id + r
 
 --------------------------------------------------------------------------------
+-- Function Errors / Graph
+--------------------------------------------------------------------------------
+
+type ErrOutgoingNodes id r = ErrOutgoingIds id + r
+
+type ErrOutgoingEdgesWithNodes id r = ErrOutgoingIds id + r
+
+type ErrIncomingEdgesWithNodes id r = ErrIncomingIds id + r
+
+type ErrNeighborIds id r = ErrOutgoingIds id + ErrIncomingIds id + r
+
+type ErrNeighborEdgesWithNodes id r = ErrIncomingEdgesWithNodes id + ErrOutgoingEdgesWithNodes id + r
+
+type ErrInsertNode :: forall k. k -> k
+type ErrInsertNode r = r
+
+type ErrInsertNodes :: forall k. k -> k
+type ErrInsertNodes r = r
+
+
+--------------------------------------------------------------------------------
 -- Pretty Print
 --------------------------------------------------------------------------------
 
@@ -97,17 +118,3 @@ printError = case_
       , edgeNotFound: \(from ~ to) -> "Edge from node id `" <> show from <> "` to node id `" <> show to <> " ` not found."
       , edgeExists: \(from ~ to) -> "Edge from node id `" <> show from <> "` to node id `" <> show to <> " ` already exists."
       }
-
---------------------------------------------------------------------------------
--- Function Errors / Graph
---------------------------------------------------------------------------------
-
-type ErrOutgoingNodes id r = ErrOutgoingIds id + r
-
-type ErrOutgoingEdgesWithNodes id r = ErrOutgoingIds id + r
-
-type ErrIncomingEdgesWithNodes id r = ErrIncomingIds id + r
-
-type ErrNeighborIds id r = ErrOutgoingIds id + ErrIncomingIds id + r
-
-type ErrNeighborEdgesWithNodes id r = ErrIncomingEdgesWithNodes id + ErrOutgoingEdgesWithNodes id + r

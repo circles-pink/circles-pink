@@ -9,6 +9,8 @@ module Data.IxGraph
   , empty
   , getIndex
   , incomingEdgesWithNodes
+  , insertNode
+  , insertNodes
   , lookupEdge
   , lookupNode
   , neighborEdgesWithNodes
@@ -27,7 +29,7 @@ import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec)
 import Data.Graph as G
-import Data.Graph.Errors (ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrAddEdge)
+import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrInsertNodes)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -69,6 +71,11 @@ deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g
 addNodes :: forall r f id e n. Foldable f => Functor f => Indexed id n => Ord id => f n -> IxGraph id e n -> EitherV (ErrAddNodes id r) (IxGraph id e n)
 addNodes nodes (IxGraph g) = IxGraph <$> G.addNodes (withIndex <$> nodes) g
 
+insertNode :: forall r id e n. Ord id => Indexed id n => n -> IxGraph id e n -> EitherV (ErrInsertNode r) (IxGraph id e n)
+insertNode node (IxGraph g) = IxGraph <$> G.insertNode (getIndex node) node g
+
+insertNodes :: forall r f id e n. Foldable f => Ord id => Functor f => Indexed id n => f n -> IxGraph id e n -> EitherV (ErrInsertNodes r) (IxGraph id e n)
+insertNodes nodes (IxGraph g) = IxGraph <$> G.insertNodes (withIndex <$> nodes) g
 
 --------------------------------------------------------------------------------
 -- Edge API
