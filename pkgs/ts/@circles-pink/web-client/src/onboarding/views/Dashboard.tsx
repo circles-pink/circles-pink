@@ -76,8 +76,6 @@ export const Dashboard = ({
 
   const trusts = state.trustsConfirmed.concat(state.trustsCandidates);
 
-  console.log(state.graph);
-
   // Theme
   const [theme] = useContext(ThemeContext);
 

@@ -3,12 +3,11 @@ module CirclesPink.Data.TrustConnection where
 import Prelude
 
 import CirclesPink.Data.Address (Address)
-import CirclesPink.Data.TrustState (TrustState(..))
+import CirclesPink.Data.TrustState (TrustState)
 import Data.FpTs.Pair as FpTs
 import Data.IxGraph (class Indexed)
 import Data.Pair (Pair)
-import Debug.Extra (todo)
-import FpTs.Class (class FpTs, fromFpTs)
+import FpTs.Class (class FpTs, fromFpTs, toFpTs)
 
 data TrustConnection = TrustConnection (Pair Address) TrustState
 
@@ -19,6 +18,8 @@ derive instance eq :: Eq TrustConnection
 
 derive instance ord :: Ord TrustConnection
 
-instance fpTs :: FpTs TrustConnection { conn :: FpTs.Pair Address, trustState :: TrustState } where
-  toFpTs = todo
-  fromFpTs = todo
+newtype TsTrustConnection = TsTrustConnection { conn :: FpTs.Pair Address, trustState :: TrustState }
+
+instance fpTs :: FpTs TrustConnection TsTrustConnection where
+  toFpTs (TrustConnection conn trustState) = TsTrustConnection { conn: toFpTs conn, trustState }
+  fromFpTs (TsTrustConnection { conn, trustState }) = TrustConnection (fromFpTs conn) trustState

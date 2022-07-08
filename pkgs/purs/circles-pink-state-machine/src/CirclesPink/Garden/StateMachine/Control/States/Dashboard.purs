@@ -177,7 +177,7 @@ dashboard env =
               Right newTrusts -> S._dashboard st'
                 { trusts = newTrusts
                 }
-              Left _ -> unsafePartial $ crashWith "failed" -- get real err str
+              Left e -> unsafePartial $ crashWith $ GE.printError e
 
   getOutgoingEdge :: Maybe TrustConnection -> Address -> TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge maybeOldTrustConnection ownAddress tn g =
@@ -197,8 +197,7 @@ dashboard env =
     case maybeOldTrustConnection of
       Nothing | tn.isOutgoing ->
         G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-      Nothing ->
-        G.deleteEdge (tn.safeAddress ~ ownAddress) g
+      Nothing -> Right g
       _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
 
   getUsers set st { userNames, addresses } = do
