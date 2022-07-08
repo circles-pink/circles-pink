@@ -3,23 +3,25 @@ module Data.Graph
   , edgeIds
   , edges
   , incomingEdgesWithNodes
+  , insertNode
+  , insertNodes
   , module Exp
   , neighborEdgesWithNodes
   , neighborIds
   , nodes
   , outgoingEdgesWithNodes
   , outgoingNodes
-  )
-  where
+  ) where
 
 import Prelude
 
+import Data.Bifunctor (lmap)
 import Data.Either (fromRight')
 import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrIncomingEdgesWithNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrAddNodes)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrInsertNodes)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
@@ -55,6 +57,13 @@ outgoingNodes id graph = graph
 
 addNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrAddNodes id r) (Graph id e n)
 addNodes nodes' g = foldM (flip $ uncurry C.addNode) g nodes'
+
+insertNode :: forall r id e n. Ord id => id -> n -> Graph id e n -> EitherV (ErrInsertNode r) (Graph id e n)
+insertNode id node graph | C.memberNode id graph = C.updateNode id node graph # lmap (unsafePartial $ crashWith "impossible")
+insertNode id node graph = C.addNode id node graph # lmap (unsafePartial $ crashWith "impossible")
+
+insertNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrInsertNodes r) (Graph id e n)
+insertNodes nodes' g = foldM (flip $ uncurry insertNode) g nodes'
 
 --------------------------------------------------------------------------------
 -- Edge API
