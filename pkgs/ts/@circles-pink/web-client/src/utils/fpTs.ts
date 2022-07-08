@@ -3,6 +3,7 @@ import * as O from 'fp-ts/Option';
 import { Either } from '@circles-pink/state-machine/output/Data.FpTs.Either';
 import { Option } from '@circles-pink/state-machine/output/Data.FpTs.Option';
 import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
+import { Pair } from '@circles-pink/state-machine/output/Data.FpTs.Pair';
 
 export const fromFpTsEither = <A, B>(e: E.Either<A, B>): Either<A, B> =>
   e as unknown as Either<A, B>;
@@ -21,3 +22,7 @@ export const fromFpTsTuple = <A, B>(e: [A, B]): Tuple<A, B> =>
 
 export const toFpTsTuple = <A, B>(e: Tuple<A, B>): [A, B] =>
   e as unknown as [A, B];
+
+export const fromFpTsPair = <A>(e: [A, A]): Pair<A> => e as unknown as Pair<A>;
+
+export const toFpTsPair = <A>(e: Pair<A>): [A, A] => e as unknown as [A, A];
