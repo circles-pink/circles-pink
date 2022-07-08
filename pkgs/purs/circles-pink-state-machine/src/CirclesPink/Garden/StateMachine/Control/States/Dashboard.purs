@@ -25,8 +25,10 @@ import Data.Array (catMaybes, drop, find, foldr, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
+import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush, isRight, note)
 import Data.Foldable (foldM)
+import Data.Graph.Errors as GE
 import Data.Int (floor, toNumber)
 import Data.IxGraph (getIndex, toUnfoldables)
 import Data.IxGraph as G
@@ -140,15 +142,15 @@ dashboard env =
           case maybeOldTrustState of
             Nothing | tn.isIncoming ->
               G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-                # note ("Could not add Edge " <> show ownAddress <> " -> " <> show tn.safeAddress)
+                # lmap GE.printError
             Nothing -> pure g
             Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming ->
               G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-                # note ("Could not add Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) 
+                # lmap GE.printError 
             Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming ->
               g
                 # G.deleteEdge (ownAddress ~ tn.safeAddress)
-                # note ("Could not delete Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) 
+                # lmap GE.printError 
             _ -> pure g
 
       getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> Either String CirclesGraph
@@ -156,12 +158,12 @@ dashboard env =
         case maybeOldTrustState of
           Nothing | tn.isOutgoing ->
             G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-              # note ("Could not add Edge " <> show tn.safeAddress <> " -> " <> show ownAddress) 
+              # lmap GE.printError 
           Nothing ->
             G.deleteEdge (tn.safeAddress ~ ownAddress) g
-              # note ("Could not delete Edge " <> show ownAddress <> " -> " <> show tn.safeAddress) 
+              # lmap GE.printError 
           _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-            # note ("Could not add Edge " <> show tn.safeAddress <> " -> " <> show ownAddress) 
+            # lmap GE.printError 
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -230,7 +232,7 @@ dashboard env =
         --       let
         --         ownAddress = st'.user.safeAddress
 
-        --         maybeNewTrusts = 
+        --         eitherNewTrusts = 
         --           let
         --             maybeNode = G.lookupNode targetAddress st'.trusts
         --             maybeEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
@@ -243,7 +245,7 @@ dashboard env =
         --                 # G.addEdge (TrustConnection (ownAddress ~ targetAddress) (next initUntrusted))
         --               _, _ -> Just $ st'.trusts
         --       in
-        --         case maybeNewTrusts of
+        --         case eitherNewTrusts of
         --           Just newTrusts -> S._dashboard st'
         --             { trusts = newTrusts
         --             }
@@ -259,7 +261,7 @@ dashboard env =
         --       let
         --         ownAddress = st'.user.safeAddress
 
-        --         maybeNewTrusts =
+        --         eitherNewTrusts =
         --           let
         --             maybeNode = G.lookupNode targetAddress st'.trusts
         --             maybeEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
@@ -269,7 +271,7 @@ dashboard env =
         --                 # G.addEdge (TrustConnection (ownAddress ~ targetAddress) (if isLoadingTrust edge then next edge else edge))
         --               _, _ -> Just st'.trusts
         --       in
-        --         case maybeNewTrusts of
+        --         case eitherNewTrusts of
         --           Just newTrusts -> S._dashboard st'
         --             { trusts = newTrusts
         --             }
@@ -287,20 +289,20 @@ dashboard env =
               let
                 ownAddress = st'.user.safeAddress
 
-                maybeNewTrusts =
+                eitherNewTrusts =
                   let
-                    maybeNode = G.lookupNode targetAddress st'.trusts
-                    maybeEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
+                    eitherNode = G.lookupNode targetAddress st'.trusts
+                    eitherEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
                   in
-                    case maybeNode, maybeEdge of
-                      Just _, Just (TrustConnection _ edge) -> st'.trusts
+                    case eitherNode, eitherEdge of
+                      Right _, Right (TrustConnection _ edge) -> st'.trusts
                         # G.updateEdge
                             ( TrustConnection (ownAddress ~ targetAddress) (if isTrusted edge then next edge else edge))
-                      _, _ -> Just st'.trusts
+                      _, _ -> Right st'.trusts
               in
-                case maybeNewTrusts of
-                  Just newTrusts ->  S._dashboard st' { trusts = newTrusts }
-                  Nothing -> initLanding -- todo: bottom!
+                case eitherNewTrusts of
+                  Right newTrusts ->  S._dashboard st' { trusts = newTrusts }
+                  Left _ -> initLanding -- todo: bottom!
         _ <-
           env.removeTrustConnection st.privKey targetAddress st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
@@ -312,19 +314,20 @@ dashboard env =
               let
                 ownAddress = st'.user.safeAddress
                 
-                maybeNewTrusts =
+                eitherNewTrusts =
                   let
-                    maybeNode = G.lookupNode targetAddress st'.trusts
-                    maybeEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
+                    eitherNode = G.lookupNode targetAddress st'.trusts
+                    eitherEdge = G.lookupEdge (ownAddress ~ targetAddress) st'.trusts
                   in
-                    case maybeNode, maybeEdge of
-                      Just _, Just (TrustConnection _ edge)  -> st'.trusts
+                    case eitherNode, eitherEdge of
+                      Right _, Right (TrustConnection _ edge)  -> st'.trusts
                         # G.updateEdge (TrustConnection (ownAddress ~ targetAddress) (if isLoadingUntrust edge then next edge else edge))
-                      _, _ -> Just $ st'.trusts
+                        # lmap GE.printError
+                      _, _ -> Right $ st'.trusts
               in
-                case maybeNewTrusts of
-                  Just newTrusts ->  S._dashboard st' { trusts = newTrusts }
-                  Nothing -> initLanding -- todo: bottom!
+                case eitherNewTrusts of
+                  Right newTrusts ->  S._dashboard st' { trusts = newTrusts }
+                  Left _ -> initLanding -- todo: bottom!
 
         pure unit
 
