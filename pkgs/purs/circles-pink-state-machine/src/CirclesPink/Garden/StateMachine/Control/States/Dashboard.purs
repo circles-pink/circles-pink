@@ -34,6 +34,7 @@ import Data.Maybe (Maybe(..))
 import Data.Pair ((~))
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
+import Debug (spyWith)
 import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Partial (crashWith)
@@ -162,7 +163,7 @@ dashboard env =
                   # (\e -> getOutgoingEdge (hush e) ownAddress tn g')
 
                 incomingEdge g' = st'.trusts
-                  # G.lookupEdge (ownAddress ~ otherAddress)
+                  # G.lookupEdge (otherAddress ~ ownAddress)
                   # (\e -> getIncomingEdge (hush e) ownAddress tn g')
               in
                 g # outgoingEdge >>= incomingEdge
@@ -179,26 +180,26 @@ dashboard env =
                 }
               Left e -> unsafePartial $ crashWith $ GE.printError e
 
-  getOutgoingEdge :: Maybe TrustConnection -> Address -> TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getOutgoingEdge maybeOldTrustConnection ownAddress tn g =
-    case maybeOldTrustConnection of
-      Nothing | tn.isIncoming ->
+  getOutgoingEdge :: Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getOutgoingEdge maybeOldTrustConnection ownAddress apiTrustNode g =
+    case maybeOldTrustConnection, apiTrustNode of
+      Nothing, Just tn | tn.isIncoming ->
         G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-      Nothing -> pure g
-      Just (TrustConnection _ oldTrustState) | isPendingTrust oldTrustState && tn.isIncoming ->
-        G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-      Just (TrustConnection _ oldTrustState) | isPendingUntrust oldTrustState && not tn.isIncoming ->
+      Nothing, Just _ -> pure g
+      Just (TrustConnection _ oldTrustState), Just tn | isPendingTrust oldTrustState && tn.isIncoming ->
+        G.updateEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+      Just (TrustConnection _ oldTrustState), Just tn | isPendingUntrust oldTrustState ->
         g
           # G.deleteEdge (ownAddress ~ tn.safeAddress)
-      _ -> pure g
+      _, _ -> pure g
 
-  getIncomingEdge :: Maybe TrustConnection -> Address -> TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getIncomingEdge maybeOldTrustConnection ownAddress tn g =
-    case maybeOldTrustConnection of
-      Nothing | tn.isOutgoing ->
+  getIncomingEdge :: Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getIncomingEdge maybeOldTrustConnection ownAddress apiTrustNode g =
+    case maybeOldTrustConnection, apiTrustNode of
+      Nothing, Just tn | tn.isOutgoing ->
         G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-      Nothing -> Right g
-      _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+      Nothing, Just _ -> Right g
+      _, Just tn -> G.updateEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -238,7 +239,7 @@ dashboard env =
                   Right newTrusts -> S._dashboard st'
                     { trusts = newTrusts
                     }
-                  Left _ -> S._dashboard st'
+                  Left e -> spyWith "addTrustConnectionLoading" (\_ -> GE.printError e) $ S._dashboard st'
         _ <-
           env.addTrustConnection st.privKey targetAddress st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
@@ -257,14 +258,14 @@ dashboard env =
                   in
                     case eitherNode, eitherEdge of
                       Right _, Right (TrustConnection _ edge) -> st'.trusts
-                        # G.addEdge (TrustConnection (ownAddress ~ targetAddress) (if isLoadingTrust edge then next edge else edge))
+                        # G.updateEdge (TrustConnection (ownAddress ~ targetAddress) (if isLoadingTrust edge then next edge else edge))
                       _, _ -> Right st'.trusts
               in
                 case eitherNewTrusts of
                   Right newTrusts -> S._dashboard st'
                     { trusts = newTrusts
                     }
-                  Left _ -> S._dashboard st'
+                  Left e -> spyWith "addTrustConnectionPending" (\_ -> e) $ S._dashboard st'
         pure unit
 
   removeTrustConnection set st u =
@@ -291,7 +292,7 @@ dashboard env =
               in
                 case eitherNewTrusts of
                   Right newTrusts -> S._dashboard st' { trusts = newTrusts }
-                  Left _ -> S._dashboard st'
+                  Left e -> spyWith "removeTrustConnectionLoading" (\_ -> GE.printError e) $ S._dashboard st'
         _ <-
           env.removeTrustConnection st.privKey targetAddress st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
@@ -311,12 +312,11 @@ dashboard env =
                     case eitherNode, eitherEdge of
                       Right _, Right (TrustConnection _ edge) -> st'.trusts
                         # G.updateEdge (TrustConnection (ownAddress ~ targetAddress) (if isLoadingUntrust edge then next edge else edge))
-                        # lmap GE.printError
                       _, _ -> Right $ st'.trusts
               in
                 case eitherNewTrusts of
                   Right newTrusts -> S._dashboard st' { trusts = newTrusts }
-                  Left _ -> S._dashboard st'
+                  Left e -> spyWith "removeTrustConnectionPending" (\_ -> GE.printError e) $ S._dashboard st'
 
         pure unit
 
