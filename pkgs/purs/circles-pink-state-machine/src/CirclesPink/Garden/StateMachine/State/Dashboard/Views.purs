@@ -25,9 +25,10 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 import Prelude
 
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
-import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.Trust as T
+import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
@@ -35,13 +36,16 @@ import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Array (any, filter)
 import Data.BN (BN)
-import Data.Either (Either(..))
+import Data.Either (Either(..), either)
+import Data.Foldable (fold)
 import Data.FpTs.Option as FpTs
+import Data.FpTs.Pair as FPT
 import Data.FpTs.Tuple as FPT
 import Data.IxGraph (IxGraph, getIndex)
 import Data.IxGraph as G
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
+import Data.Pair ((~))
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, onMatch)
 import Foreign.Object (Object, values)
@@ -92,7 +96,7 @@ type DefaultView =
 
 type Graph =
   { nodes :: Array (Address FPT./\ UserIdent)
-  , edges :: Array (Address FPT./\ Address FPT./\ TrustState)
+  , edges :: Array (FPT.Pair Address FPT./\ TrustConnection)
   }
 
 type Trusts = Array Trust
@@ -132,24 +136,24 @@ defaultView d@{ trusts } =
           )
         <#>
           ( \user -> mapTrust $ case trusts # G.lookupNode user.safeAddress of
-              Nothing -> initUntrust user
-              Just _ -> case trusts # G.lookupEdge user.safeAddress d.user.safeAddress, trusts # G.lookupEdge d.user.safeAddress user.safeAddress of
-                Nothing, Nothing -> initUntrust user
-                Just _, Nothing -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
-                Nothing, Just _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initTrusted }
-                Just _, Just _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
+              Left _ -> initUntrust user
+              Right _ -> case trusts # G.lookupEdge (user.safeAddress ~ d.user.safeAddress), trusts # G.lookupEdge (d.user.safeAddress ~ user.safeAddress) of
+                Left _, Left _ -> initUntrust user
+                Right _, Left _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
+                Left _, Right _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initTrusted }
+                Right _, Right _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
           )
 
     trustsConfirmed = d.trusts
-      # G.edgesWithNodes d.user.safeAddress
-      # maybe [] identity
-      # filter (\(e /\ _) -> isTrusted e)
+      # G.neighborEdgesWithNodes d.user.safeAddress
+      # fold
+      # filter (\((TrustConnection _ e) /\ _) -> isTrusted e)
       <#> (mapTrust' d.user.safeAddress d.trusts)
 
     trustsCandidates = d.trusts
       # G.outgoingEdgesWithNodes d.user.safeAddress
-      # maybe [] identity
-      # filter (\(e /\ _) -> not $ isTrusted e)
+      # fold
+      # filter (\((TrustConnection _ e) /\ _) -> not $ isTrusted e)
       <#> (mapTrust' d.user.safeAddress d.trusts)
   in
     { trustsConfirmed
@@ -169,10 +173,10 @@ defaultView d@{ trusts } =
     , redeployTokenResult: nubRemoteReport d.redeployTokenResult
     }
 
-mapTrust' :: Address -> IxGraph Address TrustState UserIdent -> (TrustState /\ UserIdent) -> Trust
-mapTrust' ownAddress graph (trustState /\ user) =
+mapTrust' :: Address -> IxGraph Address TrustConnection UserIdent -> (TrustConnection /\ UserIdent) -> Trust
+mapTrust' ownAddress graph (TrustConnection _ trustState /\ user) =
   { trustState
-  , isOutgoing: G.lookupEdge (getIndex user) ownAddress graph # maybe false (const true)
+  , isOutgoing: G.lookupEdge (getIndex user ~ ownAddress) graph # either (const false) (const true)
   , user
   }
 
