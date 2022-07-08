@@ -1,5 +1,6 @@
 module Data.Graph
-  ( edgeIds
+  ( addNodes
+  , edgeIds
   , edges
   , incomingEdgesWithNodes
   , module Exp
@@ -8,20 +9,22 @@ module Data.Graph
   , nodes
   , outgoingEdgesWithNodes
   , outgoingNodes
-  ) where
+  )
+  where
 
 import Prelude
 
 import Data.Either (fromRight')
-import Data.Foldable (fold)
+import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
-import Data.Graph.Core as C
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
-import Data.Graph.Errors (ErrIncomingEdgesWithNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes)
+import Data.Graph.Core as C
+import Data.Graph.Errors (ErrIncomingEdgesWithNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrAddNodes)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple (uncurry)
+import Data.Tuple.Nested (type (/\), uncurry2, (/\))
 import Partial (crashWith)
 import Partial.Unsafe (unsafePartial)
 
@@ -49,6 +52,9 @@ outgoingNodes id graph = graph
   # C.outgoingIds id
   <#> S.toUnfoldable
   <#> map (\id' -> id' /\ (unsafePartial $ partLookupNode id' graph))
+
+addNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrAddNodes id r) (Graph id e n)
+addNodes nodes' g = foldM (flip $ uncurry C.addNode) g nodes'
 
 --------------------------------------------------------------------------------
 -- Edge API

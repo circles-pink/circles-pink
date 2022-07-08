@@ -24,15 +24,14 @@ import Prelude
 
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
-import Data.Foldable (class Foldable, foldM)
-import Data.Graph (Graph, EitherV)
+import Data.Foldable (class Foldable)
+import Data.Graph (EitherV, Graph, GraphSpec)
 import Data.Graph as G
-import Data.Graph.Errors (ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrAddNode)
-import Data.Maybe (Maybe)
+import Data.Graph.Errors (ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrAddEdge)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
-import Data.Tuple.Nested (type (/\))
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
 
 class Indexed k v | v -> k where
@@ -67,16 +66,15 @@ updateNode n (IxGraph g) = IxGraph <$> G.updateNode (getIndex n) n g
 deleteNode :: forall r id e n. Ord id => id -> IxGraph id e n -> EitherV (ErrDeleteNode id r) (IxGraph id e n)
 deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g
 
---
+addNodes :: forall r f id e n. Foldable f => Functor f => Indexed id n => Ord id => f n -> IxGraph id e n -> EitherV (ErrAddNodes id r) (IxGraph id e n)
+addNodes nodes (IxGraph g) = IxGraph <$> G.addNodes (withIndex <$> nodes) g
 
-addNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> Maybe (IxGraph id e n)
-addNodes nodes ixGraph = foldM (flip addNode) ixGraph nodes
 
 --------------------------------------------------------------------------------
 -- Edge API
 --------------------------------------------------------------------------------
 
-addEdge :: forall id e n. Ord id => Indexed (Pair id) e => e -> IxGraph id e n -> Maybe (IxGraph id e n)
+addEdge :: forall r id e n. Ord id => Indexed (Pair id) e => e -> IxGraph id e n -> EitherV (ErrAddEdge id r) (IxGraph id e n)
 addEdge e (IxGraph g) = IxGraph <$> G.addEdge (getIndex e) e g
 
 lookupEdge :: forall r id e n. Ord id => Pair id -> IxGraph id e n -> EitherV (ErrLookupEdge id r) e
@@ -105,7 +103,7 @@ incomingEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.incomingEd
 neighborEdgesWithNodes :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrNeighborEdgesWithNodes id r) (Array (e /\ n))
 neighborEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.neighborEdgesWithNodes id graph
 
-toUnfoldables :: forall id e n f. Unfoldable f => Ord id => IxGraph id e n -> { nodes :: f (id /\ n), edges :: f (Pair id /\ e) }
+toUnfoldables :: forall id e n f. Unfoldable f => Ord id => IxGraph id e n -> GraphSpec f id e n
 toUnfoldables (IxGraph graph) = G.toUnfoldables graph
 
 -- insertNode :: forall id e n. Ord id => Indexed id n => n -> IxGraph id e n -> IxGraph id e n
@@ -131,5 +129,5 @@ toUnfoldables (IxGraph graph) = G.toUnfoldables graph
 
 --------------------------------------------------------------------------------
 
--- withIndex :: forall i a. Indexed i a => a -> i /\ a
--- withIndex x = getIndex x /\ x
+withIndex :: forall i a. Indexed i a => a -> i /\ a
+withIndex x = getIndex x /\ x
