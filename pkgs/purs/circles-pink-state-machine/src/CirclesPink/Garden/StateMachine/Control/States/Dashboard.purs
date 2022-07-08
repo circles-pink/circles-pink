@@ -9,37 +9,35 @@ import CirclesCore (TrustNode, User)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustEntry (isConfirmed)
-import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
-import CirclesPink.Data.UserIdent (UserIdent(..), getAddress, getIdentifier)
-import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles, throwException)
+import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
+import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
+import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
-import CirclesPink.Garden.StateMachine.State (initLanding)
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (catMaybes, drop, find, foldr, take)
+import Data.Array (catMaybes, drop, find, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), hush, isRight, note)
 import Data.Foldable (foldM)
+import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
 import Data.Int (floor, toNumber)
-import Data.IxGraph (getIndex, toUnfoldables)
 import Data.IxGraph as G
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..))
 import Data.Pair ((~))
-import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spy, spyWith)
 import Debug.Extra (todo)
 import Foreign.Object (insert)
+import Partial (crashWith)
+import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Type.Row (type (+))
 
@@ -124,46 +122,17 @@ dashboard env =
         _ <-
           syncTrusts set st
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-        let x = todo
+        let x = todo -- infinite
         _ <-
           syncTrusts set st
             # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
         pure unit
 
+  -- syncTrusts :: ActionHandler' m Int S.DashboardState ("dashboard" :: S.DashboardState)
   syncTrusts set st i = do
     let
       getNode :: Maybe User -> TrustNode -> UserIdent
       getNode maybeUser tn = UserIdent $ note tn.safeAddress maybeUser
-
-      ownAddress = st.user.safeAddress
-
-      getOutgoingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> Either String CirclesGraph
-      getOutgoingEdge maybeOldTrustState tn g =
-        case maybeOldTrustState of
-          Nothing | tn.isIncoming ->
-            G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-              # lmap GE.printError
-          Nothing -> pure g
-          Just oldTrustState | isPendingTrust oldTrustState && tn.isIncoming ->
-            G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-              # lmap GE.printError
-          Just oldTrustState | isPendingUntrust oldTrustState && not tn.isIncoming ->
-            g
-              # G.deleteEdge (ownAddress ~ tn.safeAddress)
-              # lmap GE.printError
-          _ -> pure g
-
-      getIncomingEdge :: Maybe TrustState -> TrustNode -> CirclesGraph -> Either String CirclesGraph
-      getIncomingEdge maybeOldTrustState tn g =
-        case maybeOldTrustState of
-          Nothing | tn.isOutgoing ->
-            G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-              # lmap GE.printError
-          Nothing ->
-            G.deleteEdge (tn.safeAddress ~ ownAddress) g
-              # lmap GE.printError
-          _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-            # lmap GE.printError
 
     trustNodes <-
       env.trustGetNetwork st.privKey
@@ -175,8 +144,6 @@ dashboard env =
     let
       foundUsers = catMaybes $ map hush users
 
-    pure unit
-
     lift
       $ set \st' ->
           let
@@ -185,31 +152,54 @@ dashboard env =
             newNodes = trustNodes
               <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
-            neigborEdges :: TrustNode -> CirclesGraph -> Either String CirclesGraph
-            neigborEdges tn g =
+            neigborEdges :: CirclesGraph -> TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
+            neigborEdges g tn =
               let
                 otherAddress = tn.safeAddress
 
                 outgoingEdge g' = st'.trusts
                   # G.lookupEdge (ownAddress ~ otherAddress)
-                  # (\e -> getOutgoingEdge (hush e) tn g')
+                  # (\e -> getOutgoingEdge (hush e) ownAddress tn g')
 
                 incomingEdge g' = st'.trusts
                   # G.lookupEdge (ownAddress ~ otherAddress)
-                  # (\e -> getIncomingEdge (hush e) tn g')
+                  # (\e -> getIncomingEdge (hush e) ownAddress tn g')
               in
                 g # outgoingEdge >>= incomingEdge
 
             eitherNewTrusts = st'.trusts
-              # (G.addNode (UserIdent $ Right $ st'.user) >>> note ("Could not add Node"))
-              >>= (G.addNodes newNodes >>> note "")
+              # (G.insertNode (UserIdent $ Right $ st'.user))
+              >>= (G.insertNodes newNodes)
+              >>= (\g -> foldM neigborEdges g trustNodes)
 
           in
             case eitherNewTrusts of
               Right newTrusts -> S._dashboard st'
                 { trusts = newTrusts
                 }
-              Left _ -> initLanding -- todo: bottom! 
+              Left _ -> unsafePartial $ crashWith "failed" -- get real err str
+
+  getOutgoingEdge :: Maybe TrustConnection -> Address -> TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getOutgoingEdge maybeOldTrustConnection ownAddress tn g =
+    case maybeOldTrustConnection of
+      Nothing | tn.isIncoming ->
+        G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+      Nothing -> pure g
+      Just (TrustConnection _ oldTrustState) | isPendingTrust oldTrustState && tn.isIncoming ->
+        G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+      Just (TrustConnection _ oldTrustState) | isPendingUntrust oldTrustState && not tn.isIncoming ->
+        g
+          # G.deleteEdge (ownAddress ~ tn.safeAddress)
+      _ -> pure g
+
+  getIncomingEdge :: Maybe TrustConnection -> Address -> TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getIncomingEdge maybeOldTrustConnection ownAddress tn g =
+    case maybeOldTrustConnection of
+      Nothing | tn.isOutgoing ->
+        G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+      Nothing ->
+        G.deleteEdge (tn.safeAddress ~ ownAddress) g
+      _ -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
