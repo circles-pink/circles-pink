@@ -1,4 +1,5 @@
 set dotenv-load
+set positional-arguments
 
 export PATH := "./node_modules/.bin:" + env_var('PATH')
 
@@ -128,6 +129,9 @@ run-garden_:
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
+
+generate-tsd:
+	node pkgs/ts/@circles-pink/state-machine/bin/generate-tsd.js --output-dir "{{PURS_OUTPUT}}"
 
 purs-docs:
 	LINK=results/purs-docs/result; \

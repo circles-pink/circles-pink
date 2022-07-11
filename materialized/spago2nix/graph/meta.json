@@ -2,15 +2,22 @@
   "name": "graph",
   "dependencies": [
     "aff",
+    "arrays",
     "debug-extra",
     "effect",
+    "either",
     "foldable-traversable",
     "maybe",
     "ordered-collections",
+    "pairs",
+    "partial",
     "prelude",
     "spec",
     "spec-discovery",
-    "tuples"
+    "tuples",
+    "typelevel-prelude",
+    "unfoldable",
+    "variant"
   ],
   "sources": [
     "./src/**/*.purs",

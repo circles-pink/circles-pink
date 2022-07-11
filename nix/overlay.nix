@@ -248,6 +248,10 @@
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 
+      generate-tsd = final.writeShellScriptBin "generate-tsd" ''
+        ${final.nodejs}/bin/node -e 'require("${purs.circles-pink-state-machine.output}/CirclesPink.GenerateTSD").main()' $@
+      '';
+
       purs-deps-json =
         let
           inherit (purs.circles-pink-state-machine) sources dependencies;
