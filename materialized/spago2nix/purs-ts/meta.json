@@ -1,0 +1,10 @@
+{
+  "name": "purs-ts",
+  "dependencies": [
+    "prelude"
+  ],
+  "sources": [
+    "./src/**/*.purs",
+    "./test/**/*.purs"
+  ]
+}

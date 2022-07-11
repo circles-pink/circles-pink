@@ -939,6 +939,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "pairs" = pkgs.stdenv.mkDerivation {
+        name = "pairs";
+        version = "v8.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/sharkdp/purescript-pairs.git";
+          rev = "97ae3cce9b0e00ff9473fff2779fcbcb4d7bc597";
+          sha256 = "0qmkwgn08z4ff1rb4h8adk0fysn3qkgv2m3vgfbpcqff5sksdyqw";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "parallel" = pkgs.stdenv.mkDerivation {
         name = "parallel";
         version = "v5.0.0";
