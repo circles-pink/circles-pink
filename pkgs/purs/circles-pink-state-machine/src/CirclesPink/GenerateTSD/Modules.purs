@@ -6,12 +6,13 @@ import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleMod
 import Data.ABC (A, B, Z)
 import Data.Map (Map)
 import Data.Map as M
+import Data.Set (Set)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Debug.Extra (todo)
 import Language.TypeScript.DTS as DTS
 import PursTs.Class (toTsDef, toTsType)
-import Pursts (cleanModule)
+import Pursts (cleanModule, resolveModule)
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -20,25 +21,25 @@ moduleMap = M.fromFoldable
   [ "CirclesPink.GenerateTSD.SampleModule" /\ "./CirclesPink.GenerateTSD.SampleModule" /\ "CirclesPink_GenerateTSD_SampleModule"
   ]
 
-modules :: Array (String /\ DTS.Module)
+modules :: Array (String /\ DTS.Module (Set DTS.Name))
 modules = do
   [ "CirclesPink.GenerateTSD.SampleModule" /\ cleanModule "CirclesPink_GenerateTSD_SampleModule"
-      ( DTS.Module
+      ( resolveModule $ DTS.Module
           [ DTS.DeclValueDef (DTS.Name "gravity") (toTsType CirclesPink.GenerateTSD.SampleModule.gravity)
           , DTS.DeclValueDef (DTS.Name "myName") (toTsType CirclesPink.GenerateTSD.SampleModule.myName)
           , DTS.DeclValueDef (DTS.Name "isOff") (toTsType CirclesPink.GenerateTSD.SampleModule.isOff)
           , DTS.DeclValueDef (DTS.Name "someItems") (toTsType CirclesPink.GenerateTSD.SampleModule.someItems)
           , DTS.DeclValueDef (DTS.Name "user") (toTsType CirclesPink.GenerateTSD.SampleModule.user)
           , DTS.DeclValueDef (DTS.Name "add") (toTsType CirclesPink.GenerateTSD.SampleModule.add)
-          , DTS.DeclTypeDef (DTS.Name "Baz") [] (toTsDef (Proxy :: _ CirclesPink.GenerateTSD.SampleModule.Baz))
+          , DTS.DeclTypeDef (DTS.Name "Baz") unit (toTsDef (Proxy :: _ CirclesPink.GenerateTSD.SampleModule.Baz))
           , DTS.DeclValueDef (DTS.Name "Foo") (toTsType CirclesPink.GenerateTSD.SampleModule.Foo)
           , DTS.DeclValueDef (DTS.Name "Bar") (toTsType CirclesPink.GenerateTSD.SampleModule.Bar)
           , DTS.DeclValueDef (DTS.Name "fromBaz") (toTsType CirclesPink.GenerateTSD.SampleModule.fromBaz)
-          , DTS.DeclTypeDef (DTS.Name "Vielleicht") [] (toTsDef $ mono (Proxy :: forall a. _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht a)))
-          , DTS.DeclValueDef (DTS.Name "caseVielleicht") (toTsType (CirclesPink.GenerateTSD.SampleModule.caseVielleicht :: A -> B -> _))
+          , DTS.DeclTypeDef (DTS.Name "Vielleicht") unit (toTsDef $ mono (Proxy :: forall a. _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht a)))
+          , DTS.DeclValueDef (DTS.Name "caseVielleicht") (toTsType (CirclesPink.GenerateTSD.SampleModule.caseVielleicht :: _ (_ A B) _))
           , DTS.DeclValueDef (DTS.Name "myNum") (toTsType (CirclesPink.GenerateTSD.SampleModule.myNum))
           , DTS.DeclValueDef (DTS.Name "myNumVar") (toTsType (CirclesPink.GenerateTSD.SampleModule.myNumVar))
-
+          -- , (CirclesPink.GenerateTSD.SampleModule.myNumVar) `asValue` "myNumVar"
           ]
       )
   ]

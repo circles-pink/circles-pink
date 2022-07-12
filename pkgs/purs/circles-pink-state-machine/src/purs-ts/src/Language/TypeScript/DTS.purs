@@ -13,38 +13,43 @@ import Prim hiding (Row, Type)
 
 import Data.Array as A
 import Data.Maybe (Maybe(..))
+import Data.Set (Set)
+import Data.Set as S
 import Data.String (joinWith)
 import Data.Tuple.Nested (type (/\), (/\))
 
 newtype Name = Name String
 
+derive newtype instance eqName :: Eq Name
+derive newtype instance ordName :: Ord Name
+
 data QualName = QualName (Maybe String) String
 
 newtype Path = Path String
 
-data Type
+data Type a
   = TypeString
   | TypeNumber
   | TypeBoolean
-  | TypeArray Type
-  | TypeRecord (Array (Name /\ Type))
-  | TypeFunction (Array Name) (Array (Name /\ Type)) Type
+  | TypeArray (Type a)
+  | TypeRecord (Array (Name /\ Type a))
+  | TypeFunction a (Array (Name /\ Type a)) (Type a)
   | TypeVar Name
-  | TypeConstructor QualName (Array Type) 
+  | TypeConstructor QualName (Array (Type a))
   | TypeOpaque (Array Name)
-  | TypeUnion (Array Type)
+  | TypeUnion (Array (Type a))
   | TypeTLString String
 
-data Declaration
-  = DeclTypeDef Name (Array Name) Type
-  | DeclValueDef Name Type
+data Declaration a
+  = DeclTypeDef Name a (Type a)
+  | DeclValueDef Name (Type a)
   | DeclImport Name Path
 
-newtype Module = Module (Array Declaration)
+newtype Module a = Module (Array (Declaration a))
 
 --------------------------------------------------------------------------------
 
-printType :: Type -> String
+printType :: Type (Set Name) -> String
 printType = case _ of
   TypeString -> "string"
   TypeNumber -> "number"
@@ -71,19 +76,18 @@ printType = case _ of
 
   printTargsArray xs = "[" <> joinWith "," (printName <$> xs) <> "]"
 
-printTargs :: Array Name -> String
-printTargs xs | A.length xs == 0 = ""
-printTargs xs = "<" <> joinWith "," (printName <$> xs) <> ">"
+printTargs :: Set Name -> String
+printTargs xs | S.size xs == 0 = ""
+printTargs xs = "<" <> joinWith "," (printName <$> S.toUnfoldable xs) <> ">"
 
-printTargs' :: Array Type -> String
+printTargs' :: Array (Type (Set Name)) -> String
 printTargs' xs | A.length xs == 0 = ""
 printTargs' xs = "<" <> joinWith "," (printType <$> xs) <> ">"
 
-
-printModule :: Module -> String
+printModule :: Module (Set Name) -> String
 printModule (Module xs) = joinWith "\n\n" $ printDeclaration <$> xs
 
-printDeclaration :: Declaration -> String
+printDeclaration :: Declaration (Set Name) -> String
 printDeclaration = case _ of
   DeclTypeDef n targs t -> "type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t

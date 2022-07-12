@@ -12,7 +12,7 @@ import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
 class ToTsType a where
-  toTsType :: a -> DTS.Type
+  toTsType :: a -> DTS.Type Unit
 
 instance toTsTypeNumber :: ToTsType Number where
   toTsType _ = DTS.TypeNumber
@@ -30,7 +30,7 @@ instance toTsTypeRecord :: (RowToList r rl, GenRecord rl) => ToTsType (Record r)
   toTsType _ = DTS.TypeRecord $ genRecord (Proxy :: _ rl)
 
 instance toTsTypeFunction :: (ToTsType a, ToTsType b) => ToTsType (a -> b) where
-  toTsType _ = DTS.TypeFunction []
+  toTsType _ = DTS.TypeFunction unit
     [ (DTS.Name "_") /\ toTsType (undefined :: a) ]
     (toTsType (undefined :: b))
 
@@ -44,7 +44,7 @@ instance toTsTypeVariant :: (RowToList r rl, GenVariant rl) => ToTsType (Variant
 
 class GenRecord :: RowList Type -> Constraint
 class GenRecord rl where
-  genRecord :: Proxy rl -> (Array (DTS.Name /\ DTS.Type))
+  genRecord :: Proxy rl -> (Array (DTS.Name /\ DTS.Type Unit))
 
 instance genRecordNil :: GenRecord Nil where
   genRecord _ = []
@@ -58,7 +58,7 @@ instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (C
 
 class GenVariant :: RowList Type -> Constraint
 class GenVariant rl where
-  genVariant :: Proxy rl -> (Array DTS.Type)
+  genVariant :: Proxy rl -> (Array (DTS.Type Unit))
 
 instance genVariantNil :: GenVariant Nil where
   genVariant _ = []
@@ -79,7 +79,7 @@ instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant
 --    toToTsRef :: a -> DTSTypeRef
 
 class ToTsDef a where
-  toTsDef :: a -> DTS.Type
+  toTsDef :: a -> DTS.Type Unit
 
 instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
   toTsDef _ = toTsDef (undefined :: a)

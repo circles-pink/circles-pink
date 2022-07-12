@@ -51,8 +51,9 @@ instance toTsTypeVielleicht :: ToTsType a => ToTsType (Vielleicht a) where
     (DTS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Vielleicht")
     [ toTsType (Proxy :: _ a) ]
 
-caseVielleicht :: forall a z. a -> z -> z -> Vielleicht a -> z
+caseVielleicht :: forall a z. (a -> z) -> z -> Vielleicht a -> z
 caseVielleicht = todo
+
 
 --------------------------------------------------------------------------------
 
