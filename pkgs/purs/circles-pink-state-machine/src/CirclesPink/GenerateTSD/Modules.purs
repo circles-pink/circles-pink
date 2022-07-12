@@ -3,57 +3,45 @@ module CirclesPink.GenerateTSD.Modules where
 import Prelude
 
 import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleModule
-import Data.ABC (A, B, Z)
+import Data.ABC (A, B)
 import Data.Map (Map)
 import Data.Map as M
-import Data.Set (Set)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Typelevel.Undefined (undefined)
-import Debug.Extra (todo)
 import Language.TypeScript.DTS as DTS
-import PursTs.Class (toTsDef, toTsType)
-import Pursts (cleanModule, resolveModule)
+import PursTs (typ, val)
+import Simple.Data.Maybe as Simple.Data.Maybe
 import Type.Proxy (Proxy(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 moduleMap :: Map String (String /\ String)
-moduleMap = M.fromFoldable
-  [ "CirclesPink.GenerateTSD.SampleModule" /\ "./CirclesPink.GenerateTSD.SampleModule" /\ "CirclesPink_GenerateTSD_SampleModule"
-  ]
+moduleMap = M.fromFoldable []
 
-modules :: Array (String /\ DTS.Module (Set DTS.Name))
+modules :: Array (String /\ Array (DTS.Declaration Unit))
 modules = do
-  [ "CirclesPink.GenerateTSD.SampleModule" /\ cleanModule "CirclesPink_GenerateTSD_SampleModule"
-      ( resolveModule $ DTS.Module
-          [ DTS.DeclValueDef (DTS.Name "gravity") (toTsType CirclesPink.GenerateTSD.SampleModule.gravity)
-          , DTS.DeclValueDef (DTS.Name "myName") (toTsType CirclesPink.GenerateTSD.SampleModule.myName)
-          , DTS.DeclValueDef (DTS.Name "isOff") (toTsType CirclesPink.GenerateTSD.SampleModule.isOff)
-          , DTS.DeclValueDef (DTS.Name "someItems") (toTsType CirclesPink.GenerateTSD.SampleModule.someItems)
-          , DTS.DeclValueDef (DTS.Name "user") (toTsType CirclesPink.GenerateTSD.SampleModule.user)
-          , DTS.DeclValueDef (DTS.Name "add") (toTsType CirclesPink.GenerateTSD.SampleModule.add)
-          , DTS.DeclTypeDef (DTS.Name "Baz") unit (toTsDef (Proxy :: _ CirclesPink.GenerateTSD.SampleModule.Baz))
-          , DTS.DeclValueDef (DTS.Name "Foo") (toTsType CirclesPink.GenerateTSD.SampleModule.Foo)
-          , DTS.DeclValueDef (DTS.Name "Bar") (toTsType CirclesPink.GenerateTSD.SampleModule.Bar)
-          , DTS.DeclValueDef (DTS.Name "fromBaz") (toTsType CirclesPink.GenerateTSD.SampleModule.fromBaz)
-          , DTS.DeclTypeDef (DTS.Name "Vielleicht") unit (toTsDef $ mono (Proxy :: forall a. _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht a)))
-          , DTS.DeclValueDef (DTS.Name "caseVielleicht") (toTsType (CirclesPink.GenerateTSD.SampleModule.caseVielleicht :: _ (_ A B) _))
-          , DTS.DeclValueDef (DTS.Name "myNum") (toTsType (CirclesPink.GenerateTSD.SampleModule.myNum))
-          , DTS.DeclValueDef (DTS.Name "myNumVar") (toTsType (CirclesPink.GenerateTSD.SampleModule.myNumVar))
-          -- , (CirclesPink.GenerateTSD.SampleModule.myNumVar) `asValue` "myNumVar"
-          ]
-      )
+  [ "CirclesPink.GenerateTSD.SampleModule" /\
+      [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
+      , typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht A)) "Vielleicht"
+      , val (CirclesPink.GenerateTSD.SampleModule.Foo) "Foo"
+      , val (CirclesPink.GenerateTSD.SampleModule.Bar) "Bar"
+      , val (CirclesPink.GenerateTSD.SampleModule.gravity) "gravity"
+      , val (CirclesPink.GenerateTSD.SampleModule.myName) "myName"
+      , val (CirclesPink.GenerateTSD.SampleModule.isOff) "isOff"
+      , val (CirclesPink.GenerateTSD.SampleModule.someItems) "someItems"
+      , val (CirclesPink.GenerateTSD.SampleModule.user) "user"
+      , val (CirclesPink.GenerateTSD.SampleModule.add) "add"
+      , val (CirclesPink.GenerateTSD.SampleModule.fromBaz) "fromBaz"
+      , val (CirclesPink.GenerateTSD.SampleModule.myNum) "myNum"
+      , val (CirclesPink.GenerateTSD.SampleModule.myNumVar) "myNumVar"
+      , val (CirclesPink.GenerateTSD.SampleModule.someMaybe) "someMaybe"
+
+      ]
+  , "Simple.Data.Maybe" /\
+      [ val (Simple.Data.Maybe.Just :: A -> _) "Just"
+      , val (Simple.Data.Maybe.Nothing :: _ A) "Nothing"
+      , val (Simple.Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
+      , val (Simple.Data.Maybe.maybe' :: _ -> (A -> B) -> _) "maybe'"
+      ]
+  , "Data.Maybe" /\
+      [ typ (Proxy :: _ (Simple.Data.Maybe.Maybe A)) "Maybe"
+      ]
   ]
 
--- x = toMono CirclesPink.GenerateTSD.SampleModule.caseVielleicht
-
--- class ToMono a b where
---   toMono :: a -> b
-
--- instance toMono1 :: ToMono (a1 -> z -> z -> f4 a1 -> z) (A -> z -> f2 -> f4 A -> f5) where
---   toMono = unsafeCoerce 
-
--- instance toTsMonoProxy :: (ToMono a b) => ToMono (Proxy a) (Proxy b) where
---   toMono _ = Proxy
-
-mono :: forall (f :: Type -> Type) a. (Proxy (f a)) -> Proxy (f A)
-mono = unsafeCoerce
