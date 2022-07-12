@@ -1,17 +1,22 @@
 module Language.TypeScript.DTS
   ( Declaration(..)
+  , Import(..)
   , Module(..)
+  , ModuleBody(..)
+  , ModuleHead(..)
   , Name(..)
   , Path(..)
   , QualName(..)
   , Type(..)
   , printModule
-  ) where
+  )
+  where
 
 import Prelude
 import Prim hiding (Row, Type)
 
 import Data.Array as A
+import Data.Foldable (fold)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as S
@@ -43,9 +48,14 @@ data Type a
 data Declaration a
   = DeclTypeDef Name a (Type a)
   | DeclValueDef Name (Type a)
-  | DeclImport Name Path
 
-newtype Module a = Module (Array (Declaration a))
+data Import = Import Name Path
+
+data Module a = Module ModuleHead (ModuleBody a)
+
+newtype ModuleHead = ModuleHead (Array Import)
+
+newtype ModuleBody a = ModuleBody (Array (Declaration a))
 
 --------------------------------------------------------------------------------
 
@@ -85,13 +95,22 @@ printTargs' xs | A.length xs == 0 = ""
 printTargs' xs = "<" <> joinWith "," (printType <$> xs) <> ">"
 
 printModule :: Module (Set Name) -> String
-printModule (Module xs) = joinWith "\n\n" $ printDeclaration <$> xs
+printModule (Module mh mb) = fold [ printModuleHead mh, printModuleBody mb ]
+
+printModuleHead :: ModuleHead -> String
+printModuleHead (ModuleHead im) | A.null im = ""
+printModuleHead (ModuleHead im) =  (joinWith "\n" $ printImport <$> im) <> "\n\n"
+
+printModuleBody :: ModuleBody (Set Name) -> String
+printModuleBody (ModuleBody xs) = joinWith "\n\n" $ printDeclaration <$> xs
 
 printDeclaration :: Declaration (Set Name) -> String
 printDeclaration = case _ of
-  DeclTypeDef n targs t -> "type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
+  DeclTypeDef n targs t -> "export type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
-  DeclImport n p -> "import * as " <> printName n <> " from " <> printPath p
+
+printImport :: Import -> String
+printImport (Import n p) = "import * as " <> printName n <> " from '" <> printPath p <> "'"
 
 printName :: Name -> String
 printName (Name s) = s

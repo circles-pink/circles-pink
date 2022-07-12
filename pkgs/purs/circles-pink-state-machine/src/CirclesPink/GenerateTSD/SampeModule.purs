@@ -54,6 +54,8 @@ instance toTsTypeVielleicht :: ToTsType a => ToTsType (Vielleicht a) where
 caseVielleicht :: forall a z. (a -> z) -> z -> Vielleicht a -> z
 caseVielleicht = todo
 
+someMaybe :: Maybe Number
+someMaybe = Just 1.2
 
 --------------------------------------------------------------------------------
 
