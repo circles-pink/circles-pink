@@ -120,17 +120,7 @@ export const TrustUserList = (props: TrustUserListProps) => {
     edges: _graph.edges.map(tsTupleEdge),
   };
 
-  // Paginate trusts
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const paginationInfo = paginate(graph.nodes.length, currentPage);
-
-  const pageControls = fetchPageNumbers({
-    currentPage,
-    totalPages: paginationInfo.pages.length,
-    pageNeighbours: 1,
-  });
-
-  const trusts: Trust[] = [...graph.nodes]
+  const allTrusts: Trust[] = [...graph.nodes]
     // Sort by username and safeAddress
     // .sort((a, b) => {
     //   const usernameA = pipe(
@@ -169,9 +159,23 @@ export const TrustUserList = (props: TrustUserListProps) => {
         isOutgoing: incomingEdge._tag === 'Some' ? true : false,
         user: n[1],
       };
-    })
-    // Get slice on current page
-    .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
+    });
+
+  // Paginate trusts
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const paginationInfo = paginate(allTrusts.length, currentPage);
+
+  const pageControls = fetchPageNumbers({
+    currentPage,
+    totalPages: paginationInfo.pages.length,
+    pageNeighbours: 1,
+  });
+
+  // Get slice on current page
+  const trusts = allTrusts.slice(
+    paginationInfo.startIndex,
+    paginationInfo.endIndex + 1
+  );
 
   return (
     <LightColorFrame theme={theme}>
@@ -483,4 +487,3 @@ const mapToolTipRelRec = (receivable: boolean, username: string) => {
     ? replaceUsername(t('dashboard.trustList.relationReceivable'), username)
     : replaceUsername(t('dashboard.trustList.relationNotReceivable'), username);
 };
-
