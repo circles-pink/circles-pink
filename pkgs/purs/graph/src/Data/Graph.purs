@@ -4,11 +4,13 @@ module Data.Graph
   , edges
   , incomingEdges
   , incomingEdgesWithNodes
+  , incomingNodes
   , insertNode
   , insertNodes
   , module Exp
   , neighborEdgesWithNodes
   , neighborIds
+  , neighborNodes
   , nodes
   , outgoingEdges
   , outgoingEdgesWithNodes
@@ -23,7 +25,7 @@ import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrOutgoingEdges)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrNeighborNodes)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
@@ -56,6 +58,15 @@ outgoingNodes id graph = graph
   # C.outgoingIds id
   <#> S.toUnfoldable
   <#> map (\id' -> id' /\ (unsafePartial $ partLookupNode id' graph))
+
+incomingNodes :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrIncomingNodes id r) (Array (id /\ n))
+incomingNodes id graph = graph
+  # C.incomingIds id
+  <#> S.toUnfoldable
+  <#> map (\id' -> id' /\ (unsafePartial $ partLookupNode id' graph))
+
+neighborNodes :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrNeighborNodes id r) (Array (IxNode id n))
+neighborNodes id g = (<>) <$> incomingNodes id g <*> outgoingNodes id g
 
 addNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrAddNodes id r) (Graph id e n)
 addNodes nodes' g = foldM (flip $ uncurry C.addNode) g nodes'

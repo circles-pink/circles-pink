@@ -5,7 +5,6 @@ import Prelude
 import Data.Pair (Pair, (~))
 import Data.Variant (Variant)
 import Data.Variant (case_, onMatch)
-import Debug.Extra (todo)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -89,7 +88,11 @@ type ErrAddNodes id r = ErrAddNode id + r
 
 type ErrOutgoingNodes id r = ErrOutgoingIds id + r
 
-type ErrOutgoingEdgesWithNodes id r = ErrOutgoingIds id + r
+type ErrIncomingNodes id r = ErrIncomingIds id + r
+
+type ErrNeighborNodes id r = ErrIncomingIds id + r
+
+type ErrOutgoingEdgesWithNodes id r = ErrOutgoingIds id + ErrOutgoingIds id + r
 
 type ErrIncomingEdgesWithNodes id r = ErrIncomingIds id + r
 
