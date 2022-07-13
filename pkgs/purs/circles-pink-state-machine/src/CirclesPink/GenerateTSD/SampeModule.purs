@@ -10,6 +10,7 @@ import Language.TypeScript.DTS as DTS
 import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+
 gravity :: Number
 gravity = 9.81
 
@@ -34,7 +35,7 @@ instance toTsTypeBaz :: ToTsType Baz where
   toTsType _ = DTS.TypeConstructor (DTS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Baz") []
 
 instance toTsDefBaz :: ToTsDef Baz where
-  toTsDef _ = DTS.TypeOpaque []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Baz") []
 
 fromBaz :: Baz -> Number
 fromBaz = case _ of
@@ -44,7 +45,7 @@ fromBaz = case _ of
 data Vielleicht a = Nur a | Nichts
 
 instance toTsDefVielleicht :: ToTsDef (Vielleicht a) where
-  toTsDef _ = DTS.TypeOpaque [ DTS.Name "A" ]
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Vielleicht") [ DTS.Name "A" ]
 
 instance toTsTypeVielleicht :: ToTsType a => ToTsType (Vielleicht a) where
   toTsType _ = DTS.TypeConstructor

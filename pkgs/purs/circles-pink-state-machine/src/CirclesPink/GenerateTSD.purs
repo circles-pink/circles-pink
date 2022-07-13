@@ -3,12 +3,9 @@ module CirclesPink.GenerateTSD where
 import CirclesPink.Prelude
 
 import CirclesPink.GenerateTSD.Modules (moduleMap, modules)
-import Data.Array as A
-import Effect.Class.Console (logShow)
-import Language.TypeScript.DTS (printModule)
+import Language.TypeScript.DTS.Print (printModule)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
-import Node.Process as NP
 import Options.Applicative (Parser, ParserInfo, execParser, fullDesc, header, help, helper, info, long, metavar, strOption, (<**>))
 import PursTs (defineModules)
 
@@ -37,7 +34,6 @@ parserInfo = info (parserOpts <**> helper)
 main :: Effect Unit
 main = do
   opts <- execParser parserInfo
-  logShow opts
   modules
     # defineModules moduleMap
     # traverse_

@@ -6,14 +6,17 @@ import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleMod
 import Data.ABC (A, B)
 import Data.Map (Map)
 import Data.Map as M
+import Data.Nullable as Data
+import Data.Nullable as Data.Nullable
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS as DTS
-import PursTs (typ, val)
+import PursTs (pursModule, typ, val)
 import Simple.Data.Maybe as Simple.Data.Maybe
+import Simple.Data.Number as Simple.Data.Number
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
-moduleMap = M.fromFoldable []
+moduleMap = M.fromFoldable [ pursModule "Data.Maybe" ]
 
 modules :: Array (String /\ Array (DTS.Declaration Unit))
 modules = do
@@ -32,16 +35,26 @@ modules = do
       , val (CirclesPink.GenerateTSD.SampleModule.myNum) "myNum"
       , val (CirclesPink.GenerateTSD.SampleModule.myNumVar) "myNumVar"
       , val (CirclesPink.GenerateTSD.SampleModule.someMaybe) "someMaybe"
-
       ]
   , "Simple.Data.Maybe" /\
       [ val (Simple.Data.Maybe.Just :: A -> _) "Just"
       , val (Simple.Data.Maybe.Nothing :: _ A) "Nothing"
       , val (Simple.Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
       , val (Simple.Data.Maybe.maybe' :: _ -> (A -> B) -> _) "maybe'"
+      , val (Simple.Data.Maybe.bind :: _ A -> (_ -> _ B) -> _) "bind"
+      , val (Simple.Data.Maybe.bindFlipped :: (_ -> _ B) -> _ A -> _) "bindFlipped"
+      , val (Simple.Data.Maybe.map :: (A -> B) -> _) "map"
+      , val (Simple.Data.Maybe.pure :: A -> _) "pure"
+      , val (Simple.Data.Maybe.eq :: _ -> _ A -> _) "eq"
       ]
   , "Data.Maybe" /\
       [ typ (Proxy :: _ (Simple.Data.Maybe.Maybe A)) "Maybe"
+      ]
+  , "Data.Nullable" /\
+      [ val (Data.Nullable.toNullable :: _ A -> _) "toNullable"
+      ]
+  , "Simple.Data.Number" /\
+      [ val (Simple.Data.Number.eq) "eq"
       ]
   ]
 

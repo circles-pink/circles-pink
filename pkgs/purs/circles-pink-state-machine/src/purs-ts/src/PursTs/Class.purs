@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Array as A
 import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
@@ -51,6 +52,9 @@ instance toTsTypeUnit :: ToTsType Unit where
     (DTS.QualName (Just "Data_Unit") "Unit")
     []
 
+instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
+  toTsType _ = DTS.TypeUnion [ DTS.TypeNull, toTsType (Proxy :: _ a) ]
+
 --------------------------------------------------------------------------------
 
 class GenRecord :: RowList Type -> Constraint
@@ -96,10 +100,10 @@ instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
   toTsDef _ = toTsDef (undefined :: a)
 
 instance toTsTypeDefMaybe :: ToTsDef (Maybe a) where
-  toTsDef _ = DTS.TypeOpaque [ DTS.Name "A" ]
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Maybe") "Maybe") [ DTS.Name "A" ]
 
 instance toTsTypeDefUnit :: ToTsDef Unit where
-  toTsDef _ = DTS.TypeOpaque []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Unit") "Unit") []
 
 -- class ToDTSTypeRef a where
 --   toDTSTypeRef :: a -> DTSTypeRef
