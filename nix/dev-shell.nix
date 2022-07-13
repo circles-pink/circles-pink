@@ -52,7 +52,6 @@ pkgs.mkShell {
       inherit (pkgs.nodePackages) fp-ts nijs glob yargs;
     }))
     pkgs.circles-pink.purs-output-cleaner
-    pkgs.circles-pink.generate-tsd
   ];
 
   # Change the prompt to show that you are in a devShell
