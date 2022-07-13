@@ -264,7 +264,13 @@ export const Dashboard = ({
               <br />
               <br />
               <LightColorFrame theme={theme}>
-                <TrustGraph graph={state.graph} />
+                <TrustGraph
+                  graph={state.graph}
+                  expandTrustNetwork={(addr: string) =>
+                    act(A._dashboard(A._expandTrustNetwork(addr)))
+                  }
+                  theme={theme}
+                />
               </LightColorFrame>
             </>
           </FadeIn>

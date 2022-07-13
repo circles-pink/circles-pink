@@ -21,7 +21,6 @@ import Data.Newtype (wrap)
 import Data.Variant (inj)
 import Type.Proxy (Proxy(..))
 
-
 testEnv :: forall m. Monad m => Env.Env (TestScriptT m)
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
@@ -37,7 +36,8 @@ testEnv =
   , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit
   , isTrusted: \_ -> pure $ wrap { isTrusted: true, trustConnections: 3 }
-  , trustGetNetwork: \_ -> pure []
+  , trustGetNetwork: \_ _ -> pure []
+  , privKeyToSafeAddress: \_ -> pure sampleSafeAddress
   , getSafeStatus: \_ -> pure { isCreated: true, isDeployed: true }
   , deploySafe: \_ -> pure unit
   , deployToken: \_ -> pure ""
@@ -78,7 +78,8 @@ liftEnv f e =
   , getUsers: compose3 (mapExceptT f) e.getUsers
   , coreToWindow: compose (mapExceptT f) e.coreToWindow
   , isTrusted: compose (mapExceptT f) e.isTrusted
-  , trustGetNetwork: compose (mapExceptT f) e.trustGetNetwork
+  , trustGetNetwork: compose2 (mapExceptT f) e.trustGetNetwork
+  , privKeyToSafeAddress: compose (mapExceptT f) e.privKeyToSafeAddress
   , getSafeStatus: compose (mapExceptT f) e.getSafeStatus
   , deploySafe: compose (mapExceptT f) e.deploySafe
   , deployToken: compose (mapExceptT f) e.deployToken
@@ -94,4 +95,3 @@ liftEnv f e =
   , getTimestamp: f e.getTimestamp
   , sleep: compose f e.sleep
   }
-  

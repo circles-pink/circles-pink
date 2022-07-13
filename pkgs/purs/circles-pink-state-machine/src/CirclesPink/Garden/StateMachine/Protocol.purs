@@ -52,6 +52,7 @@ type CirclesProtocol = P.Protocol
         , transfer :: P.Action ("dashboard" :> Nil')
         , userSearch :: P.Action ("dashboard" :> Nil')
         , redeploySafeAndToken :: P.Action ("dashboard" :> Nil')
+        , expandTrustNetwork :: P.Action ("dashboard" :> Nil')
         )
   , login ::
       P.State
