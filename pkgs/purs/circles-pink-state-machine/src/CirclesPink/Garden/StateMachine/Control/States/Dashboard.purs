@@ -142,7 +142,7 @@ dashboard env@{ trustGetNetwork } =
   syncTrusts set st i = do
 
     trustNodes :: Map Address TrustNode <-
-      trustGetNetwork st.privKey
+      trustGetNetwork st.privKey st.user.safeAddress
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
         <#> map (\v -> v.safeAddress /\ v) >>> M.fromFoldable

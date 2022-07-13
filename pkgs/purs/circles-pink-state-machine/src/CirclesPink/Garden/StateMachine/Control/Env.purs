@@ -21,6 +21,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsFunded
   , ErrIsTrusted
   , ErrPrepareSafeDeploy
+  , ErrPrivKeyToSafeAddress
   , ErrReadStorage
   , ErrRemoveTrustConnection
   , ErrRequestUBIPayout
@@ -40,6 +41,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , IsFunded
   , IsTrusted
   , PrepareSafeDeploy
+  , PrivKeyToSafeAddress
   , RemoveTrustConnection
   , RequestPath
   , RequestUBIPayout
@@ -54,7 +56,8 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , UserSearch
   , _errDecode
   , _errReadStorage
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -111,7 +114,12 @@ type ErrInvalidMnemonic r = (errInvalidMnemonic :: Unit | r)
 --------------------------------------------------------------------------------
 type ErrTrustGetNetwork r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
 
-type TrustGetNetwork m = forall r. PrivateKey -> ExceptV (ErrTrustGetNetwork + r) m (Array TrustNode)
+type TrustGetNetwork m = forall r. PrivateKey -> Address -> ExceptV (ErrTrustGetNetwork + r) m (Array TrustNode)
+
+--------------------------------------------------------------------------------
+type ErrPrivKeyToSafeAddress r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
+
+type PrivKeyToSafeAddress m = forall r. PrivateKey -> ExceptV (ErrPrivKeyToSafeAddress + r) m Address
 
 --------------------------------------------------------------------------------
 type ErrGetSafeStatus r = ErrNative + ErrInvalidUrl + ErrParseAddress + r
@@ -223,6 +231,7 @@ type Env m =
   , isTrusted :: IsTrusted m
   , isFunded :: IsFunded m
   , trustGetNetwork :: TrustGetNetwork m
+  , privKeyToSafeAddress :: PrivKeyToSafeAddress m
   , getSafeStatus :: GetSafeStatus m
   , deploySafe :: DeploySafe m
   , deployToken :: DeployToken m
