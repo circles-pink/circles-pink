@@ -29,13 +29,16 @@ import Data.Foldable (foldM)
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
 import Data.Int (floor, toNumber)
+import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromJust)
 import Data.Pair ((~))
+import Data.Pair as P
 import Data.Set as Set
 import Data.String (length)
+import Data.These (These, maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
 import Debug (spyWith)
 import Debug.Extra (todo)
@@ -159,14 +162,14 @@ dashboard env@{ trustGetNetwork } =
 
             eitherNewTrusts :: EitherV (GE.ErrAll Address ()) CirclesGraph
             eitherNewTrusts = do
-              incomingEdges <- G.incomingEdges ownAddress st'.trusts  
-            
+              incomingEdges <- G.incomingEdges ownAddress st'.trusts
+                <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+
               st'.trusts
                 # (G.insertNode (UserIdent $ Right $ st'.user))
                 -- >>= (\g -> foldM getNode g $ mapsToThese users nodes)
-                >>= (\g -> foldM getIncomingEdge g $ mapsToThese trustNodes incomingEdges)
-                -- >>= (\g -> foldM getOutgoingEdge g $ mapsToThese trustNodes outgoingEdges)
-              
+                >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
+          -- >>= (\g -> foldM getOutgoingEdge g $ mapsToThese trustNodes outgoingEdges)
 
           in
             case eitherNewTrusts of
@@ -175,8 +178,11 @@ dashboard env@{ trustGetNetwork } =
                 }
               Left e -> unsafePartial $ crashWith $ GE.printError e
 
-  mapsToThese :: forall k a b. Map k a -> Map k b -> Array (These a b)
-  mapsToThese = todo
+  mapsToThese :: forall k a b. Ord k => Map k a -> Map k b -> Array (These a b)
+  mapsToThese mapA mapB = Set.union (M.keys mapA) (M.keys mapB)
+    # Set.toUnfoldable
+    <#> (\k -> maybeThese (M.lookup k mapA) (M.lookup k mapB))
+    # catMaybes
 
   getNode :: These TrustNode UserIdent -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode = todo
@@ -208,15 +214,14 @@ dashboard env@{ trustGetNetwork } =
   --       g
   --         # G.deleteEdge (ownAddress ~ tn.safeAddress)
   --     _, _ -> pure g
-       
 
-  -- getIncomingEdge :: These TrustConnection TrustNode      Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  -- getIncomingEdge maybeOldTrustConnection ownAddress apiTrustNode g =
-  --   case maybeOldTrustConnection, apiTrustNode of
-  --     Nothing, Just tn | tn.isOutgoing ->
-  --       G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-  --     Nothing, Just _ -> Right g
-  --     _, Just tn -> G.updateEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+  getIncomingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getIncomingEdge these ownAddress g = todo
+  -- case maybeOldTrustConnection, apiTrustNode of
+  --   Nothing, Just tn | tn.isOutgoing ->
+  --     G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+  --   Nothing, Just _ -> Right g
+  --   _, Just tn -> G.updateEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }

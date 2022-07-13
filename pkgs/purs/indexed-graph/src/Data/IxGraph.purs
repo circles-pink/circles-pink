@@ -8,12 +8,14 @@ module Data.IxGraph
   , deleteNode
   , empty
   , getIndex
+  , incomingEdges
   , incomingEdgesWithNodes
   , insertNode
   , insertNodes
   , lookupEdge
   , lookupNode
   , neighborEdgesWithNodes
+  , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingIds
   , outgoingNodes
@@ -29,7 +31,7 @@ import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec)
 import Data.Graph as G
-import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrInsertNodes)
+import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrIncomingEdges)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -104,8 +106,14 @@ outgoingNodes id (IxGraph graph) = map snd <$> G.outgoingNodes id graph
 outgoingEdgesWithNodes :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrOutgoingEdgesWithNodes id r) (Array (e /\ n))
 outgoingEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.outgoingEdgesWithNodes id graph
 
+outgoingEdges :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrOutgoingEdges id r) (Array e)
+outgoingEdges id (IxGraph graph) = map snd <$> G.outgoingEdges id graph
+
 incomingEdgesWithNodes :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrIncomingEdgesWithNodes id r) (Array (e /\ n))
 incomingEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.incomingEdgesWithNodes id graph
+
+incomingEdges :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrIncomingEdges id r) (Array e)
+incomingEdges id (IxGraph graph) = map snd <$> G.incomingEdges id graph
 
 neighborEdgesWithNodes :: forall r id e n. Ord id => Ord e => Ord n => id -> IxGraph id e n -> EitherV (ErrNeighborEdgesWithNodes id r) (Array (e /\ n))
 neighborEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.neighborEdgesWithNodes id graph

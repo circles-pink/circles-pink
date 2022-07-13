@@ -2,6 +2,7 @@ module Data.Graph
   ( addNodes
   , edgeIds
   , edges
+  , incomingEdges
   , incomingEdgesWithNodes
   , insertNode
   , insertNodes
@@ -9,6 +10,7 @@ module Data.Graph
   , neighborEdgesWithNodes
   , neighborIds
   , nodes
+  , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingNodes
   ) where
@@ -21,12 +23,12 @@ import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrInsertNodes)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrOutgoingEdges)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
 import Data.Tuple (uncurry)
-import Data.Tuple.Nested (type (/\), uncurry2, (/\))
+import Data.Tuple.Nested (type (/\), (/\))
 import Partial (crashWith)
 import Partial.Unsafe (unsafePartial)
 
@@ -88,6 +90,13 @@ outgoingEdgesWithNodes fromId graph = do
   getBoth toId = (unsafePartial $ partLookupEdgeIx (fromId ~ toId) graph) /\
     (unsafePartial $ partLookupNodeIx toId graph)
 
+outgoingEdges :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrOutgoingEdges id r) (Array (IxEdge id e))
+outgoingEdges fromId graph = do
+  ids <- C.outgoingIds fromId graph
+  ids # S.toUnfoldable <#> getEdge # pure
+  where
+  getEdge toId = (unsafePartial $ partLookupEdgeIx (fromId ~ toId) graph)
+
 incomingEdgesWithNodes :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrIncomingEdgesWithNodes id r) (Array (IxEdgeWithNode id e n))
 incomingEdgesWithNodes fromId graph = do
   ids <- C.incomingIds fromId graph
@@ -95,6 +104,13 @@ incomingEdgesWithNodes fromId graph = do
   where
   getBoth toId = (unsafePartial $ partLookupEdgeIx (toId ~ fromId) graph) /\
     (unsafePartial $ partLookupNodeIx toId graph)
+
+incomingEdges :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrIncomingEdges id r) (Array (IxEdge id e))
+incomingEdges fromId graph = do
+  ids <- C.incomingIds fromId graph
+  ids # S.toUnfoldable <#> getEdge # pure
+  where
+  getEdge toId = (unsafePartial $ partLookupEdgeIx (toId ~ fromId) graph)
 
 neighborEdgesWithNodes :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrNeighborEdgesWithNodes id r) (Array (IxEdgeWithNode id e n))
 neighborEdgesWithNodes id g = (<>) <$> incomingEdgesWithNodes id g <*> outgoingEdgesWithNodes id g
