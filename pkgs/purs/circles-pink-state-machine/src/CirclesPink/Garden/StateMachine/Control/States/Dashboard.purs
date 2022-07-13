@@ -6,8 +6,8 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 
 import Prelude
 
-import CirclesCore (User, TrustNode)
-import CirclesPink.Data.Address (Address(..))
+import CirclesCore (TrustNode)
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
@@ -20,13 +20,12 @@ import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (catMaybes, drop, find, take)
+import Data.Array (catMaybes, drop, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
-import Data.Bifunctor (lmap)
-import Data.Either (Either(..), either, hush, isRight, note)
-import Data.Foldable (fold, foldM)
+import Data.Either (Either(..), either, isRight)
+import Data.Foldable (foldM)
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
 import Data.Int (floor, toNumber)
@@ -34,14 +33,13 @@ import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromJust)
 import Data.Pair ((~))
 import Data.Pair as P
 import Data.Set as Set
 import Data.String (length)
 import Data.These (These(..), maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spy, spyWith)
+import Debug (spyWith)
 import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Partial (crashWith)

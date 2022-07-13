@@ -5,10 +5,9 @@ module Simple.Data.Maybe
   , map
   , module Exp
   , pure
-  )
-  where
+  ) where
 
-import Control.Bind as P
+import Control.Bind as B
 import Data.Maybe (Maybe(..))
 import Data.Maybe (Maybe(..), maybe, maybe') as Exp
 import Prelude as P
@@ -18,7 +17,7 @@ bind :: forall a b. Maybe a -> (a -> Maybe b) -> Maybe b
 bind = P.bind
 
 bindFlipped :: forall a b. (a -> Maybe b) -> Maybe a -> Maybe b
-bindFlipped = P.bindFlipped
+bindFlipped = B.bindFlipped
 
 map :: forall a b. (a -> b) -> Maybe a -> Maybe b
 map = P.map
