@@ -93,6 +93,10 @@ type ErrOutgoingEdgesWithNodes id r = ErrOutgoingIds id + r
 
 type ErrIncomingEdgesWithNodes id r = ErrIncomingIds id + r
 
+type ErrIncomingEdges id r = ErrIncomingIds id + r
+
+type ErrOutgoingEdges id r = ErrOutgoingIds id + r
+
 type ErrNeighborIds id r = ErrOutgoingIds id + ErrIncomingIds id + r
 
 type ErrNeighborEdgesWithNodes id r = ErrIncomingEdgesWithNodes id + ErrOutgoingEdgesWithNodes id + r
@@ -102,7 +106,6 @@ type ErrInsertNode r = r
 
 type ErrInsertNodes :: forall k. k -> k
 type ErrInsertNodes r = r
-
 
 --------------------------------------------------------------------------------
 -- Pretty Print
