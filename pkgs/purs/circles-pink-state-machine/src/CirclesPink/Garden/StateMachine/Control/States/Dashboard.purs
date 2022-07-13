@@ -34,6 +34,7 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Pair ((~))
+import Data.Set as Set
 import Data.String (length)
 import Data.Tuple.Nested (type (/\), (/\))
 import Debug (spyWith)
@@ -107,7 +108,7 @@ dashboard
            ("dashboard" :: S.DashboardState)
      , redeploySafeAndToken :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      }
-dashboard env@{trustGetNetwork} =
+dashboard env@{ trustGetNetwork } =
   { logout: \_ _ _ -> pure unit
   , getTrusts
   , addTrustConnection
@@ -142,12 +143,11 @@ dashboard env@{trustGetNetwork} =
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
         <#> map (\v -> v.safeAddress /\ v) >>> M.fromFoldable
-    -- users <-
-    --   fetchUsersBinarySearch env st.privKey (map _.safeAddress trustNodes)
-    --     # dropError
-    -- let
-    --   foundUsers :: Map Address User
-    --   foundUsers = map hush users # catMaybes <#> (\v -> v.safeAddress /\ v) # M.fromFoldable
+
+    users :: Map Address User <-
+      fetchUsersBinarySearch env st.privKey (Set.toUnfoldable $ M.keys trustNodes)
+        # dropError
+        <#> map hush >>> catMaybes >>> map (\v -> v.safeAddress /\ v) >>> M.fromFoldable
 
     lift
       $ set \st' ->
@@ -157,19 +157,29 @@ dashboard env@{trustGetNetwork} =
             -- newNodes = trustNodes
             --   <#> (\tn -> tn # getNode (find (\u -> u.safeAddress == tn.safeAddress) foundUsers))
 
-            --eitherNewTrusts = st'.trusts
-              -- # (G.insertNode (UserIdent $ Right $ st'.user))
-              -- >>= (G.insertNodes newNodes)
-              -- >>= (\g -> foldM neigborEdges g trustNodes)
+            eitherNewTrusts :: EitherV (GE.ErrAll Address ()) CirclesGraph
+            eitherNewTrusts = do
+              incomingEdges <- G.incomingEdges ownAddress st'.trusts  
+            
+              st'.trusts
+                # (G.insertNode (UserIdent $ Right $ st'.user))
+                -- >>= (\g -> foldM getNode g $ mapsToThese users nodes)
+                >>= (\g -> foldM getIncomingEdge g $ mapsToThese trustNodes incomingEdges)
+                -- >>= (\g -> foldM getOutgoingEdge g $ mapsToThese trustNodes outgoingEdges)
+              
 
-          in S._dashboard st'
-            -- case eitherNewTrusts of
-            --   Right newTrusts -> S._dashboard st'
-            --     { trusts = newTrusts
-            --     }
-            --   Left e -> unsafePartial $ crashWith $ GE.printError e
+          in
+            case eitherNewTrusts of
+              Right newTrusts -> S._dashboard st'
+                { trusts = newTrusts
+                }
+              Left e -> unsafePartial $ crashWith $ GE.printError e
 
+  mapsToThese :: forall k a b. Map k a -> Map k b -> Array (These a b)
+  mapsToThese = todo
 
+  getNode :: These TrustNode UserIdent -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getNode = todo
 
   -- neigborEdges :: CirclesGraph -> TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
   -- neigborEdges g tn =
@@ -186,7 +196,6 @@ dashboard env@{trustGetNetwork} =
   --   in
   --     g # outgoingEdge >>= incomingEdge
 
-
   -- getOutgoingEdge :: Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
   -- getOutgoingEdge maybeOldTrustConnection ownAddress apiTrustNode g =
   --   case maybeOldTrustConnection, apiTrustNode of
@@ -199,8 +208,9 @@ dashboard env@{trustGetNetwork} =
   --       g
   --         # G.deleteEdge (ownAddress ~ tn.safeAddress)
   --     _, _ -> pure g
+       
 
-  -- getIncomingEdge :: Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  -- getIncomingEdge :: These TrustConnection TrustNode      Maybe TrustConnection -> Address -> Maybe TrustNode -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
   -- getIncomingEdge maybeOldTrustConnection ownAddress apiTrustNode g =
   --   case maybeOldTrustConnection, apiTrustNode of
   --     Nothing, Just tn | tn.isOutgoing ->
