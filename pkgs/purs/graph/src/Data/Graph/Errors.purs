@@ -110,6 +110,9 @@ type ErrInsertNode r = r
 type ErrInsertNodes :: forall k. k -> k
 type ErrInsertNodes r = r
 
+type ErrInsertEdge :: forall k. k -> k
+type ErrInsertEdge r = r
+
 --------------------------------------------------------------------------------
 -- Pretty Print
 --------------------------------------------------------------------------------

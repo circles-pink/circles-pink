@@ -5,6 +5,7 @@ module Data.Graph
   , incomingEdges
   , incomingEdgesWithNodes
   , incomingNodes
+  , insertEdge
   , insertNode
   , insertNodes
   , module Exp
@@ -25,7 +26,7 @@ import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrNeighborNodes)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrInsertEdge)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
@@ -87,6 +88,10 @@ edgeIds g = g
   # C.nodeIds
   # S.map (\from -> C.outgoingIds from g # fold # S.map (\to -> from ~ to))
   # S.unions
+
+insertEdge :: forall r id e n. Ord id => Pair id -> e -> Graph id e n -> EitherV (ErrInsertEdge r) (Graph id e n)
+insertEdge id node graph | C.memberEdge id graph = C.updateEdge id node graph # lmap (\_ -> unsafePartial $ crashWith "impossible")
+insertEdge id node graph = C.addEdge id node graph # lmap (\_ -> unsafePartial $ crashWith "impossible")
 
 --------------------------------------------------------------------------------
 

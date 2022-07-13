@@ -11,6 +11,7 @@ module Data.IxGraph
   , incomingEdges
   , incomingEdgesWithNodes
   , incomingNodes
+  , insertEdge
   , insertNode
   , insertNodes
   , lookupEdge
@@ -33,7 +34,7 @@ import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec)
 import Data.Graph as G
-import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrIncomingNodes)
+import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrInsertEdge)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -97,6 +98,9 @@ updateEdge e (IxGraph g) = IxGraph <$> G.updateEdge (getIndex e) e g
 deleteEdge :: forall r id e n. Ord id => Pair id -> IxGraph id e n -> EitherV (ErrDeleteEdge id r) (IxGraph id e n)
 deleteEdge conn (IxGraph g) = IxGraph <$> G.deleteEdge conn g
 
+insertEdge :: forall r id e n. Ord id => Indexed (Pair id) e => e -> IxGraph id e n -> EitherV (ErrInsertEdge r) (IxGraph id e n)
+insertEdge edge (IxGraph graph) = IxGraph <$> G.insertEdge (getIndex edge) edge graph
+
 --------------------------------------------------------------------------------
 
 outgoingIds :: forall r id e n. Ord id => id -> IxGraph id e n -> EitherV (ErrOutgoingIds id r) (Set id)
@@ -146,9 +150,6 @@ toUnfoldables (IxGraph graph) = G.toUnfoldables graph
 
 -- insertNodes :: forall f id e n. Foldable f => Ord id => Indexed id n => f n -> IxGraph id e n -> IxGraph id e n
 -- insertNodes nodes ixGraph = foldr insertNode ixGraph nodes
-
--- insertEdge :: forall id e n. Ord id => Indexed (Pair id) e => e -> IxGraph id e n -> IxGraph id e n
--- insertEdge edge (IxGraph graph) = IxGraph $ G.insertEdge (getIndex edge) edge graph
 
 --------------------------------------------------------------------------------
 

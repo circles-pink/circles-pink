@@ -40,7 +40,7 @@ import Data.Set as Set
 import Data.String (length)
 import Data.These (These(..), maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spyWith)
+import Debug (spy, spyWith)
 import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Partial (crashWith)
@@ -130,9 +130,10 @@ dashboard env@{ trustGetNetwork } =
           syncTrusts set st
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         let x = todo -- infinite
+        _ <- lift $ env.sleep 5000
         _ <-
           syncTrusts set st
-            # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
+            # retryUntil env (const { delay: 5000 }) (\_ n -> n == 1) 0
         pure unit
 
   -- syncTrusts :: ActionHandler' m Int S.DashboardState ("dashboard" :: S.DashboardState)
@@ -178,8 +179,8 @@ dashboard env@{ trustGetNetwork } =
               st'.trusts
                 # (G.insertNode (UserIdent $ Right $ st'.user))
                 >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
-                >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
-                >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ mapsToThese trustNodes outgoingEdges)
+                -- >>= (\g -> foldM (getIncomingEdge ownAddress) g $ spy "these incoming" $ mapsToThese trustNodes incomingEdges)
+                >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ spy "these outgoing" $ mapsToThese trustNodes outgoingEdges)
 
           in
             case eitherNewTrusts of
@@ -210,13 +211,17 @@ dashboard env@{ trustGetNetwork } =
   --     g # outgoingEdge >>= incomingEdge
 
   getOutgoingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getOutgoingEdge ownAddress g = case _ of
-    This tn | tn.isIncoming -> G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-    This tn -> Right g
-    That (TrustConnection _ ts) | isPendingTrust ts || isLoadingTrust ts -> Right g
-    That tc -> G.deleteEdge (getIndex tc) g
-    Both tn (TrustConnection _ ts) | tn.isIncoming && isPendingTrust ts -> G.updateEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
-    Both tn tc -> Right g
+  getOutgoingEdge ownAddress g =
+    let
+      x = todo -- use add edge instead of insert edge
+    in
+      case _ of
+        This tn | tn.isIncoming -> G.addEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+        This tn -> Right g
+        That (TrustConnection _ ts) | isPendingTrust ts || isLoadingTrust ts -> Right g
+        That tc -> G.deleteEdge (getIndex tc) g
+        Both tn (TrustConnection _ ts) | tn.isIncoming && isPendingTrust ts -> G.updateEdge (TrustConnection (ownAddress ~ tn.safeAddress) initTrusted) g
+        Both tn tc -> Right g
 
   -- case maybeOldTrustConnection, apiTrustNode of
   --   Nothing, Just tn | tn.isIncoming ->
@@ -230,11 +235,15 @@ dashboard env@{ trustGetNetwork } =
   --   _, _ -> pure g
 
   getIncomingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getIncomingEdge ownAddress g = case _ of
-    This tn | tn.isOutgoing -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
-    This _ -> Right g
-    That tc -> G.deleteEdge (getIndex tc) g
-    Both tn _ -> G.updateEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+  getIncomingEdge ownAddress g =
+    let
+      x = todo -- use add edge instead of insert edge
+    in
+      case _ of
+        This tn | tn.isOutgoing -> G.addEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
+        This _ -> Right g
+        That tc -> G.deleteEdge (getIndex tc) g
+        Both tn _ -> G.updateEdge (TrustConnection (tn.safeAddress ~ ownAddress) initTrusted) g
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
