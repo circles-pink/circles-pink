@@ -24,8 +24,8 @@ import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..), hush, isRight, note)
-import Data.Foldable (foldM)
+import Data.Either (Either(..), either, hush, isRight, note)
+import Data.Foldable (fold, foldM)
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
 import Data.Int (floor, toNumber)
@@ -162,20 +162,24 @@ dashboard env@{ trustGetNetwork } =
 
             eitherNewTrusts :: EitherV (GE.ErrAll Address ()) CirclesGraph
             eitherNewTrusts = do
-              neighborNodes <- G.neighborNodes ownAddress st'.trusts
-                <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
+              let
+                neighborNodes = G.neighborNodes ownAddress st'.trusts
+                  <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
+                  # either (const M.empty) identity
 
-              -- incomingEdges <- G.incomingEdges ownAddress st'.trusts
-              --   <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                incomingEdges = G.incomingEdges ownAddress st'.trusts
+                  <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                  # either (const M.empty) identity
 
-              -- outgoingEdges <- G.outgoingEdges ownAddress st'.trusts
-              --   <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                outgoingEdges = G.outgoingEdges ownAddress st'.trusts
+                  <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                  # either (const M.empty) identity
 
-              pure st'.trusts
-          -- # (G.insertNode (UserIdent $ Right $ st'.user))
-          -- >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
-          -- >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
-          -- >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ mapsToThese trustNodes outgoingEdges)
+              st'.trusts
+                # (G.insertNode (UserIdent $ Right $ st'.user))
+                >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
+                >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
+                >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ mapsToThese trustNodes outgoingEdges)
 
           in
             case eitherNewTrusts of
