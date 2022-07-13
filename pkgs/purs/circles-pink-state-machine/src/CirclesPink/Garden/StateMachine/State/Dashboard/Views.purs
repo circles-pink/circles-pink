@@ -107,13 +107,6 @@ type Trust =
   , user :: UserIdent
   }
 
-mapTrust :: T.Trust -> Trust
-mapTrust t =
-  { isOutgoing: t.isOutgoing
-  , trustState: t.trustState
-  , user: t.user
-  }
-
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts } =
   let
@@ -135,13 +128,18 @@ defaultView d@{ trusts } =
               )
           )
         <#>
-          ( \user -> mapTrust $ case trusts # G.lookupNode user.safeAddress of
+          ( \user -> case trusts # G.lookupNode user.safeAddress of
               Left _ -> initUntrust user
-              Right _ -> case trusts # G.lookupEdge (user.safeAddress ~ d.user.safeAddress), trusts # G.lookupEdge (d.user.safeAddress ~ user.safeAddress) of
-                Left _, Left _ -> initUntrust user
-                Right _, Left _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
-                Left _, Right _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initTrusted }
-                Right _, Right _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initTrusted }
+              Right _ ->
+                let
+                  eitherIncomingEdge = trusts # G.lookupEdge (user.safeAddress ~ d.user.safeAddress)
+                  eitherOutgoingEdge = trusts # G.lookupEdge (d.user.safeAddress ~ user.safeAddress)
+                in
+                  case eitherIncomingEdge, eitherOutgoingEdge of
+                    Left _, Left _ -> initUntrust user
+                    Right _, Left _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
+                    Left _, Right (TrustConnection _ ts) -> { isOutgoing: false, user: UserIdent $ Right user, trustState: ts }
+                    Right _, Right (TrustConnection _ ts) -> { isOutgoing: true, user: UserIdent $ Right user, trustState: ts }
           )
 
     trustsConfirmed = d.trusts
