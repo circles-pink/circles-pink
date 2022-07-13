@@ -26,6 +26,7 @@ import {
   TrustState,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
 import { toFpTsPair, toFpTsTuple } from '../utils/fpTs';
+import { Theme } from '../context/theme';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -95,9 +96,17 @@ const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
 // UI
 // -----------------------------------------------------------------------------
 
-type TrustGraphProps = { graph: Graph };
+type TrustGraphProps = {
+  graph: Graph;
+  expandTrustNetwork: (addr: string) => void;
+  theme: Theme;
+};
 
-export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
+export const TrustGraph = ({
+  graph,
+  expandTrustNetwork,
+  theme,
+}: TrustGraphProps): ReactElement => {
   const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
   // const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
 
@@ -105,6 +114,9 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
     if (!cy) return;
     var layout_ = cy.layout(layout);
     layout_.run();
+    cy.on('tap', 'node', evt => {
+      expandTrustNetwork(evt.target.id());
+    });
   }, [JSON.stringify(graph)]);
 
   // React.useEffect(() => {
@@ -123,7 +135,7 @@ export const TrustGraph = ({ graph }: TrustGraphProps): ReactElement => {
         height: 'label',
         padding: '4px',
         shape: 'round-rectangle',
-        'background-color': 'red',
+        'background-color': theme.baseColor,
         label: 'data(label)', // here you can label the nodes
       } as any,
     },

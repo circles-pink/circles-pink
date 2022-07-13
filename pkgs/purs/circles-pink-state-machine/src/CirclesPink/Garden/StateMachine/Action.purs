@@ -8,6 +8,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _coreToWindow
   , _dashboard
   , _debug
+  , _expandTrustNetwork
   , _finalizeRegisterUser
   , _getBalance
   , _getSafeStatus
@@ -35,8 +36,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _transfer
   , _trusts
   , _userSearch
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -102,6 +102,7 @@ type CirclesAction = Variant
             { query :: String
             }
         , redeploySafeAndToken :: Unit
+        , expandTrustNetwork :: String
         )
   , login ::
       Variant
@@ -119,7 +120,8 @@ type CirclesAction = Variant
         ( coreToWindow :: Unit
         , setMagicWords :: String
         )
-  , landing :: Variant
+  , landing ::
+      Variant
         ( signUp :: Unit
         , signIn :: Unit
         , checkForSession :: Unit
@@ -232,3 +234,6 @@ _userSearch = inj (Proxy :: _ "userSearch")
 
 _redeploySafeAndToken :: forall a v. a -> Variant (redeploySafeAndToken :: a | v)
 _redeploySafeAndToken = inj (Proxy :: _ "redeploySafeAndToken")
+
+_expandTrustNetwork :: forall a v. a -> Variant (expandTrustNetwork :: a | v)
+_expandTrustNetwork = inj (Proxy :: _ "expandTrustNetwork")
