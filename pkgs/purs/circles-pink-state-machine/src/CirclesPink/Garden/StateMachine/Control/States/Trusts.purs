@@ -28,7 +28,7 @@ trusts env@{ deployToken } =
       task = do
         safeStatus <- env.getSafeStatus st.privKey
         isReady' <- readyForDeployment env st.privKey
-        trusts' <- env.trustGetNetwork st.privKey
+        trusts' <- env.trustGetNetwork st.privKey st.user.safeAddress
         pure { safeStatus, isReady: isReady', trusts: trusts' }
     results <- runExceptT' task
     case results of

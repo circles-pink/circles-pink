@@ -24,6 +24,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Variant (inj)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Class (liftEffect)
@@ -72,6 +73,7 @@ env { request, envVars } =
   , coreToWindow
   , isTrusted
   , trustGetNetwork
+  , privKeyToSafeAddress
   , getSafeStatus
   , deploySafe
   , deployToken
@@ -251,7 +253,14 @@ env { request, envVars } =
     CC.safeIsFunded circlesCore account { safeAddress: convert safeAddress }
 
   trustGetNetwork :: Env.TrustGetNetwork Aff
-  trustGetNetwork privKey = do
+  trustGetNetwork privKey address = do
+    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    CC.trustGetNetwork circlesCore account { safeAddress: convert address }
+
+  privKeyToSafeAddress :: Env.PrivKeyToSafeAddress Aff
+  privKeyToSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
@@ -260,7 +269,7 @@ env { request, envVars } =
     let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
-    CC.trustGetNetwork circlesCore account { safeAddress: convert safeAddress }
+    pure safeAddress
 
   getSafeStatus :: Env.GetSafeStatus Aff
   getSafeStatus privKey = do

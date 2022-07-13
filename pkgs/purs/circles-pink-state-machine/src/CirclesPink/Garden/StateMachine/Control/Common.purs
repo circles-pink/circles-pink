@@ -3,6 +3,7 @@ module CirclesPink.Garden.StateMachine.Control.Common where
 import Prelude
 
 import CirclesCore (SafeStatus, TrustNode, User)
+import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -11,8 +12,8 @@ import Data.Bifunctor (lmap)
 import Data.Either (Either(..), either)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
-import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, default, onMatch)
+import Debug.Extra (todo)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import RemoteReport (RemoteReport)
@@ -56,16 +57,20 @@ type ErrLoginTask r = Env.ErrUserResolve
   + Env.ErrTrustGetNetwork
   + Env.ErrIsTrusted
   + Env.ErrIsFunded
+  + Env.ErrPrivKeyToSafeAddress
+  + Env.ErrUserResolve
   + r
 
 loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
-loginTask env privKey = do
-  user <- env.userResolve privKey
-  safeStatus <- env.getSafeStatus privKey
-  isTrusted <- env.isTrusted privKey <#> (unwrap >>> _.isTrusted)
-  trusts <- if isTrusted then pure [] else env.trustGetNetwork privKey
-  isReady' <- readyForDeployment env privKey
-  pure { user, isTrusted, trusts, safeStatus, isReady: isReady' }
+loginTask env@{ getSafeStatus, trustGetNetwork, isTrusted, privKeyToSafeAddress, userResolve } privKey =
+  do
+    user <- userResolve privKey
+    safeStatus <- getSafeStatus privKey
+    isTrusted' <- isTrusted privKey <#> (unwrap >>> _.isTrusted)
+    safeAddress <- privKeyToSafeAddress privKey
+    trusts <- if isTrusted' then pure [] else trustGetNetwork privKey safeAddress
+    isReady' <- readyForDeployment env privKey
+    pure { user, isTrusted: isTrusted', trusts, safeStatus, isReady: isReady' }
 
 --------------------------------------------------------------------------------
 

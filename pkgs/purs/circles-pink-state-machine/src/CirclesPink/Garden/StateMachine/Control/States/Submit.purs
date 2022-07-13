@@ -50,7 +50,7 @@ submit env =
               }
             safeStatus <- env.getSafeStatus privateKey
             user <- env.userResolve privateKey
-            trusts <- env.trustGetNetwork privateKey
+            trusts <- env.trustGetNetwork privateKey safeAddress
             isReady' <- readyForDeployment env privateKey
             _ <- env.saveSession privateKey
             pure { safeStatus, user, trusts, isReady: isReady' }
