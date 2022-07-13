@@ -13,6 +13,7 @@ import Test.Spec.Reporter (consoleReporter)
 import Test.Spec.Runner (runSpec)
 import Test.Unit.Main (runTest)
 import Test.Wallet.PrivateKey as Test.Wallet.PrivateKey
+import CirclesPink.Garden.StateMachine.Control.States.Dashboard as CirclesPink.Garden.StateMachine.Control.States.Dashboard
 
 foreign import globalRequires :: {}
 
@@ -30,10 +31,8 @@ mainTestSpec =
         CirclesCore.Tests.spec
         GunDB.Tests.spec
         Test.CirclesPink.Garden.StateMachine.Control.States.Dashboard.spec
+        CirclesPink.Garden.StateMachine.Control.States.Dashboard.spec
 
---Test.CirclesPink.Garden.StateMachine.Stories.spec
-
--- Test.EncryptedStorage.spec
 
 main :: Effect Unit
 main = do

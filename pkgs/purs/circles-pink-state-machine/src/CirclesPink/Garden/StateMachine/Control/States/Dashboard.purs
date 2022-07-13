@@ -1,10 +1,13 @@
 module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ( dashboard
   , fetchUsersBinarySearch
+  , spec
   ) where
 
 import Prelude
 
+import Test.Spec (Spec, describe, it)
+import Test.Spec.Assertions (shouldEqual)
 import CirclesCore (User, TrustNode)
 import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.PrivateKey (PrivateKey)
@@ -173,7 +176,7 @@ dashboard env@{ trustGetNetwork } =
                   # either (const M.empty) identity
 
                 outgoingEdges = G.outgoingEdges ownAddress st'.trusts
-                  <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                  <#> map (\v -> P.snd (getIndex v) /\ v) >>> M.fromFoldable
                   # either (const M.empty) identity
 
               st'.trusts
@@ -430,3 +433,42 @@ mapsToThese mapA mapB = Set.union (M.keys mapA) (M.keys mapB)
   # Set.toUnfoldable
   <#> (\k -> maybeThese (M.lookup k mapA) (M.lookup k mapB))
   # catMaybes
+
+spec :: Spec Unit
+spec =
+  describe "CirclesPink.Garden.StateMachine.Control.States.Dashboard" do
+    describe "mapsToThese" do
+      let
+        fromFoldable :: Array (String /\ Int) -> Map String Int
+        fromFoldable = M.fromFoldable
+
+      describe "empty maps" do
+        let
+          map1 = fromFoldable []
+          map2 = fromFoldable []
+        it "returns an empty array" do
+          (mapsToThese map1 map2) `shouldEqual` []
+      describe "first one entry" do
+        let
+          map1 = fromFoldable [ "1" /\ 1 ]
+          map2 = fromFoldable []
+        it "returns an array with one This" do
+          (mapsToThese map1 map2) `shouldEqual` [ This 1 ]
+      describe "second one entry" do
+        let
+          map1 = fromFoldable []
+          map2 = fromFoldable [ "2" /\ 2 ]
+        it "returns an array with one That" do
+          (mapsToThese map1 map2) `shouldEqual` [ That 2 ]
+      describe "both entries, different keys" do
+        let
+          map1 = fromFoldable [ "1" /\ 1 ]
+          map2 = fromFoldable [ "2" /\ 2 ]
+        it "returns an array with one This and one That" do
+          (mapsToThese map1 map2) `shouldEqual` [ This 1, That 2 ]
+      describe "both entries, same keys" do
+        let
+          map1 = fromFoldable [ "1" /\ 1 ]
+          map2 = fromFoldable [ "1" /\ 2 ]
+        it "returns an array with one Both" do
+          (mapsToThese map1 map2) `shouldEqual` [ Both 1 2 ]

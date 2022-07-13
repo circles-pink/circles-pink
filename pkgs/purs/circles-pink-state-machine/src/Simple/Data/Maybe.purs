@@ -28,6 +28,6 @@ pure = P.pure
 
 eq :: forall a. Eq a -> Maybe a -> Maybe a -> Boolean
 eq _EQ x y = case x, y of
-  Just x, Just y -> _EQ.eq x y
+  Just x', Just y' -> _EQ.eq x' y'
   _, _ -> false
 
