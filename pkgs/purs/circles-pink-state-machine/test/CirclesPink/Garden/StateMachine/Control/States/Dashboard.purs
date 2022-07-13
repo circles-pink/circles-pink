@@ -5,6 +5,7 @@ import Prelude
 import CirclesCore (User, _errNative)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
+import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, evalTestScriptT)
 import CirclesPink.Garden.StateMachine.Control.Env (ErrGetUsers)
@@ -47,7 +48,7 @@ spec =
           testEnv' = testEnv { getUsers = mkGetUsers db }
         D.fetchUsersBinarySearch testEnv' sampleKey [ addrB ]
           # run
-          # shouldEqual (Just [ Left addrB ])
+          # shouldEqual (Just [ (Left >>> UserIdent) addrB ])
       it "one element in db" do
         let
           db =
@@ -57,7 +58,7 @@ spec =
           testEnv' = testEnv { getUsers = mkGetUsers db }
         D.fetchUsersBinarySearch testEnv' sampleKey [ addrA ]
           # run
-          # shouldEqual (Just [ Right userA ])
+          # shouldEqual (Just [ (Right >>> UserIdent) userA ])
       it "many elements in db" do
         let
           db =
@@ -67,7 +68,7 @@ spec =
           testEnv' = testEnv { getUsers = mkGetUsers db }
         D.fetchUsersBinarySearch testEnv' sampleKey [ addrA, addrB, addrC, addrD, addrE ]
           # run
-          # shouldEqual (Just [ Right userA, Right userB, Left addrC, Left addrD, Right userE ])
+          # shouldEqual (Just [ (Right >>> UserIdent) userA, (Right >>> UserIdent) userB, (Left >>> UserIdent) addrC, (Left >>> UserIdent) addrD, (Right >>> UserIdent) userE ])
 
 -- describe "mapTrusts" do
 --   it "runs" do

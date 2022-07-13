@@ -65,8 +65,8 @@ fetchUsersBinarySearch env privKey xs
   | A.length xs == 1 = do
       eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
       case eitherUsers of
-        Left _ -> pure $ map Left xs
-        Right ok -> pure $ map Right ok
+        Left _ -> pure $ map (Left >>> UserIdent) xs
+        Right ok -> pure $ map (Right >>> UserIdent) ok
 
 fetchUsersBinarySearch env privKey xs = do
   eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
@@ -76,7 +76,7 @@ fetchUsersBinarySearch env privKey xs = do
         (ls /\ rs) = splitArray xs
       in
         fetchUsersBinarySearch env privKey ls <> fetchUsersBinarySearch env privKey rs
-    Right ok -> pure $ map Right ok
+    Right ok -> pure $ map (Right >>> UserIdent) ok
 
 dashboard
   :: forall m
@@ -150,7 +150,7 @@ dashboard env@{ trustGetNetwork } =
     userIdents :: Map Address UserIdent <-
       fetchUsersBinarySearch env st.privKey (Set.toUnfoldable $ M.keys trustNodes)
         # dropError
-        <#> catMaybes >>> map (\v -> v.safeAddress /\ v) >>> M.fromFoldable
+        <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
 
     lift
       $ set \st' ->
@@ -165,17 +165,17 @@ dashboard env@{ trustGetNetwork } =
               neighborNodes <- G.neighborNodes ownAddress st'.trusts
                 <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
 
-              incomingEdges <- G.incomingEdges ownAddress st'.trusts
-                <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+              -- incomingEdges <- G.incomingEdges ownAddress st'.trusts
+              --   <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
 
-              outgoingEdges <- G.outgoingEdges ownAddress st'.trusts
-                <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+              -- outgoingEdges <- G.outgoingEdges ownAddress st'.trusts
+              --   <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
 
-              st'.trusts
-                # (G.insertNode (UserIdent $ Right $ st'.user))
-                -- >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
-                >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
-                >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ mapsToThese trustNodes outgoingEdges)
+              pure st'.trusts
+          -- # (G.insertNode (UserIdent $ Right $ st'.user))
+          -- >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
+          -- >>= (\g -> foldM (getIncomingEdge ownAddress) g $ mapsToThese trustNodes incomingEdges)
+          -- >>= (\g -> foldM (getOutgoingEdge ownAddress) g $ mapsToThese trustNodes outgoingEdges)
 
           in
             case eitherNewTrusts of
@@ -184,8 +184,8 @@ dashboard env@{ trustGetNetwork } =
                 }
               Left e -> unsafePartial $ crashWith $ GE.printError e
 
-  getNode :: These UserIdent UserIdent -> CirclesGraph -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getNode = case _ of
+  getNode :: CirclesGraph -> These UserIdent UserIdent -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getNode g = case _ of
     This uiApi -> G.addNode uiApi g
     That _ -> Right g
     Both uiApi _ -> G.updateNode uiApi g
