@@ -52,6 +52,7 @@
   , "strings"
   , "sunde"
   , "test-unit"
+  , "these"
   , "transformers"
   , "tuples"
   , "typedenv"
