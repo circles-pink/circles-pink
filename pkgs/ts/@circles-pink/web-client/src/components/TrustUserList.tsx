@@ -148,6 +148,11 @@ export const TrustUserList = (props: TrustUserListProps) => {
     //   return addrToString(addressA).localeCompare(addrToString(addressB));
     // })
     .filter(n => n[0] !== ownAddress)
+    .filter(
+      n =>
+        G.lookupEdge(ownAddress, n[0], graph)._tag !== 'None' ||
+        G.lookupEdge(n[0], ownAddress, graph)._tag !== 'None'
+    )
     .map(n => {
       const outgoingEdge = G.lookupEdge(ownAddress, n[0], graph);
       const incomingEdge = G.lookupEdge(n[0], ownAddress, graph);
