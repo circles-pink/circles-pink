@@ -23,7 +23,6 @@ import Data.String as St
 import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spy, spyWith)
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
@@ -45,6 +44,7 @@ instance cleanDeclaration :: Clean (DTS.Declaration a) where
 
 instance cleanType :: Clean (DTS.Type a) where
   clean m = case _ of
+    DTS.TypeNull -> DTS.TypeNull
     DTS.TypeString -> DTS.TypeString
     DTS.TypeNumber -> DTS.TypeNumber
     DTS.TypeBoolean -> DTS.TypeBoolean
@@ -53,7 +53,7 @@ instance cleanType :: Clean (DTS.Type a) where
     DTS.TypeFunction xs ys t -> DTS.TypeFunction xs ((map $ clean m) <$> ys) (clean m t)
     DTS.TypeVar x -> DTS.TypeVar x
     DTS.TypeConstructor qn x -> DTS.TypeConstructor (clean m qn) (clean m <$> x)
-    DTS.TypeOpaque x -> DTS.TypeOpaque x
+    DTS.TypeOpaque y x -> DTS.TypeOpaque y x
     DTS.TypeUnion xs -> DTS.TypeUnion $ clean m <$> xs
     DTS.TypeTLString s -> DTS.TypeTLString s
 
@@ -90,6 +90,7 @@ resolveType x = runState (resolveType' x) mempty
 
 resolveType' :: DTS.Type Unit -> State TypeScope (DTS.Type (Set DTS.Name))
 resolveType' = case _ of
+  DTS.TypeNull -> pure DTS.TypeNull
   DTS.TypeString -> pure DTS.TypeString
   DTS.TypeNumber -> pure DTS.TypeNumber
   DTS.TypeBoolean -> pure DTS.TypeBoolean
@@ -98,14 +99,14 @@ resolveType' = case _ of
   DTS.TypeFunction _ xs r -> resolveFunction xs r
   DTS.TypeVar n -> resolveVar n
   DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn <$> traverse resolveType' xs
-  DTS.TypeOpaque ns -> resolveOpaque ns
+  DTS.TypeOpaque x ns -> resolveOpaque x ns
   DTS.TypeUnion xs -> DTS.TypeUnion <$> traverse resolveType' xs
   DTS.TypeTLString s -> pure $ DTS.TypeTLString s
   where
 
-  resolveOpaque ns = do
+  resolveOpaque x ns = do
     _ <- modify (\s -> s { floating = ns <> s.floating })
-    pure $ DTS.TypeOpaque ns
+    pure $ DTS.TypeOpaque x ns
 
   resolveVar n = do
     _ <- modify (\s -> s { floating = A.snoc s.floating n })
@@ -139,20 +140,24 @@ resolveType' = case _ of
 
 deleteQuant :: Set DTS.Name -> DTS.Type (Set DTS.Name) -> DTS.Type (Set DTS.Name)
 deleteQuant s = case _ of
+  DTS.TypeNull -> DTS.TypeNull
   DTS.TypeString -> DTS.TypeString
   DTS.TypeNumber -> DTS.TypeNumber
   DTS.TypeBoolean -> DTS.TypeBoolean
   DTS.TypeArray t -> DTS.TypeArray $ deleteQuant s t
   DTS.TypeRecord xs -> DTS.TypeRecord $ map (map $ deleteQuant s) xs
-  DTS.TypeFunction ta xs r -> DTS.TypeFunction
+  DTS.TypeFunction ta xs r -> deleteQuantFunction ta xs r
+  DTS.TypeVar n -> DTS.TypeVar n
+  DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn $ map (deleteQuant s) xs
+  DTS.TypeOpaque y x -> DTS.TypeOpaque y x
+  DTS.TypeUnion xs -> DTS.TypeUnion $ map (deleteQuant s) xs
+  DTS.TypeTLString str -> DTS.TypeTLString str
+  where
+
+  deleteQuantFunction ta xs r = DTS.TypeFunction
     (foldr S.delete ta (S.intersection ta s))
     (map (map $ deleteQuant s) xs)
     (deleteQuant s r)
-  DTS.TypeVar n -> DTS.TypeVar n
-  DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn $ map (deleteQuant s) xs
-  DTS.TypeOpaque x -> DTS.TypeOpaque x
-  DTS.TypeUnion xs -> DTS.TypeUnion $ map (deleteQuant s) xs
-  DTS.TypeTLString str -> DTS.TypeTLString str
 
 type TypeScope = { quantified :: Array DTS.Name, floating :: Array DTS.Name }
 
@@ -189,7 +194,7 @@ typ x n = DTS.DeclTypeDef (DTS.Name n) unit $ toTsDef x
 defineModules :: Map String (String /\ String) -> Array (String /\ Array (DTS.Declaration Unit)) -> Array (String /\ DTS.Module (Set DTS.Name))
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
   where
-  mm' = xs <#> fst >>> pursModule # M.fromFoldable # M.union mm # spyWith "" show
+  mm' = xs <#> fst >>> pursModule # M.fromFoldable # M.union mm
 
 defineModule :: Map String (String /\ String) -> String -> Array (DTS.Declaration Unit) -> DTS.Module (Set DTS.Name)
 defineModule mm k xs =
@@ -205,10 +210,9 @@ defineModule mm k xs =
     <#> (\(DTS.QualName sc _) -> sc)
     # catMaybes
     # A.nub
-    <#> (\key -> (key /\ M.lookup (spy "k" key) mm) # sequence)
+    <#> (\key -> (key /\ M.lookup key mm) # sequence)
     # catMaybes
     <#> (\(a /\ p /\ n) -> DTS.Import (DTS.Name a) (DTS.Path p))
-
 
   moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
 
@@ -219,6 +223,7 @@ declToRefs = case _ of
 
 typeToRefs :: forall a. DTS.Type a -> Array DTS.QualName
 typeToRefs = case _ of
+  DTS.TypeNull -> []
   DTS.TypeString -> []
   DTS.TypeNumber -> []
   DTS.TypeBoolean -> []
@@ -227,7 +232,7 @@ typeToRefs = case _ of
   DTS.TypeFunction _ xs r -> (xs <#> snd >>= typeToRefs) <> (typeToRefs r)
   DTS.TypeVar _ -> []
   DTS.TypeConstructor qn xs -> [ qn ] <> (xs >>= typeToRefs)
-  DTS.TypeOpaque _ -> []
+  DTS.TypeOpaque _ _ -> []
   DTS.TypeUnion xs -> xs >>= typeToRefs
   DTS.TypeTLString _ -> []
 
