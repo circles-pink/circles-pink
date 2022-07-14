@@ -28,7 +28,6 @@ import {
   DefaultView,
   Graph,
   Trust,
-  Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { t } from 'i18next';
 import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
@@ -46,11 +45,7 @@ import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Add
 import { toFpTsPair, toFpTsTuple } from '../utils/fpTs';
 import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
 import * as O from 'fp-ts/Option';
-import { outgoingIds } from '@circles-pink/state-machine/output/Data.IxGraph';
-import {
-  TrustConnection,
-  TsTrustConnection,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
+import { TsTrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 import { Pair } from '@circles-pink/state-machine/output/Data.FpTs.Pair';
 
 type Overlay = 'SEND' | 'RECEIVE';
@@ -83,14 +78,14 @@ type TsGraph = {
 const G = {
   outgoingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
     const outgoingIds = graph.edges
-      .filter(e => e[0][0] === id)
-      .map(e => e[0][0]);
+      .filter(([[from]]) => from === id)
+      .map(([[from]]) => from);
     return outgoingIds.length > 0 ? O.some(outgoingIds) : O.none;
   },
   incomingNodes: (id: Address, graph: TsGraph): O.Option<Array<Address>> => {
     const incomingIds = graph.edges
-      .filter(e => e[0][1] === id)
-      .map(e => e[0][0]);
+      .filter(([[, to]]) => to === id)
+      .map(([[from]]) => from);
     return incomingIds.length > 0 ? O.some(incomingIds) : O.none;
   },
   lookupEdge: (
@@ -99,7 +94,7 @@ const G = {
     graph: TsGraph
   ): O.Option<TsEdge> => {
     const optionEdge = graph.edges.find(
-      e => e[0][0] === from && e[0][1] === to
+      ([[fromEdge, toEdge]]) => fromEdge === from && toEdge === to
     );
     return optionEdge ? O.some(optionEdge) : O.none;
   },
@@ -183,14 +178,8 @@ export const TrustUserList = (props: TrustUserListProps) => {
   );
 
   return (
-    <LightColorFrame theme={theme}>
-      <Title>
-        <JustifyBetween>
-          <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
-          <Icon path={icon} size={1.5} color={darken(theme.lightColor, 2)} />
-        </JustifyBetween>
-      </Title>
-      {actionRow}
+    <LightColorFrame theme={theme} title={title} icon={icon}>
+      <>{actionRow}</>
       <TableContainer>
         <Table>
           {trusts.length > 0 && (
@@ -224,16 +213,18 @@ export const TrustUserList = (props: TrustUserListProps) => {
           </TableBody>
         </Table>
       </TableContainer>
-      {paginationInfo.totalPages > 1 && (
-        <JustifyAroundCenter>
-          <PageSelector
-            theme={theme}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageControls={pageControls}
-          />
-        </JustifyAroundCenter>
-      )}
+      <>
+        {paginationInfo.totalPages > 1 && (
+          <JustifyAroundCenter>
+            <PageSelector
+              theme={theme}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageControls={pageControls}
+            />
+          </JustifyAroundCenter>
+        )}
+      </>
     </LightColorFrame>
   );
 };
@@ -396,9 +387,35 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
 
 type FameProps = {
   theme: Theme;
+  title?: string;
+  icon?: string;
+  children: ReactElement | ReactElement[] | string;
 };
 
-export const LightColorFrame = styled.div<FameProps>(({ theme }: FameProps) => [
+export const LightColorFrame = ({
+  theme,
+  title,
+  icon,
+  children,
+}: FameProps): ReactElement => {
+  return (
+    <LightColorFrame_ theme={theme}>
+      <Title>
+        <JustifyBetween>
+          <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
+          {icon ? (
+            <Icon path={icon} size={1.5} color={darken(theme.lightColor, 2)} />
+          ) : (
+            <></>
+          )}
+        </JustifyBetween>
+      </Title>
+      <>{children}</>
+    </LightColorFrame_>
+  );
+};
+
+const LightColorFrame_ = styled.div<FameProps>(({ theme }: FameProps) => [
   tw`block lg:p-8 md:p-8 p-4 border border-gray-800 shadow-xl rounded-xl`,
   css`
     background-color: ${theme.lightColor};
