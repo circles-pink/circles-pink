@@ -7,8 +7,8 @@ import CirclesPink.Data.PrivateKey (mnemonicToKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
-import Control.Monad.Except (runExceptT)
-import Data.Maybe (Maybe(..))
+import Control.Monad.Except (lift, runExceptT)
+import Data.Either (Either(..), note)
 
 debug
   :: forall m
@@ -24,10 +24,12 @@ debug env =
   where
   coreToWindow _ st _ = do
     let
-      maybeMnemonic = getMnemonicFromString st.magicWords
+      eitherMnemonic = note ("Cannot get Mnemonic: " <> "'" <> st.magicWords <> "'") $ getMnemonicFromString st.magicWords
     let
-      maybePrivKey = mnemonicToKey <$> maybeMnemonic
-    _ <- case maybePrivKey of
-      Just pk -> runExceptT $ env.coreToWindow pk
-      Nothing -> pure $ pure unit
+      eitherPrivKey = mnemonicToKey <$> eitherMnemonic
+
+    _ <- runExceptT case eitherPrivKey of
+      Left err -> lift $ env.logInfo err
+      Right pk -> env.coreToWindow pk
+
     pure unit
