@@ -170,7 +170,7 @@ getDuplicates xs =
     f :: a -> (Set a /\ Map a Boolean) -> (Set a /\ Map a Boolean)
     f x (out /\ lu) | M.lookup x lu == Just false = out /\ M.insert x true lu
     f x (out /\ lu) | M.lookup x lu == Just true = S.insert x out /\ lu
-    f x (out /\ lu) | otherwise = unsafePartial $ unsafeCrashWith "filtered out above"
+    f _ _ | otherwise = unsafePartial $ unsafeCrashWith "filtered out above"
 
   in
     xs
@@ -212,7 +212,7 @@ defineModule mm k xs =
     # A.nub
     <#> (\key -> (key /\ M.lookup key mm) # sequence)
     # catMaybes
-    <#> (\(a /\ p /\ n) -> DTS.Import (DTS.Name a) (DTS.Path p))
+    <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
   moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
 

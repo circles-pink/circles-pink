@@ -15,7 +15,6 @@ module EncryptStorage
 import Prelude
 
 import Control.Monad.Except (ExceptT(..), except, mapExceptT)
-import Control.Monad.Except.Checked (safe)
 import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError, decodeJson, encodeJson, jsonParser, stringify)
 import Data.Bifunctor (lmap)
 import Data.Either (note)

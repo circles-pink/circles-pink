@@ -40,8 +40,6 @@ import Data.Set as Set
 import Data.String (length)
 import Data.These (These(..), maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spyWith)
-import Debug.Extra (todo)
 import Foreign.Object (insert)
 import Partial (crashWith)
 import Partial.Unsafe (unsafePartial)
@@ -133,7 +131,7 @@ dashboard env@{ trustGetNetwork } =
         _ <-
           syncTrusts set st st.user.safeAddress
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
-        let x = todo -- infinite
+        -- let x = todo -- infinite
         _ <- lift $ env.sleep 5000
         _ <-
           syncTrusts set st st.user.safeAddress
@@ -187,7 +185,7 @@ dashboard env@{ trustGetNetwork } =
                   Right newTrusts -> S._dashboard st'
                     { trusts = newTrusts
                     }
-                  Left e -> spyWith "addTrustConnectionLoading" (\_ -> GE.printError e) $ S._dashboard st'
+                  Left _ -> S._dashboard st'
         _ <-
           env.addTrustConnection st.privKey targetAddress st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
@@ -213,7 +211,7 @@ dashboard env@{ trustGetNetwork } =
                   Right newTrusts -> S._dashboard st'
                     { trusts = newTrusts
                     }
-                  Left e -> spyWith "addTrustConnectionPending" (\_ -> e) $ S._dashboard st'
+                  Left _ -> S._dashboard st'
         pure unit
 
   removeTrustConnection set st u =
@@ -240,7 +238,7 @@ dashboard env@{ trustGetNetwork } =
               in
                 case eitherNewTrusts of
                   Right newTrusts -> S._dashboard st' { trusts = newTrusts }
-                  Left e -> spyWith "removeTrustConnectionLoading" (\_ -> GE.printError e) $ S._dashboard st'
+                  Left _ -> S._dashboard st'
         _ <-
           env.removeTrustConnection st.privKey targetAddress st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
@@ -264,7 +262,7 @@ dashboard env@{ trustGetNetwork } =
               in
                 case eitherNewTrusts of
                   Right newTrusts -> S._dashboard st' { trusts = newTrusts }
-                  Left e -> spyWith "removeTrustConnectionPending" (\_ -> GE.printError e) $ S._dashboard st'
+                  Left _ -> S._dashboard st'
 
         pure unit
 
@@ -288,7 +286,7 @@ dashboard env@{ trustGetNetwork } =
           env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
-        let x = todo
+        -- let x = todo
         -- _ <-
         --   env.getBalance st.privKey st.user.safeAddress
         --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
@@ -375,13 +373,10 @@ dashboard env@{ trustGetNetwork } =
 
   getNode :: CirclesGraph -> These UserIdent UserIdent -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode g =
-    let
-      x = todo -- use addNode again
-    in
-      case _ of
-        This uiApi -> G.insertNode uiApi g
-        That _ -> Right g
-        Both uiApi _ -> G.updateNode uiApi g
+    case _ of
+      This uiApi -> G.addNode uiApi g
+      That _ -> Right g
+      Both uiApi _ -> G.updateNode uiApi g
 
   getOutgoingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge centerAddress g = case _ of
