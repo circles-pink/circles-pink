@@ -29,7 +29,7 @@ type Env = RemoveUndefined<typeof envRaw>;
 const parseEnv = (env_: typeof envRaw): Env => {
   const xs = Object.entries(env_).map(([k, v]) => {
     if (v === undefined) {
-      return [k, envDefault[k]];
+      return [k, envDefault[k as keyof Env]];
     } else {
       return [k, v];
     }

@@ -2,12 +2,10 @@ module CirclesPink.GenerateTSD.SampleModule where
 
 import Prelude
 
-import Data.ABC (A)
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import Debug.Extra (todo)
 import Language.TypeScript.DTS as DTS
-import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
+import PursTs.Class (class ToTsDef, class ToTsType, toTsType)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -53,7 +51,7 @@ instance toTsTypeVielleicht :: ToTsType a => ToTsType (Vielleicht a) where
     [ toTsType (Proxy :: _ a) ]
 
 caseVielleicht :: forall a z. (a -> z) -> z -> Vielleicht a -> z
-caseVielleicht = todo
+caseVielleicht _ z _ = z 
 
 someMaybe :: Maybe Number
 someMaybe = Just 1.2

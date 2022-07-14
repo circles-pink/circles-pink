@@ -3,8 +3,7 @@ module Data.Graph.Errors where
 import Prelude
 
 import Data.Pair (Pair, (~))
-import Data.Variant (Variant)
-import Data.Variant (case_, onMatch)
+import Data.Variant (Variant, case_, onMatch)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 

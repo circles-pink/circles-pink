@@ -6,7 +6,6 @@ import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleMod
 import Data.ABC (A, B)
 import Data.Map (Map)
 import Data.Map as M
-import Data.Nullable as Data
 import Data.Nullable as Data.Nullable
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS as DTS

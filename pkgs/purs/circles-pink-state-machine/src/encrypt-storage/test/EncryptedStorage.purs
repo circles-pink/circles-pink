@@ -2,13 +2,7 @@ module Test.EncryptedStorage (spec) where
 
 import Prelude
 
-import Control.Monad.Except (runExceptT)
-import Data.Either (Either(..))
-import Data.Variant (Variant)
-import EncryptStorage (ErrGetItem, _errItemNotFound, getItem, newEs)
-import EncryptStorage.Bindings (EsOptions(..), SecretKey(..))
-import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual)
+import Test.Spec (Spec)
 
 spec :: Spec Unit
 spec = pure unit

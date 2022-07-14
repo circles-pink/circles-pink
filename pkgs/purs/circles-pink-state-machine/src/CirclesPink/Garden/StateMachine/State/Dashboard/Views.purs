@@ -27,9 +27,8 @@ import Prelude
 import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
-import CirclesPink.Data.Trust as T
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
-import CirclesPink.Data.TrustState (TrustState, initTrusted, initUntrusted, isTrusted)
+import CirclesPink.Data.TrustState (TrustState, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
