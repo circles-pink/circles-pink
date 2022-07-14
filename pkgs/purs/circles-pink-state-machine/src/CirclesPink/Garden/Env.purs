@@ -226,7 +226,7 @@ env { request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.unsafeSampleCore circlesCore account
-    log "Debug: sampleCore and sampleAccount written to global window object"
+    log "Debug: sampleCore, sampleAccount and BN library written to global window object"
     pure unit
 
   isTrusted :: Env.IsTrusted Aff
