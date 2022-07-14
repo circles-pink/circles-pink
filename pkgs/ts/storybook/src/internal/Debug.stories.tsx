@@ -5,6 +5,7 @@ import { useStateMachine } from "@circles-pink/web-client/src/onboarding/useStat
 import { mkControl } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 import { env } from "@circles-pink/web-client/src/env";
 import { initDebug } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
+import { left } from "@circles-pink/state-machine/output/Data.FpTs.Either";
 
 export default {
   title: "Components/Internal",
@@ -16,7 +17,7 @@ export default {
   },
 } as ComponentMeta<typeof Debug>;
 
-const control = mkControl(env);
+const control = mkControl(env)({ extractEmail: left("foo@bar.com") });
 
 export const DebugCirclesCore = (args): ReactElement => {
   const [state, act] = useStateMachine(initDebug, control);
