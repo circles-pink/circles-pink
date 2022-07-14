@@ -377,6 +377,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "lcg" = pkgs.stdenv.mkDerivation {
+        name = "lcg";
+        version = "v3.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-lcg.git";
+          rev = "8fb2eb16bbba2cee1d115a6729659ac649da811b";
+          sha256 = "04r9bmx9kc3jqx59hh9yqqkl95mf869la9as5h36jv85ynn464dx";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "lists" = pkgs.stdenv.mkDerivation {
         name = "lists";
         version = "v6.0.1";
@@ -557,6 +569,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "pairs" = pkgs.stdenv.mkDerivation {
+        name = "pairs";
+        version = "v8.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/sharkdp/purescript-pairs.git";
+          rev = "97ae3cce9b0e00ff9473fff2779fcbcb4d7bc597";
+          sha256 = "0qmkwgn08z4ff1rb4h8adk0fysn3qkgv2m3vgfbpcqff5sksdyqw";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "parallel" = pkgs.stdenv.mkDerivation {
         name = "parallel";
         version = "v5.0.0";
@@ -612,6 +636,30 @@ let
           url = "https://github.com/purescript/purescript-profunctor.git";
           rev = "4551b8e437a00268cc9b687cbe691d75e812e82b";
           sha256 = "0fvd2xiv77sp4jd4spgdp4i9812p6pdzzbg4pa96mbr0h19jf39c";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "quickcheck" = pkgs.stdenv.mkDerivation {
+        name = "quickcheck";
+        version = "v7.1.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-quickcheck.git";
+          rev = "990fa1cf14b48b827d9b2d115b1c6977c4b0a76d";
+          sha256 = "1dxchng3r2mad0505a0c7cc35vs1f7y2xb5i13p59jpdz6ijqa9k";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "random" = pkgs.stdenv.mkDerivation {
+        name = "random";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-random.git";
+          rev = "3e02da113c7afbac37ea4e16188c39d3057314d5";
+          sha256 = "1v6ykgp8jmx488hq8mgb0l0sf1nyhjs6wq0w279iyibk9jxc6nib";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";

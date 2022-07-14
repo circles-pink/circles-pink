@@ -7,9 +7,9 @@ import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
-import Web3 from 'web3';
+const Web3 = require('web3');
 import { DashboardProps } from '../Dashboard';
-import QrScanner from 'eth-qr-scanner';
+const QrScanner = require('eth-qr-scanner');
 import { t } from 'i18next';
 import {
   DefaultView,
@@ -71,7 +71,7 @@ export const Send = ({
       setScannerOpen(false);
     }
   };
-  const handleError = err => {
+  const handleError = (err : unknown) => {
     console.error(err);
   };
 
