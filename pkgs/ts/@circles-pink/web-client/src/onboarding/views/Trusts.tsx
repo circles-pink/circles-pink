@@ -19,7 +19,7 @@ import {
 } from '@mdi/js';
 import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
-const QrCode = require('react-qrcode-svg');
+import QrCode from 'react-qrcode-svg';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import {
   TrustState,
