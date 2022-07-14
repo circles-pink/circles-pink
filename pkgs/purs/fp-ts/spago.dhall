@@ -4,6 +4,7 @@
   , "effect"
   , "heterogeneous"
   , "maybe"
+  , "pairs"
   , "prelude"
   , "spec"
   , "spec-discovery"
