@@ -20,7 +20,7 @@ import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (catMaybes, drop, filter, notElem, take)
+import Data.Array (catMaybes, drop, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
@@ -60,12 +60,17 @@ splitArray xs =
     take count xs /\ drop count xs
 
 fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
-fetchUsersBinarySearch env_ privKey_ xs_ =
+fetchUsersBinarySearch env_ privKey_ addresses =
   do
-    apiUsers <- map (\au -> (UserIdent (Right au))) $ go env_ privKey_ xs_
-    -- let landIdents = apiUsers <#> (\ui -> ui) # (\apiU -> filter (\u -> notElem u apiU) xs_) <#> (\lu -> (UserIdent (Left lu)))
+    apiUsers <- go env_ privKey_ addresses
+    let
+      allIds = Set.fromFoldable addresses
+      apiUsersIds = Set.fromFoldable $ (\u -> u.safeAddress) <$> apiUsers
+      otherUsersIds = Set.difference allIds apiUsersIds
+      otherUsers' = Left <$> (Set.toUnfoldable $ otherUsersIds)
+      apiUsers' = Right <$> apiUsers
 
-    pure $ apiUsers -- <> landIdents
+    pure $ UserIdent <$> (otherUsers' <> apiUsers')
 
   where
   go :: Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array User)
