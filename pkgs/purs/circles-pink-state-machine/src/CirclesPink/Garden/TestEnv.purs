@@ -52,6 +52,7 @@ testEnv =
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom
   , sleep: \_ -> pure unit
+  , logInfo: \_ -> pure unit
   }
 
 --------------------------------------------------------------------------------
@@ -94,4 +95,5 @@ liftEnv f e =
   , transfer: compose5 (mapExceptT f) e.transfer
   , getTimestamp: f e.getTimestamp
   , sleep: compose f e.sleep
+  , logInfo: compose f e.logInfo
   }

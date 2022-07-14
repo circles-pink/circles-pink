@@ -24,6 +24,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Class (liftEffect)
@@ -87,6 +88,7 @@ env { request, envVars } =
   , transfer
   , getTimestamp
   , sleep
+  , logInfo
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -369,6 +371,9 @@ env { request, envVars } =
     makeAff \f -> do
       id <- setTimeout t $ f $ Right unit
       pure $ Canceler $ \_ -> liftEffect $ clearTimeout id
+
+  logInfo :: Env.LogInfo Aff
+  logInfo = log
 
 privateKeyStore :: String
 privateKeyStore = "session"

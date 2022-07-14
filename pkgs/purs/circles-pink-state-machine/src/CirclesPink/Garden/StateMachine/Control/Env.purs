@@ -40,6 +40,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , GetUsers
   , IsFunded
   , IsTrusted
+  , LogInfo
   , PrepareSafeDeploy
   , PrivKeyToSafeAddress
   , RemoveTrustConnection
@@ -56,8 +57,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , UserSearch
   , _errDecode
   , _errReadStorage
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -211,10 +211,14 @@ type ErrTransfer r = ErrNative + ErrInvalidUrl + r
 
 type Transfer m = forall r. PrivateKey -> Address -> Address -> BN -> String -> ExceptV (ErrTransfer + r) m String
 
+--------------------------------------------------------------------------------
 type GetTimestamp :: forall k. (Type -> k) -> k
 type GetTimestamp m = m Instant
 
+--------------------------------------------------------------------------------
 type Sleep m = Int -> m Unit
+--------------------------------------------------------------------------------
+type LogInfo m = String -> m Unit
 
 --------------------------------------------------------------------------------
 type Env m =
@@ -245,6 +249,7 @@ type Env m =
   , transfer :: Transfer m
   , getTimestamp :: GetTimestamp m
   , sleep :: Sleep m
+  , logInfo :: LogInfo m
   }
 
 --------------------------------------------------------------------------------
