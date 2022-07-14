@@ -2,5 +2,6 @@
   "compilerOptions": { "composite": true },
   "extends": "../../../../tsconfig.json",
   "exclude": [],
-  "include": ["output"]
+  "include": [],
+  "files": ["output/Ansi.Codes/index.d.ts"]
 }
