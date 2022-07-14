@@ -39,40 +39,15 @@ spec =
         D.fetchUsersBinarySearch testEnv sampleKey []
           # run
           # shouldEqual (Just [])
-      it "one element not in db" do
-        let
-          db =
-            M.fromFoldable
-              [ addrA /\ userA ]
-
-          testEnv' = testEnv { getUsers = mkGetUsers db }
-        D.fetchUsersBinarySearch testEnv' sampleKey [ addrB ]
-          # run
-          # shouldEqual (Just [ (Left >>> UserIdent) addrB ])
       it "one element in db" do
         let
           db =
             M.fromFoldable
               [ addrA /\ userA ]
-
           testEnv' = testEnv { getUsers = mkGetUsers db }
         D.fetchUsersBinarySearch testEnv' sampleKey [ addrA ]
           # run
           # shouldEqual (Just [ (Right >>> UserIdent) userA ])
-      it "many elements in db" do
-        let
-          db =
-            M.fromFoldable
-              [ addrA /\ userA, addrB /\ userB, addrE /\ userE ]
-
-          testEnv' = testEnv { getUsers = mkGetUsers db }
-        D.fetchUsersBinarySearch testEnv' sampleKey [ addrA, addrB, addrC, addrD, addrE ]
-          # run
-          # shouldEqual (Just [ (Right >>> UserIdent) userA, (Right >>> UserIdent) userB, (Left >>> UserIdent) addrC, (Left >>> UserIdent) addrD, (Right >>> UserIdent) userE ])
-
--- describe "mapTrusts" do
---   it "runs" do
---     D.mapTrust [] (fromFoldable [])  `shouldEqual` 2
 
 mkGetUsers :: Map Address User -> forall r. PrivateKey -> (Array String) -> (Array Address) -> ExceptV (ErrGetUsers + r) (TestScriptT Identity) (Array User)
 mkGetUsers db _ _ xs =

@@ -4,6 +4,8 @@
 
 var Web3 = require("web3");
 
+var BN = require("bn.js");
+
 exports.newWebSocketProvider = (url) => () =>
   new Web3.providers.WebsocketProvider(url);
 
@@ -30,5 +32,6 @@ exports.mkCirclesCore = (web3) => (options) => () =>
 exports.unsafeSampleCore = (circlesCore) => (account) => (_, onSucc) => {
   window.sampleCore = circlesCore;
   window.sampleAccount = account;
+  window.BN = BN;
   onSucc(null);
 };
