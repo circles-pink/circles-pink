@@ -59,7 +59,9 @@ export const Send = ({
         A._transfer({
           from: fromAddr,
           to: toAddr,
-          value: Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether'),
+          value: new Web3.utils.BN(
+            Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether')
+          ),
           paymentNote,
         })
       )
