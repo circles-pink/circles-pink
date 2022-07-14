@@ -17,7 +17,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySaf
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
-import Control.Monad.Except (runExceptT)
+import Control.Monad.Except (runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (catMaybes, drop, take)
@@ -40,12 +40,14 @@ import Data.Set as Set
 import Data.String (length)
 import Data.These (These(..), maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
+import Data.Variant (Variant, inj)
 import Foreign.Object (insert)
 import Partial (crashWith)
 import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
 type ErrFetchUsersBinarySearch r = (err :: Unit | r)
@@ -57,26 +59,32 @@ splitArray xs =
   in
     take count xs /\ drop count xs
 
+
 fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
-fetchUsersBinarySearch _ _ xs
-  | A.length xs == 0 = pure []
+fetchUsersBinarySearch env_ privKey_ xs =
+  go env_ privKey_ xs
+    -- ... 
 
-fetchUsersBinarySearch env privKey xs
-  | A.length xs == 1 = do
-      eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
-      case eitherUsers of
-        Left _ -> pure $ map (Left >>> UserIdent) xs
-        Right ok -> pure $ map (Right >>> UserIdent) ok
+  where
+  go :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
+  go _ _ xs
+    | A.length xs == 0 = pure []
 
-fetchUsersBinarySearch env privKey xs = do
-  eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
-  case eitherUsers of
-    Left _ ->
-      let
-        (ls /\ rs) = splitArray xs
-      in
-        fetchUsersBinarySearch env privKey ls <> fetchUsersBinarySearch env privKey rs
-    Right ok -> pure $ map (Right >>> UserIdent) ok
+  go env privKey xs
+    | A.length xs == 1 = do
+        users <- env.getUsers privKey [] xs # withExceptT (const (inj (Proxy :: Proxy "err") unit))
+        pure $ (Right >>> UserIdent) <$> users
+
+  go env privKey xs = do
+    eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
+    case eitherUsers of
+      Left _ ->
+        let
+          (ls /\ rs) = splitArray xs
+        in
+          go env privKey ls <> go env privKey rs
+      Right ok -> pure $ map (Right >>> UserIdent) ok
+
 
 dashboard
   :: forall m
