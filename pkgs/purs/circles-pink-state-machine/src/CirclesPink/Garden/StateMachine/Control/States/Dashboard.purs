@@ -6,7 +6,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 
 import Prelude
 
-import CirclesCore (TrustNode)
+import CirclesCore (TrustNode, User)
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
@@ -17,10 +17,10 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySaf
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
-import Control.Monad.Except (runExceptT, throwError, withExceptT)
+import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
-import Data.Array (catMaybes, drop, take)
+import Data.Array (catMaybes, drop, filter, notElem, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
@@ -40,7 +40,7 @@ import Data.Set as Set
 import Data.String (length)
 import Data.These (These(..), maybeThese)
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (Variant, inj)
+import Data.Variant (inj)
 import Foreign.Object (insert)
 import Partial (crashWith)
 import Partial.Unsafe (unsafePartial)
@@ -59,21 +59,23 @@ splitArray xs =
   in
     take count xs /\ drop count xs
 
-
 fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
-fetchUsersBinarySearch env_ privKey_ xs =
-  go env_ privKey_ xs
-    -- ... 
+fetchUsersBinarySearch env_ privKey_ xs_ =
+  do
+    apiUsers <- map (\au -> (UserIdent (Right au))) $ go env_ privKey_ xs_
+    -- let landIdents = apiUsers <#> (\ui -> ui) # (\apiU -> filter (\u -> notElem u apiU) xs_) <#> (\lu -> (UserIdent (Left lu)))
+
+    pure $ apiUsers -- <> landIdents
 
   where
-  go :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
+  go :: Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array User)
   go _ _ xs
     | A.length xs == 0 = pure []
 
   go env privKey xs
     | A.length xs == 1 = do
         users <- env.getUsers privKey [] xs # withExceptT (const (inj (Proxy :: Proxy "err") unit))
-        pure $ (Right >>> UserIdent) <$> users
+        pure users
 
   go env privKey xs = do
     eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
@@ -83,8 +85,7 @@ fetchUsersBinarySearch env_ privKey_ xs =
           (ls /\ rs) = splitArray xs
         in
           go env privKey ls <> go env privKey rs
-      Right ok -> pure $ map (Right >>> UserIdent) ok
-
+      Right ok -> pure ok
 
 dashboard
   :: forall m
