@@ -374,7 +374,7 @@ dashboard env@{ trustGetNetwork } =
   getNode :: CirclesGraph -> These UserIdent UserIdent -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode g =
     case _ of
-      This uiApi -> G.addNode uiApi g
+      This uiApi -> G.insertNode uiApi g -- use addNode
       That _ -> Right g
       Both uiApi _ -> G.updateNode uiApi g
 
