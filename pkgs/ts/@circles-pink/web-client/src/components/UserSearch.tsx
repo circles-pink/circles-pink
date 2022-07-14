@@ -42,6 +42,7 @@ import {
   UserIdent,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { LightColorFrame } from './TrustUserList';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -103,14 +104,8 @@ export const UserSearch = (props: UserSearchProps) => {
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
 
   return (
-    <Frame theme={theme}>
-      <Title>
-        <JustifyBetween>
-          <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
-          <Icon path={icon} size={1.5} color={darken(theme.lightColor, 2)} />
-        </JustifyBetween>
-      </Title>
-      {actionRow}
+    <LightColorFrame theme={theme} title={title} icon={icon}>
+      <>{actionRow}</>
       <TableContainer>
         <Table>
           {trusts.length > 0 && (
@@ -144,17 +139,19 @@ export const UserSearch = (props: UserSearchProps) => {
           </TableBody>
         </Table>
       </TableContainer>
-      {paginationInfo.totalPages > 1 && (
-        <JustifyAroundCenter>
-          <PageSelector
-            theme={theme}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageControls={pageControls}
-          />
-        </JustifyAroundCenter>
-      )}
-    </Frame>
+      <>
+        {paginationInfo.totalPages > 1 && (
+          <JustifyAroundCenter>
+            <PageSelector
+              theme={theme}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              pageControls={pageControls}
+            />
+          </JustifyAroundCenter>
+        )}
+      </>
+    </LightColorFrame>
   );
 };
 

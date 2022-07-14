@@ -23,6 +23,8 @@ import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
   mdiCog,
+  mdiGraph,
+  mdiGraphOutline,
   mdiHandCoin,
   mdiLan,
   mdiLogout,
@@ -260,10 +262,12 @@ export const Dashboard = ({
             </FadeIn>
           </MainContent>
           <FadeIn orientation={'up'} delay={getDelay()}>
-            <>
-              <br />
-              <br />
-              <LightColorFrame theme={theme}>
+            <TopMargin>
+              <LightColorFrame
+                theme={theme}
+                title="Trust Graph"
+                icon={mdiGraphOutline}
+              >
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>
@@ -272,7 +276,7 @@ export const Dashboard = ({
                   theme={theme}
                 />
               </LightColorFrame>
-            </>
+            </TopMargin>
           </FadeIn>
         </>
       }
@@ -362,6 +366,7 @@ const ButtonText = tw.span`mr-3`;
 const DebugButtonWrapper = tw.span`mb-3`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
 const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
+const TopMargin = tw.div`mt-4`;
 
 const FlexItemGrow = styled.div(() => [
   tw`h-full`,

@@ -71,7 +71,7 @@ export const Send = ({
       setScannerOpen(false);
     }
   };
-  const handleError = (err : unknown) => {
+  const handleError = (err: unknown) => {
     console.error(err);
   };
 
