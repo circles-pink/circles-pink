@@ -3,8 +3,8 @@ import { CenterText, JustifyAround } from '../../../components/helper';
 import { Claim, Text } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { DashboardProps } from '../Dashboard';
-const QrCode = require('react-qrcode-svg');
-import tw, { css, styled } from 'twin.macro';
+import QrCode from 'react-qrcode-svg';
+import tw, { styled } from 'twin.macro';
 import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 
 // -----------------------------------------------------------------------------
