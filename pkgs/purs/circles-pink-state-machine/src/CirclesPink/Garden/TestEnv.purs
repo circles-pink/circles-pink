@@ -20,7 +20,6 @@ import Control.Monad.Except (mapExceptT, throwError)
 import Data.BN as B
 import Data.Newtype (wrap)
 import Data.Variant (inj)
-import Debug.Extra (todo)
 import Type.Proxy (Proxy(..))
 
 testEnv :: forall m. Monad m => Env.Env (TestScriptT m)
