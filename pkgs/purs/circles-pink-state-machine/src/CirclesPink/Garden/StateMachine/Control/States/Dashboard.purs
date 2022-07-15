@@ -4,11 +4,11 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   , spec
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 
 import CirclesCore (TrustNode, User)
 import CirclesPink.Data.Address (Address, parseAddress)
-import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
@@ -19,16 +19,16 @@ import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
+import Control.Monad.Identity.Trans (runIdentityT)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (catMaybes, drop, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
-import Data.Either (Either(..), either, isRight)
-import Data.Foldable (foldM)
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
-import Data.Int (floor, toNumber)
+import Data.Identity (Identity(..))
+import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
 import Data.Map (Map)
@@ -37,32 +37,43 @@ import Data.Maybe (Maybe(..))
 import Data.Pair ((~))
 import Data.Pair as P
 import Data.Set as Set
-import Data.String (length)
+import Data.String as Str
 import Data.These (These(..), maybeThese)
-import Data.Tuple.Nested (type (/\), (/\))
-import Data.Variant (inj)
 import Foreign.Object (insert)
-import Partial (crashWith)
-import Partial.Unsafe (unsafePartial)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import Test.Spec (Spec, describe, it)
-import Test.Spec.Assertions (shouldEqual)
-import Type.Proxy (Proxy(..))
-import Type.Row (type (+))
+import Test.TestUtils (addrA, addrB, addrC, userA, userB, userC)
 
-type ErrFetchUsersBinarySearch r = (err :: Unit | r)
+--------------------------------------------------------------------------------
 
 splitArray :: forall a. Array a -> Array a /\ Array a
 splitArray xs =
   let
-    count = floor ((toNumber $ A.length xs) / 2.0)
+    count = Int.floor ((Int.toNumber $ A.length xs) / 2.0)
   in
     take count xs /\ drop count xs
 
-fetchUsersBinarySearch :: forall r m. Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array UserIdent)
-fetchUsersBinarySearch env_ privKey_ addresses =
+specSplitArray :: Spec Unit
+specSplitArray = describeFn splitArray do
+  describe "Split empty array" do
+    it "returns empty arrays" do
+      splitArray ([] :: _ Int) `shouldEqual` ([] /\ [])
+  describe "split array of even length" do
+    it "returns arrays of same length" do
+      splitArray ([ 1, 2, 3, 4 ]) `shouldEqual` ([ 1, 2 ] /\ [ 3, 4 ])
+  describe "split array of odd length" do
+    it "returns arrays of different length, the latter having one item more" do
+      splitArray ([ 1, 2, 3, 4, 5 ]) `shouldEqual` ([ 1, 2 ] /\ [ 3, 4, 5 ])
+
+--------------------------------------------------------------------------------
+
+type ErrFetchUsersBinarySearch r = (err :: Unit | r)
+
+type EnvFetchUsersBinarySearch r m = (getUsers :: Env.GetUsers m | r)
+
+fetchUsersBinarySearch :: forall q r m. Monad m => { | EnvFetchUsersBinarySearch q m } -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch r) m (Array UserIdent)
+fetchUsersBinarySearch env privKey addresses =
   do
-    apiUsers <- go env_ privKey_ addresses
+    apiUsers <- go addresses
     let
       allIds = Set.fromFoldable addresses
       apiUsersIds = Set.fromFoldable $ (\u -> u.safeAddress) <$> apiUsers
@@ -73,24 +84,72 @@ fetchUsersBinarySearch env_ privKey_ addresses =
     pure $ UserIdent <$> (otherUsers' <> apiUsers')
 
   where
-  go :: Monad m => Env.Env m -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array User)
-  go _ _ xs
+  go :: Array Address -> ExceptV (ErrFetchUsersBinarySearch + r) m (Array User)
+  go xs
     | A.length xs == 0 = pure []
 
-  go env privKey xs
+  go xs
     | A.length xs == 1 = do
         users <- env.getUsers privKey [] xs # withExceptT (const (inj (Proxy :: Proxy "err") unit))
         pure users
 
-  go env privKey xs = do
+  go xs = do
     eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
     case eitherUsers of
       Left _ ->
         let
           (ls /\ rs) = splitArray xs
         in
-          go env privKey ls <> go env privKey rs
+          go ls <> go rs
       Right ok -> pure ok
+
+specFetchUsersBinarySearch :: Spec Unit
+specFetchUsersBinarySearch = describe "fetchUsersBinarySearch" do
+  let
+    fetchUsersBinarySearch' = fetchUsersBinarySearch :: { | EnvFetchUsersBinarySearch () _ } -> _ -> _ -> _ (_ (ErrFetchUsersBinarySearch ())) Identity _
+    run = runExceptT >>> unwrap
+
+  describe "A" do
+    it ".." do
+      shouldEqual
+        ( run $ fetchUsersBinarySearch'
+            { getUsers: \_ _ _ -> pure [] }
+            sampleKey
+            []
+        )
+        (Right [])
+
+  describe "B" do
+    it ".." do
+      shouldEqual
+        ( run $ fetchUsersBinarySearch'
+            { getUsers: \_ _ _ -> pure [ userA ] }
+            sampleKey
+            [ addrA ]
+        )
+        (Right [ UserIdent $ Right userA ])
+
+  describe "C" do
+    it ".." do
+      shouldEqual
+        ( run $ fetchUsersBinarySearch'
+            { getUsers: \_ _ _ -> pure [] }
+            sampleKey
+            [ addrA ]
+        )
+        (Right [ UserIdent $ Left addrA ])
+
+  describe "C" do
+    it ".." do
+      shouldEqual
+        ( run $ fetchUsersBinarySearch'
+            { getUsers: \_ _ _ -> pure [ userA ] }
+            sampleKey
+            [ addrA, addrB ]
+        )
+        (Right [ UserIdent $ Left addrB, UserIdent $ Right userA ])
+
+--------------------------------------------------------------------------------
 
 dashboard
   :: forall m
@@ -316,7 +375,7 @@ dashboard env@{ trustGetNetwork } =
           env.checkUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
-        when ((length $ BN.toDecimalStr checkPayout) >= 18) do
+        when ((Str.length $ BN.toDecimalStr checkPayout) >= 18) do
           env.requestUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
@@ -362,12 +421,14 @@ dashboard env@{ trustGetNetwork } =
       trustGetNetwork st.privKey centerAddress
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
-        <#> map (\v -> v.safeAddress /\ v) >>> M.fromFoldable
+        <#> map (\v -> v.safeAddress /\ v)
+        >>> M.fromFoldable
 
     userIdents :: Map Address UserIdent <-
       fetchUsersBinarySearch env st.privKey (Set.toUnfoldable $ M.keys trustNodes)
         # dropError
-        <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
+        <#> map (\v -> getIndex v /\ v)
+        >>> M.fromFoldable
 
     lift
       $ set \st' ->
@@ -376,15 +437,18 @@ dashboard env@{ trustGetNetwork } =
             eitherNewTrusts = do
               let
                 neighborNodes = G.neighborNodes centerAddress st'.trusts
-                  <#> map (\v -> getIndex v /\ v) >>> M.fromFoldable
+                  <#> map (\v -> getIndex v /\ v)
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 incomingEdges = G.incomingEdges centerAddress st'.trusts
-                  <#> map (\v -> P.fst (getIndex v) /\ v) >>> M.fromFoldable
+                  <#> map (\v -> P.fst (getIndex v) /\ v)
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 outgoingEdges = G.outgoingEdges centerAddress st'.trusts
-                  <#> map (\v -> P.snd (getIndex v) /\ v) >>> M.fromFoldable
+                  <#> map (\v -> P.snd (getIndex v) /\ v)
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
               st'.trusts
@@ -424,47 +488,57 @@ dashboard env@{ trustGetNetwork } =
     That tc -> G.deleteEdge (getIndex tc) g
     Both tn _ -> G.updateEdge (TrustConnection (tn.safeAddress ~ centerAddress) initTrusted) g
 
+--------------------------------------------------------------------------------
+
 mapsToThese :: forall k a b. Ord k => Map k a -> Map k b -> Array (These a b)
 mapsToThese mapA mapB = Set.union (M.keys mapA) (M.keys mapB)
   # Set.toUnfoldable
   <#> (\k -> maybeThese (M.lookup k mapA) (M.lookup k mapB))
   # catMaybes
 
+specMapsToThese :: Spec Unit
+specMapsToThese =
+  describe "mapsToThese" do
+    let
+      fromFoldable :: Array (String /\ Int) -> Map String Int
+      fromFoldable = M.fromFoldable
+
+    describe "empty maps" do
+      let
+        map1 = fromFoldable []
+        map2 = fromFoldable []
+      it "returns an empty array" do
+        (mapsToThese map1 map2) `shouldEqual` []
+    describe "first one entry" do
+      let
+        map1 = fromFoldable [ "1" /\ 1 ]
+        map2 = fromFoldable []
+      it "returns an array with one This" do
+        (mapsToThese map1 map2) `shouldEqual` [ This 1 ]
+    describe "second one entry" do
+      let
+        map1 = fromFoldable []
+        map2 = fromFoldable [ "2" /\ 2 ]
+      it "returns an array with one That" do
+        (mapsToThese map1 map2) `shouldEqual` [ That 2 ]
+    describe "both entries, different keys" do
+      let
+        map1 = fromFoldable [ "1" /\ 1 ]
+        map2 = fromFoldable [ "2" /\ 2 ]
+      it "returns an array with one This and one That" do
+        (mapsToThese map1 map2) `shouldEqual` [ This 1, That 2 ]
+    describe "both entries, same keys" do
+      let
+        map1 = fromFoldable [ "1" /\ 1 ]
+        map2 = fromFoldable [ "1" /\ 2 ]
+      it "returns an array with one Both" do
+        (mapsToThese map1 map2) `shouldEqual` [ Both 1 2 ]
+
+--------------------------------------------------------------------------------
+
 spec :: Spec Unit
 spec =
   describe "CirclesPink.Garden.StateMachine.Control.States.Dashboard" do
-    describe "mapsToThese" do
-      let
-        fromFoldable :: Array (String /\ Int) -> Map String Int
-        fromFoldable = M.fromFoldable
-
-      describe "empty maps" do
-        let
-          map1 = fromFoldable []
-          map2 = fromFoldable []
-        it "returns an empty array" do
-          (mapsToThese map1 map2) `shouldEqual` []
-      describe "first one entry" do
-        let
-          map1 = fromFoldable [ "1" /\ 1 ]
-          map2 = fromFoldable []
-        it "returns an array with one This" do
-          (mapsToThese map1 map2) `shouldEqual` [ This 1 ]
-      describe "second one entry" do
-        let
-          map1 = fromFoldable []
-          map2 = fromFoldable [ "2" /\ 2 ]
-        it "returns an array with one That" do
-          (mapsToThese map1 map2) `shouldEqual` [ That 2 ]
-      describe "both entries, different keys" do
-        let
-          map1 = fromFoldable [ "1" /\ 1 ]
-          map2 = fromFoldable [ "2" /\ 2 ]
-        it "returns an array with one This and one That" do
-          (mapsToThese map1 map2) `shouldEqual` [ This 1, That 2 ]
-      describe "both entries, same keys" do
-        let
-          map1 = fromFoldable [ "1" /\ 1 ]
-          map2 = fromFoldable [ "1" /\ 2 ]
-        it "returns an array with one Both" do
-          (mapsToThese map1 map2) `shouldEqual` [ Both 1 2 ]
+    specSplitArray
+    specFetchUsersBinarySearch
+    specMapsToThese
