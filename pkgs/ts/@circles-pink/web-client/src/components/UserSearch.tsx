@@ -56,8 +56,6 @@ type UserSearchProps = {
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
-  trustAddResult: DefaultView['trustAddResult'];
-  trustRemoveResult: DefaultView['trustRemoveResult'];
 };
 
 export const UserSearch = (props: UserSearchProps) => {

@@ -48,6 +48,7 @@ type CirclesProtocol = P.Protocol
         , addTrustConnection :: P.Action ("dashboard" :> Nil')
         , removeTrustConnection :: P.Action ("dashboard" :> Nil')
         , getBalance :: P.Action ("dashboard" :> Nil')
+        , getUBIPayout :: P.Action ("dashboard" :> Nil')
         , getUsers :: P.Action ("dashboard" :> Nil')
         , transfer :: P.Action ("dashboard" :> Nil')
         , userSearch :: P.Action ("dashboard" :> Nil')

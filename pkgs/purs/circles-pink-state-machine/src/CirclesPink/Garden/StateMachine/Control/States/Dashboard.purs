@@ -102,6 +102,7 @@ dashboard
      , addTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , removeTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+     , getUBIPayout :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
          ActionHandler' m
            { from :: Address
@@ -133,6 +134,7 @@ dashboard env@{ trustGetNetwork } =
   , addTrustConnection
   , removeTrustConnection
   , getBalance
+  , getUBIPayout
   , getUsers
   , transfer
   , userSearch
@@ -146,10 +148,10 @@ dashboard env@{ trustGetNetwork } =
           syncTrusts set st st.user.safeAddress
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         -- let x = todo -- infinite
-        _ <- lift $ env.sleep 5000
-        _ <-
-          syncTrusts set st st.user.safeAddress
-            # retryUntil env (const { delay: 5000 }) (\_ _ -> false) 0
+        -- _ <- lift $ env.sleep 5000
+        -- _ <-
+        --   syncTrusts set st st.user.safeAddress
+        --     # retryUntil env (const { delay: 5000 }) (\_ _ -> false) 0
         pure unit
 
   expandTrustNetwork set st safeAddress =
@@ -286,7 +288,30 @@ dashboard env@{ trustGetNetwork } =
         _ <-
           env.getBalance st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-            # retryUntil env (const { delay: 2000 }) (\_ n -> n == 3) 0
+            # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+        -- checkPayout <-
+        --   env.checkUBIPayout st.privKey st.user.safeAddress
+        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+        --     # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
+        -- when ((length $ BN.toDecimalStr checkPayout) >= 18) do
+        --   env.requestUBIPayout st.privKey st.user.safeAddress
+        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
+        --     # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
+        --     # void
+        -- _ <-
+        --   env.getBalance st.privKey st.user.safeAddress
+        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+        --     # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
+        -- let x = todo
+        -- _ <-
+        --   env.getBalance st.privKey st.user.safeAddress
+        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+        --     # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
+        pure unit
+
+  getUBIPayout set st _ =
+    void do
+      runExceptT do
         checkPayout <-
           env.checkUBIPayout st.privKey st.user.safeAddress
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
@@ -296,16 +321,6 @@ dashboard env@{ trustGetNetwork } =
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
             # void
-        _ <-
-          env.getBalance st.privKey st.user.safeAddress
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-            # retryUntil env (const { delay: 2000 }) (\r n -> n == 5 || isRight r) 0
-        -- let x = todo
-        -- _ <-
-        --   env.getBalance st.privKey st.user.safeAddress
-        --     # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
-        --     # retryUntil env (const { delay: 10000 }) (\_ _ -> false) 0
-        pure unit
 
   userSearch set st options = do
     void do

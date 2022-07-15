@@ -4,7 +4,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _askEmail
   , _askUsername
   , _checkForSession
-  , _checkUBIPayout
+  , _getUBIPayout
   , _coreToWindow
   , _dashboard
   , _debug
@@ -24,7 +24,6 @@ module CirclesPink.Garden.StateMachine.Action
   , _prev
   , _redeploySafeAndToken
   , _removeTrustConnection
-  , _requestUBIPayout
   , _setEmail
   , _setMagicWords
   , _setPrivacy
@@ -88,6 +87,7 @@ type CirclesAction = Variant
         , addTrustConnection :: UserIdent
         , removeTrustConnection :: UserIdent
         , getBalance :: Unit
+        , getUBIPayout :: Unit
         , transfer ::
             { from :: Address
             , to :: Address
@@ -217,11 +217,8 @@ _checkForSession = inj (Proxy :: _ "checkForSession")
 _getBalance :: forall a v. a -> Variant (getBalance :: a | v)
 _getBalance = inj (Proxy :: _ "getBalance")
 
-_checkUBIPayout :: forall a v. a -> Variant (checkUBIPayout :: a | v)
-_checkUBIPayout = inj (Proxy :: _ "checkUBIPayout")
-
-_requestUBIPayout :: forall a v. a -> Variant (requestUBIPayout :: a | v)
-_requestUBIPayout = inj (Proxy :: _ "requestUBIPayout")
+_getUBIPayout :: forall a v. a -> Variant (getUBIPayout :: a | v)
+_getUBIPayout = inj (Proxy :: _ "getUBIPayout")
 
 _getUsers :: forall a v. a -> Variant (getUsers :: a | v)
 _getUsers = inj (Proxy :: _ "getUsers")
