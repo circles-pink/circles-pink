@@ -30,6 +30,7 @@ let
           "UnusedDctorImport"
           "UserDefinedWarning"
           "UnusedTypeVar"
+          "WildcardInferredType"
         ];
         inherit nodeModules;
       };
