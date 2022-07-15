@@ -43,7 +43,7 @@ const layout: Partial<ConcentricLayoutOptions> &
   // edgeElasticity: 0.1,
   animationDuration: 550,
   // refresh: 1,
-  // randomize: false,
+  // randomize: true,
   // componentSpacing: 7000,
   // nodeRepulsion: () => 2000,
 };
