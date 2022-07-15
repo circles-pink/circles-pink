@@ -152,7 +152,7 @@ export const TrustGraph = ({
     {
       selector: 'edge',
       style: {
-        'curve-style': 'bezier',
+        'curve-style': 'unbundled-bezier',
         'target-arrow-shape': 'triangle',
         width: 1,
         'line-style': (s: any) => {
