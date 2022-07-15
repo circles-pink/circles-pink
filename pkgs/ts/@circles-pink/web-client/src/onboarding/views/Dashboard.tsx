@@ -15,6 +15,7 @@ import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.G
 import {
   DefaultView,
   defaultView,
+  Trust,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
@@ -44,6 +45,11 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { TrustGraph } from '../../components/TrustGraph';
 import { UserSearch } from '../../components/UserSearch';
+import {
+  isPendingTrust,
+  isPendingUntrust,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+import { fromFpTsTuple, toFpTsTuple } from '../../utils/fpTs';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -104,14 +110,121 @@ export const Dashboard = ({
   const getDelay = getIncrementor(0, 0.05);
 
   // -----------------------------------------------------------------------------
-  // Side Effects
+  // Data polling - Initial fetching and idle polling
   // -----------------------------------------------------------------------------
 
+  const BALANCE_INTERVAL = 10000;
+  const TRUST_NETWORK_INTERVAL = 15000;
+  const UBI_PAYOUT_INTERVAL = 60000;
+
   useEffect(() => {
-    // Gather initial Client information
+    // Gather initial client information
     act(A._dashboard(A._getBalance(unit)));
     act(A._dashboard(A._getTrusts(unit)));
+    act(A._dashboard(A._getUBIPayout(unit)));
+
+    // Start polling tasks
+    const balancePolling = setInterval(() => {
+      act(A._dashboard(A._getBalance(unit)));
+    }, BALANCE_INTERVAL);
+
+    const trustNetworkPolling = setInterval(() => {
+      act(A._dashboard(A._getTrusts(unit)));
+    }, TRUST_NETWORK_INTERVAL);
+
+    const UBIPayoutPolling = setInterval(() => {
+      act(A._dashboard(A._getTrusts(unit)));
+    }, UBI_PAYOUT_INTERVAL);
+
+    // Clear interval on unmount
+    return () => {
+      clearInterval(balancePolling);
+      clearInterval(trustNetworkPolling);
+      clearInterval(UBIPayoutPolling);
+    };
   }, []);
+
+  // -----------------------------------------------------------------------------
+  // Data polling - Balance
+  // -----------------------------------------------------------------------------
+
+  const MAX_RETRYS = 10;
+  const RETRY_INTERVAL = 1000;
+
+  // Balance refresh after transfer
+
+  const [initBalTransfer, setInitBalTransfer] = useState<string | null>(null);
+  const [countRefreshTransfer, setCountRefreshTransfer] = useState<number>(0);
+
+  useEffect(() => {
+    switch (state.transferResult.type) {
+      case 'loading':
+        setCountRefreshTransfer(0);
+        setInitBalTransfer(
+          state.getBalanceResult.type === 'success'
+            ? state.getBalanceResult.value.data.toString()
+            : null
+        );
+        break;
+      case 'success':
+        const newBalance =
+          state.getBalanceResult.type === 'success'
+            ? state.getBalanceResult.value.data.toString()
+            : null;
+
+        if (
+          newBalance === initBalTransfer &&
+          countRefreshTransfer > MAX_RETRYS
+        ) {
+          // console.log('Update:', countRefreshTransfer + 1);
+          setTimeout(() => {
+            act(A._dashboard(A._getBalance(unit)));
+            setCountRefreshTransfer(countRefreshTransfer + 1);
+          }, RETRY_INTERVAL);
+        } else {
+          // console.log('Finished after:', countRefreshTransfer);
+        }
+        break;
+      default:
+        break;
+    }
+  }, [state.transferResult, countRefreshTransfer]);
+
+  // Balance refresh after UBI payout
+
+  const [initBalPayout, setInitBalPayout] = useState<string | null>(null);
+  const [countRefreshPayout, setCountRefreshPayout] = useState<number>(0);
+
+  useEffect(() => {
+    switch (state.requestUBIPayoutResult.type) {
+      case 'loading':
+        setCountRefreshPayout(0);
+        setInitBalPayout(
+          state.getBalanceResult.type === 'success'
+            ? state.getBalanceResult.value.data.toString()
+            : null
+        );
+        break;
+      case 'success':
+        const newBalance =
+          state.getBalanceResult.type === 'success'
+            ? state.getBalanceResult.value.data.toString()
+            : null;
+
+        if (newBalance === initBalPayout && countRefreshPayout > MAX_RETRYS) {
+          // console.log('Update:', countRefreshPayout + 1);
+          setTimeout(() => {
+            act(A._dashboard(A._getBalance(unit)));
+            setCountRefreshPayout(countRefreshPayout + 1);
+          }, RETRY_INTERVAL);
+        } else {
+          // console.log('Finished after:', countRefreshPayout);
+        }
+        break;
+      default:
+        break;
+    }
+  }, [state.requestUBIPayoutResult, countRefreshPayout]);
 
   // -----------------------------------------------------------------------------
   // Redeploy, if token is not deployed
@@ -133,15 +246,26 @@ export const Dashboard = ({
   // User Search
   // -----------------------------------------------------------------------------
 
-  // Search Input
-  const [search, setSearch] = useState<string>('');
+  const [search, setSearch] = useState<string>(''); // Search Input
+  const [searchResult, setSearchResult] = useState<Trust[]>(state.usersSearch);
 
   useEffect(() => {
     // Query on user input
     if (search !== '') {
       act(A._dashboard(A._userSearch({ query: search })));
+    } else {
+      setSearchResult([]);
     }
   }, [search]);
+
+  useEffect(() => {
+    // Update on api result
+    if (search !== '') {
+      setSearchResult(state.usersSearch);
+    } else {
+      setSearchResult([]);
+    }
+  }, [state.usersSearch]);
 
   // -----------------------------------------------------------------------------
   // Transfer
@@ -237,17 +361,15 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <UserSearch
                 title={t('dashboard.exploreTitle')}
-                trusts={state.usersSearch}
+                trusts={searchResult}
                 theme={theme}
                 icon={mdiMagnify}
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
                 addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
                 removeTrust={to =>
                   act(A._dashboard(A._removeTrustConnection(to)))
                 }
-                trustRemoveResult={state.trustRemoveResult}
                 actionRow={
                   <JustifyBetweenCenter>
                     <Input
