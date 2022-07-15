@@ -20,6 +20,10 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrInvalidMnemonic
   , ErrIsFunded
   , ErrIsTrusted
+  , ErrKeyNotFound
+  , ErrNoStorage
+  , ErrParseData
+  , ErrParseJson
   , ErrPrepareSafeDeploy
   , ErrPrivKeyToSafeAddress
   , ErrReadStorage
@@ -27,6 +31,10 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrRequestUBIPayout
   , ErrRestoreSession
   , ErrSaveSession
+  , ErrStorageClear
+  , ErrStorageDeleteItem
+  , ErrStorageGetItem
+  , ErrStorageSetItem
   , ErrTransfer
   , ErrTrustGetNetwork
   , ErrUserRegister
@@ -49,6 +57,11 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , RestoreSession
   , SaveSession
   , Sleep
+  , StorageClear
+  , StorageDeleteItem
+  , StorageGetItem
+  , StorageSetItem
+  , StorageType(..)
   , Transfer
   , TrustGetNetwork
   , UserNotFoundError
@@ -67,7 +80,7 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Data.Argonaut (JsonDecodeError)
+import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError)
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Variant (Variant, inj)
@@ -221,6 +234,37 @@ type Sleep m = Int -> m Unit
 type LogInfo m = String -> m Unit
 
 --------------------------------------------------------------------------------
+-- Storage
+--------------------------------------------------------------------------------
+type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => StorageType -> k -> v -> ExceptV (ErrStorageSetItem + r) m Unit
+
+type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => StorageType -> k -> v -> ExceptV (ErrStorageGetItem + r) m v
+
+type StorageDeleteItem m = forall k r. EncodeJson k => StorageType -> k -> ExceptV (ErrStorageDeleteItem + r) m Unit
+
+type StorageClear m = forall r. StorageType -> ExceptV (ErrStorageClear + r) m Unit
+
+data StorageType = SessionStorage | LocalStorage
+
+--------------------------------------------------------------------------------
+type ErrStorageSetItem r = ErrNoStorage + r
+
+type ErrStorageGetItem r = ErrNoStorage + ErrParseJson + ErrParseData + ErrKeyNotFound + r
+
+type ErrStorageDeleteItem r = ErrNoStorage + ErrKeyNotFound + r
+
+type ErrStorageClear r = ErrNoStorage + r
+
+-- Error slices
+type ErrParseJson r = (errParseJson :: Unit | r)
+
+type ErrParseData r = (errParseData :: Unit | r)
+
+type ErrNoStorage r = (errNoStorage :: Unit | r)
+
+type ErrKeyNotFound r = (errKeyNotFound :: Unit | r)
+
+--------------------------------------------------------------------------------
 type Env m =
   { apiCheckUserName :: ApiCheckUserName m
   , apiCheckEmail :: ApiCheckEmail m
@@ -250,6 +294,10 @@ type Env m =
   , getTimestamp :: GetTimestamp m
   , sleep :: Sleep m
   , logInfo :: LogInfo m
+  , storageSetItem :: StorageSetItem m
+  , storageGetItem :: StorageGetItem m
+  , storageDeleteItem :: StorageDeleteItem m
+  , storageClear :: StorageClear m
   }
 
 --------------------------------------------------------------------------------
