@@ -9,7 +9,7 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.Env (_errDecode, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.Env (CryptoKey(..), StorageType(..), _errDecode, _errNoStorage, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
@@ -19,6 +19,7 @@ import Data.Argonaut (decodeJson, encodeJson)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
+import Data.FpTs.Either (Right)
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
@@ -59,8 +60,27 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
-env :: { request :: ReqFn (CirclesError' ()), envVars :: EnvVars } -> Env.Env Aff
-env { request, envVars } =
+env
+  :: { request :: ReqFn (CirclesError' ())
+     , localStorage ::
+         Maybe
+           { setItem :: String -> String -> Aff Unit
+           , getItem :: String -> ExceptT Unit Aff String
+           , deleteItem :: String -> ExceptT Unit Aff Unit
+           , clear :: Aff Unit
+           }
+     , sessionStorage ::
+         Maybe
+           { setItem :: String -> String -> Aff Unit
+           , getItem :: String -> ExceptT Unit Aff String
+           , deleteItem :: String -> ExceptT Unit Aff Unit
+           , clear :: Aff Unit
+           }
+     , crypto :: CryptoKey -> String -> String
+     , envVars :: EnvVars
+     }
+  -> Env.Env Aff
+env { localStorage, sessionStorage, crypto, request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey
@@ -91,7 +111,7 @@ env { request, envVars } =
   , logInfo
   , storageSetItem
   , storageGetItem
-  , storageDeleteItem 
+  , storageDeleteItem
   , storageClear
   }
   where
@@ -389,8 +409,12 @@ env { request, envVars } =
   storageDeleteItem = todo
 
   storageClear :: Env.StorageClear Aff
-  storageClear = todo
-  
+  storageClear st = case st of
+    LocalStorage -> case localStorage of
+      Nothing -> ExceptT $ map (Left _errNoStorage st)
+      Just ls -> ExceptT $ map Right ls.clear
+    SessionStorage -> todo
+
 privateKeyStore :: String
 privateKeyStore = "session"
 
