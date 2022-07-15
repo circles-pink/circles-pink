@@ -4,6 +4,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ApiCheckUserName
   , CheckUBIPayout
   , CoreToWindow
+  , CryptoKey(..)
   , DeploySafe
   , DeployToken
   , Env
@@ -22,8 +23,8 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , ErrIsTrusted
   , ErrKeyNotFound
   , ErrNoStorage
-  , ErrParseData
-  , ErrParseJson
+  , ErrParseToData
+  , ErrParseToJson
   , ErrPrepareSafeDeploy
   , ErrPrivKeyToSafeAddress
   , ErrReadStorage
@@ -69,6 +70,10 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , UserResolve
   , UserSearch
   , _errDecode
+  , _errKeyNotFound
+  , _errNoStorage
+  , _errParseToData
+  , _errParseToJson
   , _errReadStorage
   ) where
 
@@ -80,9 +85,10 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError)
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
+import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -236,11 +242,14 @@ type LogInfo m = String -> m Unit
 --------------------------------------------------------------------------------
 -- Storage
 --------------------------------------------------------------------------------
-type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => StorageType -> k -> v -> ExceptV (ErrStorageSetItem + r) m Unit
 
-type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => StorageType -> k -> v -> ExceptV (ErrStorageGetItem + r) m v
+newtype CryptoKey = CryptoKey String
 
-type StorageDeleteItem m = forall k r. EncodeJson k => StorageType -> k -> ExceptV (ErrStorageDeleteItem + r) m Unit
+type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => CryptoKey -> StorageType -> k -> v -> ExceptV (ErrStorageSetItem + r) m Unit
+
+type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> v -> ExceptV (ErrStorageGetItem k + r) m v
+
+type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageDeleteItem k + r) m Unit
 
 type StorageClear m = forall r. StorageType -> ExceptV (ErrStorageClear + r) m Unit
 
@@ -249,22 +258,40 @@ data StorageType = SessionStorage | LocalStorage
 --------------------------------------------------------------------------------
 type ErrStorageSetItem r = ErrNoStorage + r
 
-type ErrStorageGetItem r = ErrNoStorage + ErrParseJson + ErrParseData + ErrKeyNotFound + r
+type ErrStorageGetItem k r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrKeyNotFound k + r
 
-type ErrStorageDeleteItem r = ErrNoStorage + ErrKeyNotFound + r
+type ErrStorageDeleteItem k r = ErrNoStorage + ErrKeyNotFound k + r
 
 type ErrStorageClear r = ErrNoStorage + r
 
 -- Error slices
-type ErrParseJson r = (errParseJson :: Unit | r)
+type ErrParseToJson r = (errParseToJson :: String | r)
 
-type ErrParseData r = (errParseData :: Unit | r)
+type ErrParseToData r = (errParseToData :: Json /\ JsonDecodeError | r)
 
-type ErrNoStorage r = (errNoStorage :: Unit | r)
+type ErrNoStorage r = (errNoStorage :: StorageType | r)
 
-type ErrKeyNotFound r = (errKeyNotFound :: Unit | r)
+type ErrKeyNotFound :: forall k1. k1 -> Row k1 -> Row k1
+type ErrKeyNotFound k r = (errKeyNotFound :: k | r)
+
+-- Error Connstructors
 
 --------------------------------------------------------------------------------
+
+_errParseToJson :: forall r. String -> Variant (ErrParseToJson r)
+_errParseToJson = inj (Proxy :: _ "errParseToJson")
+
+_errParseToData :: forall r. Json /\ JsonDecodeError -> Variant (ErrParseToData r)
+_errParseToData = inj (Proxy :: _ "errParseToData")
+
+_errNoStorage :: forall r. StorageType -> Variant (ErrNoStorage r)
+_errNoStorage = inj (Proxy :: _ "errNoStorage")
+
+_errKeyNotFound :: forall r k. k -> Variant (ErrKeyNotFound k r)
+_errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
+
+--------------------------------------------------------------------------------
+
 type Env m =
   { apiCheckUserName :: ApiCheckUserName m
   , apiCheckEmail :: ApiCheckEmail m
