@@ -21,38 +21,20 @@ let
     (import ../../materialized/spago2nix/default.nix) [
     (recursiveUpdate {
       circles-pink-state-machine = {
-        censorCodes = [
-          "UnusedImport"
-          "UnusedExplicitImport"
-          "UnusedName"
-          "MissingKindDeclaration"
-          "UnusedDeclaration"
-          "UnusedDctorImport"
-          "UserDefinedWarning"
-          "UnusedTypeVar"
-          "WildcardInferredType"
-        ];
+        censorCodes = [ ];
         inherit nodeModules;
       };
 
       chance = {
-        censorCodes = [
-          "UnusedImport"
-          "UnusedDeclaration"
-        ];
+        censorCodes = [ ];
       };
 
       graph = {
-        censorCodes = [
-          "UnusedExplicitImport"
-          "ShadowedName"
-        ];
+        censorCodes = [ ];
       };
 
       indexed-graph = {
-        censorCodes = [
-          "UserDefinedWarning"
-        ];
+        censorCodes = [ ];
       };
     })
     (x: removeAttrs x [ "all-tests" ])

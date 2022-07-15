@@ -14,11 +14,13 @@ import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT)
+import CirclesPink.Garden.StateMachine.Control.Env (StorageType(..), _errNoStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import Control.Monad.Except (mapExceptT, throwError)
 import Data.BN as B
 import Data.Newtype (wrap)
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Type.Proxy (Proxy(..))
 
 testEnv :: forall m. Monad m => Env.Env (TestScriptT m)
@@ -53,6 +55,10 @@ testEnv =
   , getTimestamp: pure bottom
   , sleep: \_ -> pure unit
   , logInfo: \_ -> pure unit
+  , storageSetItem: \_ _ _ _ -> pure unit
+  , storageGetItem: \_ _ _ _ -> throwError $ _errNoStorage SessionStorage
+  , storageDeleteItem: \_ _ _ -> pure unit
+  , storageClear: \_ -> pure unit
   }
 
 --------------------------------------------------------------------------------
@@ -62,6 +68,9 @@ compose2 g f x1 x2 = f x1 x2 # g
 
 compose3 :: forall a1 a2 a3 z z'. (z -> z') -> (a1 -> a2 -> a3 -> z) -> (a1 -> a2 -> a3 -> z')
 compose3 g f x1 x2 x3 = f x1 x2 x3 # g
+
+compose4 :: forall a1 a2 a3 a4 z z'. (z -> z') -> (a1 -> a2 -> a3 -> a4 -> z) -> (a1 -> a2 -> a3 -> a4 -> z')
+compose4 g f x1 x2 x3 x4 = f x1 x2 x3 x4 # g
 
 compose5 :: forall a1 a2 a3 a4 a5 z z'. (z -> z') -> (a1 -> a2 -> a3 -> a4 -> a5 -> z) -> (a1 -> a2 -> a3 -> a4 -> a5 -> z')
 compose5 g f x1 x2 x3 x4 x5 = f x1 x2 x3 x4 x5 # g
@@ -96,4 +105,8 @@ liftEnv f e =
   , getTimestamp: f e.getTimestamp
   , sleep: compose f e.sleep
   , logInfo: compose f e.logInfo
+  , storageSetItem: \x1 x2 x3 x4 -> e.storageSetItem x1 x2 x3 x4 # mapExceptT f
+  , storageGetItem: \x1 x2 x3 x4 -> e.storageGetItem x1 x2 x3 x4 # mapExceptT f
+  , storageDeleteItem: \x1 x2 x3 -> e.storageDeleteItem x1 x2 x3 # mapExceptT f
+  , storageClear: compose (mapExceptT f) e.storageClear
   }
