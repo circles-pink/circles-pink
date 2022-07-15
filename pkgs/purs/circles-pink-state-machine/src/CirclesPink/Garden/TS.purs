@@ -35,7 +35,7 @@ mkControl envVars cfg setState s a =
   where
   cfg' = C.mapCirclesConfig liftEffect $ convertConfig cfg
   request = milkisRequest windowFetch
-  env = liftEnv liftAff $ Garden.env { request, envVars }
+  env = liftEnv liftAff $ Garden.env { request, envVars, localStorage: todo, sessionStorage: todo, crypto : todo }
 
 mkControlTestEnv :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControlTestEnv setState st ac =

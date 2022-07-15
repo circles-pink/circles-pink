@@ -9,13 +9,13 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.Env (CryptoKey(..), StorageType(..), _errDecode, _errNoStorage, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.Env (CryptoKey(..), StorageType(..), _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.Env as Env
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
+import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
-import Data.Argonaut (decodeJson, encodeJson)
+import Data.Argonaut (decodeJson, encodeJson, parseJson, stringify)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
@@ -24,10 +24,12 @@ import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
+import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (inj)
 import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
@@ -76,7 +78,10 @@ env
            , deleteItem :: String -> ExceptT Unit Aff Unit
            , clear :: Aff Unit
            }
-     , crypto :: CryptoKey -> String -> String
+     , crypto ::
+         { encrypt :: CryptoKey -> String -> String
+         , decrypt :: CryptoKey -> String -> Maybe String
+         }
      , envVars :: EnvVars
      }
   -> Env.Env Aff
@@ -400,20 +405,48 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
   logInfo = log
 
   storageSetItem :: Env.StorageSetItem Aff
-  storageSetItem = todo
+  storageSetItem _ st k v = case st of
+    LocalStorage -> case localStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ls -> ls.setItem (stringify $ encodeJson k) (stringify $ encodeJson v)
+        # liftAff
+    SessionStorage -> case sessionStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ss -> ss.setItem (stringify $ encodeJson k) (stringify $ encodeJson v)
+        # liftAff
 
   storageGetItem :: Env.StorageGetItem Aff
-  storageGetItem = todo
+  storageGetItem _ st k = case st of
+    LocalStorage -> case localStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ls -> ls.getItem (stringify $ encodeJson k)
+        # withExceptT (const $ _errKeyNotFound k)
+        >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
+        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData (j /\ jde)))
+    SessionStorage -> case sessionStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ss -> ss.getItem (stringify $ encodeJson k)
+        # withExceptT (const $ _errKeyNotFound k)
+        >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
+        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData (j /\ jde)))
 
   storageDeleteItem :: Env.StorageDeleteItem Aff
-  storageDeleteItem = todo
+  storageDeleteItem _ st k = case st of
+    LocalStorage -> case localStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ls -> ls.deleteItem (stringify $ encodeJson k) # withExceptT (const $ _errKeyNotFound k)
+    SessionStorage -> case sessionStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ss -> ss.deleteItem (stringify $ encodeJson k) # withExceptT (const $ _errKeyNotFound k)
 
   storageClear :: Env.StorageClear Aff
   storageClear st = case st of
     LocalStorage -> case localStorage of
-      Nothing -> ExceptT $ map (Left _errNoStorage st)
-      Just ls -> ExceptT $ map Right ls.clear
-    SessionStorage -> todo
+      Nothing -> throwError $ _errNoStorage st
+      Just ls -> ExceptT $ Right <$> ls.clear
+    SessionStorage -> case sessionStorage of
+      Nothing -> throwError $ _errNoStorage st
+      Just ss -> ExceptT $ Right <$> ss.clear
 
 privateKeyStore :: String
 privateKeyStore = "session"

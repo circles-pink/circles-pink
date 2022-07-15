@@ -189,7 +189,7 @@ main' = do
   envVars <- ExceptT $ map (lmap show) $ liftEffect getParsedEnv
   let
     request = milkisRequest nodeFetch
-    env'' = liftEnv liftAff $ env { envVars: convert envVars, request }
+    env'' = liftEnv liftAff $ env { envVars: convert envVars, request, sessionStorage: todo, localStorage : todo, crypto : todo }
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)
