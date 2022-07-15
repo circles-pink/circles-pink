@@ -24,3 +24,8 @@ import Effect.Class (class MonadEffect, liftEffect) as Exp
 import Effect (Effect, forE, foreachE, untilE, whileE) as Exp
 import Data.Traversable (class Foldable, class Traversable, Accum, all, and, any, elem, find, fold, foldMap, foldMapDefaultL, foldMapDefaultR, foldl, foldlDefault, foldr, foldrDefault, for, for_, intercalate, mapAccumL, mapAccumR, maximum, maximumBy, minimum, minimumBy, notElem, oneOf, or, scanl, scanr, sequence, sequenceDefault, sequence_, sum, traverse, traverseDefault, traverse_) as Exp
 import Data.Newtype.Extra (applyUnwrapped, applyUnwrappedFlipped, ($-), (-#)) as Exp
+import Test.Spec (Spec, describe, it) as Exp
+import Test.Spec.Assertions (expectError, fail, shouldContain, shouldEqual, shouldNotContain, shouldNotEqual) as Exp
+import Partial (crashWith) as Exp
+import Test.Spec.Extra (describeFn) as Exp
+import Data.Foldable (findMap, foldM, indexl, indexr, length, lookup, null, oneOfMap, product, surround, surroundMap) as Exp
