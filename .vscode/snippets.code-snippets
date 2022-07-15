@@ -36,6 +36,15 @@
     "description": "80 column wide section to organize source files",
     "scope": "purescript"
   },
+  "variant constructor": {
+    "prefix": ["variant constructor"],
+    "body": [
+      "_${1:name} :: forall r. ${2:type} -> Variant (${1/(.*)/${1:/capitalize}/} r)",
+      "_${1:name} = inj (Proxy :: _ \"${1:name}\")"
+    ],
+    "description": "Constructor for a variant type",
+    "scope": "purescript"
+  },
   "SectionTS": {
     "prefix": ["// --", "section"],
     "body": [

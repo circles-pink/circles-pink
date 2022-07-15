@@ -24,6 +24,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Class (liftEffect)
@@ -88,6 +89,10 @@ env { request, envVars } =
   , getTimestamp
   , sleep
   , logInfo
+  , storageSetItem
+  , storageGetItem
+  , storageDeleteItem 
+  , storageClear
   }
   where
   apiCheckUserName :: Env.ApiCheckUserName Aff
@@ -374,6 +379,18 @@ env { request, envVars } =
   logInfo :: Env.LogInfo Aff
   logInfo = log
 
+  storageSetItem :: Env.StorageSetItem Aff
+  storageSetItem = todo
+
+  storageGetItem :: Env.StorageGetItem Aff
+  storageGetItem = todo
+
+  storageDeleteItem :: Env.StorageDeleteItem Aff
+  storageDeleteItem = todo
+
+  storageClear :: Env.StorageClear Aff
+  storageClear = todo
+  
 privateKeyStore :: String
 privateKeyStore = "session"
 
