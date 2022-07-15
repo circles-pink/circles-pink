@@ -71,7 +71,11 @@ branchless-to-main:
 
 circles-garden:
 	nix develop .#garden --command \
-	"bash" "-c" "cd {{GARDEN_PATH}} && make down && make up EXPOSE_PORTS=1 && make contracts && make subgraph && make up EXPOSE_PORTS=1"
+	"bash" "-c" "cd {{GARDEN_PATH}} && make down && make up EXPOSE_PORTS=1 && make contracts && make subgraph && make up"
+
+circles-garden-restart:
+	nix develop .#garden --command \
+	"bash" "-c" "cd {{GARDEN_PATH}} && make up EXPOSE_PORTS=1"
 
 circles-garden-fund-safe addr:
 	cd {{CIRCLES_TOOLBELT_PATH}}/helper-tools && \
