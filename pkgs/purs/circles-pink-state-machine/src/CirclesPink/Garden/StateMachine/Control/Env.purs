@@ -247,7 +247,7 @@ newtype CryptoKey = CryptoKey String
 
 type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => CryptoKey -> StorageType -> k -> v -> ExceptV (ErrStorageSetItem + r) m Unit
 
-type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> v -> ExceptV (ErrStorageGetItem k + r) m v
+type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageGetItem k + r) m v
 
 type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageDeleteItem k + r) m Unit
 
