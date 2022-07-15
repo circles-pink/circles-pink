@@ -174,7 +174,7 @@ export const Dashboard = ({
 
         if (
           newBalance === initBalTransfer &&
-          countRefreshTransfer > MAX_RETRYS
+          countRefreshTransfer < MAX_RETRYS
         ) {
           // console.log('Update:', countRefreshTransfer + 1);
           setTimeout(() => {
@@ -211,7 +211,7 @@ export const Dashboard = ({
             ? state.getBalanceResult.value.data.toString()
             : null;
 
-        if (newBalance === initBalPayout && countRefreshPayout > MAX_RETRYS) {
+        if (newBalance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
           // console.log('Update:', countRefreshPayout + 1);
           setTimeout(() => {
             act(A._dashboard(A._getBalance(unit)));
