@@ -64,6 +64,8 @@
   , "unsafe-coerce"
   , "uri"
   , "variant"
+  , "web-html"
+  , "web-storage"
   , "web3"
   ]
 , packages = ../../../packages.dhall

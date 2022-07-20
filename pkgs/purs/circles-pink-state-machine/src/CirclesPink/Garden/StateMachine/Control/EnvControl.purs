@@ -260,7 +260,7 @@ data StorageType = SessionStorage | LocalStorage
 --------------------------------------------------------------------------------
 type ErrStorageSetItem r = ErrNoStorage + r
 
-type ErrStorageGetItem k r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrKeyNotFound k + r
+type ErrStorageGetItem k r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrDecrypt + ErrKeyNotFound k + r
 
 type ErrStorageDeleteItem k r = ErrNoStorage + ErrKeyNotFound k + r
 
