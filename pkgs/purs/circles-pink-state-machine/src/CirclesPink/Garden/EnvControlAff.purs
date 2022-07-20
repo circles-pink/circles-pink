@@ -345,7 +345,7 @@ env envenv@{ request, envVars } =
   saveSession :: EnvControl.SaveSession Aff
   saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
 
-  restoreSession :: EnvControl.RestoreSession Aff
+  restoreSession :: EnvControl.RestoreSession String Aff
   restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
 
   getBalance :: EnvControl.GetBalance Aff
