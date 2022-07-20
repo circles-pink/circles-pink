@@ -9,7 +9,7 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
@@ -32,13 +32,11 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
-import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Web.HTML.Window (localStorage)
 
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars
@@ -446,9 +444,6 @@ decryptJson { crypto: { decrypt } } sk v = v
   >>= (\j -> decodeJson j # lmap (\jde -> _errParseToData $ stringify j /\ jde))
 
 --------------------------------------------------------------------------------
-
-privateKeyStore :: String
-privateKeyStore = "session"
 
 getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
 getWeb3 ev = do
