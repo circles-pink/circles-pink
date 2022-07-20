@@ -7,6 +7,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', readyForD
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
+import Control.Monad.Error.Class (catchError)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
 import Data.Either (Either(..))
@@ -52,7 +53,7 @@ submit env =
             user <- env.userResolve privateKey
             trusts <- env.trustGetNetwork privateKey safeAddress
             isReady' <- readyForDeployment env privateKey
-            _ <- env.saveSession privateKey
+            _ <- env.saveSession privateKey `catchError` (\_ -> pure unit)
             pure { safeStatus, user, trusts, isReady: isReady' }
         result <- runExceptT' task
         case result of
