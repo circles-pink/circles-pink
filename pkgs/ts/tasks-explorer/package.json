@@ -9,7 +9,6 @@
     "@types/styletron-react": "^5.0.3",
     "@types/styletron-standard": "^2.0.2",
     "baseui": "^10.10.0",
-    "cytoscape": "^3.21.0",
     "cytoscape-cose-bilkent": "^4.1.0",
     "cytoscape-dagre": "^2.4.0",
     "react-cytoscapejs": "^1.2.1",

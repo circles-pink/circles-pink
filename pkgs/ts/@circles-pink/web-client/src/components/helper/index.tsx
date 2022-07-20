@@ -26,3 +26,4 @@ export const Status = tw.div`text-red-600`;
 // -----------------------------------------------------------------------------
 
 export const TwoButtonRow = tw.span`grid grid-cols-2 gap-2`;
+export const ButtonRow = tw.span`grid grid-flow-col gap-2`;

@@ -43,7 +43,7 @@ import {
 } from '@circles-pink/state-machine/output/CirclesCore';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { TrustGraph } from '../../components/TrustGraph';
+import { TrustGraph } from '../../components/TrustGraph/index';
 import { UserSearch } from '../../components/UserSearch';
 import {
   isPendingTrust,
