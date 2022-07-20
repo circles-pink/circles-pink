@@ -76,6 +76,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , _errParseToData
   , _errParseToJson
   , _errReadStorage
+  , _errDecrypt
   ) where
 
 import Prelude
@@ -270,7 +271,7 @@ type ErrParseToJson r = (errParseToJson :: String | r)
 
 type ErrDecrypt r = (errDecrypt :: Unit | r)
 
-type ErrParseToData r = (errParseToData :: Json /\ JsonDecodeError | r)
+type ErrParseToData r = (errParseToData :: String /\ JsonDecodeError | r)
 
 type ErrNoStorage r = (errNoStorage :: StorageType | r)
 
@@ -284,7 +285,7 @@ type ErrKeyNotFound k r = (errKeyNotFound :: k | r)
 _errParseToJson :: forall r. String -> Variant (ErrParseToJson r)
 _errParseToJson = inj (Proxy :: _ "errParseToJson")
 
-_errParseToData :: forall r. Json /\ JsonDecodeError -> Variant (ErrParseToData r)
+_errParseToData :: forall r. String /\ JsonDecodeError -> Variant (ErrParseToData r)
 _errParseToData = inj (Proxy :: _ "errParseToData")
 
 _errNoStorage :: forall r. StorageType -> Variant (ErrNoStorage r)
@@ -292,6 +293,9 @@ _errNoStorage = inj (Proxy :: _ "errNoStorage")
 
 _errKeyNotFound :: forall r k. k -> Variant (ErrKeyNotFound k r)
 _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
+
+_errDecrypt :: forall r. Variant (ErrDecrypt r)
+_errDecrypt = inj (Proxy :: _ "errDecrypt") unit
 
 --------------------------------------------------------------------------------
 

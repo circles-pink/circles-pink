@@ -9,7 +9,7 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrParseToData, ErrParseToJson, StorageType(..), ErrDecrypt, _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
@@ -24,6 +24,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
+import Data.Variant (Variant)
 import Data.Variant (inj)
 import Debug.Extra (todo)
 import Effect (Effect)
@@ -87,7 +88,7 @@ type EnvEnvControlAff =
 env
   :: EnvEnvControlAff
   -> EnvControl Aff
-env { localStorage, sessionStorage, crypto, request, envVars } =
+env envenv@{ localStorage, sessionStorage, crypto, request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey
@@ -410,7 +411,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
   storageSetItem sk st k v = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.setItem (encryptJSON env sk k) (encryptJSON env sk v)
+      Just ls -> ls.setItem (encryptJSON envenv sk k) (encryptJSON envenv sk v)
         # liftAff
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
@@ -423,14 +424,14 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
       Nothing -> throwError $ _errNoStorage st
       Just ls -> ls.getItem (stringify $ encodeJson k)
         # withExceptT (const $ _errKeyNotFound k)
-        >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
-        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData (j /\ jde)))
+        >>= decryptJSON 
+
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
       Just ss -> ss.getItem (stringify $ encodeJson k)
         # withExceptT (const $ _errKeyNotFound k)
         >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
-        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData (j /\ jde)))
+        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData jde))
 
   storageDeleteItem :: EnvControl.StorageDeleteItem Aff
   storageDeleteItem _ st k = case st of
@@ -453,16 +454,16 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
 encryptJSON :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
 encryptJSON { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
 
-decryptJSON :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (ErrDecryptJson r) a
-decryptJSON { crypto: { decrypt } } sk v = todo
-
--- decrypt sk v
--- <#> decodeJson v 
--- <#> 
-
--- decrypt sk $ stringify $ decodeJson v
-
+--------------------------------------------------------------------------------
 type ErrDecryptJson r = ErrParseToData + ErrParseToJson + ErrDecrypt + r
+
+decryptJSON :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (Variant (ErrDecryptJson r)) a
+decryptJSON { crypto: { decrypt } } sk v = v
+  # (decrypt sk >>> note _errDecrypt)
+  >>= (\s -> parseJson s # lmap (\jde -> _errParseToJson s))
+  >>= (\j -> decodeJson j # lmap (\jde -> _errParseToData $ stringify j /\ jde))
+
+--------------------------------------------------------------------------------
 
 privateKeyStore :: String
 privateKeyStore = "session"
