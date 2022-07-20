@@ -104,7 +104,7 @@ export const TrustGraph = ({
     if (!cy) return;
     const layout_ = cy.layout(layout);
     layout_.run();
-  }, [JSON.stringify(elements), cy]);
+  }, [JSON.stringify(elements)]);
 
   useEffect(() => {
     if (!cy) return;

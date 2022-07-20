@@ -23,13 +23,13 @@ export const cise = {
   // - true : Animate while the layout is running
   // - false : Just show the end result
   // - 'end' : Animate directly to the end result
-  animate: false,
+  animate: 'end',
 
   // number of ticks per frame; higher is faster but more jerky
-  refresh: 10,
+  refresh: 30,
 
   // Animation duration used for animate:'end'
-  animationDuration: undefined,
+  animationDuration: 500,
 
   // Easing for animate:'end'
   animationEasing: undefined,
