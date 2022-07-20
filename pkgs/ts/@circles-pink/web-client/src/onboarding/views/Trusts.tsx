@@ -120,9 +120,9 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
             trustsLength={state.trusts.length}
           />
 
-          <FadeIn orientation={orientation} delay={getDelay()}>
+          {/* <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('trusts.fundMySafeManually')}</SubClaim>
-          </FadeIn>
+          </FadeIn> */}
         </>
       }
       debug={<StateMachineDebugger state={state} />}
@@ -161,7 +161,7 @@ const FinalizeHint = ({
               <FadeIn orientation={orientation} delay={getDelay()}>
                 <Text>{t('trusts.getMoreTruts')}</Text>
               </FadeIn>
-              <FadeIn orientation={orientation} delay={getDelay()}>
+              {/* <FadeIn orientation={orientation} delay={getDelay()}>
                 <CenterElement>
                   <QrCode
                     data={safeAddress}
@@ -176,7 +176,7 @@ const FinalizeHint = ({
                 <CenterText>
                   <Text>{safeAddress}</Text>
                 </CenterText>
-              </FadeIn>
+              </FadeIn> */}
               <TrustIndicatorRow>
                 <FadeIn orientation={orientation} delay={getDelay()}>
                   <Icon

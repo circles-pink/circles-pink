@@ -1,7 +1,7 @@
 import React, { ReactElement, useContext } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { DebugContext } from '../context/debug';
-import { ThemeContext } from '../context/theme';
+import { Theme, ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
 // UserDashboard
@@ -30,7 +30,7 @@ export const UserDashboard = ({
 
   return (
     <>
-      <Frame borderColor={theme.baseColor}>
+      <Frame theme={theme}>
         {overlay}
         <Header>{header}</Header>
         <CardHead>
@@ -50,13 +50,14 @@ export const UserDashboard = ({
 // -----------------------------------------------------------------------------
 
 type FrameProps = {
-  borderColor: string;
+  theme: Theme;
 };
 
 const Frame = styled.div((props: FrameProps) => [
-  tw`relative bg-gray-50 border border-dotted`,
+  // tw`border border-dashed`,
+  // css`border-color: ${props.theme.baseColor};`,
   css`
-    border-color: ${props.borderColor};
+    background-color: ${props.theme.bgColor};
   `,
 ]);
 
