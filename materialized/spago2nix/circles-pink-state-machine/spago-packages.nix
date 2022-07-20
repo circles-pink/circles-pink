@@ -711,6 +711,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "media-types" = pkgs.stdenv.mkDerivation {
+        name = "media-types";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-media-types.git";
+          rev = "b6efa4c1e6808b31f399d8030b5938acec87cb48";
+          sha256 = "0l51nd1w52756pyy3zliwmhfbin0px4pxr7d2h5vchl1wq895fja";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "milkis" = pkgs.stdenv.mkDerivation {
         name = "milkis";
         version = "v7.5.0";
@@ -1450,6 +1462,66 @@ let
           url = "https://github.com/natefaubion/purescript-variant.git";
           rev = "3f12411ede5edd342d25340c1babce9ae81d6793";
           sha256 = "1q2pky3gf177ihy2zjzqvp1cj18ycaki9vm4ghw18p7hf256lqmc";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "web-dom" = pkgs.stdenv.mkDerivation {
+        name = "web-dom";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-web/purescript-web-dom.git";
+          rev = "03dfc2f512e124615ab183ade357e3d54007c79d";
+          sha256 = "06g9cp9fkzyfwbz5cs0wxjxgdydm9hy7756p2w4vx94myki20hgx";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "web-events" = pkgs.stdenv.mkDerivation {
+        name = "web-events";
+        version = "v3.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-web/purescript-web-events.git";
+          rev = "c8a50893f04f54e2a59be7f885d25caef3589c57";
+          sha256 = "1dxwrl2r39vazb3g1ka4dkpy6idyi17aq4hf9vvdsmcwf2jjwbn9";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "web-file" = pkgs.stdenv.mkDerivation {
+        name = "web-file";
+        version = "v3.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-web/purescript-web-file.git";
+          rev = "3e42263b4392d82c0e379b7a481bbee9b38b1308";
+          sha256 = "11x1inhr5pvs2iyg818cywwdskb33q777592sd3b4g4jyczcb1li";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "web-html" = pkgs.stdenv.mkDerivation {
+        name = "web-html";
+        version = "v3.2.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-web/purescript-web-html.git";
+          rev = "3a249b966ee72c19874b4a2ec6db4059087500e4";
+          sha256 = "1ds26vwyba0chhpa09m938brw9q8pxjk6z1n3d4nc30hvdkrjnbh";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "web-storage" = pkgs.stdenv.mkDerivation {
+        name = "web-storage";
+        version = "v4.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-web/purescript-web-storage.git";
+          rev = "22fa56bac204c708e521e746ad4ca2b5810f62c5";
+          sha256 = "1viy027k9qyr7mckqkvizwbwkfskc6frppsa1v9a0hq6gc08mpjx";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
