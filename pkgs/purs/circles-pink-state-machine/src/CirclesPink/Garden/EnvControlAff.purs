@@ -9,13 +9,13 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, stringify)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
@@ -26,7 +26,6 @@ import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant)
 import Data.Variant (inj)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -37,6 +36,7 @@ import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
+import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
@@ -64,20 +64,8 @@ _errParse = inj (Proxy :: _ "errParse") unit
 
 type EnvEnvControlAff =
   { request :: ReqFn (CirclesError' ())
-  , localStorage ::
-      Maybe
-        { setItem :: String -> String -> Aff Unit
-        , getItem :: String -> ExceptT Unit Aff String
-        , deleteItem :: String -> ExceptT Unit Aff Unit
-        , clear :: Aff Unit
-        }
-  , sessionStorage ::
-      Maybe
-        { setItem :: String -> String -> Aff Unit
-        , getItem :: String -> ExceptT Unit Aff String
-        , deleteItem :: String -> ExceptT Unit Aff Unit
-        , clear :: Aff Unit
-        }
+  , localStorage :: Maybe StringStorage
+  , sessionStorage :: Maybe StringStorage
   , crypto ::
       { encrypt :: CryptoKey -> String -> String
       , decrypt :: CryptoKey -> String -> Maybe String
@@ -88,7 +76,7 @@ type EnvEnvControlAff =
 env
   :: EnvEnvControlAff
   -> EnvControl Aff
-env envenv@{ localStorage, sessionStorage, crypto, request, envVars } =
+env envenv@{ localStorage, sessionStorage, request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey
@@ -411,36 +399,35 @@ env envenv@{ localStorage, sessionStorage, crypto, request, envVars } =
   storageSetItem sk st k v = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.setItem (encryptJSON envenv sk k) (encryptJSON envenv sk v)
+      Just ls -> ls.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
         # liftAff
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.setItem (stringify $ encodeJson k) (stringify $ encodeJson v)
+      Just ss -> ss.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
         # liftAff
 
   storageGetItem :: EnvControl.StorageGetItem Aff
-  storageGetItem _ st k = case st of
+  storageGetItem sk st k = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.getItem (stringify $ encodeJson k)
+      Just ls -> ls.getItem (encryptJson envenv sk k)
         # withExceptT (const $ _errKeyNotFound k)
-        >>= decryptJSON 
+        >>= (\v -> except $ decryptJson envenv sk v)
 
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.getItem (stringify $ encodeJson k)
+      Just ss -> ss.getItem (encryptJson envenv sk k)
         # withExceptT (const $ _errKeyNotFound k)
-        >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
-        >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData jde))
+        >>= (\v -> except $ decryptJson envenv sk v)
 
   storageDeleteItem :: EnvControl.StorageDeleteItem Aff
-  storageDeleteItem _ st k = case st of
+  storageDeleteItem sk st k = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.deleteItem (stringify $ encodeJson k) # withExceptT (const $ _errKeyNotFound k)
+      Just ls -> ls.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.deleteItem (stringify $ encodeJson k) # withExceptT (const $ _errKeyNotFound k)
+      Just ss -> ss.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
 
   storageClear :: EnvControl.StorageClear Aff
   storageClear st = case st of
@@ -451,16 +438,16 @@ env envenv@{ localStorage, sessionStorage, crypto, request, envVars } =
       Nothing -> throwError $ _errNoStorage st
       Just ss -> ExceptT $ Right <$> ss.clear
 
-encryptJSON :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
-encryptJSON { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
+encryptJson :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
+encryptJson { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
 
 --------------------------------------------------------------------------------
 type ErrDecryptJson r = ErrParseToData + ErrParseToJson + ErrDecrypt + r
 
-decryptJSON :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (Variant (ErrDecryptJson r)) a
-decryptJSON { crypto: { decrypt } } sk v = v
+decryptJson :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (Variant (ErrDecryptJson r)) a
+decryptJson { crypto: { decrypt } } sk v = v
   # (decrypt sk >>> note _errDecrypt)
-  >>= (\s -> parseJson s # lmap (\jde -> _errParseToJson s))
+  >>= (\s -> parseJson s # lmap (\_ -> _errParseToJson s))
   >>= (\j -> decodeJson j # lmap (\jde -> _errParseToData $ stringify j /\ jde))
 
 --------------------------------------------------------------------------------
