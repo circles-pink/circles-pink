@@ -76,7 +76,7 @@ type EnvEnvControlAff =
 env
   :: EnvEnvControlAff
   -> EnvControl Aff
-env envenv@{ localStorage, sessionStorage, request, envVars } =
+env envenv@{ request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey
@@ -105,10 +105,10 @@ env envenv@{ localStorage, sessionStorage, request, envVars } =
   , getTimestamp
   , sleep
   , logInfo
-  , storageSetItem
-  , storageGetItem
-  , storageDeleteItem
-  , storageClear
+  , storageSetItem: storageSetItem envenv
+  , storageGetItem: storageGetItem envenv
+  , storageDeleteItem: storageDeleteItem envenv
+  , storageClear: storageClear envenv
   }
   where
   apiCheckUserName :: EnvControl.ApiCheckUserName Aff
@@ -395,48 +395,48 @@ env envenv@{ localStorage, sessionStorage, request, envVars } =
   logInfo :: EnvControl.LogInfo Aff
   logInfo = log
 
-  storageSetItem :: EnvControl.StorageSetItem Aff
-  storageSetItem sk st k v = case st of
-    LocalStorage -> case localStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
-        # liftAff
-    SessionStorage -> case sessionStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
-        # liftAff
+storageSetItem :: EnvEnvControlAff -> EnvControl.StorageSetItem Aff
+storageSetItem envenv@{ localStorage, sessionStorage } sk st k v = case st of
+  LocalStorage -> case localStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ls -> ls.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
+      # liftAff
+  SessionStorage -> case sessionStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ss -> ss.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
+      # liftAff
 
-  storageGetItem :: EnvControl.StorageGetItem Aff
-  storageGetItem sk st k = case st of
-    LocalStorage -> case localStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.getItem (encryptJson envenv sk k)
-        # withExceptT (const $ _errKeyNotFound k)
-        >>= (\v -> except $ decryptJson envenv sk v)
+storageGetItem :: EnvEnvControlAff -> EnvControl.StorageGetItem Aff
+storageGetItem envenv@{ localStorage, sessionStorage } sk st k = case st of
+  LocalStorage -> case localStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ls -> ls.getItem (encryptJson envenv sk k)
+      # withExceptT (const $ _errKeyNotFound k)
+      >>= (\v -> except $ decryptJson envenv sk v)
 
-    SessionStorage -> case sessionStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.getItem (encryptJson envenv sk k)
-        # withExceptT (const $ _errKeyNotFound k)
-        >>= (\v -> except $ decryptJson envenv sk v)
+  SessionStorage -> case sessionStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ss -> ss.getItem (encryptJson envenv sk k)
+      # withExceptT (const $ _errKeyNotFound k)
+      >>= (\v -> except $ decryptJson envenv sk v)
 
-  storageDeleteItem :: EnvControl.StorageDeleteItem Aff
-  storageDeleteItem sk st k = case st of
-    LocalStorage -> case localStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
-    SessionStorage -> case sessionStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ss -> ss.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
+storageDeleteItem :: EnvEnvControlAff -> EnvControl.StorageDeleteItem Aff
+storageDeleteItem envenv@{ localStorage, sessionStorage } sk st k = case st of
+  LocalStorage -> case localStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ls -> ls.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
+  SessionStorage -> case sessionStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ss -> ss.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
 
-  storageClear :: EnvControl.StorageClear Aff
-  storageClear st = case st of
-    LocalStorage -> case localStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ls -> ExceptT $ Right <$> ls.clear
-    SessionStorage -> case sessionStorage of
-      Nothing -> throwError $ _errNoStorage st
-      Just ss -> ExceptT $ Right <$> ss.clear
+storageClear :: EnvEnvControlAff -> EnvControl.StorageClear Aff
+storageClear envenv@{ localStorage, sessionStorage } st = case st of
+  LocalStorage -> case localStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ls -> ExceptT $ Right <$> ls.clear
+  SessionStorage -> case sessionStorage of
+    Nothing -> throwError $ _errNoStorage st
+    Just ss -> ExceptT $ Right <$> ss.clear
 
 encryptJson :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
 encryptJson { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
