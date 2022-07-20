@@ -47,7 +47,7 @@ export const cise = {
 
   // Inter-cluster edge length factor
   // (2.0 means inter-cluster edges should be twice as long as intra-cluster edges)
-  idealInterClusterEdgeLengthCoefficient: 1.4,
+  idealInterClusterEdgeLengthCoefficient: 2.0,
 
   // Whether to pull on-circle nodes inside of the circle
   allowNodesInsideCircle: false,
