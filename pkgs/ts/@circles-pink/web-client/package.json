@@ -22,7 +22,7 @@
     "@types/react-cytoscapejs": "^1.2.2",
     "anima-react": "^0.0.6",
     "chroma-js": "^2.4.2",
-    "cytoscape": "^3.21.1",
+    "cytoscape-cise": "^1.0.0",
     "cytoscape-cose-bilkent": "^4.1.0",
     "eth-qr-scanner": "^1.1.0",
     "fp-ts": "^2.11.9",

@@ -1,15 +1,6 @@
-import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
-import Cytoscape, {
-  BreadthFirstLayoutOptions,
-  CircleLayoutOptions,
-  ConcentricLayoutOptions,
-  CoseLayoutOptions,
-  GridLayoutOptions,
-  LayoutOptions,
-  RandomLayoutOptions,
-} from 'cytoscape';
-// import COSEBilkent from 'cytoscape-cose-bilkent';
+import Cytoscape, { LayoutOptions } from 'cytoscape';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import {
   addrToString,
@@ -25,28 +16,25 @@ import {
   isTrusted,
   TrustState,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { toFpTsPair, toFpTsTuple } from '../utils/fpTs';
-import { Theme } from '../context/theme';
+import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
+import { Theme } from '../../context/theme';
+
+import { ButtonRow } from '../helper';
+import { Button } from '../forms';
 
 // -----------------------------------------------------------------------------
-// Constants
+// Layouts
 // -----------------------------------------------------------------------------
 
-const layout: Partial<ConcentricLayoutOptions> &
-  Pick<ConcentricLayoutOptions, 'name'> = {
-  name: 'concentric',
-  animate: true,
-  // other options
-  // padding: 75,
-  // nodeDimensionsIncludeLabels: true,
-  // idealEdgeLength: n => 100,
-  // edgeElasticity: 0.1,
-  animationDuration: 550,
-  // refresh: 1,
-  // randomize: true,
-  // componentSpacing: 7000,
-  // nodeRepulsion: () => 2000,
-};
+import COSEBilkent from 'cytoscape-cose-bilkent';
+import CISE from 'cytoscape-cise';
+
+Cytoscape.use(CISE);
+Cytoscape.use(COSEBilkent);
+
+import { cise } from './layout/cise';
+import { coseBilkent } from './layout/coseBilkent';
+import { concentric } from './layout/concentric';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -107,25 +95,23 @@ export const TrustGraph = ({
   expandTrustNetwork,
   theme,
 }: TrustGraphProps): ReactElement => {
-  const [cy, setCy] = React.useState<Cytoscape.Core | undefined>();
-  // const [cyInitialized, setCyInitialized] = React.useState<boolean>(false);
+  const [cy, setCy] = useState<Cytoscape.Core | undefined>();
+  const [layout, setLayout] = useState<LayoutOptions>(cise);
 
-  React.useEffect(() => {
+  const elements = getElementsFromData(graph);
+
+  useEffect(() => {
     if (!cy) return;
-    var layout_ = cy.layout(layout);
+    const layout_ = cy.layout(layout);
     layout_.run();
+  }, [JSON.stringify(elements), cy]);
+
+  useEffect(() => {
+    if (!cy) return;
     cy.on('tap', 'node', evt => {
       expandTrustNetwork(evt.target.id());
     });
-  }, [JSON.stringify(graph)]);
-
-  // React.useEffect(() => {
-  //   console.log(COSEBilkent);
-  //   Cytoscape.use(COSEBilkent);
-  //   setCyInitialized(true);
-  // }, []);
-
-  const elements = getElementsFromData(graph);
+  }, [cy]);
 
   const stylesheets = [
     {
@@ -173,22 +159,46 @@ export const TrustGraph = ({
     },
   ];
 
-  // if (!cyInitialized) return <></>;
+  // Preventing errors in some layouts for an empty graph
+  if (graph.nodes.length === 0) return <></>;
 
   return (
-    <CytoscapeComponent
-      cy={cy_ => {
-        if (!cy) setCy(cy_);
-      }}
-      elements={elements}
-      style={{
-        width: '100%',
-        height: '600px',
-        backgroundColor: 'rgba(249, 249, 245, 0.5)',
-        boxShadow: '0 0 4px 1px rgba(0,0,0,0.05)',
-      }}
-      layout={layout}
-      stylesheet={stylesheets}
-    />
+    <>
+      <CytoscapeComponent
+        cy={cy_ => {
+          if (!cy) setCy(cy_);
+        }}
+        elements={elements}
+        style={{
+          width: '100%',
+          height: '600px',
+          backgroundColor: 'rgba(249, 249, 245, 0.5)',
+          boxShadow: '0 0 4px 1px rgba(0,0,0,0.05)',
+        }}
+        layout={layout}
+        stylesheet={stylesheets}
+      />
+      <br />
+      <ButtonRow>
+        <Button
+          prio={layout.name === 'cise' ? 'medium' : 'low'}
+          onClick={() => setLayout(cise)}
+        >
+          Cise
+        </Button>
+        <Button
+          prio={layout.name === 'cose-bilkent' ? 'medium' : 'low'}
+          onClick={() => setLayout(coseBilkent)}
+        >
+          Cose Bilkent
+        </Button>
+        <Button
+          prio={layout.name === 'concentric' ? 'medium' : 'low'}
+          onClick={() => setLayout(concentric)}
+        >
+          Concentric
+        </Button>
+      </ButtonRow>
+    </>
   );
 };
