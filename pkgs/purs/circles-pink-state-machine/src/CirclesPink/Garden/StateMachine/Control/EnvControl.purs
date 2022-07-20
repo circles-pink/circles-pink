@@ -87,7 +87,7 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError)
+import Data.Argonaut (class DecodeJson, class EncodeJson, JsonDecodeError)
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
@@ -197,7 +197,7 @@ type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + r
 type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
 
 -- | Save Session
-type ErrSaveSession r = (errSaveSession :: Unit | r)
+type ErrSaveSession r = ErrStorageSetItem + r
 
 type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
@@ -208,9 +208,9 @@ type ErrReadStorage r = (errReadStorage :: RequestPath | r)
 
 type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
-type ErrRestoreSession r = ErrReadStorage + ErrDecode + r
+type ErrRestoreSession k r = ErrStorageGetItem k + r
 
-type RestoreSession m = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
+type RestoreSession m = forall k r. ExceptV (ErrRestoreSession k + r) m PrivateKey
 
 --------------------------------------------------------------------------------
 type ErrGetBalance r = ErrNative + ErrInvalidUrl + r
@@ -251,7 +251,7 @@ type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => CryptoKey 
 
 type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageGetItem k + r) m v
 
-type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageDeleteItem k + r) m Unit
+type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageDeleteItem + r) m Unit
 
 type StorageClear m = forall r. StorageType -> ExceptV (ErrStorageClear + r) m Unit
 
@@ -262,7 +262,7 @@ type ErrStorageSetItem r = ErrNoStorage + r
 
 type ErrStorageGetItem k r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrDecrypt + ErrKeyNotFound k + r
 
-type ErrStorageDeleteItem k r = ErrNoStorage + ErrKeyNotFound k + r
+type ErrStorageDeleteItem r = ErrNoStorage + r
 
 type ErrStorageClear r = ErrNoStorage + r
 
