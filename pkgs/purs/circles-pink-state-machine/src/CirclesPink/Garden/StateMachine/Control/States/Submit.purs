@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', readyForDeployment, runExceptT')
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
@@ -18,7 +18,7 @@ import RemoteData (_failure, _loading, _notAsked)
 submit
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> { prev :: ActionHandler' m Unit S.UserData ("magicWords" :: S.UserData)
      , submit :: ActionHandler' m Unit S.UserData ("submit" :: S.UserData, "trusts" :: S.TrustState)
      }

@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Garden.StateMachine.Control.Common (TaskReturn)
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State.Login (LoginState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Variant (Variant)

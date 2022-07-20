@@ -5,7 +5,7 @@ module CirclesPink.EnvVars
   ) where
 
 import Prelude
-import CirclesPink.Garden.Env as E
+import CirclesPink.Garden.EnvControlAff as E
 import CirclesPink.URI (URI)
 import CirclesPink.URI as U
 import Convertable (class Convertible)

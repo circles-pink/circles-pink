@@ -30,7 +30,7 @@ import CirclesPink.Data.Address as A
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
 import CirclesPink.Data.TrustState (TrustState, initUntrusted, isTrusted)
 import CirclesPink.Data.UserIdent (UserIdent(..))
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Array (any, filter)

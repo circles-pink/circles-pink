@@ -1,4 +1,4 @@
-module CirclesPink.Garden.StateMachine.Control.Env
+module CirclesPink.Garden.StateMachine.Control.EnvControl
   ( AddTrustConnection
   , ApiCheckEmail
   , ApiCheckUserName
@@ -7,7 +7,7 @@ module CirclesPink.Garden.StateMachine.Control.Env
   , CryptoKey(..)
   , DeploySafe
   , DeployToken
-  , Env
+  , EnvControl
   , ErrAddTrustConnection
   , ErrCheckUBIPayout
   , ErrCoreToWindow
@@ -292,7 +292,7 @@ _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
 
 --------------------------------------------------------------------------------
 
-type Env m =
+type EnvControl m =
   { apiCheckUserName :: ApiCheckUserName m
   , apiCheckEmail :: ApiCheckEmail m
   , generatePrivateKey :: GeneratePrivateKey m

@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (runExceptT)
@@ -16,7 +16,7 @@ import RemoteData (_failure, _loading, _success)
 askUsername
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> CirclesConfig m
   -> { prev :: ActionHandler' m Unit S.UserData ("infoGeneral" :: S.UserData)
      , setUsername :: ActionHandler' m String S.UserData ("askUsername" :: S.UserData)

@@ -17,7 +17,7 @@ import CirclesPink.Garden.StateMachine.Action as A
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
-import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Control.Monad.State (class MonadState, get)
 import Data.Variant.Extra (getLabel)
@@ -31,9 +31,8 @@ class
   ) <=
   MonadScript m
 
-
 --------------------------------------------------------------------------------
-act :: forall m. MonadScript m => Env m -> CirclesConfig m -> CirclesAction -> m Unit
+act :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> CirclesAction -> m Unit
 act env cfg =
   let
     ctl ac = toMonadState (circlesControl env cfg) ac
@@ -52,7 +51,7 @@ type SignUpUserOpts =
   , email :: String
   }
 
-signUpUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> SignUpUserOpts -> m Unit
+signUpUser :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> SignUpUserOpts -> m Unit
 signUpUser env cfg opts = do
   act env cfg $ A._landing $ A._signUp unit
   act env cfg $ A._infoGeneral $ A._next unit
@@ -67,7 +66,7 @@ signUpUser env cfg opts = do
   act env cfg $ A._submit $ A._submit unit
 
 --------------------------------------------------------------------------------
-finalizeAccount :: forall m. MonadScript m => Env m -> CirclesConfig m -> m Unit
+finalizeAccount :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> m Unit
 finalizeAccount env cfg = do
   act env cfg $ A._trusts $ A._finalizeRegisterUser unit
 
@@ -76,7 +75,7 @@ type LoginUserOpts =
   { magicWords :: String
   }
 
-loginUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> LoginUserOpts -> m Unit
+loginUser :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> LoginUserOpts -> m Unit
 loginUser env cfg { magicWords } = do
   act env cfg $ A._landing $ A._signIn unit
   act env cfg $ A._login $ A._setMagicWords magicWords
@@ -85,6 +84,6 @@ loginUser env cfg { magicWords } = do
 --------------------------------------------------------------------------------
 type TrustUserOpts = UserIdent
 
-trustUser :: forall m. MonadScript m => Env m -> CirclesConfig m -> TrustUserOpts -> m Unit
+trustUser :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> TrustUserOpts -> m Unit
 trustUser env cfg u = do
   act env cfg $ A._dashboard $ A._addTrustConnection u

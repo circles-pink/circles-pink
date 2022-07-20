@@ -3,7 +3,7 @@ module CirclesPink.Garden.StateMachine.State.Login where
 import Prelude
 
 import CirclesPink.Garden.StateMachine.Control.Common (TaskReturn, ErrLoginTask)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl as Env
 import Data.Variant (Variant, inj)
 import RemoteData (_notAsked)
 import RemoteReport (RemoteReport)

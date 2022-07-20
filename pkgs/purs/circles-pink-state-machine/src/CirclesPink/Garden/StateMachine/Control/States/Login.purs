@@ -5,7 +5,7 @@ import Prelude
 import CirclesPink.Data.Mnemonic (getMnemonicFromString)
 import CirclesPink.Data.PrivateKey (mnemonicToKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', dropError, loginTask, subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (except, lift, runExceptT)
 import Data.Either (note)
@@ -19,7 +19,7 @@ import Type.Proxy (Proxy(..))
 login
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> { login :: ActionHandler' m Unit S.LoginState ("trusts" :: S.TrustState, "login" :: S.LoginState, "dashboard" :: S.DashboardState)
      , signUp :: ActionHandler' m Unit S.LoginState ("infoGeneral" :: S.UserData)
      , setMagicWords :: ActionHandler' m String S.LoginState ("login" :: S.LoginState)

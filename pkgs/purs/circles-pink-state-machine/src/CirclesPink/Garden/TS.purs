@@ -7,12 +7,12 @@ module CirclesPink.Garden.TS
 
 import CirclesPink.Prelude
 
-import CirclesPink.Garden.Env as Garden
+import CirclesPink.Garden.EnvControlAff as Garden
 import CirclesPink.Garden.StateMachine (CirclesAction, circlesControl, CirclesState, initLanding)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control.Class.ProdM (runProdM)
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (evalTestScriptT)
-import CirclesPink.Garden.TestEnv (liftEnv, testEnv)
+import CirclesPink.Garden.EnvControlTest (liftEnv, testEnv)
 import Data.FpTs.Either as FP
 import FpTs.Class (fromFpTs)
 import HTTP.Milkis (milkisRequest)
@@ -35,7 +35,7 @@ mkControl envVars cfg setState s a =
   where
   cfg' = C.mapCirclesConfig liftEffect $ convertConfig cfg
   request = milkisRequest windowFetch
-  env = liftEnv liftAff $ Garden.env { request, envVars, localStorage: todo, sessionStorage: todo, crypto : todo }
+  env = liftEnv liftAff $ Garden.env { request, envVars, localStorage: todo, sessionStorage: todo, crypto: todo }
 
 mkControlTestEnv :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControlTestEnv setState st ac =

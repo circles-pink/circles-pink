@@ -5,7 +5,7 @@ import Prelude
 import CirclesPink.Data.Mnemonic (getMnemonicFromString)
 import CirclesPink.Data.PrivateKey (mnemonicToKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), note)
@@ -13,7 +13,7 @@ import Data.Either (Either(..), note)
 debug
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> { coreToWindow :: ActionHandler' m Unit S.DebugState ("debug" :: S.DebugState)
      , setMagicWords :: ActionHandler' m String S.DebugState ("debug" :: S.DebugState)
      }

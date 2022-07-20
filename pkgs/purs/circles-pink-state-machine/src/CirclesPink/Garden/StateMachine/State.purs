@@ -29,16 +29,15 @@ module CirclesPink.Garden.StateMachine.State
   , initDebug
   , initLanding
   , module Exp
-  )
-  where
+  ) where
 
 import Prelude
 
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ErrLoginTask)
-import CirclesPink.Garden.StateMachine.Control.Env (UserNotFoundError, RequestPath)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (RequestPath, UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import CirclesPink.Garden.StateMachine.State.Dashboard (DashboardState)
@@ -61,13 +60,13 @@ type EmailApiResult = RemoteData Unit Unit CirclesError { isValid :: Boolean }
 --------------------------------------------------------------------------------
 -- UserData
 --------------------------------------------------------------------------------
-type ErrSubmit = Env.ErrGetSafeAddress
-  + Env.ErrPrepareSafeDeploy
-  + Env.ErrUserRegister
-  + Env.ErrUserResolve
-  + Env.ErrTrustGetNetwork
-  + Env.ErrGetSafeStatus
-  + Env.ErrSaveSession
+type ErrSubmit = EnvControl.ErrGetSafeAddress
+  + EnvControl.ErrPrepareSafeDeploy
+  + EnvControl.ErrUserRegister
+  + EnvControl.ErrUserResolve
+  + EnvControl.ErrTrustGetNetwork
+  + EnvControl.ErrGetSafeStatus
+  + EnvControl.ErrSaveSession
   + ()
 
 type ErrSubmitResolved = Variant
@@ -125,7 +124,6 @@ type LandingState =
   { checkSessionResult :: LandingStateCheckSessionResult
   }
 
-
 type LandingStateCheckSessionResult = RemoteData Unit Unit ErrLandingStateResolved Unit
 
 type ErrLandingStateResolved = Variant
@@ -137,17 +135,14 @@ type ErrLandingStateResolved = Variant
   , errInvalidUrl :: String
   )
 
-type ErrLandingState = Env.ErrRestoreSession
+type ErrLandingState = EnvControl.ErrRestoreSession
   + ErrLoginTask
   + ()
-
-
 
 initLanding :: forall v. Variant (landing :: LandingState | v)
 initLanding =
   _landing
     { checkSessionResult: _notAsked unit }
-
 
 type DebugState =
   { magicWords :: String

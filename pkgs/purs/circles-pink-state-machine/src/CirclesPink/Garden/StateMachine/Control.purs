@@ -6,7 +6,8 @@ import CirclesPink.Garden.StateMachine.Type (_circlesStateMachine)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
 import Stadium.Control as C
@@ -14,7 +15,7 @@ import Stadium.Control as C
 circlesControl
   :: forall m
    . MonadCircles m
-  => Env.Env m
+  => EnvControl m
   -> CirclesConfig m
   -> ((S.CirclesState -> S.CirclesState) -> m Unit)
   -> S.CirclesState

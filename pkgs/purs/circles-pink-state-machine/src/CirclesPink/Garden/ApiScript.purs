@@ -16,8 +16,7 @@ module CirclesPink.Garden.ApiScript
   , safeFunderAddr
   , signUpUser
   , traverse'
-  )
-  where
+  ) where
 
 import CirclesPink.Prelude
 
@@ -27,13 +26,13 @@ import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Mnemonic (getWords, keyToMnemonic)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.EnvVars (EnvVars, getParsedEnv)
-import CirclesPink.Garden.Env (env)
+import CirclesPink.Garden.EnvControlAff (env)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.ScriptM (ScriptM, evalScriptM)
-import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Stories (SignUpUserOpts)
 import CirclesPink.Garden.StateMachine.Stories as S
-import CirclesPink.Garden.TestEnv (liftEnv)
+import CirclesPink.Garden.EnvControlTest (liftEnv)
 import Control.Parallel (class Parallel, parTraverse)
 import Convertable (convert)
 import Data.Array ((..))
@@ -52,8 +51,6 @@ import Node.Process (exit)
 import Record as R
 import Sunde (spawn)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
-
-
 
 type ErrApp r = Err + ErrSendTransaction + ErrNewWebSocketProvider + r
 
@@ -116,7 +113,7 @@ type SignUpUser =
   , safeAddress :: Address
   }
 
-signUpUser :: forall r. Env ScriptM -> CirclesConfig ScriptM -> SignUpUserOpts -> ExceptV (Err + r) ScriptM SignUpUser
+signUpUser :: forall r. EnvControl ScriptM -> CirclesConfig ScriptM -> SignUpUserOpts -> ExceptV (Err + r) ScriptM SignUpUser
 signUpUser env cfg opts =
   ExceptT do
     S.signUpUser env cfg opts
@@ -133,7 +130,7 @@ signUpUser env cfg opts =
                 }
         )
 
-finalizeAccount :: forall r. Env ScriptM -> CirclesConfig ScriptM -> ExceptV (Err + r) ScriptM Unit
+finalizeAccount :: forall r. EnvControl ScriptM -> CirclesConfig ScriptM -> ExceptV (Err + r) ScriptM Unit
 finalizeAccount env cfg =
   ExceptT do
     S.finalizeAccount env cfg
@@ -146,7 +143,7 @@ finalizeAccount env cfg =
         )
 
 --------------------------------------------------------------------------------
-mkAccount :: forall r. EnvVars -> Env ScriptM -> CirclesConfig ScriptM -> ExceptV (ErrApp + r) ScriptM MkAccountReturn
+mkAccount :: forall r. EnvVars -> EnvControl ScriptM -> CirclesConfig ScriptM -> ExceptV (ErrApp + r) ScriptM MkAccountReturn
 mkAccount envVars env cfg = do
   signupOpts <- genSignupOpts
   { privateKey, safeAddress } <- signUpUser env cfg signupOpts
@@ -189,7 +186,7 @@ main' = do
   envVars <- ExceptT $ map (lmap show) $ liftEffect getParsedEnv
   let
     request = milkisRequest nodeFetch
-    env'' = liftEnv liftAff $ env { envVars: convert envVars, request, sessionStorage: todo, localStorage : todo, crypto : todo }
+    env'' = liftEnv liftAff $ env { envVars: convert envVars, request, sessionStorage: todo, localStorage: todo, crypto: todo }
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)

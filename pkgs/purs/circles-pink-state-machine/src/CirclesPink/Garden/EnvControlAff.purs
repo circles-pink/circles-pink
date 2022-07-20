@@ -1,4 +1,4 @@
-module CirclesPink.Garden.Env
+module CirclesPink.Garden.EnvControlAff
   ( EnvVars(..)
   , env
   ) where
@@ -9,8 +9,8 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.Env (CryptoKey(..), StorageType(..), _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, StorageType(..), _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -19,14 +19,12 @@ import Data.Argonaut (decodeJson, encodeJson, parseJson, stringify)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
-import Data.FpTs.Either (Right)
 import Data.HTTP.Method (Method(..))
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -84,7 +82,7 @@ env
          }
      , envVars :: EnvVars
      }
-  -> Env.Env Aff
+  -> EnvControl Aff
 env { localStorage, sessionStorage, crypto, request, envVars } =
   { apiCheckUserName
   , apiCheckEmail
@@ -120,7 +118,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
   , storageClear
   }
   where
-  apiCheckUserName :: Env.ApiCheckUserName Aff
+  apiCheckUserName :: EnvControl.ApiCheckUserName Aff
   apiCheckUserName username =
     if username == "" then
       pure { isValid: false }
@@ -149,7 +147,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
           )
         # ExceptT
 
-  apiCheckEmail :: Env.ApiCheckEmail Aff
+  apiCheckEmail :: EnvControl.ApiCheckEmail Aff
   apiCheckEmail email =
     if email == "" then
       pure { isValid: false }
@@ -178,10 +176,10 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
           )
         # ExceptT
 
-  generatePrivateKey :: Env.GeneratePrivateKey Aff
+  generatePrivateKey :: EnvControl.GeneratePrivateKey Aff
   generatePrivateKey = genPrivateKey
 
-  userRegister :: Env.UserRegister Aff
+  userRegister :: EnvControl.UserRegister Aff
   userRegister privKey options = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -201,14 +199,14 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     --------------------------------------------------------------------------------
     CC.userRegister circlesCore account options
 
-  userSearch :: Env.UserSearch Aff
+  userSearch :: EnvControl.UserSearch Aff
   userSearch privKey options = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.userSearch circlesCore account options
 
-  getSafeAddress :: Env.GetSafeAddress Aff
+  getSafeAddress :: EnvControl.GetSafeAddress Aff
   getSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -220,7 +218,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
-  safePrepareDeploy :: Env.PrepareSafeDeploy Aff
+  safePrepareDeploy :: EnvControl.PrepareSafeDeploy Aff
   safePrepareDeploy privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
@@ -231,7 +229,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
       nonce = addressToNonce $ wrap address
     CC.safePrepareDeploy circlesCore account { nonce: nonce }
 
-  userResolve :: Env.UserResolve Aff
+  userResolve :: EnvControl.UserResolve Aff
   userResolve privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
@@ -242,14 +240,14 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
       Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
       Just u -> pure u
 
-  getUsers :: Env.GetUsers Aff
+  getUsers :: EnvControl.GetUsers Aff
   getUsers privKey userNames addresses = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     CC.userResolve circlesCore account { userNames, addresses: map convert addresses }
 
-  coreToWindow :: Env.CoreToWindow Aff
+  coreToWindow :: EnvControl.CoreToWindow Aff
   coreToWindow privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -258,7 +256,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     log "Debug: sampleCore, sampleAccount and BN library written to global window object"
     pure unit
 
-  isTrusted :: Env.IsTrusted Aff
+  isTrusted :: EnvControl.IsTrusted Aff
   isTrusted privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -270,7 +268,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.trustIsTrusted circlesCore account { safeAddress: convert safeAddress, limit: 3 }
 
-  isFunded :: Env.IsFunded Aff
+  isFunded :: EnvControl.IsFunded Aff
   isFunded privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -282,14 +280,14 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeIsFunded circlesCore account { safeAddress: convert safeAddress }
 
-  trustGetNetwork :: Env.TrustGetNetwork Aff
+  trustGetNetwork :: EnvControl.TrustGetNetwork Aff
   trustGetNetwork privKey address = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.trustGetNetwork circlesCore account { safeAddress: convert address }
 
-  privKeyToSafeAddress :: Env.PrivKeyToSafeAddress Aff
+  privKeyToSafeAddress :: EnvControl.PrivKeyToSafeAddress Aff
   privKeyToSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -301,7 +299,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
-  getSafeStatus :: Env.GetSafeStatus Aff
+  getSafeStatus :: EnvControl.GetSafeStatus Aff
   getSafeStatus privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -313,7 +311,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeGetSafeStatus circlesCore account { safeAddress: convert safeAddress }
 
-  deploySafe :: Env.DeploySafe Aff
+  deploySafe :: EnvControl.DeploySafe Aff
   deploySafe privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -325,7 +323,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.safeDeploy circlesCore account { safeAddress: convert safeAddress }
 
-  deployToken :: Env.DeployToken Aff
+  deployToken :: EnvControl.DeployToken Aff
   deployToken privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
@@ -337,74 +335,74 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.tokenDeploy circlesCore account { safeAddress: convert safeAddress }
 
-  addTrustConnection :: Env.AddTrustConnection Aff
+  addTrustConnection :: EnvControl.AddTrustConnection Aff
   addTrustConnection pk other us = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustAddConnection circlesCore account { user: convert other, canSendTo: convert us }
 
-  removeTrustConnection :: Env.RemoveTrustConnection Aff
+  removeTrustConnection :: EnvControl.RemoveTrustConnection Aff
   removeTrustConnection pk other us = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
 
-  saveSession :: Env.SaveSession Aff
+  saveSession :: EnvControl.SaveSession Aff
   saveSession privKey = do
     gundb <- liftEffect $ offline
     _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
     pure unit
 
-  restoreSession :: Env.RestoreSession Aff
+  restoreSession :: EnvControl.RestoreSession Aff
   restoreSession = do
     gundb <- lift $ liftEffect $ offline
     result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
     resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
     pure resultPk.privKey
 
-  getBalance :: Env.GetBalance Aff
+  getBalance :: EnvControl.GetBalance Aff
   getBalance privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.tokenGetBalance circlesCore account { safeAddress: convert safeAddress }
 
-  checkUBIPayout :: Env.CheckUBIPayout Aff
+  checkUBIPayout :: EnvControl.CheckUBIPayout Aff
   checkUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.tokenCheckUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
-  requestUBIPayout :: Env.RequestUBIPayout Aff
+  requestUBIPayout :: EnvControl.RequestUBIPayout Aff
   requestUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.tokenRequestUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
-  transfer :: Env.Transfer Aff
+  transfer :: EnvControl.Transfer Aff
   transfer privKey from to value paymentNote = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     CC.tokenTransfer circlesCore account { from: convert from, to: convert to, value, paymentNote }
 
-  getTimestamp :: Env.GetTimestamp Aff
+  getTimestamp :: EnvControl.GetTimestamp Aff
   getTimestamp = liftEffect now
 
-  sleep :: Env.Sleep Aff
+  sleep :: EnvControl.Sleep Aff
   sleep t =
     makeAff \f -> do
       id <- setTimeout t $ f $ Right unit
       pure $ Canceler $ \_ -> liftEffect $ clearTimeout id
 
-  logInfo :: Env.LogInfo Aff
+  logInfo :: EnvControl.LogInfo Aff
   logInfo = log
 
-  storageSetItem :: Env.StorageSetItem Aff
+  storageSetItem :: EnvControl.StorageSetItem Aff
   storageSetItem _ st k v = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
@@ -415,7 +413,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
       Just ss -> ss.setItem (stringify $ encodeJson k) (stringify $ encodeJson v)
         # liftAff
 
-  storageGetItem :: Env.StorageGetItem Aff
+  storageGetItem :: EnvControl.StorageGetItem Aff
   storageGetItem _ st k = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
@@ -430,7 +428,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
         >>= (\s -> parseJson s # except # withExceptT (\jde -> _errParseToJson s))
         >>= (\j -> decodeJson j # except # withExceptT (\jde -> _errParseToData (j /\ jde)))
 
-  storageDeleteItem :: Env.StorageDeleteItem Aff
+  storageDeleteItem :: EnvControl.StorageDeleteItem Aff
   storageDeleteItem _ st k = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
@@ -439,7 +437,7 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
       Nothing -> throwError $ _errNoStorage st
       Just ss -> ss.deleteItem (stringify $ encodeJson k) # withExceptT (const $ _errKeyNotFound k)
 
-  storageClear :: Env.StorageClear Aff
+  storageClear :: EnvControl.StorageClear Aff
   storageClear st = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
