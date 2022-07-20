@@ -76,8 +76,11 @@ export const resources = {
         greet: 'Hello',
         subClaim:
           'Your Account is in pending state. Follow the instructions to finalize it!',
-        getMoreTruts: 'Collect at least three trust connections',
+        getMoreTruts:
+          'Collect at least three trust connections of existing Circles users.',
         fundYourSafe: 'Or fund your Safe with xDai. Your Safe Address is:',
+        collectTrustsTitle: 'Collect three trusts...',
+        fundMySafeManually: 'I know what I am doing and I want to fund my safe',
       },
       dashboard: {
         addTrustPlaceholder: 'Address of a person you want to trust',
@@ -141,7 +144,7 @@ export const resources = {
       login: {
         claim: 'Willkommen zurück!',
         subClaim:
-          'Gib hier deinen privaten Schlüssel ein, um deine Circles Wallet wiederherzustellen.',
+          'Gib hier deinen privaten Schlüssel ein, um deine Circles Wallet wiederherzustellen. Dein privater Schlüssel besteht aus 24 Worten, durch Leerzeichen getrennt.',
         magicWordsPlaceholder: 'Deine 24 geheimen Worte...',
       },
       infoGeneral: {
@@ -197,7 +200,7 @@ export const resources = {
         greet: 'Hallo',
         subClaim: 'Dein Account ist noch nicht aktiviert.',
         getMoreTruts:
-          'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen, oder lass sie diesen Code scannen.',
+          'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen. Danach kannst du deinen Account freischalten und erhälst Grundeinkommen!',
         fundYourSafe:
           'Oder funde deine Wallet mit mindestens einem xDai. Das ist deine Safe Adresse, wenn sie mit mindestens einem Euro gefunded ist, kannst du die Registrierung abschließen.',
         collectTrustsTitle: 'Sammle drei Trusts!',

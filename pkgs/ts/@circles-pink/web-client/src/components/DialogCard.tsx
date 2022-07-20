@@ -57,9 +57,9 @@ type FrameProps = {
 };
 
 const Frame = styled.div((props: FrameProps) => [
-  tw`border border-dotted`,
+  // tw`border border-dashed`,
+  // css`border-color: ${props.theme.baseColor};`,
   css`
-    border-color: ${props.theme.baseColor};
     background-color: ${props.theme.bgColor};
   `,
 ]);

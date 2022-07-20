@@ -9,6 +9,7 @@ export const parameters = {
       date: /Date$/,
     },
   },
+  layout: "fullscreen",
 };
 
 export const decorators = [
