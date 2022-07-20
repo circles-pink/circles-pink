@@ -8,9 +8,9 @@ import CirclesPink.Data.Mnemonic (sampleMnemonic)
 import CirclesPink.Garden.StateMachine (initLanding)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
-import CirclesPink.Garden.StateMachine.Control.Env (Env)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Stories (finalizeAccount, loginUser, signUpUser)
-import CirclesPink.Garden.TestEnv (testEnv)
+import CirclesPink.Garden.EnvControlTest (testEnv)
 import Data.Either (Either(..))
 import Data.Identity (Identity)
 import Data.Newtype (unwrap)
@@ -23,7 +23,7 @@ import Test.Spec.Assertions (shouldEqual)
 spec :: Spec Unit
 spec =
   let
-    env' :: Env (TestScriptT Identity)
+    env' :: EnvControl (TestScriptT Identity)
     env' = testEnv
 
     cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }

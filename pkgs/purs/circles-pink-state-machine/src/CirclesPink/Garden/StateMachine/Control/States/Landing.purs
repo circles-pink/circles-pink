@@ -3,7 +3,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Landing where
 import Prelude
 
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', loginTask, runExceptT')
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Either (Either(..))
@@ -12,7 +12,7 @@ import RemoteData (RemoteData, _failure, _loading, _notAsked)
 landing
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> { signUp :: ActionHandler' m Unit S.LandingState ("infoGeneral" :: S.UserData)
      , signIn :: ActionHandler' m Unit S.LandingState ("login" :: S.LoginState)
      , checkForSession :: ActionHandler' m Unit S.LandingState ("landing" :: S.LandingState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState)

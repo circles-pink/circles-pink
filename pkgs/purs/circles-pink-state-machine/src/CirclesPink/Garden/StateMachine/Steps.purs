@@ -5,8 +5,7 @@ module CirclesPink.Garden.StateMachine.Steps
   , infoSecurity
   , magicWords
   , submit
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -17,7 +16,7 @@ import CirclesPink.Garden.StateMachine.Control (circlesControl)
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.TestEnv (testEnv)
+import CirclesPink.Garden.EnvControlTest (testEnv)
 import Data.Either (Either(..))
 import Data.Identity (Identity)
 import Data.Newtype (unwrap)

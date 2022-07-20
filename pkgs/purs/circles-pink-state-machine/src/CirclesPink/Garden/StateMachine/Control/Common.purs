@@ -4,7 +4,8 @@ import Prelude
 
 import CirclesCore (SafeStatus, TrustNode, User)
 import CirclesPink.Data.PrivateKey (PrivateKey)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (class MonadTrans, lift)
@@ -34,9 +35,9 @@ type ActionHandler t m a s v = ((s -> Variant v) -> t m Unit) -> s -> a -> t m U
 type ActionHandler' m a s v = ((s -> Variant v) -> m Unit) -> s -> a -> m Unit
 
 --------------------------------------------------------------------------------
-type ErrReadyForDeployment r = Env.ErrIsTrusted + Env.ErrIsFunded + r
+type ErrReadyForDeployment r = EnvControl.ErrIsTrusted + EnvControl.ErrIsFunded + r
 
-readyForDeployment :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrReadyForDeployment r) m Boolean
+readyForDeployment :: forall m r. Monad m => EnvControl m -> PrivateKey -> ExceptV (ErrReadyForDeployment r) m Boolean
 readyForDeployment { isTrusted, isFunded } privKey = do
   isTrusted' <- isTrusted privKey <#> (unwrap >>> _.isTrusted)
   isFunded' <- isFunded privKey
@@ -51,16 +52,16 @@ type TaskReturn =
   , isReady :: Boolean
   }
 
-type ErrLoginTask r = Env.ErrUserResolve
-  + Env.ErrGetSafeStatus
-  + Env.ErrTrustGetNetwork
-  + Env.ErrIsTrusted
-  + Env.ErrIsFunded
-  + Env.ErrPrivKeyToSafeAddress
-  + Env.ErrUserResolve
+type ErrLoginTask r = EnvControl.ErrUserResolve
+  + EnvControl.ErrGetSafeStatus
+  + EnvControl.ErrTrustGetNetwork
+  + EnvControl.ErrIsTrusted
+  + EnvControl.ErrIsFunded
+  + EnvControl.ErrPrivKeyToSafeAddress
+  + EnvControl.ErrUserResolve
   + r
 
-loginTask :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
+loginTask :: forall m r. Monad m => EnvControl m -> PrivateKey -> ExceptV (ErrLoginTask + r) m TaskReturn
 loginTask env@{ getSafeStatus, trustGetNetwork, isTrusted, privKeyToSafeAddress, userResolve } privKey =
   do
     user <- userResolve privKey
@@ -94,7 +95,7 @@ subscribeRemoteData setCb comp = do
 subscribeRemoteReport
   :: forall e a m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> (RemoteReport e a -> m Unit)
   -> ExceptT e m a
   -> Int
@@ -116,7 +117,7 @@ addPreviousData pd rp =
 -- subscribeRemoteReport_
 --   :: forall e a m
 --    . Monad m
---   => Env.Env m
+--   => EnvControl.Env m
 --   -> (RemoteReport e a -> m Unit)
 --   -> m (Either e a)
 --   -> m (Either e a)
@@ -130,7 +131,7 @@ type RetryConfig =
 retryUntil
   :: forall m e a
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> (Int -> RetryConfig)
   -> (Either e a -> Int -> Boolean)
   -> Int
@@ -153,9 +154,9 @@ dropError = mapExceptT (\x -> x <#> lmap (const unit))
 
 --------------------------------------------------------------------------------
 
-type ErrDeploySafe' r = Env.ErrDeploySafe + Env.ErrGetSafeStatus + r
+type ErrDeploySafe' r = EnvControl.ErrDeploySafe + EnvControl.ErrGetSafeStatus + r
 
-deploySafe' :: forall m r. Monad m => Env.Env m -> PrivateKey -> ExceptV (ErrDeploySafe' r) m SafeStatus
+deploySafe' :: forall m r. Monad m => EnvControl m -> PrivateKey -> ExceptV (ErrDeploySafe' r) m SafeStatus
 deploySafe' { deploySafe, getSafeStatus } privKey = do
   _ <- deploySafe privKey
   safeStatus <- getSafeStatus privKey

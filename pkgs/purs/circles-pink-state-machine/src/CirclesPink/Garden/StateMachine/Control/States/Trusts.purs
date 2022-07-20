@@ -5,7 +5,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Trusts
 import Prelude
 
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, readyForDeployment, retryUntil, runExceptT', subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), isRight)
@@ -14,7 +14,7 @@ import RemoteData (_failure)
 trusts
   :: forall m
    . Monad m
-  => Env.Env m
+  => EnvControl m
   -> { getSafeStatus :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState)
      , finalizeRegisterUser :: ActionHandler' m Unit S.TrustState ("trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
      }

@@ -39,7 +39,7 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustConnection (TrustConnection)
 import CirclesPink.Data.UserIdent (UserIdent)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
@@ -83,11 +83,11 @@ type CirclesGraph = IxGraph Address TrustConnection UserIdent
 type ErrDashboardState r = ErrService + ErrNative + ErrInvalidUrl + r
 
 type RedeploySafeResult = RemoteReport
-  (Variant (Env.ErrDeploySafe + Env.ErrGetSafeStatus + ()))
+  (Variant (EnvControl.ErrDeploySafe + EnvControl.ErrGetSafeStatus + ()))
   SafeStatus
 
 type RedeployTokenResult = RemoteReport
-  (Variant (Env.ErrDeployToken + ()))
+  (Variant (EnvControl.ErrDeployToken + ()))
   String
 
 --------------------------------------------------------------------------------
@@ -122,63 +122,63 @@ initDashboard id =
 --------------------------------------------------------------------------------
 type GetUsersResult = RemoteDataV_ (ErrGetUsers + ()) (Array User)
 
-type ErrGetUsers r = Env.ErrGetUsers + r
+type ErrGetUsers r = EnvControl.ErrGetUsers + r
 
 --------------------------------------------------------------------------------
 -- UserSearchResult
 --------------------------------------------------------------------------------
 type UserSearchResult = RemoteReport (Variant (ErrUserSearch + ())) (Array User)
 
-type ErrUserSearch r = Env.ErrUserSearch + r
+type ErrUserSearch r = EnvControl.ErrUserSearch + r
 
 --------------------------------------------------------------------------------
 -- TrustGetTrusts
 --------------------------------------------------------------------------------
 type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
 
-type ErrTrustGetTrusts r = Env.ErrAddTrustConnection + ErrParseAddress + r
+type ErrTrustGetTrusts r = EnvControl.ErrAddTrustConnection + ErrParseAddress + r
 
 --------------------------------------------------------------------------------
 -- TrustAddResult
 --------------------------------------------------------------------------------
 type TrustAddResult = Object (RemoteReportV (ErrTrustAddConnection + ()) String)
 
-type ErrTrustAddConnection r = Env.ErrAddTrustConnection + r
+type ErrTrustAddConnection r = EnvControl.ErrAddTrustConnection + r
 
 --------------------------------------------------------------------------------
 -- TrustRemoveResult
 --------------------------------------------------------------------------------
 type TrustRemoveResult = Object (RemoteReportV (ErrTrustRemoveConnection + ()) String)
 
-type ErrTrustRemoveConnection r = Env.ErrRemoveTrustConnection + r
+type ErrTrustRemoveConnection r = EnvControl.ErrRemoveTrustConnection + r
 
 --------------------------------------------------------------------------------
 -- TokenGetBalanceResult
 --------------------------------------------------------------------------------
 type TokenGetBalanceResult = RemoteReportV (ErrTokenGetBalance + ()) BN
 
-type ErrTokenGetBalance r = Env.ErrGetBalance + r
+type ErrTokenGetBalance r = EnvControl.ErrGetBalance + r
 
 --------------------------------------------------------------------------------
 -- TokenCheckUBIPayoutResult
 --------------------------------------------------------------------------------
 type TokenCheckUBIPayoutResult = RemoteReportV (ErrTokenCheckUBIPayout + ()) BN
 
-type ErrTokenCheckUBIPayout r = Env.ErrCheckUBIPayout + r
+type ErrTokenCheckUBIPayout r = EnvControl.ErrCheckUBIPayout + r
 
 --------------------------------------------------------------------------------
 -- TokenRequestUBIPayoutResult
 --------------------------------------------------------------------------------
 type TokenRequestUBIPayoutResult = RemoteReportV (ErrTokenRequestUBIPayout + ()) String
 
-type ErrTokenRequestUBIPayout r = Env.ErrRequestUBIPayout + r
+type ErrTokenRequestUBIPayout r = EnvControl.ErrRequestUBIPayout + r
 
 --------------------------------------------------------------------------------
 -- TokenTransferResult
 --------------------------------------------------------------------------------
 type TokenTransferResult = RemoteDataV_ (ErrTokenTransfer + ()) String
 
-type ErrTokenTransfer r = Env.ErrTransfer + r
+type ErrTokenTransfer r = EnvControl.ErrTransfer + r
 
 --------------------------------------------------------------------------------
 -- Constructors

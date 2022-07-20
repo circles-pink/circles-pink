@@ -1,4 +1,4 @@
-module CirclesPink.Garden.TestEnv
+module CirclesPink.Garden.EnvControlTest
   -- ( TestEnvM
   -- , TestEnvT
   -- , liftEnv
@@ -14,15 +14,14 @@ import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT)
-import CirclesPink.Garden.StateMachine.Control.Env (StorageType(..), _errNoStorage)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (StorageType(..), _errNoStorage, EnvControl)
 import Control.Monad.Except (mapExceptT, throwError)
 import Data.BN as B
 import Data.Newtype (wrap)
 import Data.Variant (inj)
 import Type.Proxy (Proxy(..))
 
-testEnv :: forall m. Monad m => Env.Env (TestScriptT m)
+testEnv :: forall m. Monad m => EnvControl (TestScriptT m)
 testEnv =
   { apiCheckUserName: \_ -> pure { isValid: true }
   , apiCheckEmail: \_ -> pure { isValid: true }
@@ -55,7 +54,7 @@ testEnv =
   , sleep: \_ -> pure unit
   , logInfo: \_ -> pure unit
   , storageSetItem: \_ _ _ _ -> pure unit
-  , storageGetItem: \_ _ _ _ -> throwError $ _errNoStorage SessionStorage
+  , storageGetItem: \_ _ _ -> throwError $ _errNoStorage SessionStorage
   , storageDeleteItem: \_ _ _ -> pure unit
   , storageClear: \_ -> pure unit
   }
@@ -74,7 +73,7 @@ compose4 g f x1 x2 x3 x4 = f x1 x2 x3 x4 # g
 compose5 :: forall a1 a2 a3 a4 a5 z z'. (z -> z') -> (a1 -> a2 -> a3 -> a4 -> a5 -> z) -> (a1 -> a2 -> a3 -> a4 -> a5 -> z')
 compose5 g f x1 x2 x3 x4 x5 = f x1 x2 x3 x4 x5 # g
 
-liftEnv :: forall m n. (m ~> n) -> Env.Env m -> Env.Env n
+liftEnv :: forall m n. (m ~> n) -> EnvControl m -> EnvControl n
 liftEnv f e =
   { apiCheckUserName: compose (mapExceptT f) e.apiCheckUserName
   , apiCheckEmail: compose (mapExceptT f) e.apiCheckEmail
@@ -105,7 +104,7 @@ liftEnv f e =
   , sleep: compose f e.sleep
   , logInfo: compose f e.logInfo
   , storageSetItem: \x1 x2 x3 x4 -> e.storageSetItem x1 x2 x3 x4 # mapExceptT f
-  , storageGetItem: \x1 x2 x3 x4 -> e.storageGetItem x1 x2 x3 x4 # mapExceptT f
+  , storageGetItem: \x1 x2 x3 -> e.storageGetItem x1 x2 x3 # mapExceptT f
   , storageDeleteItem: \x1 x2 x3 -> e.storageDeleteItem x1 x2 x3 # mapExceptT f
   , storageClear: compose (mapExceptT f) e.storageClear
   }

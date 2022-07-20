@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler')
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Reader (ask)
@@ -15,7 +15,7 @@ import Data.Newtype.Extra ((-#))
 infoSecurity
   :: forall m
    . MonadCircles m
-  => Env.Env m
+  => EnvControl m
   -> { prev :: ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData, "askUsername" :: S.UserData)
      , next :: ActionHandler' m Unit S.UserData ("magicWords" :: S.UserData)
      }

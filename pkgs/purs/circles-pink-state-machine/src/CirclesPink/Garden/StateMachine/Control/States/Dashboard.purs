@@ -14,12 +14,12 @@ import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, 
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
-import Control.Monad.Identity.Trans (runIdentityT)
 import Control.Monad.Trans.Class (lift)
 import Data.Array (catMaybes, drop, take)
 import Data.Array as A
@@ -27,7 +27,7 @@ import Data.BN (BN)
 import Data.BN as BN
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
-import Data.Identity (Identity(..))
+import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
@@ -41,7 +41,7 @@ import Data.String as Str
 import Data.These (These(..), maybeThese)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import Test.TestUtils (addrA, addrB, addrC, userA, userB, userC)
+import Test.TestUtils (addrA, addrB, userA)
 
 --------------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ specSplitArray = describeFn splitArray do
 
 type ErrFetchUsersBinarySearch r = (err :: Unit | r)
 
-type EnvFetchUsersBinarySearch r m = (getUsers :: Env.GetUsers m | r)
+type EnvFetchUsersBinarySearch r m = (getUsers :: EnvControl.GetUsers m | r)
 
 fetchUsersBinarySearch :: forall q r m. Monad m => { | EnvFetchUsersBinarySearch q m } -> PrivateKey -> Array Address -> ExceptV (ErrFetchUsersBinarySearch r) m (Array UserIdent)
 fetchUsersBinarySearch env privKey addresses =
@@ -154,7 +154,7 @@ specFetchUsersBinarySearch = describe "fetchUsersBinarySearch" do
 dashboard
   :: forall m
    . MonadCircles m
-  => Env.Env m
+  => EnvControl m
   -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
      , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , expandTrustNetwork :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)

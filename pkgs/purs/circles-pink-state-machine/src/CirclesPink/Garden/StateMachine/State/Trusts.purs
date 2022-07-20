@@ -11,7 +11,7 @@ import Prelude
 
 import CirclesCore (SafeStatus, TrustNode)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.Env as Env
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Data.Variant (Variant, inj)
 import RemoteReport (RemoteReport)
@@ -19,11 +19,11 @@ import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
 --------------------------------------------------------------------------------
-type ErrTrustState r = Env.ErrGetSafeStatus
-  + Env.ErrIsTrusted
-  + Env.ErrIsFunded
-  + Env.ErrDeploySafe
-  + Env.ErrDeployToken
+type ErrTrustState r = EnvControl.ErrGetSafeStatus
+  + EnvControl.ErrIsTrusted
+  + EnvControl.ErrIsFunded
+  + EnvControl.ErrDeploySafe
+  + EnvControl.ErrDeployToken
   + r
 
 type TrustStateTrustsResult = RemoteReport
@@ -31,11 +31,11 @@ type TrustStateTrustsResult = RemoteReport
   Unit
 
 type TrustsDeploySafeResult = RemoteReport
-  (Variant (Env.ErrDeploySafe + Env.ErrGetSafeStatus + ()))
+  (Variant (EnvControl.ErrDeploySafe + EnvControl.ErrGetSafeStatus + ()))
   SafeStatus
 
 type TrustsDeployTokenResult = RemoteReport
-  (Variant (Env.ErrDeployToken + ()))
+  (Variant (EnvControl.ErrDeployToken + ()))
   String
 
 type TrustState =
