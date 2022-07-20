@@ -2,17 +2,15 @@ module StringStorage where
 
 import Prelude
 
-import Control.Monad.Except (ExceptT(..), lift)
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
-import Data.Either (hush, note)
+import Data.Either (hush)
 import Data.Maybe (Maybe)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Exception (try)
 import Web.HTML (window)
-import Web.HTML.Window (localStorage)
+import Web.HTML.Window (localStorage, sessionStorage)
 import Web.Storage.Storage (clear, getItem, removeItem, setItem)
 
 type StringStorage =
@@ -28,10 +26,18 @@ getLocalStorage = runMaybeT do
   s <- localStorage w # liftEffect
   pure
     { setItem: \k v -> liftEffect $ setItem k v s
-    , getItem: \k -> todo -- ExceptT $ liftEffect $ note unit <$> getItem k s
-    , clear: todo -- liftEffect $ clear s
-    , deleteItem: todo -- \k -> liftEffect $ removeItem k s
+    , getItem: \k -> liftEffect $ getItem k s
+    , clear: liftEffect $ clear s
+    , deleteItem: \k -> liftEffect $ removeItem k s
     }
 
 getSessionStorage :: Effect (Maybe StringStorage)
-getSessionStorage = todo
+getSessionStorage = runMaybeT do
+  w <- try window <#> hush # MaybeT
+  s <- sessionStorage w # liftEffect
+  pure
+    { setItem: \k v -> liftEffect $ setItem k v s
+    , getItem: \k -> liftEffect $ getItem k s
+    , clear: liftEffect $ clear s
+    , deleteItem: \k -> liftEffect $ removeItem k s
+    }

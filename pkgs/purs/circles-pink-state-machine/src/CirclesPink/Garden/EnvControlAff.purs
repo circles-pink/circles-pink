@@ -9,10 +9,10 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
+import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, stringify)
@@ -24,8 +24,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
-import Data.Variant (Variant)
-import Data.Variant (inj)
+import Data.Variant (Variant, inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -39,6 +38,7 @@ import Network.Ethereum.Core.Signatures (privateToAddress)
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web.HTML.Window (localStorage)
 
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars
@@ -343,17 +343,10 @@ env envenv@{ request, envVars } =
     CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
 
   saveSession :: EnvControl.SaveSession Aff
-  saveSession privKey = do
-    gundb <- liftEffect $ offline
-    _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
-    pure unit
+  saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
 
   restoreSession :: EnvControl.RestoreSession Aff
-  restoreSession = do
-    gundb <- lift $ liftEffect $ offline
-    result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
-    resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
-    pure resultPk.privKey
+  restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
 
   getBalance :: EnvControl.GetBalance Aff
   getBalance privKey safeAddress = do
@@ -411,26 +404,28 @@ storageGetItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ls -> ls.getItem (encryptJson envenv sk k)
-      # withExceptT (const $ _errKeyNotFound k)
+      <#> note (_errKeyNotFound k)
+      # ExceptT
       >>= (\v -> except $ decryptJson envenv sk v)
 
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ss -> ss.getItem (encryptJson envenv sk k)
-      # withExceptT (const $ _errKeyNotFound k)
+      <#> note (_errKeyNotFound k)
+      # ExceptT
       >>= (\v -> except $ decryptJson envenv sk v)
 
 storageDeleteItem :: EnvEnvControlAff -> EnvControl.StorageDeleteItem Aff
 storageDeleteItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ls -> ls.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
+    Just ls -> ls.deleteItem (encryptJson envenv sk k) # liftAff
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ss -> ss.deleteItem (encryptJson envenv sk k) # withExceptT (const $ _errKeyNotFound k)
+    Just ss -> ss.deleteItem (encryptJson envenv sk k) # liftAff
 
 storageClear :: EnvEnvControlAff -> EnvControl.StorageClear Aff
-storageClear envenv@{ localStorage, sessionStorage } st = case st of
+storageClear { localStorage, sessionStorage } st = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ls -> ExceptT $ Right <$> ls.clear

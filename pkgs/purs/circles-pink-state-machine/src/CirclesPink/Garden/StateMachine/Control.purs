@@ -7,7 +7,6 @@ import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
-import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Control.States as States
 import CirclesPink.Garden.StateMachine.State as S
 import Stadium.Control as C
