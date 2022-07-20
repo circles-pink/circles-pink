@@ -12,6 +12,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , ErrCheckUBIPayout
   , ErrCoreToWindow
   , ErrDecode
+  , ErrDecrypt
   , ErrDeploySafe
   , ErrDeployToken
   , ErrGetBalance
@@ -266,6 +267,8 @@ type ErrStorageClear r = ErrNoStorage + r
 
 -- Error slices
 type ErrParseToJson r = (errParseToJson :: String | r)
+
+type ErrDecrypt r = (errDecrypt :: Unit | r)
 
 type ErrParseToData r = (errParseToData :: Json /\ JsonDecodeError | r)
 
