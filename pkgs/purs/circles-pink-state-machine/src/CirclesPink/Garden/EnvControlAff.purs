@@ -9,13 +9,13 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, StorageType(..), _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrParseToData, ErrParseToJson, StorageType(..), ErrDecrypt, _errDecode, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
-import Data.Argonaut (decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError, decodeJson, encodeJson, parseJson, stringify)
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
@@ -25,6 +25,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -60,28 +61,31 @@ _errService = inj (Proxy :: _ "errService") unit
 _errParse :: CirclesError
 _errParse = inj (Proxy :: _ "errParse") unit
 
+type EnvEnvControlAff =
+  { request :: ReqFn (CirclesError' ())
+  , localStorage ::
+      Maybe
+        { setItem :: String -> String -> Aff Unit
+        , getItem :: String -> ExceptT Unit Aff String
+        , deleteItem :: String -> ExceptT Unit Aff Unit
+        , clear :: Aff Unit
+        }
+  , sessionStorage ::
+      Maybe
+        { setItem :: String -> String -> Aff Unit
+        , getItem :: String -> ExceptT Unit Aff String
+        , deleteItem :: String -> ExceptT Unit Aff Unit
+        , clear :: Aff Unit
+        }
+  , crypto ::
+      { encrypt :: CryptoKey -> String -> String
+      , decrypt :: CryptoKey -> String -> Maybe String
+      }
+  , envVars :: EnvVars
+  }
+
 env
-  :: { request :: ReqFn (CirclesError' ())
-     , localStorage ::
-         Maybe
-           { setItem :: String -> String -> Aff Unit
-           , getItem :: String -> ExceptT Unit Aff String
-           , deleteItem :: String -> ExceptT Unit Aff Unit
-           , clear :: Aff Unit
-           }
-     , sessionStorage ::
-         Maybe
-           { setItem :: String -> String -> Aff Unit
-           , getItem :: String -> ExceptT Unit Aff String
-           , deleteItem :: String -> ExceptT Unit Aff Unit
-           , clear :: Aff Unit
-           }
-     , crypto ::
-         { encrypt :: CryptoKey -> String -> String
-         , decrypt :: CryptoKey -> String -> Maybe String
-         }
-     , envVars :: EnvVars
-     }
+  :: EnvEnvControlAff
   -> EnvControl Aff
 env { localStorage, sessionStorage, crypto, request, envVars } =
   { apiCheckUserName
@@ -403,10 +407,10 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
   logInfo = log
 
   storageSetItem :: EnvControl.StorageSetItem Aff
-  storageSetItem _ st k v = case st of
+  storageSetItem sk st k v = case st of
     LocalStorage -> case localStorage of
       Nothing -> throwError $ _errNoStorage st
-      Just ls -> ls.setItem (stringify $ encodeJson k) (stringify $ encodeJson v)
+      Just ls -> ls.setItem (encryptJSON env sk k) (encryptJSON env sk v)
         # liftAff
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
@@ -445,6 +449,20 @@ env { localStorage, sessionStorage, crypto, request, envVars } =
     SessionStorage -> case sessionStorage of
       Nothing -> throwError $ _errNoStorage st
       Just ss -> ExceptT $ Right <$> ss.clear
+
+encryptJSON :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
+encryptJSON { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
+
+decryptJSON :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (ErrDecryptJson r) a
+decryptJSON { crypto: { decrypt } } sk v = todo
+
+-- decrypt sk v
+-- <#> decodeJson v 
+-- <#> 
+
+-- decrypt sk $ stringify $ decodeJson v
+
+type ErrDecryptJson r = ErrParseToData + ErrParseToJson + ErrDecrypt + r
 
 privateKeyStore :: String
 privateKeyStore = "session"
