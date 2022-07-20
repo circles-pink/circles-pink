@@ -1,6 +1,12 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useEffect, useMemo } from 'react';
+import React, {
+  ReactElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
@@ -8,7 +14,7 @@ import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
-import { ThemeContext } from '../../context/theme';
+import { Theme, ThemeContext } from '../../context/theme';
 import Icon from '@mdi/react';
 import {
   mdiNumeric1CircleOutline,
@@ -32,6 +38,12 @@ import {
 import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 
 // -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
+
+type FinalizeMethod = 'collectTrusts' | 'fundSafe';
+
+// -----------------------------------------------------------------------------
 // Trusts
 // -----------------------------------------------------------------------------
 
@@ -46,11 +58,11 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
     [stateRaw]
   );
 
-  const safeAddress = addrToString(state.user.safeAddress);
-
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
+
+  const safeAddress = addrToString(state.user.safeAddress);
 
   useEffect(() => {
     const safeStatus = setInterval(
@@ -59,6 +71,9 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
     );
     return () => clearInterval(safeStatus);
   }, []);
+
+  const [finalizeMethod, setFinalizeMethod] =
+    useState<FinalizeMethod>('collectTrusts');
 
   return (
     <DialogCard
@@ -75,12 +90,6 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
           <>
-            {/* <Button
-              theme={theme}
-              onClick={() => act(A._trusts(A._getSafeStatus(unit)))}
-            >
-              {t('safeStateButton')}
-            </Button> */}
             {state.isReady ? (
               <Button
                 theme={theme}
@@ -101,99 +110,134 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
           <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('trusts.subClaim')}</SubClaim>
           </FadeIn>
-          <FlexRow>
-            <InfoCard
-              title={'Trusts'}
-              text={
-                <>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <Text>{t('trusts.getMoreTruts')}</Text>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterElement>
-                      <QrCode
-                        data={safeAddress}
-                        height="200"
-                        width="200"
-                        fgColor="gray"
-                        bgColor="white"
-                      />
-                    </CenterElement>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterText>
-                      <Text>{safeAddress}</Text>
-                    </CenterText>
-                  </FadeIn>
-                  <TrustIndicatorRow>
-                    <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric1CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 1 ? theme.baseColor : 'gray'
-                        }
-                      />
-                    </FadeIn>
-                    <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric2CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 2 ? theme.baseColor : 'gray'
-                        }
-                      />
-                    </FadeIn>
-                    <FadeIn orientation={orientation} delay={getDelay()}>
-                      <Icon
-                        path={mdiNumeric3CircleOutline}
-                        size={2}
-                        color={
-                          state.trusts.length >= 3 ? theme.baseColor : 'gray'
-                        }
-                      />
-                    </FadeIn>
-                  </TrustIndicatorRow>
-                </>
-              }
-              themeColor={theme.baseColor}
-              icon={mdiAccountGroup}
-            />
 
-            <InfoCard
-              title={'Gnosis Safe'}
-              text={
-                <>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <Text>{t('trusts.fundYourSafe')}</Text>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterElement>
-                      <QrCode
-                        data={safeAddress}
-                        height="200"
-                        width="200"
-                        fgColor="gray"
-                        bgColor="white"
-                      />
-                    </CenterElement>
-                  </FadeIn>
-                  <FadeIn orientation={orientation} delay={getDelay()}>
-                    <CenterText>
-                      <Text>{safeAddress}</Text>
-                    </CenterText>
-                  </FadeIn>
-                </>
-              }
-              themeColor={theme.baseColor}
-              icon={mdiCashFast}
-            />
-          </FlexRow>
+          <FinalizeHint
+            finalizeMethod={finalizeMethod}
+            safeAddress={safeAddress}
+            orientation={orientation}
+            getDelay={getDelay}
+            theme={theme}
+            trustsLength={state.trusts.length}
+          />
+
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <SubClaim>{t('trusts.fundMySafeManually')}</SubClaim>
+          </FadeIn>
         </>
       }
       debug={<StateMachineDebugger state={state} />}
     />
   );
+};
+
+// -----------------------------------------------------------------------------
+// Finalize hint
+// -----------------------------------------------------------------------------
+
+type FinalizeHintProps = {
+  finalizeMethod: FinalizeMethod;
+  safeAddress: string;
+  orientation: Orientation;
+  getDelay: () => number;
+  theme: Theme;
+  trustsLength: number;
+};
+
+const FinalizeHint = ({
+  finalizeMethod,
+  safeAddress,
+  orientation,
+  getDelay,
+  theme,
+  trustsLength,
+}: FinalizeHintProps): ReactElement => {
+  switch (finalizeMethod) {
+    case 'collectTrusts':
+      return (
+        <InfoCard
+          title={t('trusts.collectTrustsTitle')}
+          text={
+            <>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <Text>{t('trusts.getMoreTruts')}</Text>
+              </FadeIn>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <CenterElement>
+                  <QrCode
+                    data={safeAddress}
+                    height="200"
+                    width="200"
+                    fgColor="gray"
+                    bgColor="white"
+                  />
+                </CenterElement>
+              </FadeIn>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <CenterText>
+                  <Text>{safeAddress}</Text>
+                </CenterText>
+              </FadeIn>
+              <TrustIndicatorRow>
+                <FadeIn orientation={orientation} delay={getDelay()}>
+                  <Icon
+                    path={mdiNumeric1CircleOutline}
+                    size={2}
+                    color={trustsLength >= 1 ? theme.baseColor : 'gray'}
+                  />
+                </FadeIn>
+                <FadeIn orientation={orientation} delay={getDelay()}>
+                  <Icon
+                    path={mdiNumeric2CircleOutline}
+                    size={2}
+                    color={trustsLength >= 2 ? theme.baseColor : 'gray'}
+                  />
+                </FadeIn>
+                <FadeIn orientation={orientation} delay={getDelay()}>
+                  <Icon
+                    path={mdiNumeric3CircleOutline}
+                    size={2}
+                    color={trustsLength >= 3 ? theme.baseColor : 'gray'}
+                  />
+                </FadeIn>
+              </TrustIndicatorRow>
+            </>
+          }
+          themeColor={theme.baseColor}
+          icon={mdiAccountGroup}
+        />
+      );
+    case 'fundSafe':
+      return (
+        <InfoCard
+          title={t('trusts.fundSafeTitle')}
+          text={
+            <>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <Text>{t('trusts.fundYourSafe')}</Text>
+              </FadeIn>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <CenterElement>
+                  <QrCode
+                    data={safeAddress}
+                    height="200"
+                    width="200"
+                    fgColor="gray"
+                    bgColor="white"
+                  />
+                </CenterElement>
+              </FadeIn>
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <CenterText>
+                  <Text>{safeAddress}</Text>
+                </CenterText>
+              </FadeIn>
+            </>
+          }
+          themeColor={theme.baseColor}
+          icon={mdiCashFast}
+        />
+      );
+  }
 };
 
 // -----------------------------------------------------------------------------

@@ -200,6 +200,9 @@ export const resources = {
           'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen, oder lass sie diesen Code scannen.',
         fundYourSafe:
           'Oder funde deine Wallet mit mindestens einem xDai. Das ist deine Safe Adresse, wenn sie mit mindestens einem Euro gefunded ist, kannst du die Registrierung abschließen.',
+        collectTrustsTitle: 'Sammle drei Trusts!',
+        fundMySafeManually:
+          'Ich weiß was ich tue und möchte meinen Safe selbst funden',
       },
       dashboard: {
         addTrustPlaceholder:
