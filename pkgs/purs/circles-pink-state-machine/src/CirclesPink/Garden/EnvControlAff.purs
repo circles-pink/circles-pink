@@ -9,7 +9,7 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
@@ -32,6 +32,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
+import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import StringStorage (StringStorage)
@@ -340,11 +341,27 @@ env envenv@{ request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
 
-  saveSession :: EnvControl.SaveSession Aff
-  saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
+  -- saveSession :: EnvControl.SaveSession Aff
+  -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
 
-  restoreSession :: EnvControl.RestoreSession String Aff
-  restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+  -- restoreSession :: EnvControl.RestoreSession String Aff
+  -- restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+
+  privateKeyStore :: String
+  privateKeyStore = "session"
+
+  saveSession :: EnvControl.SaveSession Aff
+  saveSession privKey = do
+    gundb <- liftEffect $ offline
+    _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
+    pure unit
+
+  restoreSession :: EnvControl.RestoreSession Aff
+  restoreSession = do
+    gundb <- lift $ liftEffect $ offline
+    result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
+    resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
+    pure resultPk.privKey
 
   getBalance :: EnvControl.GetBalance Aff
   getBalance privKey safeAddress = do

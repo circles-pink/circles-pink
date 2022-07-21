@@ -135,7 +135,7 @@ type ErrLandingStateResolved = Variant
   , errInvalidUrl :: String
   )
 
-type ErrLandingState = EnvControl.ErrRestoreSession String
+type ErrLandingState = EnvControl.ErrRestoreSession
   + ErrLoginTask
   + ()
 
