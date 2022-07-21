@@ -25,6 +25,10 @@ export const resources = {
         claim: 'Welcome back',
         subClaim: 'Enter your seedphrase to restore your Circles Wallet!',
         magicWordsPlaceholder: 'Your 24 secret words go here...',
+        validation: {
+          invalidMnemonic: 'This private key is not valid.',
+          userNotFound: 'No user found for this private key!',
+        },
       },
       infoGeneral: {
         claim: 'Happy to have you here!',
@@ -146,6 +150,10 @@ export const resources = {
         subClaim:
           'Gib hier deinen privaten Schlüssel ein, um deine Circles Wallet wiederherzustellen. Dein privater Schlüssel besteht aus 24 Worten, durch Leerzeichen getrennt.',
         magicWordsPlaceholder: 'Deine 24 geheimen Worte...',
+        validation: {
+          invalidMnemonic: 'Bitte prüfe deinen Privaten Schlüssel!',
+          userNotFound: 'Zu diesem Schlüssel existiert kein:e User:in.',
+        },
       },
       infoGeneral: {
         claim: 'Schön, dass du dabei bist!',
