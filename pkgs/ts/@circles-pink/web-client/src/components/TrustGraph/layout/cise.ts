@@ -1,3 +1,5 @@
+import { getIdentifier } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+
 export const cise = {
   // -------- Mandatory parameters --------
   name: 'cise',
@@ -15,7 +17,7 @@ export const cise = {
   //    ['n5','n6']                                         }
   //    ['n7', 'n8', 'n9', 'n10'] ]
   clusters: function (node: any) {
-    return node.data.id;
+    return node._private.data.label.substring(0, 1).charCodeAt(0);
   },
 
   // -------- Optional parameters --------
