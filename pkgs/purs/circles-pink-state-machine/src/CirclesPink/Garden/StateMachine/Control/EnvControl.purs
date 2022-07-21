@@ -197,9 +197,9 @@ type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + r
 type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
 
 -- | Save Session
-type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
+-- type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
 
-type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
+-- type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
 -- | Restore Session
 type RequestPath = Array String
@@ -208,9 +208,23 @@ type ErrReadStorage r = (errReadStorage :: RequestPath | r)
 
 type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
-type ErrRestoreSession k r = ErrNoStorage + ErrStorageGetItem k + r
+-- type ErrRestoreSession k r = ErrNoStorage + ErrStorageGetItem k + r
 
-type RestoreSession k m = forall r. ExceptV (ErrRestoreSession k + r) m PrivateKey
+-- type RestoreSession k m = forall r. ExceptV (ErrRestoreSession k + r) m PrivateKey
+
+
+-- | Save Session
+type ErrSaveSession r = (errSaveSession :: Unit | r)
+
+type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
+
+-- | Restore Session
+
+
+
+type ErrRestoreSession r = ErrReadStorage + ErrDecode + r
+
+type RestoreSession m = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
 
 --------------------------------------------------------------------------------
 type ErrGetBalance r = ErrNative + ErrInvalidUrl + r
@@ -320,7 +334,7 @@ type EnvControl m =
   , addTrustConnection :: AddTrustConnection m
   , removeTrustConnection :: RemoveTrustConnection m
   , saveSession :: SaveSession m
-  , restoreSession :: RestoreSession String m
+  , restoreSession :: RestoreSession m
   , getBalance :: GetBalance m
   , checkUBIPayout :: CheckUBIPayout m
   , requestUBIPayout :: RequestUBIPayout m

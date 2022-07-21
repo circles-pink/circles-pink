@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Garden.StateMachine.Control.Common (TaskReturn)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (StorageType, UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State.Login (LoginState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Tuple.Nested (type (/\))
@@ -24,9 +24,9 @@ type ErrLoginStateResolved = Variant
   , errNative :: NativeError
   , errUserNotFound :: UserNotFoundError
   , errInvalidUrl :: String
+  , errSaveSession :: Unit
   , errInvalidMnemonic :: Unit
   , errParseAddress :: String
-  , errNoStorage :: StorageType
   )
 
 defaultView :: LoginState -> DefaultView
