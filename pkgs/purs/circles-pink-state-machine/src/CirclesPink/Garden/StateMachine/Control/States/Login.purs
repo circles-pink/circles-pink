@@ -10,7 +10,6 @@ import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (except, lift, runExceptT)
 import Data.Either (note)
 import Data.Maybe (Maybe(..))
-import Data.Tuple (fst)
 import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
 import RemoteData (_loading, _notAsked)
@@ -40,18 +39,12 @@ login env =
               mnemonic <- getMnemonicFromString st.magicWords
                 # note (inj (Proxy :: _ "errInvalidMnemonic") unit)
                 # except
-
               let privKey = mnemonicToKey mnemonic
               taskReturn <- loginTask env privKey
               _ <- env.saveSession privKey
               pure (taskReturn /\ privKey)
           )
-            #
-              ( \x -> do
-                  result <- x
-                  _ <- subscribeRemoteReport env (\r -> set \st' -> S._login st' { loginResult = r }) (map fst x) 0
-                  pure result
-              )
+            # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._login st' { loginResult = r }) x 0)
             # dropError
         if safeStatus.isCreated && safeStatus.isDeployed then
           lift $ set \_ -> S.initDashboard { user, privKey }
