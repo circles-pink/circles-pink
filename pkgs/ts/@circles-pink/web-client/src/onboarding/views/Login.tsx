@@ -1,20 +1,21 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useState } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import { Button, Input } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { LoginState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login';
+import {
+  LoginState,
+  LoginStateLoginResult,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login';
+import { ErrLoginStateResolved } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
-import { RemoteData } from '@circles-pink/state-machine/output/RemoteData';
-import { ButtonState } from '../../components/forms/Button';
 import { mapResult } from '../utils/mapResult';
-import { TwoButtonRow } from '../../components/helper';
-import tw from 'twin.macro';
+import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
 type LoginProps = {
@@ -42,15 +43,24 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
       }
       interaction={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <Input
-            autoFocus
-            // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
-            type="password"
-            value={state.magicWords}
-            placeholder={t('login.magicWordsPlaceholder')}
-            onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
-            onKeyPress={e => e.key === 'Enter' && act(A._login(A._login(unit)))}
-          />
+          <>
+            <Input
+              autoFocus
+              // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
+              type="password"
+              value={state.magicWords}
+              placeholder={t('login.magicWordsPlaceholder')}
+              onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
+              onKeyPress={e =>
+                e.key === 'Enter' && act(A._login(A._login(unit)))
+              }
+            />
+            {mapStatusMessage(state.loginResult) !== '' && (
+              <StatusContainer>
+                <Status>{mapStatusMessage(state.loginResult)}</Status>
+              </StatusContainer>
+            )}
+          </>
         </FadeIn>
       }
       control={
@@ -77,4 +87,27 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
       debug={<StateMachineDebugger state={state} />}
     />
   );
+};
+
+// -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const mapStatusMessage = (loginResult: LoginStateLoginResult) => {
+  switch (loginResult.type) {
+    case 'loading':
+      return '';
+    case 'success':
+      return '';
+    case 'failure': {
+      switch ((loginResult.value.error as ErrLoginStateResolved).type) {
+        case 'errInvalidMnemonic':
+          return t('login.validation.invalidMnemonic');
+        case 'errUserNotFound':
+          return t('login.validation.userNotFound');
+      }
+    }
+    case 'notAsked':
+      return '';
+  }
 };
