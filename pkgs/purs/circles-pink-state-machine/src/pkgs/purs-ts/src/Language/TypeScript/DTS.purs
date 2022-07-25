@@ -14,7 +14,9 @@ import Prelude
 import Prim hiding (Row, Type)
 
 import Data.Maybe (Maybe)
+import Data.Set (Set)
 import Data.Tuple.Nested (type (/\))
+import Prim as P
 
 newtype Name = Name String
 
@@ -25,28 +27,28 @@ data QualName = QualName (Maybe String) String
 
 newtype Path = Path String
 
-data Type a
+data Type
   = TypeNull
   | TypeString
   | TypeNumber
   | TypeBoolean
-  | TypeArray (Type a)
-  | TypeRecord (Array (Name /\ Type a))
-  | TypeFunction a (Array (Name /\ Type a)) (Type a)
+  | TypeArray Type
+  | TypeRecord (Array (Name /\ Type))
+  | TypeFunction (Set Name) (Array (Name /\ Type)) Type
   | TypeVar Name
-  | TypeConstructor QualName (Array (Type a))
+  | TypeConstructor QualName (Array Type)
   | TypeOpaque QualName (Array Name)
-  | TypeUnion (Array (Type a))
+  | TypeUnion (Array Type)
   | TypeTLString String
 
-data Declaration a
-  = DeclTypeDef Name a (Type a)
-  | DeclValueDef Name (Type a)
+data Declaration
+  = DeclTypeDef Name (Set Name) Type
+  | DeclValueDef Name Type
 
 data Import = Import Name Path
 
-data Module a = Module ModuleHead (ModuleBody a)
+data Module = Module ModuleHead ModuleBody
 
 newtype ModuleHead = ModuleHead (Array Import)
 
-newtype ModuleBody a = ModuleBody (Array (Declaration a))
+newtype ModuleBody = ModuleBody (Array Declaration)

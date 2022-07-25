@@ -5,6 +5,7 @@ import Prelude
 import Data.Array as A
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
+import Data.Set as S
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
@@ -14,7 +15,7 @@ import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
 class ToTsType a where
-  toTsType :: a -> DTS.Type Unit
+  toTsType :: a -> DTS.Type
 
 instance toTsTypeNumber :: ToTsType Number where
   toTsType _ = DTS.TypeNumber
@@ -32,7 +33,7 @@ instance toTsTypeRecord :: (RowToList r rl, GenRecord rl) => ToTsType (Record r)
   toTsType _ = DTS.TypeRecord $ genRecord (Proxy :: _ rl)
 
 instance toTsTypeFunction :: (ToTsType a, ToTsType b) => ToTsType (a -> b) where
-  toTsType _ = DTS.TypeFunction unit
+  toTsType _ = DTS.TypeFunction S.empty
     [ (DTS.Name "_") /\ toTsType (undefined :: a) ]
     (toTsType (undefined :: b))
 
@@ -59,7 +60,7 @@ instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
 
 class GenRecord :: RowList Type -> Constraint
 class GenRecord rl where
-  genRecord :: Proxy rl -> (Array (DTS.Name /\ DTS.Type Unit))
+  genRecord :: Proxy rl -> (Array (DTS.Name /\ DTS.Type))
 
 instance genRecordNil :: GenRecord Nil where
   genRecord _ = []
@@ -73,7 +74,7 @@ instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (C
 
 class GenVariant :: RowList Type -> Constraint
 class GenVariant rl where
-  genVariant :: Proxy rl -> (Array (DTS.Type Unit))
+  genVariant :: Proxy rl -> (Array DTS.Type)
 
 instance genVariantNil :: GenVariant Nil where
   genVariant _ = []
@@ -94,7 +95,7 @@ instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant
 --    toToTsRef :: a -> DTSTypeRef
 
 class ToTsDef a where
-  toTsDef :: a -> DTS.Type Unit
+  toTsDef :: a -> DTS.Type
 
 instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
   toTsDef _ = toTsDef (undefined :: a)

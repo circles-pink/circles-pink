@@ -31,18 +31,18 @@ import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 class Clean a where
   clean :: String -> a -> a
 
-instance cleanModule' :: Clean (DTS.Module a) where
+instance cleanModule' :: Clean DTS.Module where
   clean m (DTS.Module mh mb) = DTS.Module mh $ clean m mb
 
-instance cleanModuleBody :: Clean (DTS.ModuleBody a) where
+instance cleanModuleBody :: Clean DTS.ModuleBody where
   clean m (DTS.ModuleBody ds) = DTS.ModuleBody $ clean m <$> ds
 
-instance cleanDeclaration :: Clean (DTS.Declaration a) where
+instance cleanDeclaration :: Clean DTS.Declaration where
   clean m x = case x of
     DTS.DeclTypeDef x' y t -> DTS.DeclTypeDef x' y $ clean m t
     DTS.DeclValueDef x' t -> DTS.DeclValueDef x' $ clean m t
 
-instance cleanType :: Clean (DTS.Type a) where
+instance cleanType :: Clean DTS.Type where
   clean m = case _ of
     DTS.TypeNull -> DTS.TypeNull
     DTS.TypeString -> DTS.TypeString
@@ -61,7 +61,7 @@ instance cleanQualName :: Clean DTS.QualName where
   clean m (DTS.QualName (Just x) y) | x == m = DTS.QualName Nothing y
   clean _ all = all
 
-cleanModule :: forall a. String -> DTS.Module a -> DTS.Module a
+cleanModule :: String -> DTS.Module -> DTS.Module
 cleanModule = clean
 
 --------------------------------------------------------------------------------
@@ -69,10 +69,10 @@ cleanModule = clean
 -- resolveModule :: DTS.Module Unit -> DTS.Module (Set DTS.Name)
 -- resolveModule (DTS.Module mh mb) = DTS.Module mh $ resolveModuleBody mb
 
-resolveModuleBody :: DTS.ModuleBody Unit -> DTS.ModuleBody (Set DTS.Name)
+resolveModuleBody :: DTS.ModuleBody -> DTS.ModuleBody
 resolveModuleBody (DTS.ModuleBody xs) = DTS.ModuleBody $ resolveDeclaration <$> xs
 
-resolveDeclaration :: DTS.Declaration Unit -> DTS.Declaration (Set DTS.Name)
+resolveDeclaration :: DTS.Declaration -> DTS.Declaration
 resolveDeclaration = case _ of
   DeclTypeDef x _ y ->
     let
@@ -85,10 +85,10 @@ resolveDeclaration = case _ of
     in
       DeclValueDef x y'
 
-resolveType :: DTS.Type Unit -> DTS.Type (Set DTS.Name) /\ TypeScope
+resolveType :: DTS.Type -> DTS.Type /\ TypeScope
 resolveType x = runState (resolveType' x) mempty
 
-resolveType' :: DTS.Type Unit -> State TypeScope (DTS.Type (Set DTS.Name))
+resolveType' :: DTS.Type -> State TypeScope DTS.Type
 resolveType' = case _ of
   DTS.TypeNull -> pure DTS.TypeNull
   DTS.TypeString -> pure DTS.TypeString
@@ -115,7 +115,7 @@ resolveType' = case _ of
   combine :: forall a b f. Functor f => Foldable f => Monoid b => f (a /\ b) -> (f a) /\ b
   combine xs = map fst xs /\ (fold $ map snd xs)
 
-  resolveFunction :: Array (DTS.Name /\ DTS.Type Unit) -> DTS.Type Unit -> State TypeScope (DTS.Type (Set DTS.Name))
+  resolveFunction :: Array (DTS.Name /\ DTS.Type) -> DTS.Type -> State TypeScope DTS.Type
   resolveFunction xs r = do
     st <- get
 
@@ -138,7 +138,7 @@ resolveType' = case _ of
 
 --------------------------------------------------------------------------------
 
-deleteQuant :: Set DTS.Name -> DTS.Type (Set DTS.Name) -> DTS.Type (Set DTS.Name)
+deleteQuant :: Set DTS.Name -> DTS.Type -> DTS.Type
 deleteQuant s = case _ of
   DTS.TypeNull -> DTS.TypeNull
   DTS.TypeString -> DTS.TypeString
@@ -185,18 +185,18 @@ pursModule x = modToAlias x /\ ("../" <> x) /\ x
 modToAlias :: String -> String
 modToAlias = St.replace (Pattern ".") (Replacement "_")
 
-val :: forall a. ToTsType a => a -> String -> DTS.Declaration Unit
+val :: forall a. ToTsType a => a -> String -> DTS.Declaration
 val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
 
-typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration Unit
-typ x n = DTS.DeclTypeDef (DTS.Name n) unit $ toTsDef x
+typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
+typ x n = DTS.DeclTypeDef (DTS.Name n) S.empty $ toTsDef x
 
-defineModules :: Map String (String /\ String) -> Array (String /\ Array (DTS.Declaration Unit)) -> Array (String /\ DTS.Module (Set DTS.Name))
+defineModules :: Map String (String /\ String) -> Array (String /\ Array DTS.Declaration) -> Array (String /\ DTS.Module)
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
   where
   mm' = xs <#> fst >>> pursModule # M.fromFoldable # M.union mm
 
-defineModule :: Map String (String /\ String) -> String -> Array (DTS.Declaration Unit) -> DTS.Module (Set DTS.Name)
+defineModule :: Map String (String /\ String) -> String -> Array DTS.Declaration -> DTS.Module
 defineModule mm k xs =
   DTS.Module moduleHead moduleBody
     # cleanModule alias
@@ -216,12 +216,12 @@ defineModule mm k xs =
 
   moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
 
-declToRefs :: forall a. DTS.Declaration a -> Array DTS.QualName
+declToRefs :: DTS.Declaration -> Array DTS.QualName
 declToRefs = case _ of
   DTS.DeclTypeDef _ _ t -> typeToRefs t
   DTS.DeclValueDef _ t -> typeToRefs t
 
-typeToRefs :: forall a. DTS.Type a -> Array DTS.QualName
+typeToRefs :: DTS.Type -> Array DTS.QualName
 typeToRefs = case _ of
   DTS.TypeNull -> []
   DTS.TypeString -> []

@@ -1,7 +1,6 @@
 module Language.TypeScript.DTS.Print
   ( printModule
-  )
-  where
+  ) where
 
 import Prelude
 import Prim hiding (Row, Type)
@@ -15,8 +14,7 @@ import Data.String (joinWith)
 import Data.Tuple.Nested ((/\))
 import Language.TypeScript.DTS (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..))
 
-
-printType :: Type (Set Name) -> String
+printType :: Type -> String
 printType = case _ of
   TypeNull -> "null"
   TypeString -> "string"
@@ -48,21 +46,21 @@ printTargs :: Set Name -> String
 printTargs xs | S.size xs == 0 = ""
 printTargs xs = "<" <> joinWith "," (printName <$> S.toUnfoldable xs) <> ">"
 
-printTargs' :: Array (Type (Set Name)) -> String
+printTargs' :: Array Type -> String
 printTargs' xs | A.length xs == 0 = ""
 printTargs' xs = "<" <> joinWith "," (printType <$> xs) <> ">"
 
-printModule :: Module (Set Name) -> String
+printModule :: Module -> String
 printModule (Module mh mb) = fold [ printModuleHead mh, printModuleBody mb ]
 
 printModuleHead :: ModuleHead -> String
 printModuleHead (ModuleHead im) | A.null im = ""
 printModuleHead (ModuleHead im) = (joinWith "\n" $ printImport <$> im) <> "\n\n"
 
-printModuleBody :: ModuleBody (Set Name) -> String
+printModuleBody :: ModuleBody -> String
 printModuleBody (ModuleBody xs) = joinWith "\n\n" $ printDeclaration <$> xs
 
-printDeclaration :: Declaration (Set Name) -> String
+printDeclaration :: Declaration -> String
 printDeclaration = case _ of
   DeclTypeDef n targs t -> "export type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
