@@ -17,7 +17,7 @@ import Type.Proxy (Proxy(..))
 moduleMap :: Map String (String /\ String)
 moduleMap = M.fromFoldable [ pursModule "Data.Maybe" ]
 
-modules :: Array (String /\ Array (DTS.Declaration Unit))
+modules :: Array (String /\ Array DTS.Declaration)
 modules = do
   [ "CirclesPink.GenerateTSD.SampleModule" /\
       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
