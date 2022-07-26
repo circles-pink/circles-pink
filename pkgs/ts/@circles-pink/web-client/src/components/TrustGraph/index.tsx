@@ -37,6 +37,7 @@ import { coseBilkent } from './layout/coseBilkent';
 import { concentric } from './layout/concentric';
 import { JustText } from '../text';
 import { t } from 'i18next';
+import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -44,11 +45,11 @@ import { t } from 'i18next';
 
 const getNode = (
   key: Address,
-  value: UserIdent
+  value: TrustNode
 ): Cytoscape.ElementDefinition => ({
   data: {
     id: addrToString(key),
-    label: getIdentifier(value),
+    label: getIdentifier(value.userIdent),
   },
 });
 
@@ -111,41 +112,41 @@ export const TrustGraph = ({
   useEffect(() => {
     if (!cy) return;
 
-    let loopAnimation1 = (ele: any): any => {
-      const duration = 250 + Math.random() *  50
-      return ele
-        .animation({
-          style:  { opacity: 1, 'background-color': theme.baseColor, width: ele.data('label').length * 12, height: 15}, 
-          duration,
-          easing: 'ease-in-out-sine',
-        })
-        .play()
-        .promise('done')
-        .then(() => {
-          loopAnimation2(ele);
-          console.log('done');
-        });
-    };
+    // let loopAnimation1 = (ele: any): any => {
+    //   const duration = 250 + Math.random() *  50
+    //   return ele
+    //     .animation({
+    //       style:  { opacity: 1, 'background-color': theme.baseColor, width: ele.data('label').length * 12, height: 15}, 
+    //       duration,
+    //       easing: 'ease-in-out-sine',
+    //     })
+    //     .play()
+    //     .promise('done')
+    //     .then(() => {
+    //       loopAnimation2(ele);
+    //       console.log('done');
+    //     });
+    // };
 
-    let loopAnimation2 = (ele: any): any => {
-      const duration = 250 + Math.random() * 50
-      return ele
-        .animation({
-          style: { opacity: 1, 'background-color': theme.lightColor, width: ele.data('label').length * 13, height: 20},
-          duration,
-          easing: 'ease-in-out-sine',
-        })
-        .play()
-        .promise('done')
-        .then(() => {
-          loopAnimation1(ele);
-          console.log('done');
-        });
-    };
+    // let loopAnimation2 = (ele: any): any => {
+    //   const duration = 250 + Math.random() * 50
+    //   return ele
+    //     .animation({
+    //       style: { opacity: 1, 'background-color': theme.lightColor, width: ele.data('label').length * 13, height: 20},
+    //       duration,
+    //       easing: 'ease-in-out-sine',
+    //     })
+    //     .play()
+    //     .promise('done')
+    //     .then(() => {
+    //       loopAnimation1(ele);
+    //       console.log('done');
+    //     });
+    // };
 
     cy.on('tap', 'node', evt => {
       expandTrustNetwork(evt.target.id());
-      loopAnimation1(evt.target);
+      //loopAnimation1(evt.target);
 
       // evt.cy.nodes().animate({
       //   style: {}
