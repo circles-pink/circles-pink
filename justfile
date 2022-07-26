@@ -136,6 +136,11 @@ run-garden_:
 
 generate-tsd:
 	node pkgs/ts/@circles-pink/state-machine/bin/generate-tsd.js --output-dir "{{PURS_OUTPUT}}"
+	prettier --write '{{PURS_OUTPUT}}/Data.IxGraph/index.d.ts'
+	prettier --write '{{PURS_OUTPUT}}/CirclesPink.Data.Address/index.d.ts'
+	prettier --write '{{PURS_OUTPUT}}/CirclesPink.Data.TrustNode/index.d.ts'
+	prettier --write '{{PURS_OUTPUT}}/CirclesPink.Data.TrustConnection/index.d.ts'
+	
 
 purs-docs:
 	LINK=results/purs-docs/result; \

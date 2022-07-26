@@ -5,7 +5,7 @@ import Prelude
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
 import Language.TypeScript.DTS as DTS
-import PursTs.Class (class ToTsDef, class ToTsType, toTsType)
+import CirclesPink.GenerateTSD.Class (class ToTsDef, class ToTsType, toTsType)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
