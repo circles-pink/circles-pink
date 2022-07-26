@@ -1,25 +1,17 @@
 module CirclesPink.GenerateTSD.Modules where
 
-import Prelude
 
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
-import CirclesPink.GenerateTSD.Class (class ToTsDef, toTsDef, toTsType, typ)
-import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleModule
-import Data.ABC (A(..), B(..), C(..))
-import Data.Identity (Identity(..))
+import CirclesPink.GenerateTSD.Class (typ, val)
+import Data.ABC (A, B, C)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
-import Data.Nullable as Data.Nullable
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug.Extra (todo)
 import Language.TypeScript.DTS as DTS
 import PursTs (pursModule)
-import Simple.Data.Maybe (Maybe(..))
-import Simple.Data.Maybe as Simple.Data.Maybe
-import Simple.Data.Number as Simple.Data.Number
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
@@ -34,7 +26,7 @@ modules = do
       [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address" ]
   , "CirclesPink.Data.TrustNode" /\
       [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
-      --, val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
+      , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
       ]
   , "CirclesPink.Data.TrustConnection" /\
       [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
