@@ -3,8 +3,6 @@ module PursTs
   , defineModules
   , getDuplicates
   , pursModule
-  , typ
-  , val
   ) where
 
 import Prelude
@@ -26,7 +24,7 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
-import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
+--import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 
 class Clean a where
   clean :: String -> a -> a
@@ -78,7 +76,7 @@ resolveDeclaration = case _ of
     let
       (y' /\ { floating }) = resolveType y
     in
-      DeclTypeDef x (S.fromFoldable floating) y' -- todo
+      DeclTypeDef x floating y' -- todo
   DeclValueDef x y ->
     let
       (y' /\ _) = resolveType y
@@ -106,7 +104,7 @@ resolveType' = case _ of
 
   resolveOpaque x ns = do
     _ <- modify (\s -> s { floating = ns <> s.floating })
-    pure $ DTS.TypeOpaque x ns
+    pure $  DTS.TypeOpaque x ns
 
   resolveVar n = do
     _ <- modify (\s -> s { floating = A.snoc s.floating n })
@@ -185,11 +183,7 @@ pursModule x = modToAlias x /\ ("../" <> x) /\ x
 modToAlias :: String -> String
 modToAlias = St.replace (Pattern ".") (Replacement "_")
 
-val :: forall a. ToTsType a => a -> String -> DTS.Declaration
-val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
 
-typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
-typ x n = DTS.DeclTypeDef (DTS.Name n) S.empty $ toTsDef x
 
 defineModules :: Map String (String /\ String) -> Array (String /\ Array DTS.Declaration) -> Array (String /\ DTS.Module)
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs

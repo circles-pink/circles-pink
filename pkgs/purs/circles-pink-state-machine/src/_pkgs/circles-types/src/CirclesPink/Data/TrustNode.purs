@@ -10,9 +10,11 @@ import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
 import FpTs.Class (class FpTs)
 import Type.Proxy (Proxy(..))
+import Data.Newtype as NT
 
+type TrustNode' = { userIdent :: UserIdent }
 
-newtype TrustNode = TrustNode { userIdent :: UserIdent }
+newtype TrustNode = TrustNode TrustNode'
 
 derive instance newtypeTrusNode :: Newtype TrustNode _
 
@@ -22,7 +24,10 @@ derive newtype instance eqTrustNode :: Eq TrustNode
 
 derive newtype instance ordTrustNode :: Ord TrustNode
 
-instance fpTsTrustNode ::  FpTs TrustNode TrustNode where
+unwrap :: TrustNode -> TrustNode'
+unwrap = NT.unwrap
+
+instance fpTsTrustNode :: FpTs TrustNode TrustNode where
   fromFpTs = identity
   toFpTs = identity
 
