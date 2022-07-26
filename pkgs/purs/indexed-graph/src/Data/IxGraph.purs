@@ -16,6 +16,7 @@ module Data.IxGraph
   , insertNodes
   , lookupEdge
   , lookupNode
+  , modifyNode
   , neighborEdgesWithNodes
   , neighborNodes
   , outgoingEdges
@@ -25,7 +26,8 @@ module Data.IxGraph
   , toUnfoldables
   , updateEdge
   , updateNode
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -34,7 +36,7 @@ import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec)
 import Data.Graph as G
-import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrInsertEdge)
+import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrModifyNode)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -69,6 +71,9 @@ lookupNode id (IxGraph graph) = G.lookupNode id graph
 
 updateNode :: forall r id e n. Ord id => Indexed id n => n -> IxGraph id e n -> EitherV (ErrUpdateNode id r) (IxGraph id e n)
 updateNode n (IxGraph g) = IxGraph <$> G.updateNode (getIndex n) n g
+
+modifyNode :: forall r id e n. Ord id => Indexed id n => id -> (n -> n) -> IxGraph id e n -> EitherV (ErrModifyNode id r) (IxGraph id e n)
+modifyNode id f (IxGraph g) = IxGraph <$> G.modifyNode id f g 
 
 deleteNode :: forall r id e n. Ord id => id -> IxGraph id e n -> EitherV (ErrDeleteNode id r) (IxGraph id e n)
 deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g

@@ -1,6 +1,5 @@
 module CirclesPink.GenerateTSD.Modules where
 
-import Prelude
 
 import CirclesPink.GenerateTSD.SampleModule as CirclesPink.GenerateTSD.SampleModule
 import Data.ABC (A, B)

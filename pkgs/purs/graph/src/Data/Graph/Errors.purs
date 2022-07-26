@@ -103,6 +103,8 @@ type ErrNeighborIds id r = ErrOutgoingIds id + ErrIncomingIds id + r
 
 type ErrNeighborEdgesWithNodes id r = ErrIncomingEdgesWithNodes id + ErrOutgoingEdgesWithNodes id + r
 
+type ErrModifyNode id r = NodeNotFound id + r
+
 type ErrInsertNode :: forall k. k -> k
 type ErrInsertNode r = r
 

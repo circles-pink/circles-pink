@@ -28,17 +28,20 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , UserSearchResult
   , _dashboard
   , initDashboard
-  ) where
+  , module Exp
+  )
+  where
 
 import Prelude
 
-import CirclesCore (ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, User, ErrParseAddress)
+import CirclesCore (ErrInvalidUrl, ErrNative, ErrService, SafeStatus, User, ErrParseAddress)
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustConnection (TrustConnection)
-import CirclesPink.Data.UserIdent (UserIdent)
+import CirclesPink.Data.TrustNode (TrustNode)
+import CirclesPink.Data.TrustNode (TrustNode) as Exp
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
 import Data.IxGraph (IxGraph)
@@ -76,7 +79,7 @@ type DashboardState =
 
 type Trusts = Map Address Trust
 
-type CirclesGraph = IxGraph Address TrustConnection UserIdent
+type CirclesGraph = IxGraph Address TrustConnection TrustNode
 
 --------------------------------------------------------------------------------
 
@@ -134,7 +137,7 @@ type ErrUserSearch r = EnvControl.ErrUserSearch + r
 --------------------------------------------------------------------------------
 -- TrustGetTrusts
 --------------------------------------------------------------------------------
-type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
+type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array CC.TrustNode)
 
 type ErrTrustGetTrusts r = EnvControl.ErrAddTrustConnection + ErrParseAddress + r
 
