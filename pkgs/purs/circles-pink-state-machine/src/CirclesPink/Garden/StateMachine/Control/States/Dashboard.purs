@@ -10,6 +10,8 @@ import CirclesCore (TrustNode)
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
+import CirclesPink.Data.TrustNode (initTrustNode)
+import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
@@ -18,7 +20,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySaf
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
+import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph, TrustNode)
 import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)
@@ -33,6 +35,7 @@ import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
+import Data.Lens (set)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -257,7 +260,7 @@ dashboard env@{ trustGetNetwork } =
                   in
                     case eitherNode, eitherEdge of
                       Left _, Left _ -> st'.trusts
-                        # G.addNode u
+                        # G.addNode (initTrustNode u)
                         >>= G.addEdge (TrustConnection (ownAddress ~ targetAddress) (next initUntrusted))
                       Right _, Left _ -> st'.trusts
                         # G.addEdge (TrustConnection (ownAddress ~ targetAddress) (next initUntrusted))
@@ -414,9 +417,10 @@ dashboard env@{ trustGetNetwork } =
           # dropError
         pure unit
 
+
   syncTrusts set st centerAddress i = do
 
-    trustNodes :: Map Address TrustNode <-
+    trustNodes :: Map Address CC.TrustNode <-
       trustGetNetwork st.privKey centerAddress
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
@@ -451,7 +455,7 @@ dashboard env@{ trustGetNetwork } =
                   # either (const M.empty) identity
 
               st'.trusts
-                # (G.insertNode (UserIdent $ Right $ st'.user))
+                # (G.insertNode (initTrustNode $ UserIdent $ Right $ st'.user))
                 >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
                 >>= (\g -> foldM (getIncomingEdge centerAddress) g $ mapsToThese trustNodes incomingEdges)
                 >>= (\g -> foldM (getOutgoingEdge centerAddress) g $ mapsToThese trustNodes outgoingEdges)
@@ -463,14 +467,14 @@ dashboard env@{ trustGetNetwork } =
                 }
               Left e -> unsafePartial $ crashWith $ GE.printError e
 
-  getNode :: CirclesGraph -> These UserIdent UserIdent -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getNode :: CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode g =
     case _ of
-      This uiApi -> G.insertNode uiApi g -- use addNode
+      This uiApi -> g # G.insertNode (TN.initTrustNode uiApi) -- use addNode
       That _ -> Right g
-      Both uiApi _ -> G.updateNode uiApi g
+      Both uiApi _ -> G.modifyNode (getIndex uiApi) (set TN.userIdent uiApi) g
 
-  getOutgoingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getOutgoingEdge :: Address -> CirclesGraph -> These CC.TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge centerAddress g = case _ of
     This tn | tn.isIncoming -> G.addEdge (TrustConnection (centerAddress ~ wrap tn.safeAddress) initTrusted) g
     This _ -> Right g
@@ -480,7 +484,7 @@ dashboard env@{ trustGetNetwork } =
     Both tn tc@(TrustConnection _ ts) | not tn.isIncoming && isPendingUntrust ts -> G.deleteEdge (getIndex tc) g
     Both _ _ -> Right g
 
-  getIncomingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getIncomingEdge :: Address -> CirclesGraph -> These CC.TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getIncomingEdge centerAddress g = case _ of
     This tn | tn.isOutgoing -> G.addEdge (TrustConnection (wrap tn.safeAddress ~ centerAddress) initTrusted) g
     This _ -> Right g
