@@ -30,7 +30,9 @@ import {
   mdiLan,
   mdiMagnify,
 } from '@mdi/js';
-import { TrustUserList } from '../../../components/TrustUserList';
+import {
+  TrustUserList,
+} from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
@@ -59,6 +61,7 @@ import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
 import { UserConfig } from '../..';
 import { LightColorFrame } from '../../../components/layout';
+import { Frame } from '../../../components/Frame';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -418,21 +421,23 @@ export const Dashboard = ({
         <>
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
-                title={t('dashboard.trustNetworkTitle')}
-                graph={state.graph}
-                ownAddress={stateRaw.user.safeAddress}
-                theme={theme}
-                icon={mdiLan}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                trustRemoveResult={state.trustRemoveResult}
-              />
+              <Frame theme={theme}>
+                <TrustUserList
+                // title={t('dashboard.trustNetworkTitle')}
+                // graph={state.graph}
+                // ownAddress={stateRaw.user.safeAddress}
+                // theme={theme}
+                // icon={mdiLan}
+                // toggleOverlay={toggleOverlay}
+                // setOverwriteTo={setOverwriteTo}
+                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // trustAddResult={state.trustAddResult}
+                // removeTrust={to =>
+                //   act(A._dashboard(A._removeTrustConnection(to)))
+                // }
+                // trustRemoveResult={state.trustRemoveResult}
+                />
+              </Frame>
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <UserSearch
@@ -464,7 +469,7 @@ export const Dashboard = ({
           {cfg?.voucherShopEnabled && (
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TopMargin>
-                <LightColorFrame
+                <Frame
                   theme={theme}
                   title={t('dashboard.voucherShop.shopTitle')}
                   icon={mdiGiftOutline}
@@ -505,17 +510,14 @@ export const Dashboard = ({
                     </JustifyStartCenter>
                   </Margin>
                 </LightColorFrame>
+                </Frame>
               </TopMargin>
             </FadeIn>
           )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
-              <LightColorFrame
-                theme={theme}
-                title="Trust Graph"
-                icon={mdiGraphOutline}
-              >
+              <Frame theme={theme} title="Trust Graph" icon={mdiGraphOutline}>
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>
@@ -523,7 +525,7 @@ export const Dashboard = ({
                   }
                   theme={theme}
                 />
-              </LightColorFrame>
+              </Frame>
             </TopMargin>
           </FadeIn>
         </>
