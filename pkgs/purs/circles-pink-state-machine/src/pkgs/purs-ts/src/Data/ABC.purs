@@ -1,9 +1,5 @@
 module Data.ABC where
 
-import Prelude
-
-import Language.TypeScript.DTS as DTS
-
 data A = A
 
 data B = B
