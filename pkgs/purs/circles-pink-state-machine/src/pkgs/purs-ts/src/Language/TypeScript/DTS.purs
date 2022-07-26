@@ -42,7 +42,7 @@ data Type
   | TypeTLString String
 
 data Declaration
-  = DeclTypeDef Name (Set Name) Type
+  = DeclTypeDef Name (Array Name) Type
   | DeclValueDef Name Type
 
 data Import = Import Name Path
