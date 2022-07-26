@@ -31,7 +31,9 @@ import {
   mdiLogout,
   mdiMagnify,
 } from '@mdi/js';
-import { LightColorFrame, TrustUserList } from '../../components/TrustUserList';
+import {
+  /*LightColorFrame,*/ TrustUserList,
+} from '../../components/TrustUserList';
 import { Overlay } from '../../components/Overlay';
 import { JustifyBetweenCenter, TwoButtonRow } from '../../components/helper';
 import { Send, SendProps } from './dashboard/Send';
@@ -50,6 +52,7 @@ import {
   isPendingUntrust,
 } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
 import { fromFpTsTuple, toFpTsTuple } from '../../utils/fpTs';
+import { Frame } from '../../components/Frame';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -342,54 +345,54 @@ export const Dashboard = ({
         <>
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
-                title={t('dashboard.trustNetworkTitle')}
-                graph={state.graph}
-                ownAddress={stateRaw.user.safeAddress}
-                theme={theme}
-                icon={mdiLan}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                trustRemoveResult={state.trustRemoveResult}
-              />
+              <Frame theme={theme}>
+                <TrustUserList
+                // title={t('dashboard.trustNetworkTitle')}
+                // graph={state.graph}
+                // ownAddress={stateRaw.user.safeAddress}
+                // theme={theme}
+                // icon={mdiLan}
+                // toggleOverlay={toggleOverlay}
+                // setOverwriteTo={setOverwriteTo}
+                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // trustAddResult={state.trustAddResult}
+                // removeTrust={to =>
+                //   act(A._dashboard(A._removeTrustConnection(to)))
+                // }
+                // trustRemoveResult={state.trustRemoveResult}
+                />
+              </Frame>
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <UserSearch
-                title={t('dashboard.exploreTitle')}
-                trusts={searchResult}
-                theme={theme}
-                icon={mdiMagnify}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                actionRow={
-                  <JustifyBetweenCenter>
-                    <Input
-                      type="text"
-                      value={search}
-                      placeholder={t('dashboard.userSearchPlaceholder')}
-                      onChange={e => setSearch(e.target.value)}
-                    />
-                  </JustifyBetweenCenter>
-                }
-              />
+              <Frame theme={theme}>
+                <UserSearch
+                // title={t('dashboard.exploreTitle')}
+                // trusts={searchResult}
+                // theme={theme}
+                // icon={mdiMagnify}
+                // toggleOverlay={toggleOverlay}
+                // setOverwriteTo={setOverwriteTo}
+                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // removeTrust={to =>
+                //   act(A._dashboard(A._removeTrustConnection(to)))
+                // }
+                // actionRow={
+                //   <JustifyBetweenCenter>
+                //     <Input
+                //       type="text"
+                //       value={search}
+                //       placeholder={t('dashboard.userSearchPlaceholder')}
+                //       onChange={e => setSearch(e.target.value)}
+                //     />
+                //   </JustifyBetweenCenter>
+                // }
+                />
+              </Frame>
             </FadeIn>
           </MainContent>
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
-              <LightColorFrame
-                theme={theme}
-                title="Trust Graph"
-                icon={mdiGraphOutline}
-              >
+              <Frame theme={theme} title="Trust Graph" icon={mdiGraphOutline}>
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>
@@ -397,7 +400,7 @@ export const Dashboard = ({
                   }
                   theme={theme}
                 />
-              </LightColorFrame>
+              </Frame>
             </TopMargin>
           </FadeIn>
         </>
