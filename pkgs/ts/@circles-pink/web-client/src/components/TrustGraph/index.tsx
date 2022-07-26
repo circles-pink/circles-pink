@@ -21,6 +21,7 @@ import { Theme } from '../../context/theme';
 
 import { ButtonRow, Margin } from '../helper';
 import { Button } from '../forms';
+import * as TN from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode"
 
 // -----------------------------------------------------------------------------
 // Layouts
@@ -49,7 +50,7 @@ const getNode = (
 ): Cytoscape.ElementDefinition => ({
   data: {
     id: addrToString(key),
-    label: getIdentifier(value.userIdent),
+    label: getIdentifier(TN.unwrap(value).userIdent),
   },
 });
 
