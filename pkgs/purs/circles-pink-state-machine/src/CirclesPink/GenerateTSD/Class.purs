@@ -8,6 +8,7 @@ import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
+import Data.Either as Data.Either
 import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
@@ -53,6 +54,11 @@ instance toTsTypeMaybe :: ToTsType a => ToTsType (Maybe a) where
   toTsType _ = DTS.TypeConstructor
     (DTS.QualName (Just "Data_Maybe") "Maybe")
     [ toTsType (Proxy :: _ a) ]
+
+instance toTsType_Data_Either_Either :: (ToTsType a, ToTsType b) => ToTsType (Data.Either.Either a b) where
+  toTsType _ = DTS.TypeConstructor
+    (DTS.QualName (Just "Data_Either") "Either")
+    [ toTsType (Proxy :: _ a), toTsType (Proxy :: _ b) ]
 
 instance toTsTypeUnit :: ToTsType Unit where
   toTsType _ = DTS.TypeConstructor
@@ -151,6 +157,9 @@ instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
 
 instance toTsTypeDefMaybe :: ToTsDef (Maybe a) where
   toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Maybe") "Maybe") $ DTS.Name <$> [ "A" ]
+
+instance toTsTypeDefEither :: ToTsDef (Data.Either.Either a b) where
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Either") "Either") $ DTS.Name <$> [ "A", "B" ]
 
 instance toTsTypeDefUnit :: ToTsDef Unit where
   toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Unit") "Unit") []
