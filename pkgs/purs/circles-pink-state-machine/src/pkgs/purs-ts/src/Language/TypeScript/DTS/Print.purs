@@ -8,7 +8,6 @@ import Prim hiding (Row, Type)
 import Data.Array as A
 import Data.Foldable (fold)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set)
 import Data.Set as S
 import Data.String (joinWith)
 import Data.Tuple.Nested ((/\))
@@ -22,7 +21,7 @@ printType = case _ of
   TypeBoolean -> "boolean"
   TypeArray t -> "ReadonlyArray<" <> printType t <> ">"
   TypeRecord xs -> "Readonly<{ " <> printRecEntries xs <> " }>"
-  TypeFunction targs args b -> printTargs targs <> printFnHead args <> printType b
+  TypeFunction targs args b -> printTargs (S.toUnfoldable targs) <> printFnHead args <> printType b
   TypeVar n -> printName n
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
   TypeOpaque id targs -> "Readonly<{ readonly 'Opaque:" <> printQualName id <> "' : unique symbol; args : " <> printTargsArray targs <> "}>"
@@ -42,9 +41,9 @@ printType = case _ of
 
   printTargsArray xs = "[" <> joinWith "," (printName <$> xs) <> "]"
 
-printTargs :: Set Name -> String
-printTargs xs | S.size xs == 0 = ""
-printTargs xs = "<" <> joinWith "," (printName <$> S.toUnfoldable xs) <> ">"
+printTargs :: Array Name -> String
+printTargs xs | A.length xs == 0 = ""
+printTargs xs = "<" <> joinWith "," (printName <$> xs) <> ">"
 
 printTargs' :: Array Type -> String
 printTargs' xs | A.length xs == 0 = ""

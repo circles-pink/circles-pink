@@ -348,7 +348,7 @@ export const Dashboard = ({
               <Frame theme={theme}>
                 <TrustUserList
                 // title={t('dashboard.trustNetworkTitle')}
-                // graph={state.graph}
+                graph={stateRaw.trusts}
                 // ownAddress={stateRaw.user.safeAddress}
                 // theme={theme}
                 // icon={mdiLan}

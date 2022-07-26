@@ -3,14 +3,12 @@ module Data.ABC where
 import Prelude
 
 import Language.TypeScript.DTS as DTS
-import PursTs.Class (class ToTsType)
 
-data A
+data A = A
 
+data B = B
 
-data B
-
-data C
+data C = C
 
 data D
 
@@ -57,24 +55,4 @@ data X
 data Y
 
 data Z
-
-
-instance toTsTypeA :: ToTsType A where
-  toTsType _ = DTS.TypeVar $ DTS.Name "A"
-
-instance toTsTypeB :: ToTsType B where
-  toTsType _ = DTS.TypeVar $ DTS.Name "B"
-
-instance toTsTypeC :: ToTsType C where
-  toTsType _ = DTS.TypeVar $ DTS.Name "C"
-
-instance toTsTypeD :: ToTsType D where
-  toTsType _ = DTS.TypeVar $ DTS.Name "D"
-
-instance toTsTypeE :: ToTsType E where
-  toTsType _ = DTS.TypeVar $ DTS.Name "E"
-
-
-instance toTsTypeZ :: ToTsType Z where
-  toTsType _ = DTS.TypeVar $ DTS.Name "Z"
 

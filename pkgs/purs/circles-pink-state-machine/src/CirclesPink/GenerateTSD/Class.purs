@@ -1,8 +1,13 @@
-module PursTs.Class where
+module CirclesPink.GenerateTSD.Class where
 
 import Prelude
 
+import CirclesPink.Data.Address as CirclesPink.Data.Address
+import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
+import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
+import Data.ABC (A(..), B(..), C(..), D(..), E(..), Z(..))
 import Data.Array as A
+import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
 import Data.Set as S
@@ -56,6 +61,26 @@ instance toTsTypeUnit :: ToTsType Unit where
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
   toTsType _ = DTS.TypeUnion [ DTS.TypeNull, toTsType (Proxy :: _ a) ]
 
+instance toTsTypeA :: ToTsType A where
+  toTsType _ = DTS.TypeVar $ DTS.Name "A"
+
+instance toTsTypeB :: ToTsType B where
+  toTsType _ = DTS.TypeVar $ DTS.Name "B"
+
+instance toTsTypeC :: ToTsType C where
+  toTsType _ = DTS.TypeVar $ DTS.Name "C"
+
+instance toTsTypeD :: ToTsType D where
+  toTsType _ = DTS.TypeVar $ DTS.Name "D"
+
+instance toTsTypeE :: ToTsType E where
+  toTsType _ = DTS.TypeVar $ DTS.Name "E"
+
+instance toTsTypeZ :: ToTsType Z where
+  toTsType _ = DTS.TypeVar $ DTS.Name "Z"
+
+
+
 --------------------------------------------------------------------------------
 
 class GenRecord :: RowList Type -> Constraint
@@ -101,13 +126,36 @@ instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
   toTsDef _ = toTsDef (undefined :: a)
 
 instance toTsTypeDefMaybe :: ToTsDef (Maybe a) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Maybe") "Maybe") [ DTS.Name "A" ]
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Maybe") "Maybe") $ DTS.Name <$> [  "A" ]
 
 instance toTsTypeDefUnit :: ToTsDef Unit where
   toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Unit") "Unit") []
+
+instance toTsTypeDef_Data_IxGraph_IxGraph :: ToTsDef (Data.IxGraph.IxGraph id e n) where
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_IxGraph") "IxGraph") $ DTS.Name <$> [  "Id" , "E", "N" ]
+
+instance toTsTypeDef_CirclesPink_Data_TrustNode :: ToTsDef (CirclesPink.Data.TrustNode.TrustNode) where
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.TrustNode") "TrustNode") $ DTS.Name <$> [  "Id" , "E", "N" ]
+
+instance toTsTypeDef_CirclesPink_Data_Address :: ToTsDef (CirclesPink.Data.Address.Address) where
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.Address") "Address") $ DTS.Name <$> [  ]
+
+
+instance toTsTypeDef_CirclesPink_Data_TrustConnection :: ToTsDef (CirclesPink.Data.TrustConnection.TrustConnection) where
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.TrustConnection") "TrustConnection") $ DTS.Name <$> [  ]
+
 
 -- class ToDTSTypeRef a where
 --   toDTSTypeRef :: a -> DTSTypeRef
 
 -- class ToDTSValueDef a where
 --   toDTSValueDef :: a -> DTSValueDef
+
+
+--------------------------------------------------------------------------------
+
+val :: forall a. ToTsType a => a -> String -> DTS.Declaration
+val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
+
+typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
+typ x n = DTS.DeclTypeDef (DTS.Name n) mempty $ toTsDef x
