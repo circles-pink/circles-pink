@@ -247,6 +247,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "foreign-object" = pkgs.stdenv.mkDerivation {
+        name = "foreign-object";
+        version = "v3.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-foreign-object.git";
+          rev = "c9a7b7bb8bed1b87c5545c4ebe85a70f86c0e6b1";
+          sha256 = "0accw6qd93qqry19rskjgl7y54xi2wd70rglbqyjx6c5ybcjnavr";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "fork" = pkgs.stdenv.mkDerivation {
         name = "fork";
         version = "v5.0.0";
@@ -628,6 +640,18 @@ let
           url = "https://github.com/purescript/purescript-profunctor.git";
           rev = "4551b8e437a00268cc9b687cbe691d75e812e82b";
           sha256 = "0fvd2xiv77sp4jd4spgdp4i9812p6pdzzbg4pa96mbr0h19jf39c";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "profunctor-lenses" = pkgs.stdenv.mkDerivation {
+        name = "profunctor-lenses";
+        version = "v7.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-profunctor-lenses.git";
+          rev = "9c3d87a6dab8eb785a93bff11aa183796dc93183";
+          sha256 = "1wknj7g6vwk2ga1rq57l470h322308ddjn5bd3x2hhfkiy039kc3";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
