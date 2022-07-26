@@ -8,6 +8,7 @@ module Data.Graph
   , insertEdge
   , insertNode
   , insertNodes
+  , modifyNode
   , module Exp
   , neighborEdgesWithNodes
   , neighborIds
@@ -16,7 +17,8 @@ module Data.Graph
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingNodes
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -26,7 +28,7 @@ import Data.Foldable (class Foldable, fold, foldM)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrInsertEdge)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrModifyNode)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
@@ -78,6 +80,11 @@ insertNode id node graph = C.addNode id node graph # lmap (\_ -> unsafePartial $
 
 insertNodes :: forall r f id e n. Foldable f => Ord id => f (id /\ n) -> Graph id e n -> EitherV (ErrInsertNodes r) (Graph id e n)
 insertNodes nodes' g = foldM (flip $ uncurry insertNode) g nodes'
+
+modifyNode :: forall r id e n. Ord id => id -> (n -> n) -> Graph id e n -> EitherV (ErrModifyNode id r) (Graph id e n)
+modifyNode id f g = do
+  n <- C.lookupNode id g
+  C.updateNode id (f n) g
 
 --------------------------------------------------------------------------------
 -- Edge API
