@@ -83,7 +83,7 @@ type DashboardState =
 
 type Trusts = Map Address Trust
 
-type CirclesGraph = IxGraph Address TrustConnection UserIdent
+type CirclesGraph = IxGraph Address TrustConnection TrustNode
 
 --------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ type ErrUserSearch r = EnvControl.ErrUserSearch + r
 --------------------------------------------------------------------------------
 -- TrustGetTrusts
 --------------------------------------------------------------------------------
-type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array TrustNode)
+type TrustGetTrusts = RemoteReportV (ErrTrustGetTrusts + ()) (Array CC.TrustNode)
 
 type ErrTrustGetTrusts r = EnvControl.ErrAddTrustConnection + ErrParseAddress + r
 

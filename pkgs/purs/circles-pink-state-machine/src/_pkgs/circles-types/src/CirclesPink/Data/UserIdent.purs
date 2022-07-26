@@ -20,6 +20,8 @@ derive newtype instance eqUserIdent :: Eq UserIdent
 
 derive newtype instance ordUserIdent :: Ord UserIdent
 
+
+
 instance indexedUserIdent :: Indexed Address UserIdent where
   getIndex (UserIdent (Left x)) = x
   getIndex (UserIdent (Right (User { safeAddress }))) = safeAddress

@@ -29,11 +29,13 @@ import CirclesCore (ApiError, NativeError, TrustNode, SafeStatus)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
+import CirclesPink.Data.TrustNode (TrustNode, userIdent)
 import CirclesPink.Data.TrustState (TrustState, initUntrusted, isTrusted)
 import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
+import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Array (any, filter)
 import Data.BN (BN)
@@ -42,8 +44,9 @@ import Data.Foldable (fold)
 import Data.FpTs.Option as FpTs
 import Data.FpTs.Pair (Pair) as FPT
 import Data.FpTs.Tuple (type (/\)) as FPT
-import Data.IxGraph (IxGraph, getIndex)
+import Data.IxGraph (getIndex)
 import Data.IxGraph as G
+import Data.Lens (view)
 import Data.Maybe (maybe)
 import Data.Newtype (unwrap)
 import Data.Newtype.Extra ((-#))
@@ -88,7 +91,7 @@ type DefaultView =
   , getUsersResult :: RemoteData_ ErrGetUsersResolved (Array User)
   , trustAddResult :: Object (RemoteReport ErrTrustAddConnectionResolved String)
   , trustRemoveResult :: Object (RemoteReport ErrTrustRemoveConnectionResolved String)
-  , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array TrustNode)
+  , trustsResult :: RemoteReport ErrTrustGetTrustsResolved (Array CC.TrustNode)
   , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved BN
   , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved BN
   , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
@@ -99,7 +102,7 @@ type DefaultView =
   }
 
 type Graph =
-  { nodes :: Array (Address FPT./\ UserIdent)
+  { nodes :: Array (Address FPT./\ TrustNode)
   , edges :: Array (FPT.Pair Address FPT./\ TsTrustConnection)
   }
 
@@ -176,11 +179,11 @@ defaultView d@{ trusts } =
     , redeployTokenResult: nubRemoteReport d.redeployTokenResult
     }
 
-mapTrust' :: Address -> IxGraph Address TrustConnection UserIdent -> (TrustConnection /\ UserIdent) -> Trust
-mapTrust' ownAddress graph (TrustConnection _ trustState /\ user) =
+mapTrust' :: Address -> CirclesGraph -> (TrustConnection /\ TrustNode) -> Trust
+mapTrust' ownAddress graph (TrustConnection _ trustState /\ tn) =
   { trustState
-  , isOutgoing: G.lookupEdge (getIndex user ~ ownAddress) graph # either (const false) (const true)
-  , user
+  , isOutgoing: G.lookupEdge (getIndex tn ~ ownAddress) graph # either (const false) (const true)
+  , user: view userIdent tn
   }
 
 --------------------------------------------------------------------------------
