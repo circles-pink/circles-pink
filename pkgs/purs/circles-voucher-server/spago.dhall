@@ -5,6 +5,7 @@
   , "option"
   , "payload"
   , "prelude"
+  , "simple-json"
   , "spec"
   , "spec-discovery"
   , "unsafe-coerce"
