@@ -9,6 +9,7 @@ import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
 import Data.Either as Data.Either
+import Data.Foldable (foldr)
 import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable)
@@ -190,5 +191,18 @@ instance toTsTypeDef_CirclesPink_Data_UserIdent :: ToTsDef (CirclesPink.Data.Use
 val :: forall a. ToTsType a => a -> String -> DTS.Declaration
 val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
 
+val' :: forall a. ToTsType a => Array DTS.Type -> a -> String -> DTS.Declaration
+val' cs x n = DTS.DeclValueDef (DTS.Name n) $
+  foldr mkFn init cs
+  where
+  mkFn y f = DTS.TypeFunction S.empty [ (DTS.Name "_") /\ y ] f
+  init = toTsType x
+
 typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
 typ x n = DTS.DeclTypeDef (DTS.Name n) mempty $ toTsDef x
+
+cla :: forall dummy a. ToTsDef a => dummy -> a -> String -> DTS.Declaration
+cla _ = typ
+
+ins :: DTS.Type -> String -> DTS.Declaration
+ins x n = DTS.DeclValueDef (DTS.Name n) $ x
