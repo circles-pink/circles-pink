@@ -1,17 +1,20 @@
 module CirclesPink.GenerateTSD.Modules where
 
+import Prelude
 
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
-import CirclesPink.GenerateTSD.Class (typ, val)
-import CirclesPink.GenerateTSD.TypeClasses (ORD)
-import Data.ABC (A, B, C)
+import CirclesPink.GenerateTSD.Class (class ToTsType, cla, ins, toTsType, typ, val, val')
+import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
+import Data.ABC (A(..), B, C)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrNeighborNodes)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
+import Data.Maybe (Maybe(..))
+import Data.Ord as Data.Ord
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS as DTS
 import PursTs (pursModule)
@@ -20,26 +23,39 @@ import Type.Proxy (Proxy(..))
 moduleMap :: Map String (String /\ String)
 moduleMap = M.fromFoldable [ pursModule "Data.Maybe" ]
 
-
+_Ord :: forall a. Ord a => ToTsType a => a -> DTS.Type
+_Ord a = DTS.TypeConstructor (DTS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
 
 modules :: Array (String /\ Array DTS.Declaration)
 modules = do
   [ "Data.IxGraph" /\
       [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
-    , val (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
+      , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
       ]
+
   , "CirclesPink.Data.Address" /\
-      [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address" ]
+      [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address" 
+      , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
+      ]
+
   , "CirclesPink.Data.TrustNode" /\
       [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
       , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
+      , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
       ]
+
   , "CirclesPink.Data.TrustConnection" /\
       [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
       ]
+
   , "Data.Either" /\
       [ typ (Proxy :: _ (Data.Either.Either A B)) "Either"
       ]
+
+  , "Data.Ord" /\
+      [ cla (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A)) "Ord"
+      ]
+
   --        "CirclesPink.GenerateTSD.SampleModule" /\
   --       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
   --       , typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht A)) "Vielleicht"

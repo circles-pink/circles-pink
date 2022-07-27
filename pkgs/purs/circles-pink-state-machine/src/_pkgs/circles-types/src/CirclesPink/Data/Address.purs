@@ -19,17 +19,17 @@ import Partial.Unsafe (unsafePartial)
 
 newtype Address = Address W3.Address
 
-derive instance newtype_ :: Newtype Address _
+derive instance newtypeAddress :: Newtype Address _
 
-derive newtype instance show :: Show Address
+derive newtype instance showAddress :: Show Address
 
-derive newtype instance eq :: Eq Address
+derive newtype instance eqAddress :: Eq Address
 
-derive newtype instance ord :: Ord Address
+derive newtype instance ordAddress :: Ord Address
 
-derive newtype instance decodeJson :: DecodeJson Address
+derive newtype instance decodeJsonAddress :: DecodeJson Address
 
-derive newtype instance encodeJson :: EncodeJson Address
+derive newtype instance encodeJsonAddress :: EncodeJson Address
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity
