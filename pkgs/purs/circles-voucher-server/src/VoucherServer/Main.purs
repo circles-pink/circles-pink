@@ -4,23 +4,29 @@ import Prelude
 
 import CirclesPink.Data.Address (parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
-import Control.Comonad.Env (ask)
+import Data.DateTime (diff)
+import Data.DateTime.Instant (instant, toDateTime)
 import Data.DateTime.Instant as DT
 import Data.Either (Either(..), note)
 import Data.Foldable (fold)
 import Data.Map (Map)
 import Data.Map as M
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, un)
+import Data.Number (fromString)
+import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..))
-import Payload.ResponseTypes (Failure)
+import Effect.Class (liftEffect)
+import Effect.Now (now)
+import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server as Payload
 import Payload.Server.Params (class DecodeParam, decodeParam)
+import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
-import Web3.Accounts (SignatureObj)
+import Web3.Accounts (SignatureObj(..))
 import Web3.Accounts as W3A
 
 type Message =
@@ -72,22 +78,34 @@ spec = Spec
 --------------------------------------------------------------------------------
 
 db :: Map Address (Array Voucher)
-db = M.fromFoldable
-  [ Address sampleAddress /\ []
-  ]
+db =
+  M.fromFoldable
+    [ Address sampleAddress /\ []
+    ]
+
+allowedDiff ∷ Seconds
+allowedDiff = Seconds 60.0
 
 isValid :: SignatureObj -> Aff Boolean
-isValid = todo
+isValid (SignatureObj { message, messageHash }) = do
+  timestamp <- liftEffect $ toDateTime <$> now
+  let
+    messageValid = messageHash == (un W3A.Hash $ W3A.hashMessage message)
+    maybeMessageTime = fromString message <#> Milliseconds >>= instant <#> toDateTime
+    timestampValid = case maybeMessageTime of
+      Nothing -> false
+      Just i -> diff i timestamp <= allowedDiff
+  pure (messageValid && timestampValid)
 
 getVouchers :: { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers { body: { signatureObj } } = do
   case W3A.recover signatureObj of
-    Left _ -> pure $ Left ?a
+    Left _ -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
     Right address -> do
       valid <- isValid signatureObj
       if valid then
         M.lookup (Address $ C.Address address) db # fold # Right # pure
-      else pure $ Left ?b
+      else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
 main :: Effect Unit
