@@ -4,8 +4,7 @@ module Web3.Accounts
   , hashMessage
   , recover
   , sign
-  )
-  where
+  ) where
 
 import Data.Either (Either)
 import Data.Newtype (class Newtype)
