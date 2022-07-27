@@ -210,7 +210,6 @@ defineModule mm k xs =
     # A.nub
     <#> (\key -> (key /\ M.lookup key mm) # sequence)
     # catMaybes
-    
     <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
   moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
