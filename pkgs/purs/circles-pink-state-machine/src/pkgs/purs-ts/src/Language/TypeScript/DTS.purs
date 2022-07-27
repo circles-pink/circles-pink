@@ -13,6 +13,7 @@ module Language.TypeScript.DTS
 import Prelude
 import Prim hiding (Row, Type)
 
+import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Data.Tuple.Nested (type (/\))
@@ -38,7 +39,7 @@ data Type
   | TypeVar Name
   | TypeConstructor QualName (Array Type)
   | TypeOpaque QualName (Array Name)
-  | TypeUnion (Array Type)
+  | TypeUnion (NonEmptyArray Type)
   | TypeTLString String
 
 data Declaration

@@ -8,6 +8,8 @@ import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
+import Data.Array.NonEmpty (NonEmptyArray)
+import Data.Array.NonEmpty as NEA
 import Data.Either as Data.Either
 import Data.Foldable (foldr)
 import Data.IxGraph as Data.IxGraph
@@ -92,7 +94,7 @@ instance toTsType_CirclesPink_Data_UserIdent_UserIdent :: ToTsType (CirclesPink.
     []
 
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
-  toTsType _ = DTS.TypeUnion [ DTS.TypeNull, toTsType (Proxy :: _ a) ]
+  toTsType _ = DTS.TypeUnion (DTS.TypeNull `NEA.cons'` [ toTsType (Proxy :: _ a) ])
 
 instance toTsTypeA :: ToTsType A where
   toTsType _ = DTS.TypeVar $ DTS.Name "A"
@@ -130,15 +132,18 @@ instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (C
 
 class GenVariant :: RowList Type -> Constraint
 class GenVariant rl where
-  genVariant :: Proxy rl -> (Array DTS.Type)
+  genVariant :: Proxy rl -> NonEmptyArray DTS.Type
 
-instance genVariantNil :: GenVariant Nil where
-  genVariant _ = []
+instance genVariantNil :: (ToTsType t, IsSymbol s) => GenVariant (Cons s t Nil) where
+  genVariant _ = pure $ DTS.TypeRecord
+    [ DTS.Name "tag" /\ DTS.TypeTLString (reflectSymbol (Proxy :: _ s))
+    , DTS.Name "value" /\ toTsType (Proxy :: _ t)
+    ]
 
-instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant (Cons s t rl) where
+else instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant (Cons s t rl) where
   genVariant _ =
     genVariant (Proxy :: _ rl)
-      # A.cons
+      # NEA.cons
           ( DTS.TypeRecord
               [ DTS.Name "tag" /\ DTS.TypeTLString (reflectSymbol (Proxy :: _ s))
               , DTS.Name "value" /\ toTsType (Proxy :: _ t)
