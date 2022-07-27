@@ -53,11 +53,16 @@ type ServerState = Map Address Challenge
 
 type Challenge =
   { message :: String
-  , timestamp :: Instant
+  -- , timestamp :: Instant
   }
 
 type ChallengeAnswer =
-  { signature :: String
+  { message :: String
+  , messageHash :: String
+  , v :: String
+  , r :: String
+  , s :: String
+  , signature :: String
   }
 
 type ErrGetVoucher = String
@@ -86,11 +91,10 @@ spec = Spec
 --------------------------------------------------------------------------------
 getChallenge :: Ref ServerState -> { params :: { address :: Address } } -> Aff Challenge
 getChallenge ref { params: { address } } = do
-  timestamp <- liftEffect now <#> Instant
+  -- timestamp <- liftEffect now <#> Instant
   let
     challenge =
-      { timestamp
-      , message: "hello"
+      { message: "hello"
       }
   pure challenge
 
@@ -108,3 +112,4 @@ main = do
     , getVouchers: getVouchers ref
     }
   pure unit
+
