@@ -24,11 +24,17 @@ printType = case _ of
   TypeFunction targs args b -> printTargs (S.toUnfoldable targs) <> printFnHead args <> printType b
   TypeVar n -> printName n
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
-  TypeOpaque id targs -> "Readonly<{ readonly 'Opaque:" <> printQualName id <> "' : unique symbol; args : " <> printTargsArray targs <> "}>"
+  TypeOpaque id targs -> "{ " <> printOpaque id <> printTargsValues targs <> " }"
+  
+  --printType $ TypeRecord [ Name ("Opaque__" <> printQualName id) /\ TypeUniqueSymbol ]
+
+  -- "Readonly<{ readonly 'Opaque:" <> printQualName id <> "' : unique symbol; args : " <> printTargsArray targs <> "}>"
   TypeUnion xs -> joinWith " | " $ printType <$> xs
   TypeTLString s -> "\"" <> s <> "\""
 
   where
+  printOpaque id = "readonly \"" <> "Opaque__" <> printQualName id <> "\": unique symbol;"
+
   printFnHead args = "(" <> printFnArgs args <> ") => "
 
   printFnArgs args = joinWith ", " $ printFnArg <$> args
@@ -39,7 +45,7 @@ printType = case _ of
 
   printRecEntry (k /\ v) = printName k <> " : " <> printType v
 
-  printTargsArray xs = "[" <> joinWith "," (printName <$> xs) <> "]"
+  printTargsValues xs = xs # A.mapWithIndex (\i x -> Name ("_" <> show (i + 1)) /\ TypeVar x) # printRecEntries
 
 printTargs :: Array Name -> String
 printTargs xs | A.length xs == 0 = ""
