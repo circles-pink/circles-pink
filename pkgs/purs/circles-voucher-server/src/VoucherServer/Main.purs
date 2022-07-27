@@ -2,26 +2,26 @@ module VoucherServer.Main where
 
 import Prelude
 
-import CirclesPink.Data.Address (parseAddress)
+import CirclesPink.Data.Address (parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
+import Control.Comonad.Env (ask)
 import Data.DateTime.Instant as DT
-import Data.Either (Either, note)
-import Data.Map (Map, empty)
+import Data.Either (Either(..), note)
+import Data.Foldable (fold)
+import Data.Map (Map)
+import Data.Map as M
 import Data.Newtype (class Newtype, un)
-import Data.Time (Millisecond)
+import Data.Tuple.Nested ((/\))
 import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..))
-import Effect.Class (liftEffect)
-import Effect.Now (now)
-import Effect.Ref (Ref, modify_, new)
-import Network.Ethereum.Core.HexString (unHex)
-import Network.Ethereum.Core.Signatures (unAddress)
-import Payload.ResponseTypes (Failure, Response)
+import Payload.ResponseTypes (Failure)
 import Payload.Server as Payload
-import Payload.Server.Params (class DecodeParam, DecodeError, decodeParam)
-import Payload.Spec (GET, Spec(Spec), POST)
+import Payload.Server.Params (class DecodeParam, decodeParam)
+import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
+import Web3.Accounts (SignatureObj)
+import Web3.Accounts as W3A
 
 type Message =
   { id :: Int
@@ -42,28 +42,15 @@ newtype Address = Address C.Address
 
 derive instance newtypeAddress :: Newtype Address _
 
+derive newtype instance ordAddress :: Ord Address
+derive newtype instance eqAddress :: Eq Address
+
 instance decodeParamAddress :: DecodeParam Address where
   decodeParam x = decodeParam x
     >>= (parseAddress >>> note "Could not parse Address")
     <#> Address
 
 --------------------------------------------------------------------------------
-
-type ServerState = Map Address Challenge
-
-type Challenge =
-  { message :: String
-  -- , timestamp :: Instant
-  }
-
-type ChallengeAnswer =
-  { message :: String
-  , messageHash :: String
-  , v :: String
-  , r :: String
-  , s :: String
-  , signature :: String
-  }
 
 type ErrGetVoucher = String
 
@@ -74,42 +61,37 @@ type Voucher =
 --------------------------------------------------------------------------------
 spec
   :: Spec
-       { getChallenge ::
-           GET "/get-challenge/<address>"
-             { params :: { address :: Address }
-             , response :: Challenge
-             }
-       , getVouchers ::
-           POST "/vouchers/<address>"
-             { body :: ChallengeAnswer
-             , params :: { address :: Address }
+       { getVouchers ::
+           POST "/vouchers"
+             { body :: { signatureObj :: SignatureObj }
              , response :: Array Voucher
              }
        }
 spec = Spec
 
 --------------------------------------------------------------------------------
-getChallenge :: Ref ServerState -> { params :: { address :: Address } } -> Aff Challenge
-getChallenge ref { params: { address } } = do
-  -- timestamp <- liftEffect now <#> Instant
-  let
-    challenge =
-      { message: "hello"
-      }
-  pure challenge
 
--- modify_ address challenge
+db :: Map Address (Array Voucher)
+db = M.fromFoldable
+  [ Address sampleAddress /\ []
+  ]
 
-getVouchers :: Ref ServerState -> { params :: { address :: Address }, body :: ChallengeAnswer } -> Aff (Either Failure (Array Voucher))
-getVouchers ref = todo
+isValid :: SignatureObj -> Aff Boolean
+isValid = todo
+
+getVouchers :: { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
+getVouchers { body: { signatureObj } } = do
+  case W3A.recover signatureObj of
+    Left _ -> pure $ Left ?a
+    Right address -> do
+      valid <- isValid signatureObj
+      if valid then
+        M.lookup (Address $ C.Address address) db # fold # Right # pure
+      else pure $ Left ?b
 
 --------------------------------------------------------------------------------
 main :: Effect Unit
-main = do
-  ref <- new empty
-  Payload.launch spec
-    { getChallenge: getChallenge ref
-    , getVouchers: getVouchers ref
-    }
-  pure unit
+main = Payload.launch spec
+  { getVouchers
+  }
 
