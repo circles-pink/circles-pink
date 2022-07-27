@@ -6,11 +6,15 @@ import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Address as C
 import Data.DateTime.Instant as DT
 import Data.Either (Either, note)
+import Data.Map (Map, empty)
 import Data.Newtype (class Newtype, un)
 import Data.Time (Millisecond)
 import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..))
+import Effect.Class (liftEffect)
+import Effect.Now (now)
+import Effect.Ref (Ref, modify_, new)
 import Network.Ethereum.Core.HexString (unHex)
 import Network.Ethereum.Core.Signatures (unAddress)
 import Payload.ResponseTypes (Failure, Response)
@@ -45,6 +49,8 @@ instance decodeParamAddress :: DecodeParam Address where
 
 --------------------------------------------------------------------------------
 
+type ServerState = Map Address Challenge
+
 type Challenge =
   { message :: String
   , timestamp :: Instant
@@ -60,16 +66,11 @@ type Voucher =
   { voucherCode :: String
   }
 
+--------------------------------------------------------------------------------
 spec
   :: Spec
-       { getMessages ::
-           GET "/users/<id>/messages?limit=<limit>"
-             { params :: { id :: Int }
-             , query :: { limit :: Int }
-             , response :: Array Message
-             }
-       , getVouchersPreflight ::
-           GET "/vouchers-preflight/<address>"
+       { getChallenge ::
+           GET "/get-challenge/<address>"
              { params :: { address :: Address }
              , response :: Challenge
              }
@@ -82,15 +83,28 @@ spec
        }
 spec = Spec
 
-getVouchersPreflight :: { params :: { address :: Address } } -> Aff Challenge
-getVouchersPreflight = todo
+--------------------------------------------------------------------------------
+getChallenge :: Ref ServerState -> { params :: { address :: Address } } -> Aff Challenge
+getChallenge ref { params: { address } } = do
+  timestamp <- liftEffect now <#> Instant
+  let
+    challenge =
+      { timestamp
+      , message: "hello"
+      }
+  pure challenge
 
-getVouchers :: { params :: { address :: Address }, body :: ChallengeAnswer } -> Aff (Either Failure (Array Voucher))
-getVouchers = todo
+-- modify_ address challenge
 
-getMessages :: { params :: { id :: Int }, query :: { limit :: Int } } -> Aff (Array Message)
-getMessages { params: { id }, query: { limit } } = pure
-  [ { id: 1, text: "Hey " <> show id }, { id: 2, text: "Limit " <> show limit } ]
+getVouchers :: Ref ServerState -> { params :: { address :: Address }, body :: ChallengeAnswer } -> Aff (Either Failure (Array Voucher))
+getVouchers ref = todo
 
+--------------------------------------------------------------------------------
 main :: Effect Unit
-main = Payload.launch spec { getMessages, getVouchersPreflight, getVouchers }
+main = do
+  ref <- new empty
+  Payload.launch spec
+    { getChallenge: getChallenge ref
+    , getVouchers: getVouchers ref
+    }
+  pure unit
