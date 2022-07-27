@@ -14,6 +14,8 @@ import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Maybe as Simple.Data.Maybe
+import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\), (/\))
@@ -51,10 +53,20 @@ modules =
 
   , "Data.Either" /\
       [ typ (Proxy :: _ (Data.Either.Either A B)) "Either"
+      , val (Data.Either.either :: _ -> _ -> _ A B -> C) "either"
+      , val (Data.Either.hush :: _ A B -> _) "hush"
+      ]
+
+  , "Data.Maybe" /\
+      [ typ (Proxy :: _ (Simple.Data.Maybe.Maybe A)) "Maybe"
       ]
 
   , "Data.Ord" /\
       [ cla (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A)) "Ord"
+      ]
+
+  , "Data.Nullable" /\
+      [ val (Data.Nullable.toNullable :: _ A -> _) "toNullable"
       ]
 
   --        "CirclesPink.GenerateTSD.SampleModule" /\
@@ -84,12 +96,7 @@ modules =
   --       , val (Simple.Data.Maybe.pure :: A -> _) "pure"
   --       , val (Simple.Data.Maybe.eq :: _ -> _ A -> _) "eq"
   --       ]
-  --   , "Data.Maybe" /\
-  --       [ typ (Proxy :: _ (Simple.Data.Maybe.Maybe A)) "Maybe"
-  --       ]
-  --   , "Data.Nullable" /\
-  --       [ val (Data.Nullable.toNullable :: _ A -> _) "toNullable"
-  --       ]
+
   --   , "Simple.Data.Number" /\
   --       [ val (Simple.Data.Number.eq) "eq"
   --       ]
