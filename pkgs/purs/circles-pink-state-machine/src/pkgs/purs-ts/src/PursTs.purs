@@ -10,6 +10,7 @@ import Prelude
 import Control.Monad.State (State, get, modify, runState)
 import Data.Array (catMaybes)
 import Data.Array as A
+import Data.Array.NonEmpty as NEA
 import Data.Bifunctor (lmap)
 import Data.Map (Map)
 import Data.Map as M
@@ -231,7 +232,7 @@ typeToRefs = case _ of
   DTS.TypeVar _ -> []
   DTS.TypeConstructor qn xs -> [ qn ] <> (xs >>= typeToRefs)
   DTS.TypeOpaque _ _ -> []
-  DTS.TypeUnion xs -> xs >>= typeToRefs
+  DTS.TypeUnion xs -> NEA.toArray xs >>= typeToRefs
   DTS.TypeTLString _ -> []
 
 -- x = toMono CirclesPink.GenerateTSD.SampleModule.caseVielleicht

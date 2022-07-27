@@ -6,6 +6,7 @@ import Prelude
 import Prim hiding (Row, Type)
 
 import Data.Array as A
+import Data.Array.NonEmpty as NEA
 import Data.Foldable (fold)
 import Data.Maybe (Maybe(..))
 import Data.Set as S
@@ -29,7 +30,7 @@ printType = case _ of
   --printType $ TypeRecord [ Name ("Opaque__" <> printQualName id) /\ TypeUniqueSymbol ]
 
   -- "Readonly<{ readonly 'Opaque:" <> printQualName id <> "' : unique symbol; args : " <> printTargsArray targs <> "}>"
-  TypeUnion xs -> joinWith " | " $ printType <$> xs
+  TypeUnion xs -> joinWith " | " $ printType <$> NEA.toArray xs
   TypeTLString s -> "\"" <> s <> "\""
 
   where
