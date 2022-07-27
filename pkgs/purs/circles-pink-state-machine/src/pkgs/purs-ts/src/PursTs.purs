@@ -21,9 +21,11 @@ import Data.String as St
 import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
+import Debug (spy, spyWith)
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
+
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 
 class Clean a where
@@ -181,7 +183,7 @@ pursModule :: String -> (String /\ String /\ String)
 pursModule x = modToAlias x /\ ("../" <> x) /\ x
 
 modToAlias :: String -> String
-modToAlias = St.replace (Pattern ".") (Replacement "_")
+modToAlias = St.replaceAll (Pattern ".") (Replacement "_")
 
 
 
@@ -189,6 +191,8 @@ defineModules :: Map String (String /\ String) -> Array (String /\ Array DTS.Dec
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
   where
   mm' = xs <#> fst >>> pursModule # M.fromFoldable # M.union mm
+
+
 
 defineModule :: Map String (String /\ String) -> String -> Array DTS.Declaration -> DTS.Module
 defineModule mm k xs =
@@ -206,6 +210,7 @@ defineModule mm k xs =
     # A.nub
     <#> (\key -> (key /\ M.lookup key mm) # sequence)
     # catMaybes
+    
     <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
   moduleBody = (DTS.ModuleBody xs) # resolveModuleBody

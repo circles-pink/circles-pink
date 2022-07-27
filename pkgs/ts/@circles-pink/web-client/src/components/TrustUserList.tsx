@@ -10,11 +10,10 @@ type Props = {
     address: Address
 }
 
-//const x : Address = 1
 
-export const TrustUserList = (props: Props) => {
+export const TrustUserList = ({address, graph}: Props) => {
 
-    const neighbors = neighborNodes(ordAddress)(1) //(props.address)
+    const neighbors = neighborNodes(ordAddress)(address)(graph)
    
     return <div>Hello! tul</div>
 };

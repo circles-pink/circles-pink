@@ -15,26 +15,27 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Ord as Data.Ord
+import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS as DTS
 import PursTs (pursModule)
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
-moduleMap = M.fromFoldable [ pursModule "Data.Maybe" ]
+moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
 
 _Ord :: forall a. Ord a => ToTsType a => a -> DTS.Type
 _Ord a = DTS.TypeConstructor (DTS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
 
 modules :: Array (String /\ Array DTS.Declaration)
-modules = do
+modules =
   [ "Data.IxGraph" /\
       [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
       , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
       ]
 
   , "CirclesPink.Data.Address" /\
-      [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address" 
+      [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address"
       , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
       ]
 

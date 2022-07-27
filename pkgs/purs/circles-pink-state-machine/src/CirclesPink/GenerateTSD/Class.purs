@@ -169,16 +169,16 @@ instance toTsTypeDef_Data_IxGraph_IxGraph :: ToTsDef (Data.IxGraph.IxGraph id e 
   toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_IxGraph") "IxGraph") $ DTS.Name <$> [ "Id", "E", "N" ]
 
 instance toTsTypeDef_CirclesPink_Data_TrustNode :: ToTsDef (CirclesPink.Data.TrustNode.TrustNode) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.TrustNode") "TrustNode") $ DTS.Name <$> []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_TrustNode") "TrustNode") $ DTS.Name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_Address :: ToTsDef (CirclesPink.Data.Address.Address) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.Address") "Address") $ DTS.Name <$> []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_Address") "Address") $ DTS.Name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_TrustConnection :: ToTsDef (CirclesPink.Data.TrustConnection.TrustConnection) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.TrustConnection") "TrustConnection") $ DTS.Name <$> []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_TrustConnection") "TrustConnection") $ DTS.Name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_UserIdent :: ToTsDef (CirclesPink.Data.UserIdent.UserIdent) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink.Data.UserIdent") "UserIdent") $ DTS.Name <$> []
+  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_UserIdent") "UserIdent") $ DTS.Name <$> []
 
 -- class ToDTSTypeRef a where
 --   toDTSTypeRef :: a -> DTSTypeRef
