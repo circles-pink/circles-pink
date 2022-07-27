@@ -13,6 +13,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..))
 import Network.Ethereum.Core.HexString (unHex)
 import Network.Ethereum.Core.Signatures (unAddress)
+import Payload.ResponseTypes (Failure, Response)
 import Payload.Server as Payload
 import Payload.Server.Params (class DecodeParam, DecodeError, decodeParam)
 import Payload.Spec (GET, Spec(Spec), POST)
@@ -75,8 +76,8 @@ spec
        , getVouchers ::
            POST "/vouchers/<address>"
              { body :: ChallengeAnswer
-             , guards :: { address :: Address }
-             , response :: Either ErrGetVoucher (Array Voucher)
+             , params :: { address :: Address }
+             , response :: Array Voucher
              }
        }
 spec = Spec
@@ -84,7 +85,7 @@ spec = Spec
 getVouchersPreflight :: { params :: { address :: Address } } -> Aff Challenge
 getVouchersPreflight = todo
 
-getVouchers :: { guards :: { address :: Address } } -> Aff (Either ErrGetVoucher (Array Voucher))
+getVouchers :: { params :: { address :: Address }, body :: ChallengeAnswer } -> Aff (Either Failure (Array Voucher))
 getVouchers = todo
 
 getMessages :: { params :: { id :: Int }, query :: { limit :: Int } } -> Aff (Array Message)
