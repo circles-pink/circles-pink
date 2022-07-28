@@ -26,6 +26,8 @@ import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
+import Web3 (Message(..), SignatureObj(..), Web3, newWeb3_)
+import Web3 as W3
 
 type Message =
   { id :: Int
@@ -84,12 +86,12 @@ db =
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
 
-isValid :: SignatureObj -> Aff Boolean
-isValid (SignatureObj { message, messageHash }) = do
+isValid :: Web3 -> SignatureObj -> Aff Boolean
+isValid web3 (SignatureObj { message, messageHash }) = do
   timestamp <- liftEffect $ toDateTime <$> now
   let
-    messageValid = messageHash == (un W3A.Hash $ W3A.hashMessage message)
-    maybeMessageTime = fromString message <#> Milliseconds >>= instant <#> toDateTime
+    messageValid = messageHash == W3.accountsHashMessage web3 message
+    maybeMessageTime = message # un Message # fromString <#> Milliseconds >>= instant <#> toDateTime
     timestampValid = case maybeMessageTime of
       Nothing -> false
       Just i -> diff i timestamp <= allowedDiff
@@ -97,17 +99,19 @@ isValid (SignatureObj { message, messageHash }) = do
 
 getVouchers :: { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers { body: { signatureObj } } = do
-  case W3A.recover signatureObj of
-    Left _ -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
-    Right address -> do
-      valid <- isValid signatureObj
+  web3 <- newWeb3_
+  case W3.accountsRecover web3 signatureObj of
+    Nothing -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
+    Just address -> do
+      valid <- isValid web3 signatureObj
       if valid then
-        M.lookup (Address $ C.Address address) db # fold # Right # pure
+        M.lookup (Address $ address) db # fold # Right # pure
       else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
 main :: Effect Unit
-main = Payload.launch spec
-  { getVouchers
-  }
+main = do
+  Payload.launch spec
+    { getVouchers: getVouchers
+    }
 
