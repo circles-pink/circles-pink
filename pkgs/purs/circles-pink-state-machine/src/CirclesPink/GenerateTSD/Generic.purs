@@ -5,13 +5,12 @@ import Prelude
 import CirclesPink.GenerateTSD.Class (class ToTsDef, toTsDef)
 import Data.Array (cons)
 import Data.Array.NonEmpty (NonEmptyArray)
-import Data.Generic.Rep (class Generic, Argument, Constructor(..), NoArguments(..), NoConstructors, Product, Sum, from)
-import Data.Symbol (class IsSymbol, reflectSymbol)
+import Data.Generic.Rep (class Generic, Argument, Constructor, NoArguments, NoConstructors, Product, Sum, from)
+import Data.Symbol (class IsSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Debug.Extra (todo)
 import Language.TypeScript.DTS as DTS
-import Type.Proxy (Proxy(..))
 
 genericToTsDef :: forall a rep. Generic a rep => GenToTsDefSum rep => a -> DTS.Type
 genericToTsDef = DTS.TypeUnion <<< genToTsDefSum <<< from
