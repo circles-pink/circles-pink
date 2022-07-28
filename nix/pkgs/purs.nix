@@ -34,7 +34,7 @@ let
     (import ../../materialized/spago2nix/default.nix) [
     (recursiveUpdate {
       circles-pink-state-machine = {
-        censorCodes = [ ];
+        censorCodes = [ "UserDefinedWarning" ];
         inherit nodeModules;
       };
 
