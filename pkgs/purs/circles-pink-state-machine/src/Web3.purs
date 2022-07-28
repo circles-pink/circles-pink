@@ -4,14 +4,18 @@ module Web3
   , Hash(..)
   , Message(..)
   , NativeError
+  , SignatureObj(..)
   , accountsHashMessage
   , accountsRecover
   , accountsSign
+  , module Exp
   , newWeb3
+  , newWeb3_
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -23,7 +27,7 @@ import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Either (hush)
 import Data.Maybe (Maybe, fromJust)
-import Data.Newtype (class Newtype)
+import Data.Newtype (class Newtype, un, unwrap)
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff, Error, attempt, message, try)
 import Effect.Aff.Compat (fromEffectFnAff)
@@ -34,8 +38,11 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (PrivateKey)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+import Record as R
+import Simple.JSON (class ReadForeign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web3.Bindings (Web3) as Exp
 import Web3.Bindings as B
 
 --------------------------------------------------------------------------------
@@ -45,10 +52,25 @@ import Web3.Bindings as B
 newtype Hash = Hash String
 
 derive instance newtypeHash :: Newtype Hash _
+derive newtype instance readForeignHash :: ReadForeign Hash
+derive instance eqHash :: Eq Hash
 
 newtype Message = Message String
 
 derive instance newtypeMessage :: Newtype Message _
+derive newtype instance readForeignMessage :: ReadForeign Message
+
+newtype SignatureObj = SignatureObj
+  { message :: Message
+  , messageHash :: Hash
+  , v :: String
+  , r :: String
+  , s :: String
+  , signature :: String
+  }
+
+derive instance newtypeSignatureObj :: Newtype SignatureObj _
+derive newtype instance readForeignSignatureObj :: ReadForeign SignatureObj
 
 --------------------------------------------------------------------------------
 -- Error types
@@ -100,6 +122,9 @@ newWebSocketProvider x1 =
 newWeb3 :: B.Provider -> Aff B.Web3
 newWeb3 = B.newWeb3 >>> liftEffect
 
+newWeb3_ :: Aff B.Web3
+newWeb3_ = B.newWeb3_ # liftEffect
+
 --------------------------------------------------------------------------------
 type ErrPrivKeyToAccount r = ErrNative + r
 
@@ -115,13 +140,15 @@ privKeyToAccount w3 pk =
 -- Accounts
 --------------------------------------------------------------------------------
 
-type SignatureObject = ...
-
 accountsSign :: B.Web3 -> Message -> PrivateKey -> SignatureObj
-accountsSign web3 (Message msg) pk = B.accountsSign web3 msg (show pk)
+accountsSign web3 (Message msg) pk =
+  B.accountsSign web3 msg (show pk)
+    # toSignatureObj
 
-accountsRecover :: B.Web3 -> B.SignatureObj -> Maybe Address
-accountsRecover web3 so = B.accountsRecover web3 so
+accountsRecover :: B.Web3 -> SignatureObj -> Maybe Address
+accountsRecover web3 so = so
+  # fromSignatureObj
+  # B.accountsRecover web3
   # try
   # unsafePerformEffect
   # hush
@@ -135,3 +162,15 @@ accountsHashMessage web3 (Message msg) = B.accountsHashMessage web3 msg # Hash
 --------------------------------------------------------------------------------
 mkErrorNative :: forall r. Error -> Variant (ErrNative + r)
 mkErrorNative e = _errNative { message: message e, name: name e }
+
+toSignatureObj :: B.SignatureObj -> SignatureObj
+toSignatureObj r = r
+  # R.modify (Proxy :: _ "message") Message
+  # R.modify (Proxy :: _ "messageHash") Hash
+  # SignatureObj
+
+fromSignatureObj :: SignatureObj -> B.SignatureObj
+fromSignatureObj r = r
+  # unwrap
+  # R.modify (Proxy :: _ "message") (un Message)
+  # R.modify (Proxy :: _ "messageHash") (un Hash)

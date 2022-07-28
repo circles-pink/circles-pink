@@ -9,6 +9,8 @@ exports.newWebSocketProvider = (url) => () =>
 
 exports.newWeb3 = (provider) => () => new Web3(provider);
 
+exports.newWeb3_ = () => new Web3();
+
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
