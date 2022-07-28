@@ -2,16 +2,14 @@ module CirclesPink.GenerateTSD.TypeClasses where
 
 import Prelude
 
-import CirclesPink.Data.Address as CirclesPink.Data.Address
-import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
-import CirclesPink.GenerateTSD.Class (class ToTsDef, class ToTsType, toTsType)
-import Data.ABC (A(..))
+import CirclesPink.GenerateTSD.Class (class ToTsDef, class ToTsType)
+import Data.ABC (A)
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Undefined (undefined)
 import Language.TypeScript.DTS as DTS
-import Type.Proxy (Proxy(..))
 
 
+data ClassOrd :: forall k. k -> Type
 data ClassOrd a
 
 instance toTsTypeDefClassOrd :: ToTsDef (ClassOrd A) where

@@ -7,14 +7,14 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.GenerateTSD.Class (class ToTsType, cla, ins, toTsType, typ, val, val')
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
-import Data.ABC (A(..), B, C)
+import Data.ABC (A, B, C)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrNeighborNodes)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Maybe as Simple.Data.Maybe
+import Data.Maybe as Data.Maybe
 import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Tuple (fst)
@@ -58,7 +58,8 @@ modules =
       ]
 
   , "Data.Maybe" /\
-      [ typ (Proxy :: _ (Simple.Data.Maybe.Maybe A)) "Maybe"
+      [ typ (Proxy :: _ (Data.Maybe.Maybe A)) "Maybe"
+      , val (Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
       ]
 
   , "Data.Ord" /\

@@ -22,7 +22,6 @@ import Data.String as St
 import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spy, spyWith)
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
