@@ -2,7 +2,7 @@ module Data.Graph.Lens where
 
 import Prelude
 
-import Control.Error.Util (hush)
+import Data.Either (hush)
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Lens (Lens', lens)
