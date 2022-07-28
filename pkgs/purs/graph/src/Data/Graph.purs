@@ -1,5 +1,6 @@
 module Data.Graph
-  ( addNodes
+  ( NeighborConnectivity(..)
+  , addNodes
   , edgeIds
   , edges
   , incomingEdges
@@ -13,34 +14,47 @@ module Data.Graph
   , neighborEdgesWithNodes
   , neighborIds
   , neighborNodes
+  , neighborhood
   , nodes
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingNodes
-  )
-  where
+  ) where
 
 import Prelude
 
 import Data.Bifunctor (lmap)
-import Data.Either (fromRight')
+import Data.Either (Either(..), fromRight')
 import Data.Foldable (class Foldable, fold, foldM)
+import Data.Generic.Rep (class Generic)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
-import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrModifyNode)
+import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrNeighborhood)
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
+import Data.Show.Generic (genericShow)
 import Data.Tuple (uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
 import Partial (crashWith)
-import Partial.Unsafe (unsafePartial)
+import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 
 type IxNode id n = id /\ n
 type IxEdge id e = Pair id /\ e
 
 type IxEdgeWithNode id e n = IxEdge id e /\ IxNode id n
+
+--------------------------------------------------------------------------------
+
+data NeighborConnectivity e = JustOutgoing e | JustIncoming e | MutualOutAndIn e e
+
+derive instance genericNeighborConnectivity :: Generic (NeighborConnectivity e) _
+derive instance eqNeighborConnectivity :: Eq e => Eq (NeighborConnectivity e)
+derive instance ordNeighborConnectivity :: Ord e => Ord (NeighborConnectivity e)
+
+instance showNeighborConnectivity :: Show e => Show (NeighborConnectivity e) where
+  show = genericShow
 
 --------------------------------------------------------------------------------
 -- Graph API
@@ -137,6 +151,16 @@ incomingEdges fromId graph = do
 
 neighborEdgesWithNodes :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrNeighborEdgesWithNodes id r) (Array (IxEdgeWithNode id e n))
 neighborEdgesWithNodes id g = (<>) <$> incomingEdgesWithNodes id g <*> outgoingEdgesWithNodes id g
+
+neighborhood :: forall r id e n. Ord id => id -> Graph id e n -> EitherV (ErrNeighborhood id r) (Array (NeighborConnectivity e /\ id /\ n))
+neighborhood id g = g # neighborIds id <#> S.toUnfoldable <#> map (\id' -> getEdges id' /\ getIxNode id')
+  where
+  getEdges id' = case C.lookupEdge (id ~ id') g, C.lookupEdge (id' ~ id) g of
+    Right outgoing, Right incoming -> MutualOutAndIn outgoing incoming
+    Right outgoing, Left _ -> JustOutgoing outgoing
+    Left _, Right incoming -> JustIncoming incoming
+    Left _, Left _ -> unsafeCrashWith "inpossible case"
+  getIxNode id' = id' /\ unsafePartial (partLookupNode id' g)
 
 --------------------------------------------------------------------------------
 
