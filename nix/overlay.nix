@@ -248,6 +248,11 @@
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 
+      voucher-server =  final.writeShellScriptBin "voucher-server" ''
+        export NODE_PATH=${ts.workspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/node_modules:${ts.workspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/deps/@circles-pink/state-machine/node_modules
+        ${final.nodejs}/bin/node -e 'require("${purs.default}/VoucherServer.Main").main()' $@
+      '';
+
       generate-tsd = final.writeShellScriptBin "generate-tsd" ''
         ${final.nodejs}/bin/node -e 'require("${purs.circles-pink-state-machine.output}/CirclesPink.GenerateTSD").main()' $@
       '';
