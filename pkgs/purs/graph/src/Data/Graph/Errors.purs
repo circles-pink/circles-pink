@@ -99,7 +99,7 @@ type ErrIncomingEdges id r = ErrIncomingIds id + r
 
 type ErrOutgoingEdges id r = ErrOutgoingIds id + r
 
-type ErrNeighborIds id r = ErrOutgoingIds id + ErrIncomingIds id + r
+type ErrNeighborIds id r = NodeNotFound id + r
 
 type ErrNeighborEdgesWithNodes id r = ErrIncomingEdgesWithNodes id + ErrOutgoingEdgesWithNodes id + r
 
@@ -113,6 +113,8 @@ type ErrInsertNodes r = r
 
 type ErrInsertEdge :: forall k. k -> k
 type ErrInsertEdge r = r
+
+type ErrNeighborhood id r = NodeNotFound id r
 
 --------------------------------------------------------------------------------
 -- Pretty Print
