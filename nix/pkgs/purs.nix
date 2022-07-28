@@ -13,7 +13,24 @@ let
     ''
       cp -r ${pursOutput} $out
       chmod -R +w $out
+      
+      rm -rf $out/Payload.*
+      rm -rf $out/VoucherServer.*
+
       purs-tsd-gen -d $out
+
+      for dir in $out/Payload.*
+      do
+        echo "copy dir $dir"
+        cp $dir -t $out
+      done
+
+      for dir in $out/VoucherServer.*
+      do
+        echo "copy dir $dir"
+        cp $dir -t $out
+      done
+
       patchTsTypes $out
     '';
 

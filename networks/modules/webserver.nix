@@ -32,6 +32,7 @@ in
 
   imports = [
     (import ./tasks-explorer.nix { inherit pkgs config lib; })
+    (import ./voucher-server.nix { inherit pkgs config lib; })
     (import ./directus.nix { inherit pkgs config lib; })
     (import ./env.nix { inherit pkgs config lib; })
     (import ./network-config.nix { inherit pkgs config lib; })
@@ -60,6 +61,10 @@ in
     mysql = {
       url = config.env.url; # REMOVE!!
       port = 3306;
+    };
+    voucher-server = {
+      url = (config.env.url // { subdomain = "voucher-server"; });
+      port = 4000;
     };
   };
 
@@ -141,6 +146,11 @@ in
     port = config.env.services.tasks.port;
     notion-token = secrets.notion-token;
     dev = true;
+  };
+
+  services.voucher-server = {
+    enable = true;
+    port = config.env.services.voucher-server.port;
   };
 
 }
