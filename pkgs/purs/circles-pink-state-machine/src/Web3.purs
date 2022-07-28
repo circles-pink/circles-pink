@@ -2,39 +2,41 @@ module Web3
   ( ErrNative
   , ErrPrivKeyToAccount
   , Hash(..)
+  , Message(..)
   , NativeError
   , accountsHashMessage
+  , accountsRecover
+  , accountsSign
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  )
-  where
+  ) where
 
 import Prelude
 
-import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.URI (URI)
 import CirclesPink.URI as U
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
-import Data.Maybe (fromJust)
+import Data.Either (hush)
+import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype)
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff, Error, attempt, message, try)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Class (liftEffect)
 import Effect.Exception (name)
+import Effect.Unsafe (unsafePerformEffect)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (PrivateKey)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import Web3.Accounts (SignatureObj(..))
 import Web3.Bindings as B
-
 
 --------------------------------------------------------------------------------
 -- Types
@@ -47,7 +49,6 @@ derive instance newtypeHash :: Newtype Hash _
 newtype Message = Message String
 
 derive instance newtypeMessage :: Newtype Message _
-
 
 --------------------------------------------------------------------------------
 -- Error types
@@ -114,8 +115,17 @@ privKeyToAccount w3 pk =
 -- Accounts
 --------------------------------------------------------------------------------
 
+type SignatureObject = ...
+
 accountsSign :: B.Web3 -> Message -> PrivateKey -> SignatureObj
-accountsSign web3 (Message msg) pk = B.accountsHashMessage web3 
+accountsSign web3 (Message msg) pk = B.accountsSign web3 msg (show pk)
+
+accountsRecover :: B.Web3 -> B.SignatureObj -> Maybe Address
+accountsRecover web3 so = B.accountsRecover web3 so
+  # try
+  # unsafePerformEffect
+  # hush
+  >>= parseAddress
 
 accountsHashMessage :: B.Web3 -> Message -> Hash
 accountsHashMessage web3 (Message msg) = B.accountsHashMessage web3 msg # Hash
