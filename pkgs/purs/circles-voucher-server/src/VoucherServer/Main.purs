@@ -26,8 +26,6 @@ import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
-import Web3.Accounts (SignatureObj(..))
-import Web3.Accounts as W3A
 
 type Message =
   { id :: Int

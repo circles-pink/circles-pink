@@ -2,17 +2,19 @@ module Web3.Bindings
   ( Account
   , Eth
   , Provider
+  , SignatureObj(..)
   , Utils
   , Web3
   , Web3Static
   , accountsHashMessage
+  , accountsRecover
+  , accountsSign
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
   , web3static
-  )
-  where
+  ) where
 
 import Data.Newtype (class Newtype)
 import Effect (Effect)
@@ -41,11 +43,9 @@ newtype SignatureObj = SignatureObj
   , signature :: String
   }
 
-
 derive instance newtypeSignatureObj :: Newtype SignatureObj _
 
 derive newtype instance readForeign :: ReadForeign SignatureObj
-
 
 foreign import sendTransaction :: Web3 -> { from :: String, to :: String, value :: String } -> EffectFnAff String
 
@@ -58,7 +58,6 @@ foreign import privKeyToAccount :: Web3 -> String -> Effect Account
 --------------------------------------------------------------------------------
 -- Accounts
 --------------------------------------------------------------------------------
-
 
 foreign import accountsSign :: Web3 -> String -> String -> SignatureObj
 
