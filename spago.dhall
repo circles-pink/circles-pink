@@ -3,7 +3,7 @@ let circles-pink-state-machine =
 
 let chance = ./pkgs/purs/chance/spago.dhall
 
-let circles-voucher-server = ./pkgs/purs/circles-voucher-server/spago.dhall
+-- let circles-voucher-server = ./pkgs/purs/circles-voucher-server/spago.dhall
 
 let fp-ts = ./pkgs/purs/fp-ts/spago.dhall
 
@@ -19,7 +19,7 @@ in  { name = "circles-pink"
     , dependencies =
           circles-pink-state-machine.dependencies
         # chance.dependencies
-        # circles-voucher-server.dependencies
+        -- # circles-voucher-server.dependencies
         # fp-ts.dependencies
         # graph.dependencies
         # indexed-graph.dependencies
@@ -31,8 +31,8 @@ in  { name = "circles-pink"
       , "./pkgs/purs/circles-pink-state-machine/test/**/*.purs"
       , "./pkgs/purs/chance/src/**/*.purs"
       , "./pkgs/purs/chance/test/**/*.purs"
-      , "./pkgs/purs/circles-voucher-server/src/**/*.purs"
-      , "./pkgs/purs/circles-voucher-server/test/**/*.purs"
+      -- , "./pkgs/purs/circles-voucher-server/src/**/*.purs"
+      -- , "./pkgs/purs/circles-voucher-server/test/**/*.purs"
       , "./pkgs/purs/fp-ts/src/**/*.purs"
       , "./pkgs/purs/fp-ts/test/**/*.purs"
       , "./pkgs/purs/graph/src/**/*.purs"
