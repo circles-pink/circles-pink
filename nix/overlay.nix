@@ -248,9 +248,16 @@
         ${final.nodejs}/bin/node -e 'require("${purs.default}/CirclesPink.Garden.ApiScript").main()' $@
       '';
 
-      generate-tsd = final.writeShellScriptBin "generate-tsd" ''
-        ${final.nodejs}/bin/node -e 'require("${purs.circles-pink-state-machine.output}/CirclesPink.GenerateTSD").main()' $@
-      '';
+      generate-tsd =
+        let
+          script = final.writeText "script.js" ''
+            require("${purs.circles-pink-state-machine.output}/CirclesPink.GenerateTSD").main()
+          '';
+        in
+        final.writeShellScriptBin "generate-tsd" ''
+          export NODE_PATH=${ts.emptyWorkspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/node_modules
+          ${final.nodejs}/bin/node ${script} $@
+        '';
 
       purs-deps-json =
         let
