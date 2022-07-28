@@ -1,12 +1,15 @@
 module Web3
   ( ErrNative
   , ErrPrivKeyToAccount
+  , Hash(..)
   , NativeError
+  , accountsHashMessage
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -17,17 +20,34 @@ import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Bifunctor (lmap)
 import Data.Maybe (fromJust)
+import Data.Newtype (class Newtype)
 import Data.Variant (Variant, inj)
 import Effect.Aff (Aff, Error, attempt, message, try)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Class (liftEffect)
 import Effect.Exception (name)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
+import Network.Ethereum.Core.Signatures (PrivateKey)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web3.Accounts (SignatureObj(..))
 import Web3.Bindings as B
+
+
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
+newtype Hash = Hash String
+
+derive instance newtypeHash :: Newtype Hash _
+
+newtype Message = Message String
+
+derive instance newtypeMessage :: Newtype Message _
+
 
 --------------------------------------------------------------------------------
 -- Error types
@@ -89,6 +109,16 @@ privKeyToAccount w3 pk =
     # try
     <#> lmap mkErrorNative
     # ExceptT
+
+--------------------------------------------------------------------------------
+-- Accounts
+--------------------------------------------------------------------------------
+
+accountsSign :: B.Web3 -> Message -> PrivateKey -> SignatureObj
+accountsSign web3 (Message msg) pk = B.accountsHashMessage web3 
+
+accountsHashMessage :: B.Web3 -> Message -> Hash
+accountsHashMessage web3 (Message msg) = B.accountsHashMessage web3 msg # Hash
 
 --------------------------------------------------------------------------------
 -- Util

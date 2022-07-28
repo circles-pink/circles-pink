@@ -12,6 +12,13 @@ exports.newWeb3 = (provider) => () => new Web3(provider);
 exports.privKeyToAccount = (web3) => (privKey) => () =>
   web3.eth.accounts.privateKeyToAccount(privKey);
 
+exports.accountsSign = (web3) => (msg) => (pk) => web3.accounts.sign(msg, pk);
+
+exports.accountsRecover = (web3) => (so) => () => web3.accounts.recover(so);
+
+exports.accountsHashMessage = (web3) => (msg) => web3.accounts.hashMessage(msg);
+
+
 exports.sendTransaction = (web3) => (opts) =>
   function (onError, onSuccess) {
     var cancel = web3.eth.sendTransaction(opts, function (err, res) {
