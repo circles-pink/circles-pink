@@ -8,9 +8,8 @@ module PursTs
 import Prelude
 
 import Control.Monad.State (State, get, modify, runState)
-import Data.Array (catMaybes, intersperse)
+import Data.Array (catMaybes)
 import Data.Array as A
-import Data.Array.NonEmpty as NEA
 import Data.Bifunctor (lmap)
 import Data.Map (Map)
 import Data.Map as M
@@ -23,8 +22,8 @@ import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS (Declaration(..))
-import Language.TypeScript.DTS as DTS
-import Language.TypeScript.DTS.DSL as DTS
+import Language.TypeScript.DTS (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..)) as DTS
+import Language.TypeScript.DTS.DSL (emptyLine, lineComment) as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
@@ -216,15 +215,13 @@ defineModule mm k xs =
     , "PureScript Module: " <> k
     ]
 
-  xs' = xs >>= (\x -> [DTS.emptyLine, DTS.lineComment "Purs export", x])
-
-  moduleBody = (DTS.ModuleBody xs') # resolveModuleBody
+  moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
 
 declToRefs :: DTS.Declaration -> Array DTS.QualName
 declToRefs = case _ of
   DTS.DeclTypeDef _ _ t -> typeToRefs t
   DTS.DeclValueDef _ t -> typeToRefs t
-  t -> []
+  _ -> []
 
 typeToRefs :: DTS.Type -> Array DTS.QualName
 typeToRefs = case _ of
@@ -240,22 +237,3 @@ typeToRefs = case _ of
   DTS.TypeOpaque _ _ -> []
   DTS.TypeUnion x y -> typeToRefs x <> typeToRefs y
   DTS.TypeTLString _ -> []
-
--- x = toMono CirclesPink.GenerateTSD.SampleModule.caseVielleicht
-
--- class ToMono a b | a -> b where
---   toMono :: a -> b
-
--- instance toMono1 ::
---   ToMono
---     ((a -> b) -> b -> f a -> b)
---     ((A -> B) -> B -> f A -> B) where
---   toMono = unsafeCoerce
-
--- B -> (A -> _) -> _
-
--- instance toTsMonoProxy :: (ToMono a b) => ToMono (Proxy a) (Proxy b) where
---   toMono _ = Proxy
-
--- mono :: forall (f :: Type -> Type) a. (Proxy (f a)) -> Proxy (f A)
--- mono = unsafeCoerce

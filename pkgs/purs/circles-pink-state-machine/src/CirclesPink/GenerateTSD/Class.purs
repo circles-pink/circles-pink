@@ -20,7 +20,7 @@ import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
 import Language.TypeScript.DTS (Declaration(..), Name(..), Type(..)) as DTS
 import Language.TypeScript.DTS.DSL ((|||))
-import Language.TypeScript.DTS.DSL (array, boolean, function_, keyVal, mkType, mkType_, name, null, number, opaque, qualName, record, record', string, tlString, var) as DTS
+import Language.TypeScript.DTS.DSL (array, boolean, emptyLine, function_, keyVal, lineComment, mkType, mkType_, name, null, number, opaque, qualName, record, record', string, tlString, var) as DTS
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
@@ -190,21 +190,35 @@ newtype Ctor a = Ctor a
 
 --------------------------------------------------------------------------------
 
-val :: forall a. ToTsType a => a -> String -> DTS.Declaration
-val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
+val :: forall a. ToTsType a => a -> String -> Array DTS.Declaration
+val x n =
+  [ DTS.emptyLine
+  , DTS.lineComment "Value"
+  , DTS.DeclValueDef (DTS.Name n) $ toTsType x
+  ]
 
-val' :: forall a. ToTsType a => Array DTS.Type -> a -> String -> DTS.Declaration
-val' cs x n = DTS.DeclValueDef (DTS.Name n) $
-  foldr mkFn init cs
+val' :: forall a. ToTsType a => Array DTS.Type -> a -> String -> Array DTS.Declaration
+val' cs x n =
+  [ DTS.emptyLine
+  , DTS.DeclValueDef (DTS.Name n) $ foldr mkFn init cs
+  ]
   where
   mkFn y f = DTS.TypeFunction S.empty [ (DTS.Name "_") /\ y ] f
   init = toTsType x
 
-typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
-typ x n = DTS.DeclTypeDef (DTS.Name n) mempty $ toTsDef x
+typ :: forall a. ToTsDef a => a -> String -> Array DTS.Declaration
+typ x n =
+  [ DTS.emptyLine
+  , DTS.lineComment "Type"
+  , DTS.DeclTypeDef (DTS.Name n) mempty $ toTsDef x
+  ]
 
-cla :: forall dummy a. ToTsDef a => dummy -> a -> String -> DTS.Declaration
+cla :: forall dummy a. ToTsDef a => dummy -> a -> String -> Array DTS.Declaration
 cla _ = typ
 
-ins :: DTS.Type -> String -> DTS.Declaration
-ins x n = DTS.DeclValueDef (DTS.Name n) $ x
+ins :: DTS.Type -> String -> Array DTS.Declaration
+ins x n =
+  [ DTS.emptyLine
+  , DTS.lineComment "Instance"
+  , DTS.DeclValueDef (DTS.Name n) $ x
+  ]
