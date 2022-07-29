@@ -18,6 +18,7 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
+import Language.PureScript.Type as PT
 import Language.TypeScript.DTS (Declaration(..), Name(..), Type(..)) as DTS
 import Language.TypeScript.DTS.DSL ((|||))
 import Language.TypeScript.DTS.DSL (array, boolean, emptyLine, function_, keyVal, lineComment, mkType, mkType_, name, null, number, opaque, qualName, record, record', string, tlString, var) as DTS
@@ -190,10 +191,18 @@ newtype Ctor a = Ctor a
 
 --------------------------------------------------------------------------------
 
-val :: forall a. ToTsType a => a -> String -> Array DTS.Declaration
+class ToPursType a where
+  toPursType :: a -> PT.Type
+
+instance toPursType' :: ToPursType a where
+  toPursType _ = PT.string
+
+--------------------------------------------------------------------------------
+
+val :: forall a. ToTsType a => ToPursType a => a -> String -> Array DTS.Declaration
 val x n =
   [ DTS.emptyLine
-  , DTS.lineComment "Value"
+  , DTS.lineComment ("Value: " <> (PT.printType $ toPursType x))
   , DTS.DeclValueDef (DTS.Name n) $ toTsType x
   ]
 
@@ -209,7 +218,7 @@ val' cs x n =
 typ :: forall a. ToTsDef a => a -> String -> Array DTS.Declaration
 typ x n =
   [ DTS.emptyLine
-  , DTS.lineComment "Type"
+  , DTS.lineComment ("Type")
   , DTS.DeclTypeDef (DTS.Name n) mempty $ toTsDef x
   ]
 
