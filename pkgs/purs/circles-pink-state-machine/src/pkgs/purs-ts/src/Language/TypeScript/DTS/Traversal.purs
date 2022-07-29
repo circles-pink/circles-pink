@@ -56,6 +56,7 @@ traverseDeclaration { onType } =
   case _ of
     DeclTypeDef n ns t -> DeclTypeDef n ns <$> onType t
     DeclValueDef n t -> DeclValueDef n <$> onType t
+    t -> pure t 
 
 traverseModuleBody :: forall f r. Applicative f => { | OnType (Rewrite f) + r } -> Rewrite f ModuleBody
 traverseModuleBody v (ModuleBody xs) = ModuleBody <$> traverse (traverseDeclaration v) xs

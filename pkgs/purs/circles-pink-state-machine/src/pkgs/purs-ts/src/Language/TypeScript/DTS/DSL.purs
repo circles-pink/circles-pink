@@ -2,9 +2,11 @@ module Language.TypeScript.DTS.DSL
   ( (|||)
   , array
   , boolean
+  , emptyLine
   , function
   , function_
   , keyVal
+  , lineComment
   , mkType
   , mkType_
   , name
@@ -32,7 +34,7 @@ import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (fromHomogeneous)
 import Foreign.Object as O
-import Language.TypeScript.DTS (Name(..), QualName(..), Type(..))
+import Language.TypeScript.DTS (Declaration(..), Name(..), QualName(..), Type(..))
 import Type.Row.Homogeneous (class Homogeneous)
 
 null :: Type
@@ -93,3 +95,10 @@ qualName_ n = QualName Nothing n
 
 name :: String -> Name
 name n = Name n
+
+lineComment :: String -> Declaration
+lineComment = DeclLineComment
+
+
+emptyLine :: Declaration
+emptyLine = DeclEmptyLine
