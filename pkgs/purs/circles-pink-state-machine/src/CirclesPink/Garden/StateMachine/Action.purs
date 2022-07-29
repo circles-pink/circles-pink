@@ -30,7 +30,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _setTerms
   , _setUsername
   , _signIn
-  , _signMessage
+  , _getVouchers
   , _signUp
   , _submit
   , _transfer
@@ -104,7 +104,7 @@ type CirclesAction = Variant
             }
         , redeploySafeAndToken :: Unit
         , expandTrustNetwork :: String
-        , signMessage :: String
+        , getVouchers :: String
         )
   , login ::
       Variant
@@ -237,5 +237,5 @@ _redeploySafeAndToken = inj (Proxy :: _ "redeploySafeAndToken")
 _expandTrustNetwork :: forall a v. a -> Variant (expandTrustNetwork :: a | v)
 _expandTrustNetwork = inj (Proxy :: _ "expandTrustNetwork")
 
-_signMessage :: forall a v. a -> Variant (signMessage :: a | v)
-_signMessage = inj (Proxy :: _ "signMessage")
+_getVouchers :: forall a v. a -> Variant (getVouchers :: a | v)
+_getVouchers = inj (Proxy :: _ "getVouchers")
