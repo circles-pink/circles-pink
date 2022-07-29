@@ -19,6 +19,7 @@ module Data.IxGraph
   , modifyNode
   , neighborEdgesWithNodes
   , neighborNodes
+  , neighborhood
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingIds
@@ -26,6 +27,7 @@ module Data.IxGraph
   , toUnfoldables
   , updateEdge
   , updateNode
+  , module Exp
   )
   where
 
@@ -34,9 +36,10 @@ import Prelude
 import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
-import Data.Graph (EitherV, Graph, GraphSpec)
+import Data.Graph (EitherV, Graph, GraphSpec, NeighborConnectivity)
+import Data.Graph (NeighborConnectivity) as Exp
 import Data.Graph as G
-import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrModifyNode)
+import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrNeighborhood)
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -137,6 +140,9 @@ neighborEdgesWithNodes id (IxGraph graph) = map (bimap snd snd) <$> G.neighborEd
 
 toUnfoldables :: forall id e n f. Unfoldable f => Ord id => IxGraph id e n -> GraphSpec f id e n
 toUnfoldables (IxGraph graph) = G.toUnfoldables graph
+
+neighborhood :: forall r id e n. Ord id => id -> IxGraph id e n -> EitherV (ErrNeighborhood id r) (Array (NeighborConnectivity e /\ n))
+neighborhood id (IxGraph graph) = G.neighborhood id graph <#> (map >>> map) snd
 
 -- insertNode :: forall id e n. Ord id => Indexed id n => n -> IxGraph id e n -> IxGraph id e n
 -- insertNode node (IxGraph graph) = IxGraph $ G.insertNode (getIndex node) node graph

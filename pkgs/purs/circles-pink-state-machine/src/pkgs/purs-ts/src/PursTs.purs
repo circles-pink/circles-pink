@@ -54,7 +54,7 @@ instance cleanType :: Clean DTS.Type where
     DTS.TypeVar x -> DTS.TypeVar x
     DTS.TypeConstructor qn x -> DTS.TypeConstructor (clean m qn) (clean m <$> x)
     DTS.TypeOpaque y x -> DTS.TypeOpaque y x
-    DTS.TypeUnion xs -> DTS.TypeUnion $ clean m <$> xs
+    DTS.TypeUnion x y -> DTS.TypeUnion (clean m x) (clean m x)
     DTS.TypeTLString s -> DTS.TypeTLString s
 
 instance cleanQualName :: Clean DTS.QualName where
@@ -100,13 +100,13 @@ resolveType' = case _ of
   DTS.TypeVar n -> resolveVar n
   DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn <$> traverse resolveType' xs
   DTS.TypeOpaque x ns -> resolveOpaque x ns
-  DTS.TypeUnion xs -> DTS.TypeUnion <$> traverse resolveType' xs
+  DTS.TypeUnion x y -> DTS.TypeUnion <$> resolveType' x <*> resolveType' y
   DTS.TypeTLString s -> pure $ DTS.TypeTLString s
   where
 
   resolveOpaque x ns = do
     _ <- modify (\s -> s { floating = ns <> s.floating })
-    pure $  DTS.TypeOpaque x ns
+    pure $ DTS.TypeOpaque x ns
 
   resolveVar n = do
     _ <- modify (\s -> s { floating = A.snoc s.floating n })
@@ -150,7 +150,7 @@ deleteQuant s = case _ of
   DTS.TypeVar n -> DTS.TypeVar n
   DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn $ map (deleteQuant s) xs
   DTS.TypeOpaque y x -> DTS.TypeOpaque y x
-  DTS.TypeUnion xs -> DTS.TypeUnion $ map (deleteQuant s) xs
+  DTS.TypeUnion x y -> DTS.TypeUnion (deleteQuant s x) (deleteQuant s y)
   DTS.TypeTLString str -> DTS.TypeTLString str
   where
 
@@ -185,14 +185,10 @@ pursModule x = modToAlias x /\ ("../" <> x) /\ x
 modToAlias :: String -> String
 modToAlias = St.replaceAll (Pattern ".") (Replacement "_")
 
-
-
 defineModules :: Map String (String /\ String) -> Array (String /\ Array DTS.Declaration) -> Array (String /\ DTS.Module)
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
   where
   mm' = xs <#> fst >>> pursModule # M.fromFoldable # M.union mm
-
-
 
 defineModule :: Map String (String /\ String) -> String -> Array DTS.Declaration -> DTS.Module
 defineModule mm k xs =
@@ -231,7 +227,7 @@ typeToRefs = case _ of
   DTS.TypeVar _ -> []
   DTS.TypeConstructor qn xs -> [ qn ] <> (xs >>= typeToRefs)
   DTS.TypeOpaque _ _ -> []
-  DTS.TypeUnion xs -> NEA.toArray xs >>= typeToRefs
+  DTS.TypeUnion x y -> typeToRefs x <> typeToRefs y
   DTS.TypeTLString _ -> []
 
 -- x = toMono CirclesPink.GenerateTSD.SampleModule.caseVielleicht

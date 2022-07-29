@@ -48,7 +48,7 @@ traverseType { onType } =
     TypeRecord xs -> TypeRecord <$> traverse (traverse onType) xs
     TypeFunction q args ret -> TypeFunction q <$> traverse (traverse onType) args <*> onType ret
     TypeConstructor n xs -> TypeConstructor n <$> traverse onType xs
-    TypeUnion xs -> TypeUnion <$> traverse onType xs
+    TypeUnion x y -> TypeUnion <$> onType x <*> onType y
     t -> pure t
 
 traverseDeclaration :: forall f r. Applicative f => { | OnType (Rewrite f) + r } -> Rewrite f Declaration
