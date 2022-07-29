@@ -32,43 +32,51 @@ _Ord a = DTS.TypeConstructor (DTS.QualName (Just "Data_Ord") "Ord") [ toTsType a
 modules :: Array (String /\ Array DTS.Declaration)
 modules =
   [ "Data.IxGraph" /\
-      [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
-      , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
-      ]
+      join
+        [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
+        , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
+        ]
 
   , "CirclesPink.Data.Address" /\
-      [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address"
-      , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
-      ]
+      join
+        [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address"
+        , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
+        ]
 
   , "CirclesPink.Data.TrustNode" /\
-      [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
-      , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
-      , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
-      ]
+      join
+        [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
+        , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
+        , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
+        ]
 
   , "CirclesPink.Data.TrustConnection" /\
-      [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
-      ]
+      join
+        [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
+        ]
 
   , "Data.Either" /\
-      [ typ (Proxy :: _ (Data.Either.Either A B)) "Either"
-      , val (Data.Either.either :: _ -> _ -> _ A B -> C) "either"
-      , val (Data.Either.hush :: _ A B -> _) "hush"
-      ]
+      join
+        [ typ (Proxy :: _ (Data.Either.Either A B)) "Either"
+        , val (Data.Either.either :: _ -> _ -> _ A B -> C) "either"
+        , val (Data.Either.hush :: _ A B -> _) "hush"
+        ]
 
   , "Data.Maybe" /\
-      [ typ (Proxy :: _ (Data.Maybe.Maybe A)) "Maybe"
-      , val (Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
-      ]
+      join
+        [ typ (Proxy :: _ (Data.Maybe.Maybe A)) "Maybe"
+        , val (Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
+        ]
 
   , "Data.Ord" /\
-      [ cla (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A)) "Ord"
-      ]
+      join
+        [ cla (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A)) "Ord"
+        ]
 
   , "Data.Nullable" /\
-      [ val (Data.Nullable.toNullable :: _ A -> _) "toNullable"
-      ]
+      join
+        [ val (Data.Nullable.toNullable :: _ A -> _) "toNullable"
+        ]
 
   --        "CirclesPink.GenerateTSD.SampleModule" /\
   --       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
