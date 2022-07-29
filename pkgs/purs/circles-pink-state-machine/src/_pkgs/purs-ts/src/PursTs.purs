@@ -8,7 +8,7 @@ module PursTs
 import Prelude
 
 import Control.Monad.State (State, get, modify, runState)
-import Data.Array (catMaybes)
+import Data.Array (catMaybes, intersperse)
 import Data.Array as A
 import Data.Array.NonEmpty as NEA
 import Data.Bifunctor (lmap)
@@ -198,7 +198,7 @@ defineModule mm k xs =
   DTS.Module moduleHead moduleBody
     # cleanModule alias
   where
-  moduleHead = (DTS.ModuleHead imports)
+  moduleHead = (DTS.ModuleHead commentHeader imports)
 
   alias = M.lookup k mm <#> snd # maybe "Unknown_Alias" identity
 
@@ -211,13 +211,14 @@ defineModule mm k xs =
     # catMaybes
     <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
-  commentHeader = [
-    DTS.lineComment "Auto generated type signatures",
-    DTS.lineComment $ k,
-    DTS.emptyLine
-  ]
+  commentHeader =
+    [ "Auto generated type signatures."
+    , "PureScript Module: " <> k
+    ]
 
-  moduleBody = (DTS.ModuleBody (commentHeader <> xs)) # resolveModuleBody
+  xs' = xs >>= (\x -> [DTS.emptyLine, DTS.lineComment "Purs export", x])
+
+  moduleBody = (DTS.ModuleBody xs') # resolveModuleBody
 
 declToRefs :: DTS.Declaration -> Array DTS.QualName
 declToRefs = case _ of

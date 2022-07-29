@@ -81,6 +81,6 @@ data Import = Import Name Path
 
 data Module = Module ModuleHead ModuleBody
 
-newtype ModuleHead = ModuleHead (Array Import)
+data ModuleHead = ModuleHead (Array String) (Array Import)
 
 newtype ModuleBody = ModuleBody (Array Declaration)

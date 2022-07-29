@@ -25,7 +25,7 @@ printType = case _ of
   TypeVar n -> printName n
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
   TypeOpaque id targs -> "{ " <> printOpaque id <> printTargsValues targs <> " }"
-  TypeUnion x y -> printType x <> " | " <>  printType y
+  TypeUnion x y -> printType x <> " | " <> printType y
   TypeTLString s -> "\"" <> s <> "\""
 
   where
@@ -55,18 +55,23 @@ printModule :: Module -> String
 printModule (Module mh mb) = fold [ printModuleHead mh, printModuleBody mb ]
 
 printModuleHead :: ModuleHead -> String
-printModuleHead (ModuleHead im) | A.null im = ""
-printModuleHead (ModuleHead im) = (joinWith "\n" $ printImport <$> im) <> "\n\n"
+printModuleHead (ModuleHead cm im) = printCmt <> printImports
+  where
+  printCmt | A.length cm == 0 = ""
+  printCmt = (joinWith "\n" $ map (\c -> "// " <> c) cm) <> "\n\n"
+
+  printImports | A.length im == 0 = ""
+  printImports = (joinWith "\n" $ map printImport im) <> "\n"
 
 printModuleBody :: ModuleBody -> String
-printModuleBody (ModuleBody xs) = joinWith "\n\n" $ printDeclaration <$> xs
+printModuleBody (ModuleBody xs) = joinWith "\n" $ printDeclaration <$> xs
 
 printDeclaration :: Declaration -> String
 printDeclaration = case _ of
   DeclTypeDef n targs t -> "export type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
   DeclLineComment s -> "// " <> s
-  DeclEmptyLine -> "\n"
+  DeclEmptyLine -> ""
 
 printImport :: Import -> String
 printImport (Import n p) = "import * as " <> printName n <> " from '" <> printPath p <> "'"
