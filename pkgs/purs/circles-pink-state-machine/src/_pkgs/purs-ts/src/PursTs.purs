@@ -23,8 +23,6 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..)) as DTS
-import Language.TypeScript.DTS.DSL (emptyLine, lineComment) as DTS
-import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 

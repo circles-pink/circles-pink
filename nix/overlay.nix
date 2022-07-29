@@ -253,9 +253,6 @@
         ${final.nodejs}/bin/node -e 'require("${purs.circles-pink-state-machine.output}/VoucherServer.Main").main()' $@
       '';
 
-      generate-tsd = final.writeShellScriptBin "generate-tsd" ''
-        ${final.nodejs}/bin/node -e 'require("${purs.circles-pink-state-machine.output}/CirclesPink.GenerateTSD").main()' $@
-      '';
       generate-tsd =
         let
           script = final.writeText "script.js" ''
