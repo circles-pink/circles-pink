@@ -4,6 +4,7 @@ import Prelude
 
 import CirclesPink.Data.Address (parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
+import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.DateTime.Instant as DT
@@ -17,15 +18,20 @@ import Data.Number (fromString)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..))
+import Effect.Aff (Aff, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
+import Effect.Class.Console (error)
 import Effect.Now (now)
+import Node.Process (exit, getEnv)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
+import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
 import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
+import Type.Proxy (Proxy(..))
+import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import Web3 (Message(..), SignatureObj(..), Web3, newWeb3_)
 import Web3 as W3
 
@@ -109,9 +115,24 @@ getVouchers { body: { signatureObj } } = do
       else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
-main :: Effect Unit
-main = do
-  Payload.launch spec
-    { getVouchers: getVouchers
-    }
 
+type Config = (port :: Maybe Int <: "PORT")
+
+--------------------------------------------------------------------------------
+
+app :: Aff (Either String Server)
+app = do
+  env <- liftEffect $ getEnv
+  let config = lmap envErrorMessage $ fromEnv (Proxy :: _ Config) env
+  case config of
+    Left e -> do
+      error e
+      liftEffect $ exit 1
+    Right parsedEnv -> case parsedEnv.port of
+      Nothing -> Payload.start defaultOpts spec { getVouchers: getVouchers }
+      Just port -> Payload.start (defaultOpts { port = port }) spec
+        { getVouchers: getVouchers
+        }
+
+main :: Effect Unit
+main = launchAff_ app

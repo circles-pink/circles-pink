@@ -98,7 +98,7 @@ liftEnv f e =
   , removeTrustConnection: compose3 (mapExceptT f) e.removeTrustConnection
   , saveSession: compose (mapExceptT f) e.saveSession
   , restoreSession: (mapExceptT f) e.restoreSession
-  , signChallenge: e.signChallenge
+  , signChallenge: compose2 f e.signChallenge
   , getBalance: compose2 (mapExceptT f) e.getBalance
   , checkUBIPayout: compose2 (mapExceptT f) e.checkUBIPayout
   , requestUBIPayout: compose2 (mapExceptT f) e.requestUBIPayout

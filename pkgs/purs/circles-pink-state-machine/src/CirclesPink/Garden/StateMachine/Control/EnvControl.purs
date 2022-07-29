@@ -93,7 +93,6 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
-import Effect.Aff (Aff)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Web3 (Message, SignatureObj)
@@ -202,8 +201,7 @@ type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> Exc
 --------------------------------------------------------------------------------
 
 -- | Sign Challenge
-type SignChallenge :: forall k. k -> Type
-type SignChallenge m = Message -> PrivateKey -> Aff SignatureObj
+type SignChallenge m = Message -> PrivateKey -> m SignatureObj
 
 --------------------------------------------------------------------------------
 

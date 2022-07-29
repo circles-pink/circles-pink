@@ -345,9 +345,8 @@ dashboard env@{ trustGetNetwork } =
         pure unit
 
   signMessage _ st msg = do
-    let
-      sig = env.signChallenge (Message msg) st.privKey
-      _ = spy "signature" sig
+    _ <- env.signChallenge (Message msg) st.privKey
+    -- let _ = spy "signature" sig
     pure unit
 
   getBalance set st _ =
