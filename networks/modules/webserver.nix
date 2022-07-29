@@ -86,7 +86,7 @@ in
 
   systemd.mounts = [ ];
 
-  networking.firewall.allowedTCPPorts = [ 80 22 443 4000 ];
+  networking.firewall.allowedTCPPorts = [ 80 22 443 ];
 
   services.nginx = {
     enable = true;

@@ -15,8 +15,7 @@ module Web3.Bindings
   , privKeyToAccount
   , sendTransaction
   , web3static
-  )
-  where
+  ) where
 
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
