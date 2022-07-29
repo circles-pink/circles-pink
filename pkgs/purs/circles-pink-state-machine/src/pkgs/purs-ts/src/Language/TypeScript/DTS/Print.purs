@@ -65,6 +65,8 @@ printDeclaration :: Declaration -> String
 printDeclaration = case _ of
   DeclTypeDef n targs t -> "export type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
+  DeclLineComment s -> "// " <> s
+  DeclEmptyLine -> "\n"
 
 printImport :: Import -> String
 printImport (Import n p) = "import * as " <> printName n <> " from '" <> printPath p <> "'"
