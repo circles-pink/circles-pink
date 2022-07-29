@@ -24,6 +24,7 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
+import Language.TypeScript.DTS.DSL as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
@@ -41,6 +42,7 @@ instance cleanDeclaration :: Clean DTS.Declaration where
   clean m x = case x of
     DTS.DeclTypeDef x' y t -> DTS.DeclTypeDef x' y $ clean m t
     DTS.DeclValueDef x' t -> DTS.DeclValueDef x' $ clean m t
+    t -> t
 
 instance cleanType :: Clean DTS.Type where
   clean m = case _ of
@@ -54,7 +56,7 @@ instance cleanType :: Clean DTS.Type where
     DTS.TypeVar x -> DTS.TypeVar x
     DTS.TypeConstructor qn x -> DTS.TypeConstructor (clean m qn) (clean m <$> x)
     DTS.TypeOpaque y x -> DTS.TypeOpaque y x
-    DTS.TypeUnion x y -> DTS.TypeUnion (clean m x) (clean m x)
+    DTS.TypeUnion x y -> DTS.TypeUnion (clean m x) (clean m y)
     DTS.TypeTLString s -> DTS.TypeTLString s
 
 instance cleanQualName :: Clean DTS.QualName where
@@ -84,6 +86,7 @@ resolveDeclaration = case _ of
       (y' /\ _) = resolveType y
     in
       DeclValueDef x y'
+  x -> x
 
 resolveType :: DTS.Type -> DTS.Type /\ TypeScope
 resolveType x = runState (resolveType' x) mempty
@@ -208,12 +211,19 @@ defineModule mm k xs =
     # catMaybes
     <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
-  moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
+  commentHeader = [
+    DTS.lineComment "Auto generated type signatures",
+    DTS.lineComment $ k,
+    DTS.emptyLine
+  ]
+
+  moduleBody = (DTS.ModuleBody (commentHeader <> xs)) # resolveModuleBody
 
 declToRefs :: DTS.Declaration -> Array DTS.QualName
 declToRefs = case _ of
   DTS.DeclTypeDef _ _ t -> typeToRefs t
   DTS.DeclValueDef _ t -> typeToRefs t
+  t -> []
 
 typeToRefs :: DTS.Type -> Array DTS.QualName
 typeToRefs = case _ of
