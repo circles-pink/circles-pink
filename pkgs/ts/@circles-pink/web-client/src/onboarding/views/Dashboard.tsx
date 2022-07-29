@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { Button, Input } from '../../components/forms';
-import { Text } from '../../components/text';
+import { Claim, Text } from '../../components/text';
 import { UserDashboard } from '../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
@@ -24,12 +24,14 @@ import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
   mdiCog,
+  mdiGiftOutline,
   mdiGraph,
   mdiGraphOutline,
   mdiHandCoin,
   mdiLan,
   mdiLogout,
   mdiMagnify,
+  mdiTicketPercentOutline,
 } from '@mdi/js';
 import { LightColorFrame, TrustUserList } from '../../components/TrustUserList';
 import { Overlay } from '../../components/Overlay';
@@ -383,6 +385,22 @@ export const Dashboard = ({
               />
             </FadeIn>
           </MainContent>
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <TopMargin>
+              <LightColorFrame
+                theme={theme}
+                title="Voucher"
+                icon={mdiGiftOutline}
+              >
+                <Claim color={theme.baseColor}>Sign a new Challenge</Claim>
+                <Button
+                  onClick={() => act(A._dashboard(A._signMessage('Cheers')))}
+                >
+                  Sign Challenge!
+                </Button>
+              </LightColorFrame>
+            </TopMargin>
+          </FadeIn>
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
               <LightColorFrame

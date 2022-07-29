@@ -58,6 +58,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , RequestUBIPayout
   , RestoreSession
   , SaveSession
+  , SignChallenge
   , Sleep
   , StorageClear
   , StorageDeleteItem
@@ -71,12 +72,12 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , UserResolve
   , UserSearch
   , _errDecode
+  , _errDecrypt
   , _errKeyNotFound
   , _errNoStorage
   , _errParseToData
   , _errParseToJson
   , _errReadStorage
-  , _errDecrypt
   ) where
 
 import Prelude
@@ -92,8 +93,10 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
+import Effect.Aff (Aff)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web3 (Message, SignatureObj)
 
 --------------------------------------------------------------------------------
 -- Error
@@ -196,6 +199,14 @@ type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + r
 
 type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
 
+--------------------------------------------------------------------------------
+
+-- | Sign Challenge
+type SignChallenge :: forall k. k -> Type
+type SignChallenge m = Message -> PrivateKey -> Aff SignatureObj
+
+--------------------------------------------------------------------------------
+
 -- | Save Session
 -- type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
 
@@ -212,15 +223,12 @@ type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
 -- type RestoreSession k m = forall r. ExceptV (ErrRestoreSession k + r) m PrivateKey
 
-
 -- | Save Session
 type ErrSaveSession r = (errSaveSession :: Unit | r)
 
 type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
 -- | Restore Session
-
-
 
 type ErrRestoreSession r = ErrReadStorage + ErrDecode + r
 
@@ -333,6 +341,7 @@ type EnvControl m =
   , deployToken :: DeployToken m
   , addTrustConnection :: AddTrustConnection m
   , removeTrustConnection :: RemoveTrustConnection m
+  , signChallenge :: SignChallenge m
   , saveSession :: SaveSession m
   , restoreSession :: RestoreSession m
   , getBalance :: GetBalance m

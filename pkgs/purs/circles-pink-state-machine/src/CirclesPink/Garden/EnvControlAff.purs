@@ -8,7 +8,7 @@ import Prelude
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
-import CirclesPink.Data.PrivateKey (genPrivateKey)
+import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
@@ -38,6 +38,7 @@ import Network.Ethereum.Core.Signatures (privateToAddress)
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web3 (accountsSign, newWeb3_)
 
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars
@@ -95,6 +96,7 @@ env envenv@{ request, envVars } =
   , isFunded
   , addTrustConnection
   , removeTrustConnection
+  , signChallenge
   , saveSession
   , restoreSession
   , getBalance
@@ -340,6 +342,11 @@ env envenv@{ request, envVars } =
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
     CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
+
+  signChallenge :: EnvControl.SignChallenge Aff
+  signChallenge msg (PrivateKey pk) = do
+    web3 <- newWeb3_
+    pure $ accountsSign web3 msg pk
 
   -- saveSession :: EnvControl.SaveSession Aff
   -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey

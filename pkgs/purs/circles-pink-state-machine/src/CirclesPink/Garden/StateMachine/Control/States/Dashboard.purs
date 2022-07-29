@@ -42,6 +42,7 @@ import Data.These (These(..), maybeThese)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Test.TestUtils (addrA, addrB, userA)
+import Web3 (Message(..))
 
 --------------------------------------------------------------------------------
 
@@ -160,6 +161,7 @@ dashboard
      , expandTrustNetwork :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
      , addTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , removeTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
+     , signMessage :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , getUBIPayout :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
@@ -192,6 +194,7 @@ dashboard env@{ trustGetNetwork } =
   , expandTrustNetwork
   , addTrustConnection
   , removeTrustConnection
+  , signMessage
   , getBalance
   , getUBIPayout
   , getUsers
@@ -340,6 +343,12 @@ dashboard env@{ trustGetNetwork } =
                   Left _ -> S._dashboard st'
 
         pure unit
+
+  signMessage _ st msg = do
+    let
+      sig = env.signChallenge (Message msg) st.privKey
+      _ = spy "signature" sig
+    pure unit
 
   getBalance set st _ =
     void do
