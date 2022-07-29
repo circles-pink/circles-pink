@@ -8,6 +8,7 @@ const envDefault = {
   gardenProxyFactoryAddress: '0x8b4404DE0CaECE4b966a9959f134f0eFDa636156',
   gardenSafeMasterAddress: '0x2CB0ebc503dE87CFD8f0eCEED8197bF7850184ae',
   gardenEthereumNodeWebSocket: 'wss://dark-frosty-field.xdai.quiknode.pro',
+  voucherServerHost: 'https://voucher-server.circles.pink',
 };
 
 const envRaw = {
@@ -20,6 +21,7 @@ const envRaw = {
   gardenProxyFactoryAddress: process.env.STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS,
   gardenSafeMasterAddress: process.env.STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS,
   gardenEthereumNodeWebSocket: process.env.STORYBOOK_GARDEN_ETHEREUM_NODE_WS,
+  voucherServerHost: process.env.STORYBOOK_VOUCHER_SERVER_HOST,
 };
 
 type RemoveUndefined<T> = { [key in keyof T]: Exclude<T[key], undefined> };

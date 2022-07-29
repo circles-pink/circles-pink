@@ -9,10 +9,10 @@ import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
-import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError)
+import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, stringify)
@@ -35,9 +35,11 @@ import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
+import Payload.Client (defaultOpts, mkClient)
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import VoucherServer.Spec (spec)
 import Web3 (accountsSign, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -51,6 +53,7 @@ newtype EnvVars = EnvVars
   , gardenProxyFactoryAddress :: String
   , gardenSafeMasterAddress :: String
   , gardenEthereumNodeWebSocket :: String
+  , voucherServerHost :: String
   }
 
 derive instance newtypeEnvVars :: Newtype EnvVars _
@@ -97,6 +100,7 @@ env envenv@{ request, envVars } =
   , addTrustConnection
   , removeTrustConnection
   , signChallenge
+  , getVouchers
   , saveSession
   , restoreSession
   , getBalance
@@ -347,6 +351,12 @@ env envenv@{ request, envVars } =
   signChallenge msg (PrivateKey pk) = do
     web3 <- newWeb3_
     pure $ accountsSign web3 msg pk
+
+  getVouchers :: EnvControl.GetVouchers Aff
+  getVouchers signatureObj = do
+    let client = mkClient (defaultOpts { baseUrl = envVars -# _.voucherServerHost }) spec
+    res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
+    pure (res -# _.body)
 
   -- saveSession :: EnvControl.SaveSession Aff
   -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey

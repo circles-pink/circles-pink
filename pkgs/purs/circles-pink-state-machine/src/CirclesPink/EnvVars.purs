@@ -30,6 +30,7 @@ type Config f =
   , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" ChecksumAddress
   , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" ChecksumAddress
   , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
+  , voucherServerHost :: f "VOUCHER_SERVER_HOST" URI
   )
 
 --------------------------------------------------------------------------------
@@ -49,6 +50,7 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenProxyFactoryAddress: show :: ChecksumAddress -> _
       , gardenSafeMasterAddress: show :: ChecksumAddress -> _
       , gardenEthereumNodeWebSocket: U.print
+      , voucherServerHost: U.print
       }
       env
       # E.EnvVars

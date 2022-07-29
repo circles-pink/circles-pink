@@ -14,8 +14,7 @@ module Web3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -39,7 +38,7 @@ import Network.Ethereum.Core.Signatures (PrivateKey)
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import Record as R
-import Simple.JSON (class ReadForeign)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Web3.Bindings (Web3) as Exp
@@ -53,12 +52,14 @@ newtype Hash = Hash String
 
 derive instance newtypeHash :: Newtype Hash _
 derive newtype instance readForeignHash :: ReadForeign Hash
+derive newtype instance writeForeignHash :: WriteForeign Hash
 derive instance eqHash :: Eq Hash
 
 newtype Message = Message String
 
 derive instance newtypeMessage :: Newtype Message _
 derive newtype instance readForeignMessage :: ReadForeign Message
+derive newtype instance writeForeignMessage :: WriteForeign Message
 
 newtype SignatureObj = SignatureObj
   { message :: Message
@@ -71,6 +72,7 @@ newtype SignatureObj = SignatureObj
 
 derive instance newtypeSignatureObj :: Newtype SignatureObj _
 derive newtype instance readForeignSignatureObj :: ReadForeign SignatureObj
+derive newtype instance writeForeignSignatureObj :: WriteForeign SignatureObj
 
 --------------------------------------------------------------------------------
 -- Error types
