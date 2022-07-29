@@ -13,7 +13,6 @@ module Language.TypeScript.DTS
 import Prelude
 import Prim hiding (Row, Type)
 
-import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe)
 import Data.Set (Set)
