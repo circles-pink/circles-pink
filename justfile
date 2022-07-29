@@ -10,6 +10,7 @@ GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
 
 TASKS_EXPLORER_SERVER := env_var_or_default("TASKS_EXPLORER_SERVER", "http://tasks.circles.local")
 DIRECTUS_URL := env_var_or_default("DIRECTUS_URL", "http://directus.circles.local/graphql")
+VOUCHER_SERVER_HOST := env_var_or_default("VOUCHER_SERVER_HOST", "http://localhost:4000")
 GARDEN_API := env_var_or_default("GARDEN_API", "http://api.circles.local")
 GARDEN_API_USERS := env_var_or_default("GARDEN_API_USERS", "http://api.circles.local/api/users")
 GARDEN_GRAPH_API := env_var_or_default("GARDEN_GRAPH_API", "http://graph.circles.local")
@@ -19,6 +20,7 @@ GARDEN_HUB_ADDRESS := env_var_or_default("GARDEN_HUB_ADDRESS", "0xCfEB869F69431e
 GARDEN_PROXY_FACTORY_ADRESS := env_var_or_default("GARDEN_PROXY_FACTORY_ADRESS", "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb")
 GARDEN_SAFE_MASTER_ADDRESS := env_var_or_default("GARDEN_SAFE_MASTER_ADDRESS", "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550")
 GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://localhost:8545")
+
 
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
 
@@ -110,6 +112,7 @@ dev-storybook_:
 	export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
 	export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export STORYBOOK_GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	export STORYBOOK_VOUCHER_SERVER_HOST={{VOUCHER_SERVER_HOST}}
 	yarn workspace storybook run storybook
 
 _dump:
@@ -132,6 +135,7 @@ run-garden_:
 	export GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	export VOUCHER_SERVER_HOST={{VOUCHER_SERVER_HOST}}
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
 
 generate-tsd:

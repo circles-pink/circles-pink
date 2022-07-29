@@ -393,11 +393,11 @@ export const Dashboard = ({
                 title="Voucher"
                 icon={mdiGiftOutline}
               >
-                <Claim color={theme.baseColor}>Sign a new Challenge</Claim>
+                <Claim color={theme.baseColor}>Your Vouchers:</Claim>
                 <Button
-                  onClick={() => act(A._dashboard(A._signMessage('Cheers')))}
+                  onClick={() => act(A._dashboard(A._getVouchers('Cheers')))}
                 >
-                  Sign Challenge!
+                  Get Vouchers!
                 </Button>
               </LightColorFrame>
             </TopMargin>

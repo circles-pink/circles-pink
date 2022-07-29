@@ -19,6 +19,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , ErrGetSafeAddress
   , ErrGetSafeStatus
   , ErrGetUsers
+  , ErrGetVouchers
   , ErrInvalidMnemonic
   , ErrIsFunded
   , ErrIsTrusted
@@ -48,6 +49,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , GetSafeStatus
   , GetTimestamp
   , GetUsers
+  , GetVouchers
   , IsFunded
   , IsTrusted
   , LogInfo
@@ -73,6 +75,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , UserSearch
   , _errDecode
   , _errDecrypt
+  , _errGetVouchers
   , _errKeyNotFound
   , _errNoStorage
   , _errParseToData
@@ -93,8 +96,10 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
+import Payload.Client (ClientError)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import VoucherServer.Main (Voucher)
 import Web3 (Message, SignatureObj)
 
 --------------------------------------------------------------------------------
@@ -188,29 +193,37 @@ type GeneratePrivateKey :: forall k. (Type -> k) -> k
 type GeneratePrivateKey m = m PrivateKey
 
 --------------------------------------------------------------------------------
--- | Trust Add Connection
+-- Trust Add Connection
 type ErrAddTrustConnection r = ErrNative + ErrInvalidUrl + r
 
 type AddTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
--- | Trust Remove Connection
+-- Trust Remove Connection
 type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + r
 
 type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
 
 --------------------------------------------------------------------------------
 
--- | Sign Challenge
+-- Sign Challenge
 type SignChallenge m = Message -> PrivateKey -> m SignatureObj
 
 --------------------------------------------------------------------------------
 
--- | Save Session
+-- Get Vouchers
+
+type ErrGetVouchers r = (errGetVouchers :: ClientError | r)
+
+type GetVouchers m = forall r. SignatureObj -> ExceptV (ErrGetVouchers + r) m (Array Voucher)
+
+--------------------------------------------------------------------------------
+
+-- Save Session
 -- type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
 
 -- type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
--- | Restore Session
+-- Restore Session
 type RequestPath = Array String
 
 type ErrReadStorage r = (errReadStorage :: RequestPath | r)
@@ -221,12 +234,12 @@ type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
 -- type RestoreSession k m = forall r. ExceptV (ErrRestoreSession k + r) m PrivateKey
 
--- | Save Session
+-- Save Session
 type ErrSaveSession r = (errSaveSession :: Unit | r)
 
 type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
--- | Restore Session
+-- Restore Session
 
 type ErrRestoreSession r = ErrReadStorage + ErrDecode + r
 
@@ -317,6 +330,9 @@ _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
 _errDecrypt :: forall r. Variant (ErrDecrypt r)
 _errDecrypt = inj (Proxy :: _ "errDecrypt") unit
 
+_errGetVouchers :: forall r. ClientError -> Variant (ErrGetVouchers r)
+_errGetVouchers = inj (Proxy :: _ "errGetVouchers")
+
 --------------------------------------------------------------------------------
 
 type EnvControl m =
@@ -340,6 +356,7 @@ type EnvControl m =
   , addTrustConnection :: AddTrustConnection m
   , removeTrustConnection :: RemoveTrustConnection m
   , signChallenge :: SignChallenge m
+  , getVouchers :: GetVouchers m
   , saveSession :: SaveSession m
   , restoreSession :: RestoreSession m
   , getBalance :: GetBalance m
