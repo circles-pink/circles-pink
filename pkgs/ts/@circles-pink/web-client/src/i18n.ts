@@ -82,8 +82,10 @@ export const resources = {
           'Your Account is in pending state. Follow the instructions to finalize it!',
         getMoreTruts:
           'Collect at least three trust connections of existing Circles users.',
-        fundYourSafe: 'Or fund your Safe with xDai. Your Safe Address is:',
+        fundYourSafe:
+          'Fund your Safe with at least one xDai. Your Safe Address is:',
         collectTrustsTitle: 'Collect three trusts...',
+        fundSafeTitle: 'Feeling generous today!',
         fundMySafeManually: 'I know what I am doing and I want to fund my safe',
       },
       dashboard: {
@@ -212,8 +214,9 @@ export const resources = {
         fundYourSafe:
           'Oder funde deine Wallet mit mindestens einem xDai. Das ist deine Safe Adresse, wenn sie mit mindestens einem Euro gefunded ist, kannst du die Registrierung abschließen.',
         collectTrustsTitle: 'Sammle drei Trusts!',
+        fundSafeTitle: 'Funde deinen Safe!',
         fundMySafeManually:
-          'Ich weiß was ich tue und möchte meinen Safe selbst funden',
+          'Ich weiß was ich tue und möchte meinen Safe selbst funden.',
       },
       dashboard: {
         addTrustPlaceholder:
