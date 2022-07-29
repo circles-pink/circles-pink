@@ -11,17 +11,16 @@ import Data.Array as A
 import Data.Either as Data.Either
 import Data.Foldable (foldr)
 import Data.IxGraph as Data.IxGraph
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
 import Data.Nullable (Nullable)
 import Data.Set as S
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
-import Language.TypeScript.DTS (Declaration(..), Name(..), QualName(..), Type(..)) as DTS
+import Language.TypeScript.DTS (Declaration(..), Name(..), Type(..)) as DTS
 import Language.TypeScript.DTS.DSL ((|||))
-import Language.TypeScript.DTS.DSL (null, record', tlString) as DTS
-
+import Language.TypeScript.DTS.DSL (array, boolean, function_, keyVal, mkType, mkType_, name, null, number, opaque, qualName, record, record', string, tlString, var) as DTS
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
@@ -29,23 +28,23 @@ class ToTsType a where
   toTsType :: a -> DTS.Type
 
 instance toTsTypeNumber :: ToTsType Number where
-  toTsType _ = DTS.TypeNumber
+  toTsType _ = DTS.number
 
 instance toTsTypeString :: ToTsType String where
-  toTsType _ = DTS.TypeString
+  toTsType _ = DTS.string
 
 instance toTsTypeBoolean :: ToTsType Boolean where
-  toTsType _ = DTS.TypeBoolean
+  toTsType _ = DTS.boolean
 
 instance toTsTypeArray :: ToTsType a => ToTsType (Array a) where
-  toTsType _ = DTS.TypeArray $ toTsType (undefined :: a)
+  toTsType _ = DTS.array $ toTsType (undefined :: a)
 
 instance toTsTypeRecord :: (RowToList r rl, GenRecord rl) => ToTsType (Record r) where
-  toTsType _ = DTS.TypeRecord $ genRecord (Proxy :: _ rl)
+  toTsType _ = DTS.record $ genRecord (Proxy :: _ rl)
 
 instance toTsTypeFunction :: (ToTsType a, ToTsType b) => ToTsType (a -> b) where
-  toTsType _ = DTS.TypeFunction S.empty
-    [ (DTS.Name "_") /\ toTsType (undefined :: a) ]
+  toTsType _ = DTS.function_
+    [ DTS.keyVal "_" $ toTsType (undefined :: a) ]
     (toTsType (undefined :: b))
 
 instance toTsTypeProxy :: ToTsType a => ToTsType (Proxy a) where
@@ -55,65 +54,60 @@ instance toTsTypeVariant :: (RowToList r rl, GenVariant rl) => ToTsType (Variant
   toTsType _ = genVariant (Proxy :: _ rl)
 
 instance toTsTypeMaybe :: ToTsType a => ToTsType (Maybe a) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "Data_Maybe") "Maybe")
+  toTsType _ = DTS.mkType
+    (DTS.qualName "Data_Maybe" "Maybe")
     [ toTsType (Proxy :: _ a) ]
 
 instance toTsType_Data_Either_Either :: (ToTsType a, ToTsType b) => ToTsType (Data.Either.Either a b) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "Data_Either") "Either")
+  toTsType _ = DTS.mkType
+    (DTS.qualName "Data_Either" "Either")
     [ toTsType (Proxy :: _ a), toTsType (Proxy :: _ b) ]
 
 instance toTsTypeUnit :: ToTsType Unit where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "Data_Unit") "Unit")
-    []
+  toTsType _ = DTS.mkType_
+    (DTS.qualName "Data_Unit" "Unit")
 
 instance toTsType_Data_IxGraph_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Data.IxGraph.IxGraph id e n) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "Data_IxGraph") "IxGraph")
+  toTsType _ = DTS.mkType
+    (DTS.qualName "Data_IxGraph" "IxGraph")
     [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
 
 instance toTsType_CirclesPink_Data_Address_Address :: ToTsType (CirclesPink.Data.Address.Address) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "CirclesPink_Data_Address") "Address")
-    []
+  toTsType _ = DTS.mkType_
+    (DTS.qualName "CirclesPink_Data_Address" "Address")
 
 instance toTsType_CirclesPink_Data_Address_TrustNode :: ToTsType (CirclesPink.Data.TrustNode.TrustNode) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "CirclesPink_Data_TrustNode") "TrustNode")
-    []
+  toTsType _ = DTS.mkType_
+    (DTS.qualName "CirclesPink_Data_TrustNode" "TrustNode")
 
 instance toTsType_CirclesPink_Data_TrustConnection_TrustConnection :: ToTsType (CirclesPink.Data.TrustConnection.TrustConnection) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "CirclesPink_Data_TrustConnection") "TrustConnection")
-    []
+  toTsType _ = DTS.mkType_
+    (DTS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection")
 
 instance toTsType_CirclesPink_Data_UserIdent_UserIdent :: ToTsType (CirclesPink.Data.UserIdent.UserIdent) where
-  toTsType _ = DTS.TypeConstructor
-    (DTS.QualName (Just "CirclesPink_Data_UserIdent") "UserIdent")
-    []
+  toTsType _ = DTS.mkType_
+    (DTS.qualName "CirclesPink_Data_UserIdent" "UserIdent")
 
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
   toTsType _ = DTS.null ||| toTsType (Proxy :: _ a)
 
 instance toTsTypeA :: ToTsType A where
-  toTsType _ = DTS.TypeVar $ DTS.Name "A"
+  toTsType _ = DTS.var $ DTS.name "A"
 
 instance toTsTypeB :: ToTsType B where
-  toTsType _ = DTS.TypeVar $ DTS.Name "B"
+  toTsType _ = DTS.var $ DTS.name "B"
 
 instance toTsTypeC :: ToTsType C where
-  toTsType _ = DTS.TypeVar $ DTS.Name "C"
+  toTsType _ = DTS.var $ DTS.name "C"
 
 instance toTsTypeD :: ToTsType D where
-  toTsType _ = DTS.TypeVar $ DTS.Name "D"
+  toTsType _ = DTS.var $ DTS.name "D"
 
 instance toTsTypeE :: ToTsType E where
-  toTsType _ = DTS.TypeVar $ DTS.Name "E"
+  toTsType _ = DTS.var $ DTS.name "E"
 
 instance toTsTypeZ :: ToTsType Z where
-  toTsType _ = DTS.TypeVar $ DTS.Name "Z"
+  toTsType _ = DTS.var $ DTS.name "Z"
 
 --------------------------------------------------------------------------------
 
@@ -127,7 +121,7 @@ instance genRecordNil :: GenRecord Nil where
 instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (Cons s t rl) where
   genRecord _ =
     genRecord (Proxy :: _ rl)
-      # A.cons (DTS.Name (reflectSymbol (Proxy :: _ s)) /\ toTsType (undefined :: t))
+      # A.cons (DTS.keyVal (reflectSymbol (Proxy :: _ s)) $ toTsType (undefined :: t))
 
 --------------------------------------------------------------------------------
 
@@ -161,34 +155,38 @@ instance toTsDefProxy :: ToTsDef a => ToTsDef (Proxy a) where
   toTsDef _ = toTsDef (undefined :: a)
 
 instance toTsTypeDefMaybe :: ToTsDef (Maybe a) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Maybe") "Maybe") $ DTS.Name <$> [ "A" ]
+  toTsDef _ = DTS.opaque (DTS.qualName "Data_Maybe" "Maybe") $ DTS.name <$> [ "A" ]
 
 instance toTsTypeDefEither :: ToTsDef (Data.Either.Either a b) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Either") "Either") $ DTS.Name <$> [ "A", "B" ]
+  toTsDef _ = DTS.opaque (DTS.qualName "Data_Either" "Either") $ DTS.name <$> [ "A", "B" ]
 
 instance toTsTypeDefUnit :: ToTsDef Unit where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Unit") "Unit") []
+  toTsDef _ = DTS.opaque (DTS.qualName "Data_Unit" "Unit") []
 
 instance toTsTypeDef_Data_IxGraph_IxGraph :: ToTsDef (Data.IxGraph.IxGraph id e n) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_IxGraph") "IxGraph") $ DTS.Name <$> [ "Id", "E", "N" ]
+  toTsDef _ = DTS.opaque (DTS.qualName "Data_IxGraph" "IxGraph") $ DTS.Name <$> [ "Id", "E", "N" ]
 
 instance toTsTypeDef_CirclesPink_Data_TrustNode :: ToTsDef (CirclesPink.Data.TrustNode.TrustNode) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_TrustNode") "TrustNode") $ DTS.Name <$> []
+  toTsDef _ = DTS.opaque (DTS.qualName "CirclesPink_Data_TrustNode" "TrustNode") $ DTS.name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_Address :: ToTsDef (CirclesPink.Data.Address.Address) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_Address") "Address") $ DTS.Name <$> []
+  toTsDef _ = DTS.opaque (DTS.qualName "CirclesPink_Data_Address" "Address") $ DTS.name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_TrustConnection :: ToTsDef (CirclesPink.Data.TrustConnection.TrustConnection) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_TrustConnection") "TrustConnection") $ DTS.Name <$> []
+  toTsDef _ = DTS.opaque (DTS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection") $ DTS.name <$> []
 
 instance toTsTypeDef_CirclesPink_Data_UserIdent :: ToTsDef (CirclesPink.Data.UserIdent.UserIdent) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "CirclesPink_Data_UserIdent") "UserIdent") $ DTS.Name <$> []
+  toTsDef _ = DTS.opaque (DTS.qualName "CirclesPink_Data_UserIdent" "UserIdent") $ DTS.name <$> []
 
 -- class ToDTSTypeRef a where
 --   toDTSTypeRef :: a -> DTSTypeRef
 
 -- class ToDTSValueDef a where
 --   toDTSValueDef :: a -> DTSValueDef
+
+--------------------------------------------------------------------------------
+
+newtype Ctor a = Ctor a
 
 --------------------------------------------------------------------------------
 
