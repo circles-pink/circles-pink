@@ -7,7 +7,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Button } from '../../components/forms';
+import { Button, ButtonLinkLike } from '../../components/forms';
 import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
@@ -63,6 +63,8 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   const safeAddress = addrToString(state.user.safeAddress);
+
+  const [showSafeInfo, setShowSafeInfo] = useState<boolean>(false);
 
   useEffect(() => {
     const safeStatus = setInterval(
@@ -120,9 +122,24 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
             trustsLength={state.trusts.length}
           />
 
-          {/* <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>{t('trusts.fundMySafeManually')}</SubClaim>
-          </FadeIn> */}
+          <FadeIn orientation={orientation} delay={getDelay()}>
+            <MarginY size={2}>
+              <ButtonLinkLike onClick={() => setShowSafeInfo(!showSafeInfo)}>
+                {t('trusts.fundMySafeManually')}
+              </ButtonLinkLike>
+            </MarginY>
+          </FadeIn>
+
+          {showSafeInfo && (
+            <FinalizeHint
+              finalizeMethod={'fundSafe'}
+              safeAddress={safeAddress}
+              orientation={orientation}
+              getDelay={getDelay}
+              theme={theme}
+              trustsLength={state.trusts.length}
+            />
+          )}
         </>
       }
       debug={<StateMachineDebugger state={state} />}
@@ -251,9 +268,21 @@ const FlexItemGrow = styled.div(() => [
     flex-basis: 0;
   `,
 ]);
+
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
+
+type MarginYProps = {
+  size: number;
+  children: ReactElement | ReactElement[] | string;
+};
+
+const MarginY = styled.div<MarginYProps>(({ size, children }) => [
+  css`
+    margin: ${size}rem 0;
+  `,
+]);
 
 const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4 gap-4`;
 const TrustIndicatorRow = tw.div`flex flex-row justify-between mx-16 my-4 gap-4`;
