@@ -8,8 +8,6 @@ import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
-import Data.Array.NonEmpty (NonEmptyArray)
-import Data.Array.NonEmpty as NEA
 import Data.Either as Data.Either
 import Data.Foldable (foldr)
 import Data.IxGraph as Data.IxGraph
@@ -20,7 +18,10 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
-import Language.TypeScript.DTS as DTS
+import Language.TypeScript.DTS (Declaration(..), Name(..), QualName(..), Type(..)) as DTS
+import Language.TypeScript.DTS.DSL ((|||))
+import Language.TypeScript.DTS.DSL (null, record', tlString) as DTS
+
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
@@ -51,7 +52,7 @@ instance toTsTypeProxy :: ToTsType a => ToTsType (Proxy a) where
   toTsType _ = toTsType (undefined :: a)
 
 instance toTsTypeVariant :: (RowToList r rl, GenVariant rl) => ToTsType (Variant r) where
-  toTsType _ = DTS.TypeUnion $ genVariant (Proxy :: _ rl)
+  toTsType _ = genVariant (Proxy :: _ rl)
 
 instance toTsTypeMaybe :: ToTsType a => ToTsType (Maybe a) where
   toTsType _ = DTS.TypeConstructor
@@ -94,7 +95,7 @@ instance toTsType_CirclesPink_Data_UserIdent_UserIdent :: ToTsType (CirclesPink.
     []
 
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
-  toTsType _ = DTS.TypeUnion (DTS.TypeNull `NEA.cons'` [ toTsType (Proxy :: _ a) ])
+  toTsType _ = DTS.null ||| toTsType (Proxy :: _ a)
 
 instance toTsTypeA :: ToTsType A where
   toTsType _ = DTS.TypeVar $ DTS.Name "A"
@@ -132,23 +133,21 @@ instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (C
 
 class GenVariant :: RowList Type -> Constraint
 class GenVariant rl where
-  genVariant :: Proxy rl -> NonEmptyArray DTS.Type
+  genVariant :: Proxy rl -> DTS.Type
 
 instance genVariantNil :: (ToTsType t, IsSymbol s) => GenVariant (Cons s t Nil) where
-  genVariant _ = pure $ DTS.TypeRecord
-    [ DTS.Name "tag" /\ DTS.TypeTLString (reflectSymbol (Proxy :: _ s))
-    , DTS.Name "value" /\ toTsType (Proxy :: _ t)
-    ]
+  genVariant _ = DTS.record'
+    { tag: DTS.tlString (reflectSymbol (Proxy :: _ s))
+    , value: toTsType (Proxy :: _ t)
+    }
 
 else instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant (Cons s t rl) where
   genVariant _ =
-    genVariant (Proxy :: _ rl)
-      # NEA.cons
-          ( DTS.TypeRecord
-              [ DTS.Name "tag" /\ DTS.TypeTLString (reflectSymbol (Proxy :: _ s))
-              , DTS.Name "value" /\ toTsType (Proxy :: _ t)
-              ]
-          )
+    genVariant (Proxy :: _ rl) |||
+      DTS.record'
+        { tag: DTS.tlString (reflectSymbol (Proxy :: _ s))
+        , value: toTsType (Proxy :: _ t)
+        }
 
 --------------------------------------------------------------------------------
 
