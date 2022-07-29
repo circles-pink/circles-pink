@@ -8,7 +8,6 @@ import Prim hiding (Row, Type)
 import Data.Array as A
 import Data.Foldable (fold)
 import Data.Maybe (Maybe(..))
-import Data.Set (Set)
 import Data.Set as S
 import Data.String (joinWith)
 import Data.Tuple.Nested ((/\))
@@ -22,14 +21,16 @@ printType = case _ of
   TypeBoolean -> "boolean"
   TypeArray t -> "ReadonlyArray<" <> printType t <> ">"
   TypeRecord xs -> "Readonly<{ " <> printRecEntries xs <> " }>"
-  TypeFunction targs args b -> printTargs targs <> printFnHead args <> printType b
+  TypeFunction targs args b -> printTargs (S.toUnfoldable targs) <> printFnHead args <> printType b
   TypeVar n -> printName n
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
-  TypeOpaque id targs -> "Readonly<{ readonly 'Opaque:" <> printQualName id <> "' : unique symbol; args : " <> printTargsArray targs <> "}>"
-  TypeUnion xs -> joinWith " | " $ printType <$> xs
+  TypeOpaque id targs -> "{ " <> printOpaque id <> printTargsValues targs <> " }"
+  TypeUnion x y -> printType x <> " | " <> printType y
   TypeTLString s -> "\"" <> s <> "\""
 
   where
+  printOpaque id = "readonly \"" <> "Opaque__" <> printQualName id <> "\": unique symbol;"
+
   printFnHead args = "(" <> printFnArgs args <> ") => "
 
   printFnArgs args = joinWith ", " $ printFnArg <$> args
@@ -40,11 +41,11 @@ printType = case _ of
 
   printRecEntry (k /\ v) = printName k <> " : " <> printType v
 
-  printTargsArray xs = "[" <> joinWith "," (printName <$> xs) <> "]"
+  printTargsValues xs = xs # A.mapWithIndex (\i x -> Name ("_" <> show (i + 1)) /\ TypeVar x) # printRecEntries
 
-printTargs :: Set Name -> String
-printTargs xs | S.size xs == 0 = ""
-printTargs xs = "<" <> joinWith "," (printName <$> S.toUnfoldable xs) <> ">"
+printTargs :: Array Name -> String
+printTargs xs | A.length xs == 0 = ""
+printTargs xs = "<" <> joinWith "," (printName <$> xs) <> ">"
 
 printTargs' :: Array Type -> String
 printTargs' xs | A.length xs == 0 = ""
@@ -54,16 +55,23 @@ printModule :: Module -> String
 printModule (Module mh mb) = fold [ printModuleHead mh, printModuleBody mb ]
 
 printModuleHead :: ModuleHead -> String
-printModuleHead (ModuleHead im) | A.null im = ""
-printModuleHead (ModuleHead im) = (joinWith "\n" $ printImport <$> im) <> "\n\n"
+printModuleHead (ModuleHead cm im) = printCmt <> printImports
+  where
+  printCmt | A.length cm == 0 = ""
+  printCmt = (joinWith "\n" $ map (\c -> "// " <> c) cm) <> "\n\n"
+
+  printImports | A.length im == 0 = ""
+  printImports = (joinWith "\n" $ map printImport im) <> "\n"
 
 printModuleBody :: ModuleBody -> String
-printModuleBody (ModuleBody xs) = joinWith "\n\n" $ printDeclaration <$> xs
+printModuleBody (ModuleBody xs) = joinWith "\n" $ printDeclaration <$> xs
 
 printDeclaration :: Declaration -> String
 printDeclaration = case _ of
   DeclTypeDef n targs t -> "export type " <> printName n <> " " <> printTargs targs <> " =  " <> printType t
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
+  DeclLineComment s -> "// " <> s
+  DeclEmptyLine -> ""
 
 printImport :: Import -> String
 printImport (Import n p) = "import * as " <> printName n <> " from '" <> printPath p <> "'"

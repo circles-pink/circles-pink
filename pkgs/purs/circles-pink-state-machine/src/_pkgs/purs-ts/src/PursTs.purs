@@ -3,15 +3,14 @@ module PursTs
   , defineModules
   , getDuplicates
   , pursModule
-  , typ
-  , val
   ) where
 
 import Prelude
 
 import Control.Monad.State (State, get, modify, runState)
-import Data.Array (catMaybes)
+import Data.Array (catMaybes, intersperse)
 import Data.Array as A
+import Data.Array.NonEmpty as NEA
 import Data.Bifunctor (lmap)
 import Data.Map (Map)
 import Data.Map as M
@@ -25,8 +24,10 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import Language.TypeScript.DTS (Declaration(..))
 import Language.TypeScript.DTS as DTS
+import Language.TypeScript.DTS.DSL as DTS
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
-import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
+
+--import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 
 class Clean a where
   clean :: String -> a -> a
@@ -41,6 +42,7 @@ instance cleanDeclaration :: Clean DTS.Declaration where
   clean m x = case x of
     DTS.DeclTypeDef x' y t -> DTS.DeclTypeDef x' y $ clean m t
     DTS.DeclValueDef x' t -> DTS.DeclValueDef x' $ clean m t
+    t -> t
 
 instance cleanType :: Clean DTS.Type where
   clean m = case _ of
@@ -54,7 +56,7 @@ instance cleanType :: Clean DTS.Type where
     DTS.TypeVar x -> DTS.TypeVar x
     DTS.TypeConstructor qn x -> DTS.TypeConstructor (clean m qn) (clean m <$> x)
     DTS.TypeOpaque y x -> DTS.TypeOpaque y x
-    DTS.TypeUnion xs -> DTS.TypeUnion $ clean m <$> xs
+    DTS.TypeUnion x y -> DTS.TypeUnion (clean m x) (clean m y)
     DTS.TypeTLString s -> DTS.TypeTLString s
 
 instance cleanQualName :: Clean DTS.QualName where
@@ -78,12 +80,13 @@ resolveDeclaration = case _ of
     let
       (y' /\ { floating }) = resolveType y
     in
-      DeclTypeDef x (S.fromFoldable floating) y' -- todo
+      DeclTypeDef x floating y' -- todo
   DeclValueDef x y ->
     let
       (y' /\ _) = resolveType y
     in
       DeclValueDef x y'
+  x -> x
 
 resolveType :: DTS.Type -> DTS.Type /\ TypeScope
 resolveType x = runState (resolveType' x) mempty
@@ -100,7 +103,7 @@ resolveType' = case _ of
   DTS.TypeVar n -> resolveVar n
   DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn <$> traverse resolveType' xs
   DTS.TypeOpaque x ns -> resolveOpaque x ns
-  DTS.TypeUnion xs -> DTS.TypeUnion <$> traverse resolveType' xs
+  DTS.TypeUnion x y -> DTS.TypeUnion <$> resolveType' x <*> resolveType' y
   DTS.TypeTLString s -> pure $ DTS.TypeTLString s
   where
 
@@ -150,7 +153,7 @@ deleteQuant s = case _ of
   DTS.TypeVar n -> DTS.TypeVar n
   DTS.TypeConstructor qn xs -> DTS.TypeConstructor qn $ map (deleteQuant s) xs
   DTS.TypeOpaque y x -> DTS.TypeOpaque y x
-  DTS.TypeUnion xs -> DTS.TypeUnion $ map (deleteQuant s) xs
+  DTS.TypeUnion x y -> DTS.TypeUnion (deleteQuant s x) (deleteQuant s y)
   DTS.TypeTLString str -> DTS.TypeTLString str
   where
 
@@ -183,13 +186,7 @@ pursModule :: String -> (String /\ String /\ String)
 pursModule x = modToAlias x /\ ("../" <> x) /\ x
 
 modToAlias :: String -> String
-modToAlias = St.replace (Pattern ".") (Replacement "_")
-
-val :: forall a. ToTsType a => a -> String -> DTS.Declaration
-val x n = DTS.DeclValueDef (DTS.Name n) $ toTsType x
-
-typ :: forall a. ToTsDef a => a -> String -> DTS.Declaration
-typ x n = DTS.DeclTypeDef (DTS.Name n) S.empty $ toTsDef x
+modToAlias = St.replaceAll (Pattern ".") (Replacement "_")
 
 defineModules :: Map String (String /\ String) -> Array (String /\ Array DTS.Declaration) -> Array (String /\ DTS.Module)
 defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
@@ -201,7 +198,7 @@ defineModule mm k xs =
   DTS.Module moduleHead moduleBody
     # cleanModule alias
   where
-  moduleHead = (DTS.ModuleHead imports)
+  moduleHead = (DTS.ModuleHead commentHeader imports)
 
   alias = M.lookup k mm <#> snd # maybe "Unknown_Alias" identity
 
@@ -214,12 +211,20 @@ defineModule mm k xs =
     # catMaybes
     <#> (\(a /\ p /\ _) -> DTS.Import (DTS.Name a) (DTS.Path p))
 
-  moduleBody = (DTS.ModuleBody xs) # resolveModuleBody
+  commentHeader =
+    [ "Auto generated type signatures."
+    , "PureScript Module: " <> k
+    ]
+
+  xs' = xs >>= (\x -> [DTS.emptyLine, DTS.lineComment "Purs export", x])
+
+  moduleBody = (DTS.ModuleBody xs') # resolveModuleBody
 
 declToRefs :: DTS.Declaration -> Array DTS.QualName
 declToRefs = case _ of
   DTS.DeclTypeDef _ _ t -> typeToRefs t
   DTS.DeclValueDef _ t -> typeToRefs t
+  t -> []
 
 typeToRefs :: DTS.Type -> Array DTS.QualName
 typeToRefs = case _ of
@@ -233,7 +238,7 @@ typeToRefs = case _ of
   DTS.TypeVar _ -> []
   DTS.TypeConstructor qn xs -> [ qn ] <> (xs >>= typeToRefs)
   DTS.TypeOpaque _ _ -> []
-  DTS.TypeUnion xs -> xs >>= typeToRefs
+  DTS.TypeUnion x y -> typeToRefs x <> typeToRefs y
   DTS.TypeTLString _ -> []
 
 -- x = toMono CirclesPink.GenerateTSD.SampleModule.caseVielleicht

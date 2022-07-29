@@ -1,16 +1,12 @@
 module Data.ABC where
 
-import Prelude
+import CirclesPink.GenerateTSD.Class (class ToTsType)
 
-import Language.TypeScript.DTS as DTS
-import PursTs.Class (class ToTsType)
+data A = A
 
-data A
+data B = B
 
-
-data B
-
-data C
+data C = C
 
 data D
 
