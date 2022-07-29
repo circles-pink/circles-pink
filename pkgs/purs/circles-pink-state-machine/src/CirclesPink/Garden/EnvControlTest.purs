@@ -20,6 +20,7 @@ import Data.BN as B
 import Data.Newtype (wrap)
 import Data.Variant (inj)
 import Type.Proxy (Proxy(..))
+import Web3 (Hash(..), Message(..), SignatureObj(..))
 
 testEnv :: forall m. Monad m => EnvControl (TestScriptT m)
 testEnv =
@@ -44,6 +45,7 @@ testEnv =
   , isFunded: \_ -> pure true
   , addTrustConnection: \_ _ _ -> pure ""
   , removeTrustConnection: \_ _ _ -> pure ""
+  , signChallenge: \_ _ -> pure (SignatureObj { message: Message "", messageHash: Hash "", v: "", r: "", s: "", signature: "" })
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
   , getBalance: \_ _ -> pure $ B.fromDecimalStr "34141123134632464543156"
@@ -96,6 +98,7 @@ liftEnv f e =
   , removeTrustConnection: compose3 (mapExceptT f) e.removeTrustConnection
   , saveSession: compose (mapExceptT f) e.saveSession
   , restoreSession: (mapExceptT f) e.restoreSession
+  , signChallenge: e.signChallenge
   , getBalance: compose2 (mapExceptT f) e.getBalance
   , checkUBIPayout: compose2 (mapExceptT f) e.checkUBIPayout
   , requestUBIPayout: compose2 (mapExceptT f) e.requestUBIPayout

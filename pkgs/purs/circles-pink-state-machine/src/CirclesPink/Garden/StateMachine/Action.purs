@@ -4,7 +4,6 @@ module CirclesPink.Garden.StateMachine.Action
   , _askEmail
   , _askUsername
   , _checkForSession
-  , _getUBIPayout
   , _coreToWindow
   , _dashboard
   , _debug
@@ -13,6 +12,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _getBalance
   , _getSafeStatus
   , _getTrusts
+  , _getUBIPayout
   , _getUsers
   , _infoGeneral
   , _infoSecurity
@@ -30,6 +30,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _setTerms
   , _setUsername
   , _signIn
+  , _signMessage
   , _signUp
   , _submit
   , _transfer
@@ -103,6 +104,7 @@ type CirclesAction = Variant
             }
         , redeploySafeAndToken :: Unit
         , expandTrustNetwork :: String
+        , signMessage :: String
         )
   , login ::
       Variant
@@ -234,3 +236,6 @@ _redeploySafeAndToken = inj (Proxy :: _ "redeploySafeAndToken")
 
 _expandTrustNetwork :: forall a v. a -> Variant (expandTrustNetwork :: a | v)
 _expandTrustNetwork = inj (Proxy :: _ "expandTrustNetwork")
+
+_signMessage :: forall a v. a -> Variant (signMessage :: a | v)
+_signMessage = inj (Proxy :: _ "signMessage")
