@@ -74,6 +74,8 @@ instance showType :: Show Type where
 data Declaration
   = DeclTypeDef Name (Array Name) Type
   | DeclValueDef Name Type
+  | DeclLineComment String
+  | DeclEmptyLine
 
 data Import = Import Name Path
 

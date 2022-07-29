@@ -1,0 +1,13 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+spawn spago repl --deps-only
+
+expect "> "
+send -- "import Data.Maybe as M\r"
+send -- "import Data.Either as E\r"
+
+
+interact
+
+expect eof
