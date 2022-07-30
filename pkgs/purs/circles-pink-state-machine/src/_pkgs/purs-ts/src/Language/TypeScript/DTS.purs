@@ -50,6 +50,7 @@ newtype Path = Path String
 
 data Type
   = TypeNull
+  | TypeUndefined
   | TypeString
   | TypeNumber
   | TypeBoolean

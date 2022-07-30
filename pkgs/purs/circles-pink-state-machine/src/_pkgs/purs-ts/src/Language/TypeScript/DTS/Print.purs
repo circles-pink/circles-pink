@@ -16,6 +16,7 @@ import Language.TypeScript.DTS (Declaration(..), Import(..), Module(..), ModuleB
 printType :: Type -> String
 printType = case _ of
   TypeNull -> "null"
+  TypeUndefined -> "undefined"
   TypeString -> "string"
   TypeNumber -> "number"
   TypeBoolean -> "boolean"

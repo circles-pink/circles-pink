@@ -9,6 +9,7 @@ module Language.TypeScript.DTS.DSL
   , lineComment
   , mkType
   , mkType_
+  , module Exp
   , name
   , null
   , number
@@ -19,6 +20,7 @@ module Language.TypeScript.DTS.DSL
   , record'
   , string
   , tlString
+  , undefined
   , union
   , var
   )
@@ -35,10 +37,14 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (fromHomogeneous)
 import Foreign.Object as O
 import Language.TypeScript.DTS (Declaration(..), Name(..), QualName(..), Type(..))
+import Language.TypeScript.DTS (Type, Name, QualName, Path, Declaration, Import, Module, ModuleHead, ModuleBody) as Exp
 import Type.Row.Homogeneous (class Homogeneous)
 
 null :: Type
 null = TypeNull
+
+undefined :: Type
+undefined = TypeUndefined
 
 string :: Type
 string = TypeString
@@ -98,7 +104,6 @@ name n = Name n
 
 lineComment :: String -> Declaration
 lineComment = DeclLineComment
-
 
 emptyLine :: Declaration
 emptyLine = DeclEmptyLine
