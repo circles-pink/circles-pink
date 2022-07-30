@@ -26,6 +26,7 @@ instance ordORD :: Ord ORD where
 
 instance toTsTypeORD :: ToTsType ORD where
   toTsType _ = DTS.TypeVar $ DTS.Name "ORD"
+--  toPursType _ = PT.var $ PT.name "ord"
 
 
 
