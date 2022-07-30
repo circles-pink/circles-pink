@@ -74,6 +74,15 @@ forall' = TypeQuantification
 keyVal :: String -> Type -> Name /\ Type
 keyVal n t = Name n /\ t
 
+qualName :: String -> String -> QualName
+qualName ns n = QualName (Just $ Name ns) (Name n)
+
+qualName_ :: String -> QualName
+qualName_ n = QualName Nothing (Name n)
+
+name :: String -> Name
+name n = Name n
+
 --------------------------------------------------------------------------------
 printType :: Type -> String
 printType = case _ of
@@ -83,9 +92,9 @@ printType = case _ of
   TypeInt -> "Int"
   TypeChar -> "Char"
   TypeArray t -> "(Array " <> printType t <> ")"
-  TypeFunction a b -> printType a <> " -> " <> printType b
+  TypeFunction a b -> "(" <> printType a <> " -> " <> printType b <> ")"
   TypeRecord xs -> "{ " <> (joinWith "; " $ printRecordEntry <$> xs) <> " }"
-  TypeConstructor qn ts -> "(" <> printQualName qn <> (joinWith " " $ printType <$> ts) <> ")"
+  TypeConstructor qn ts -> "(" <> printQualName qn <> " " <> (joinWith " " $ printType <$> ts) <> ")"
   TypeVar n -> printName n
   TypeQuantification ns t -> "forall " <> (joinWith " " $ Set.toUnfoldable $ Set.map printName ns) <> ". " <> printType t
   where

@@ -45,6 +45,7 @@ instance cleanDeclaration :: Clean DTS.Declaration where
 instance cleanType :: Clean DTS.Type where
   clean m = case _ of
     DTS.TypeNull -> DTS.TypeNull
+    DTS.TypeUndefined -> DTS.TypeUndefined
     DTS.TypeString -> DTS.TypeString
     DTS.TypeNumber -> DTS.TypeNumber
     DTS.TypeBoolean -> DTS.TypeBoolean
@@ -92,6 +93,7 @@ resolveType x = runState (resolveType' x) mempty
 resolveType' :: DTS.Type -> State TypeScope DTS.Type
 resolveType' = case _ of
   DTS.TypeNull -> pure DTS.TypeNull
+  DTS.TypeUndefined -> pure DTS.TypeUndefined
   DTS.TypeString -> pure DTS.TypeString
   DTS.TypeNumber -> pure DTS.TypeNumber
   DTS.TypeBoolean -> pure DTS.TypeBoolean
@@ -142,6 +144,7 @@ resolveType' = case _ of
 deleteQuant :: Set DTS.Name -> DTS.Type -> DTS.Type
 deleteQuant s = case _ of
   DTS.TypeNull -> DTS.TypeNull
+  DTS.TypeUndefined -> DTS.TypeUndefined
   DTS.TypeString -> DTS.TypeString
   DTS.TypeNumber -> DTS.TypeNumber
   DTS.TypeBoolean -> DTS.TypeBoolean
@@ -225,6 +228,7 @@ declToRefs = case _ of
 typeToRefs :: DTS.Type -> Array DTS.QualName
 typeToRefs = case _ of
   DTS.TypeNull -> []
+  DTS.TypeUndefined -> []
   DTS.TypeString -> []
   DTS.TypeNumber -> []
   DTS.TypeBoolean -> []
