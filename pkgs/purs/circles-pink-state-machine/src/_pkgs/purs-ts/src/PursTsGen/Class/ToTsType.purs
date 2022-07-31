@@ -1,8 +1,8 @@
-module ToTsType where
+module PursTsGen.Class.ToTsType where
 
 import Prelude
 
-import Data.ABC (A, B, C, D, E, Z)
+import PursTsGen.Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
 import Data.Either (Either)
 import Data.Maybe (Maybe)
@@ -11,32 +11,32 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
-import Language.TypeScript.DTS.DSL ((|||))
-import Language.TypeScript.DTS.DSL as DTS
+import PursTsGen.Lang.TypeScript.DSL ((|||))
+import PursTsGen.Lang.TypeScript.DSL as TS
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
 class ToTsType a where
-  toTsType :: a -> DTS.Type
+  toTsType :: a -> TS.Type
 
 instance toTsTypeNumber :: ToTsType Number where
-  toTsType _ = DTS.number
+  toTsType _ = TS.number
 
 instance toTsTypeString :: ToTsType String where
-  toTsType _ = DTS.string
+  toTsType _ = TS.string
 
 instance toTsTypeBoolean :: ToTsType Boolean where
-  toTsType _ = DTS.boolean
+  toTsType _ = TS.boolean
 
 instance toTsTypeArray :: ToTsType a => ToTsType (Array a) where
-  toTsType _ = DTS.array $ toTsType (undefined :: a)
+  toTsType _ = TS.array $ toTsType (undefined :: a)
 
 instance toTsTypeRecord :: (RowToList r rl, GenRecord rl) => ToTsType (Record r) where
-  toTsType _ = DTS.record $ genRecord (Proxy :: _ rl)
+  toTsType _ = TS.record $ genRecord (Proxy :: _ rl)
 
 instance toTsTypeFunction :: (ToTsType a, ToTsType b) => ToTsType (a -> b) where
-  toTsType _ = DTS.function_
-    [ DTS.keyVal "_" $ toTsType (undefined :: a) ]
+  toTsType _ = TS.function_
+    [ TS.keyVal "_" $ toTsType (undefined :: a) ]
     (toTsType (undefined :: b))
 
 instance toTsTypeProxy :: ToTsType a => ToTsType (Proxy a) where
@@ -46,36 +46,36 @@ instance toTsTypeVariant :: (RowToList r rl, GenVariant rl) => ToTsType (Variant
   toTsType _ = genVariant (Proxy :: _ rl)
 
 instance toTsTypeMaybe :: ToTsType a => ToTsType (Maybe a) where
-  toTsType _ = DTS.mkType (DTS.qualName "Data_Maybe" "Maybe")
+  toTsType _ = TS.mkType (TS.qualName "Data_Maybe" "Maybe")
     [ toTsType (Proxy :: _ a) ]
 
 instance toTsTypeEither :: (ToTsType a, ToTsType b) => ToTsType (Either a b) where
-  toTsType _ = DTS.mkType (DTS.qualName "Data_Either" "Either")
+  toTsType _ = TS.mkType (TS.qualName "Data_Either" "Either")
     [ toTsType (Proxy :: _ a), toTsType (Proxy :: _ b) ]
 
 instance toTsTypeUnit :: ToTsType Unit where
-  toTsType _ = DTS.mkType_ $ DTS.qualName "Data_Unit" "Unit"
+  toTsType _ = TS.mkType_ $ TS.qualName "Data_Unit" "Unit"
 
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
-  toTsType _ = DTS.null ||| toTsType (Proxy :: _ a)
+  toTsType _ = TS.null ||| toTsType (Proxy :: _ a)
 
 instance toTsTypeA :: ToTsType A where
-  toTsType _ = DTS.var $ DTS.name "A"
+  toTsType _ = TS.var $ TS.name "A"
 
 instance toTsTypeB :: ToTsType B where
-  toTsType _ = DTS.var $ DTS.name "B"
+  toTsType _ = TS.var $ TS.name "B"
 
 instance toTsTypeC :: ToTsType C where
-  toTsType _ = DTS.var $ DTS.name "C"
+  toTsType _ = TS.var $ TS.name "C"
 
 instance toTsTypeD :: ToTsType D where
-  toTsType _ = DTS.var $ DTS.name "D"
+  toTsType _ = TS.var $ TS.name "D"
 
 instance toTsTypeE :: ToTsType E where
-  toTsType _ = DTS.var $ DTS.name "E"
+  toTsType _ = TS.var $ TS.name "E"
 
 instance toTsTypeZ :: ToTsType Z where
-  toTsType _ = DTS.var $ DTS.name "Z"
+  toTsType _ = TS.var $ TS.name "Z"
 
 --------------------------------------------------------------------------------
 -- class GenRecord
@@ -83,7 +83,7 @@ instance toTsTypeZ :: ToTsType Z where
 
 class GenRecord :: RowList Type -> Constraint
 class GenRecord rl where
-  genRecord :: Proxy rl -> (Array (DTS.Name /\ DTS.Type))
+  genRecord :: Proxy rl -> (Array (TS.Name /\ TS.Type))
 
 instance genRecordNil :: GenRecord Nil where
   genRecord _ = []
@@ -91,7 +91,7 @@ instance genRecordNil :: GenRecord Nil where
 instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (Cons s t rl) where
   genRecord _ =
     genRecord (Proxy :: _ rl)
-      # A.cons (DTS.keyVal (reflectSymbol (Proxy :: _ s)) $ toTsType (undefined :: t))
+      # A.cons (TS.keyVal (reflectSymbol (Proxy :: _ s)) $ toTsType (undefined :: t))
 
 --------------------------------------------------------------------------------
 -- class GenVariant
@@ -99,19 +99,19 @@ instance genRecordCons :: (GenRecord rl, ToTsType t, IsSymbol s) => GenRecord (C
 
 class GenVariant :: RowList Type -> Constraint
 class GenVariant rl where
-  genVariant :: Proxy rl -> DTS.Type
+  genVariant :: Proxy rl -> TS.Type
 
 instance genVariantNil :: (ToTsType t, IsSymbol s) => GenVariant (Cons s t Nil) where
-  genVariant _ = DTS.record'
-    { tag: DTS.tlString (reflectSymbol (Proxy :: _ s))
+  genVariant _ = TS.record'
+    { tag: TS.tlString (reflectSymbol (Proxy :: _ s))
     , value: toTsType (Proxy :: _ t)
     }
 
 else instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVariant (Cons s t rl) where
   genVariant _ =
     genVariant (Proxy :: _ rl) |||
-      DTS.record'
-        { tag: DTS.tlString (reflectSymbol (Proxy :: _ s))
+      TS.record'
+        { tag: TS.tlString (reflectSymbol (Proxy :: _ s))
         , value: toTsType (Proxy :: _ t)
         }
 

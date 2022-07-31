@@ -5,9 +5,9 @@ import Prelude
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
-import CirclesPink.GenerateTSD.Class (class ToTsType, cla, ins, toTsType, typ, val, val')
+import PursTsGen (class ToTsType, cla, ins, toTsType, typ, val, val')
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
-import Data.ABC (A, B, C)
+import PursTsGen.Data.ABC (A, B, C)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrNeighborNodes)
 import Data.IxGraph as Data.IxGraph
@@ -19,43 +19,45 @@ import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\), (/\))
-import Language.TypeScript.DTS as DTS
-import PursTs (pursModule)
+import PursTsGen.Lang.TypeScript.DSL as TS
+import PursTsGen (pursModule)
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
 moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
 
-_Ord :: forall a. Ord a => ToTsType a => a -> DTS.Type
-_Ord a = DTS.TypeConstructor (DTS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
+_Ord :: forall a. Ord a => ToTsType a => a -> TS.Type
+_Ord a = TS.TypeConstructor (TS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
 
-modules :: Array (String /\ Array DTS.Declaration)
+modules :: Array (String /\ Array TS.Declaration)
 modules =
-  [ "Data.IxGraph" /\
-      join
-        [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
-        , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
-        ]
+  [
+    
+    --  "Data.IxGraph" /\
+    --   join
+    --     [ typ (Proxy :: _ (Data.IxGraph.IxGraph A B C)) "IxGraph"
+    --     , val' [ _Ord ORD ] (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes _ ())) _) "neighborNodes"
+    --     ]
 
-  , "CirclesPink.Data.Address" /\
-      join
-        [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address"
-        , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
-        ]
+  --  "CirclesPink.Data.Address" /\
+  --     join
+  --       [ typ (Proxy :: _ (CirclesPink.Data.Address.Address)) "Address"
+  --       , ins (_Ord (Proxy :: _ CirclesPink.Data.Address.Address)) "ordAddress"
+  --       ]
 
-  , "CirclesPink.Data.TrustNode" /\
-      join
-        [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
-        , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
-        , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
-        ]
+  --  "CirclesPink.Data.TrustNode" /\
+  --     join
+  --       [ typ (Proxy :: _ (CirclesPink.Data.TrustNode.TrustNode)) "TrustNode"
+  --       , val (CirclesPink.Data.TrustNode.unwrap) "unwrap"
+  --       , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
+  --       ]
 
-  , "CirclesPink.Data.TrustConnection" /\
-      join
-        [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
-        ]
+  --  "CirclesPink.Data.TrustConnection" /\
+  --     join
+  --       [ typ (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection)) "TrustConnection"
+  --       ]
 
-  , "Data.Either" /\
+   "Data.Either" /\
       join
         [ typ (Proxy :: _ (Data.Either.Either A B)) "Either"
         , val (Data.Either.either :: _ -> _ -> _ A B -> C) "either"

@@ -1,4 +1,4 @@
-module Language.PureScript.Type where
+module PursTsGen.Lang.PureScript.Type where
 
 import Prelude
 import Prim hiding (Type)

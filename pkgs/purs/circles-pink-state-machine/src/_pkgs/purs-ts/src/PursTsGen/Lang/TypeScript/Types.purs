@@ -1,25 +1,58 @@
-module Language.TypeScript.DTS
-  ( Declaration(..)
-  , Import(..)
-  , Module(..)
-  , ModuleBody(..)
-  , ModuleHead(..)
-  , Name(..)
-  , Path(..)
-  , QualName(..)
-  , Type(..)
-  ) where
+module PursTsGen.Lang.TypeScript.Types where
 
-import Prelude
+import PursTsGen.Prelude
 import Prim hiding (Row, Type)
-
-import Data.Generic.Rep (class Generic)
-import Data.Maybe (Maybe)
-import Data.Set (Set)
-import Data.Show.Generic (genericShow)
-import Data.Tuple.Nested (type (/\))
 import Prim as P
 
+newtype Path = Path String
+
+data Import = Import Name Path
+
+data Module = Module ModuleHead ModuleBody
+
+data ModuleHead = ModuleHead (Array String) (Array Import)
+
+newtype ModuleBody = ModuleBody (Array Declaration)
+
+data Token
+  -- Keywords
+  = TokConst
+  | TokDefault
+  | TokExport
+  | TokDeclare
+  | TokImport
+  | TokVoid
+  | TokReadonly
+  | TokUnique
+  | TokAs
+  | TokFrom
+  -- Puntuation
+  | TokSemicolon
+  | TokAsterisk
+  | TokOpenParen
+  | TokCloseParen
+  | TokOpenBracket
+  | TokCloseBracket
+  | TokOpenBrace
+  | TokCloseBrace
+  | TokOpenAngle
+  | TokCloseAngle
+  | TokComma
+  | TokEquals
+  | TokColon
+  --
+  | TokWhitespace
+  | TokNewline
+  -- 
+  | TokIdentifier String
+  | TokStringLiteral String
+  | TokNumberLiteral Number
+  | TokSingleComment String
+  | TokMultiComment String
+
+
+--------------------------------------------------------------------------------
+-- Name
 --------------------------------------------------------------------------------
 
 newtype Name = Name String
@@ -32,6 +65,8 @@ instance showName :: Show Name where
   show = genericShow
 
 --------------------------------------------------------------------------------
+-- QualName
+--------------------------------------------------------------------------------
 
 data QualName = QualName (Maybe String) String
 
@@ -43,9 +78,7 @@ instance showQualName :: Show QualName where
   show = genericShow
 
 --------------------------------------------------------------------------------
-
-newtype Path = Path String
-
+-- Type
 --------------------------------------------------------------------------------
 
 data Type
@@ -66,9 +99,12 @@ data Type
 derive instance genericType :: Generic Type _
 derive instance eqType :: Eq Type
 derive instance ordType :: Ord Type
+
 instance showType :: Show Type where
   show x = genericShow x
 
+--------------------------------------------------------------------------------
+-- Declaration
 --------------------------------------------------------------------------------
 
 data Declaration
@@ -76,11 +112,3 @@ data Declaration
   | DeclValueDef Name Type
   | DeclLineComment String
   | DeclEmptyLine
-
-data Import = Import Name Path
-
-data Module = Module ModuleHead ModuleBody
-
-data ModuleHead = ModuleHead (Array String) (Array Import)
-
-newtype ModuleBody = ModuleBody (Array Declaration)
