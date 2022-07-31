@@ -1,20 +1,14 @@
-module Language.TypeScript.DTS.Traversal
+module PursTsGen.Lang.TypeScript.Traversal
   ( defaultVisitor
   , defaultVisitorM
   , rewriteModuleTopDown
   , rewriteModuleTopDownM
   ) where
 
-import Prelude
+import PursTsGen.Prelude
 import Prim hiding (Row, Type)
-
-import Control.Monad.Free (Free, runFree)
-import Data.Identity (Identity(..))
-import Data.Newtype (un)
-import Data.Traversable (traverse)
-import Language.TypeScript.DTS (Declaration(..), Module(..), ModuleBody(..), Type(..))
+import PursTsGen.Lang.TypeScript.Types (Declaration(..), Module(..), ModuleBody(..), Type(..))
 import Prim as P
-import Type.Row (type (+))
 
 type Rewrite f a = a -> f a
 
@@ -26,16 +20,21 @@ type OnType t r = (onType :: t Type | r)
 type OnDeclaration :: forall k. (P.Type -> k) -> P.Row k -> P.Row k
 type OnDeclaration t r = (onDeclaration :: t Declaration | r)
 
-type OnDTS :: forall k. (P.Type -> k) -> P.Row k
-type OnDTS t = OnType t + OnDeclaration t + ()
+type OnTs :: forall k. (P.Type -> k) -> P.Row k
+type OnTs t = OnType t + OnDeclaration t + ()
 
-defaultVisitorM :: forall f. Applicative f => { | OnDTS (Rewrite f) }
+defaultVisitorM :: forall f. Applicative f => { | OnTs (Rewrite f) }
 defaultVisitorM =
-  { onType: pure
-  , onDeclaration: pure
+  { onType:
+
+      pure
+  , 
+  
+  
+  onDeclaration: pure
   }
 
-defaultVisitor :: forall f. Applicative f => { | OnDTS PureRewrite }
+defaultVisitor :: forall f. Applicative f => { | OnTs PureRewrite }
 defaultVisitor =
   { onType: identity
   , onDeclaration: identity
@@ -56,7 +55,7 @@ traverseDeclaration { onType } =
   case _ of
     DeclTypeDef n ns t -> DeclTypeDef n ns <$> onType t
     DeclValueDef n t -> DeclValueDef n <$> onType t
-    t -> pure t 
+    t -> pure t
 
 traverseModuleBody :: forall f r. Applicative f => { | OnType (Rewrite f) + r } -> Rewrite f ModuleBody
 traverseModuleBody v (ModuleBody xs) = ModuleBody <$> traverse (traverseDeclaration v) xs
@@ -64,7 +63,7 @@ traverseModuleBody v (ModuleBody xs) = ModuleBody <$> traverse (traverseDeclarat
 traverseModule :: forall f r. Applicative f => { | OnType (Rewrite f) + r } -> Rewrite f Module
 traverseModule v (Module mh mb) = Module mh <$> traverseModuleBody v mb
 
-topDownTraversal :: forall m. Monad m => { | OnDTS (Rewrite m) } -> { | OnDTS (Rewrite m) }
+topDownTraversal :: forall m. Monad m => { | OnTs (Rewrite m) } -> { | OnTs (Rewrite m) }
 topDownTraversal visitor = visitor'
   where
   visitor' =
@@ -72,7 +71,7 @@ topDownTraversal visitor = visitor'
     , onDeclaration: \a -> visitor.onDeclaration a >>= traverseDeclaration visitor'
     }
 
-topDownPureTraversal :: { | OnDTS PureRewrite } -> { | OnDTS (Rewrite (Free Identity)) }
+topDownPureTraversal :: { | OnTs PureRewrite } -> { | OnTs (Rewrite (Free Identity)) }
 topDownPureTraversal visitor = visitor'
   where
   visitor' =
@@ -82,21 +81,21 @@ topDownPureTraversal visitor = visitor'
 
 rewriteTopDown
   :: forall g
-   . ({ | OnDTS (Rewrite (Free Identity)) } -> Rewrite (Free Identity) g)
-  -> { | OnDTS PureRewrite }
+   . ({ | OnTs (Rewrite (Free Identity)) } -> Rewrite (Free Identity) g)
+  -> { | OnTs PureRewrite }
   -> PureRewrite g
 rewriteTopDown traversal visitor = do
   let visitor' = topDownPureTraversal visitor
   runFree (un Identity) <<< traversal visitor'
 
-rewriteTopDownM :: forall m g. Monad m => ({ | OnDTS (Rewrite m) } -> Rewrite m g) -> { | OnDTS (Rewrite m) } -> Rewrite m g
+rewriteTopDownM :: forall m g. Monad m => ({ | OnTs (Rewrite m) } -> Rewrite m g) -> { | OnTs (Rewrite m) } -> Rewrite m g
 rewriteTopDownM traversal visitor = do
   let visitor' = topDownTraversal visitor
   traversal visitor'
 
-rewriteModuleTopDown :: { | OnDTS PureRewrite } -> PureRewrite Module
+rewriteModuleTopDown :: { | OnTs PureRewrite } -> PureRewrite Module
 rewriteModuleTopDown = rewriteTopDown traverseModule
 
-rewriteModuleTopDownM :: forall m. Monad m => { | OnDTS (Rewrite m) } -> Rewrite m Module
+rewriteModuleTopDownM :: forall m. Monad m => { | OnTs (Rewrite m) } -> Rewrite m Module
 rewriteModuleTopDownM = rewriteTopDownM traverseModule
 
