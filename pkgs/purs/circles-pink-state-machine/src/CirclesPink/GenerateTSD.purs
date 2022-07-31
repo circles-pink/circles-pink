@@ -4,12 +4,12 @@ import CirclesPink.Prelude
 
 import CirclesPink.GenerateTSD.Modules (moduleMap, modules)
 import Effect.Class.Console (log)
-import Language.TypeScript.DTS.Print (printModule)
+import PursTsGen.Lang.TypeScript (printModule)
 import Node.ChildProcess (Exit(..), defaultSpawnOptions)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (writeTextFile)
 import Options.Applicative (Parser, ParserInfo, execParser, fullDesc, header, help, helper, info, long, metavar, strOption, (<**>))
-import PursTs (defineModules)
+import PursTsGen (defineModules)
 import Sunde as Sun
 
 type GenerateTSOpts =
@@ -43,13 +43,13 @@ app = do
         ( \(modName /\ mod) -> do
             let filePath = opts.outputDir <> "/" <> modName <> "/index.d.ts"
             log filePath
-            _ <- spawn  "prettier"  [ "--write", filePath ]
             writeTextFile UTF8 filePath (printModule mod)
+            void $ spawn "prettier" [ "--write", filePath ]
         )
 
 spawn :: String -> Array String -> Aff { stderr :: String, stdout :: String }
 spawn cmd args = do
-  { exit, stderr, stdout } <- Sun.spawn {cmd, args, stdin: Nothing} defaultSpawnOptions
+  { exit, stderr, stdout } <- Sun.spawn { cmd, args, stdin: Nothing } defaultSpawnOptions
   case exit of
     Normally 0 -> pure { stderr, stdout }
     _ -> throwError $ error ("Command " <> cmd <> " failed")

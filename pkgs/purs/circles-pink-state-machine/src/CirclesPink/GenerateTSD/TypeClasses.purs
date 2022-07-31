@@ -2,18 +2,18 @@ module CirclesPink.GenerateTSD.TypeClasses where
 
 import Prelude
 
-import CirclesPink.GenerateTSD.Class (class ToTsDef, class ToTsType)
-import Data.ABC (A)
+import PursTsGen (class ToTsDef, class ToTsType)
+import PursTsGen.Data.ABC (A)
 import Data.Maybe (Maybe(..))
 import Data.Typelevel.Undefined (undefined)
-import Language.TypeScript.DTS as DTS
+import PursTsGen.Lang.TypeScript.DSL as TS
 
 
 data ClassOrd :: forall k. k -> Type
 data ClassOrd a
 
 instance toTsTypeDefClassOrd :: ToTsDef (ClassOrd A) where
-  toTsDef _ = DTS.TypeOpaque (DTS.QualName (Just "Data_Ord") "Ord") $ DTS.Name <$> [ "A" ]
+  toTsDef _ = TS.TypeOpaque (TS.QualName (Just "Data_Ord") "Ord") $ TS.Name <$> [ "A" ]
 
 data ORD = ORD
 
@@ -25,7 +25,7 @@ instance ordORD :: Ord ORD where
   compare = undefined
 
 instance toTsTypeORD :: ToTsType ORD where
-  toTsType _ = DTS.TypeVar $ DTS.Name "ORD"
+  toTsType _ = TS.TypeVar $ TS.Name "ORD"
 --  toPursType _ = PT.var $ PT.name "ord"
 
 

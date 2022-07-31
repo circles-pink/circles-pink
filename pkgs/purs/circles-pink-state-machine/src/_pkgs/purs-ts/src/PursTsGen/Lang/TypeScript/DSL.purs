@@ -1,4 +1,4 @@
-module Language.TypeScript.DTS.DSL
+module PursTsGen.Lang.TypeScript.DSL
   ( (|||)
   , array
   , boolean
@@ -36,8 +36,8 @@ import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (fromHomogeneous)
 import Foreign.Object as O
-import Language.TypeScript.DTS (Declaration(..), Name(..), QualName(..), Type(..))
-import Language.TypeScript.DTS (Type, Name, QualName, Path, Declaration, Import, Module, ModuleHead, ModuleBody) as Exp
+import PursTsGen.Lang.TypeScript (Declaration(..), Name(..), QualName(..), Type(..))
+import PursTsGen.Lang.TypeScript.Types (Type(..), Name(..), QualName(..), Path(..), Declaration(..), Import(..), Module(..), ModuleHead(..), ModuleBody(..)) as Exp
 import Type.Row.Homogeneous (class Homogeneous)
 
 null :: Type
