@@ -1,6 +1,7 @@
 module PursTsGen
   ( cla
   , cleanModule
+  , constructor
   , defineModules
   , getDuplicates
   , ins
@@ -8,7 +9,8 @@ module PursTsGen
   , pursModule
   , typeDef
   , value
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -30,48 +32,12 @@ import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, MyThese(..), genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, spec, toTsDef) as Exp
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
-import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
+import PursTsGen.Class.ToTsType (class ToTsType, Constructor(..), toTsType)
 import PursTsGen.Lang.TypeScript (Declaration(..), defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
-import PursTsGen.Lang.TypeScript.Traversal (rewriteTypeTopDown)
 import Type.Proxy (Proxy)
 
---import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 
--- class Clean a where
---   clean :: String -> a -> a
-
--- instance cleanModule' :: Clean TS.Module where
---   clean m (TS.Module mh mb) = TS.Module mh $ clean m mb
-
--- instance cleanModuleBody :: Clean TS.ModuleBody where
---   clean m (TS.ModuleBody ds) = TS.ModuleBody $ clean m <$> ds
-
--- instance cleanDeclaration :: Clean TS.Declaration where
---   clean m x = case x of
---     TS.DeclTypeDef x' y t -> TS.DeclTypeDef x' y $ clean m t
---     TS.DeclValueDef x' t -> TS.DeclValueDef x' $ clean m t
---     t -> t
-
--- instance cleanType :: Clean TS.Type where
---   clean m = case _ of
---     TS.TypeNull -> TS.TypeNull
---     TS.TypeUndefined -> TS.TypeUndefined
---     TS.TypeString -> TS.TypeString
---     TS.TypeNumber -> TS.TypeNumber
---     TS.TypeBoolean -> TS.TypeBoolean
---     TS.TypeArray t -> TS.TypeArray $ clean m t
---     TS.TypeRecord xs -> TS.TypeRecord $ (map $ clean m) <$> xs
---     TS.TypeFunction xs ys t -> TS.TypeFunction xs ((map $ clean m) <$> ys) (clean m t)
---     TS.TypeVar x -> TS.TypeVar x
---     TS.TypeConstructor qn x -> TS.TypeConstructor (clean m qn) (clean m <$> x)
---     TS.TypeOpaque y x -> TS.TypeOpaque y x
---     TS.TypeUnion x y -> TS.TypeUnion (clean m x) (clean m y)
---     TS.TypeTLString s -> TS.TypeTLString s
-
--- instance cleanQualName :: Clean TS.QualName where
---   clean m (TS.QualName (Just x) y) | x == m = TS.QualName Nothing y
---   clean _ all = all
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -85,9 +51,6 @@ cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
   cleanQualName x = x
 
 --------------------------------------------------------------------------------
-
--- resolveModule :: TS.Module Unit -> TS.Module (Set TS.Name)
--- resolveModule (TS.Module mh mb) = TS.Module mh $ resolveModuleBody mb
 
 resolveModuleBody :: TS.ModuleBody -> TS.ModuleBody
 resolveModuleBody (TS.ModuleBody xs) = TS.ModuleBody $ resolveDeclaration <$> xs
@@ -256,6 +219,10 @@ value n cs x =
   where
   mkFn y f = TS.TypeFunction S.empty [ (TS.Name "_") /\ y ] f
   init = toTsType x
+
+
+constructor :: forall a. ToTsType (Constructor a) => String -> a -> Array TS.Declaration
+constructor n x = value n [] (Constructor x)
 
 typeDef :: forall a. ToTsDef a => String -> Proxy a -> Array TS.Declaration
 typeDef n x =

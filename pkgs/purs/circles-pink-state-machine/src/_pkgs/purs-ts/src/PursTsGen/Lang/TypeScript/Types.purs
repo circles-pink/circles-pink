@@ -95,6 +95,7 @@ data Type
   | TypeOpaque QualName (Array Name)
   | TypeUnion Type Type
   | TypeTLString String
+  | TypeUniqueSymbol
 
 derive instance genericType :: Generic Type _
 derive instance eqType :: Eq Type

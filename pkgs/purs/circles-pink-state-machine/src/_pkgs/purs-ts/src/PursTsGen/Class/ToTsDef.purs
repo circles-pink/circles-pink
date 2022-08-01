@@ -62,11 +62,13 @@ else instance recSum ::
   genToTsDefSum _ = genToTsDefSum' (Proxy :: _ s) (Proxy :: _ t) ||| genToTsDefSum (Proxy :: _ rep)
 
 genToTsDefSum' :: forall s t. GenToTsDefProd t => IsSymbol s => Proxy s -> Proxy t -> TS.Type
-genToTsDefSum' _ _ = TS.record (label : values)
+genToTsDefSum' _ _ = TS.record (label : brand : values)
   where
+  name = reflectSymbol (Proxy :: _ s)
   label = TS.keyVal "constructor" ctor
+  brand = TS.keyVal name TS.uniqueSymbol
   values = genToTsDefProd (undefined :: t) 0
-  ctor = TS.record [ TS.keyVal "name" $ TS.tlString (reflectSymbol (Proxy :: _ s)) ]
+  ctor = TS.record [ TS.keyVal "name" $ TS.tlString name ]
 
 --------------------------------------------------------------------------------
 -- class GenToTsDefProd

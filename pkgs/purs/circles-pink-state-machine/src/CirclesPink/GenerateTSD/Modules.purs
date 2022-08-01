@@ -17,8 +17,9 @@ import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\), (/\))
-import PursTsGen (class ToTsDef, class ToTsType, cla, pursModule, toTsType)
+import PursTsGen (class ToTsDef, class ToTsType, cla, constructor, pursModule, toTsType)
 import PursTsGen as PT
+import PursTsGen.Class.ToTsType (Constructor(..))
 import PursTsGen.Data.ABC (A, B, C)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
@@ -63,6 +64,8 @@ modules =
   , "Data.Maybe" /\
       join
         [ typeDef "Maybe" (Proxy :: _ (Data.Maybe.Maybe A))
+        , constructor "Just"  (Data.Maybe.Just :: A -> _) 
+        , constructor "Nothing" (Data.Maybe.Nothing :: _ A) 
         , value "maybe" [] (Data.Maybe.maybe :: _ -> (A -> B) -> _)
         ]
   , "Data.Ord" /\

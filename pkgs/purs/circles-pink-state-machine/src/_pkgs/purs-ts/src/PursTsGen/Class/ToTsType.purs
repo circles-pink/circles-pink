@@ -2,7 +2,6 @@ module PursTsGen.Class.ToTsType where
 
 import Prelude
 
-import PursTsGen.Data.ABC (A, B, C, D, E, Z)
 import Data.Array as A
 import Data.Either (Either)
 import Data.Maybe (Maybe)
@@ -11,9 +10,10 @@ import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
+import Prim.RowList (class RowToList, Cons, Nil, RowList)
+import PursTsGen.Data.ABC (A, B, C, D, E, Z)
 import PursTsGen.Lang.TypeScript.DSL ((|||))
 import PursTsGen.Lang.TypeScript.DSL as TS
-import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import Type.Proxy (Proxy(..))
 
 class ToTsType a where
@@ -114,4 +114,14 @@ else instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVa
         { tag: TS.tlString (reflectSymbol (Proxy :: _ s))
         , value: toTsType (Proxy :: _ t)
         }
+
+--------------------------------------------------------------------------------
+
+newtype Constructor a = Constructor a
+
+instance toTsTypeConstructorFn :: ToTsType (Function a b) => ToTsType (Constructor (Function a b)) where
+  toTsType (Constructor f) = TS.record' { create: toTsType f }
+
+else instance toTsTypeConstructorVal :: ToTsType a => ToTsType (Constructor a) where
+  toTsType (Constructor v) = TS.record' { value: toTsType v }
 
