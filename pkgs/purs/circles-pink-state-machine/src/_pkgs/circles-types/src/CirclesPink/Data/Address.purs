@@ -52,7 +52,9 @@ instance Arbitrary Address where
 instance ParseValue Address where
   parseValue = parseAddress
 instance toTsTypeDefAddress :: ToTsDef Address where
-  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_Address" "Address") $ TS.name <$> []
+  toTsDef _ = pure $ TS.typeDef (TS.name "Address") []
+    $ TS.opaque (TS.qualName "CirclesPink_Data_Address" "Address")
+    $ TS.name <$> []
 
 instance toTsTypeAddress :: ToTsType Address where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"

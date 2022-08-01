@@ -21,7 +21,10 @@ derive newtype instance eqUserIdent :: Eq UserIdent
 derive newtype instance ordUserIdent :: Ord UserIdent
 
 instance toTsTypeDefUserIdent :: ToTsDef UserIdent where
-  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_UserIdent" "UserIdent") $ TS.name <$> []
+  toTsDef _ = pure $ TS.typeDef (TS.name "UserIdent") []
+    $ TS.opaque (TS.qualName "CirclesPink_Data_UserIdent" "UserIdent")
+    $ TS.name
+    <$> []
 
 instance toTsTypeUserIdent :: ToTsType UserIdent where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_UserIdent" "UserIdent"
