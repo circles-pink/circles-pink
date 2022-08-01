@@ -16,9 +16,9 @@ export const TrustUserList = ({address, graph}: Props) => {
 
     const neighbors = neighborNodes(ordAddress)(address)(graph)
 
-    const trustNodes = pipe(neighbors, hush, toNullable)
+    //const trustNodes = pipe(neighbors, hush, toNullable)
 
-    if (!trustNodes) return <div>Address not found in graph</div>
+    //if (!trustNodes) return <div>Address not found in graph</div>
    
     // const x = trustNodes
 

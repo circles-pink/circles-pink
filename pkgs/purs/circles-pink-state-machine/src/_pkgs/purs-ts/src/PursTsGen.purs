@@ -1,9 +1,9 @@
 module PursTsGen
-  ( cla
+  ( classDef
   , cleanModule
   , constructor
   , defineModules
-  , ins
+  , instanceDef
   , module Exp
   , pursModule
   , typeDef
@@ -121,11 +121,11 @@ typeDef n x =
   , TS.lineComment ("Type")
   ] <> toTsDef x
 
-cla :: forall dummy a. ToTsDef a => String -> dummy -> Proxy a -> Array TS.Declaration
-cla n _ = typeDef n
+classDef :: forall dummy a. ToTsDef a => String -> dummy -> Proxy a -> Array TS.Declaration
+classDef n _ = typeDef n
 
-ins :: TS.Type -> String -> Array TS.Declaration
-ins x n =
+instanceDef :: String -> TS.Type -> Array TS.Declaration
+instanceDef n x  =
   [ TS.emptyLine
   , TS.lineComment "Instance"
   , TS.DeclValueDef (TS.Name n) $ x

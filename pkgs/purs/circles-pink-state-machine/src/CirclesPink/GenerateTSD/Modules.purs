@@ -17,7 +17,7 @@ import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple.Nested (type (/\), (/\))
-import PursTsGen (class ToTsDef, class ToTsType, cla, constructor, pursModule, toTsType)
+import PursTsGen (class ToTsDef, class ToTsType, classDef, constructor, instanceDef, pursModule, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToTsType (Constructor(..))
 import PursTsGen.Data.ABC (A, B, C)
@@ -43,13 +43,13 @@ modules =
   , "CirclesPink.Data.Address" /\
       join
         [ typeDef "Address" (Proxy :: _ CirclesPink.Data.Address.Address)
-        --, ins "ordAddress" (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
+        , instanceDef "ordAddress" (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
         ]
   , "CirclesPink.Data.TrustNode" /\
       join
         [ typeDef "TrustNode" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
         , value "unwrap" [] CirclesPink.Data.TrustNode.unwrap
-        --         , ins (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)) "ordTrustNode"
+        , instanceDef "ordTrustNode" (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
         ]
   , "CirclesPink.Data.TrustConnection" /\
       join
@@ -68,7 +68,7 @@ modules =
         ]
   , "Data.Ord" /\
       join
-        [ -- cla "Ord" (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A))
+        [ classDef "Ord" (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A))
         ]
   , "Data.Nullable" /\
       join
@@ -113,7 +113,7 @@ modules =
 newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
 
 instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph id e n) where
-  toTsDef _ = pure $ TS.typeDef (TS.name "TrustNode") []
+  toTsDef _ = pure $ TS.typeDef (TS.name "IxGraph") []
     $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph")
     $ TS.Name <$> [ "Id", "E", "N" ]
 
