@@ -64,8 +64,6 @@ modules =
   , "Data.Maybe" /\
       join
         [ typeDef "Maybe" (Proxy :: _ (Data.Maybe.Maybe A))
-        , constructor "Just"  (Data.Maybe.Just :: A -> _) 
-        , constructor "Nothing" (Data.Maybe.Nothing :: _ A) 
         , value "maybe" [] (Data.Maybe.maybe :: _ -> (A -> B) -> _)
         ]
   , "Data.Ord" /\
@@ -116,7 +114,8 @@ newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
 
 instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph id e n) where
   toTsDef _ = pure $ TS.typeDef (TS.name "TrustNode") []
-    $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph") $ TS.Name <$> [ "Id", "E", "N" ]
+    $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph")
+    $ TS.Name <$> [ "Id", "E", "N" ]
 
 instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (IxGraph id e n) where
   toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "IxGraph") $
