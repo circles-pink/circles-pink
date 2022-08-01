@@ -10,8 +10,10 @@ import Data.Nullable (Nullable)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple, fst, snd)
 import Data.Typelevel.Undefined (undefined)
+import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
 import PursTsGen.Data.ABC (A(..), B)
+import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL ((|||))
 import PursTsGen.Lang.TypeScript.DSL as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveType)
@@ -42,7 +44,7 @@ instance toTsDefNullable :: ToTsDef (Nullable A) where
 
 class GenToTsDefSum :: forall k. k -> Constraint
 class GenToTsDefSum rep where
-  genToTsDefSum :: Proxy rep -> NonEmptyArray (TS.Declaration /\ TS.Declaration /\ TS.Type)
+  genToTsDefSum :: Proxy rep -> NonEmptyArray (Array TS.Declaration /\ (PS.Type -> Array TS.Declaration) /\ TS.Type)
 
 instance lastSum ::
   ( GenToTsDefProd t
@@ -59,18 +61,31 @@ else instance recSum ::
   GenToTsDefSum (Sum (Constructor s t) rep) where
   genToTsDefSum _ = genToTsDefSum' (Proxy :: _ s) (Proxy :: _ t) `NEA.cons` genToTsDefSum (Proxy :: _ rep)
 
-genToTsDefSum' :: forall s t. GenToTsDefProd t => IsSymbol s => Proxy s -> Proxy t -> TS.Declaration /\ TS.Declaration /\ TS.Type
+genToTsDefSum' :: forall s t. GenToTsDefProd t => IsSymbol s => Proxy s -> Proxy t -> Array TS.Declaration /\ (PS.Type -> Array TS.Declaration) /\ TS.Type
 genToTsDefSum' _ _ = typeDef /\ ctor /\ type'
   where
   name = reflectSymbol (Proxy :: _ s)
   ctorType = TS.record [ TS.keyVal "name" $ TS.tlString name ]
   label = TS.keyVal "constructor" ctorType
   brand = TS.keyVal name TS.uniqueSymbol
-  values = genToTsDefProd (undefined :: t) 0
-  typeDef = TS.typeDef (TS.name name) [] $ TS.record (label : brand : values)
-  { floating } = fold $ snd <<< resolveType <<< snd <$> values
+  res = genToTsDefProd (undefined :: t) 0
+  values = snd <$> res
+  psTypes = fst <$> res 
+  types = snd <$> values
+  typeDef =
+    [ TS.emptyLine
+    , TS.typeDef (TS.name name) [] $ TS.record (label : brand : values)
+    ]
+  { floating } = fold $ snd <<< resolveType <$> types
   type' = TS.mkType (TS.QualName Nothing name) $ TS.var <$> floating
-  ctor = TS.valueDef (TS.Name name) $ mkCtor type' $ snd <$> values
+  ctor ret =
+    let
+      pursType = PS.printType $ foldr PS.function ret psTypes 
+    in
+    [ TS.emptyLine
+    , TS.lineComment (name <> " :: " <> pursType)
+    , TS.valueDef (TS.Name name) $ mkCtor type' $ types
+    ]
 
 mkCtor :: TS.Type -> Array TS.Type -> TS.Type
 mkCtor t [] = TS.record' { value: t }
@@ -81,13 +96,13 @@ mkCtor t xs = TS.record' { create: foldr (\x y -> TS.function_ (pure (TS.name "_
 --------------------------------------------------------------------------------
 
 class GenToTsDefProd rep where
-  genToTsDefProd :: rep -> Int -> Array (TS.Name /\ TS.Type)
+  genToTsDefProd :: rep -> Int -> Array (PS.Type /\ (TS.Name /\ TS.Type))
 
 instance nilProd :: GenToTsDefProd NoArguments where
   genToTsDefProd _ _ = []
 
-instance nilOne :: ToTsType t => GenToTsDefProd (Argument t) where
-  genToTsDefProd _ i = [ TS.keyVal ("value" <> show i) $ toTsType (undefined :: t) ]
+instance nilOne :: (ToTsType t, ToPursType t) => GenToTsDefProd (Argument t) where
+  genToTsDefProd _ i = [ toPursType (Proxy :: _ t) /\ (TS.keyVal ("value" <> show i) $ toTsType (undefined :: t)) ]
 
 instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Product a b) where
   genToTsDefProd _ i = genToTsDefProd (undefined :: a) i <> genToTsDefProd (undefined :: b) (i + 1)
@@ -96,14 +111,13 @@ instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Prod
 -- Utils
 --------------------------------------------------------------------------------
 
-genericToTsDef :: forall a rep. Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
+genericToTsDef :: forall a rep. ToPursType a => Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
 genericToTsDef name _ =
-  intersperse TS.emptyLine
-    $ union : toArray ctors <> toArray ctorTypes
+  union : ctorTypes <> ((\f -> f $ toPursType (Proxy :: _ a)) =<< ctors)
   where
-  xs = genToTsDefSum $ (Proxy :: _ rep)
-  ctorTypes = fst <$> xs
-  ctors = fst <<< snd <$> xs
+  xs = genToTsDefSum (Proxy :: _ rep)
+  ctorTypes = fst =<< toArray xs
+  ctors = fst <<< snd <$> toArray xs
   union = TS.typeDef (TS.name name) [] $ foldl1 (|||) $ snd <<< snd <$> xs
 
 --------------------------------------------------------------------------------

@@ -3,7 +3,7 @@ import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Gar
 import { toNullable } from '@circles-pink/state-machine/output/Data.Nullable';
 import { neighborNodes } from '@circles-pink/state-machine/output/Data.IxGraph';
 import React from 'react';
-import {  hush } from '@circles-pink/state-machine/output/Data.Either';
+import {  hush, isLeft } from '@circles-pink/state-machine/output/Data.Either';
 import { pipe } from 'fp-ts/lib/function';
 
 type Props = {
@@ -16,11 +16,13 @@ export const TrustUserList = ({address, graph}: Props) => {
 
     const neighbors = neighborNodes(ordAddress)(address)(graph)
 
+
+
     //const trustNodes = pipe(neighbors, hush, toNullable)
 
-    //if (!trustNodes) return <div>Address not found in graph</div>
+    if (isLeft(neighbors)) return <div>Address not found in graph</div>
    
-    // const x = trustNodes
+    const x = neighbors
 
     return <div>Hello! tul</div>
 };
