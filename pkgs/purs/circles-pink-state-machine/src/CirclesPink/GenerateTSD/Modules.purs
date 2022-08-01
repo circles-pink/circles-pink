@@ -60,6 +60,8 @@ modules =
         [ typeDef "Either" (Proxy :: _ (Data.Either.Either A B))
         , value "either" [] (Data.Either.either :: _ -> _ -> _ A B -> C)
         , value "hush" [] (Data.Either.hush :: _ A B -> _)
+       -- , defPredicateFn "isLeft" [] (Data.Either.isLeft :: _ A B -> _) (TS.mkType (TS.qualName_ "Left") [toTsType A])
+       -- , defPredicateFn "isRight" [] (Data.Either.isRight :: _ A B -> _)
         ]
   , "Data.Maybe" /\
       join
@@ -147,3 +149,7 @@ typeDef s x = PT.typeDef s (unsafeReplace x)
 
 value :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
 value s xs x = PT.value s xs (unsafeReplace x)
+
+-- defPredicateFn :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
+-- defPredicateFn s xs x = PT.defPredicateFn s xs (unsafeReplace x)
+
