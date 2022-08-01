@@ -26,6 +26,8 @@ import TypedEnv (class ParseValue)
 
 --import Payload.Server.Params (class DecodeParam, decodeParam)
 --import Simple.JSON (class ReadForeign, class WriteForeign)
+import PursTs.Class (class ToTsDef)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 
 newtype Address = Address W3.Address
 
@@ -49,6 +51,11 @@ instance Arbitrary Address where
 
 instance ParseValue Address where
   parseValue = parseAddress
+instance toTsTypeDefAddress :: ToTsDef Address where
+  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_Address" "Address") $ TS.name <$> []
+
+instance toTsTypeAddress :: ToTsType Address where
+  toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"
 
 instance FpTs Address Address where
   toFpTs = identity
