@@ -121,6 +121,21 @@ typeDef n x =
   , TS.lineComment ("Type")
   ] <> toTsDef x
 
+-- defPredicateFn :: forall a. ToTsType a => String -> Array TS.Type -> a -> TS.Type -> Array TS.Declaration
+-- defPredicateFn = 1
+
+
+-- class ToPred a b | a -> b where
+--   toPred :: a -> b
+
+-- data Pred = Pred TS.Name TS.Type
+
+-- instance isPred :: ToPred (a -> Boolean) (a -> Pred) where
+--   toPred f _ =  
+
+-- else instance isPred2 :: ToPred b b' => ToPred (a -> b) (a -> b')
+
+
 classDef :: forall dummy a. ToTsDef a => String -> dummy -> Proxy a -> Array TS.Declaration
 classDef n _ = typeDef n
 
