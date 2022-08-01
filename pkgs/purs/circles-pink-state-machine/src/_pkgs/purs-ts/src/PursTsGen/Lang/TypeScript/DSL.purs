@@ -11,6 +11,7 @@ module PursTsGen.Lang.TypeScript.DSL
   , mkType_
   , module Exp
   , name
+  , never
   , null
   , number
   , opaque
@@ -20,6 +21,7 @@ module PursTsGen.Lang.TypeScript.DSL
   , record'
   , string
   , tlString
+  , typeDef
   , undefined
   , union
   , uniqueSymbol
@@ -108,6 +110,12 @@ name n = Name n
 
 lineComment :: String -> Declaration
 lineComment = DeclLineComment
+
+typeDef :: Name -> Array Name -> Type -> Declaration
+typeDef = DeclTypeDef
+
+never :: Type
+never = TypeNever
 
 emptyLine :: Declaration
 emptyLine = DeclEmptyLine

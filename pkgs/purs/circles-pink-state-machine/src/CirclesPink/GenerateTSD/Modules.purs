@@ -70,7 +70,7 @@ modules =
         ]
   , "Data.Ord" /\
       join
-        [ cla "Ord" (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A))
+        [ -- cla "Ord" (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A))
         ]
   , "Data.Nullable" /\
       join
@@ -115,7 +115,8 @@ modules =
 newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
 
 instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph id e n) where
-  toTsDef _ = TS.opaque (TS.qualName "Data_IxGraph" "IxGraph") $ TS.Name <$> [ "Id", "E", "N" ]
+  toTsDef _ = pure $ TS.typeDef (TS.name "TrustNode") []
+    $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph") $ TS.Name <$> [ "Id", "E", "N" ]
 
 instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (IxGraph id e n) where
   toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "IxGraph") $

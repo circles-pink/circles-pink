@@ -24,7 +24,8 @@ derive newtype instance eqTrustNode :: Eq TrustNode
 derive newtype instance ordTrustNode :: Ord TrustNode
 
 instance toTsTypeDefTrustNode :: ToTsDef TrustNode where
-  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_TrustNode" "TrustNode") $ TS.name <$> []
+  toTsDef _ = pure $ TS.typeDef (TS.name "TrustNode") []
+    $ TS.opaque (TS.qualName "CirclesPink_Data_TrustNode" "TrustNode") $ TS.name <$> []
 
 instance toTsTypeTrustNode :: ToTsType TrustNode where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustNode" "TrustNode"

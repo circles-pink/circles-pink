@@ -32,8 +32,8 @@ data Baz = Foo Number | Bar
 -- instance toTsTypeBaz :: ToTsType Baz where
 --   toTsType _ = TS.TypeConstructor (TS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Baz") []
 
-instance toTsDefBaz :: ToTsDef Baz where
-  toTsDef _ = TS.TypeOpaque (TS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Baz") []
+-- instance toTsDefBaz :: ToTsDef Baz where
+--   toTsDef _ = TS.TypeOpaque (TS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Baz") []
 
 fromBaz :: Baz -> Number
 fromBaz = case _ of
@@ -42,8 +42,8 @@ fromBaz = case _ of
 
 data Vielleicht a = Nur a | Nichts
 
-instance toTsDefVielleicht :: ToTsDef (Vielleicht a) where
-  toTsDef _ = TS.TypeOpaque (TS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Vielleicht") [ TS.Name "A" ]
+-- instance toTsDefVielleicht :: ToTsDef (Vielleicht a) where
+--   toTsDef _ = TS.TypeOpaque (TS.QualName (Just "CirclesPink_GenerateTSD_SampleModule") "Vielleicht") [ TS.Name "A" ]
 
 -- instance toTsTypeVielleicht :: ToTsType a => ToTsType (Vielleicht a) where
 --   toTsType _ = TS.TypeConstructor
