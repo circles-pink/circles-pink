@@ -18,7 +18,7 @@ import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..), maybe)
+import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as S
 import Data.String (Pattern(..), Replacement(..))
@@ -26,7 +26,6 @@ import Data.String as St
 import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug.Extra (todo)
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, MyThese(..), genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, spec, toTsDef) as Exp
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
@@ -34,6 +33,7 @@ import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsTy
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
 import PursTsGen.Lang.TypeScript (Declaration(..), defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
+import PursTsGen.Lang.TypeScript.Traversal (rewriteTypeTopDown)
 import Type.Proxy (Proxy)
 
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
@@ -111,11 +111,6 @@ resolveType x = runState (resolveType' x) mempty
 
 resolveType' :: TS.Type -> State TypeScope TS.Type
 resolveType' = case _ of
-  TS.TypeNull -> pure TS.TypeNull
-  TS.TypeUndefined -> pure TS.TypeUndefined
-  TS.TypeString -> pure TS.TypeString
-  TS.TypeNumber -> pure TS.TypeNumber
-  TS.TypeBoolean -> pure TS.TypeBoolean
   TS.TypeArray t -> TS.TypeArray <$> resolveType' t
   TS.TypeRecord xs -> TS.TypeRecord <$> traverse (traverse resolveType') xs
   TS.TypeFunction _ xs r -> resolveFunction xs r
@@ -123,7 +118,7 @@ resolveType' = case _ of
   TS.TypeConstructor qn xs -> TS.TypeConstructor qn <$> traverse resolveType' xs
   TS.TypeOpaque x ns -> resolveOpaque x ns
   TS.TypeUnion x y -> TS.TypeUnion <$> resolveType' x <*> resolveType' y
-  TS.TypeTLString s -> pure $ TS.TypeTLString s
+  x -> pure x
   where
 
   resolveOpaque x ns = do
@@ -162,19 +157,12 @@ resolveType' = case _ of
 
 deleteQuant :: Set TS.Name -> TS.Type -> TS.Type
 deleteQuant s = case _ of
-  TS.TypeNull -> TS.TypeNull
-  TS.TypeUndefined -> TS.TypeUndefined
-  TS.TypeString -> TS.TypeString
-  TS.TypeNumber -> TS.TypeNumber
-  TS.TypeBoolean -> TS.TypeBoolean
   TS.TypeArray t -> TS.TypeArray $ deleteQuant s t
   TS.TypeRecord xs -> TS.TypeRecord $ map (map $ deleteQuant s) xs
   TS.TypeFunction ta xs r -> deleteQuantFunction ta xs r
-  TS.TypeVar n -> TS.TypeVar n
   TS.TypeConstructor qn xs -> TS.TypeConstructor qn $ map (deleteQuant s) xs
-  TS.TypeOpaque y x -> TS.TypeOpaque y x
   TS.TypeUnion x y -> TS.TypeUnion (deleteQuant s x) (deleteQuant s y)
-  TS.TypeTLString str -> TS.TypeTLString str
+  x -> x
   where
 
   deleteQuantFunction ta xs r = TS.TypeFunction
@@ -220,8 +208,6 @@ defineModule mm k xs =
   where
   moduleHead = (TS.ModuleHead commentHeader imports)
 
-  alias = M.lookup (modToAlias k) mm <#> snd # maybe "Unknown_Alias" identity
-
   imports = xs
     >>= declToRefs
     <#> (\(TS.QualName sc _) -> sc)
@@ -246,19 +232,12 @@ declToRefs = case _ of
 
 typeToRefs :: TS.Type -> Array TS.QualName
 typeToRefs = case _ of
-  TS.TypeNull -> []
-  TS.TypeUndefined -> []
-  TS.TypeString -> []
-  TS.TypeNumber -> []
-  TS.TypeBoolean -> []
   TS.TypeArray t -> typeToRefs t
   TS.TypeRecord xs -> xs <#> snd >>= typeToRefs
   TS.TypeFunction _ xs r -> (xs <#> snd >>= typeToRefs) <> (typeToRefs r)
-  TS.TypeVar _ -> []
   TS.TypeConstructor qn xs -> [ qn ] <> (xs >>= typeToRefs)
-  TS.TypeOpaque _ _ -> []
   TS.TypeUnion x y -> typeToRefs x <> typeToRefs y
-  TS.TypeTLString _ -> []
+  _ -> []
 
 --------------------------------------------------------------------------------
 

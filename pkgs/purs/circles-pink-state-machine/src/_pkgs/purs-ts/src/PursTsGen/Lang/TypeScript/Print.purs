@@ -20,7 +20,7 @@ printType = case _ of
   TypeBoolean -> "boolean"
   TypeVar n -> printName n
   TypeArray t -> "ReadonlyArray<" <> printType t <> ">"
-  TypeRecord xs -> "Readonly<{ " <> printRecEntries xs <> " }>"
+  TypeRecord xs -> "{ " <> printRecEntries xs <> " }"
   TypeFunction targs args b -> printTargs (S.toUnfoldable targs) <> printFnHead args <> printType b
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
   TypeOpaque id targs -> "{ " <> printOpaque id <> printTargsValues targs <> " }"
@@ -38,7 +38,7 @@ printType = case _ of
 
   printRecEntries xs = joinWith "; " $ printRecEntry <$> xs
 
-  printRecEntry (k /\ v) = printName k <> " : " <> printType v
+  printRecEntry (k /\ v) = "readonly " <> printName k <> " : " <> printType v
 
   printTargsValues xs = xs # A.mapWithIndex (\i x -> Name ("_" <> show (i + 1)) /\ TypeVar x) # printRecEntries
 

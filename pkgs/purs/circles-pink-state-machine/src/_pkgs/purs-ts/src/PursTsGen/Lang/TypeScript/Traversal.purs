@@ -3,6 +3,8 @@ module PursTsGen.Lang.TypeScript.Traversal
   , defaultVisitorM
   , rewriteModuleTopDown
   , rewriteModuleTopDownM
+  , rewriteTypeTopDown
+  , rewriteTypeTopDownM
   ) where
 
 import PursTsGen.Prelude
@@ -93,4 +95,10 @@ rewriteModuleTopDown = rewriteTopDown traverseModule
 
 rewriteModuleTopDownM :: forall m. Monad m => { | OnTs (Rewrite m) } -> Rewrite m Module
 rewriteModuleTopDownM = rewriteTopDownM traverseModule
+
+rewriteTypeTopDown :: { | OnTs PureRewrite } -> PureRewrite Type
+rewriteTypeTopDown = rewriteTopDown traverseType
+
+rewriteTypeTopDownM :: forall m. Monad m => { | OnTs (Rewrite m) } -> Rewrite m Type
+rewriteTypeTopDownM = rewriteTopDownM traverseType
 
