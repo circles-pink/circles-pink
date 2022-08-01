@@ -26,54 +26,63 @@ import Data.String as St
 import Data.Traversable (class Foldable, fold, foldr, sequence, traverse)
 import Data.Tuple (Tuple(..), fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
+import Debug.Extra (todo)
 import Partial.Unsafe (unsafeCrashWith, unsafePartial)
-import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, MyThese(..), genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, spec, toTsDef) as Exp
-import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
+import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
-import PursTsGen.Lang.TypeScript (Declaration(..))
+import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
+import PursTsGen.Lang.TypeScript (Declaration(..), defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
 import Type.Proxy (Proxy)
 
 --import PursTs.Class (class ToTsDef, class ToTsType, toTsDef, toTsType)
 
-class Clean a where
-  clean :: String -> a -> a
+-- class Clean a where
+--   clean :: String -> a -> a
 
-instance cleanModule' :: Clean TS.Module where
-  clean m (TS.Module mh mb) = TS.Module mh $ clean m mb
+-- instance cleanModule' :: Clean TS.Module where
+--   clean m (TS.Module mh mb) = TS.Module mh $ clean m mb
 
-instance cleanModuleBody :: Clean TS.ModuleBody where
-  clean m (TS.ModuleBody ds) = TS.ModuleBody $ clean m <$> ds
+-- instance cleanModuleBody :: Clean TS.ModuleBody where
+--   clean m (TS.ModuleBody ds) = TS.ModuleBody $ clean m <$> ds
 
-instance cleanDeclaration :: Clean TS.Declaration where
-  clean m x = case x of
-    TS.DeclTypeDef x' y t -> TS.DeclTypeDef x' y $ clean m t
-    TS.DeclValueDef x' t -> TS.DeclValueDef x' $ clean m t
-    t -> t
+-- instance cleanDeclaration :: Clean TS.Declaration where
+--   clean m x = case x of
+--     TS.DeclTypeDef x' y t -> TS.DeclTypeDef x' y $ clean m t
+--     TS.DeclValueDef x' t -> TS.DeclValueDef x' $ clean m t
+--     t -> t
 
-instance cleanType :: Clean TS.Type where
-  clean m = case _ of
-    TS.TypeNull -> TS.TypeNull
-    TS.TypeUndefined -> TS.TypeUndefined
-    TS.TypeString -> TS.TypeString
-    TS.TypeNumber -> TS.TypeNumber
-    TS.TypeBoolean -> TS.TypeBoolean
-    TS.TypeArray t -> TS.TypeArray $ clean m t
-    TS.TypeRecord xs -> TS.TypeRecord $ (map $ clean m) <$> xs
-    TS.TypeFunction xs ys t -> TS.TypeFunction xs ((map $ clean m) <$> ys) (clean m t)
-    TS.TypeVar x -> TS.TypeVar x
-    TS.TypeConstructor qn x -> TS.TypeConstructor (clean m qn) (clean m <$> x)
-    TS.TypeOpaque y x -> TS.TypeOpaque y x
-    TS.TypeUnion x y -> TS.TypeUnion (clean m x) (clean m y)
-    TS.TypeTLString s -> TS.TypeTLString s
+-- instance cleanType :: Clean TS.Type where
+--   clean m = case _ of
+--     TS.TypeNull -> TS.TypeNull
+--     TS.TypeUndefined -> TS.TypeUndefined
+--     TS.TypeString -> TS.TypeString
+--     TS.TypeNumber -> TS.TypeNumber
+--     TS.TypeBoolean -> TS.TypeBoolean
+--     TS.TypeArray t -> TS.TypeArray $ clean m t
+--     TS.TypeRecord xs -> TS.TypeRecord $ (map $ clean m) <$> xs
+--     TS.TypeFunction xs ys t -> TS.TypeFunction xs ((map $ clean m) <$> ys) (clean m t)
+--     TS.TypeVar x -> TS.TypeVar x
+--     TS.TypeConstructor qn x -> TS.TypeConstructor (clean m qn) (clean m <$> x)
+--     TS.TypeOpaque y x -> TS.TypeOpaque y x
+--     TS.TypeUnion x y -> TS.TypeUnion (clean m x) (clean m y)
+--     TS.TypeTLString s -> TS.TypeTLString s
 
-instance cleanQualName :: Clean TS.QualName where
-  clean m (TS.QualName (Just x) y) | x == m = TS.QualName Nothing y
-  clean _ all = all
+-- instance cleanQualName :: Clean TS.QualName where
+--   clean m (TS.QualName (Just x) y) | x == m = TS.QualName Nothing y
+--   clean _ all = all
 
 cleanModule :: String -> TS.Module -> TS.Module
-cleanModule = clean
+cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
+  where
+  onType = case _ of
+    TS.TypeConstructor qn x -> TS.TypeConstructor (cleanQualName qn) x
+    TS.TypeOpaque qn x -> TS.TypeOpaque (cleanQualName qn) x
+    x -> x
+
+  cleanQualName (TS.QualName (Just x) y) | x == m = TS.QualName Nothing y
+  cleanQualName x = x
 
 --------------------------------------------------------------------------------
 
@@ -207,11 +216,11 @@ defineModules mm xs = (\(k /\ v) -> k /\ defineModule mm' k v) <$> xs
 defineModule :: Map String (String /\ String) -> String -> Array TS.Declaration -> TS.Module
 defineModule mm k xs =
   TS.Module moduleHead moduleBody
-    # cleanModule alias
+    # cleanModule (modToAlias k)
   where
   moduleHead = (TS.ModuleHead commentHeader imports)
 
-  alias = M.lookup k mm <#> snd # maybe "Unknown_Alias" identity
+  alias = M.lookup (modToAlias k) mm <#> snd # maybe "Unknown_Alias" identity
 
   imports = xs
     >>= declToRefs
