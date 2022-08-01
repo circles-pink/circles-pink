@@ -25,9 +25,9 @@ module PursTsGen.Lang.TypeScript.DSL
   , undefined
   , union
   , uniqueSymbol
+  , valueDef
   , var
-  )
-  where
+  ) where
 
 import Prelude
 import Prim hiding (Type)
@@ -113,6 +113,9 @@ lineComment = DeclLineComment
 
 typeDef :: Name -> Array Name -> Type -> Declaration
 typeDef = DeclTypeDef
+
+valueDef :: Name -> Type -> Declaration
+valueDef = DeclValueDef
 
 never :: Type
 never = TypeNever
