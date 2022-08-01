@@ -16,20 +16,23 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+import PursTsGen (class ToTsDef, class ToTsType)
+import PursTsGen.Lang.TypeScript.DSL as TS
 
 newtype Address = Address W3.Address
 
 derive instance newtypeAddress :: Newtype Address _
-
 derive newtype instance showAddress :: Show Address
-
 derive newtype instance eqAddress :: Eq Address
-
 derive newtype instance ordAddress :: Ord Address
-
 derive newtype instance decodeJsonAddress :: DecodeJson Address
-
 derive newtype instance encodeJsonAddress :: EncodeJson Address
+
+instance toTsTypeDefAddress :: ToTsDef Address where
+  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_Address" "Address") $ TS.name <$> []
+
+instance toTsTypeAddress :: ToTsType Address where
+  toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity

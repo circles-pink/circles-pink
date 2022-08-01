@@ -6,11 +6,9 @@ module PursTsGen
   , ins
   , module Exp
   , pursModule
-  , typ
-  , val
-  , val'
-  )
-  where
+  , typeDef
+  , value
+  ) where
 
 import Prelude
 
@@ -253,18 +251,17 @@ typeToRefs = case _ of
   TS.TypeUnion x y -> typeToRefs x <> typeToRefs y
   TS.TypeTLString _ -> []
 
-
 --------------------------------------------------------------------------------
 
-val :: forall a. ToTsType a => a -> String -> Array TS.Declaration
-val x n =
-  [ TS.emptyLine
-  , TS.lineComment ("Value") -- <> (PT.printType $ toPursType x)
-  , TS.DeclValueDef (TS.Name n) $ toTsType x
-  ]
+-- value :: forall a. ToTsType a => String -> a -> Array TS.Declaration
+-- value n x =
+--   [ TS.emptyLine
+--   , TS.lineComment ("Value") -- <> (PT.printType $ toPursType x)
+--   , TS.DeclValueDef (TS.Name n) $ toTsType x
+--   ]
 
-val' :: forall a. ToTsType a => Array TS.Type -> a -> String -> Array TS.Declaration
-val' cs x n =
+value :: forall a. ToTsType a => String -> Array TS.Type -> a -> Array TS.Declaration
+value n cs x =
   [ TS.emptyLine
   , TS.DeclValueDef (TS.Name n) $ foldr mkFn init cs
   ]
@@ -272,15 +269,15 @@ val' cs x n =
   mkFn y f = TS.TypeFunction S.empty [ (TS.Name "_") /\ y ] f
   init = toTsType x
 
-typ :: forall a. ToTsDef a => Proxy a -> String -> Array TS.Declaration
-typ x n =
+typeDef :: forall a. ToTsDef a => String -> Proxy a -> Array TS.Declaration
+typeDef n x =
   [ TS.emptyLine
   , TS.lineComment ("Type")
   , TS.DeclTypeDef (TS.Name n) mempty $ toTsDef x
   ]
 
-cla :: forall dummy a. ToTsDef a => dummy -> Proxy a -> String -> Array TS.Declaration
-cla _ = typ
+cla :: forall dummy a. ToTsDef a => String -> dummy -> Proxy a -> Array TS.Declaration
+cla n _ = typeDef n
 
 ins :: TS.Type -> String -> Array TS.Declaration
 ins x n =
