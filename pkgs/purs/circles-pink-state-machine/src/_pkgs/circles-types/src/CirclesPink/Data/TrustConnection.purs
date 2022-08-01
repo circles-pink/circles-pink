@@ -20,7 +20,9 @@ instance indexed :: Indexed (Pair Address) TrustConnection where
   getIndex (TrustConnection conn _) = conn
 
 instance toTsTypeDefTrustConnection :: ToTsDef TrustConnection where
-  toTsDef _ = TS.opaque (TS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection") $ TS.name <$> []
+  toTsDef _ = pure $ TS.typeDef (TS.name "TrustConnection") []
+    $ TS.opaque (TS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection")
+    $ TS.name <$> []
 
 instance toTsTypeTrustConnection :: ToTsType TrustConnection where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection"

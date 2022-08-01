@@ -12,8 +12,8 @@ import PursTsGen.Lang.TypeScript.DSL as TS
 data ClassOrd :: forall k. k -> Type
 data ClassOrd a
 
-instance toTsTypeDefClassOrd :: ToTsDef (ClassOrd A) where
-  toTsDef _ = TS.TypeOpaque (TS.QualName (Just "Data_Ord") "Ord") $ TS.Name <$> [ "A" ]
+-- instance toTsTypeDefClassOrd :: ToTsDef (ClassOrd A) where
+--   toTsDef _ = TS.TypeOpaque (TS.QualName (Just "Data_Ord") "Ord") $ TS.Name <$> [ "A" ]
 
 data ORD = ORD
 

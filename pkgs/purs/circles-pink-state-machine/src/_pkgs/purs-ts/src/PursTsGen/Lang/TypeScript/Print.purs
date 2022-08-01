@@ -14,6 +14,7 @@ import PursTsGen.Lang.TypeScript.Types (Type(..), Declaration(..), Import(..), M
 printType :: Type -> String
 printType = case _ of
   TypeNull -> "null"
+  TypeNever -> "never"
   TypeUndefined -> "undefined"
   TypeString -> "string"
   TypeNumber -> "number"
