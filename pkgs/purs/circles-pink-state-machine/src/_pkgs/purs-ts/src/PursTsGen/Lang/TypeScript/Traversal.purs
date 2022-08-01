@@ -25,16 +25,11 @@ type OnTs t = OnType t + OnDeclaration t + ()
 
 defaultVisitorM :: forall f. Applicative f => { | OnTs (Rewrite f) }
 defaultVisitorM =
-  { onType:
-
-      pure
-  , 
-  
-  
-  onDeclaration: pure
+  { onType: pure
+  , onDeclaration: pure
   }
 
-defaultVisitor :: forall f. Applicative f => { | OnTs PureRewrite }
+defaultVisitor :: { | OnTs PureRewrite }
 defaultVisitor =
   { onType: identity
   , onDeclaration: identity
