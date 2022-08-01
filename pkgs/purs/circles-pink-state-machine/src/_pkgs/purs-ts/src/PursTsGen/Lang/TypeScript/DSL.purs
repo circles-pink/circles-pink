@@ -22,6 +22,7 @@ module PursTsGen.Lang.TypeScript.DSL
   , tlString
   , undefined
   , union
+  , uniqueSymbol
   , var
   )
   where
@@ -98,6 +99,9 @@ qualName ns n = QualName (Just ns) n
 
 qualName_ :: String -> QualName
 qualName_ n = QualName Nothing n
+
+uniqueSymbol :: Type
+uniqueSymbol = TypeUniqueSymbol
 
 name :: String -> Name
 name n = Name n
