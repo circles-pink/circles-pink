@@ -25,6 +25,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -354,8 +355,13 @@ env envenv@{ request, envVars } =
 
   getVouchers :: EnvControl.GetVouchers Aff
   getVouchers signatureObj = do
-    let client = mkClient (defaultOpts { baseUrl = envVars -# _.voucherServerHost }) spec
+    let
+      baseURL = envVars -# _.voucherServerHost
+      _ = spy "baseURL" baseURL
+      client = mkClient (defaultOpts { baseUrl = baseURL }) spec
+      _ = spy "client" client
     res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
+    let _ = spy "res" res
     pure (res -# _.body)
 
   -- saveSession :: EnvControl.SaveSession Aff
