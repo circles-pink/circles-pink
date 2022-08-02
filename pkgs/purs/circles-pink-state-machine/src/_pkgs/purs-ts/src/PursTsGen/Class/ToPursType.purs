@@ -5,7 +5,7 @@ import Prelude
 import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
-import PursTsGen.Data.ABC (A(..), B(..))
+import PursTsGen.Data.ABC (A, B)
 import PursTsGen.Lang.PureScript.Type as PS
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)

@@ -4,8 +4,6 @@ import Prelude
 
 import Data.Maybe (Maybe(..))
 import Data.Variant (Variant, inj)
-import PursTsGen.Lang.TypeScript.DSL as TS
-import PursTsGen.Class.ToTsDef (class ToTsDef)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 
