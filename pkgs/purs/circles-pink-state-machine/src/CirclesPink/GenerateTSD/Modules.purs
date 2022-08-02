@@ -6,6 +6,7 @@ import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
+import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
 import Data.Either as Data.Either
@@ -24,17 +25,16 @@ import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Typelevel.Undefined (undefined)
 import Debug.Extra (todo)
-import PursTsGen (class ToTsDef, classDef, constructor, defPredicateFn, genericToTsDef, instanceDef, pursModule, toTsType)
+import PursTsGen (class ToTsDef, classDef, constructor, defPredicateFn, genericToTsDef, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B, C)
+import PursTsGen.Data.ABC (A(..), B(..), C)
 import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Simple.Data.Array as Simple.Data.Array
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
-import CirclesPink.GenerateTSD.Replace as R
 
 moduleMap :: Map String (String /\ String)
 moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
