@@ -3,6 +3,7 @@ module PursTsGen.Lang.TypeScript.Ops where
 import PursTsGen.Prelude
 
 import Control.Monad.State (State, get, modify, runState)
+import Data.Array (nub)
 import Data.Array as A
 import Data.Bifunctor (lmap)
 import Data.Map (Map)
@@ -26,7 +27,7 @@ resolveDeclaration = case _ of
     let
       (y' /\ { floating }) = resolveType y
     in
-      DeclTypeDef x floating y' -- todo
+      DeclTypeDef x (nub floating) y' -- todo
   DeclValueDef x y ->
     let
       (y' /\ { floating }) = resolveType y
