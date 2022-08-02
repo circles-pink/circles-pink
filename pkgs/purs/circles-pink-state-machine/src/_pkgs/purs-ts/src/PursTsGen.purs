@@ -7,9 +7,11 @@ module PursTsGen
   , instanceDef
   , module Exp
   , pursModule
+  , typeAlias
   , typeDef
   , value
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -112,6 +114,12 @@ value n cs x =
   where
   mkFn y f = TS.TypeFunction S.empty [ (TS.Name "_") /\ y ] f
   init = toTsType x
+
+typeAlias :: forall a. ToTsType a => String -> a -> Array TS.Declaration
+typeAlias n x =
+  [ TS.emptyLine
+  , TS.DeclTypeDef (TS.Name n) [] $ toTsType x
+  ]
 
 constructor :: forall a. ToTsType (Constructor a) => String -> a -> Array TS.Declaration
 constructor n x = value n [] (Constructor x)

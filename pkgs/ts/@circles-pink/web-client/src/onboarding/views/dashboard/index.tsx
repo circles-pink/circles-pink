@@ -443,7 +443,7 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <Frame theme={theme}>
                 <UserSearch
-                  userSearchResult={stateRaw.userSearchResult}
+                  //userSearchResult={stateRaw.userSearchResult}
                   trusts={stateRaw.trusts}
                 // title={t('dashboard.exploreTitle')}
                 // trusts={searchResult}
