@@ -185,6 +185,18 @@ ts-build:
 	cd pkgs/ts/@circles-pink/web-client; tsc
 
 ################################################################################
+
+purs-tsd-gen:
+	TMP=`mktemp -d`
+	echo $TMP ; \
+	for dir in {{PURS_OUTPUT}}/Payload.* ; do \
+	  echo "copy dir $dir"; \
+	  cp -r $dir -t $TMP ; \
+	done ; \
+	# purs-tsd-gen --directory {{PURS_OUTPUT}} \
+
+
+################################################################################
 # All Makefile tasks
 ################################################################################
 
@@ -217,9 +229,6 @@ spago-clean:
 
 spago-test-watch:
 	make spago-test-watch
-
-purs-tsd-gen:
-	make purs-tsd-gen
 
 patchTsTypes:
 	make patchTsTypes
