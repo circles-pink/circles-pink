@@ -395,7 +395,13 @@ export const Dashboard = ({
               >
                 <Claim color={theme.baseColor}>Your Vouchers:</Claim>
                 <Button
-                  onClick={() => act(A._dashboard(A._getVouchers('Cheers')))}
+                  onClick={() =>
+                    act(
+                      A._dashboard(
+                        A._getVouchers(Math.round(new Date().getTime() / 1000).toString())
+                      )
+                    )
+                  }
                 >
                   Get Vouchers!
                 </Button>

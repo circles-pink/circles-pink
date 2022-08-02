@@ -359,8 +359,13 @@ env envenv@{ request, envVars } =
     let
       baseURL = envVars -# _.voucherServerHost
       _ = spy "baseURL" baseURL
-      client = mkClient (defaultOpts { baseUrl = baseURL, 
-      extraHeaders = H.fromFoldable ["Target-URL" /\ "http://localhost:4000"] }) spec
+      client = mkClient
+        ( defaultOpts
+            { baseUrl = baseURL
+            , extraHeaders = H.fromFoldable [ "Target-URL" /\ "http://localhost:4000/" ]
+            }
+        )
+        spec
       _ = spy "client" client
     res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
     let _ = spy "res" res

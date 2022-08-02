@@ -106,7 +106,6 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
 getVouchers :: { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers { body: { signatureObj } } = do
-  _ <- liftEffect $ log "I was called"
   web3 <- newWeb3_
   case W3.accountsRecover web3 signatureObj of
     Nothing -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
