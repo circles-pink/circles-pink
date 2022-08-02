@@ -187,14 +187,10 @@ ts-build:
 ################################################################################
 
 purs-tsd-gen:
-	TMP=`mktemp -d`
-	echo $TMP ; \
-	for dir in {{PURS_OUTPUT}}/Payload.* ; do \
-	  echo "copy dir $dir"; \
-	  cp -r $dir -t $TMP ; \
-	done ; \
-	# purs-tsd-gen --directory {{PURS_OUTPUT}} \
-
+	DIR=`mktemp -d` ; \
+	mv {{PURS_OUTPUT}}/Payload.* {{PURS_OUTPUT}}/VoucherServer.* -t $DIR ; \
+	purs-tsd-gen --directory {{PURS_OUTPUT}} ; \
+	mv $DIR/* -t {{PURS_OUTPUT}} ; \
 
 ################################################################################
 # All Makefile tasks
