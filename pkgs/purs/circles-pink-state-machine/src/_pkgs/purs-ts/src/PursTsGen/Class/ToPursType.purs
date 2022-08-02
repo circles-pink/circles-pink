@@ -5,7 +5,8 @@ import Prelude
 import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
-import PursTsGen.Data.ABC (A, B)
+import Data.Variant (Variant)
+import PursTsGen.Data.ABC (A, B, C(..), D)
 import PursTsGen.Lang.PureScript.Type as PS
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
@@ -31,10 +32,18 @@ instance toPursTypeEither :: (ToPursType a, ToPursType b) => ToPursType (Either 
     , toPursType (Proxy :: _ b)
     ]
 
-
 instance toPursTypeA :: ToPursType A where
   toPursType _ = PS.var $ PS.Name "a"
 
 instance toPursTypeB :: ToPursType B where
   toPursType _ = PS.var $ PS.Name "b"
+
+instance toPursTypeC :: ToPursType C where
+  toPursType _ = PS.var $ PS.Name "c"
+
+instance toPursTypeD :: ToPursType D where
+  toPursType _ = PS.var $ PS.Name "d"
+
+instance toPursTypeVariant :: ToPursType (Variant v) where
+  toPursType _ = PS.var $ PS.Name "TODO"
 
