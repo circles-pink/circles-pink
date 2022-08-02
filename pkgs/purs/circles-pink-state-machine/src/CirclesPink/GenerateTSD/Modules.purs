@@ -10,31 +10,23 @@ import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
 import Data.Either as Data.Either
-import Data.Generic.Rep (class Generic, Argument, Constructor(..), NoArguments(..), Product, Sum)
 import Data.Graph.Errors (ErrNeighborNodes, ErrNeighborhood)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Maybe as Data.Maybe
-import Data.Newtype (class Newtype, unwrap)
 import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
-import Data.Tuple (Tuple, fst)
+import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
-import Data.Typelevel.Undefined (undefined)
-import Debug.Extra (todo)
-import PursTsGen (class ToTsDef, classDef, constructor, defPredicateFn, genericToTsDef, instanceDef, pursModule, toTsType, typeDef, value)
-import PursTsGen as PT
-import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
+import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Data.ABC (A(..), B(..), C)
-import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Simple.Data.Array as Simple.Data.Array
 import Type.Proxy (Proxy(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 moduleMap :: Map String (String /\ String)
 moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable

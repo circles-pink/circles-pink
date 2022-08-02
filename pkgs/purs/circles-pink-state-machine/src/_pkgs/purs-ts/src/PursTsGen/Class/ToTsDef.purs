@@ -2,7 +2,7 @@ module PursTsGen.Class.ToTsDef where
 
 import PursTsGen.Prelude
 
-import Data.Array (intersperse, (:))
+import Data.Array ((:))
 import Data.Array.NonEmpty (NonEmptyArray, foldl1, toArray)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either)

@@ -8,7 +8,12 @@ let
 
   withTS = pursOutput: pkgs.runCommand "pursOutputWithTS"
     {
-      buildInputs = [ pkgs.purescript-tsd-gen pkgs.circles-pink.patchTsTypes pkgs.circles-pink.generate-tsd ];
+      buildInputs = [
+        pkgs.purescript-tsd-gen
+        pkgs.circles-pink.patchTsTypes
+        pkgs.circles-pink.generate-tsd
+        pkgs.nodePackages.prettier
+      ];
     }
     ''
       cp -r ${pursOutput} $out

@@ -41,7 +41,7 @@ import Data.Set as S
 import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (fromHomogeneous)
 import Foreign.Object as O
-import PursTsGen.Lang.TypeScript (Declaration(..), Name(..), QualName(..), Type(..))
+import PursTsGen.Lang.TypeScript (Declaration(..), Name(..), QualName(..))
 import PursTsGen.Lang.TypeScript.Types (Type(..))
 import PursTsGen.Lang.TypeScript.Types (Type(..), Name(..), QualName(..), Path(..), Declaration(..), Import(..), Module(..), ModuleHead(..), ModuleBody(..)) as Exp
 import Type.Row.Homogeneous (class Homogeneous)
