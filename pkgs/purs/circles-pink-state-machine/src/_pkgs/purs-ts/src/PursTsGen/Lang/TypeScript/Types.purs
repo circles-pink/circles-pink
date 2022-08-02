@@ -82,7 +82,8 @@ instance showQualName :: Show QualName where
 --------------------------------------------------------------------------------
 
 data Type
-  = TypeNull
+  = TypeAny
+  | TypeNull
   | TypeNever
   | TypeUndefined
   | TypeString

@@ -1,5 +1,6 @@
 module PursTsGen.Lang.TypeScript.DSL
   ( (|||)
+  , any
   , array
   , boolean
   , emptyLine
@@ -128,3 +129,6 @@ emptyLine = DeclEmptyLine
 
 isPred :: Name -> Type -> Type
 isPred = TypeIsPred
+
+any :: Type
+any = TypeAny

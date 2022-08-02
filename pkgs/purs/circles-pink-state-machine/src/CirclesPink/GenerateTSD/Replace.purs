@@ -52,3 +52,6 @@ typeDef s x = PT.typeDef s (unsafeReplace x)
 
 value :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
 value s xs x = PT.value s xs (unsafeReplace x)
+
+typeAlias :: forall t119 t120. ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
+typeAlias n x = PT.typeAlias n  (unsafeReplace x)

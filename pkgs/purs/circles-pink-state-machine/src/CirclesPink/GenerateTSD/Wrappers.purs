@@ -2,7 +2,6 @@ module CirclesPink.GenerateTSD.Wrappers where
 
 import Prelude
 
-
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
 import Data.Newtype (class Newtype)
@@ -10,6 +9,7 @@ import Data.Typelevel.Undefined (undefined)
 import PursTsGen (class ToTsDef, genericToTsDef, toTsType)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType)
+import PursTsGen.Data.ABC (A, B, C)
 import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
@@ -23,7 +23,7 @@ infixl 7 type Product as :*:
 
 newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
 
-instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph id e n) where
+instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph A B C) where
   toTsDef _ = pure $ TS.typeDef (TS.name "IxGraph") []
     $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph")
     $ TS.Name <$> [ "Id", "E", "N" ]
