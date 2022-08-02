@@ -7,9 +7,11 @@ import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable)
 import Data.Symbol (class IsSymbol, reflectSymbol)
+import Data.Tuple (Tuple)
 import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
+import Debug.Extra (todo)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import PursTsGen.Data.ABC (A, B, C, D, E, Z)
 import PursTsGen.Lang.TypeScript.DSL ((|||))
@@ -21,6 +23,9 @@ class ToTsType a where
 
 instance toTsTypeNumber :: ToTsType Number where
   toTsType _ = TS.number
+
+instance toTsTypeInt :: ToTsType Int where
+  toTsType _ = TS.mkType_ $ TS.qualName "Data_Int" "Int"
 
 instance toTsTypeString :: ToTsType String where
   toTsType _ = TS.string
@@ -51,6 +56,10 @@ instance toTsTypeMaybe :: ToTsType a => ToTsType (Maybe a) where
 
 instance toTsTypeEither :: (ToTsType a, ToTsType b) => ToTsType (Either a b) where
   toTsType _ = TS.mkType (TS.qualName "Data_Either" "Either")
+    [ toTsType (Proxy :: _ a), toTsType (Proxy :: _ b) ]
+
+instance toTsTypeTuple :: (ToTsType a, ToTsType b) => ToTsType (Tuple a b) where
+  toTsType _ = TS.mkType (TS.qualName "Data_Tuple" "Tuple")
     [ toTsType (Proxy :: _ a), toTsType (Proxy :: _ b) ]
 
 instance toTsTypeUnit :: ToTsType Unit where
@@ -125,3 +134,20 @@ instance toTsTypeConstructorFn :: ToTsType (Function a b) => ToTsType (Construct
 else instance toTsTypeConstructorVal :: ToTsType a => ToTsType (Constructor a) where
   toTsType (Constructor v) = TS.record' { value: toTsType v }
 
+
+--------------------------------------------------------------------------------
+
+newtype PredicateFn a = PredicateFn a 
+
+class ToTsPredFn a where
+  toTsPredFn :: TS.Type -> a -> TS.Type
+
+instance toTsPredFnNil :: ToTsType a => ToTsPredFn (a -> Boolean) where
+  toTsPredFn t _ = TS.function_
+    [ TS.keyVal "obj" $ toTsType (undefined :: a) ]
+    (TS.isPred (TS.name "obj") t)
+
+else instance toTsPredicateFnRec :: (ToTsType a , ToTsPredFn b) => ToTsPredFn (a -> b) where
+  toTsPredFn t _ = TS.function_
+    [ TS.keyVal "_" $ toTsType (undefined :: a) ]
+    (toTsPredFn t (undefined :: b))

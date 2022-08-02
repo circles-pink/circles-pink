@@ -1,28 +1,42 @@
-import { Address, ordAddress } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import { toNullable } from '@circles-pink/state-machine/output/Data.Nullable';
-import { neighborNodes } from '@circles-pink/state-machine/output/Data.IxGraph';
+import {
+  Address,
+  ordAddress,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import * as G from '@circles-pink/state-machine/output/Data.IxGraph';
 import React from 'react';
-import {  hush, isLeft } from '@circles-pink/state-machine/output/Data.Either';
+import { isLeft } from '@circles-pink/state-machine/output/Data.Either';
+import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
+import * as UI from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
+import { fields } from '../purs-util';
+import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { pipe } from 'fp-ts/lib/function';
 
 type Props = {
-    graph : CirclesGraph,
-    address: Address
-}
+  graph: CirclesGraph;
+  address: Address;
+};
 
+export const TrustUserList = ({ address, graph }: Props) => {
+  const neighborhood = G.neighborhood(ordAddress)(address)(graph);
 
-export const TrustUserList = ({address, graph}: Props) => {
+  if (isLeft(neighborhood)) return <div>Address not found in graph!</div>;
 
-    const neighbors = neighborNodes(ordAddress)(address)(graph)
+  const [items] = fields(neighborhood);
 
+  return (
+    <div>
+      {pipe(
+        items,
+        A.map(x => {
+          const [_, trustNode] = fields(x);
+          const { userIdent } = TN.unwrap(trustNode);
 
+          const id = UI.getIdentifier(userIdent);
 
-    //const trustNodes = pipe(neighbors, hush, toNullable)
-
-    if (isLeft(neighbors)) return <div>Address not found in graph</div>
-   
-    const x = neighbors
-
-    return <div>Hello! tul</div>
+          return <div>{id}</div>;
+        })
+      )}
+    </div>
+  );
 };

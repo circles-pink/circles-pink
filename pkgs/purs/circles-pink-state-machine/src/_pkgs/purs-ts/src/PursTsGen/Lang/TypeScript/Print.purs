@@ -28,6 +28,7 @@ printType = case _ of
   TypeUnion x y -> printType x <> " | " <> printType y
   TypeTLString s -> "\"" <> s <> "\""
   TypeUniqueSymbol -> "unique symbol"
+  TypeIsPred n t -> printName n <> " is " <> printType t
 
   where
   printOpaque id = "readonly \"" <> "Opaque__" <> printQualName id <> "\": unique symbol;"
