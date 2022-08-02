@@ -230,9 +230,6 @@ spago-clean:
 spago-test-watch:
 	make spago-test-watch
 
-purs-tsd-gen:
-	make purs-tsd-gen
-
 patchTsTypes:
 	make patchTsTypes
 

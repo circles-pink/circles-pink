@@ -49,9 +49,6 @@ spago-test: spago-clean yarn-install
 spago-test-watch: spago-clean yarn-install
 	spago test --watch --purs-args '--output $(PURS_OUTPUT)'
 
-purs-tsd-gen:
-	purs-tsd-gen --directory $(PURS_OUTPUT)
-
 patchTsTypes: yarn-install 
 	patchTsTypes $(PWD)/$(PURS_OUTPUT)
 
@@ -64,7 +61,6 @@ assets_:
 	cp -r result-assets/* -t ./pkgs/ts/assets/src
 	rm result-assets
 
-
 rw-result:
 	rm -rf rw-result
 	cp -r -H --dereference result/ rw-result
@@ -73,7 +69,7 @@ rw-result:
 generate: materialize clean-generate spago-build generate_
 
 generate_:
-	make purs-tsd-gen
+	just purs-tsd-gen
 	make patchTsTypes
 	make generate-zeus
 
