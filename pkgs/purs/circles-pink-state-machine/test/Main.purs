@@ -24,12 +24,21 @@ mainTestUnit =
     PursDeps.Tests.tests
 
 mainTestSpec :: Effect Unit
-mainTestSpec = launchAff_ do
-  specs <- discover """^(?!(Milkis.Impl.Window|cache-db\.json|Web3\.Bindings|Web3|Web.XHR.XMLHttpRequestUpload|Web.XHR|Web.Storage|Web.Internal.FFI|Web|VoucherServer.Main)).*"""
+mainTestSpec =
+  launchAff_
+    $ runSpec [ consoleReporter ] do
+        pure unit
+
+mainTestSpecDiscovered :: Effect Unit
+mainTestSpecDiscovered = launchAff_ do
+  specs <- discover """^(Test\.CirclesPink|CirclesCore|CirclesPink)"""
   runSpec [consoleReporter] specs
+  pure unit
 
 main :: Effect Unit
 main = do
   mainTestSpec
   mainTestUnit
   Test.VoucherServer.Main.main
+  mainTestSpecDiscovered
+
