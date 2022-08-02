@@ -97,6 +97,7 @@ data Type
   | TypeUnion Type Type
   | TypeTLString String
   | TypeUniqueSymbol
+  | TypeIsPred Name Type
 
 derive instance genericType :: Generic Type _
 derive instance eqType :: Eq Type

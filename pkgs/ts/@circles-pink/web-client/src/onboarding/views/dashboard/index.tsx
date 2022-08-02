@@ -423,7 +423,7 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <Frame theme={theme}>
                 <TrustUserList
-                address={1 as unknown as Address}
+                address={stateRaw.user.safeAddress}
                 // title={t('dashboard.trustNetworkTitle')}
                 graph={stateRaw.trusts}
                 // ownAddress={stateRaw.user.safeAddress}

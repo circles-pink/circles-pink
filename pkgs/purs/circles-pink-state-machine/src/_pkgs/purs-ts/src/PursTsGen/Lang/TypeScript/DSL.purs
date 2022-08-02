@@ -5,6 +5,7 @@ module PursTsGen.Lang.TypeScript.DSL
   , emptyLine
   , function
   , function_
+  , isPred
   , keyVal
   , lineComment
   , mkType
@@ -27,7 +28,8 @@ module PursTsGen.Lang.TypeScript.DSL
   , uniqueSymbol
   , valueDef
   , var
-  ) where
+  )
+  where
 
 import Prelude
 import Prim hiding (Type)
@@ -40,6 +42,7 @@ import Data.Tuple.Nested (type (/\), (/\))
 import Foreign.Object (fromHomogeneous)
 import Foreign.Object as O
 import PursTsGen.Lang.TypeScript (Declaration(..), Name(..), QualName(..), Type(..))
+import PursTsGen.Lang.TypeScript.Types (Type(..))
 import PursTsGen.Lang.TypeScript.Types (Type(..), Name(..), QualName(..), Path(..), Declaration(..), Import(..), Module(..), ModuleHead(..), ModuleBody(..)) as Exp
 import Type.Row.Homogeneous (class Homogeneous)
 
@@ -122,3 +125,6 @@ never = TypeNever
 
 emptyLine :: Declaration
 emptyLine = DeclEmptyLine
+
+isPred :: Name -> Type -> Type
+isPred = TypeIsPred
