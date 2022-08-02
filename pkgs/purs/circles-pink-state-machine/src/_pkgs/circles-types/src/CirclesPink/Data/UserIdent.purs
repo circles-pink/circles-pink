@@ -1,10 +1,13 @@
 module CirclesPink.Data.UserIdent
-  ( UserIdent(..)
+  ( UserIdent'
+  , UserIdent(..)
   , getAddress
   , getIdentifier
-  ) where
+  , unwrap
+  )
+  where
 
-import CirclesPink.Prelude
+import CirclesPink.Prelude hiding (unwrap)
 
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.User (User(..))
@@ -13,9 +16,12 @@ import Data.String as S
 import FpTs.Class (class FpTs)
 import PursTsGen (class ToTsDef, class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
+import Data.Newtype as NT
 
-newtype UserIdent = UserIdent (Either Address User)
+type UserIdent' = Either Address User
+newtype UserIdent = UserIdent UserIdent'
 
+derive instance newtypeUserIdent :: Newtype UserIdent _
 derive newtype instance showUserIdent :: Show UserIdent
 derive newtype instance eqUserIdent :: Eq UserIdent
 derive newtype instance ordUserIdent :: Ord UserIdent
@@ -36,6 +42,9 @@ instance indexedUserIdent :: Indexed Address UserIdent where
 instance ftTsUserIdent :: FpTs UserIdent UserIdent where
   fromFpTs = identity
   toFpTs = identity
+
+unwrap :: UserIdent -> UserIdent'
+unwrap = NT.unwrap
 
 getAddress :: UserIdent -> Address
 getAddress (UserIdent (Left addr)) = addr

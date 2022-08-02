@@ -2,6 +2,7 @@ module PursTsGen
   ( classDef
   , cleanModule
   , constructor
+  , defPredicateFn
   , defineModules
   , instanceDef
   , module Exp
@@ -26,11 +27,11 @@ import Data.Tuple.Nested (type (/\), (/\))
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, MyThese(..), genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, toTsDef) as Exp
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
-import PursTsGen.Class.ToTsType (class ToTsType, Constructor(..), toTsType)
+import PursTsGen.Class.ToTsType (class ToTsPredFn, class ToTsType, Constructor(..), toTsPredFn, toTsType)
 import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
-import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
+import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, name, string) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
-import Type.Proxy (Proxy)
+import Type.Proxy (Proxy(..))
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -121,26 +122,20 @@ typeDef n x =
   , TS.lineComment ("Type")
   ] <> toTsDef x
 
--- defPredicateFn :: forall a. ToTsType a => String -> Array TS.Type -> a -> TS.Type -> Array TS.Declaration
--- defPredicateFn = 1
-
-
--- class ToPred a b | a -> b where
---   toPred :: a -> b
-
--- data Pred = Pred TS.Name TS.Type
-
--- instance isPred :: ToPred (a -> Boolean) (a -> Pred) where
---   toPred f _ =  
-
--- else instance isPred2 :: ToPred b b' => ToPred (a -> b) (a -> b')
-
+defPredicateFn :: forall a. ToTsPredFn a => String -> Array TS.Type -> a -> TS.Type -> Array TS.Declaration
+defPredicateFn n cs x t =
+  [ TS.emptyLine
+  , TS.DeclValueDef (TS.Name n) $ foldr mkFn init cs
+  ]
+  where
+  mkFn y f = TS.TypeFunction S.empty [ (TS.Name "_") /\ y ] f
+  init = toTsPredFn t x
 
 classDef :: forall dummy a. ToTsDef a => String -> dummy -> Proxy a -> Array TS.Declaration
 classDef n _ = typeDef n
 
 instanceDef :: String -> TS.Type -> Array TS.Declaration
-instanceDef n x  =
+instanceDef n x =
   [ TS.emptyLine
   , TS.lineComment "Instance"
   , TS.DeclValueDef (TS.Name n) $ x
