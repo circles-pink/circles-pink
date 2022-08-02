@@ -189,6 +189,14 @@ ts-build:
 	cd pkgs/ts/@circles-pink/web-client; tsc
 
 ################################################################################
+
+purs-tsd-gen:
+	DIR=`mktemp -d` ; \
+	mv {{PURS_OUTPUT}}/Payload.* {{PURS_OUTPUT}}/VoucherServer.* -t $DIR ; \
+	purs-tsd-gen --directory {{PURS_OUTPUT}} ; \
+	mv $DIR/* -t {{PURS_OUTPUT}} ; \
+
+################################################################################
 # All Makefile tasks
 ################################################################################
 
