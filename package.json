@@ -12,6 +12,7 @@
     "pkgs/ts/storybook",
     "pkgs/ts/cli",
     "pkgs/ts/@circles-pink/web-client",
+    "pkgs/ts/cors-proxy",
     "pkgs/ts/circles-directus",
     "pkgs/ts/assets",
     "pkgs/ts/tasks-explorer",
@@ -24,9 +25,6 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "@directus/cli": "^9.7.1",
-    "body-parser": "^1.20.0",
-    "express": "^4.18.1",
-    "request": "^2.88.2"
+    "@directus/cli": "^9.7.1"
   }
 }
