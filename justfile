@@ -10,7 +10,7 @@ GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
 
 TASKS_EXPLORER_SERVER := env_var_or_default("TASKS_EXPLORER_SERVER", "http://tasks.circles.local")
 DIRECTUS_URL := env_var_or_default("DIRECTUS_URL", "http://directus.circles.local/graphql")
-VOUCHER_SERVER_HOST := env_var_or_default("VOUCHER_SERVER_HOST", "http://localhost:4000")
+VOUCHER_SERVER_HOST := env_var_or_default("VOUCHER_SERVER_HOST", "http://localhost:3000")
 GARDEN_API := env_var_or_default("GARDEN_API", "http://api.circles.local")
 GARDEN_API_USERS := env_var_or_default("GARDEN_API_USERS", "http://api.circles.local/api/users")
 GARDEN_GRAPH_API := env_var_or_default("GARDEN_GRAPH_API", "http://graph.circles.local")
