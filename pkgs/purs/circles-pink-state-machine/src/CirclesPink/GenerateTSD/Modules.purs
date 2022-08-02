@@ -22,10 +22,11 @@ import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
-import PursTsGen (class ToTsType, classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
+import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C)
+import PursTsGen.Data.ABC (A(..), B(..), C, D)
 import PursTsGen.Lang.TypeScript.DSL as TS
+import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
 import Type.Proxy (Proxy(..))
 
@@ -44,7 +45,11 @@ modules :: Array (String /\ Array TS.Declaration)
 modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
       [ R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
-      , R.typeAlias "DashboardState" (Proxy :: _ Any)
+      , R.typeAlias "DashboardState" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
+      
+      ]
+  , "RemoteData" /\ join
+      [ R.typeDef "--" (Proxy :: _ (RemoteData.RemoteData A B C D))
       ]
   , "Data.IxGraph" /\
       join
