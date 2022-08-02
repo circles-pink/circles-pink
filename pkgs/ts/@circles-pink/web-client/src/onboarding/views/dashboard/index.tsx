@@ -441,29 +441,32 @@ export const Dashboard = ({
               </Frame>
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <UserSearch
-                title={t('dashboard.exploreTitle')}
-                trusts={searchResult}
-                ownSafeAddress={stateRaw.user.safeAddress}
-                theme={theme}
-                icon={mdiMagnify}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                actionRow={
-                  <JustifyBetweenCenter>
-                    <Input
-                      type="text"
-                      value={search}
-                      placeholder={t('dashboard.userSearchPlaceholder')}
-                      onChange={e => setSearch(e.target.value)}
-                    />
-                  </JustifyBetweenCenter>
-                }
-              />
+              <Frame theme={theme}>
+                <UserSearch
+                  userSearchResult={stateRaw.userSearchResult}
+                  trusts={stateRaw.trusts}
+                // title={t('dashboard.exploreTitle')}
+                // trusts={searchResult}
+                // theme={theme}
+                // icon={mdiMagnify}
+                // toggleOverlay={toggleOverlay}
+                // setOverwriteTo={setOverwriteTo}
+                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // removeTrust={to =>
+                //   act(A._dashboard(A._removeTrustConnection(to)))
+                // }
+                // actionRow={
+                //   <JustifyBetweenCenter>
+                //     <Input
+                //       type="text"
+                //       value={search}
+                //       placeholder={t('dashboard.userSearchPlaceholder')}
+                //       onChange={e => setSearch(e.target.value)}
+                //     />
+                //   </JustifyBetweenCenter>
+                // }
+                />
+              </Frame>
             </FadeIn>
           </MainContent>
 

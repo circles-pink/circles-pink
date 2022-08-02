@@ -29,9 +29,9 @@ import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
 import PursTsGen.Class.ToTsType (class ToTsPredFn, class ToTsType, Constructor(..), toTsPredFn, toTsType)
 import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
-import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, name, string) as TS
+import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
-import Type.Proxy (Proxy(..))
+import Type.Proxy (Proxy)
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -117,7 +117,7 @@ constructor :: forall a. ToTsType (Constructor a) => String -> a -> Array TS.Dec
 constructor n x = value n [] (Constructor x)
 
 typeDef :: forall a. ToTsDef a => String -> Proxy a -> Array TS.Declaration
-typeDef n x =
+typeDef _ x =
   [ TS.emptyLine
   , TS.lineComment ("Type")
   ] <> toTsDef x

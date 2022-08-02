@@ -1,49 +1,52 @@
-import React, {
-  ReactElement,
-  SetStateAction,
-  useEffect,
-  useState,
-} from 'react';
-import tw, { css, styled } from 'twin.macro';
-import { Theme } from '../context/theme';
-import { Claim, LoadingText } from './text';
-import ReactTooltip from 'react-tooltip';
-import {
-  mdiAccountArrowLeft,
-  mdiAccountArrowRight,
-  mdiAccountCancel,
-  mdiHeart,
-  mdiHeartOutline,
-  mdiCashFast,
-  mdiCashRemove,
-  mdiAt,
-  mdiWeatherCloudyClock,
-} from '@mdi/js';
-import Icon from '@mdi/react';
-import { darken } from '../onboarding/utils/colorUtils';
-import { JustifyAroundCenter, JustifyStartCenter } from './helper';
-import { LoadingCircles } from './LoadingCircles';
-import {
-  addrToString,
-  DefaultView,
-  Trust,
-  Trusts,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { t } from 'i18next';
-import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
-import { PageSelector } from './PageSelector';
-import * as TrustState from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { FadeIn, getIncrementor } from 'anima-react';
-import { User } from '@circles-pink/state-machine/output/CirclesCore';
-import { either } from '@circles-pink/state-machine/output/Data.Either';
-import { pipe } from 'fp-ts/lib/function';
-import {
-  getAddress,
-  UserIdent,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+// import React, {
+//   ReactElement,
+//   SetStateAction,
+//   useEffect,
+//   useState,
+// } from 'react';
+// import tw, { css, styled } from 'twin.macro';
+// import { Theme } from '../context/theme';
+// import { Claim, LoadingText } from './text';
+// import ReactTooltip from 'react-tooltip';
+// import {
+//   mdiAccountArrowLeft,
+//   mdiAccountArrowRight,
+//   mdiAccountCancel,
+//   mdiHeart,
+//   mdiHeartOutline,
+//   mdiCashFast,
+//   mdiCashRemove,
+//   mdiAt,
+//   mdiWeatherCloudyClock,
+// } from '@mdi/js';
+// import Icon from '@mdi/react';
+// import { darken } from '../onboarding/utils/colorUtils';
+// import { JustifyAroundCenter, JustifyStartCenter } from './helper';
+// import { LoadingCircles } from './LoadingCircles';
+// import {
+//   addrToString,
+//   DefaultView,
+//   Trust,
+//   Trusts,
+// } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+// import { t } from 'i18next';
+// import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
+// import { PageSelector } from './PageSelector';
+// import * as TrustState from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+// import { FadeIn, getIncrementor } from 'anima-react';
+// import { User } from '@circles-pink/state-machine/output/CirclesCore';
+// import { either } from '@circles-pink/state-machine/output/Data.Either';
+// import { pipe } from 'fp-ts/lib/function';
+// import {
+//   getAddress,
+//   UserIdent,
+// } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+// import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+
+export const x = 1
+
 //import { LightColorFrame } from './TrustUserList';
-import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
+// import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 
 // type Overlay = 'SEND' | 'RECEIVE';
 
