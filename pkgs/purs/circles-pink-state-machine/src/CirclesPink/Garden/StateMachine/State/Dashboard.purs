@@ -1,6 +1,7 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard
   ( CirclesGraph
   , DashboardState
+  , DashboardState_
   , ErrDashboardState
   , ErrGetUsers
   , ErrTokenCheckUBIPayout
@@ -45,10 +46,12 @@ import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers, ErrGetVoucherProviders)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
+import Data.DateTime.Instant (Instant)
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple)
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Record as R
@@ -79,6 +82,24 @@ type DashboardState =
   , redeployTokenResult :: RedeployTokenResult
   , vouchersResult :: VouchersResult
   , voucherProvidersResult :: VoucherProvidersResult
+  }
+
+type DashboardState_ =
+  { user :: CC.User
+  --, privKey :: PrivateKey
+  , error :: Maybe (Variant (ErrDashboardState + ()))
+  , trusts :: CirclesGraph
+  , trustsResult :: TrustGetTrusts
+  --, trustAddResult :: TrustAddResult
+  --, trustRemoveResult :: TrustRemoveResult
+  --, getBalanceResult :: TokenGetBalanceResult
+  , getUsersResult :: GetUsersResult
+  -- , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
+  , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
+  , transferResult :: TokenTransferResult
+  , userSearchResult :: UserSearchResult
+  , redeploySafeResult :: RedeploySafeResult
+  , redeployTokenResult :: RedeployTokenResult
   }
 
 type Trusts = Map Address Trust
