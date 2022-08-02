@@ -1,9 +1,9 @@
-import { CirclesGraph, UserSearchResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { CirclesGraph /*, UserSearchResult*/ } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import React from 'react';
 
 type Props = {
     trusts : CirclesGraph
-    userSearchResult: UserSearchResult
+    //userSearchResult: UserSearchResult
 }
 
 

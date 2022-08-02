@@ -6,6 +6,7 @@ import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
+import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
@@ -21,7 +22,7 @@ import Data.Ord as Data.Ord
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
-import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
+import PursTsGen (class ToTsType, classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Data.ABC (A(..), B(..), C)
 import PursTsGen.Lang.TypeScript.DSL as TS
@@ -34,12 +35,21 @@ moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
 _Ord :: forall a. Ord a => ToTsType a => a -> TS.Type
 _Ord a = TS.TypeConstructor (TS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
 
+data Any
+
+instance toTsTypeAny :: ToTsType Any where
+  toTsType _ = TS.any
+
 modules :: Array (String /\ Array TS.Declaration)
 modules =
-  [ "Data.IxGraph" /\
+  [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
+      [ R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
+      , R.typeAlias "DashboardState" (Proxy :: _ Any)
+      ]
+  , "Data.IxGraph" /\
       join
-        [ R.typeDef "IxGraph" (Proxy :: _ (Data.IxGraph.IxGraph A B C))
-        , R.typeDef "NeighborConnectivity" (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
+        [ R.typeDef "--" (Proxy :: _ (Data.IxGraph.IxGraph A B C))
+        , R.typeDef "--" (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
         , R.value "neighborNodes"
             [ _Ord ORD ]
             (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes ORD ())) _)
@@ -50,7 +60,7 @@ modules =
         ]
   , "CirclesPink.Data.Address" /\
       join
-        [ typeDef "Address" (Proxy :: _ CirclesPink.Data.Address.Address)
+        [ typeDef "--" (Proxy :: _ CirclesPink.Data.Address.Address)
         , instanceDef "ordAddress" (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
         ]
   , "Simple.Data.Array" /\
@@ -58,23 +68,23 @@ modules =
         [ value "map" [] (Simple.Data.Array.map :: (A -> B) -> _) ]
   , "CirclesPink.Data.TrustNode" /\
       join
-        [ typeDef "TrustNode" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
+        [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
         , value "unwrap" [] CirclesPink.Data.TrustNode.unwrap
         , instanceDef "ordTrustNode" (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
         ]
   , "CirclesPink.Data.UserIdent" /\
       join
-        [ typeDef "UserIdent" (Proxy :: _ CirclesPink.Data.UserIdent.UserIdent)
+        [ typeDef "--" (Proxy :: _ CirclesPink.Data.UserIdent.UserIdent)
         , value "unwrap" [] CirclesPink.Data.UserIdent.unwrap
         , value "getIdentifier" [] CirclesPink.Data.UserIdent.getIdentifier
         ]
   , "CirclesPink.Data.TrustConnection" /\
       join
-        [ typeDef "TrustConnection" (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection))
+        [ typeDef "--" (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection))
         ]
   , "Data.Either" /\
       join
-        [ typeDef "Either" (Proxy :: _ (Data.Either.Either A B))
+        [ typeDef "--" (Proxy :: _ (Data.Either.Either A B))
         , value "either" [] (Data.Either.either :: _ -> _ -> _ A B -> C)
         , value "hush" [] (Data.Either.hush :: _ A B -> _)
         , defPredicateFn "isLeft" [] (Data.Either.isLeft :: Either A B -> Boolean)
@@ -84,11 +94,11 @@ modules =
         ]
   , "Data.Tuple" /\
       join
-        [ typeDef "Tuple" (Proxy :: _ (Data.Tuple.Tuple A B))
+        [ typeDef "--" (Proxy :: _ (Data.Tuple.Tuple A B))
         ]
   , "Data.Maybe" /\
       join
-        [ typeDef "Maybe" (Proxy :: _ (Data.Maybe.Maybe A))
+        [ typeDef "--" (Proxy :: _ (Data.Maybe.Maybe A))
         , value "maybe" [] (Data.Maybe.maybe :: _ -> (A -> B) -> _)
         ]
   , "Data.Ord" /\
