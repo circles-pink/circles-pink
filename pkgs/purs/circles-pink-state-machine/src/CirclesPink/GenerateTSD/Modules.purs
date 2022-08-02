@@ -34,6 +34,7 @@ import PursTsGen.Lang.TypeScript.DSL as TS
 import Simple.Data.Array as Simple.Data.Array
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
+import CirclesPink.GenerateTSD.Replace as R
 
 moduleMap :: Map String (String /\ String)
 moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
@@ -45,12 +46,12 @@ modules :: Array (String /\ Array TS.Declaration)
 modules =
   [ "Data.IxGraph" /\
       join
-        [ typeDef "IxGraph" (Proxy :: _ (Data.IxGraph.IxGraph A B C))
-        , typeDef "NeighborConnectivity" (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
-        , value "neighborNodes"
+        [ R.typeDef "IxGraph" (Proxy :: _ (Data.IxGraph.IxGraph A B C))
+        , R.typeDef "NeighborConnectivity" (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
+        , R.value "neighborNodes"
             [ _Ord ORD ]
             (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes ORD ())) _)
-        , value "neighborhood"
+        , R.value "neighborhood"
             [ _Ord ORD ]
             (Data.IxGraph.neighborhood :: ORD -> _ ORD B C -> _ (_ (ErrNeighborhood ORD ())) _)
 
@@ -86,7 +87,8 @@ modules =
         , value "hush" [] (Data.Either.hush :: _ A B -> _)
         , defPredicateFn "isLeft" [] (Data.Either.isLeft :: Either A B -> Boolean)
             (TS.mkType (TS.qualName_ "Either_Left") [ toTsType A ])
-        -- , defPredicateFn "isRight" [] (Data.Either.isRight :: _ A B -> _)
+        , defPredicateFn "isRight" [] (Data.Either.isRight :: _ A B -> _)
+            (TS.mkType (TS.qualName_ "Either_Right") [ toTsType B ])
         ]
   , "Data.Tuple" /\
       join
@@ -106,127 +108,36 @@ modules =
         [ value "toNullable" [] (Data.Nullable.toNullable :: _ A -> _)
         ]
 
-  --        "CirclesPink.GenerateTSD.SampleModule" /\
-  --       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
-  --       , typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht A)) "Vielleicht"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.Foo) "Foo"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.Bar) "Bar"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.gravity) "gravity"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.myName) "myName"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.isOff) "isOff"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.someItems) "someItems"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.user) "user"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.add) "add"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.fromBaz) "fromBaz"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.myNum) "myNum"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.myNumVar) "myNumVar"
-  --       , val (CirclesPink.GenerateTSD.SampleModule.someMaybe) "someMaybe"
-  --       ]
-  --   , "Simple.Data.Maybe" /\
-  --       [ val (Simple.Data.Maybe.Just :: A -> _) "Just"
-  --       , val (Simple.Data.Maybe.Nothing :: _ A) "Nothing"
-  --       , val (Simple.Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
-  --       , val (Simple.Data.Maybe.maybe' :: _ -> (A -> B) -> _) "maybe'"
-  --       , val (Simple.Data.Maybe.bind :: _ A -> (_ -> _ B) -> _) "bind"
-  --       , val (Simple.Data.Maybe.bindFlipped :: (_ -> _ B) -> _ A -> _) "bindFlipped"
-  --       , val (Simple.Data.Maybe.map :: (A -> B) -> _) "map"
-  --       , val (Simple.Data.Maybe.pure :: A -> _) "pure"
-  --       , val (Simple.Data.Maybe.eq :: _ -> _ A -> _) "eq"
-  --       ]
-
-  --   , "Simple.Data.Number" /\
-  --       [ val (Simple.Data.Number.eq) "eq"
-  --       ]
   ]
 
---------------------------------------------------------------------------------
+--        "CirclesPink.GenerateTSD.SampleModule" /\
+--       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
+--       , typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht A)) "Vielleicht"
+--       , val (CirclesPink.GenerateTSD.SampleModule.Foo) "Foo"
+--       , val (CirclesPink.GenerateTSD.SampleModule.Bar) "Bar"
+--       , val (CirclesPink.GenerateTSD.SampleModule.gravity) "gravity"
+--       , val (CirclesPink.GenerateTSD.SampleModule.myName) "myName"
+--       , val (CirclesPink.GenerateTSD.SampleModule.isOff) "isOff"
+--       , val (CirclesPink.GenerateTSD.SampleModule.someItems) "someItems"
+--       , val (CirclesPink.GenerateTSD.SampleModule.user) "user"
+--       , val (CirclesPink.GenerateTSD.SampleModule.add) "add"
+--       , val (CirclesPink.GenerateTSD.SampleModule.fromBaz) "fromBaz"
+--       , val (CirclesPink.GenerateTSD.SampleModule.myNum) "myNum"
+--       , val (CirclesPink.GenerateTSD.SampleModule.myNumVar) "myNumVar"
+--       , val (CirclesPink.GenerateTSD.SampleModule.someMaybe) "someMaybe"
+--       ]
+--   , "Simple.Data.Maybe" /\
+--       [ val (Simple.Data.Maybe.Just :: A -> _) "Just"
+--       , val (Simple.Data.Maybe.Nothing :: _ A) "Nothing"
+--       , val (Simple.Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
+--       , val (Simple.Data.Maybe.maybe' :: _ -> (A -> B) -> _) "maybe'"
+--       , val (Simple.Data.Maybe.bind :: _ A -> (_ -> _ B) -> _) "bind"
+--       , val (Simple.Data.Maybe.bindFlipped :: (_ -> _ B) -> _ A -> _) "bindFlipped"
+--       , val (Simple.Data.Maybe.map :: (A -> B) -> _) "map"
+--       , val (Simple.Data.Maybe.pure :: A -> _) "pure"
+--       , val (Simple.Data.Maybe.eq :: _ -> _ A -> _) "eq"
+--       ]
 
-infixr 6 type Sum as :+:
-infixl 7 type Product as :*:
-
---------------------------------------------------------------------------------
-
-newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
-
-instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph id e n) where
-  toTsDef _ = pure $ TS.typeDef (TS.name "IxGraph") []
-    $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph")
-    $ TS.Name <$> [ "Id", "E", "N" ]
-
-instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (IxGraph id e n) where
-  toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "IxGraph") $
-    [ toTsType (Proxy :: _ id)
-    , toTsType (Proxy :: _ e)
-    , toTsType (Proxy :: _ n)
-    ]
-
---------------------------------------------------------------------------------
-
-newtype NeighborConnectivity a = NeighborConnectivity (Data.IxGraph.NeighborConnectivity a)
-
-derive instance newtypeNeighborConnectivity :: Newtype (NeighborConnectivity a) _
-
-instance g ::
-  Generic (NeighborConnectivity a)
-    ( (Constructor "JustOutgoing" (Argument a))
-        :+: (Constructor "JustIncoming" (Argument a))
-        :+: (Constructor "MutualOutAndIn" (Argument a))
-    ) where
-  from = undefined
-  to = undefined
-
-instance toTsType_NeighborConnectivity :: (ToTsType a) => ToTsType (NeighborConnectivity a) where
-  toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "NeighborConnectivity")
-    [ toTsType (Proxy :: _ a) ]
-
-instance toTsDef_NeighborConnectivity :: (ToPursType a, ToTsType a) => ToTsDef (NeighborConnectivity a) where
-  toTsDef = genericToTsDef "NeighborConnectivity"
-
-instance toPursType_NeighborConnectivity :: (ToPursType a) => ToPursType (NeighborConnectivity a) where
-  toPursType _ = PS.mkType (PS.qualName "Data_IxGraph" "NeighborConnectivity")
-    [ toPursType (Proxy :: _ a)
-    ]
-
---------------------------------------------------------------------------------
-
-unsafeReplace :: forall a b. UnsafeReplace a b => a -> b
-unsafeReplace = unsafeCoerce
-
-class UnsafeReplace :: forall k1 k2. k1 -> k2 -> Constraint
-class UnsafeReplace a b | a -> b
-
-instance replaceIxGraph ::
-  ( UnsafeReplace a a'
-  , UnsafeReplace b b'
-  , UnsafeReplace c c'
-  ) =>
-  UnsafeReplace (Data.IxGraph.IxGraph a b c) (IxGraph a' b' c')
-
-else instance replaceNeighborConnectivity ::
-  ( UnsafeReplace a a'
-  ) =>
-  UnsafeReplace (Data.IxGraph.NeighborConnectivity a) (NeighborConnectivity a')
-
-else instance replaceFn :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Function a b) (Function a' b')
-
-else instance replaceTuple :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Tuple a b) (Tuple a' b')
-
-else instance replaceEither :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Either a b) (Either a' b')
-
-else instance replaceArray :: (UnsafeReplace a a') => UnsafeReplace (Array a) (Array a')
-
-else instance replaceProxy :: (UnsafeReplace a a') => UnsafeReplace (Proxy a) (Proxy a')
-
-else instance replace :: UnsafeReplace a a
-
---------------------------------------------------------------------------------
-
-typeDef :: forall t154 t155. ToTsDef t154 => UnsafeReplace t155 (Proxy t154) => String -> t155 -> Array TS.Declaration
-typeDef s x = PT.typeDef s (unsafeReplace x)
-
-value :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
-value s xs x = PT.value s xs (unsafeReplace x)
-
--- defPredicateFn :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
--- defPredicateFn s xs x = PT.defPredicateFn s xs (unsafeReplace x)
-
+--   , "Simple.Data.Number" /\
+--       [ val (Simple.Data.Number.eq) "eq"
+--       ]
