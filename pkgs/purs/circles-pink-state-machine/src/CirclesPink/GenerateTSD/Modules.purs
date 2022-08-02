@@ -169,9 +169,8 @@ derive instance newtypeNeighborConnectivity :: Newtype (NeighborConnectivity a) 
 instance g ::
   Generic (NeighborConnectivity a)
     ( (Constructor "JustOutgoing" (Argument a))
+        :+: (Constructor "JustIncoming" (Argument a))
         :+: (Constructor "MutualOutAndIn" (Argument a))
-        :+: (Constructor "MutualOutAndIn" (Argument a))
-
     ) where
   from = undefined
   to = undefined
