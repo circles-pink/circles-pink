@@ -32,6 +32,8 @@ rec {
         cleanSource ../../pkgs/ts/${"@"}circles-pink/dependency-assistant;
       dev-utils =
         cleanSource ../../pkgs/ts/dev-utils;
+      cors-proxy =
+        cleanSource ../../pkgs/ts/cors-proxy;
       common =
         cleanSource ../../pkgs/ts/common;
       storybook =
