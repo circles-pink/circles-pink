@@ -386,7 +386,7 @@ export const Dashboard = ({
             </FadeIn>
           </MainContent>
 
-          {/* <FadeIn orientation={'up'} delay={getDelay()}>
+          <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
               <LightColorFrame
                 theme={theme}
@@ -401,7 +401,7 @@ export const Dashboard = ({
                 </Button>
               </LightColorFrame>
             </TopMargin>
-          </FadeIn> */}
+          </FadeIn>
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>

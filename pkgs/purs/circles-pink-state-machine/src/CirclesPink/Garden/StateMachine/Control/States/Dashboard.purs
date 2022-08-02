@@ -348,8 +348,9 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
-        _ <- env.getVouchers signatureObj
-        -- let _ = spy "signature" sig
+        let _ = spy "signatureObj" signatureObj
+        vouchers <- env.getVouchers signatureObj
+        let _ = spy "vouchers" vouchers
         pure unit
 
   getBalance set st _ =

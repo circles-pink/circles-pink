@@ -21,6 +21,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error)
+import Effect.Console (log)
 import Effect.Now (now)
 import Node.Process (exit, getEnv)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
@@ -105,6 +106,7 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
 getVouchers :: { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers { body: { signatureObj } } = do
+  _ <- liftEffect $ log "I was called"
   web3 <- newWeb3_
   case W3.accountsRecover web3 signatureObj of
     Nothing -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
@@ -129,7 +131,7 @@ app = do
       error e
       liftEffect $ exit 1
     Right parsedEnv -> case parsedEnv.port of
-      Nothing -> Payload.start defaultOpts spec { getVouchers: getVouchers }
+      Nothing -> Payload.start (defaultOpts { port = 4000 }) spec { getVouchers: getVouchers }
       Just port -> Payload.start (defaultOpts { port = port }) spec
         { getVouchers: getVouchers
         }
