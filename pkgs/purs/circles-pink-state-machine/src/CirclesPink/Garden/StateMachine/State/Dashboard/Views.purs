@@ -117,11 +117,6 @@ type Trust =
 defaultView :: DashboardState -> DefaultView
 defaultView d@{ trusts } =
   let
-    initUntrust user =
-      { isOutgoing: false
-      , user: UserIdent $ Right user
-      , trustState: initUntrusted
-      }
 
     usersSearch :: Trusts
     usersSearch =
@@ -136,14 +131,14 @@ defaultView d@{ trusts } =
           )
         <#>
           ( \user -> case trusts # G.lookupNode (user -# _.safeAddress) of
-              Left _ -> initUntrust user
+              Left _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initUntrusted }
               Right _ ->
                 let
                   eitherIncomingEdge = trusts # G.lookupEdge ((user -# _.safeAddress) ~ (d.user -# _.safeAddress))
                   eitherOutgoingEdge = trusts # G.lookupEdge ((d.user -# _.safeAddress) ~ (user -# _.safeAddress))
                 in
                   case eitherIncomingEdge, eitherOutgoingEdge of
-                    Left _, Left _ -> initUntrust user
+                    Left _, Left _ -> { isOutgoing: false, user: UserIdent $ Right user, trustState: initUntrusted }
                     Right _, Left _ -> { isOutgoing: true, user: UserIdent $ Right user, trustState: initUntrusted }
                     Left _, Right (TrustConnection _ ts) -> { isOutgoing: false, user: UserIdent $ Right user, trustState: ts }
                     Right _, Right (TrustConnection _ ts) -> { isOutgoing: true, user: UserIdent $ Right user, trustState: ts }

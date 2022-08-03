@@ -6,6 +6,7 @@ import Data.Array as A
 import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable)
+import Data.Pair (Pair)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple)
 import Data.Tuple.Nested (type (/\))
@@ -111,7 +112,7 @@ class GenVariant rl where
 
 instance genVariantNil :: (ToTsType t, IsSymbol s) => GenVariant (Cons s t Nil) where
   genVariant _ = TS.record'
-    { tag: TS.tlString (reflectSymbol (Proxy :: _ s))
+    { type: TS.tlString (reflectSymbol (Proxy :: _ s))
     , value: toTsType (Proxy :: _ t)
     }
 
@@ -119,7 +120,7 @@ else instance genVariantCons :: (GenVariant rl, ToTsType t, IsSymbol s) => GenVa
   genVariant _ =
     genVariant (Proxy :: _ rl) |||
       TS.record'
-        { tag: TS.tlString (reflectSymbol (Proxy :: _ s))
+        { type: TS.tlString (reflectSymbol (Proxy :: _ s))
         , value: toTsType (Proxy :: _ t)
         }
 
@@ -133,10 +134,9 @@ instance toTsTypeConstructorFn :: ToTsType (Function a b) => ToTsType (Construct
 else instance toTsTypeConstructorVal :: ToTsType a => ToTsType (Constructor a) where
   toTsType (Constructor v) = TS.record' { value: toTsType v }
 
-
 --------------------------------------------------------------------------------
 
-newtype PredicateFn a = PredicateFn a 
+newtype PredicateFn a = PredicateFn a
 
 class ToTsPredFn a where
   toTsPredFn :: TS.Type -> a -> TS.Type
@@ -146,7 +146,7 @@ instance toTsPredFnNil :: ToTsType a => ToTsPredFn (a -> Boolean) where
     [ TS.keyVal "obj" $ toTsType (undefined :: a) ]
     (TS.isPred (TS.name "obj") t)
 
-else instance toTsPredicateFnRec :: (ToTsType a , ToTsPredFn b) => ToTsPredFn (a -> b) where
+else instance toTsPredicateFnRec :: (ToTsType a, ToTsPredFn b) => ToTsPredFn (a -> b) where
   toTsPredFn t _ = TS.function_
     [ TS.keyVal "_" $ toTsType (undefined :: a) ]
     (toTsPredFn t (undefined :: b))

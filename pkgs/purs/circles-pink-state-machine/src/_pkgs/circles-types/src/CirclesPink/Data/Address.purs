@@ -28,6 +28,10 @@ import TypedEnv (class ParseValue)
 --import Simple.JSON (class ReadForeign, class WriteForeign)
 import PursTs.Class (class ToTsDef)
 import Simple.JSON (class ReadForeign, class WriteForeign)
+import PursTsGen (class ToTsDef, class ToTsType)
+import PursTsGen.Class.ToPursType (class ToPursType)
+import PursTsGen.Lang.PureScript.Type as PS
+import PursTsGen.Lang.TypeScript.DSL as TS
 
 newtype Address = Address W3.Address
 
@@ -60,6 +64,10 @@ instance toTsTypeAddress :: ToTsType Address where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"
 
 instance FpTs Address Address where
+instance toPursType_Address :: ToPursType Address where
+  toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_Address" "Address") [ ]
+
+instance fpTs :: FpTs Address Address where
   toFpTs = identity
   fromFpTs = identity
 
