@@ -1,6 +1,7 @@
 module CirclesPink.Data.UserIdent
   ( UserIdent'
   , UserIdent(..)
+  , fromUser
   , getAddress
   , getIdentifier
   , unwrap
@@ -56,3 +57,6 @@ shortenAddrBy = 6
 getIdentifier :: UserIdent -> String
 getIdentifier (UserIdent (Left addr)) = S.take shortenAddrBy $ show addr
 getIdentifier (UserIdent (Right { username })) = username
+
+fromUser :: User -> UserIdent
+fromUser u = UserIdent $ Right u 

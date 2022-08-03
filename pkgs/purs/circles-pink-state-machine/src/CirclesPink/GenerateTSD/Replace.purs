@@ -3,13 +3,16 @@ module CirclesPink.GenerateTSD.Replace where
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
+import Data.Generic.Rep (class Generic)
 import Data.IxGraph as Data.IxGraph
+import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class ToTsDef)
+import PursTsGen (class GenToTsDefSum, class ToTsDef)
 import PursTsGen as PT
+import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
@@ -35,6 +38,11 @@ else instance replaceNeighborConnectivity ::
   ( UnsafeReplace a a'
   ) =>
   UnsafeReplace (Data.IxGraph.NeighborConnectivity a) (W.NeighborConnectivity a')
+
+else instance replacePair ::
+  ( UnsafeReplace a a'
+  ) =>
+  UnsafeReplace (Data.Pair.Pair a) (W.Pair a')
 
 else instance replaceInstant ::
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant

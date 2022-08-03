@@ -17,6 +17,8 @@ import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import PursTsGen (class ToTsDef, class ToTsType)
+import PursTsGen.Class.ToPursType (class ToPursType)
+import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 
 newtype Address = Address W3.Address
@@ -35,6 +37,9 @@ instance toTsTypeDefAddress :: ToTsDef Address where
 
 instance toTsTypeAddress :: ToTsType Address where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"
+
+instance toPursType_Address :: ToPursType Address where
+  toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_Address" "Address") [ ]
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity

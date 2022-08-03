@@ -1,5 +1,6 @@
 module RemoteData
-  ( RemoteData(..)
+  ( RemoteData'
+  , RemoteData(..)
   , _failure
   , _loading
   , _notAsked
@@ -9,12 +10,15 @@ module RemoteData
   , isNotAsked
   , isSuccess
   , onSuccess
-  ) where
+  , unwrap
+  )
+  where
 
 import Prelude
 
 import Data.Generic.Rep (class Generic)
-import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype (class Newtype)
+import Data.Newtype as NT
 import Data.Variant (Variant, default, inj, onMatch)
 import PursTsGen (class ToTsDef, class ToTsType, genericToTsDef, toTsType)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
@@ -23,14 +27,17 @@ import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
 
-newtype RemoteData n l e a = RemoteData
-  ( Variant
-      ( notAsked :: n
-      , loading :: l
-      , failure :: e
-      , success :: a
-      )
+type RemoteData' n l e a = Variant 
+  ( notAsked :: n
+  , loading :: l
+  , failure :: e
+  , success :: a
   )
+
+newtype RemoteData n l e a = RemoteData (RemoteData' n l e a)
+
+unwrap :: forall n l e a. RemoteData n l e a -> RemoteData' n l e a
+unwrap = NT.unwrap
 
 derive instance genericRemoteData :: Generic (RemoteData n l e a) _
 derive instance newtypeRemoteData :: Newtype (RemoteData n l e a) _
