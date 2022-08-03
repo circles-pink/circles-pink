@@ -6,6 +6,15 @@ module Data.BN
 
 import Prelude
 
+import Data.Argonaut (class DecodeJson, JsonDecodeError(..), decodeJson)
+import Data.Either (note)
+import Data.Maybe (Maybe(..), fromJust)
+import Data.String.Regex (Regex)
+import Data.String.Regex as Reg
+import Data.String.Regex.Flags (noFlags)
+import Data.String.Regex.Unsafe (unsafeRegex)
+import Partial.Unsafe (unsafePartial)
+
 foreign import data BN :: Type
 foreign import fromStrImpl :: String -> Int -> BN
 foreign import toStrImpl :: BN -> Int -> String
@@ -15,8 +24,12 @@ foreign import eqImpl :: BN -> BN -> Boolean
 foreign import addImpl :: BN -> BN -> BN
 foreign import mulImpl :: BN -> BN -> BN
 
-fromDecimalStr :: String -> BN
-fromDecimalStr s = fromStrImpl s 10
+fromDecimalStr :: String -> Maybe BN
+fromDecimalStr s | Reg.test regex s = pure $ fromStrImpl s 10
+fromDecimalStr _ = Nothing
+
+regex :: Regex
+regex = unsafeRegex "^[0-9]+$" noFlags
 
 toDecimalStr :: BN -> String
 toDecimalStr bn = toStrImpl bn 10
@@ -30,5 +43,8 @@ instance eq :: Eq BN where
 instance semiring :: Semiring BN where
   add = addImpl
   mul = mulImpl
-  zero = fromDecimalStr ("0")
-  one = fromDecimalStr ("1")
+  zero = unsafePartial $ fromJust $ fromDecimalStr ("0")
+  one = unsafePartial $ fromJust $ fromDecimalStr ("1")
+
+instance decodeJsonBN :: DecodeJson BN where
+  decodeJson x = decodeJson x >>= fromDecimalStr >>> note (TypeMismatch "Cannot parse BN")

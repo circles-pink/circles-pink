@@ -17,8 +17,10 @@ import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (StorageType(..), _errNoStorage, EnvControl)
 import Control.Monad.Except (mapExceptT, throwError)
 import Data.BN as B
+import Data.Maybe (fromJust)
 import Data.Newtype (wrap)
 import Data.Variant (inj)
+import Partial.Unsafe (unsafePartial)
 import Type.Proxy (Proxy(..))
 import Web3 (Hash(..), Message(..), SignatureObj(..))
 
@@ -49,8 +51,8 @@ testEnv =
   , getVouchers: \_ -> pure []
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
-  , getBalance: \_ _ -> pure $ B.fromDecimalStr "34141123134632464543156"
-  , checkUBIPayout: \_ _ -> pure $ B.fromDecimalStr "8943789342768937829897"
+  , getBalance: \_ _ -> pure $ unsafePartial $ fromJust $ B.fromDecimalStr "34141123134632464543156"
+  , checkUBIPayout: \_ _ -> pure $ unsafePartial $ fromJust $ B.fromDecimalStr "8943789342768937829897"
   , requestUBIPayout: \_ _ -> pure ""
   , transfer: \_ _ _ _ _ -> pure ""
   , getTimestamp: pure bottom
