@@ -11,7 +11,7 @@ import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
 import Data.Either as Data.Either
-import Data.Graph.Errors (ErrNeighborNodes, ErrNeighborhood)
+import Data.Graph.Errors (ErrNeighborNodes, ErrNeighborhood, ErrLookupEdge)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
@@ -19,6 +19,7 @@ import Data.Maybe (Maybe(..))
 import Data.Maybe as Data.Maybe
 import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
+import Data.Pair as Data.Pair
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
@@ -46,10 +47,11 @@ modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
       [ R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
       , R.typeAlias "DashboardState" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
-      
+
       ]
   , "RemoteData" /\ join
       [ R.typeDef "--" (Proxy :: _ (RemoteData.RemoteData A B C D))
+      , value "unwrap" [] (RemoteData.unwrap :: _ A B C D -> _)
       ]
   , "Data.IxGraph" /\
       join
@@ -61,7 +63,9 @@ modules =
         , R.value "neighborhood"
             [ _Ord ORD ]
             (Data.IxGraph.neighborhood :: ORD -> _ ORD B C -> _ (_ (ErrNeighborhood ORD ())) _)
-
+        , R.value "lookupEdge"
+            [ _Ord ORD ]
+            (Data.IxGraph.lookupEdge :: _ -> _ ORD B C -> _ (_ (ErrLookupEdge ORD ())) _)
         ]
   , "CirclesPink.Data.Address" /\
       join
@@ -82,6 +86,8 @@ modules =
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.UserIdent.UserIdent)
         , value "unwrap" [] CirclesPink.Data.UserIdent.unwrap
         , value "getIdentifier" [] CirclesPink.Data.UserIdent.getIdentifier
+        , value "fromUser" [] CirclesPink.Data.UserIdent.fromUser
+        , value "getAddress" [] CirclesPink.Data.UserIdent.getAddress
         ]
   , "CirclesPink.Data.TrustConnection" /\
       join
@@ -100,6 +106,10 @@ modules =
   , "Data.Tuple" /\
       join
         [ typeDef "--" (Proxy :: _ (Data.Tuple.Tuple A B))
+        ]
+  , "Data.Pair" /\
+      join
+        [ R.typeDef "--" (Proxy :: _ (Data.Pair.Pair A))
         ]
   , "Data.Maybe" /\
       join

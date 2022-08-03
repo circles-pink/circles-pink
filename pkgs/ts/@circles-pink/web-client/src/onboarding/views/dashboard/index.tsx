@@ -423,20 +423,20 @@ export const Dashboard = ({
             <FadeIn orientation={'up'} delay={getDelay()}>
               <Frame theme={theme}>
                 <TrustUserList
-                address={stateRaw.user.safeAddress}
-                // title={t('dashboard.trustNetworkTitle')}
-                graph={stateRaw.trusts}
-                // ownAddress={stateRaw.user.safeAddress}
-                // theme={theme}
-                // icon={mdiLan}
-                // toggleOverlay={toggleOverlay}
-                // setOverwriteTo={setOverwriteTo}
-                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                // trustAddResult={state.trustAddResult}
-                // removeTrust={to =>
-                //   act(A._dashboard(A._removeTrustConnection(to)))
-                // }
-                // trustRemoveResult={state.trustRemoveResult}
+                  address={stateRaw.user.safeAddress}
+                  // title={t('dashboard.trustNetworkTitle')}
+                  graph={stateRaw.trusts}
+                  // ownAddress={stateRaw.user.safeAddress}
+                  // theme={theme}
+                  // icon={mdiLan}
+                  // toggleOverlay={toggleOverlay}
+                  // setOverwriteTo={setOverwriteTo}
+                  // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                  // trustAddResult={state.trustAddResult}
+                  // removeTrust={to =>
+                  //   act(A._dashboard(A._removeTrustConnection(to)))
+                  // }
+                  // trustRemoveResult={state.trustRemoveResult}
                 />
               </Frame>
             </FadeIn>
@@ -445,26 +445,34 @@ export const Dashboard = ({
                 <UserSearch
                   //userSearchResult={stateRaw.userSearchResult}
                   trusts={stateRaw.trusts}
-                // title={t('dashboard.exploreTitle')}
-                // trusts={searchResult}
-                // theme={theme}
-                // icon={mdiMagnify}
-                // toggleOverlay={toggleOverlay}
-                // setOverwriteTo={setOverwriteTo}
-                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                // removeTrust={to =>
-                //   act(A._dashboard(A._removeTrustConnection(to)))
-                // }
-                // actionRow={
-                //   <JustifyBetweenCenter>
-                //     <Input
-                //       type="text"
-                //       value={search}
-                //       placeholder={t('dashboard.userSearchPlaceholder')}
-                //       onChange={e => setSearch(e.target.value)}
-                //     />
-                //   </JustifyBetweenCenter>
-                // }
+                  userSearchResult={stateRaw.userSearchResult}
+                  onSearch={query =>
+                    act(A._dashboard(A._userSearch({ query })))
+                  }
+                  onAddTrust={userIdent =>
+                    act(A._dashboard(A._addTrustConnection(userIdent)))
+                  }
+
+                  // title={t('dashboard.exploreTitle')}
+                  // trusts={searchResult}
+                  // theme={theme}
+                  // icon={mdiMagnify}
+                  // toggleOverlay={toggleOverlay}
+                  // setOverwriteTo={setOverwriteTo}
+                  // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                  // removeTrust={to =>
+                  //   act(A._dashboard(A._removeTrustConnection(to)))
+                  // }
+                  // actionRow={
+                  //   <JustifyBetweenCenter>
+                  //     <Input
+                  //       type="text"
+                  //       value={search}
+                  //       placeholder={t('dashboard.userSearchPlaceholder')}
+                  //       onChange={e => setSearch(e.target.value)}
+                  //     />
+                  //   </JustifyBetweenCenter>
+                  // }
                 />
               </Frame>
             </FadeIn>

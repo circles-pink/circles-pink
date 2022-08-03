@@ -15,6 +15,10 @@ import Prelude
 
 import Data.Variant (Variant, inj, match)
 import FpTs.Class (class FpTs)
+import PursTsGen (class ToTsType)
+import PursTsGen.Class.ToPursType (class ToPursType)
+import PursTsGen.Lang.PureScript.Type as PS
+import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
 
 --------------------------------------------------------------------------------
@@ -38,6 +42,14 @@ derive newtype instance showTrustState :: Show TrustState
 instance fpTs :: FpTs TrustState TrustState where
   toFpTs = identity
   fromFpTs = identity
+
+instance toTsTypeTrustState :: ToTsType TrustState where
+  toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustState" "TrustState"
+
+instance toPursTypeTrustState :: ToPursType TrustState where
+  toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_TrustState" "TrustState") [  ]
+
+
 
 --------------------------------------------------------------------------------
 -- Constructors

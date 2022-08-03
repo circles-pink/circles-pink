@@ -117,6 +117,7 @@ instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Prod
 -- Utils
 --------------------------------------------------------------------------------
 
+
 genericToTsDef :: forall a rep. ToPursType a => Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
 genericToTsDef name _ =
   union : ctorTypes <> ((\f -> f $ toPursType (Proxy :: _ a)) =<< ctors)
