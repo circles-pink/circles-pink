@@ -7,23 +7,20 @@ module CirclesCore.Bindings
   , CoreTrust(..)
   , CoreUser(..)
   , CoreUtils(..)
+  , Fn1Promise
   , Fn2Promise
   , Fn3Promise
+  , Fn4Promise
   , Options
   , Provider
   , TrustIsTrustedResult(..)
   , User(..)
-  , Web3
-  
-
   , convertCore
-  
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  
   , unsafeSampleCore
   ) where
 
@@ -33,19 +30,18 @@ import CirclesCore.ApiResult (ApiResult)
 import Control.Promise (Promise)
 import Data.BN (BN)
 import Data.BigInt (BigInt)
-import Data.Function.Uncurried (Fn2, Fn3)
+import Data.Function.Uncurried (Fn2, Fn3, Fn4, Fn1)
 import Data.Newtype (class Newtype)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
 import Structural (class Structural)
 import Unsafe.Coerce (unsafeCoerce)
+import Web3 (Web3)
 
 --------------------------------------------------------------------------------
 -- Types
 --------------------------------------------------------------------------------
 foreign import data Provider :: Type
-
-foreign import data Web3 :: Type
 
 foreign import data CirclesCore :: Type
 
@@ -107,7 +103,7 @@ newtype CirclesCore_ = CirclesCore_
   , trust :: CoreTrust
   , safe :: CoreSafe
   , token :: CoreToken
-  , utiles :: CoreUtils
+  , utils :: CoreUtils
   }
 
 derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
@@ -206,12 +202,24 @@ derive newtype instance structuralCoreTrust :: Structural CoreTrust
 --------------------------------------------------------------------------------
 newtype CoreUtils = CoreUtils
   { toFreckles ::
-      Fn2Promise Account
+      Fn1Promise
         { value :: String }
         String
   , fromFreckles ::
-      Fn2Promise Account
+      Fn1Promise
         { value :: String }
+        String
+  , requestRelayer ::
+      Fn1Promise
+        { path :: Array String
+        , version :: Int
+        , method :: String
+        , data ::
+            { saltNonce :: BigInt
+            , owners :: Array String
+            , threshold :: Int
+            }
+        }
         String
   }
 
@@ -230,8 +238,12 @@ foreign import unsafeSampleCore :: CirclesCore -> Account -> EffectFnAff Unit
 convertCore :: CirclesCore -> CirclesCore_
 convertCore = unsafeCoerce
 
+type Fn1Promise a1 b = Fn1 a1 (Promise b)
+
 type Fn2Promise a1 a2 b = Fn2 a1 a2 (Promise b)
 
 type Fn3Promise a1 a2 a3 b = Fn3 a1 a2 a3 (Promise b)
+
+type Fn4Promise a1 a2 a3 a4 b = Fn4 a1 a2 a3 a4 (Promise b)
 
 --------------------------------------------------------------------------------
