@@ -3,16 +3,15 @@ module CirclesPink.GenerateTSD.Replace where
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
-import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep (Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
 import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef)
+import PursTsGen (class ToTsDef)
 import PursTsGen as PT
-import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
@@ -67,6 +66,14 @@ else instance replaceRemoteData ::
 
 else instance replaceRecord :: (RowToList a rl, GenRecord rl a') => UnsafeReplace (Record a) (Record a')
 
+else instance replaceSum :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Sum a b) (Sum a' b')
+
+else instance replaceConstructor :: (UnsafeReplace a a') => UnsafeReplace (Constructor s a) (Constructor s a')
+
+else instance replaceProduct :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Product a b) (Product a' b')
+
+else instance replaceArgument :: (UnsafeReplace a a') => UnsafeReplace (Argument a) (Argument a')
+
 else instance replaceVariant :: (RowToList a rl, GenRecord rl a') => UnsafeReplace (Variant a) (Variant a')
 
 else instance replace :: UnsafeReplace a a
@@ -95,3 +102,7 @@ value s xs x = PT.value s xs (unsafeReplace x)
 
 typeAlias :: forall t119 t120. ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
 typeAlias n x = PT.typeAlias n (unsafeReplace x)
+
+
+-- genericToTsDef :: forall a rep. ToPursType a =>  GenToTsDefSum rep => String -> Proxy a -> Proxy rep -> Array TS.Declaration
+-- genericToTsDef = todo
