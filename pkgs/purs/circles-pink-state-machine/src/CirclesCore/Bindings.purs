@@ -220,7 +220,8 @@ newtype CoreUtils = CoreUtils
             , threshold :: Int
             }
         }
-        String
+        { safe :: String
+        }
   }
 
 derive instance newtypeCoreUtils :: Newtype CoreUtils _
