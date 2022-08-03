@@ -2,13 +2,12 @@ module VoucherServer.Main where
 
 import Prelude
 
-import CirclesCore (CirclesCore, ErrNative)
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
 import CirclesPink.Data.Nonce (addressToNonce)
 import Control.Monad.Except (mapExceptT, runExceptT)
-import Control.Monad.Except.Checked (ExceptV)
+import Convertable (convert)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
@@ -17,13 +16,11 @@ import Data.Either (Either(..), note)
 import Data.Foldable (fold)
 import Data.Map (Map)
 import Data.Map as M
-import Data.Maybe (Maybe(..), maybe)
-import Data.Newtype (class Newtype, un, wrap)
-import Data.Newtype.Extra ((-#))
+import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, un)
 import Data.Number (fromString)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
@@ -38,7 +35,6 @@ import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
-import Type.Row (type (+))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
@@ -94,12 +90,7 @@ sampleVoucher :: Voucher
 sampleVoucher = { voucherCode: "Bingo" }
 
 db :: Map Address (Array Voucher)
-db =
-  M.fromFoldable
-    [ Address sampleAddress /\
-        [ sampleVoucher
-        ]
-    ]
+db = M.fromFoldable [ Address sampleAddress /\ [ sampleVoucher ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
@@ -146,13 +137,13 @@ getVouchers env { body: { signatureObj } } = do
               , method: "POST"
               , data:
                   { saltNonce: nonce
-                  , owners: [ address ]
+                  , owners: [ convert address ]
                   , threshold: 1
                   }
               }
           case safeAddress of
-            Left _ -> todo
-            Right sa -> M.lookup sa db # fold # Right # pure
+            Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
+            Right sa -> M.lookup (Address sa) db # fold # Right # pure
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
