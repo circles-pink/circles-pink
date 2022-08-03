@@ -10,6 +10,7 @@ import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.Bifunctor (lmap)
+import Data.BigInt (BigInt)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.DateTime.Instant as DT
@@ -25,12 +26,14 @@ import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
 import Debug (spy, spyWith)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, logShow)
+import Effect.Exception as E
 import Effect.Now (now)
-import GraphQL.Client.Args (type (==>), (=>>))
+import GraphQL.Client.Args (class ArgGql, type (==>), (=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
@@ -45,7 +48,6 @@ import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.Spec (Voucher)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
-import Effect.Exception as E
 
 type Message =
   { id :: Int
@@ -68,11 +70,15 @@ derive instance newtypeAddress :: Newtype Address _
 
 derive newtype instance ordAddress :: Ord Address
 derive newtype instance eqAddress :: Eq Address
+derive newtype instance decodeJsonAddress :: DecodeJson Address
+derive newtype instance showAddress :: Show Address
 
 instance decodeParamAddress :: DecodeParam Address where
   decodeParam x = decodeParam x
     >>= (parseAddress >>> note "Could not parse Address")
     <#> Address
+
+instance argGqlAddress :: ArgGql Address String
 
 --------------------------------------------------------------------------------
 
@@ -159,10 +165,17 @@ type Transaction = {}
 
 getTransactions :: forall r. { | r } -> Address -> Aff (Maybe (Array Transaction))
 getTransactions env addr = do
-  result <- queryGql "Hallo? " { transfers : { where : { from : "", to : ""} } =>> { from, to } }
+  result <- queryGql "Hallo? "
+    { transfers:
+        { where:
+            { from: "0x5281764e3ce70ebc6c2eb18aaa8c4aebff98f393"
+            , to: "0x2390b428f0a968b39eb4d7cbec8d20bcd578c411"
+            }
+        } =>> { from, to, id, amount }
+    }
   case result of
     Left e -> logShow e
-    Right { transfers } -> logShow $ map _.from transfers
+    Right { transfers } -> logShow transfers
   pure $ Just [ {} ]
 
 --------------------------------------------------------------------------------
@@ -187,12 +200,14 @@ queryGql s q = query_ "http://graph.circles.local/subgraphs/name/CirclesUBI/circ
 
 -- Schema
 type Schema =
-  { transfers :: { where :: { from :: String, to :: String } } ==> Array Transfer
+  { transfers :: { where :: { from :: Address, to :: Address } } ==> Array Transfer
   }
 
 type Transfer =
-  { from :: String
-  , to :: String
+  { from :: Address
+  , to :: Address
+  , id :: String
+  , amount :: BigInt
   }
 
 -- Symbols 
@@ -205,10 +220,14 @@ name = Proxy
 from :: Proxy "from"
 from = Proxy
 
-
 to :: Proxy "to"
 to = Proxy
 
+id :: Proxy "id"
+id = Proxy
+
+amount :: Proxy "amount"
+amount = Proxy
 
 --------------------------------------------------------------------------------
 

@@ -48,6 +48,7 @@ pkgs.mkShell {
     pkgs.purescript-psa
     pkgs.dhall-json
     pkgs.spago2nix-extra.spago2nix-extra-cli
+    pkgs.expect
     (pkgs.writers.nodeRepl (builtins.attrValues {
       inherit (pkgs.nodePackages) fp-ts nijs glob yargs;
     }))
