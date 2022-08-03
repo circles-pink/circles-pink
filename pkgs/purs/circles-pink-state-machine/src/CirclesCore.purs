@@ -495,14 +495,10 @@ type UtilsRequestRelayerOptions =
       }
   }
 
-type ErrUtilsRequestRelayer r = ErrNative + r
+type ErrUtilsRequestRelayer r = ErrNative + ErrParseAddress + r
 
-utilsRequestRelayer
-  :: forall r
-   . B.CirclesCore
-  -> UtilsRequestRelayerOptions
-  -> Result (ErrUtilsRequestRelayer r) (Either (Variant (errParseAddress :: String | r)) Address)
-utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative (parseAddr >>> pure)
+utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) Address
+utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative parseAddr
   where
   fn = convertCore cc -# _.utils -# _.requestRelayer
 
