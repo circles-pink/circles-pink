@@ -108,14 +108,14 @@ const getUsers =
       RD.unwrap,
       remoteData =>
         matchV(remoteData)({
+          notAsked: () => [],
           failure: () => [],
           success: ({ data }) => data,
           loading: ({ previousData }) =>
             matchADT(previousData)({
-              Just: ([user]) => user,
+              Just: ([users]) => users,
               Nothing: () => [],
             }),
-          notAsked: () => [],
         }),
       A.map(fromUser)
     );
