@@ -351,7 +351,7 @@ dashboard env@{ trustGetNetwork } =
         _ <-
           env.getVouchers signatureObj
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { vouchersResult = r })
-            # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
+            # retryUntil env (const { delay: 1000 }) (\_ n -> n == 0) 0
         pure unit
 
   getBalance set st _ =

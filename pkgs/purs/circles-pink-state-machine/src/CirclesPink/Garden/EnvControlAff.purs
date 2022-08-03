@@ -25,7 +25,6 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -296,8 +295,8 @@ env envenv@{ request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
       nonce = addressToNonce $ wrap address
-      _ = spy "address" address
-      _ = spy "nonce" nonce
+    -- _ = spy "address" address
+    -- _ = spy "nonce" nonce
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
@@ -367,7 +366,7 @@ env envenv@{ request, envVars } =
         )
         spec
     res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
-    let _ = spy "res" (res -# _.body)
+    -- let _ = spy "res" (res -# _.body)
     pure (res -# _.body)
 
   -- saveSession :: EnvControl.SaveSession Aff

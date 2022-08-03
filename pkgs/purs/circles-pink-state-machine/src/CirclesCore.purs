@@ -490,7 +490,7 @@ type UtilsRequestRelayerOptions =
   , method :: String
   , data ::
       { saltNonce :: Nonce
-      , owners :: Array Address
+      , owners :: Array ChecksumAddress
       , threshold :: Int
       }
   }
@@ -498,7 +498,7 @@ type UtilsRequestRelayerOptions =
 type ErrUtilsRequestRelayer r = ErrNative + ErrParseAddress + r
 
 utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) Address
-utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative parseAddr
+utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.utils -# _.requestRelayer
 
@@ -509,6 +509,8 @@ utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative parseAddr
         , threshold: x.data.threshold
         }
     }
+
+  mapOk x = parseAddr x.safe
 
 --------------------------------------------------------------------------------
 -- Err slices
