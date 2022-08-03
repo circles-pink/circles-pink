@@ -23,6 +23,7 @@ GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://l
 
 
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
+PURS_TARGET_PACKAGE := "pkgs/ts/@circles-pink/state-machine"
 
 default:
 	nix build .#ci --out-link results/ci/result
@@ -198,6 +199,9 @@ spago-docs:
 
 doc-search:
 	just spago-docs; purescript-docs-search
+
+spago-repl:
+  export NODE_PATH={{PURS_TARGET_PACKAGE}}/node_modules; expect ./repl.exp
 
 ################################################################################
 # ts

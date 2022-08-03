@@ -1,0 +1,11 @@
+#!/usr/bin/expect -f
+
+set timeout -1
+spawn spago repl
+
+expect "> "
+send -- "import CirclesPink.Prelude\r"
+
+interact
+
+expect eof

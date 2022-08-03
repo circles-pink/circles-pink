@@ -36,7 +36,7 @@ instance fpTs :: FpTs Address Address where
   fromFpTs = identity
 
 sampleAddress :: Address
-sampleAddress = unsafeMkAddress "fb7dc4d8f841af32d777e698d6c71409e85955d9"
+sampleAddress = unsafeMkAddress "5281764e3ce70ebc6c2eb18aaa8c4aebff98f393"
 
 sampleSafeAddress :: Address
 sampleSafeAddress = unsafeMkAddress "984501180D63335928eA7fb59c17d33e0398Ed39"
