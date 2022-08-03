@@ -1,6 +1,7 @@
 {
   "name": "cors-proxy",
   "version": "1.0.0",
+  "main": "./src/index.ts",
   "dependencies": {
     "@types/request": "^2.48.8",
     "body-parser": "^1.20.0",

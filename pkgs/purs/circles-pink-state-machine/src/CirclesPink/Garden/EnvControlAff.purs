@@ -5,8 +5,7 @@ module CirclesPink.Garden.EnvControlAff
 
 import Prelude
 
-import Payload.Headers as H
-import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative, Web3)
+import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative)
 import CirclesCore as CC
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
@@ -38,11 +37,13 @@ import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Payload.Client (defaultOpts, mkClient)
+import Payload.Headers as H
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import VoucherServer.Spec (spec)
 import Web3 (accountsSign, newWeb3_)
+import Web3 as W3
 
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars
@@ -294,8 +295,9 @@ env envenv@{ request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
       address = privateToAddress $ unwrap privKey
-    let
       nonce = addressToNonce $ wrap address
+      _ = spy "address" address
+      _ = spy "nonce" nonce
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     pure safeAddress
 
@@ -330,7 +332,6 @@ env envenv@{ request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     let
       address = privateToAddress $ unwrap privKey
-    let
       nonce = addressToNonce $ wrap address
     safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
     CC.tokenDeploy circlesCore account { safeAddress: convert safeAddress }
@@ -358,7 +359,6 @@ env envenv@{ request, envVars } =
   getVouchers signatureObj = do
     let
       baseURL = envVars -# _.voucherServerHost
-      _ = spy "baseURL" baseURL
       client = mkClient
         ( defaultOpts
             { baseUrl = baseURL
@@ -366,9 +366,8 @@ env envenv@{ request, envVars } =
             }
         )
         spec
-      _ = spy "client" client
     res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
-    let _ = spy "res" res
+    let _ = spy "res" (res -# _.body)
     pure (res -# _.body)
 
   -- saveSession :: EnvControl.SaveSession Aff
@@ -492,13 +491,13 @@ decryptJson { crypto: { decrypt } } sk v = v
 
 --------------------------------------------------------------------------------
 
-getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect Web3
+getWeb3 :: forall r. EnvVars -> ExceptV (ErrNative + ErrInvalidUrl + r) Effect W3.Web3
 getWeb3 ev = do
   provider <- CC.newWebSocketProvider $ ev -# _.gardenEthereumNodeWebSocket
   web3 <- lift $ CC.newWeb3 provider
   pure web3
 
-getCirclesCore :: forall r. Web3 -> EnvVars -> ExceptV (ErrNative + r) Effect CirclesCore
+getCirclesCore :: forall r. W3.Web3 -> EnvVars -> ExceptV (ErrNative + r) Effect CirclesCore
 getCirclesCore web3 ev =
   CC.newCirclesCore web3
     { apiServiceEndpoint: ev -# _.gardenApi

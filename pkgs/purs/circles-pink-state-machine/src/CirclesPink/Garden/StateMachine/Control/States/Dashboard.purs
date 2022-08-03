@@ -344,13 +344,14 @@ dashboard env@{ trustGetNetwork } =
 
         pure unit
 
-  getVouchers _ st msg =
+  getVouchers set st msg =
     void do
       runExceptT do
         signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
-        let _ = spy "signatureObj" signatureObj
-        vouchers <- env.getVouchers signatureObj
-        let _ = spy "vouchers" vouchers
+        _ <-
+          env.getVouchers signatureObj
+            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { vouchersResult = r })
+            # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         pure unit
 
   getBalance set st _ =

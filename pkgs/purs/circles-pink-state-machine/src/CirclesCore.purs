@@ -40,6 +40,7 @@ module CirclesCore
   , TrustRemoveConnectionOptions
   , User
   , UserOptions
+  , UtilsRequestRelayerOptions
   , _errApi
   , _errInvalidUrl
   , _errNative
@@ -70,6 +71,7 @@ module CirclesCore
   , userRegister
   , userResolve
   , userSearch
+  , utilsRequestRelayer
   ) where
 
 --------------------------------------------------------------------------------
@@ -80,10 +82,10 @@ import Prelude
 
 import CirclesCore.ApiResult (ApiError) as Exp
 import CirclesCore.ApiResult (apiResultToEither, ApiError)
-import CirclesCore.Bindings (Options, Provider, Web3, CirclesCore, Account, TrustIsTrustedResult) as Exp
+import CirclesCore.Bindings (Options, Provider, CirclesCore, Account, TrustIsTrustedResult) as Exp
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
-import CirclesCore.FfiUtils (mapFn2)
+import CirclesCore.FfiUtils (mapFn1, mapFn2)
 import CirclesPink.Data.Address (Address, mkAddress)
 import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
@@ -104,6 +106,7 @@ import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Web3 as W3
 
 --------------------------------------------------------------------------------
 -- Web3
@@ -123,7 +126,7 @@ newWebSocketProvider x1 =
     "TypeError", "Invalid URL" -> _errInvalidUrl x1
     _, _ -> mkErrorNative e
 
-newWeb3 :: B.Provider -> Effect B.Web3
+newWeb3 :: B.Provider -> Effect W3.Web3
 newWeb3 = B.newWeb3
 
 --------------------------------------------------------------------------------
@@ -131,7 +134,7 @@ newWeb3 = B.newWeb3
 --------------------------------------------------------------------------------
 type ErrNewCirclesCore r = ErrNative + r
 
-newCirclesCore :: forall r. B.Web3 -> B.Options -> ExceptV (ErrNewCirclesCore r) Effect B.CirclesCore
+newCirclesCore :: forall r. W3.Web3 -> B.Options -> ExceptV (ErrNewCirclesCore r) Effect B.CirclesCore
 newCirclesCore x1 x2 =
   B.newCirclesCore x1 x2
     # try
@@ -141,7 +144,7 @@ newCirclesCore x1 x2 =
 --------------------------------------------------------------------------------
 type ErrPrivKeyToAccount r = ErrNative + r
 
-privKeyToAccount :: forall r. B.Web3 -> PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Effect B.Account
+privKeyToAccount :: forall r. W3.Web3 -> PrivateKey -> ExceptV (ErrPrivKeyToAccount r) Effect B.Account
 privKeyToAccount w3 pk =
   B.privKeyToAccount w3 (show pk)
     # try
@@ -151,7 +154,7 @@ privKeyToAccount w3 pk =
 --------------------------------------------------------------------------------
 type ErrSendTransaction r = ErrNative + r
 
-sendTransaction :: forall r. B.Web3 -> Address -> Address -> ExceptV (ErrSendTransaction r) Effect Unit
+sendTransaction :: forall r. W3.Web3 -> Address -> Address -> ExceptV (ErrSendTransaction r) Effect Unit
 sendTransaction w3 f t =
   B.sendTransaction w3 (show f) (show t)
     # try
@@ -476,6 +479,40 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   fn = convertCore cc -# _.token -# _.transfer
 
   mapArg2 x = x { from = show x.from, to = show x.to }
+
+--------------------------------------------------------------------------------
+-- API / utilsRequestRelayer
+--------------------------------------------------------------------------------
+
+type UtilsRequestRelayerOptions =
+  { path :: Array String
+  , version :: Int
+  , method :: String
+  , data ::
+      { saltNonce :: Nonce
+      , owners :: Array Address
+      , threshold :: Int
+      }
+  }
+
+type ErrUtilsRequestRelayer r = ErrNative + r
+
+utilsRequestRelayer
+  :: forall r
+   . B.CirclesCore
+  -> UtilsRequestRelayerOptions
+  -> Result (ErrUtilsRequestRelayer r) (Either (Variant (errParseAddress :: String | r)) Address)
+utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative (parseAddr >>> pure)
+  where
+  fn = convertCore cc -# _.utils -# _.requestRelayer
+
+  mapArg1 x = x
+    { data =
+        { saltNonce: nonceToBigInt x.data.saltNonce
+        , owners: map show x.data.owners
+        , threshold: x.data.threshold
+        }
+    }
 
 --------------------------------------------------------------------------------
 -- Err slices

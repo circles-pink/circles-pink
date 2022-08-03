@@ -115,6 +115,24 @@ dev-storybook_:
 	export STORYBOOK_VOUCHER_SERVER_HOST={{VOUCHER_SERVER_HOST}}
 	yarn workspace storybook run storybook
 
+dev-voucher-server:
+	#!/usr/bin/env bash
+	set -euxo pipefail
+	export PORT="4000"
+	export GARDEN_API={{GARDEN_API}}
+	export GARDEN_API_USERS={{GARDEN_API_USERS}}
+	export GARDEN_GRAPH_API={{GARDEN_GRAPH_API}}
+	export GARDEN_SUBGRAPH_NAME={{GARDEN_SUBGRAPH_NAME}}
+	export GARDEN_RELAY={{GARDEN_RELAY}}
+	export GARDEN_HUB_ADDRESS={{GARDEN_HUB_ADDRESS}}
+	export GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
+	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
+	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	node ./pkgs/ts/@circles-pink/state-machine/bin/voucher-server
+
+cors-proxy-server:
+	ts-node ./pkgs/ts/cors-proxy
+
 _dump:
 	just --unstable --dump --dump-format json | jq
 
