@@ -26,6 +26,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustRemoveResult
   , Trusts
   , UserSearchResult
+  , VouchersResult
   , _dashboard
   , initDashboard
   ) where
@@ -39,6 +40,7 @@ import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustConnection (TrustConnection)
 import CirclesPink.Data.UserIdent (UserIdent)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
 import Data.IxGraph (IxGraph)
@@ -52,6 +54,7 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import VoucherServer.Spec (Voucher)
 
 --------------------------------------------------------------------------------
 -- DashboardState
@@ -72,6 +75,7 @@ type DashboardState =
   , userSearchResult :: UserSearchResult
   , redeploySafeResult :: RedeploySafeResult
   , redeployTokenResult :: RedeployTokenResult
+  , vouchersResult :: VouchersResult
   }
 
 type Trusts = Map Address Trust
@@ -115,6 +119,7 @@ initDashboard id =
         , userSearchResult: _notAsked unit
         , redeploySafeResult: _notAsked unit
         , redeployTokenResult: _notAsked unit
+        , vouchersResult: _notAsked unit
         }
 
 --------------------------------------------------------------------------------
@@ -179,6 +184,12 @@ type ErrTokenRequestUBIPayout r = EnvControl.ErrRequestUBIPayout + r
 type TokenTransferResult = RemoteDataV_ (ErrTokenTransfer + ()) String
 
 type ErrTokenTransfer r = EnvControl.ErrTransfer + r
+
+--------------------------------------------------------------------------------
+-- VouchersResult
+--------------------------------------------------------------------------------
+
+type VouchersResult = RemoteReportV (ErrGetVouchers + ()) (Array Voucher)
 
 --------------------------------------------------------------------------------
 -- Constructors
