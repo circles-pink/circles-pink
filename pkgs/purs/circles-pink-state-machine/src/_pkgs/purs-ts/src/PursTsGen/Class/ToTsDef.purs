@@ -117,15 +117,17 @@ instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Prod
 -- Utils
 --------------------------------------------------------------------------------
 
-
-genericToTsDef :: forall a rep. ToPursType a => Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
-genericToTsDef name _ =
+genericToTsDef' :: forall a rep. ToPursType a =>  GenToTsDefSum rep => String -> Proxy a -> Proxy rep -> Array TS.Declaration
+genericToTsDef' name _ _ = 
   union : ctorTypes <> ((\f -> f $ toPursType (Proxy :: _ a)) =<< ctors)
   where
   xs = genToTsDefSum name (Proxy :: _ rep)
   ctorTypes = fst =<< toArray xs
   ctors = fst <<< snd <$> toArray xs
   union = TS.typeDef (TS.name name) [] $ foldl1 (|||) $ snd <<< snd <$> xs
+
+genericToTsDef :: forall a rep. ToPursType a => Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
+genericToTsDef name _ = genericToTsDef' name (Proxy :: _ a) (Proxy :: _ rep)
 
 --------------------------------------------------------------------------------
 -- Spec
