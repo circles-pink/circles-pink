@@ -4,6 +4,7 @@ module Data.BigInt
   , toString
   ) where
 
+
 foreign import data BigInt :: Type
 
 foreign import fromString :: String -> BigInt

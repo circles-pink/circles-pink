@@ -9,6 +9,7 @@ import CirclesPink.Data.Nonce (addressToNonce)
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
+import Data.BN (BN)
 import Data.Bifunctor (lmap)
 import Data.BigInt (BigInt)
 import Data.DateTime (diff)
@@ -207,7 +208,7 @@ type Transfer =
   { from :: Address
   , to :: Address
   , id :: String
-  , amount :: BigInt
+  , amount :: BN
   }
 
 -- Symbols 
