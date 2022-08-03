@@ -99,7 +99,7 @@ import Data.Variant (Variant, inj)
 import Payload.Client (ClientError)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import VoucherServer.Main (Voucher)
+import VoucherServer.Spec (Voucher)
 import Web3 (Message, SignatureObj)
 
 --------------------------------------------------------------------------------

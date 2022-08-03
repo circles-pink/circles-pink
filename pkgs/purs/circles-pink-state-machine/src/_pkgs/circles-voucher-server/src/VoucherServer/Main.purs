@@ -8,24 +8,31 @@ import CirclesPink.Data.Address as C
 import CirclesPink.Data.Nonce (addressToNonce)
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
+import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.DateTime.Instant as DT
 import Data.Either (Either(..), note)
 import Data.Foldable (fold)
+import Data.Generic.Rep (class Generic)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, un)
+import Data.Newtype (class Newtype, un, wrap)
 import Data.Number (fromString)
+import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
+import Debug (spy, spyWith)
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), launchAff_)
+import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error)
+import Effect.Class.Console (error, logShow)
 import Effect.Now (now)
+import GraphQL.Client.Args (type (==>), (=>>))
+import GraphQL.Client.Query (query_)
+import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
@@ -36,7 +43,9 @@ import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
+import VoucherServer.Spec (Voucher)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
+import Effect.Exception as E
 
 type Message =
   { id :: Int
@@ -68,10 +77,6 @@ instance decodeParamAddress :: DecodeParam Address where
 --------------------------------------------------------------------------------
 
 type ErrGetVoucher = String
-
-type Voucher =
-  { voucherCode :: String
-  }
 
 --------------------------------------------------------------------------------
 spec
@@ -143,8 +148,67 @@ getVouchers env { body: { signatureObj } } = do
               }
           case safeAddress of
             Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
-            Right sa -> M.lookup (Address sa) db # fold # Right # pure
+            Right sa -> do
+              txs <- getTransactions env (wrap sa)
+              M.lookup (Address sa) db # fold # Right # pure
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
+
+--------------------------------------------------------------------------------
+
+type Transaction = {}
+
+getTransactions :: forall r. { | r } -> Address -> Aff (Maybe (Array Transaction))
+getTransactions env addr = do
+  result <- queryGql "Hallo? " { transfers : { where : { from : "", to : ""} } =>> { from, to } }
+  case result of
+    Left e -> logShow e
+    Right { transfers } -> logShow $ map _.from transfers
+  pure $ Just [ {} ]
+
+--------------------------------------------------------------------------------
+
+data GQLError = ConnOrParseError
+
+derive instance genericGQLError :: Generic GQLError _
+instance showGQLError :: Show GQLError where
+  show = genericShow
+
+queryGql
+  :: forall query returns
+   . GqlQuery Schema query returns
+  => DecodeJsonField returns
+  => DecodeJson returns
+  => String
+  -> query
+  -> Aff (Either GQLError returns)
+queryGql s q = query_ "http://graph.circles.local/subgraphs/name/CirclesUBI/circles-subgraph" (Proxy :: Proxy Schema) s q
+  # try
+  <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
+
+-- Schema
+type Schema =
+  { transfers :: { where :: { from :: String, to :: String } } ==> Array Transfer
+  }
+
+type Transfer =
+  { from :: String
+  , to :: String
+  }
+
+-- Symbols 
+prop :: Proxy "prop"
+prop = Proxy
+
+name :: Proxy "name"
+name = Proxy
+
+from :: Proxy "from"
+from = Proxy
+
+
+to :: Proxy "to"
+to = Proxy
+
 
 --------------------------------------------------------------------------------
 

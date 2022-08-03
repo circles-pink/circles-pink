@@ -22,6 +22,7 @@
   , "foreign-object"
   , "fp-ts"
   , "functions"
+  , "graphql-client"
   , "heterogeneous"
   , "http-methods"
   , "identity"
