@@ -3,14 +3,17 @@
   "version": "1.0.35",
   "dependencies": {
     "@circles/core": "2.11.1",
+    "@urql/core": "^2.6.1",
     "bip39": "^3.0.4",
     "bn.js": "^5.2.1",
     "chance": "^1.1.8",
     "ethereumjs-util": "^7.1.4",
     "ethereumjs-wallet": "^1.0.2",
     "ethjs-provider-http": "^0.1.6",
+    "graphql-ws": "^5.9.1",
     "gun": "nmauersberg/gun.git",
     "isomorphic-fetch": "^3.0.0",
+    "isomorphic-unfetch": "^3.1.0",
     "node-fetch": "^2.0.0",
     "web3": "^1.7.1"
   }
