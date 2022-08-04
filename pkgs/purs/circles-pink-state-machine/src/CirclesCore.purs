@@ -27,6 +27,7 @@ module CirclesCore
   , ErrUserResolve
   , NativeError
   , ResolveOptions
+  , SafeAddress
   , SafeDeployOptions
   , SafeStatus
   , SearchOptions
@@ -91,6 +92,7 @@ import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.BN (BN)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
@@ -104,6 +106,7 @@ import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Web3 as W3
@@ -497,7 +500,23 @@ type UtilsRequestRelayerOptions =
 
 type ErrUtilsRequestRelayer r = ErrNative + ErrParseAddress + r
 
-utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) Address
+newtype SafeAddress = SafeAddress Address
+
+derive newtype instance show :: Show SafeAddress
+
+derive newtype instance eq :: Eq SafeAddress
+
+derive newtype instance ord :: Ord SafeAddress
+
+derive newtype instance decodeJson :: DecodeJson SafeAddress
+
+derive newtype instance encodeJson :: EncodeJson SafeAddress
+
+derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
+
+derive newtype instance readForeignSafeAddress :: ReadForeign SafeAddress
+
+utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) SafeAddress
 utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.utils -# _.requestRelayer
@@ -510,7 +529,7 @@ utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk
         }
     }
 
-  mapOk x = parseAddr x.safe
+  mapOk x = parseAddr x.safe <#> SafeAddress
 
 --------------------------------------------------------------------------------
 -- Err slices

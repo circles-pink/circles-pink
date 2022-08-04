@@ -16,6 +16,7 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 
 newtype Address = Address W3.Address
 
@@ -30,6 +31,10 @@ derive newtype instance ord :: Ord Address
 derive newtype instance decodeJson :: DecodeJson Address
 
 derive newtype instance encodeJson :: EncodeJson Address
+
+derive newtype instance writeForeignAddress :: WriteForeign Address
+
+derive newtype instance readForeignAddress :: ReadForeign Address
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity

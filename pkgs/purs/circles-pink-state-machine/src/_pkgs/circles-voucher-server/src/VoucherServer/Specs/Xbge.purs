@@ -2,8 +2,9 @@ module VoucherServer.Specs.Xbge where
 
 import Prelude
 
+import CirclesCore (SafeAddress)
 import Payload.Spec (POST, Spec(..), GET)
-import VoucherServer.Types (SafeAddress, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
+import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
 xbgeSpec
   :: Spec
