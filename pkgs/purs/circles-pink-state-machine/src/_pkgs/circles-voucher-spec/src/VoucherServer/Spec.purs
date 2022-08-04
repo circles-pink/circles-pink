@@ -12,12 +12,11 @@ import CirclesPink.Data.Address as C
 import Data.DateTime.Instant as DT
 import Data.Either (note)
 import Data.Newtype (class Newtype, un)
-import Data.Tuple.Nested (type (/\), (/\))
 import Effect.Aff (Milliseconds(..))
 import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Spec (POST, Spec(Spec), GET)
 import Simple.JSON (class WriteForeign, writeImpl)
-import VoucherServer.Types (Voucher(..), VoucherAmount(..), VoucherMeta(..), VoucherProvider(..))
+import VoucherServer.Types (Voucher, VoucherProvider)
 import Web3 (SignatureObj)
 
 type Message =
@@ -60,12 +59,9 @@ spec
              , response :: Array Voucher
              }
        , getVoucherProviders ::
-           GET "/get-voucher-providers"
+           GET "/voucher-providers"
              { response ::
-                 Array
-                   ( VoucherProvider /\
-                       Array (VoucherAmount /\ VoucherMeta)
-                   )
+                 Array VoucherProvider
              }
        }
 spec = Spec

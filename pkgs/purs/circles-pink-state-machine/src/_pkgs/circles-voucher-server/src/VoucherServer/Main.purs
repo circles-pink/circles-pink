@@ -25,8 +25,7 @@ module VoucherServer.Main
   , sampleVoucher
   , spec
   , to
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -68,6 +67,7 @@ import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
 import Payload.Client (mkClient)
 import Payload.Client as PC
+import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
@@ -77,8 +77,8 @@ import Payload.Spec (POST, Spec(Spec))
 import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
-import VoucherServer.Spec (Voucher)
 import VoucherServer.Specs.Xbge (xbgeSpec)
+import VoucherServer.Types (Voucher)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 type Message =
@@ -111,6 +111,27 @@ instance decodeParamAddress :: DecodeParam Address where
     <#> Address
 
 instance argGqlAddress :: ArgGql Address String
+
+--------------------------------------------------------------------------------
+
+newtype SafeAddress = SafeAddress CC.SafeAddress
+
+derive instance newtypeSafeAddress :: Newtype SafeAddress _
+
+derive newtype instance ordSafeAddress :: Ord SafeAddress
+derive newtype instance eqSafeAddress :: Eq SafeAddress
+derive newtype instance decodeJsonSafeAddress :: DecodeJson SafeAddress
+derive newtype instance showSafeAddress :: Show SafeAddress
+
+instance decodeParamSafeAddress :: DecodeParam SafeAddress where
+  decodeParam x = decodeParam x
+    >>= (parseAddress >>> note "Could not parse SafeAddress")
+    <#> SafeAddress
+
+instance encodeParamSafeAddress :: EncodeParam SafeAddress where
+  encodeParam (SafeAddress x) = encodeParam x
+
+instance argGqlSafeAddress :: ArgGql SafeAddress String
 
 --------------------------------------------------------------------------------
 

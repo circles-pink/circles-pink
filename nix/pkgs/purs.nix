@@ -14,24 +14,14 @@ let
       cp -r ${pursOutput} $out
       chmod -R +w $out
       
-      rm -rf $out/Payload.*
-      rm -rf $out/VoucherServer.*
-
-      purs-tsd-gen -d $out
-
-      for dir in $out/Payload.*
-      do
-        echo "copy dir $dir"
-        cp $dir -t $out
-      done
-
-      for dir in $out/VoucherServer.*
-      do
-        echo "copy dir $dir"
-        cp $dir -t $out
-      done
+      DIR=`mktemp -d`;
+      mv $out/Payload.* $out/VoucherServer.* $out/CirclesPink.Garden.EnvControlAff -t $DIR;
+      purs-tsd-gen --directory $out;
+      mv $DIR/* -t $out; 
 
       patchTsTypes $out
+
+      
     '';
 
   builts = pipe
