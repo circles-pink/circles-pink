@@ -51,7 +51,38 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
             matchADT(x)({
               Left: () => 'X',
               Right: ([trustConnection]) =>
-                pipe(trustConnection, fields, ([_, _]) => ''),
+                matchADT(trustConnection)({
+                  TrustConnection: ([_, trustState]) =>
+                    matchADT(trustState)({
+                      TrustState: ([v]) =>
+                        matchV(v)({
+                          loadingTrust: () => '',
+                          loadingUntrust: () => '',
+                          pendingTrust: () => '',
+                          pendingUntrust: () => '',
+                          trusted: () => '',
+                          untrusted: () => '',
+                        }),
+                    }),
+                }),
+            })
+          )}
+          {pipe(outgoingEdge, x =>
+            matchADT(x)({
+              Left: () => 'X',
+              Right: ([trustConnection]) =>
+                pipe(trustConnection, fields, ([_, trustState]) =>
+                  pipe(trustState, fields, ([v]) =>
+                    matchV(v)({
+                      loadingTrust: () => '',
+                      loadingUntrust: () => '',
+                      pendingTrust: () => '',
+                      pendingUntrust: () => '',
+                      trusted: () => '',
+                      untrusted: () => '',
+                    })
+                  )
+                ),
             })
           )}
         </pre>
@@ -61,6 +92,17 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
     </tr>
   );
 };
+
+// match(
+
+//   )
+//   pipe(trustConnection, fields, ([a, trustState]) =>
+//     pipe(trustState, ts =>
+//       matchADT(ts)({
+//         d: 1,
+//       })
+//     )
+//   ),
 
 // -----------------------------------------------------------------------------
 // UI UserSearch

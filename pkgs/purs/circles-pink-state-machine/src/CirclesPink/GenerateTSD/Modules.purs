@@ -5,6 +5,7 @@ import Prelude
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
+import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
 import CirclesPink.GenerateTSD.Replace as R
@@ -80,6 +81,10 @@ modules =
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
         , value "unwrap" [] CirclesPink.Data.TrustNode.unwrap
         , instanceDef "ordTrustNode" (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
+        ]
+          , "CirclesPink.Data.TrustState" /\
+      join
+        [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
         ]
   , "CirclesPink.Data.UserIdent" /\
       join
