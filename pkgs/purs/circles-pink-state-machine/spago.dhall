@@ -3,6 +3,7 @@
   [ "aff"
   , "aff-promise"
   , "argonaut"
+  , "argonaut-codecs"
   , "arrays"
   , "bifunctors"
   , "chance"
