@@ -452,6 +452,7 @@ export const Dashboard = ({
                   onAddTrust={userIdent =>
                     act(A._dashboard(A._addTrustConnection(userIdent)))
                   }
+                  centerAddress={stateRaw.user.safeAddress}
 
                   // title={t('dashboard.exploreTitle')}
                   // trusts={searchResult}

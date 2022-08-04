@@ -2,7 +2,6 @@ module CirclesPink.GenerateTSD.Wrappers
   ( Instant(..)
   , IxGraph(..)
   , NeighborConnectivity(..)
-  , Pair(..)
   , type (:*:)
   , type (:+:)
   )
@@ -10,12 +9,10 @@ module CirclesPink.GenerateTSD.Wrappers
 
 import Prelude
 
-import CirclesPink.GenerateTSD.Replace as R
 import Data.DateTime.Instant as DT
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
 import Data.Newtype (class Newtype)
-import Data.Pair as Data.Pair
 import Data.Typelevel.Undefined (undefined)
 import PursTsGen (class ToTsDef, genericToTsDef, toTsType)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
@@ -91,22 +88,3 @@ instance toPursType_NeighborConnectivity :: (ToPursType a) => ToPursType (Neighb
     [ toPursType (Proxy :: _ a)
     ]
 
---------------------------------------------------------------------------------
-
-newtype Pair a = Pair (Data.Pair.Pair a)
-
-derive instance newtypePair :: Newtype (Pair a) _
-
-derive instance genericPair :: Generic (Pair a) _
-  
-instance toTsType_Pair :: (ToTsType a) => ToTsType (Pair a) where
-  toTsType _ = TS.mkType (TS.qualName "Data_Pair" "Pair")
-    [ toTsType (Proxy :: _ a) ]
-
-instance toTsDef_Pair :: (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
-  toTsDef = R.genericToTsDef "Pair"
-
-instance toPursType_Pair :: (ToPursType a) => ToPursType (Pair a) where
-  toPursType _ = PS.mkType (PS.qualName "Data_Pair" "Pair")
-    [ toPursType (Proxy :: _ a)
-    ]

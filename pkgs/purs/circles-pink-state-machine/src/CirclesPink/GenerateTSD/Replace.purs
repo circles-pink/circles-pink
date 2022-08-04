@@ -5,12 +5,13 @@ import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
+import Data.Newtype (class Newtype)
 import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef)
+import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
@@ -18,6 +19,7 @@ import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import Type.Proxy (Proxy(..))
+import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
@@ -43,7 +45,7 @@ else instance replaceNeighborConnectivity ::
 else instance replacePair ::
   ( UnsafeReplace a a'
   ) =>
-  UnsafeReplace (Data.Pair.Pair a) (W.Pair a')
+  UnsafeReplace (Data.Pair.Pair a) (Pair a')
 
 else instance replaceInstant ::
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant
@@ -115,3 +117,36 @@ genericToTsDef
   -> Proxy a
   -> Array TS.Declaration
 genericToTsDef s p = genericToTsDef' s p (Proxy :: _ rep')
+
+--------------------------------------------------------------------------------
+
+infixr 6 type Sum as :+:
+infixl 7 type Product as :*:
+
+--------------------------------------------------------------------------------
+
+newtype Pair a = Pair (Data.Pair.Pair a)
+
+
+ptPair :: PursType
+ptPair = PursType "Data_Pair" "Pair"
+
+
+derive instance newtypePair :: Newtype (Pair a) _
+
+instance g ::
+  UnsafeReplace a a' =>
+  Generic (Pair a)
+    (Constructor "Pair" (Argument a' :*: Argument a'))
+  where
+  from = undefined
+  to = undefined
+
+instance toTsType_Pair :: (ToTsType a) => ToTsType (Pair a) where
+  toTsType _ = defaultToTsType ptPair []
+
+instance toTsDef_Pair :: (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
+  toTsDef = genericToTsDef "Pair"
+
+instance toPursType_Pair :: (ToPursType a) => ToPursType (Pair a) where
+  toPursType _ = defaultToPursType ptPair []

@@ -44,7 +44,7 @@ type VariantCasesOf<V extends Variant, Z> = {
 };
 
 export const matchV =
-  <V extends Variant>(v: V) =>
+  <V extends Variant, Z>(v: V) =>
   <Z>(c: VariantCasesOf<V, Z>): Z =>
     (c as any)[v.type](v.value);
 
@@ -61,6 +61,6 @@ type ADTCasesOf<D extends ADT, Z> = {
 };
 
 export const matchADT =
-  <D extends ADT>(adt: D) =>
+  <D extends ADT>(adt: D,) =>
   <Z>(c: ADTCasesOf<D, Z>): Z =>
     (c as any)[adt.constructor.name](fields(adt));

@@ -1,27 +1,20 @@
-import {
-  UserIdent,
-  fromUser,
-  getIdentifier,
-  getAddress,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import { TrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
-import * as G from '@circles-pink/state-machine/output/Data.IxGraph';
-import {
-  CirclesGraph,
-  DashboardState,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import * as RD from '@circles-pink/state-machine/output/RemoteData';
-import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
-
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
 import { fields, matchADT, matchV } from '../purs-util';
 import {
   Address,
-  ordAddress,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { Pair } from '@circles-pink/state-machine/output/Data.Pair';
-import { match } from 'assert';
+  CirclesGraph,
+  DashboardState,
+  UserIdent,
+  _Address,
+  _Array,
+  _ArrayS,
+  _IxGraph,
+  _Pair,
+  _RemoteData,
+  _TrustState,
+  _UserIdent,
+} from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // UI / Row
@@ -30,61 +23,43 @@ import { match } from 'assert';
 type RowProps = { userIdent: UserIdent } & UserSearchProps;
 
 const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
-  const targetAddress = getAddress(userIdent);
+  const targetAddress = _UserIdent.getAddress(userIdent);
 
   const outgoingEdge = pipe(
     trusts,
-    G.lookupEdge(ordAddress)(Pair.create(centerAddress)(targetAddress))
+    _IxGraph.lookupEdge(_Address.ordAddress)(
+      _Pair.Pair.create(centerAddress)(targetAddress)
+    )
   );
 
   const incomingEdge = pipe(
     trusts,
-    G.lookupEdge(ordAddress)(Pair.create(targetAddress)(centerAddress))
+    _IxGraph.lookupEdge(_Address.ordAddress)(
+      _Pair.Pair.create(targetAddress)(centerAddress)
+    )
   );
 
   return (
     <tr>
-      <td>{getIdentifier(userIdent)}</td>
+      <td>{_UserIdent.getIdentifier(userIdent)}</td>
       <td>
         <pre>
-          {pipe(outgoingEdge, x =>
-            matchADT(x)({
-              Left: () => 'X',
-              Right: ([trustConnection]) =>
-                matchADT(trustConnection)({
-                  TrustConnection: ([_, trustState]) =>
-                    matchADT(trustState)({
-                      TrustState: ([v]) =>
-                        matchV(v)({
-                          loadingTrust: () => '',
-                          loadingUntrust: () => '',
-                          pendingTrust: () => '',
-                          pendingUntrust: () => '',
-                          trusted: () => '',
-                          untrusted: () => '',
-                        }),
-                    }),
-                }),
-            })
-          )}
-          {pipe(outgoingEdge, x =>
-            matchADT(x)({
-              Left: () => 'X',
-              Right: ([trustConnection]) =>
-                pipe(trustConnection, fields, ([_, trustState]) =>
-                  pipe(trustState, fields, ([v]) =>
-                    matchV(v)({
-                      loadingTrust: () => '',
-                      loadingUntrust: () => '',
-                      pendingTrust: () => '',
-                      pendingUntrust: () => '',
-                      trusted: () => '',
-                      untrusted: () => '',
-                    })
-                  )
-                ),
-            })
-          )}
+          {matchADT(outgoingEdge)({
+            Left: () => '  X',
+            Right: ([trustConnection]) => {
+              const [_, trustState] = fields(trustConnection);
+              const trustState_ = _TrustState.unwrap(trustState);
+
+              return matchV(trustState_)({
+                loadingTrust: () => '..O',
+                loadingUntrust: () => '..X',
+                pendingTrust: () => ' .O',
+                pendingUntrust: () => ' .X',
+                trusted: () => '  O',
+                untrusted: () => '  X',
+              });
+            },
+          })}
         </pre>
       </td>
       <td></td>
@@ -92,17 +67,6 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
     </tr>
   );
 };
-
-// match(
-
-//   )
-//   pipe(trustConnection, fields, ([a, trustState]) =>
-//     pipe(trustState, ts =>
-//       matchADT(ts)({
-//         d: 1,
-//       })
-//     )
-//   ),
 
 // -----------------------------------------------------------------------------
 // UI UserSearch
@@ -117,9 +81,9 @@ type UserSearchProps = {
 };
 
 export const UserSearch = (props: UserSearchProps) => {
-  const { userSearchResult, trusts, onSearch } = props;
+  const { userSearchResult, onSearch } = props;
 
-  const users = getUsers(trusts)(userSearchResult);
+  const users = getUsers(userSearchResult);
 
   return (
     <div>
@@ -130,7 +94,7 @@ export const UserSearch = (props: UserSearchProps) => {
         <table>
           {pipe(
             users,
-            A.map(userIdent => <Row {...props} userIdent={userIdent} />)
+            _ArrayS.map(userIdent => <Row {...props} userIdent={userIdent} />)
           )}
         </table>
       )}
@@ -142,22 +106,19 @@ export const UserSearch = (props: UserSearchProps) => {
 // Util
 // -----------------------------------------------------------------------------
 
-const getUsers =
-  (trusts: CirclesGraph) =>
-  (userSearchResult: DashboardState['userSearchResult']) =>
-    pipe(
-      userSearchResult,
-      RD.unwrap,
-      remoteData =>
-        matchV(remoteData)({
-          notAsked: () => [],
-          failure: () => [],
-          success: ({ data }) => data,
-          loading: ({ previousData }) =>
-            matchADT(previousData)({
-              Just: ([users]) => users,
-              Nothing: () => [],
-            }),
-        }),
-      A.map(fromUser)
-    );
+const getUsers = (userSearchResult: DashboardState['userSearchResult']) => {
+  const userSearchResult_ = _RemoteData.unwrap(userSearchResult);
+
+  const users = matchV(userSearchResult_)({
+    notAsked: () => [],
+    failure: () => [],
+    success: ({ data }) => data,
+    loading: ({ previousData }) =>
+      matchADT(previousData)({
+        Just: ([users]) => users,
+        Nothing: () => [],
+      }),
+  });
+
+  return _ArrayS.map(_UserIdent.fromUser)(users);
+};

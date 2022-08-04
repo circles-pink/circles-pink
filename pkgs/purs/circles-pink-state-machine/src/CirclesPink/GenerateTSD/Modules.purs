@@ -18,6 +18,7 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Maybe as Data.Maybe
+import Data.Newtype (class Newtype)
 import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Pair as Data.Pair
@@ -37,6 +38,9 @@ moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
 
 _Ord :: forall a. Ord a => ToTsType a => a -> TS.Type
 _Ord a = TS.TypeConstructor (TS.QualName (Just "Data_Ord") "Ord") [ toTsType a ]
+
+_Newtype :: forall a b. Newtype a b => ToTsType a => ToTsType b => a -> b -> TS.Type
+_Newtype a b = TS.TypeConstructor (TS.QualName (Just "Data_Newtype") "Newtype") [ toTsType a, toTsType b ]
 
 data Any
 
@@ -82,9 +86,10 @@ modules =
         , value "unwrap" [] CirclesPink.Data.TrustNode.unwrap
         , instanceDef "ordTrustNode" (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
         ]
-          , "CirclesPink.Data.TrustState" /\
+  , "CirclesPink.Data.TrustState" /\
       join
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
+        , value "unwrap" [] CirclesPink.Data.TrustState.unwrap
         ]
   , "CirclesPink.Data.UserIdent" /\
       join
