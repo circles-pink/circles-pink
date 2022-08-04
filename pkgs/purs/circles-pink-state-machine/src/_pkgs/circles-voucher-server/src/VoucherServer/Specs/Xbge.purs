@@ -2,7 +2,7 @@ module VoucherServer.Specs.Xbge where
 
 import Prelude
 
-import CirclesCore (SafeAddress)
+import CirclesPink.Data.SafeAddress (SafeAddress)
 import Payload.Spec (POST, Spec(..), GET)
 import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
