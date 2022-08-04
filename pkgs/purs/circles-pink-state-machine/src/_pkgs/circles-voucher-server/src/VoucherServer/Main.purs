@@ -230,6 +230,38 @@ id = Proxy
 amount :: Proxy "amount"
 amount = Proxy
 
+-- {
+--   transfers (
+--     where: 
+--     {
+--       from: "idFrom",
+--       to: "idTo"
+--     }
+--   )
+--   {
+--     id 
+--     from 
+--     to 
+--     amount
+--   }
+-- }
+
+-- {
+--   notifications (
+--     where: 
+--     {
+--       transfer: "21429855-18"
+--       safeAddress: "0xccdfa2fa15c9d0ba7e84a96341a54296873abba4"
+--     }
+--   ) 
+--   {
+--     id
+--     safeAddress
+--     transactionHash
+--     transfer {from to amount}
+--   }
+-- }
+
 --------------------------------------------------------------------------------
 
 type ServerConfig =
