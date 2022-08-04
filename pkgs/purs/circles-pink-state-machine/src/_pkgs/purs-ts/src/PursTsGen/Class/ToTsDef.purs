@@ -2,7 +2,7 @@ module PursTsGen.Class.ToTsDef where
 
 import PursTsGen.Prelude
 
-import Data.Array ((:))
+import Data.Array (nub, (:))
 import Data.Array.NonEmpty (NonEmptyArray, foldl1, toArray)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either)
@@ -83,7 +83,7 @@ genToTsDefSum' prefix _ _ = typeDef /\ ctor /\ type'
     , TS.typeDef (TS.name (prefix <> "_" <> name)) [] $ TS.record (label : brand : values)
     ]
   { floating } = fold $ snd <<< resolveType <$> types
-  type' = TS.mkType (TS.QualName Nothing (prefix <> "_" <> name)) $ TS.var <$> floating
+  type' = TS.mkType (TS.QualName Nothing (prefix <> "_" <> name)) $ TS.var <$> nub floating
   ctor ret =
     let
       pursType = PS.printType $ foldr PS.function ret psTypes

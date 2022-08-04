@@ -13,9 +13,11 @@ module CirclesPink.Data.TrustState
 
 import Prelude
 
+import CirclesPink.GenerateTSD.Replace as R
+import Data.Generic.Rep (class Generic)
 import Data.Variant (Variant, inj, match)
 import FpTs.Class (class FpTs)
-import PursTsGen (class ToTsType)
+import PursTsGen (class ToTsDef, class ToTsType, genericToTsDef)
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
@@ -33,15 +35,16 @@ newtype TrustState = TrustState
       )
   )
 
+
 derive instance trustStateEq :: Eq TrustState
-
 derive instance ordTrustState :: Ord TrustState
-
 derive newtype instance showTrustState :: Show TrustState
 
 instance fpTs :: FpTs TrustState TrustState where
   toFpTs = identity
   fromFpTs = identity
+
+
 
 instance toTsTypeTrustState :: ToTsType TrustState where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustState" "TrustState"

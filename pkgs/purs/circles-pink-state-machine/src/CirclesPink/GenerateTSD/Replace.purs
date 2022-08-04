@@ -3,19 +3,21 @@ module CirclesPink.GenerateTSD.Replace where
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
-import Data.Generic.Rep (Argument, Constructor, Product, Sum)
+import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
 import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class ToTsDef)
+import PursTsGen (class GenToTsDefSum, class ToTsDef)
 import PursTsGen as PT
+import PursTsGen.Class.ToPursType (class ToPursType)
+import PursTsGen.Class.ToTsDef (genericToTsDef')
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
-import Type.Proxy (Proxy)
+import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 --------------------------------------------------------------------------------
@@ -103,6 +105,13 @@ value s xs x = PT.value s xs (unsafeReplace x)
 typeAlias :: forall t119 t120. ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
 typeAlias n x = PT.typeAlias n (unsafeReplace x)
 
-
--- genericToTsDef :: forall a rep. ToPursType a =>  GenToTsDefSum rep => String -> Proxy a -> Proxy rep -> Array TS.Declaration
--- genericToTsDef = todo
+genericToTsDef
+  :: forall a rep rep'
+   . UnsafeReplace rep rep'
+  => ToPursType a
+  => Generic a rep
+  => GenToTsDefSum rep'
+  => String
+  -> Proxy a
+  -> Array TS.Declaration
+genericToTsDef s p = genericToTsDef' s p (Proxy :: _ rep')
