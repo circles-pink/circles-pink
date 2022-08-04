@@ -6,7 +6,6 @@ import Data.Array as A
 import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable)
-import Data.Pair (Pair)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple)
 import Data.Tuple.Nested (type (/\))

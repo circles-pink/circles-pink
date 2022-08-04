@@ -6,7 +6,7 @@ import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
-import PursTsGen.Data.ABC (A, B, C(..), D)
+import PursTsGen.Data.ABC (A, B, C, D)
 import PursTsGen.Lang.PureScript.Type as PS
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
