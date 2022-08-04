@@ -2,7 +2,6 @@ module VoucherServer.Spec
   ( Address(..)
   , ErrGetVoucher
   , Instant(..)
-  , Voucher
   , spec
   ) where
 
@@ -13,10 +12,12 @@ import CirclesPink.Data.Address as C
 import Data.DateTime.Instant as DT
 import Data.Either (note)
 import Data.Newtype (class Newtype, un)
+import Data.Tuple.Nested (type (/\), (/\))
 import Effect.Aff (Milliseconds(..))
 import Payload.Server.Params (class DecodeParam, decodeParam)
-import Payload.Spec (POST, Spec(Spec))
+import Payload.Spec (POST, Spec(Spec), GET)
 import Simple.JSON (class WriteForeign, writeImpl)
+import VoucherServer.Types (Voucher(..), VoucherAmount(..), VoucherMeta(..), VoucherProvider(..))
 import Web3 (SignatureObj)
 
 type Message =
@@ -50,10 +51,6 @@ instance decodeParamAddress :: DecodeParam Address where
 
 type ErrGetVoucher = String
 
-type Voucher =
-  { voucherCode :: String
-  }
-
 --------------------------------------------------------------------------------
 spec
   :: Spec
@@ -61,6 +58,14 @@ spec
            POST "/vouchers"
              { body :: { signatureObj :: SignatureObj }
              , response :: Array Voucher
+             }
+       , getVoucherProviders ::
+           GET "/get-voucher-providers"
+             { response ::
+                 Array
+                   ( VoucherProvider /\
+                       Array (VoucherAmount /\ VoucherMeta)
+                   )
              }
        }
 spec = Spec
