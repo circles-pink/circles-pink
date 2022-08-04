@@ -46,12 +46,10 @@ import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers, ErrGetVoucherProviders)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
-import Data.DateTime.Instant (Instant)
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple)
 import Data.Variant (Variant, inj)
 import Foreign.Object (Object, empty)
 import Record as R

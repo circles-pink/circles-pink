@@ -11,7 +11,7 @@ import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
