@@ -1,5 +1,6 @@
 module CirclesPink.Data.TrustState
-  ( TrustState(..)
+  ( TrustState'
+  , TrustState(..)
   , initTrusted
   , initUntrusted
   , isLoadingTrust
@@ -9,33 +10,33 @@ module CirclesPink.Data.TrustState
   , isTrusted
   , isUntrusted
   , next
-  ) where
+  , unwrap
+  )
+  where
 
 import Prelude
 
-import CirclesPink.GenerateTSD.Replace as R
-import Data.Generic.Rep (class Generic)
+import Data.Newtype (class Newtype)
+import Data.Newtype as NT
 import Data.Variant (Variant, inj, match)
 import FpTs.Class (class FpTs)
-import PursTsGen (class ToTsDef, class ToTsType, genericToTsDef)
+import PursTsGen (class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
-import PursTsGen.Lang.PureScript.Type as PS
-import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
 
 --------------------------------------------------------------------------------
-newtype TrustState = TrustState
-  ( Variant
-      ( untrusted :: Unit -- 0
-      , loadingTrust :: Unit -- 1
-      , pendingTrust :: Unit -- 2
-      , trusted :: Unit -- 3
-      , loadingUntrust :: Unit -- 4
-      , pendingUntrust :: Unit -- 5
-      )
+newtype TrustState = TrustState TrustState'
+
+type TrustState' = Variant
+  ( untrusted :: Unit -- 0
+  , loadingTrust :: Unit -- 1
+  , pendingTrust :: Unit -- 2
+  , trusted :: Unit -- 3
+  , loadingUntrust :: Unit -- 4
+  , pendingUntrust :: Unit -- 5
   )
 
-
+derive instance newtypeTrustState :: Newtype TrustState _
 derive instance trustStateEq :: Eq TrustState
 derive instance ordTrustState :: Ord TrustState
 derive newtype instance showTrustState :: Show TrustState
@@ -44,15 +45,14 @@ instance fpTs :: FpTs TrustState TrustState where
   toFpTs = identity
   fromFpTs = identity
 
-
+instance toTsDef :: ToTsDef TrustState where
+  toTsDef _ = defaultToTsDef trustState []
 
 instance toTsTypeTrustState :: ToTsType TrustState where
-  toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustState" "TrustState"
+  toTsType _ = defaultToTsType trustState []
 
 instance toPursTypeTrustState :: ToPursType TrustState where
-  toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_TrustState" "TrustState") [  ]
-
-
+  toPursType _ = defaultToPursType trustState []
 
 --------------------------------------------------------------------------------
 -- Constructors
@@ -97,3 +97,10 @@ next (TrustState ts) =
         }
         ts
 
+--------------------------------------------------------------------------------
+
+trustState :: PursType
+trustState = PursType "CirclesPink_Data_TrustState" "TrustState"
+
+unwrap :: TrustState -> TrustState'
+unwrap = NT.unwrap

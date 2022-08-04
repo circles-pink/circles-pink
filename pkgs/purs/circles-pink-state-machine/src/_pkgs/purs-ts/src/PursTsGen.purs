@@ -1,8 +1,12 @@
 module PursTsGen
-  ( classDef
+  ( PursType(..)
+  , classDef
   , cleanModule
   , constructor
   , defPredicateFn
+  , defaultToPursType
+  , defaultToTsDef
+  , defaultToTsType
   , defineModules
   , instanceDef
   , module Exp
@@ -10,8 +14,7 @@ module PursTsGen
   , typeAlias
   , typeDef
   , value
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -30,8 +33,9 @@ import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
 import PursTsGen.Class.ToTsType (class ToTsPredFn, class ToTsType, Constructor(..), toTsPredFn, toTsType)
+import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
-import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment) as TS
+import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, mkType, name, opaque, qualName, typeDef) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
 import Type.Proxy (Proxy)
 
@@ -148,3 +152,17 @@ instanceDef n x =
   , TS.lineComment "Instance"
   , TS.DeclValueDef (TS.Name n) $ x
   ]
+
+--------------------------------------------------------------------------------
+
+data PursType = PursType String String
+
+defaultToTsDef :: PursType -> Array TS.Name -> Array TS.Declaration
+defaultToTsDef (PursType m n) xs = pure $ TS.typeDef (TS.name n) []
+  $ TS.opaque (TS.qualName m n) xs
+
+defaultToTsType :: PursType -> Array TS.Type -> TS.Type
+defaultToTsType (PursType m n) xs = TS.mkType (TS.qualName m n) xs
+
+defaultToPursType :: PursType -> Array PS.Type -> PS.Type
+defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs
