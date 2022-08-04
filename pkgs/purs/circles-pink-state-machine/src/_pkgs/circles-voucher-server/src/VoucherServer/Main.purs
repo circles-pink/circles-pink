@@ -1,4 +1,32 @@
-module VoucherServer.Main where
+module VoucherServer.Main
+  ( Address(..)
+  , ErrGetVoucher
+  , GQLError(..)
+  , Instant(..)
+  , Message
+  , Schema
+  , ServerConfig
+  , ServerEnv
+  , Transaction
+  , Transfer
+  , allowedDiff
+  , amount
+  , app
+  , db
+  , from
+  , getTransactions
+  , getVouchers
+  , id
+  , isValid
+  , main
+  , name
+  , prop
+  , queryGql
+  , sampleVoucher
+  , spec
+  , to
+  )
+  where
 
 import Prelude
 
@@ -38,6 +66,8 @@ import GraphQL.Client.Args (class ArgGql, type (==>), (=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
+import Payload.Client (mkClient)
+import Payload.Client as PC
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
@@ -48,6 +78,7 @@ import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.Spec (Voucher)
+import VoucherServer.Specs.Xbge (xbgeSpec)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 type Message =
@@ -178,6 +209,13 @@ getTransactions env addr = do
     Left e -> logShow e
     Right { transfers } -> logShow transfers
   pure $ Just [ {} ]
+
+xbgeClient = mkClient
+  ( PC.defaultOpts
+      { baseUrl = "..."
+      }
+  )
+  xbgeSpec
 
 --------------------------------------------------------------------------------
 
