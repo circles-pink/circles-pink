@@ -1,8 +1,6 @@
 module VoucherServer.Main
-  ( Address(..)
-  , ErrGetVoucher
+  ( ErrGetVoucher
   , GQLError(..)
-  , Instant(..)
   , Message
   , Schema
   , ServerConfig
@@ -30,9 +28,10 @@ module VoucherServer.Main
 import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (parseAddress, sampleAddress)
+import CirclesPink.Data.Address (Address(..), parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
 import CirclesPink.Data.Nonce (addressToNonce)
+import CirclesPink.Data.SafeAddress (SafeAddress(..), sampleSafeAddress)
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
@@ -78,7 +77,7 @@ import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.Specs.Xbge (xbgeSpec)
-import VoucherServer.Types (Voucher)
+import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 type Message =
@@ -87,51 +86,8 @@ type Message =
   }
 
 --------------------------------------------------------------------------------
-newtype Instant = Instant DT.Instant
-
-derive instance newtypeInstant :: Newtype Instant _
-
-instance writeForeignInstant :: WriteForeign Instant where
-  writeImpl = un Instant >>> DT.unInstant >>> un Milliseconds >>> writeImpl
 
 --------------------------------------------------------------------------------
-
-newtype Address = Address C.Address
-
-derive instance newtypeAddress :: Newtype Address _
-
-derive newtype instance ordAddress :: Ord Address
-derive newtype instance eqAddress :: Eq Address
-derive newtype instance decodeJsonAddress :: DecodeJson Address
-derive newtype instance showAddress :: Show Address
-
-instance decodeParamAddress :: DecodeParam Address where
-  decodeParam x = decodeParam x
-    >>= (parseAddress >>> note "Could not parse Address")
-    <#> Address
-
-instance argGqlAddress :: ArgGql Address String
-
---------------------------------------------------------------------------------
-
-newtype SafeAddress = SafeAddress CC.SafeAddress
-
-derive instance newtypeSafeAddress :: Newtype SafeAddress _
-
-derive newtype instance ordSafeAddress :: Ord SafeAddress
-derive newtype instance eqSafeAddress :: Eq SafeAddress
-derive newtype instance decodeJsonSafeAddress :: DecodeJson SafeAddress
-derive newtype instance showSafeAddress :: Show SafeAddress
-
-instance decodeParamSafeAddress :: DecodeParam SafeAddress where
-  decodeParam x = decodeParam x
-    >>= (parseAddress >>> note "Could not parse SafeAddress")
-    <#> SafeAddress
-
-instance encodeParamSafeAddress :: EncodeParam SafeAddress where
-  encodeParam (SafeAddress x) = encodeParam x
-
-instance argGqlSafeAddress :: ArgGql SafeAddress String
 
 --------------------------------------------------------------------------------
 
@@ -151,10 +107,13 @@ spec = Spec
 --------------------------------------------------------------------------------
 
 sampleVoucher :: Voucher
-sampleVoucher = { voucherCode: "Bingo" }
+sampleVoucher = Voucher
+  { voucherProviderId: VoucherProviderId "goodbuy"
+  , voucherCode: VoucherCode "bingo"
+  }
 
-db :: Map Address (Array Voucher)
-db = M.fromFoldable [ Address sampleAddress /\ [ sampleVoucher ] ]
+db :: Map SafeAddress (Array Voucher)
+db = M.fromFoldable [ sampleSafeAddress /\ [ sampleVoucher ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
@@ -209,14 +168,14 @@ getVouchers env { body: { signatureObj } } = do
             Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
               txs <- getTransactions env (wrap sa)
-              M.lookup (Address sa) db # fold # Right # pure
+              M.lookup (SafeAddress sa) db # fold # Right # pure
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
 
 type Transaction = {}
 
-getTransactions :: forall r. { | r } -> Address -> Aff (Maybe (Array Transaction))
+getTransactions :: forall r. { | r } -> SafeAddress -> Aff (Maybe (Array Transaction))
 getTransactions env addr = do
   result <- queryGql "Hallo? "
     { transfers:

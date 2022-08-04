@@ -9,36 +9,39 @@ module CirclesPink.Data.Address
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Either (note)
 import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype, wrap)
 import FpTs.Class (class FpTs)
+import GraphQL.Client.Args (class ArgGql)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+import Payload.Server.Params (class DecodeParam, decodeParam)
 import Simple.JSON (class ReadForeign, class WriteForeign)
 
 newtype Address = Address W3.Address
 
 derive instance newtype_ :: Newtype Address _
-
 derive newtype instance show :: Show Address
-
 derive newtype instance eq :: Eq Address
-
 derive newtype instance ord :: Ord Address
-
 derive newtype instance decodeJson :: DecodeJson Address
-
 derive newtype instance encodeJson :: EncodeJson Address
-
+derive newtype instance readForeignAddress :: ReadForeign Address
 derive newtype instance writeForeignAddress :: WriteForeign Address
 
-derive newtype instance readForeignAddress :: ReadForeign Address
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity
   fromFpTs = identity
+
+instance decodeParamAddress :: DecodeParam Address where
+  decodeParam x = decodeParam x
+    >>= (parseAddress >>> note "Could not parse Address")
+
+instance argGqlAddress :: ArgGql Address String
 
 sampleAddress :: Address
 sampleAddress = unsafeMkAddress "fb7dc4d8f841af32d777e698d6c71409e85955d9"
