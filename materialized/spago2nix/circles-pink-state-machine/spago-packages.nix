@@ -565,6 +565,30 @@ let
 
   # graph is a Local package in (Local "./../../../pkgs/purs/graph")
 
+    "graphql-client" = pkgs.stdenv.mkDerivation {
+        name = "graphql-client";
+        version = "v7.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/OxfordAbstracts/purescript-graphql-client.git";
+          rev = "4698981b28afa036a29ca9ef5a30431d6e160a08";
+          sha256 = "1zqgd5acp0n09a6xb81wjgw0gnancspdwiwa37xcdf58imp44150";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "halogen-subscriptions" = pkgs.stdenv.mkDerivation {
+        name = "halogen-subscriptions";
+        version = "v1.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-halogen/purescript-halogen-subscriptions.git";
+          rev = "95dfd40ec490ac847b9fe458e5821acba3e30ff5";
+          sha256 = "00yjxxzwvqc0mvf6z3qml3br9f611h10v07gcbnc723xd2qvbgrb";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "heterogeneous" = pkgs.stdenv.mkDerivation {
         name = "heterogeneous";
         version = "v0.5.1";
@@ -1311,6 +1335,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "string-parsers" = pkgs.stdenv.mkDerivation {
+        name = "string-parsers";
+        version = "v6.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-string-parsers.git";
+          rev = "7c3cad8ce7cd4d1036eeafa09af323dc7b8d367c";
+          sha256 = "143a2s56kbx3i0xi5wfqp28znr0hdydy902jla236i7kal5y098m";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "strings" = pkgs.stdenv.mkDerivation {
         name = "strings";
         version = "v5.0.0";
@@ -1318,6 +1354,18 @@ let
           url = "https://github.com/purescript/purescript-strings.git";
           rev = "157e372a23e4becd594d7e7bff6f372a6f63dd82";
           sha256 = "0hyaa4d8gyyvac2nxnwqkn2rvi5vax4bi4yv10mpk7rgb8rv7mb8";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "strings-extra" = pkgs.stdenv.mkDerivation {
+        name = "strings-extra";
+        version = "v3.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-strings-extra.git";
+          rev = "f7e230de84a6fea025de86f4148e33098b8d12b8";
+          sha256 = "0c50w22in8gcd368j1i161apy7214s7m8r5v7f63bc4vypplwm92";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
@@ -1534,6 +1582,18 @@ let
           url = "https://github.com/purescript/purescript-unsafe-coerce.git";
           rev = "ee24f0d3b94bf925d9c50fcc2b449579580178c0";
           sha256 = "0l2agnm1k910v4yp1hz19wrsrywsr5scb397762y7pigm3frzs8r";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "unsafe-reference" = pkgs.stdenv.mkDerivation {
+        name = "unsafe-reference";
+        version = "v4.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-unsafe-reference.git";
+          rev = "d4e11a0f291fe8db9855c8bec89fd50b4e48d043";
+          sha256 = "103bax2g6g97k868j66rm6658qv6ix1kk3736c0lq1p47raqf3fb";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
