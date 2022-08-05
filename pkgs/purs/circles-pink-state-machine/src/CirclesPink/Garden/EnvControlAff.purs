@@ -186,7 +186,7 @@ env envenv@{ request, envVars } =
   userRegister privKey options = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     -- safeAddress <- getSafeAddress privKey
     --------------------------------------------------------------------------------
     -- This Section cannot go to production! it auto-funds safe of user on register
@@ -206,14 +206,14 @@ env envenv@{ request, envVars } =
   userSearch privKey options = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.userSearch circlesCore account options <#> coerce
 
   getSafeAddress :: EnvControl.GetSafeAddress Aff
   getSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
     let
@@ -224,7 +224,7 @@ env envenv@{ request, envVars } =
   safePrepareDeploy :: EnvControl.PrepareSafeDeploy Aff
   safePrepareDeploy privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 $ envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     let
       address = privateToAddress $ unwrap privKey
@@ -235,7 +235,7 @@ env envenv@{ request, envVars } =
   userResolve :: EnvControl.UserResolve Aff
   userResolve privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     safeAddress <- getSafeAddress privKey
     users <- CC.userResolve circlesCore account { userNames: [], addresses: [ convert safeAddress ] } <#> coerce
@@ -246,7 +246,7 @@ env envenv@{ request, envVars } =
   getUsers :: EnvControl.GetUsers Aff
   getUsers privKey userNames addresses = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     CC.userResolve circlesCore account { userNames, addresses: map convert addresses } <#> coerce
 
@@ -254,7 +254,7 @@ env envenv@{ request, envVars } =
   coreToWindow privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.unsafeSampleCore circlesCore account
     log "Debug: sampleCore, sampleAccount and BN library written to global window object"
     pure unit
@@ -263,7 +263,7 @@ env envenv@{ request, envVars } =
   isTrusted privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
     let
@@ -275,7 +275,7 @@ env envenv@{ request, envVars } =
   isFunded privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
     let
@@ -287,14 +287,14 @@ env envenv@{ request, envVars } =
   trustGetNetwork privKey address = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.trustGetNetwork circlesCore account { safeAddress: convert address }
 
   privKeyToSafeAddress :: EnvControl.PrivKeyToSafeAddress Aff
   privKeyToSafeAddress privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
       nonce = addressToNonce $ wrap address
@@ -307,7 +307,7 @@ env envenv@{ request, envVars } =
   getSafeStatus privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
     let
@@ -319,7 +319,7 @@ env envenv@{ request, envVars } =
   deploySafe privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
     let
@@ -331,7 +331,7 @@ env envenv@{ request, envVars } =
   deployToken privKey = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     let
       address = privateToAddress $ unwrap privKey
       nonce = addressToNonce $ wrap address
@@ -342,14 +342,14 @@ env envenv@{ request, envVars } =
   addTrustConnection pk other us = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce pk
     CC.trustAddConnection circlesCore account { user: convert other, canSendTo: convert us }
 
   removeTrustConnection :: EnvControl.RemoveTrustConnection Aff
   removeTrustConnection pk other us = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 pk
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce pk
     CC.trustRemoveConnection circlesCore account { user: convert other, canSendTo: convert us }
 
   signChallenge :: EnvControl.SignChallenge Aff
@@ -398,28 +398,28 @@ env envenv@{ request, envVars } =
   getBalance privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.tokenGetBalance circlesCore account { safeAddress: convert safeAddress }
 
   checkUBIPayout :: EnvControl.CheckUBIPayout Aff
   checkUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.tokenCheckUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
   requestUBIPayout :: EnvControl.RequestUBIPayout Aff
   requestUBIPayout privKey safeAddress = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.tokenRequestUBIPayout circlesCore account { safeAddress: convert safeAddress }
 
   transfer :: EnvControl.Transfer Aff
   transfer privKey from to value paymentNote = do
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
+    account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce privKey
     CC.tokenTransfer circlesCore account { from: convert from, to: convert to, value, paymentNote }
 
   getTimestamp :: EnvControl.GetTimestamp Aff
