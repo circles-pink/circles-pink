@@ -51,6 +51,7 @@
   , "prelude"
   , "psci-support"
   , "record"
+  , "safe-coerce"
   , "simple-json"
   , "spec"
   , "stadium"

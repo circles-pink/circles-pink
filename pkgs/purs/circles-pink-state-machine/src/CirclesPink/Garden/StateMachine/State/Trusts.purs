@@ -11,8 +11,9 @@ import Prelude
 
 import CirclesCore (SafeStatus, TrustNode)
 import CirclesCore as CC
-import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.User (User(..))
+import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.Variant (Variant, inj)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
@@ -39,7 +40,7 @@ type TrustsDeployTokenResult = RemoteReport
   String
 
 type TrustState =
-  { user :: CC.User
+  { user :: User
   , privKey :: PrivateKey
   , trusts :: Array TrustNode
   , safeStatus :: SafeStatus

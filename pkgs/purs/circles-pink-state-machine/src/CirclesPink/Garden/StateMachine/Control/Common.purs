@@ -2,8 +2,9 @@ module CirclesPink.Garden.StateMachine.Control.Common where
 
 import Prelude
 
-import CirclesCore (SafeStatus, TrustNode, User)
+import CirclesCore (SafeStatus, TrustNode)
 import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.User (User)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT)

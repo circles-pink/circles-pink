@@ -13,6 +13,7 @@ import Prelude
 import CirclesPink.Data.Address (sampleAddress, sampleSafeAddress)
 import CirclesPink.Data.PrivateKey (sampleKey)
 import CirclesPink.Data.PrivateKey as P
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (StorageType(..), _errNoStorage, EnvControl)
 import Control.Monad.Except (mapExceptT, throwError)
@@ -34,7 +35,7 @@ testEnv =
   , getSafeAddress: \_ -> pure sampleAddress
   , safePrepareDeploy: \_ -> pure sampleAddress
   , userResolve: \pk ->
-      if pk == sampleKey then pure { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
+      if pk == sampleKey then pure $ User { id: 0, username: "", safeAddress: sampleAddress, avatarUrl: "" }
       else throwError $ inj (Proxy :: _ "errUserNotFound") { safeAddress: sampleSafeAddress }
   , getUsers: \_ _ _ -> pure []
   , coreToWindow: \_ -> pure unit

@@ -9,6 +9,7 @@ import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), isRight)
+import Data.Newtype.Extra ((-#))
 import RemoteData (_failure)
 
 trusts
@@ -28,7 +29,7 @@ trusts env@{ deployToken } =
       task = do
         safeStatus <- env.getSafeStatus st.privKey
         isReady' <- readyForDeployment env st.privKey
-        trusts' <- env.trustGetNetwork st.privKey st.user.safeAddress
+        trusts' <- env.trustGetNetwork st.privKey (st.user -# _.safeAddress)
         pure { safeStatus, isReady: isReady', trusts: trusts' }
     results <- runExceptT' task
     case results of

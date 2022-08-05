@@ -6,11 +6,12 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 
 import CirclesPink.Prelude
 
-import CirclesCore (TrustNode, User)
+import CirclesCore (TrustNode)
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
@@ -41,6 +42,7 @@ import Data.String as Str
 import Data.These (These(..), maybeThese)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
+import Safe.Coerce (coerce)
 import Test.TestUtils (addrA, addrB, userA)
 import Web3 (Message(..))
 
@@ -77,7 +79,7 @@ fetchUsersBinarySearch env privKey addresses =
     apiUsers <- go addresses
     let
       allIds = Set.fromFoldable addresses
-      apiUsersIds = Set.fromFoldable $ (\u -> u.safeAddress) <$> apiUsers
+      apiUsersIds = Set.fromFoldable $ (\u -> u -# _.safeAddress) <$> apiUsers
       otherUsersIds = Set.difference allIds apiUsersIds
       otherUsers' = Left <$> (Set.toUnfoldable $ otherUsersIds)
       apiUsers' = Right <$> apiUsers
@@ -91,8 +93,7 @@ fetchUsersBinarySearch env privKey addresses =
 
   go xs
     | A.length xs == 1 = do
-        users <- env.getUsers privKey [] xs # withExceptT (const (inj (Proxy :: Proxy "err") unit))
-        pure users
+        env.getUsers privKey [] xs # withExceptT (const (inj (Proxy :: Proxy "err") unit))
 
   go xs = do
     eitherUsers <- lift $ runExceptT $ env.getUsers privKey [] xs
@@ -128,7 +129,7 @@ specFetchUsersBinarySearch = describe "fetchUsersBinarySearch" do
             sampleKey
             [ addrA ]
         )
-        (Right [ UserIdent $ Right userA ])
+        (Right [ UserIdent $ Right $ userA ])
 
   describe "C" do
     it ".." do
@@ -148,7 +149,7 @@ specFetchUsersBinarySearch = describe "fetchUsersBinarySearch" do
             sampleKey
             [ addrA, addrB ]
         )
-        (Right [ UserIdent $ Left addrB, UserIdent $ Right userA ])
+        (Right [ UserIdent $ Left addrB, UserIdent $ Right $ userA ])
 
 --------------------------------------------------------------------------------
 
@@ -207,7 +208,7 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         _ <-
-          syncTrusts set st st.user.safeAddress
+          syncTrusts set st (st.user -# _.safeAddress)
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         -- let x = todo -- infinite
         -- _ <- lift $ env.sleep 5000
@@ -244,7 +245,7 @@ dashboard env@{ trustGetNetwork } =
         lift
           $ set \st' ->
               let
-                ownAddress = st'.user.safeAddress
+                ownAddress = st'.user -# _.safeAddress 
 
                 eitherNewTrusts =
                   let
@@ -265,7 +266,7 @@ dashboard env@{ trustGetNetwork } =
                     }
                   Left _ -> S._dashboard st'
         _ <-
-          env.addTrustConnection st.privKey targetAddress st.user.safeAddress
+          env.addTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
@@ -273,7 +274,7 @@ dashboard env@{ trustGetNetwork } =
         lift
           $ set \st' ->
               let
-                ownAddress = st'.user.safeAddress
+                ownAddress = st'.user -# _.safeAddress
 
                 eitherNewTrusts =
                   let
@@ -301,7 +302,7 @@ dashboard env@{ trustGetNetwork } =
         lift
           $ set \st' ->
               let
-                ownAddress = st'.user.safeAddress
+                ownAddress = st'.user -# _.safeAddress
 
                 eitherNewTrusts =
                   let
@@ -318,7 +319,7 @@ dashboard env@{ trustGetNetwork } =
                   Right newTrusts -> S._dashboard st' { trusts = newTrusts }
                   Left _ -> S._dashboard st'
         _ <-
-          env.removeTrustConnection st.privKey targetAddress st.user.safeAddress
+          env.removeTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
@@ -326,7 +327,7 @@ dashboard env@{ trustGetNetwork } =
         lift
           $ set \st' ->
               let
-                ownAddress = st'.user.safeAddress
+                ownAddress = st'.user -# _.safeAddress
 
                 eitherNewTrusts =
                   let
@@ -358,7 +359,7 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         _ <-
-          env.getBalance st.privKey st.user.safeAddress
+          env.getBalance st.privKey (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         pure unit
@@ -367,11 +368,11 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         checkPayout <-
-          env.checkUBIPayout st.privKey st.user.safeAddress
+          env.checkUBIPayout st.privKey (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
         when ((Str.length $ BN.toDecimalStr checkPayout) >= 18) do
-          env.requestUBIPayout st.privKey st.user.safeAddress
+          env.requestUBIPayout st.privKey (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
             # void
@@ -416,7 +417,7 @@ dashboard env@{ trustGetNetwork } =
       trustGetNetwork st.privKey centerAddress
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
-        <#> map (\v -> v.safeAddress /\ v)
+        <#> map (\v -> wrap v.safeAddress /\ v)
         >>> M.fromFoldable
 
     userIdents :: Map Address UserIdent <-
@@ -468,20 +469,20 @@ dashboard env@{ trustGetNetwork } =
 
   getOutgoingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge centerAddress g = case _ of
-    This tn | tn.isIncoming -> G.addEdge (TrustConnection (centerAddress ~ tn.safeAddress) initTrusted) g
+    This tn | tn.isIncoming -> G.addEdge (TrustConnection (centerAddress ~ wrap tn.safeAddress) initTrusted) g
     This _ -> Right g
     That (TrustConnection _ ts) | isPendingTrust ts || isLoadingTrust ts -> Right g
     That tc -> G.deleteEdge (getIndex tc) g
-    Both tn (TrustConnection _ ts) | tn.isIncoming && isPendingTrust ts -> G.updateEdge (TrustConnection (centerAddress ~ tn.safeAddress) initTrusted) g
+    Both tn (TrustConnection _ ts) | tn.isIncoming && isPendingTrust ts -> G.updateEdge (TrustConnection (centerAddress ~ wrap tn.safeAddress) initTrusted) g
     Both tn tc@(TrustConnection _ ts) | not tn.isIncoming && isPendingUntrust ts -> G.deleteEdge (getIndex tc) g
     Both _ _ -> Right g
 
   getIncomingEdge :: Address -> CirclesGraph -> These TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getIncomingEdge centerAddress g = case _ of
-    This tn | tn.isOutgoing -> G.addEdge (TrustConnection (tn.safeAddress ~ centerAddress) initTrusted) g
+    This tn | tn.isOutgoing -> G.addEdge (TrustConnection (wrap tn.safeAddress ~ centerAddress) initTrusted) g
     This _ -> Right g
     That tc -> G.deleteEdge (getIndex tc) g
-    Both tn _ -> G.updateEdge (TrustConnection (tn.safeAddress ~ centerAddress) initTrusted) g
+    Both tn _ -> G.updateEdge (TrustConnection (wrap tn.safeAddress ~ centerAddress) initTrusted) g
 
 --------------------------------------------------------------------------------
 

@@ -2,11 +2,12 @@ module Test.TestUtils where
 
 import Prelude
 
-import CirclesCore (User)
 import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.User (User(..))
 import Control.Error.Util (hush)
 import Data.Argonaut (decodeJson, fromString)
 import Data.Maybe (fromJust)
+import Data.Newtype (unwrap, wrap)
 import Partial.Unsafe (unsafePartial)
 
 --------------------------------------------------------------------------------
@@ -46,7 +47,7 @@ userE = mkDummyUser addrE
 
 --
 mkDummyUser :: Address -> User
-mkDummyUser a = { id: 1, username: "A", avatarUrl: "", safeAddress: a }
+mkDummyUser a = User { id: 1, username: "A", avatarUrl: "", safeAddress: a }
 
 --
 
