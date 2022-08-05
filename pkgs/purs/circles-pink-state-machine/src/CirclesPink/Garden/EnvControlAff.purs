@@ -218,7 +218,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> wrap
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> wrap
     pure safeAddress
 
   safePrepareDeploy :: EnvControl.PrepareSafeDeploy Aff
@@ -230,7 +230,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    CC.safePrepareDeploy circlesCore account { nonce: nonce } <#> wrap
+    CC.safePrepareDeploy circlesCore account { nonce: coerce nonce } <#> wrap
 
   userResolve :: EnvControl.UserResolve Aff
   userResolve privKey = do
@@ -268,7 +268,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> Address
     CC.trustIsTrusted circlesCore account { safeAddress: convert safeAddress, limit: 3 }
 
   isFunded :: EnvControl.IsFunded Aff
@@ -280,7 +280,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> Address
     CC.safeIsFunded circlesCore account { safeAddress: convert safeAddress }
 
   trustGetNetwork :: EnvControl.TrustGetNetwork Aff
@@ -300,7 +300,7 @@ env envenv@{ request, envVars } =
       nonce = addressToNonce $ wrap address
     -- _ = spy "address" address
     -- _ = spy "nonce" nonce
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> wrap
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> wrap
     pure safeAddress
 
   getSafeStatus :: EnvControl.GetSafeStatus Aff
@@ -312,7 +312,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> Address
     CC.safeGetSafeStatus circlesCore account { safeAddress: convert safeAddress }
 
   deploySafe :: EnvControl.DeploySafe Aff
@@ -324,7 +324,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> Address
     CC.safeDeploy circlesCore account { safeAddress: convert safeAddress }
 
   deployToken :: EnvControl.DeployToken Aff
@@ -335,7 +335,7 @@ env envenv@{ request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: coerce nonce } <#> Address
     CC.tokenDeploy circlesCore account { safeAddress: convert safeAddress }
 
   addTrustConnection :: EnvControl.AddTrustConnection Aff

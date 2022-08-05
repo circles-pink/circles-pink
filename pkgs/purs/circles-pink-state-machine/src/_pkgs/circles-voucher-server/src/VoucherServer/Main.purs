@@ -73,6 +73,7 @@ import Payload.Server as Payload
 import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
+import Safe.Coerce (coerce)
 import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
@@ -159,7 +160,7 @@ getVouchers env { body: { signatureObj } } = do
               , version: 3
               , method: "POST"
               , data:
-                  { saltNonce: nonce
+                  { saltNonce: coerce nonce
                   , owners: [ convert address ]
                   , threshold: 1
                   }
