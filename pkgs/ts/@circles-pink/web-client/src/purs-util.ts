@@ -43,10 +43,12 @@ type VariantCasesOf<V extends Variant, Z> = {
   [key in V['type']]: (x: Extract<V, { type: key }>['value']) => Z;
 };
 
+type VariantCasesOf_<V extends Variant, Z, D> = {}
+
 export const matchV =
   <V extends Variant, Z>(v: V) =>
-  <Z>(c: VariantCasesOf<V, Z>): Z =>
-    (c as any)[v.type](v.value);
+  <Z>(c: VariantCasesOf_<V, Z, typeof defCase>, defCase? : () => Z): Z =>
+    ((c as any)[v.type] || defCase)(v.value);
 
 // -----------------------------------------------------------------------------
 // matchData
