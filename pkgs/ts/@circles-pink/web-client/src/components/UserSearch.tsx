@@ -62,7 +62,24 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
           })}
         </pre>
       </td>
-      <td></td>
+      <td>
+        {matchADT(outgoingEdge)({
+          Left: () => '  X',
+          Right: ([trustConnection]) => {
+            const [_, trustState] = fields(trustConnection);
+            const trustState_ = _TrustState.unwrap(trustState);
+
+            return matchV(trustState_)({
+              loadingTrust: () => '%',
+              loadingUntrust: () => '%',
+              pendingTrust: () => ' .%',
+              pendingUntrust: () => '%',
+              trusted: () => 'O',
+              untrusted: () => 'X',
+            }, () => "%");
+          },
+        })}
+      </td>
       <button onClick={() => onAddTrust(userIdent)}>trust</button>
     </tr>
   );
