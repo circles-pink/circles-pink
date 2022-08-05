@@ -24,11 +24,12 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 
 import Prelude
 
-import CirclesCore (ApiError, NativeError, TrustNode, User, SafeStatus)
+import CirclesCore (ApiError, NativeError, TrustNode, SafeStatus)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
 import CirclesPink.Data.TrustState (TrustState, initUntrusted, isTrusted)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
@@ -44,6 +45,7 @@ import Data.IxGraph (IxGraph, getIndex)
 import Data.IxGraph as G
 import Data.Maybe (maybe)
 import Data.Newtype (unwrap)
+import Data.Newtype.Extra ((-#))
 import Data.Pair ((~))
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Variant (Variant, default, onMatch)
@@ -127,12 +129,12 @@ defaultView d@{ trusts } =
               )
           )
         <#>
-          ( \user -> case trusts # G.lookupNode user.safeAddress of
+          ( \user -> case trusts # G.lookupNode (user -# _.safeAddress) of
               Left _ -> initUntrust user
               Right _ ->
                 let
-                  eitherIncomingEdge = trusts # G.lookupEdge (user.safeAddress ~ d.user.safeAddress)
-                  eitherOutgoingEdge = trusts # G.lookupEdge (d.user.safeAddress ~ user.safeAddress)
+                  eitherIncomingEdge = trusts # G.lookupEdge ((user -# _.safeAddress) ~ (d.user -# _.safeAddress))
+                  eitherOutgoingEdge = trusts # G.lookupEdge ((d.user -# _.safeAddress) ~ (user -# _.safeAddress))
                 in
                   case eitherIncomingEdge, eitherOutgoingEdge of
                     Left _, Left _ -> initUntrust user
@@ -142,16 +144,16 @@ defaultView d@{ trusts } =
           )
 
     trustsConfirmed = d.trusts
-      # G.neighborEdgesWithNodes d.user.safeAddress
+      # G.neighborEdgesWithNodes (d.user -# _.safeAddress)
       # fold
       # filter (\((TrustConnection _ e) /\ _) -> isTrusted e)
-      <#> (mapTrust' d.user.safeAddress d.trusts)
+      <#> (mapTrust' (d.user -# _.safeAddress) d.trusts)
 
     trustsCandidates = d.trusts
-      # G.outgoingEdgesWithNodes d.user.safeAddress
+      # G.outgoingEdgesWithNodes (d.user -# _.safeAddress)
       # fold
       # filter (\((TrustConnection _ e) /\ _) -> not $ isTrusted e)
-      <#> (mapTrust' d.user.safeAddress d.trusts)
+      <#> (mapTrust' (d.user -# _.safeAddress) d.trusts)
   in
     { trustsConfirmed
     , trustsCandidates

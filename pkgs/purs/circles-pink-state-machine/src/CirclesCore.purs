@@ -87,7 +87,6 @@ import CirclesCore.Bindings (Options, Provider, CirclesCore, Account, TrustIsTru
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn1, mapFn2)
-import CirclesPink.Data.Address (Address, mkAddress)
 import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Control.Monad.Except (ExceptT(..))
@@ -105,6 +104,7 @@ import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
 import Effect.Exception (Error, message, name, try)
 import Network.Ethereum.Core.HexString (mkHexString)
+import Network.Ethereum.Core.Signatures (Address, mkAddress)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import Type.Proxy (Proxy(..))
@@ -609,5 +609,5 @@ mapBoolean false = Left $ _errService unit
 parseAddr :: forall r. String -> Either (Variant (ErrParseAddress r)) Address
 parseAddr s = s
   # mkHexString
-  >>= (mkAddress >>> map wrap)
+  >>= mkAddress
   # note (_errParseAddress s)

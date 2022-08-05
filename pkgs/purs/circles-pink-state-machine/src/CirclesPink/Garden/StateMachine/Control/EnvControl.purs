@@ -85,9 +85,10 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
 
 import Prelude
 
-import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, User, UserOptions, ErrParseAddress)
+import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, UserOptions, ErrParseAddress)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)

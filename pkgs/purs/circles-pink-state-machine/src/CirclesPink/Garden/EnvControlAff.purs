@@ -7,6 +7,8 @@ import Prelude
 
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative)
 import CirclesCore as CC
+import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
@@ -37,6 +39,7 @@ import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Payload.Client (defaultOpts, mkClient)
 import Payload.Headers as H
+import Safe.Coerce (coerce)
 import StringStorage (StringStorage)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
@@ -204,7 +207,7 @@ env envenv@{ request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
-    CC.userSearch circlesCore account options
+    CC.userSearch circlesCore account options <#> coerce
 
   getSafeAddress :: EnvControl.GetSafeAddress Aff
   getSafeAddress privKey = do
@@ -215,19 +218,19 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> wrap
     pure safeAddress
 
   safePrepareDeploy :: EnvControl.PrepareSafeDeploy Aff
   safePrepareDeploy privKey = do
-    web3 <- mapExceptT liftEffect $ getWeb3 envVars
+    web3 <- mapExceptT liftEffect $ getWeb3 $ envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     let
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    CC.safePrepareDeploy circlesCore account { nonce: nonce }
+    CC.safePrepareDeploy circlesCore account { nonce: nonce } <#> wrap
 
   userResolve :: EnvControl.UserResolve Aff
   userResolve privKey = do
@@ -235,7 +238,7 @@ env envenv@{ request, envVars } =
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     safeAddress <- getSafeAddress privKey
-    users <- CC.userResolve circlesCore account { userNames: [], addresses: [ convert safeAddress ] }
+    users <- CC.userResolve circlesCore account { userNames: [], addresses: [ convert safeAddress ] } <#> coerce
     case head users of
       Nothing -> throwError (inj (Proxy :: _ "errUserNotFound") { safeAddress })
       Just u -> pure u
@@ -245,7 +248,7 @@ env envenv@{ request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 privKey
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
-    CC.userResolve circlesCore account { userNames, addresses: map convert addresses }
+    CC.userResolve circlesCore account { userNames, addresses: map convert addresses } <#> coerce
 
   coreToWindow :: EnvControl.CoreToWindow Aff
   coreToWindow privKey = do
@@ -265,7 +268,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
     CC.trustIsTrusted circlesCore account { safeAddress: convert safeAddress, limit: 3 }
 
   isFunded :: EnvControl.IsFunded Aff
@@ -277,7 +280,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
     CC.safeIsFunded circlesCore account { safeAddress: convert safeAddress }
 
   trustGetNetwork :: EnvControl.TrustGetNetwork Aff
@@ -297,7 +300,7 @@ env envenv@{ request, envVars } =
       nonce = addressToNonce $ wrap address
     -- _ = spy "address" address
     -- _ = spy "nonce" nonce
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> wrap
     pure safeAddress
 
   getSafeStatus :: EnvControl.GetSafeStatus Aff
@@ -309,7 +312,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
     CC.safeGetSafeStatus circlesCore account { safeAddress: convert safeAddress }
 
   deploySafe :: EnvControl.DeploySafe Aff
@@ -321,7 +324,7 @@ env envenv@{ request, envVars } =
       address = privateToAddress $ unwrap privKey
     let
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
     CC.safeDeploy circlesCore account { safeAddress: convert safeAddress }
 
   deployToken :: EnvControl.DeployToken Aff
@@ -332,7 +335,7 @@ env envenv@{ request, envVars } =
     let
       address = privateToAddress $ unwrap privKey
       nonce = addressToNonce $ wrap address
-    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce }
+    safeAddress <- CC.safePredictAddress circlesCore account { nonce: nonce } <#> Address
     CC.tokenDeploy circlesCore account { safeAddress: convert safeAddress }
 
   addTrustConnection :: EnvControl.AddTrustConnection Aff

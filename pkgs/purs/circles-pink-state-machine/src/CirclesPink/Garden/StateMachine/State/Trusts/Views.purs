@@ -9,14 +9,14 @@ module CirclesPink.Garden.StateMachine.State.Trusts.Views
 import Prelude
 
 import CirclesCore (NativeError, TrustNode, SafeStatus)
-import CirclesCore as CC
+import CirclesPink.Data.User (User)
 import CirclesPink.Garden.StateMachine.State (TrustState)
 import CirclesPink.Garden.StateMachine.ViewUtils (nubRemoteReport)
 import Data.Variant (Variant)
 import RemoteReport (RemoteReport)
 
 type DefaultView =
-  { user :: CC.User
+  { user :: User
   , trusts :: Array TrustNode
   , safeStatus :: SafeStatus
   , isReady :: Boolean

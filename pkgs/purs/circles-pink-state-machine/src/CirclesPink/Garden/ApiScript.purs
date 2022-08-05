@@ -125,7 +125,7 @@ signUpUser env cfg opts =
                     \x ->
                       pure
                         { privateKey: x.privKey
-                        , safeAddress: x.user.safeAddress
+                        , safeAddress: x.user -# _.safeAddress
                         }
                 }
         )
