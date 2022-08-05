@@ -7,7 +7,7 @@ import Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (sampleSafeAddress)
-import CirclesPink.Data.PrivateKey (sampleKey)
+import CirclesPink.Data.PrivateKey (PrivateKey(..), sampleKey)
 import Control.Monad.Except (lift, mapExceptT, runExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
@@ -17,6 +17,7 @@ import Data.Variant (Variant)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
+import Safe.Coerce (coerce)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 
@@ -71,7 +72,7 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            account <- effToAff $ CC.privKeyToAccount web3 $ coerce sampleKey
             CC.safeDeploy core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
@@ -93,7 +94,7 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            account <- effToAff $ CC.privKeyToAccount web3 $ coerce sampleKey
             CC.safeIsFunded core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
@@ -115,7 +116,7 @@ spec =
                     , subgraphName: ""
                     , databaseSource: ""
                     }
-            account <- effToAff $ CC.privKeyToAccount web3 sampleKey
+            account <- effToAff $ CC.privKeyToAccount web3 $ coerce  sampleKey
             CC.tokenDeploy core account { safeAddress: convert sampleSafeAddress }
         )
           <#> lmap (const unit)
