@@ -2,8 +2,12 @@ module CirclesPink.Data.User where
 
 import Prelude
 
-import CirclesPink.Data.Address (Address)
+import CirclesCore as CC
+import CirclesPink.Data.Address (Address(..))
 import Data.Newtype (class Newtype)
+import Network.Ethereum.Core.Signatures as X
+import Safe.Coerce (coerce)
+import Undefined (undefined)
 
 newtype User = User
   { id :: Int

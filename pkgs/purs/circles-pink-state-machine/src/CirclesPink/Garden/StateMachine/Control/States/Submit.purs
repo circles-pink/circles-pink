@@ -2,7 +2,7 @@ module CirclesPink.Garden.StateMachine.Control.States.Submit where
 
 import Prelude
 
-import CirclesPink.Data.Nonce (addressToNonce)
+import CirclesPink.Data.Nonce (Nonce(..), addressToNonce)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', readyForDeployment, runExceptT')
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Direction as D
@@ -15,6 +15,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap, wrap)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import RemoteData (_failure, _loading, _notAsked)
+import Safe.Coerce (coerce)
 
 submit
   :: forall m
@@ -45,7 +46,7 @@ submit env =
             env.userRegister
               privateKey
               { email: st.email
-              , nonce
+              , nonce: coerce nonce
               , safeAddress: convert safeAddress
               , username: st.username
               }

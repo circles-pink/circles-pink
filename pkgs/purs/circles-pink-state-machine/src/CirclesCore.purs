@@ -26,6 +26,7 @@ module CirclesCore
   , ErrUserRegister
   , ErrUserResolve
   , NativeError
+  , Nonce(..)
   , ResolveOptions
   , SafeAddress
   , SafeDeployOptions
@@ -73,7 +74,8 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  ) where
+  )
+  where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
@@ -87,15 +89,15 @@ import CirclesCore.Bindings (Options, Provider, CirclesCore, Account, TrustIsTru
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn1, mapFn2)
-import CirclesPink.Data.Nonce (Nonce, nonceToBigInt)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import Control.Monad.Except (ExceptT(..))
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.BN (BN)
 import Data.Bifunctor (lmap)
+import Data.BigInt (BigInt)
 import Data.Either (Either(..), note)
-import Data.Newtype (wrap)
+import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
@@ -249,6 +251,10 @@ trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
 --------------------------------------------------------------------------------
 -- API / userRegister
 --------------------------------------------------------------------------------
+newtype Nonce = Nonce BigInt
+
+derive instance newtypeNone :: Newtype Nonce _
+
 type UserOptions =
   { nonce :: Nonce
   , safeAddress :: ChecksumAddress
@@ -265,7 +271,7 @@ userRegister cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapBoolean
 
   mapArg2 x =
     x
-      { nonce = nonceToBigInt x.nonce
+      { nonce = unwrap x.nonce
       , safeAddress = show x.safeAddress
       }
 
@@ -345,7 +351,7 @@ safePredictAddress cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.safe -# _.predictAddress
 
-  mapArg2 x = x { nonce = nonceToBigInt x.nonce }
+  mapArg2 x = x { nonce = unwrap x.nonce }
 
   mapOk = parseAddr
 
@@ -359,7 +365,7 @@ safePrepareDeploy cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.safe -# _.prepareDeploy
 
-  mapArg2 x = x { nonce = nonceToBigInt x.nonce }
+  mapArg2 x = x { nonce = unwrap x.nonce }
 
   mapOk = parseAddr
 
@@ -523,7 +529,7 @@ utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk
 
   mapArg1 x = x
     { data =
-        { saltNonce: nonceToBigInt x.data.saltNonce
+        { saltNonce: unwrap x.data.saltNonce
         , owners: map show x.data.owners
         , threshold: x.data.threshold
         }
