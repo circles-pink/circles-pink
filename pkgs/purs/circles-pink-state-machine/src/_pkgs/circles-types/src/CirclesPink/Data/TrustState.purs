@@ -10,7 +10,7 @@ module CirclesPink.Data.TrustState
   , isTrusted
   , isUntrusted
   , next
-  , unwrap
+  , unTrustState
   )
   where
 
@@ -102,5 +102,5 @@ next (TrustState ts) =
 trustState :: PursType
 trustState = PursType "CirclesPink_Data_TrustState" "TrustState"
 
-unwrap :: TrustState -> TrustState'
-unwrap = NT.unwrap
+unTrustState :: TrustState -> TrustState'
+unTrustState = NT.unwrap

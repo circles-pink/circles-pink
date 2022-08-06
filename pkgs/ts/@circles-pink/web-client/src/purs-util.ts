@@ -4,7 +4,7 @@
 
 import { pipe } from 'fp-ts/lib/function';
 
-export const fields = <V>(d: V): ValuesToFields<V> => {
+export const fieldsOf = <L extends string>(l : L) => <V extends {constructor: {name: L}}>(d: V): ValuesToFields<V> => {
   var i = 0;
   const out = [];
   while (`value${i}` in d) {
@@ -23,32 +23,37 @@ type ValuesToFields<T, D extends Prev[number] = 9> = T extends {
   ? [T[`value${Idx[D]}`], ...ValuesToFields<T, Prev[D]>]
   : [];
 
-// type ValuesToFields<T> = T extends { value6: infer A }
-//   ? [...(T extends any ?  ValuesToFields<T> : never), A]
-//   : [];
 
-type O = ValuesToFields<{ value0: 6; value1: 2; value2: 3 }>;
-
-const fields_ = <V>(values: V): V extends any ? ValuesToFields<V> : never => {
-  return 1 as any;
-};
+export const fieldOf = <L extends string>(l : L) => <T>(x: {value0: T, constructor: {name: L}}):T => x.value0
 
 // -----------------------------------------------------------------------------
 // matchV
 // -----------------------------------------------------------------------------
 
-type Variant = { type: string; value: unknown };
+type Variant<T = string,V = unknown> = { type: string; value: unknown };
 
 type VariantCasesOf<V extends Variant, Z> = {
   [key in V['type']]: (x: Extract<V, { type: key }>['value']) => Z;
 };
 
-type VariantCasesOf_<V extends Variant, Z, D> = {}
+type VariantCasesOf_<V extends Variant, Z, D extends undefined | (() => Z)> = Extract<
+  D,
+  undefined
+> extends never
+  ? Partial<VariantCasesOf<V, Z>>
+  : VariantCasesOf<V, Z> 
 
 export const matchV =
   <V extends Variant, Z>(v: V) =>
-  <Z>(c: VariantCasesOf_<V, Z, typeof defCase>, defCase? : () => Z): Z =>
+  <Z, D extends undefined | (() => Z)>(c: VariantCasesOf_<V, Z, D>, defCase?: D): Z =>
     ((c as any)[v.type] || defCase)(v.value);
+
+// -----------------------------------------------------------------------------
+// isV
+// -----------------------------------------------------------------------------
+
+export const isCaseV = <L extends V["type"], V extends Variant>(s : L) => ( v: V): v is Extract<V, {type: L}> => 
+  s === v.type 
 
 // -----------------------------------------------------------------------------
 // matchData
@@ -63,6 +68,17 @@ type ADTCasesOf<D extends ADT, Z> = {
 };
 
 export const matchADT =
-  <D extends ADT>(adt: D,) =>
+  <D extends ADT>(adt: D) =>
   <Z>(c: ADTCasesOf<D, Z>): Z =>
-    (c as any)[adt.constructor.name](fields(adt));
+    (c as any)[adt.constructor.name](fieldsOf(adt));
+
+// -----------------------------------------------------------------------------
+// is
+// -----------------------------------------------------------------------------
+
+export const isCase = <L extends string>(s : L) => <A extends ADT>( a: A): a is Extract<A, {constructor: {name:L}}> => 
+  s === a.constructor.name 
+
+
+
+export const run = <Z,>(f : ()=> Z): Z => f()

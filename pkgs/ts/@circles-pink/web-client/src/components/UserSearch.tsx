@@ -1,10 +1,11 @@
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
-import { fields, matchADT, matchV } from '../purs-util';
+import { fieldsOf, fieldOf, isCaseV, matchADT, matchV, isCase, run } from '../purs-util';
 import {
   Address,
   CirclesGraph,
   DashboardState,
+  unTrustState,
   UserIdent,
   _Address,
   _Array,
@@ -15,6 +16,7 @@ import {
   _TrustState,
   _UserIdent,
 } from '@circles-pink/state-machine/src';
+import { hush, isLeft } from '@circles-pink/state-machine/output/Data.Either';
 
 // -----------------------------------------------------------------------------
 // UI / Row
@@ -29,7 +31,8 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
     trusts,
     _IxGraph.lookupEdge(_Address.ordAddress)(
       _Pair.Pair.create(centerAddress)(targetAddress)
-    )
+    ),
+    hush
   );
 
   const incomingEdge = pipe(
@@ -44,10 +47,11 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
       <td>{_UserIdent.getIdentifier(userIdent)}</td>
       <td>
         <pre>
-          {matchADT(outgoingEdge)({
+          {/* {matchADT(outgoingEdge)({
             Left: () => '  X',
             Right: ([trustConnection]) => {
-              const [_, trustState] = fields(trustConnection);
+              const [_, trustState] =
+                fields('TrustConnection')(trustConnection);
               const trustState_ = _TrustState.unwrap(trustState);
 
               return matchV(trustState_)({
@@ -59,31 +63,33 @@ const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
                 untrusted: () => '  X',
               });
             },
-          })}
+          })} */}
         </pre>
       </td>
-      <td>
-        {matchADT(outgoingEdge)({
-          Left: () => '  X',
-          Right: ([trustConnection]) => {
-            const [_, trustState] = fields(trustConnection);
-            const trustState_ = _TrustState.unwrap(trustState);
 
-            return matchV(trustState_)({
-              loadingTrust: () => '%',
-              loadingUntrust: () => '%',
-              pendingTrust: () => ' .%',
-              pendingUntrust: () => '%',
-              trusted: () => 'O',
-              untrusted: () => 'X',
-            }, () => "%");
-          },
+      <td>
+        {run(() => {
+          if (isCase('Nothing')(outgoingEdge)) return <NotTrusting />;
+
+          const [trustConnection] = fieldsOf('Just')(outgoingEdge);
+          
+          const [_, trustState] = fieldsOf('TrustConnection')(trustConnection);
+
+          if (isCaseV('trusted')(unTrustState(trustState)))
+            return <NotTrusting />;
+
+          return <Trusting />;
         })}
       </td>
+
       <button onClick={() => onAddTrust(userIdent)}>trust</button>
     </tr>
   );
 };
+
+const Trusting = () => null;
+
+const NotTrusting = () => null;
 
 // -----------------------------------------------------------------------------
 // UI UserSearch

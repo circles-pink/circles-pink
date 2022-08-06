@@ -89,7 +89,7 @@ modules =
   , "CirclesPink.Data.TrustState" /\
       join
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
-        , value "unwrap" [] CirclesPink.Data.TrustState.unwrap
+        , value "unTrustState" [] CirclesPink.Data.TrustState.unTrustState
         ]
   , "CirclesPink.Data.UserIdent" /\
       join

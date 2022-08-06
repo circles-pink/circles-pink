@@ -7,17 +7,16 @@ import * as RemoteData from "@circles-pink/state-machine/output/RemoteData";
 import * as Data_IxGraph from "@circles-pink/state-machine/output/Data.IxGraph";
 import * as CirclesPink_Data_TrustState from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 
-
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
 export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
+export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 
 export type {
   DashboardState,
   CirclesGraph,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
-
 
 export const _Array = Data_Array;
 export const _ArrayS = Simple_Data_Array;
@@ -26,4 +25,4 @@ export const _Pair = Data_Pair;
 export const _Address = CirclesPink_Data_Address;
 export const _RemoteData = RemoteData;
 export const _IxGraph = Data_IxGraph;
-export const _TrustState = CirclesPink_Data_TrustState
+export const _TrustState = CirclesPink_Data_TrustState;

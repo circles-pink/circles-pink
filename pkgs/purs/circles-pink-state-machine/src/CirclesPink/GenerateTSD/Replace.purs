@@ -11,7 +11,7 @@ import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsType)
+import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsType, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
@@ -127,10 +127,8 @@ infixl 7 type Product as :*:
 
 newtype Pair a = Pair (Data.Pair.Pair a)
 
-
 ptPair :: PursType
 ptPair = PursType "Data_Pair" "Pair"
-
 
 derive instance newtypePair :: Newtype (Pair a) _
 
@@ -143,7 +141,7 @@ instance g ::
   to = undefined
 
 instance toTsType_Pair :: (ToTsType a) => ToTsType (Pair a) where
-  toTsType _ = defaultToTsType ptPair []
+  toTsType _ = defaultToTsType ptPair [ toTsType (Proxy :: _ a) ]
 
 instance toTsDef_Pair :: (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
   toTsDef = genericToTsDef "Pair"
