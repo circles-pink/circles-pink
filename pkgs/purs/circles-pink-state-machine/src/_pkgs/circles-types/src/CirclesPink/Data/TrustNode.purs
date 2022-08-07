@@ -3,6 +3,7 @@ module CirclesPink.Data.TrustNode where
 import CirclesPink.Prelude
 
 import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import Data.IxGraph (class Indexed)
 import Data.Lens (Lens')
@@ -39,7 +40,7 @@ instance fpTsTrustNode :: FpTs TrustNode TrustNode where
 
 instance indexedUserIdent :: Indexed Address TrustNode where
   getIndex (TrustNode { userIdent: UserIdent (Left x) }) = x
-  getIndex (TrustNode { userIdent: UserIdent (Right { safeAddress }) }) = safeAddress
+  getIndex (TrustNode { userIdent: UserIdent (Right (User { safeAddress })) }) = safeAddress
 
 initTrustNode :: UserIdent -> TrustNode
 initTrustNode userIdent' = TrustNode { userIdent: userIdent' }

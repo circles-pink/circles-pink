@@ -6,11 +6,11 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 
 import CirclesPink.Prelude
 
-import CirclesCore (TrustNode)
+import CirclesCore as CC
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode(..), initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User)
@@ -20,7 +20,7 @@ import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySaf
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.State as S
-import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph, TrustNode)
+import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Trans.Class (lift)

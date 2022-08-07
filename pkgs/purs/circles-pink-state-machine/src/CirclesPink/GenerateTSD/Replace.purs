@@ -1,23 +1,28 @@
 module CirclesPink.GenerateTSD.Replace where
 
+import Prelude
+
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
+import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
+import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef, PursType(..), defaultToPursType, defaultToTsType, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType, toPursType, toTsType)
+import PursTsGen as P
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Class.ToTsType (class ToTsType)
+import PursTsGen.Class.ToTsType as P
 import PursTsGen.Lang.TypeScript.DSL as TS
-import RemoteData (RemoteData)
+import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
@@ -47,6 +52,8 @@ else instance replacePair ::
   ) =>
   UnsafeReplace (Data.Pair.Pair a) (Pair a')
 
+else instance replaceAddress :: UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
+
 else instance replaceInstant ::
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant
 
@@ -55,6 +62,8 @@ else instance replaceFn :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeRep
 else instance replaceTuple :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Tuple a b) (Tuple a' b')
 
 else instance replaceEither :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Either a b) (Either a' b')
+
+else instance replaceMaybe :: (UnsafeReplace a a') => UnsafeReplace (Maybe a) (Maybe a')
 
 else instance replaceArray :: (UnsafeReplace a a') => UnsafeReplace (Array a) (Array a')
 
@@ -66,7 +75,7 @@ else instance replaceRemoteData ::
   , UnsafeReplace c c'
   , UnsafeReplace d d'
   ) =>
-  UnsafeReplace (RemoteData a b c d) (RemoteData a' b' c' d')
+  UnsafeReplace (RemoteData.RemoteData a b c d) (RemoteData a' b' c' d')
 
 else instance replaceRecord :: (RowToList a rl, GenRecord rl a') => UnsafeReplace (Record a) (Record a')
 
@@ -101,11 +110,16 @@ instance genRecordCons ::
 typeDef :: forall t154 t155. ToTsDef t154 => UnsafeReplace t155 (Proxy t154) => String -> t155 -> Array TS.Declaration
 typeDef s x = PT.typeDef s (unsafeReplace x)
 
-value :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
+value :: forall t88 t89. P.ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
 value s xs x = PT.value s xs (unsafeReplace x)
 
-typeAlias :: forall t119 t120. ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
+typeAlias :: forall t119 t120. P.ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
 typeAlias n x = PT.typeAlias n (unsafeReplace x)
+
+-- toTsType :: forall a a'. UnsafeReplace a a' => ToTsType a => a -> TS.Type
+-- toTsType x = P.toTsType $ unsafeReplace x
+
+-- class (UnsafeReplace a a', P.ToTsType a') <= ToTsType a
 
 genericToTsDef
   :: forall a rep rep'
@@ -140,11 +154,69 @@ instance g ::
   from = undefined
   to = undefined
 
-instance toTsType_Pair :: (ToTsType a) => ToTsType (Pair a) where
-  toTsType _ = defaultToTsType ptPair [ toTsType (Proxy :: _ a) ]
+instance toTsType_Pair :: (P.ToTsType a) => P.ToTsType (Pair a) where
+  toTsType _ = defaultToTsType ptPair [ P.toTsType (Proxy :: _ a) ]
 
-instance toTsDef_Pair :: (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
+instance toTsDef_Pair :: (ToPursType a, P.ToTsType a) => ToTsDef (Pair a) where
   toTsDef = genericToTsDef "Pair"
 
 instance toPursType_Pair :: (ToPursType a) => ToPursType (Pair a) where
   toPursType _ = defaultToPursType ptPair []
+
+--------------------------------------------------------------------------------
+
+newtype Address = Address Network.Ethereum.Core.Signatures.Address
+
+ptAddress :: PursType
+ptAddress = PursType "Network_Ethereum_Core_Signatures" "Address"
+
+derive instance newtypeAddress :: Newtype Address _
+
+instance toTsType_Address :: P.ToTsType Address where
+  toTsType _ = defaultToTsType ptAddress []
+
+instance toTsDef_Address :: ToTsDef Address where
+  toTsDef _ = defaultToTsDef ptAddress []
+
+instance toPursType_Address :: ToPursType Address where
+  toPursType _ = defaultToPursType ptAddress []
+
+--------------------------------------------------------------------------------
+
+newtype RemoteData a b c d = RemoteData (RemoteData.RemoteData a b c d)
+
+ptRemoteData :: PursType
+ptRemoteData = PursType "RemoteData" "RemoteData"
+
+derive instance newtypeRemoteData :: Newtype (RemoteData a b c d) _
+
+instance toTsType_RemoteData ::
+  ( ToTsType a
+  , ToTsType b
+  , ToTsType c
+  , ToTsType d
+  ) =>
+  ToTsType (RemoteData a b c d) where
+  toTsType _ = defaultToTsType ptRemoteData
+    [ toTsType (Proxy :: _ a)
+    , toTsType (Proxy :: _ b)
+    , toTsType (Proxy :: _ c)
+    , toTsType (Proxy :: _ d)
+    ]
+
+instance toTsDef_RemoteData :: ToTsDef (RemoteData a b c d) where
+  toTsDef _ = defaultToTsDef ptRemoteData $ TS.name <$> [ "A", "B", "C", "D" ]
+
+instance toPursType_RemoteData ::
+  ( ToPursType a
+  , ToPursType b
+  , ToPursType c
+  , ToPursType d
+  ) =>
+  ToPursType (RemoteData a b c d) where
+  toPursType _ = defaultToPursType ptRemoteData
+    [ toPursType (Proxy :: _ a)
+    , toPursType (Proxy :: _ b)
+    , toPursType (Proxy :: _ c)
+    , toPursType (Proxy :: _ d)
+    ]

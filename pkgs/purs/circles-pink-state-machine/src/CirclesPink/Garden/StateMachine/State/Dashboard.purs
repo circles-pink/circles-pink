@@ -36,11 +36,13 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
 
 import Prelude
 
-import CirclesCore (ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustNode, ErrParseAddress)
+import CirclesCore (ErrInvalidUrl, ErrNative, ErrService, SafeStatus, ErrParseAddress)
+import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustConnection (TrustConnection)
+import CirclesPink.Data.TrustNode (TrustNode(..))
 import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers, ErrGetVoucherProviders)
@@ -82,8 +84,10 @@ type DashboardState =
   , voucherProvidersResult :: VoucherProvidersResult
   }
 
+
+
 type DashboardState_ =
-  { user :: CC.User
+  { user :: User
   --, privKey :: PrivateKey
   , error :: Maybe (Variant (ErrDashboardState + ()))
   , trusts :: CirclesGraph
