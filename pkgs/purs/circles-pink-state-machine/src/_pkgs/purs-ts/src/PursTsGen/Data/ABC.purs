@@ -8,7 +8,7 @@ data B = B
 
 data C = C
 
-data D
+data D = D
 
 data E
 

@@ -25,7 +25,8 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
 
 import Prelude
 
-import CirclesCore (ApiError, NativeError, TrustNode, SafeStatus)
+import CirclesCore (ApiError, NativeError, SafeStatus)
+import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)

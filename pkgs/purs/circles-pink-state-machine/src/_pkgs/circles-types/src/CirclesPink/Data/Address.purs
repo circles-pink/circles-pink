@@ -6,8 +6,7 @@ module CirclesPink.Data.Address
   , sampleSafeAddress
   ) where
 
-import Prelude
-
+import CirclesPink.Prelude
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Array.NonEmpty as NEA
 import Data.Maybe (Maybe, fromJust)
@@ -30,8 +29,6 @@ import PursTs.Class (class ToTsDef)
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import PursTsGen (class ToTsDef, class ToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
-import PursTsGen.Lang.PureScript.Type as PS
-import PursTsGen.Lang.TypeScript.DSL as TS
 
 newtype Address = Address W3.Address
 
@@ -55,17 +52,19 @@ instance Arbitrary Address where
 
 instance ParseValue Address where
   parseValue = parseAddress
+ptAddress :: PursType
+ptAddress = PursType "CirclesPink_Data_Address" "Address"
+
 instance toTsTypeDefAddress :: ToTsDef Address where
-  toTsDef _ = pure $ TS.typeDef (TS.name "Address") []
-    $ TS.opaque (TS.qualName "CirclesPink_Data_Address" "Address")
-    $ TS.name <$> []
+  toTsDef _ = defaultToTsDef ptAddress []
 
 instance toTsTypeAddress :: ToTsType Address where
-  toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_Address" "Address"
+  toTsType _ = defaultToTsType ptAddress []
 
-instance FpTs Address Address where
 instance toPursType_Address :: ToPursType Address where
   toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_Address" "Address") [ ]
+instance toPursTypeAddress :: ToPursType Address where
+  toPursType _ = defaultToPursType ptAddress []
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity
