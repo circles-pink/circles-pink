@@ -1,10 +1,20 @@
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
-import { fieldsOf, fieldOf, isCaseV, matchADT, matchV, isCase, run } from '../purs-util';
+import {
+  fieldsOf,
+  isCaseV,
+  matchADT,
+  matchV,
+  isCase,
+} from '../purs-util';
 import {
   Address,
   CirclesGraph,
   DashboardState,
+  mapArray,
+  Maybe,
+  Pair,
+  TrustConnection,
   unTrustState,
   UserIdent,
   _Address,
@@ -24,72 +34,75 @@ import { hush, isLeft } from '@circles-pink/state-machine/output/Data.Either';
 
 type RowProps = { userIdent: UserIdent } & UserSearchProps;
 
-const Row = ({ centerAddress, userIdent, trusts, onAddTrust }: RowProps) => {
+const Row = (props: RowProps) => {
+  const { centerAddress, userIdent, trusts, onAddTrust } = props;
+
   const targetAddress = _UserIdent.getAddress(userIdent);
 
   const outgoingEdge = pipe(
     trusts,
-    _IxGraph.lookupEdge(_Address.ordAddress)(
-      _Pair.Pair.create(centerAddress)(targetAddress)
-    ),
+    lookupEdge(Pair.create(centerAddress)(targetAddress)),
     hush
   );
 
   const incomingEdge = pipe(
     trusts,
-    _IxGraph.lookupEdge(_Address.ordAddress)(
-      _Pair.Pair.create(targetAddress)(centerAddress)
-    )
+    lookupEdge(Pair.create(targetAddress)(centerAddress)),
+    hush
   );
 
   return (
     <tr>
       <td>{_UserIdent.getIdentifier(userIdent)}</td>
       <td>
-        <pre>
-          {/* {matchADT(outgoingEdge)({
-            Left: () => '  X',
-            Right: ([trustConnection]) => {
-              const [_, trustState] =
-                fields('TrustConnection')(trustConnection);
-              const trustState_ = _TrustState.unwrap(trustState);
-
-              return matchV(trustState_)({
-                loadingTrust: () => '..O',
-                loadingUntrust: () => '..X',
-                pendingTrust: () => ' .O',
-                pendingUntrust: () => ' .X',
-                trusted: () => '  O',
-                untrusted: () => '  X',
-              });
-            },
-          })} */}
-        </pre>
+        {isTrusting(outgoingEdge) ? (
+          <LoadingIndicator {...props} {...{ outgoingEdge }} />
+        ) : (
+          <TrustRelations {...props} {...{ outgoingEdge, incomingEdge }} />
+        )}
       </td>
-
       <td>
-        {run(() => {
-          if (isCase('Nothing')(outgoingEdge)) return <NotTrusting />;
-
-          const [trustConnection] = fieldsOf('Just')(outgoingEdge);
-          
-          const [_, trustState] = fieldsOf('TrustConnection')(trustConnection);
-
-          if (isCaseV('trusted')(unTrustState(trustState)))
-            return <NotTrusting />;
-
-          return <Trusting />;
-        })}
+        <Heart {...props} {...{ outgoingEdge }} />
       </td>
-
-      <button onClick={() => onAddTrust(userIdent)}>trust</button>
+      <td>
+        <button onClick={() => onAddTrust(userIdent)}>trust</button>
+      </td>
     </tr>
   );
 };
 
-const Trusting = () => null;
+// -----------------------------------------------------------------------------
+// UI LoadingIndicator
+// -----------------------------------------------------------------------------
 
-const NotTrusting = () => null;
+type LoadingIndicatorProps = RowProps & {
+  outgoingEdge: Maybe<TrustConnection>;
+};
+
+const LoadingIndicator = (props: LoadingIndicatorProps) => null;
+
+// -----------------------------------------------------------------------------
+// UI TrustRelations
+// -----------------------------------------------------------------------------
+
+type TrustRelationsProps = RowProps & {
+  incomingEdge: Maybe<TrustConnection>;
+  outgoingEdge: Maybe<TrustConnection>;
+};
+
+const TrustRelations = (props: TrustRelationsProps) => null;
+
+
+// -----------------------------------------------------------------------------
+// UI Heart
+// -----------------------------------------------------------------------------
+
+type HeartProps = RowProps & {
+  outgoingEdge: Maybe<TrustConnection>;
+};
+
+const Heart = (props: HeartProps) => null;
+
 
 // -----------------------------------------------------------------------------
 // UI UserSearch
@@ -117,7 +130,7 @@ export const UserSearch = (props: UserSearchProps) => {
         <table>
           {pipe(
             users,
-            _ArrayS.map(userIdent => <Row {...props} userIdent={userIdent} />)
+            mapArray(userIdent => <Row {...props} userIdent={userIdent} />)
           )}
         </table>
       )}
@@ -129,7 +142,7 @@ export const UserSearch = (props: UserSearchProps) => {
 // Util
 // -----------------------------------------------------------------------------
 
-const getUsers = (userSearchResult: DashboardState['userSearchResult']) => {
+const getUsers = (userSearchResult: DashboardState['userSearchResult']): readonly UserIdent[] => {
   const userSearchResult_ = _RemoteData.unwrap(userSearchResult);
 
   const users = matchV(userSearchResult_)({
@@ -143,5 +156,41 @@ const getUsers = (userSearchResult: DashboardState['userSearchResult']) => {
       }),
   });
 
-  return _ArrayS.map(_UserIdent.fromUser)(users);
+  return mapArray(_UserIdent.fromUser)(users);
 };
+
+const isTrusting = (tc: Maybe<TrustConnection>): boolean => {
+  if (isCase('Nothing')(tc)) return false;
+
+  const [trustConnection] = fieldsOf('Just')(tc);
+  const [_, trustState] = fieldsOf('TrustConnection')(trustConnection);
+  const trustState_ = unTrustState(trustState);
+
+  if (isCaseV('trusted')(trustState_)) return false;
+
+  return true;
+};
+
+const lookupEdge = _IxGraph.lookupEdge(_Address.ordAddress);
+
+// <td>
+// <pre>
+//   {/* {matchADT(outgoingEdge)({
+//     Left: () => '  X',
+//     Right: ([trustConnection]) => {
+//       const [_, trustState] =
+//         fields('TrustConnection')(trustConnection);
+//       const trustState_ = _TrustState.unwrap(trustState);
+
+//       return matchV(trustState_)({
+//         loadingTrust: () => '..O',
+//         loadingUntrust: () => '..X',
+//         pendingTrust: () => ' .O',
+//         pendingUntrust: () => ' .X',
+//         trusted: () => '  O',
+//         untrusted: () => '  X',
+//       });
+//     },
+//   })} */}
+// </pre>
+// </td>

@@ -79,7 +79,7 @@ modules =
         ]
   , "Simple.Data.Array" /\
       join
-        [ value "map" [] (Simple.Data.Array.map :: (A -> B) -> _) ]
+        [ value "mapArray" [] (Simple.Data.Array.mapArray :: (A -> B) -> _) ]
   , "CirclesPink.Data.TrustNode" /\
       join
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
