@@ -7,11 +7,15 @@ import * as RemoteData from "@circles-pink/state-machine/output/RemoteData";
 import * as Data_IxGraph from "@circles-pink/state-machine/output/Data.IxGraph";
 import * as CirclesPink_Data_TrustState from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 
+export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
 export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
+export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
+export { Pair } from "@circles-pink/state-machine/output/Data.Pair";
+export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
 
 export type {
   DashboardState,
