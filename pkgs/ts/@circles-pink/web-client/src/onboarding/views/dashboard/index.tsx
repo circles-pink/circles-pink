@@ -51,6 +51,8 @@ import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Add
 import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
+import { BuyVouchers } from './BuyVouchers';
+import { VoucherOffer } from '@circles-pink/state-machine/output/VoucherServer.Types';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -397,10 +399,38 @@ export const Dashboard = ({
                 title="Voucher"
                 icon={mdiGiftOutline}
               >
-                <ListVouchers
+                <BuyVouchers
                   theme={theme}
-                  vouchersResult={state.vouchersResult}
+                  providers={[
+                    {
+                      id: 'goodbuy',
+                      name: 'GoodBuy',
+                      logoUrl:
+                        'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435',
+                      shopUrl: 'https://www.goodbuy.eu/',
+                      availableOffers: [
+                        {
+                          amount: 5,
+                          countAvailable: 67,
+                        },
+                        {
+                          amount: 15,
+                          countAvailable: 75,
+                        },
+                        {
+                          amount: 25,
+                          countAvailable: 97,
+                        },
+                      ],
+                    },
+                  ]}
                 />
+                <TopMargin>
+                  <ListVouchers
+                    theme={theme}
+                    vouchersResult={state.vouchersResult}
+                  />
+                </TopMargin>
               </LightColorFrame>
             </TopMargin>
           </FadeIn>
