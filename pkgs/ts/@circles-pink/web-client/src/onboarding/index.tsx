@@ -28,12 +28,18 @@ import {
 import { ThemeProvider, ThemeContext } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
+import {
+  TrackingEvent,
+  encodeJsonTrackingEvent,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent';
+
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
 import { Unit, unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { fromFpTsEither } from '../utils/fpTs';
 import * as E from 'fp-ts/Either';
+import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
 
 type Language = 'en' | 'de';
 
@@ -41,6 +47,7 @@ type Content = {};
 
 type UserConfig = {
   email?: string | ((email: string) => void);
+  onTrackingEvent?: (json: unknown) => void;
 };
 
 export type OnboardingProps = {
@@ -49,7 +56,7 @@ export type OnboardingProps = {
   baseColor?: string;
   content?: Content;
   userConfig?: UserConfig;
-  testEnv? : Boolean
+  testEnv?: Boolean;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -156,10 +163,20 @@ const OnboardingContent = ({
   baseColor,
   content = {},
   userConfig,
-  testEnv = false
+  testEnv = false,
 }: OnboardingProps): ReactElement => {
-  const cfg =
+  const cfg_ =
     userConfig && userConfig.email ? mkCfg(userConfig) : cfgDefaultRight;
+
+  const cfg = {
+    ...cfg_,
+    onTrackingEvent: !userConfig?.onTrackingEvent
+      ? Just.create((x: TrackingEvent) => {
+          if (!userConfig?.onTrackingEvent) return;
+          return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
+        })
+      : Nothing.value,
+  };
 
   const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);
 

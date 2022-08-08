@@ -5,14 +5,15 @@ module Test.CirclesPink.Garden.StateMachine.Stories
 import Prelude
 
 import CirclesPink.Data.Mnemonic (sampleMnemonic)
+import CirclesPink.Garden.EnvControlTest (testEnv)
 import CirclesPink.Garden.StateMachine (initLanding)
 import CirclesPink.Garden.StateMachine.Config (CirclesConfig(..))
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (TestScriptT, execTestScriptT)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Stories (finalizeAccount, loginUser, signUpUser)
-import CirclesPink.Garden.EnvControlTest (testEnv)
 import Data.Either (Either(..))
 import Data.Identity (Identity)
+import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (fst)
 import Data.Variant.Extra (getLabel)
@@ -26,7 +27,7 @@ spec =
     env' :: EnvControl (TestScriptT Identity)
     env' = testEnv
 
-    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit) }
+    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit), onTrackingEvent : Nothing }
 
     execTestScriptM_ = execTestScriptT cfg initLanding >>> unwrap >>> fst
   in
