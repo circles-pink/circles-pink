@@ -7,9 +7,9 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Button, Input } from '../../components/forms';
-import { Claim, Text } from '../../components/text';
-import { UserDashboard } from '../../components/UserDashboard';
+import { Button, Input } from '../../../components/forms';
+import { Claim, Text } from '../../../components/text';
+import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
@@ -17,9 +17,9 @@ import {
   defaultView,
   Trust,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { getIncrementor } from '../utils/getCounter';
+import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
-import { ThemeContext } from '../../context/theme';
+import { ThemeContext } from '../../../context/theme';
 import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
@@ -33,25 +33,24 @@ import {
   mdiMagnify,
   mdiTicketPercentOutline,
 } from '@mdi/js';
-import { LightColorFrame, TrustUserList } from '../../components/TrustUserList';
-import { Overlay } from '../../components/Overlay';
-import { JustifyBetweenCenter, TwoButtonRow } from '../../components/helper';
-import { Send, SendProps } from './dashboard/Send';
-import { Receive } from './dashboard/Receive';
-import { Balance } from './dashboard/Balance';
+import {
+  LightColorFrame,
+  TrustUserList,
+} from '../../../components/TrustUserList';
+import { Overlay } from '../../../components/Overlay';
+import { JustifyBetweenCenter, TwoButtonRow } from '../../../components/helper';
+import { Send, SendProps } from './Send';
+import { Receive } from './Receive';
+import { Balance } from './Balance';
 import {
   TrustNode,
   User,
 } from '@circles-pink/state-machine/output/CirclesCore';
-import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { StateMachineDebugger } from '../../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { TrustGraph } from '../../components/TrustGraph/index';
-import { UserSearch } from '../../components/UserSearch';
-import {
-  isPendingTrust,
-  isPendingUntrust,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { fromFpTsTuple, toFpTsTuple } from '../../utils/fpTs';
+import { TrustGraph } from '../../../components/TrustGraph/index';
+import { UserSearch } from '../../../components/UserSearch';
+import { Vouchers } from './Vouchers';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -83,8 +82,6 @@ export const Dashboard = ({
     () => (defaultView as any)(stateRaw) as DefaultView,
     [stateRaw]
   );
-
-  const trusts = state.trustsConfirmed.concat(state.trustsCandidates);
 
   // Theme
   const [theme] = useContext(ThemeContext);
@@ -118,12 +115,14 @@ export const Dashboard = ({
   const BALANCE_INTERVAL = 10000;
   const TRUST_NETWORK_INTERVAL = 15000;
   const UBI_PAYOUT_INTERVAL = 60000;
+  const VOUCHER_INTERVAL = 30000;
 
   useEffect(() => {
     // Gather initial client information
     act(A._dashboard(A._getBalance(unit)));
     act(A._dashboard(A._getTrusts(unit)));
     act(A._dashboard(A._getUBIPayout(unit)));
+    act(A._dashboard(A._getVouchers(getTimestamp())));
 
     // Start polling tasks
     const balancePolling = setInterval(() => {
@@ -138,11 +137,16 @@ export const Dashboard = ({
       act(A._dashboard(A._getTrusts(unit)));
     }, UBI_PAYOUT_INTERVAL);
 
+    const VoucherPolling = setInterval(() => {
+      act(A._dashboard(A._getVouchers(getTimestamp())));
+    }, VOUCHER_INTERVAL);
+
     // Clear interval on unmount
     return () => {
       clearInterval(balancePolling);
       clearInterval(trustNetworkPolling);
       clearInterval(UBIPayoutPolling);
+      clearInterval(VoucherPolling);
     };
   }, []);
 
@@ -393,18 +397,7 @@ export const Dashboard = ({
                 title="Voucher"
                 icon={mdiGiftOutline}
               >
-                <Claim color={theme.baseColor}>Your Vouchers:</Claim>
-                <Button
-                  onClick={() =>
-                    act(
-                      A._dashboard(
-                        A._getVouchers(Math.round(new Date().getTime() / 1000).toString())
-                      )
-                    )
-                  }
-                >
-                  Get Vouchers!
-                </Button>
+                <Vouchers theme={theme} vouchersResult={state.vouchersResult} />
               </LightColorFrame>
             </TopMargin>
           </FadeIn>
@@ -461,6 +454,12 @@ export const Dashboard = ({
 };
 
 // -----------------------------------------------------------------------------
+// Util
+// -----------------------------------------------------------------------------
+
+const getTimestamp = () => Math.round(new Date().getTime() / 1000).toString();
+
+// -----------------------------------------------------------------------------
 // UI / DashboardOverlay
 // -----------------------------------------------------------------------------
 
@@ -478,7 +477,7 @@ const DashboardOverlay = ({
   theme,
   closeOverlay,
   overwriteTo,
-}: DashboardOverlayProps) => {
+}: DashboardOverlayProps): ReactElement | null => {
   switch (overlay) {
     case 'SEND':
       return (
@@ -487,6 +486,8 @@ const DashboardOverlay = ({
 
     case 'RECEIVE':
       return <Receive state={state} act={act} theme={theme} />;
+    default:
+      return null;
   }
 };
 

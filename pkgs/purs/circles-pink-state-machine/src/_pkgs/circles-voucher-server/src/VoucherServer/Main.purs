@@ -20,7 +20,6 @@ module VoucherServer.Main
   , name
   , prop
   , queryGql
-  , sampleVoucher
   , spec
   , to
   ) where
@@ -101,8 +100,8 @@ spec = Spec
 
 --------------------------------------------------------------------------------
 
-sampleVoucher :: Voucher
-sampleVoucher = Voucher
+sampleVoucherOne :: Voucher
+sampleVoucherOne = Voucher
   { voucherProviderId: VoucherProviderId "goodbuy"
   , voucherAmount: VoucherAmount $ EurCent 25
   , voucherCode: VoucherCode "bingo"
@@ -113,8 +112,20 @@ sampleVoucher = Voucher
       }
   }
 
+sampleVoucherTwo :: Voucher
+sampleVoucherTwo = Voucher
+  { voucherProviderId: VoucherProviderId "goodbuy"
+  , voucherAmount: VoucherAmount $ EurCent 15
+  , voucherCode: VoucherCode "bongo"
+  , sold:
+      { transactionId: "201-4"
+      , safeAddress: show sampleSafeAddress
+      , timestamp: "1659971225500"
+      }
+  }
+
 db :: Map SafeAddress (Array Voucher)
-db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucher ] ]
+db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucherOne, sampleVoucherTwo ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
