@@ -7,4 +7,4 @@ export { Submit } from './Submit';
 export { Landing } from './Landing';
 export { Login } from './Login';
 export { Trusts } from './Trusts';
-export { Dashboard } from './Dashboard';
+export { Dashboard } from './dashboard';
