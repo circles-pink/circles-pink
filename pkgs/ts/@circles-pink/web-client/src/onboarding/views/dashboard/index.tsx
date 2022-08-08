@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { Button, Input } from '../../../components/forms';
-import { Claim, Text } from '../../../components/text';
+import { Text } from '../../../components/text';
 import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
@@ -50,7 +50,7 @@ import { StateMachineDebugger } from '../../../components/StateMachineDebugger';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
-import { Vouchers } from './Vouchers';
+import { ListVouchers } from './ListVouchers';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -397,7 +397,10 @@ export const Dashboard = ({
                 title="Voucher"
                 icon={mdiGiftOutline}
               >
-                <Vouchers theme={theme} vouchersResult={state.vouchersResult} />
+                <ListVouchers
+                  theme={theme}
+                  vouchersResult={state.vouchersResult}
+                />
               </LightColorFrame>
             </TopMargin>
           </FadeIn>

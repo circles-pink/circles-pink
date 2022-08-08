@@ -1,6 +1,6 @@
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { FadeIn, getIncrementor } from 'anima-react';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
@@ -21,16 +21,24 @@ type SoldVoucher = {
   timestamp: string;
 };
 
-type VouchersProps = {
+type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
   theme: Theme;
 };
 
-export const Vouchers = ({
+export const ListVouchers = ({
   vouchersResult,
   theme,
-}: VouchersProps): ReactElement | null => {
-  const vouchers = mapResult(vouchersResult);
+}: ListVouchersProps): ReactElement | null => {
+  const [vouchers, setVouchers] = useState<Array<Voucher>>(
+    mapResult(vouchersResult)
+  );
+
+  useEffect(() => {
+    if (vouchersResult.type === 'success') {
+      setVouchers(mapResult(vouchersResult));
+    }
+  }, [vouchersResult]);
 
   // animation
   const getDelay = getIncrementor(0, 0.25);
