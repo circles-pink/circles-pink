@@ -28,8 +28,7 @@ module VoucherServer.Main
 import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address(..), parseAddress, sampleAddress)
-import CirclesPink.Data.Address as C
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.SafeAddress (sampleSafeAddress)
 import CirclesPink.Data.SafeAddress as C
@@ -38,48 +37,42 @@ import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.BN (BN)
 import Data.Bifunctor (lmap)
-import Data.BigInt (BigInt)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
-import Data.DateTime.Instant as DT
-import Data.Either (Either(..), note)
+import Data.Either (Either(..))
 import Data.Foldable (fold)
 import Data.Generic.Rep (class Generic)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, un, wrap)
+import Data.Newtype (un, wrap)
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
-import Debug (spy, spyWith)
-import Debug.Extra (todo)
+import Debug (spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, logShow)
 import Effect.Exception as E
 import Effect.Now (now)
-import GraphQL.Client.Args (class ArgGql, type (==>), (=>>))
+import GraphQL.Client.Args (type (==>), (=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
 import Payload.Client (mkClient)
 import Payload.Client as PC
-import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
-import Payload.Server.Params (class DecodeParam, decodeParam)
 import Payload.Server.Response as Response
 import Payload.Spec (POST, Spec(Spec))
 import Safe.Coerce (coerce)
-import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
-import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 type Message =
@@ -90,7 +83,6 @@ type Message =
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-
 
 --------------------------------------------------------------------------------
 
@@ -112,7 +104,13 @@ spec = Spec
 sampleVoucher :: Voucher
 sampleVoucher = Voucher
   { voucherProviderId: VoucherProviderId "goodbuy"
+  , voucherAmount: VoucherAmount $ EurCent 25
   , voucherCode: VoucherCode "bingo"
+  , sold:
+      { transactionId: "200-4"
+      , safeAddress: show sampleSafeAddress
+      , timestamp: "1659971225399"
+      }
   }
 
 db :: Map SafeAddress (Array Voucher)

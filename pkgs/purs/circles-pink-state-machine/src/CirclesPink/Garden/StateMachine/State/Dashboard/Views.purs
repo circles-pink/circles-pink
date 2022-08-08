@@ -4,6 +4,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard.Views
   , ErrDeploySafeResolved
   , ErrDeployTokenResolved
   , ErrGetUsersResolved
+  , ErrGetVouchersResolved
   , ErrTokenCheckUBIPayoutResolved
   , ErrTokenGetBalanceResolved
   , ErrTokenRequestUBIPayoutResolved
@@ -29,7 +30,7 @@ import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.Address as A
 import CirclesPink.Data.TrustConnection (TrustConnection(..), TsTrustConnection)
 import CirclesPink.Data.TrustState (TrustState, initUntrusted, isTrusted)
-import CirclesPink.Data.User (User(..))
+import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import CirclesPink.Garden.StateMachine.Control.EnvControl (UserNotFoundError)
 import CirclesPink.Garden.StateMachine.State (DashboardState)
@@ -53,6 +54,7 @@ import Foreign.Object (Object, values)
 import FpTs.Class (toFpTs)
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
+import VoucherServer.Types (Voucher)
 
 --------------------------------------------------------------------------------
 -- globalLoading
@@ -90,6 +92,7 @@ type DefaultView =
   , getBalanceResult :: RemoteReport ErrTokenGetBalanceResolved BN
   , checkUBIPayoutResult :: RemoteReport ErrTokenCheckUBIPayoutResolved BN
   , requestUBIPayoutResult :: RemoteReport ErrTokenRequestUBIPayoutResolved String
+  , vouchersResult :: RemoteReport ErrGetVouchersResolved (Array Voucher)
   , transferResult :: RemoteData_ ErrTokenTransferResolved String
   , redeploySafeResult :: RemoteReport ErrDeploySafeResolved SafeStatus
   , redeployTokenResult :: RemoteReport ErrDeployTokenResolved String
@@ -167,6 +170,7 @@ defaultView d@{ trusts } =
     , checkUBIPayoutResult: d.checkUBIPayoutResult
     , getBalanceResult: d.getBalanceResult
     , requestUBIPayoutResult: d.requestUBIPayoutResult
+    , vouchersResult: d.vouchersResult
     , transferResult: d.transferResult
     , redeploySafeResult: nubRemoteReport d.redeploySafeResult
     , redeployTokenResult: nubRemoteReport d.redeployTokenResult
@@ -226,6 +230,10 @@ type ErrTokenCheckUBIPayoutResolved = Variant
 type ErrTokenRequestUBIPayoutResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
+  )
+
+type ErrGetVouchersResolved = Variant
+  ( errGetVouchers :: String
   )
 
 type ErrTokenTransferResolved = Variant
