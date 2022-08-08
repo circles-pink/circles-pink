@@ -6,7 +6,7 @@ import CirclesCore as CC
 import Data.Newtype (class Newtype)
 import Debug.Extra (todo)
 import GraphQL.Client.Args (class ArgGql)
-import Payload.Client.EncodeParam (class EncodeParam)
+--import Payload.Client.EncodeParam (class EncodeParam)
 import Simple.JSON (class WriteForeign)
 
 --------------------------------------------------------------------------------
@@ -25,8 +25,8 @@ derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
 --     >>= (parseAddress >>> note "Could not parse SafeAddress")
 --     <#> SafeAddress
 
-instance encodeParamSafeAddress :: EncodeParam SafeAddress where
-  encodeParam (SafeAddress x) = todo -- encodeParam x
+-- instance encodeParamSafeAddress :: EncodeParam SafeAddress where
+--   encodeParam (SafeAddress x) = todo -- encodeParam x
 
 instance argGqlSafeAddress :: ArgGql SafeAddress String
 

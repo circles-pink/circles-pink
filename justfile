@@ -214,7 +214,11 @@ ts-build:
 
 purs-tsd-gen:
 	DIR=`mktemp -d`; \
+	mv {{PURS_OUTPUT}}/CirclesPink.EnvVars -t $DIR ; \
+	mv {{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript -t $DIR ; \
+	mv {{PURS_OUTPUT}}/CirclesPink.Garden.TS -t $DIR ; \
 	mv {{PURS_OUTPUT}}/Payload.* {{PURS_OUTPUT}}/VoucherServer.* {{PURS_OUTPUT}}/CirclesPink.Garden.EnvControlAff -t $DIR ; \
+	mv $DIR/VoucherServer.Types -t {{PURS_OUTPUT}} ; \
 	purs-tsd-gen --directory {{PURS_OUTPUT}} ; \
 	mv $DIR/* -t {{PURS_OUTPUT}} ; \
 

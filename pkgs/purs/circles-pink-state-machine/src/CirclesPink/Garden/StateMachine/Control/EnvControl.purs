@@ -97,7 +97,7 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
-import Payload.Client (ClientError)
+--import Payload.Client (ClientError)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import VoucherServer.Types (Voucher)
@@ -213,7 +213,7 @@ type SignChallenge m = Message -> PrivateKey -> m SignatureObj
 
 -- Get Vouchers
 
-type ErrGetVouchers r = (errGetVouchers :: ClientError | r)
+type ErrGetVouchers r = (errGetVouchers :: String | r)
 
 type GetVouchers m = forall r. SignatureObj -> ExceptV (ErrGetVouchers + r) m (Array Voucher)
 
@@ -331,7 +331,7 @@ _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
 _errDecrypt :: forall r. Variant (ErrDecrypt r)
 _errDecrypt = inj (Proxy :: _ "errDecrypt") unit
 
-_errGetVouchers :: forall r. ClientError -> Variant (ErrGetVouchers r)
+_errGetVouchers :: forall r. String -> Variant (ErrGetVouchers r)
 _errGetVouchers = inj (Proxy :: _ "errGetVouchers")
 
 --------------------------------------------------------------------------------
