@@ -4,6 +4,7 @@
   , "aff-promise"
   , "argonaut"
   , "argonaut-codecs"
+  , "argonaut-generic"
   , "arrays"
   , "bifunctors"
   , "chance"
