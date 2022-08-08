@@ -31,7 +31,8 @@ import CirclesCore as CC
 import CirclesPink.Data.Address (Address(..), parseAddress, sampleAddress)
 import CirclesPink.Data.Address as C
 import CirclesPink.Data.Nonce (addressToNonce)
-import CirclesPink.Data.SafeAddress (SafeAddress(..), sampleSafeAddress)
+import CirclesPink.Data.SafeAddress (sampleSafeAddress)
+import CirclesPink.Data.SafeAddress as C
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
@@ -77,7 +78,7 @@ import Safe.Coerce (coerce)
 import Simple.JSON (class WriteForeign, writeImpl)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
-import VoucherServer.Specs.Xbge (xbgeSpec)
+import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
 import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
@@ -89,6 +90,7 @@ type Message =
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
+
 
 --------------------------------------------------------------------------------
 
@@ -114,7 +116,7 @@ sampleVoucher = Voucher
   }
 
 db :: Map SafeAddress (Array Voucher)
-db = M.fromFoldable [ sampleSafeAddress /\ [ sampleVoucher ] ]
+db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucher ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
@@ -168,8 +170,8 @@ getVouchers env { body: { signatureObj } } = do
           case safeAddress of
             Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
-              txs <- getTransactions env (wrap sa)
-              M.lookup (SafeAddress sa) db # fold # Right # pure
+              txs <- getTransactions env (SafeAddress $ C.SafeAddress sa)
+              M.lookup (SafeAddress $ C.SafeAddress sa) db # fold # Right # pure
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------

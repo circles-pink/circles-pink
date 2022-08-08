@@ -18,8 +18,8 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
-import Payload.Server.Params (class DecodeParam, decodeParam)
-import Simple.JSON (class ReadForeign, class WriteForeign)
+--import Payload.Server.Params (class DecodeParam, decodeParam)
+--import Simple.JSON (class ReadForeign, class WriteForeign)
 
 newtype Address = Address W3.Address
 
@@ -29,17 +29,17 @@ derive newtype instance eq :: Eq Address
 derive newtype instance ord :: Ord Address
 derive newtype instance decodeJson :: DecodeJson Address
 derive newtype instance encodeJson :: EncodeJson Address
-derive newtype instance readForeignAddress :: ReadForeign Address
-derive newtype instance writeForeignAddress :: WriteForeign Address
+-- derive newtype instance readForeignAddress :: ReadForeign Address
+-- derive newtype instance writeForeignAddress :: WriteForeign Address
 
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity
   fromFpTs = identity
 
-instance decodeParamAddress :: DecodeParam Address where
-  decodeParam x = decodeParam x
-    >>= (parseAddress >>> note "Could not parse Address")
+-- instance decodeParamAddress :: DecodeParam Address where
+--   decodeParam x = decodeParam x
+--     >>= (parseAddress >>> note "Could not parse Address")
 
 instance argGqlAddress :: ArgGql Address String
 

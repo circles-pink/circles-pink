@@ -8,9 +8,9 @@ import Prelude
 import CirclesCore (CirclesCore, ErrInvalidUrl, ErrNative)
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address(..))
-import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
@@ -27,6 +27,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -368,7 +369,7 @@ env envenv@{ request, envVars } =
             }
         )
         spec
-    res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT _errGetVouchers
+    res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT (show >>> _errGetVouchers)
     -- let _ = spy "res" (res -# _.body)
     pure (res -# _.body)
 
