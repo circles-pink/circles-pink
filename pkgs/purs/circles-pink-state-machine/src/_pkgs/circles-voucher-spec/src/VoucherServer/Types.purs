@@ -89,7 +89,13 @@ derive newtype instance readForeignVoucherEncrypted :: ReadForeign VoucherEncryp
 newtype Voucher =
   Voucher
     { voucherProviderId :: VoucherProviderId
+    , voucherAmount :: VoucherAmount
     , voucherCode :: VoucherCode
+    , sold ::
+        { transactionId :: String
+        , safeAddress :: String
+        , timestamp :: String
+        }
     }
 
 derive newtype instance readForeignVoucher :: ReadForeign Voucher

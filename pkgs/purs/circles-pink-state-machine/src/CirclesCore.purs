@@ -28,7 +28,7 @@ module CirclesCore
   , NativeError
   , Nonce(..)
   , ResolveOptions
-  , SafeAddress
+  , SafeAddress(..)
   , SafeDeployOptions
   , SafeStatus
   , SearchOptions
@@ -74,8 +74,7 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  )
-  where
+  ) where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
@@ -96,7 +95,7 @@ import Data.BN (BN)
 import Data.Bifunctor (lmap)
 import Data.BigInt (BigInt)
 import Data.Either (Either(..), note)
-import Data.Newtype (class Newtype, unwrap, wrap)
+import Data.Newtype (class Newtype, unwrap)
 import Data.Newtype.Extra ((-#))
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)

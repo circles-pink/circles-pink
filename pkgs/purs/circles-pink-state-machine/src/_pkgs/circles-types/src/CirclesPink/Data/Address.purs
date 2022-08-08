@@ -9,7 +9,6 @@ module CirclesPink.Data.Address
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
-import Data.Either (note)
 import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype, wrap)
 import FpTs.Class (class FpTs)
@@ -18,6 +17,7 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+
 --import Payload.Server.Params (class DecodeParam, decodeParam)
 --import Simple.JSON (class ReadForeign, class WriteForeign)
 
@@ -31,7 +31,6 @@ derive newtype instance decodeJson :: DecodeJson Address
 derive newtype instance encodeJson :: EncodeJson Address
 -- derive newtype instance readForeignAddress :: ReadForeign Address
 -- derive newtype instance writeForeignAddress :: WriteForeign Address
-
 
 instance fpTs :: FpTs Address Address where
   toFpTs = identity
