@@ -2,11 +2,8 @@ module VoucherServer.Main
   ( ErrGetVoucher
   , GQLError(..)
   , Message
-  , Schema
   , ServerConfig
   , ServerEnv
-  , Transaction
-  , Transfer
   , allowedDiff
   , amount
   , app
@@ -49,7 +46,7 @@ import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
 import Data.Tuple.Nested ((/\))
-import Debug (spyWith)
+import Debug (spy, spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
@@ -73,6 +70,7 @@ import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
 import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
+import VoucherServer.GraphQLSchemas.GraphNode (Transfer, Schema)
 
 type Message =
   { id :: Int
@@ -180,27 +178,20 @@ getVouchers env { body: { signatureObj } } = do
             Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
               txs <- getTransactions env (SafeAddress $ C.SafeAddress sa)
+              let _ = spy "Transactions" txs
               M.lookup (SafeAddress $ C.SafeAddress sa) db # fold # Right # pure
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 --------------------------------------------------------------------------------
 
-type Transaction = {}
-
-getTransactions :: forall r. { | r } -> SafeAddress -> Aff (Maybe (Array Transaction))
+getTransactions :: forall r. { | r } -> SafeAddress -> Aff (Maybe (Array Transfer))
 getTransactions env addr = do
-  result <- queryGql "Hallo? "
-    { transfers:
-        { where:
-            { from: "0x5281764e3ce70ebc6c2eb18aaa8c4aebff98f393"
-            , to: "0x2390b428f0a968b39eb4d7cbec8d20bcd578c411"
-            }
-        } =>> { from, to, id, amount }
+  result <- queryGql "get-transactions"
+    { transfers: { where: { from: show sampleSafeAddress } } =>> { from, to, id, amount }
     }
   case result of
-    Left e -> logShow e
-    Right { transfers } -> logShow transfers
-  pure $ Just [ {} ]
+    Left _ -> pure Nothing
+    Right { transfers } -> pure $ Just transfers
 
 xbgeClient = mkClient
   ( PC.defaultOpts
@@ -228,18 +219,6 @@ queryGql
 queryGql s q = query_ "http://graph.circles.local/subgraphs/name/CirclesUBI/circles-subgraph" (Proxy :: Proxy Schema) s q
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
-
--- Schema
-type Schema =
-  { transfers :: { where :: { from :: Address, to :: Address } } ==> Array Transfer
-  }
-
-type Transfer =
-  { from :: Address
-  , to :: Address
-  , id :: String
-  , amount :: BN
-  }
 
 -- Symbols 
 prop :: Proxy "prop"
