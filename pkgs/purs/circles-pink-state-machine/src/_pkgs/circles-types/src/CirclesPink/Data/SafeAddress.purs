@@ -5,6 +5,7 @@ import Prelude
 import CirclesCore as CC
 import CirclesPink.Data.Address as C
 import CirclesPink.Data.Address as W3
+import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Maybe (fromJust)
 import Data.Newtype (class Newtype)
 import GraphQL.Client.Args (class ArgGql)
@@ -23,6 +24,8 @@ derive newtype instance ordSafeAddress :: Ord SafeAddress
 derive newtype instance eqSafeAddress :: Eq SafeAddress
 derive newtype instance showSafeAddress :: Show SafeAddress
 derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
+derive newtype instance decodeJson :: DecodeJson SafeAddress
+derive newtype instance encodeJson :: EncodeJson SafeAddress
 
 -- instance decodeParamSafeAddress :: DecodeParam SafeAddress where
 --   decodeParam x = decodeParam x
