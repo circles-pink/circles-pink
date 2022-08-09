@@ -5,33 +5,27 @@ module VoucherServer.Main
   , ServerConfig
   , ServerEnv
   , allowedDiff
-  , amount
   , app
   , db
-  , from
   , getTransactions
   , getVouchers
-  , id
   , isValid
   , main
-  , name
-  , prop
   , queryGql
   , spec
-  , to
   ) where
 
 import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.SafeAddress (sampleSafeAddress)
 import CirclesPink.Data.SafeAddress as C
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
-import Data.BN (BN)
+import Data.BN (BN, fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
@@ -41,16 +35,19 @@ import Data.Generic.Rep (class Generic)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (un, wrap)
+import Data.Newtype (un, unwrap, wrap)
+import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
+import Data.Traversable (traverse)
 import Data.Tuple.Nested ((/\))
 import Debug (spy, spyWith)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error, logShow)
+import Effect.Class.Console (error, log, logShow)
 import Effect.Exception as E
 import Effect.Now (now)
 import GraphQL.Client.Args (type (==>), (=>>))
@@ -67,10 +64,11 @@ import Payload.Spec (POST, Spec(Spec))
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
+import VoucherServer.GraphQLSchemas.GraphNode (Schema)
+import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherEncrypted(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
-import VoucherServer.GraphQLSchemas.GraphNode (Transfer, Schema)
 
 type Message =
   { id :: Int
@@ -155,9 +153,13 @@ getVouchers env { body: { signatureObj } } = do
     }
 
   case circlesCore of
-    Left _ -> pure $ Left $ Error (Response.internalError (StringBody "INTERNAL SERVER ERROR"))
+    Left _ -> do
+      log "no circles core"
+      pure $ Left $ Error (Response.internalError (StringBody "INTERNAL SERVER ERROR"))
     Right cc -> case accountsRecover web3 signatureObj of
-      Nothing -> pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
+      Nothing -> do
+        log "Unauthorized error" 
+        pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
       Just address -> do
         valid <- isValid web3 signatureObj
 
@@ -175,27 +177,80 @@ getVouchers env { body: { signatureObj } } = do
                   }
               }
           case safeAddress of
-            Left _ -> pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
+            Left _ -> do
+              log "Safe Address not found"
+              pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
-              txs <- getTransactions env (SafeAddress $ C.SafeAddress sa)
-              let _ = spy "Transactions" txs
-              M.lookup (SafeAddress $ C.SafeAddress sa) db # fold # Right # pure
+              result <- xbgeClient.getVouchers
+                { query: { safeAddress: Just $ wrap $ wrap sa }
+                }
+              case result of
+                Left e -> do
+                  log ("XBGE API Error: " <> show e)
+                  pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
+                Right response -> case (response -# _.body) # traverse decryptVoucher of
+                  Just voucherEncrypted -> pure $ Right voucherEncrypted
+                  Nothing -> do
+                    log "Decryption error"
+                    pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
+
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
+
+decryptVoucher :: VoucherEncrypted -> Maybe Voucher
+decryptVoucher = todo
+
+-- do
+--   txs <- getTransactions env
+--     { fromAddress: SafeAddress $ C.SafeAddress sa
+--     , toAddress: SafeAddress $ C.SafeAddress sa
+--     }
+--   let _ = spy "Transactions" txs
+--   M.lookup (SafeAddress $ C.SafeAddress sa) db # fold # Right # pure
 
 --------------------------------------------------------------------------------
 
-getTransactions :: forall r. { | r } -> SafeAddress -> Aff (Maybe (Array Transfer))
-getTransactions env addr = do
+getTransactions
+  :: ServerEnv
+  -> { fromAddress :: SafeAddress
+     , toAddress :: SafeAddress
+     }
+  -> Aff (Maybe (Array Transfer))
+getTransactions env { fromAddress, toAddress } = do
   result <- queryGql "get-transactions"
-    { transfers: { where: { from: show sampleSafeAddress } } =>> { from, to, id, amount }
+    { transfers:
+        { where:
+            { from: show fromAddress
+            , to: show toAddress
+            }
+        } =>>
+          { from: GraphNode.from
+          , to: GraphNode.to
+          , id: GraphNode.id
+          , amount: GraphNode.amount
+          }
     }
   case result of
     Left _ -> pure Nothing
-    Right { transfers } -> pure $ Just transfers
+    Right { transfers } -> transfers # traverse mkTransfer # pure
+
+  where
+  mkTransfer :: GraphNode.Transfer -> Maybe Transfer
+  mkTransfer x = ado
+    from <- parseAddress x.from
+    to <- parseAddress x.to
+    amount <- fromDecimalStr x.amount
+    in { from, to, amount, id: x.id }
+
+type Transfer =
+  { from :: Address
+  , to :: Address
+  , id :: String
+  , amount :: BN
+  }
 
 xbgeClient = mkClient
   ( PC.defaultOpts
-      { baseUrl = "..."
+      { baseUrl = "https://2j0bcp5tr9.execute-api.eu-central-1.amazonaws.com/dev"
       }
   )
   xbgeSpec
@@ -219,25 +274,6 @@ queryGql
 queryGql s q = query_ "http://graph.circles.local/subgraphs/name/CirclesUBI/circles-subgraph" (Proxy :: Proxy Schema) s q
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
-
--- Symbols 
-prop :: Proxy "prop"
-prop = Proxy
-
-name :: Proxy "name"
-name = Proxy
-
-from :: Proxy "from"
-from = Proxy
-
-to :: Proxy "to"
-to = Proxy
-
-id :: Proxy "id"
-id = Proxy
-
-amount :: Proxy "amount"
-amount = Proxy
 
 -- {
 --   transfers (

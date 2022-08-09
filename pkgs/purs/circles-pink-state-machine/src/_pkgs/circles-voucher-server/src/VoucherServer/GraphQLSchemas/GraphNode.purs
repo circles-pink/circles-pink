@@ -2,9 +2,10 @@ module VoucherServer.GraphQLSchemas.GraphNode where
 
 import Prelude
 
-import CirclesPink.Data.Address (Address)
-import Data.BN (BN)
 import GraphQL.Client.Args (type (==>))
+import Type.Proxy (Proxy(..))
+
+type Address = String
 
 -- Schema
 type Schema =
@@ -21,5 +22,17 @@ type Transfer =
   { from :: Address
   , to :: Address
   , id :: String
-  , amount :: BN
+  , amount :: String
   }
+
+prop = Proxy :: Proxy "prop"
+
+name = Proxy :: Proxy "name"
+
+from = Proxy :: Proxy "from"
+
+to = Proxy :: Proxy "to"
+
+id = Proxy :: Proxy "id"
+
+amount = Proxy :: Proxy "amount"

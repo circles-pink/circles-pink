@@ -3,6 +3,7 @@ module VoucherServer.Specs.Xbge where
 import Prelude
 
 import CirclesPink.Data.SafeAddress as C
+import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Debug.Extra (todo)
 import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
@@ -43,9 +44,9 @@ xbgeSpec
            GET "/voucher-providers"
              { response :: Array VoucherProvider
              }
-       , getVouchersOfUser ::
-           GET "/vouchers-of-user/<safeAddress>"
-             { params :: { safeAddress :: SafeAddress }
+       , getVouchers ::
+           GET "/vouchers"
+             { query :: { safeAddress :: Maybe SafeAddress }
              , response :: Array VoucherEncrypted
              }
        }
