@@ -30,6 +30,7 @@ import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Data.ABC (A(..), B(..), C, D)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
+import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
 import Type.Proxy (Proxy(..))
 
@@ -55,7 +56,7 @@ modules =
       ]
   , "RemoteData" /\ join
       [ R.typeDef "--" (Proxy :: _ (RemoteData A B C D))
-      --, value "unwrap" [] (RemoteData.unwrap :: _ A B C D -> _)
+      , R.value "unwrap" [] (RemoteData.unwrap :: _ A B C D -> _)
       ]
   , "Data.IxGraph" /\
       join

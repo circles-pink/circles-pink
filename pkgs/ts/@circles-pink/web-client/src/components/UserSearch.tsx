@@ -1,12 +1,6 @@
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
-import {
-  fieldsOf,
-  isCaseV,
-  matchADT,
-  matchV,
-  isCase,
-} from '../purs-util';
+import { fieldsOf, isCaseV, matchADT, matchV, isCase } from '../purs-util';
 import {
   Address,
   CirclesGraph,
@@ -92,7 +86,6 @@ type TrustRelationsProps = RowProps & {
 
 const TrustRelations = (props: TrustRelationsProps) => null;
 
-
 // -----------------------------------------------------------------------------
 // UI Heart
 // -----------------------------------------------------------------------------
@@ -102,7 +95,6 @@ type HeartProps = RowProps & {
 };
 
 const Heart = (props: HeartProps) => null;
-
 
 // -----------------------------------------------------------------------------
 // UI UserSearch
@@ -142,7 +134,9 @@ export const UserSearch = (props: UserSearchProps) => {
 // Util
 // -----------------------------------------------------------------------------
 
-const getUsers = (userSearchResult: DashboardState['userSearchResult']): readonly UserIdent[] => {
+const getUsers = (
+  userSearchResult: DashboardState['userSearchResult']
+): readonly UserIdent[] => {
   const userSearchResult_ = _RemoteData.unwrap(userSearchResult);
 
   const users = matchV(userSearchResult_)({
