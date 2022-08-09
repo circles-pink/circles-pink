@@ -1,22 +1,4 @@
-module VoucherServer.Main
-  ( ErrGetVoucher
-  , GQLError(..)
-  , Message
-  , ServerConfig
-  , ServerEnv
-  , allowedDiff
-  , app
-  , db
-  , decrypt
-  , encrypt
-  , getTransactions
-  , getVouchers
-  , isValid
-  , main
-  , queryGql
-  , spec
-  )
-  where
+module VoucherServer.Main where
 
 import Prelude
 
@@ -24,7 +6,6 @@ import CirclesCore as CC
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.SafeAddress (sampleSafeAddress)
-import CirclesPink.Data.SafeAddress as C
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
@@ -33,7 +14,6 @@ import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.Either (Either(..))
-import Data.Foldable (fold)
 import Data.Generic.Rep (class Generic)
 import Data.Map (Map)
 import Data.Map as M
@@ -45,21 +25,25 @@ import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
 import Data.Traversable (traverse)
 import Data.Tuple.Nested ((/\))
-import Debug (spy, spyWith)
-import Debug.Extra (todo)
+import Debug (spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error, log, logShow)
+import Effect.Class.Console (error, log)
 import Effect.Exception as E
 import Effect.Now (now)
-import GraphQL.Client.Args (type (==>), (=>>))
+import Effect.Unsafe (unsafePerformEffect)
+import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
+import Node.Encoding (Encoding(..))
+import Node.FS.Sync (writeFile, writeTextFile)
 import Node.Process (exit, getEnv)
-import Payload.Client (mkClient)
+import Payload.Client (ClientError(..), mkClient)
 import Payload.Client as PC
-import Payload.ResponseTypes (Failure(..), ResponseBody(..))
+import Payload.Headers (Headers)
+import Payload.Headers as H
+import Payload.ResponseTypes (Failure(..), Response, ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
 import Payload.Server.Response as Response
@@ -69,7 +53,7 @@ import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
-import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
+import VoucherServer.Specs.Xbge (SafeAddress, xbgeSpec)
 import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
@@ -101,9 +85,9 @@ spec = Spec
 
 sampleVoucherOne :: Voucher
 sampleVoucherOne = Voucher
-  { voucherProviderId: VoucherProviderId "goodbuy"
-  , voucherAmount: VoucherAmount $ EurCent 25
-  , voucherCode: VoucherCode "bingo"
+  { providerId: VoucherProviderId "goodbuy"
+  , amount: VoucherAmount $ EurCent 25
+  , code: VoucherCode "bingo"
   , sold:
       { transactionId: "200-4"
       , safeAddress: show sampleSafeAddress
@@ -111,20 +95,10 @@ sampleVoucherOne = Voucher
       }
   }
 
-sampleVoucherTwo :: Voucher
-sampleVoucherTwo = Voucher
-  { voucherProviderId: VoucherProviderId "goodbuy"
-  , voucherAmount: VoucherAmount $ EurCent 15
-  , voucherCode: VoucherCode "bongo"
-  , sold:
-      { transactionId: "201-4"
-      , safeAddress: show sampleSafeAddress
-      , timestamp: "1659971225500"
-      }
-  }
+
 
 db :: Map SafeAddress (Array Voucher)
-db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucherOne, sampleVoucherTwo ] ]
+db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucherOne ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
@@ -184,14 +158,22 @@ getVouchers env { body: { signatureObj } } = do
               log "Safe Address not found"
               pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
-              result <- xbgeClient.getVouchers
+              result <- (xbgeClient env).getVouchers
                 { query: { safeAddress: Just $ wrap $ wrap sa }
                 }
               case result of
                 Left e -> do
-                  log ("XBGE API Error: " <> show e)
+                  case e of
+                    DecodeError {error, response } -> do
+                      log ("DecodeError: " <> show error)
+                      let x = unsafePerformEffect $ writeTextFile UTF8 "out.json" (_.body $ unwrap response) 
+                      pure unit
+                    StatusError _ -> log "StatusError"
+                    RequestError _ -> log "RequestError"
+                  log ("XBGE API Error: ")
+
                   pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
-                Right response -> case (response -# _.body) # traverse (decryptVoucher env.voucherCodeSecret) of
+                Right response -> case (response -# _.body # _.data) # traverse (decryptVoucher env.voucherCodeSecret) of
                   Just voucherEncrypted -> pure $ Right voucherEncrypted
                   Nothing -> do
                     log "Decryption error"
@@ -200,9 +182,9 @@ getVouchers env { body: { signatureObj } } = do
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
-decryptVoucher key (VoucherEncrypted x@{ voucherProviderId }) = ado
-  voucherCode <- decryptVoucherCode key x.voucherCode
-  in Voucher x { voucherCode = voucherCode }
+decryptVoucher key (VoucherEncrypted x) = ado
+  code <- pure $ coerce x.code --   decryptVoucherCode key x.code
+  in Voucher x { code = code }
 
 decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
 decryptVoucherCode key (VoucherCodeEncrypted s) = decrypt key s <#> VoucherCode
@@ -256,9 +238,11 @@ type Transfer =
   , amount :: BN
   }
 
-xbgeClient = mkClient
+
+xbgeClient env = mkClient
   ( PC.defaultOpts
-      { baseUrl = "https://2j0bcp5tr9.execute-api.eu-central-1.amazonaws.com/dev"
+      { baseUrl = env.xbgeEndpoint
+      , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
       }
   )
   xbgeSpec

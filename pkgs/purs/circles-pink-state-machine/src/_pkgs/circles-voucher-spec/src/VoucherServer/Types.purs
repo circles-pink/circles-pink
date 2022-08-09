@@ -79,9 +79,9 @@ derive newtype instance writeForeignVoucherCode :: WriteForeign VoucherCode
 
 newtype VoucherEncrypted =
   VoucherEncrypted
-    { voucherProviderId :: VoucherProviderId
-    , voucherAmount :: VoucherAmount
-    , voucherCode :: VoucherCodeEncrypted
+    { providerId :: VoucherProviderId
+    , amount :: VoucherAmount
+    , code :: VoucherCodeEncrypted
     , sold ::
         { transactionId :: String
         , safeAddress :: String
@@ -95,9 +95,9 @@ derive newtype instance readForeignVoucherEncrypted :: ReadForeign VoucherEncryp
 
 newtype Voucher =
   Voucher
-    { voucherProviderId :: VoucherProviderId
-    , voucherAmount :: VoucherAmount
-    , voucherCode :: VoucherCode
+    { providerId :: VoucherProviderId
+    , amount :: VoucherAmount
+    , code :: VoucherCode
     , sold ::
         { transactionId :: String
         , safeAddress :: String

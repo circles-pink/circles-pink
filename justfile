@@ -129,6 +129,9 @@ dev-voucher-server:
 	export GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
+	export VOUCHER_CODE_SECRET=""
+	export XBGE_AUTH_SECRET=0
+	export XBGE_ENDPOINT=0
 	node ./pkgs/ts/@circles-pink/state-machine/bin/voucher-server
 
 cors-proxy-server:
