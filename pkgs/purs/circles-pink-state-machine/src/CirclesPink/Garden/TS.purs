@@ -36,7 +36,7 @@ convertConfig cfg = C.CirclesConfig
 mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControl envVars cfg setState s a = do
   fold (cfg.onTrackingEvent <*> TE.fromAction s  a)
-
+ 
   localStorage <- getLocalStorage
   sessionStorage <- getSessionStorage
   let

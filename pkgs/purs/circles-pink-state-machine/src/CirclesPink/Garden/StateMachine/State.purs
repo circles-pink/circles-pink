@@ -117,7 +117,6 @@ type CirclesState = Variant
   , trusts :: TrustState
   , debug :: DebugState
   , landing :: LandingState
-  -- | CirclesProtocolDef GetState
   )
 
 type LandingState =
