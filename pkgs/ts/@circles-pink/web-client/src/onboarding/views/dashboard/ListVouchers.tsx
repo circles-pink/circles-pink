@@ -1,4 +1,5 @@
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { FadeIn, getIncrementor } from 'anima-react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
@@ -23,6 +24,7 @@ type SoldVoucher = {
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
+  providers: Array<VoucherProvider>;
   theme: Theme;
 };
 

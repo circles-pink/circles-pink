@@ -36,6 +36,7 @@ import {
   DefaultView,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
 import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { MarginY } from '../../components/helper';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -272,17 +273,6 @@ const FlexItemGrow = styled.div(() => [
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
-
-type MarginYProps = {
-  size: number;
-  children: ReactElement | ReactElement[] | string;
-};
-
-const MarginY = styled.div<MarginYProps>(({ size, children }) => [
-  css`
-    margin: ${size}rem 0;
-  `,
-]);
 
 const FlexRow = tw.div`flex lg:flex-row flex-col justify-between mb-4 gap-4`;
 const TrustIndicatorRow = tw.div`flex flex-row justify-between mx-16 my-4 gap-4`;
