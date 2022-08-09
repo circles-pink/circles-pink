@@ -15,26 +15,30 @@ export default {
   },
 } as ComponentMeta<typeof Onboarding>;
 
+const userConfig = {
+  onTrackingEvent: (te) => console.log("Tracking Event", te),
+};
+
 export const InfoGeneral = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.infoGeneral} />
+  <Onboarding {...args} initState={Steps.infoGeneral} userConfig={userConfig}/>
 );
 
 export const AskUsername = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.askUsername} />
+  <Onboarding {...args} initState={Steps.askUsername} userConfig={userConfig} />
 );
 
 export const AskEmail = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.askEmail} />
+  <Onboarding {...args} initState={Steps.askEmail} userConfig={userConfig} />
 );
 
 export const InfoSecurity = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.infoSecurity} />
+  <Onboarding {...args} initState={Steps.infoSecurity} userConfig={userConfig} />
 );
 
 export const MagicWords = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.magicWords} />
+  <Onboarding {...args} initState={Steps.magicWords} userConfig={userConfig} />
 );
 
 export const Submit = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.submit} />
+  <Onboarding {...args} initState={Steps.submit} userConfig={userConfig} />
 );
