@@ -11,7 +11,6 @@ import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
 import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
-
 newtype SafeAddress = SafeAddress C.SafeAddress
 
 derive instance newtypeSafeAddress :: Newtype SafeAddress _
@@ -27,7 +26,7 @@ derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
 --     <#> SafeAddress
 
 instance encodeParamSafeAddress :: EncodeParam SafeAddress where
-  encodeParam (SafeAddress x) =  encodeParam $ show x
+  encodeParam (SafeAddress x) = encodeParam $ show x
 
 xbgeSpec
   :: Spec
@@ -47,7 +46,7 @@ xbgeSpec
        , getVouchers ::
            GET "/vouchers"
              { query :: { safeAddress :: Maybe SafeAddress }
-             , response :: Array VoucherEncrypted
+             , response :: { data :: Array VoucherEncrypted }
              }
        }
 xbgeSpec = Spec
