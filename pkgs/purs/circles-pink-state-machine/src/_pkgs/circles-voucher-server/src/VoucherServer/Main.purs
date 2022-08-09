@@ -7,13 +7,16 @@ module VoucherServer.Main
   , allowedDiff
   , app
   , db
+  , decrypt
+  , encrypt
   , getTransactions
   , getVouchers
   , isValid
   , main
   , queryGql
   , spec
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -67,7 +70,7 @@ import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Specs.Xbge (SafeAddress(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherEncrypted(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 type Message =
@@ -158,7 +161,7 @@ getVouchers env { body: { signatureObj } } = do
       pure $ Left $ Error (Response.internalError (StringBody "INTERNAL SERVER ERROR"))
     Right cc -> case accountsRecover web3 signatureObj of
       Nothing -> do
-        log "Unauthorized error" 
+        log "Unauthorized error"
         pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
       Just address -> do
         valid <- isValid web3 signatureObj
@@ -188,7 +191,7 @@ getVouchers env { body: { signatureObj } } = do
                 Left e -> do
                   log ("XBGE API Error: " <> show e)
                   pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
-                Right response -> case (response -# _.body) # traverse decryptVoucher of
+                Right response -> case (response -# _.body) # traverse (decryptVoucher env.voucherCodeSecret) of
                   Just voucherEncrypted -> pure $ Right voucherEncrypted
                   Nothing -> do
                     log "Decryption error"
@@ -196,8 +199,13 @@ getVouchers env { body: { signatureObj } } = do
 
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
-decryptVoucher :: VoucherEncrypted -> Maybe Voucher
-decryptVoucher = todo
+decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
+decryptVoucher key (VoucherEncrypted x@{ voucherProviderId }) = ado
+  voucherCode <- decryptVoucherCode key x.voucherCode
+  in Voucher x { voucherCode = voucherCode }
+
+decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
+decryptVoucherCode key (VoucherCodeEncrypted s) = decrypt key s <#> VoucherCode
 
 -- do
 --   txs <- getTransactions env
@@ -320,6 +328,9 @@ type ServerConfig =
   , gardenProxyFactoryAddress :: String <: "GARDEN_PROXY_FACTORY_ADRESS"
   , gardenSafeMasterAddress :: String <: "GARDEN_SAFE_MASTER_ADDRESS"
   , gardenEthereumNodeWebSocket :: String <: "GARDEN_ETHEREUM_NODE_WS"
+  , voucherCodeSecret :: String <: "VOUCHER_CODE_SECRET"
+  , xbgeAuthSecret :: String <: "XBGE_AUTH_SECRET"
+  , xbgeEndpoint :: String <: "XBGE_ENDPOINT"
   )
 
 type ServerEnv =
@@ -333,7 +344,22 @@ type ServerEnv =
   , gardenProxyFactoryAddress :: String
   , gardenSafeMasterAddress :: String
   , gardenEthereumNodeWebSocket :: String
+  , voucherCodeSecret :: String
+  , xbgeAuthSecret :: String
+  , xbgeEndpoint :: String
   }
+
+--------------------------------------------------------------------------------
+
+foreign import decryptImpl :: forall z. z -> (String -> z) -> String -> String -> z
+
+decrypt :: String -> String -> Maybe String
+decrypt = decryptImpl Nothing Just
+
+foreign import encryptImpl :: forall z. z -> (String -> z) -> String -> String -> z
+
+encrypt :: String -> String -> Maybe String
+encrypt = encryptImpl Nothing Just
 
 --------------------------------------------------------------------------------
 
