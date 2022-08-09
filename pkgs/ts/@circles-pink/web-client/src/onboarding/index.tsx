@@ -170,8 +170,8 @@ const OnboardingContent = ({
 
   const cfg = {
     ...cfg_,
-    onTrackingEvent: !userConfig?.onTrackingEvent
-      ? Just.create((x: TrackingEvent) => {
+    onTrackingEvent: userConfig?.onTrackingEvent
+      ? Just.create((x: TrackingEvent) => () => {
           if (!userConfig?.onTrackingEvent) return;
           return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
         })
