@@ -38,7 +38,11 @@ import {
   TrustUserList,
 } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
-import { JustifyBetweenCenter, TwoButtonRow } from '../../../components/helper';
+import {
+  JustifyBetweenCenter,
+  MarginY,
+  TwoButtonRow,
+} from '../../../components/helper';
 import { Send, SendProps } from './Send';
 import { Receive } from './Receive';
 import { Balance } from './Balance';
@@ -53,6 +57,30 @@ import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
 import { VoucherOffer } from '@circles-pink/state-machine/output/VoucherServer.Types';
+
+const VOUCHER_PROVIDERS = [
+  {
+    id: 'goodbuy',
+    name: 'GoodBuy',
+    logoUrl:
+      'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435',
+    shopUrl: 'https://www.goodbuy.eu/',
+    availableOffers: [
+      {
+        amount: 5,
+        countAvailable: 29,
+      },
+      {
+        amount: 15,
+        countAvailable: 75,
+      },
+      {
+        amount: 25,
+        countAvailable: 97,
+      },
+    ],
+  },
+];
 
 // -----------------------------------------------------------------------------
 // Types
@@ -399,38 +427,14 @@ export const Dashboard = ({
                 title="Voucher"
                 icon={mdiGiftOutline}
               >
-                <BuyVouchers
+                <MarginY size={2}>
+                  <BuyVouchers theme={theme} providers={VOUCHER_PROVIDERS} />
+                </MarginY>
+                <ListVouchers
                   theme={theme}
-                  providers={[
-                    {
-                      id: 'goodbuy',
-                      name: 'GoodBuy',
-                      logoUrl:
-                        'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435',
-                      shopUrl: 'https://www.goodbuy.eu/',
-                      availableOffers: [
-                        {
-                          amount: 5,
-                          countAvailable: 67,
-                        },
-                        {
-                          amount: 15,
-                          countAvailable: 75,
-                        },
-                        {
-                          amount: 25,
-                          countAvailable: 97,
-                        },
-                      ],
-                    },
-                  ]}
+                  providers={VOUCHER_PROVIDERS}
+                  vouchersResult={state.vouchersResult}
                 />
-                <TopMargin>
-                  <ListVouchers
-                    theme={theme}
-                    vouchersResult={state.vouchersResult}
-                  />
-                </TopMargin>
               </LightColorFrame>
             </TopMargin>
           </FadeIn>

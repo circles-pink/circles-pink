@@ -1,5 +1,9 @@
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import {
+  VoucherOffer,
+  VoucherProvider,
+} from '@circles-pink/state-machine/output/VoucherServer.Types';
 import React, { ReactElement } from 'react';
+import { css, styled } from 'twin.macro';
 import { Button } from '../../../components/forms';
 import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
@@ -19,17 +23,78 @@ export const BuyVouchers = ({
       {providers.map(provider => {
         return (
           <div key={provider.id}>
-            <h2>{provider.name}</h2>
-            {provider.availableOffers.map(offer => {
-              return (
-                <div key={offer.amount}>
-                  {offer.countAvailable}x: {offer.amount}€ <Button>BUY!</Button>
-                </div>
-              );
-            })}
+            <OfferContainer elementCount={provider.availableOffers.length}>
+              {provider.availableOffers.map(offer => {
+                return (
+                  <Offer theme={theme} key={offer.amount}>
+                    <Logo src={provider.logoUrl} />
+                    <div>
+                      {offer.amount}€ {provider.name} voucher
+                    </div>
+                    <div>{offer.countAvailable} vouchers left!</div>
+                  </Offer>
+                );
+              })}
+            </OfferContainer>
           </div>
         );
       })}
     </>
   );
 };
+
+type OfferContainerProps = {
+  elementCount: number;
+};
+
+const OfferContainer = styled.div<OfferContainerProps>(({ elementCount }) => [
+  css`
+    display: grid;
+    grid-template-columns: repeat(${elementCount}, 1fr);
+  `,
+]);
+
+type OfferProps = {
+  theme: Theme;
+};
+
+const Offer = styled.button<OfferProps>(({ theme }) => {
+  const borderWithoutLeft = `
+    border-top: 1px solid ${theme.darkColor};
+    border-bottom: 1px solid ${theme.darkColor};
+    border-right: 1px solid ${theme.darkColor};
+  `;
+
+  return [
+    css`
+      outline: none;
+      border: none;
+      cursor: pointer;
+      font-size: 2rem;
+      color: ${theme.textColorDark};
+      background-color: ${theme.lightColor};
+      ${borderWithoutLeft}
+      padding: 1rem;
+      &:first-of-type {
+        border: 1px solid ${theme.darkColor};
+      }
+      &:last-of-type {
+        ${borderWithoutLeft}
+      }
+      &:hover {
+        background-color: ${theme.textColorLight};
+        color: ${theme.baseColor};
+      }
+    `,
+  ];
+});
+
+// -----------------------------------------------------------------------------
+// UI Logo
+// -----------------------------------------------------------------------------
+
+const Logo = styled.img(() => [
+  css`
+    max-width: 10rem;
+  `,
+]);

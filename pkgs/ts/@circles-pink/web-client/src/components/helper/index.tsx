@@ -1,4 +1,5 @@
-import tw from 'twin.macro';
+import { ReactElement } from 'react';
+import tw, { css, styled } from 'twin.macro';
 
 // -----------------------------------------------------------------------------
 // Flex
@@ -27,3 +28,18 @@ export const Status = tw.div`text-red-600`;
 
 export const TwoButtonRow = tw.span`grid grid-cols-2 gap-2`;
 export const ButtonRow = tw.span`grid grid-flow-col gap-2`;
+
+// -----------------------------------------------------------------------------
+// Margin
+// -----------------------------------------------------------------------------
+
+type MarginYProps = {
+  size: number;
+  children: ReactElement | ReactElement[] | string;
+};
+
+export const MarginY = styled.div<MarginYProps>(({ size, children }) => [
+  css`
+    margin: ${size}rem 0;
+  `,
+]);
