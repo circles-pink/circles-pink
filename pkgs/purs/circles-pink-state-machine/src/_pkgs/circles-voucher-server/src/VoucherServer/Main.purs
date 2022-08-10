@@ -50,7 +50,7 @@ import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
-import VoucherServer.Spec (VoucherServerSpec, spec)
+import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (SafeAddress, xbgeSpec)
 import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
