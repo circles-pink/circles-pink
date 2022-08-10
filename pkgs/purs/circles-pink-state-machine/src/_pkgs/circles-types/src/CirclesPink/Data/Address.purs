@@ -17,6 +17,7 @@ import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
+import Simple.JSON (class ReadForeign, class WriteForeign)
 import TypedEnv (class ParseValue)
 
 --import Payload.Server.Params (class DecodeParam, decodeParam)
@@ -30,8 +31,8 @@ derive newtype instance eq :: Eq Address
 derive newtype instance ord :: Ord Address
 derive newtype instance decodeJson :: DecodeJson Address
 derive newtype instance encodeJson :: EncodeJson Address
--- derive newtype instance readForeignAddress :: ReadForeign Address
--- derive newtype instance writeForeignAddress :: WriteForeign Address
+derive newtype instance readForeignAddress :: ReadForeign Address
+derive newtype instance writeForeignAddress :: WriteForeign Address
 
 
 instance parseValueAddress :: ParseValue Address where
