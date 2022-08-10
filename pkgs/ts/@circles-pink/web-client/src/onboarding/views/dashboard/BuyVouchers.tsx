@@ -7,7 +7,7 @@ import {
 import React, { ReactElement } from 'react';
 import { css, styled } from 'twin.macro';
 import { Button } from '../../../components/forms';
-import { Claim } from '../../../components/text';
+import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
 type BuyVouchersProps = {
@@ -22,6 +22,10 @@ export const BuyVouchers = ({
   const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
     providers as any
   );
+
+  if (providers_.length === 0) {
+    return <SubClaim>Currently there were no vouchers available.</SubClaim>;
+  }
 
   return (
     <>

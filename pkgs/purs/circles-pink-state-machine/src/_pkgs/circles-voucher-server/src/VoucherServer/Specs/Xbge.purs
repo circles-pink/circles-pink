@@ -46,7 +46,7 @@ xbgeSpec
              , response :: { data :: VoucherEncrypted }
              }
        , getVoucherProviders ::
-           GET "/voucher-providers"
+           GET "/voucher/providers"
              { response :: { data :: Array VoucherProvider }
              }
        , getVouchers ::

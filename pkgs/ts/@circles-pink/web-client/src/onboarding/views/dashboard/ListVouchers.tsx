@@ -1,6 +1,7 @@
 import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import {
   Voucher,
   VoucherProvider,
@@ -8,11 +9,8 @@ import {
 import { FadeIn, getIncrementor } from 'anima-react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
-import { Claim } from '../../../components/text';
+import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
-
-const EXAMPLE_LOGO =
-  'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435';
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
@@ -23,9 +21,13 @@ type ListVouchersProps = {
 export const ListVouchers = ({
   vouchersResult,
   theme,
+  providers,
 }: ListVouchersProps): ReactElement | null => {
   const [vouchers, setVouchers] = useState<Array<Voucher>>(
     mapResult(vouchersResult)
+  );
+  const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
+    providers as any
   );
 
   useEffect(() => {
@@ -37,20 +39,33 @@ export const ListVouchers = ({
   // animation
   const getDelay = getIncrementor(0, 0.25);
 
+  if (vouchers.length === 0) {
+    return <SubClaim>You don't have any vouchers yet.</SubClaim>;
+  }
+
   return (
     <>
       <Claim color={theme.baseColor}>Your Vouchers:</Claim>
       <VoucherContainer>
-        {vouchers.map(voucher => (
-          <FadeIn orientation={'left'} delay={getDelay()} key={voucher.code}>
-            <VoucherCard
-              theme={theme}
-              left={<Logo src={EXAMPLE_LOGO} />}
-              center={<VoucherContent theme={theme} voucher={voucher} />}
-              right={<VoucherAmount amount={voucher.amount} theme={theme} />}
-            />
-          </FadeIn>
-        ))}
+        {vouchers.map(voucher => {
+          const provider = mapInfo(providers_, voucher.providerId);
+          return (
+            <FadeIn orientation={'left'} delay={getDelay()} key={voucher.code}>
+              <VoucherCard
+                theme={theme}
+                left={<Logo src={provider?.logoUrl} />}
+                center={
+                  <VoucherContent
+                    provider={provider}
+                    theme={theme}
+                    voucher={voucher}
+                  />
+                }
+                right={<VoucherAmount amount={voucher.amount} theme={theme} />}
+              />
+            </FadeIn>
+          );
+        })}
       </VoucherContainer>
     </>
   );
@@ -68,6 +83,18 @@ const mapResult = (
     default:
       return [];
   }
+};
+
+const mapInfo = (
+  providers: Array<VoucherProvider>,
+  providerId: string
+): VoucherProvider | null => {
+  providers.forEach(provider => {
+    if (provider.id === providerId) {
+      return provider;
+    }
+  });
+  return null;
 };
 
 // -----------------------------------------------------------------------------
@@ -168,29 +195,37 @@ const Logo = styled.img(() => [
 
 type VoucherContentProps = {
   voucher: Voucher;
+  provider: VoucherProvider | null;
   theme: Theme;
 };
 
 const VoucherContent = ({
   voucher,
+  provider,
   theme,
 }: VoucherContentProps): ReactElement => {
   return (
     <VoucherContentContainer theme={theme}>
-      <VoucherText theme={theme}>{voucher.providerId}</VoucherText>
-      <VoucherText theme={theme}>{voucher.code}</VoucherText>
+      <VoucherText fontSize={1.25} theme={theme}>
+        {provider ? provider.name : voucher.providerId}
+      </VoucherText>
+      <VoucherText fontSize={0.75} theme={theme}>
+        {voucher.code}
+      </VoucherText>
     </VoucherContentContainer>
   );
 };
 
-const VoucherText = styled.p<{ theme: Theme }>(({ theme }) => [
-  css`
-    color: ${theme.textColorDark};
-    font-size: 1.25rem;
-    margin: 0;
-    padding: 0;
-  `,
-]);
+const VoucherText = styled.p<{ theme: Theme; fontSize: number }>(
+  ({ theme }) => [
+    css`
+      color: ${theme.textColorDark};
+      font-size: 1.25rem;
+      margin: 0;
+      padding: 0;
+    `,
+  ]
+);
 
 const VoucherContentContainer = styled.div<{ theme: Theme }>(({ theme }) => [
   css`
