@@ -9,6 +9,7 @@ import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
 import Payload.Client.QueryParams (class EncodeQueryParam, encodeQueryParam)
 import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
+import TypedEnv (class ParseValue)
 import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
 newtype Address = Address C.Address
@@ -19,6 +20,7 @@ derive newtype instance ordAddress :: Ord Address
 derive newtype instance eqAddress :: Eq Address
 derive newtype instance showAddress :: Show Address
 derive newtype instance writeForeignAddress :: WriteForeign Address
+derive newtype instance parseValueAddress :: ParseValue Address
 
 -- instance decodeParamAddress :: DecodeParam Address where
 --   decodeParam x = decodeParam x

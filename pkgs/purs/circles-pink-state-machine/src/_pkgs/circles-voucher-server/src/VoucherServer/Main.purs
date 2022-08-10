@@ -2,6 +2,7 @@ module VoucherServer.Main (main) where
 
 import Prelude
 
+import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
@@ -199,7 +200,7 @@ getVouchers env { body: { signatureObj } } = do
             Left _ -> do
               log "Safe Address not found"
               pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
-            Right sa -> do
+            Right (SafeAddress sa) -> do
               result <- xbgeClient.getVouchers
                 { query: { safeAddress: Just $ wrap $ wrap sa }
                 }
@@ -394,10 +395,10 @@ app = do
       liftEffect $ exit 1
     Right parsedEnv -> do
       _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
-      -- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
-      --   { getVouchers: getVouchers parsedEnv
-      --   , getVoucherProviders: getVoucherProviders parsedEnv
-      --   }
+      _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
+        { getVouchers: getVouchers parsedEnv
+        , getVoucherProviders: getVoucherProviders parsedEnv
+        }
       pure $ Right unit
 
 main :: Effect Unit
