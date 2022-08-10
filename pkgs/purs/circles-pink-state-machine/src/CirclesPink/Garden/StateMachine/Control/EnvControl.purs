@@ -19,6 +19,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , ErrGetSafeAddress
   , ErrGetSafeStatus
   , ErrGetUsers
+  , ErrGetVoucherProviders
   , ErrGetVouchers
   , ErrInvalidMnemonic
   , ErrIsFunded
@@ -49,6 +50,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , GetSafeStatus
   , GetTimestamp
   , GetUsers
+  , GetVoucherProviders
   , GetVouchers
   , IsFunded
   , IsTrusted
@@ -75,6 +77,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , UserSearch
   , _errDecode
   , _errDecrypt
+  , _errGetVoucherProviders
   , _errGetVouchers
   , _errKeyNotFound
   , _errNoStorage
@@ -88,7 +91,7 @@ import Prelude
 import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, UserOptions, ErrParseAddress)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
-import CirclesPink.Data.User (User(..))
+import CirclesPink.Data.User (User)
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Except.Checked (ExceptV)
@@ -97,10 +100,9 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
---import Payload.Client (ClientError)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import VoucherServer.Types (Voucher)
+import VoucherServer.Types (Voucher, VoucherProvider)
 import Web3 (Message, SignatureObj)
 
 --------------------------------------------------------------------------------
@@ -219,6 +221,14 @@ type GetVouchers m = forall r. SignatureObj -> ExceptV (ErrGetVouchers + r) m (A
 
 --------------------------------------------------------------------------------
 
+-- Get VoucherProviders
+
+type ErrGetVoucherProviders r = (errGetVoucherProviders :: String | r)
+
+type GetVoucherProviders m = forall r. SignatureObj -> ExceptV (ErrGetVoucherProviders + r) m (Array VoucherProvider)
+
+--------------------------------------------------------------------------------
+
 -- Save Session
 -- type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
 
@@ -334,6 +344,9 @@ _errDecrypt = inj (Proxy :: _ "errDecrypt") unit
 _errGetVouchers :: forall r. String -> Variant (ErrGetVouchers r)
 _errGetVouchers = inj (Proxy :: _ "errGetVouchers")
 
+_errGetVoucherProviders :: forall r. String -> Variant (ErrGetVoucherProviders r)
+_errGetVoucherProviders = inj (Proxy :: _ "errGetVoucherProviders")
+
 --------------------------------------------------------------------------------
 
 type EnvControl m =
@@ -358,6 +371,7 @@ type EnvControl m =
   , removeTrustConnection :: RemoveTrustConnection m
   , signChallenge :: SignChallenge m
   , getVouchers :: GetVouchers m
+  , getVoucherProviders :: GetVoucherProviders m
   , saveSession :: SaveSession m
   , restoreSession :: RestoreSession m
   , getBalance :: GetBalance m

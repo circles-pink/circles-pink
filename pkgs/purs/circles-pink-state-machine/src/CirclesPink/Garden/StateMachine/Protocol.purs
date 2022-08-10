@@ -55,6 +55,7 @@ type CirclesProtocol = P.Protocol
         , redeploySafeAndToken :: P.Action ("dashboard" :> Nil')
         , expandTrustNetwork :: P.Action ("dashboard" :> Nil')
         , getVouchers :: P.Action ("dashboard" :> Nil')
+        , getVoucherProviders :: P.Action ("dashboard" :> Nil')
         )
   , login ::
       P.State

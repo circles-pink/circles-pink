@@ -105,6 +105,7 @@ type CirclesAction = Variant
         , redeploySafeAndToken :: Unit
         , expandTrustNetwork :: String
         , getVouchers :: String
+        , getVoucherProviders :: Unit
         )
   , login ::
       Variant

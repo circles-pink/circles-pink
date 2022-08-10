@@ -15,7 +15,7 @@ import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl, GetVoucherProviders)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
@@ -26,6 +26,7 @@ import Data.Array (catMaybes, drop, take)
 import Data.Array as A
 import Data.BN (BN)
 import Data.BN as BN
+import Data.DateTime.Instant (unInstant)
 import Data.Graph (EitherV)
 import Data.Graph.Errors as GE
 import Data.Identity (Identity)
@@ -35,11 +36,13 @@ import Data.IxGraph as G
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Number.Format as N
 import Data.Pair ((~))
 import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
 import Data.These (These(..), maybeThese)
+import Effect.Now (now)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Safe.Coerce (coerce)
@@ -163,6 +166,7 @@ dashboard
      , addTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , removeTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , getVouchers :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , getVoucherProviders :: HandlerGetVoucherProviders m
      , getBalance :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , getUBIPayout :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
      , transfer ::
@@ -196,6 +200,7 @@ dashboard env@{ trustGetNetwork } =
   , addTrustConnection
   , removeTrustConnection
   , getVouchers
+  , getVoucherProviders: getVoucherProviders env
   , getBalance
   , getUBIPayout
   , getUsers
@@ -245,7 +250,7 @@ dashboard env@{ trustGetNetwork } =
         lift
           $ set \st' ->
               let
-                ownAddress = st'.user -# _.safeAddress 
+                ownAddress = st'.user -# _.safeAddress
 
                 eitherNewTrusts =
                   let
@@ -483,6 +488,22 @@ dashboard env@{ trustGetNetwork } =
     This _ -> Right g
     That tc -> G.deleteEdge (getIndex tc) g
     Both tn _ -> G.updateEdge (TrustConnection (wrap tn.safeAddress ~ centerAddress) initTrusted) g
+
+--------------------------------------------------------------------------------
+
+type HandlerGetVoucherProviders m = ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
+
+getVoucherProviders :: forall m. MonadCircles m => EnvControl m -> HandlerGetVoucherProviders m
+getVoucherProviders env set st _ =
+  void do
+    runExceptT do
+      msg <- env.getTimestamp # lift <#> unInstant >>> unwrap >>> N.toString 
+      signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
+      _ <-
+        env.getVoucherProviders signatureObj
+          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { voucherProvidersResult = r })
+          # retryUntil env (const { delay: 1000 }) (\_ n -> n == 0) 0
+      pure unit
 
 --------------------------------------------------------------------------------
 

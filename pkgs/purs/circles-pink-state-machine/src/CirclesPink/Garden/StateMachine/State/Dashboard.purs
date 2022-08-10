@@ -26,10 +26,12 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , TrustRemoveResult
   , Trusts
   , UserSearchResult
+  , VoucherProvidersResult
   , VouchersResult
   , _dashboard
   , initDashboard
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -40,7 +42,7 @@ import CirclesPink.Data.Trust (Trust)
 import CirclesPink.Data.TrustConnection (TrustConnection)
 import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (ErrGetVouchers, ErrGetVoucherProviders)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.BN (BN)
 import Data.IxGraph (IxGraph)
@@ -54,7 +56,7 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import VoucherServer.Types (Voucher)
+import VoucherServer.Types (Voucher, VoucherProvider)
 
 --------------------------------------------------------------------------------
 -- DashboardState
@@ -76,6 +78,7 @@ type DashboardState =
   , redeploySafeResult :: RedeploySafeResult
   , redeployTokenResult :: RedeployTokenResult
   , vouchersResult :: VouchersResult
+  , voucherProvidersResult :: VoucherProvidersResult
   }
 
 type Trusts = Map Address Trust
@@ -120,6 +123,7 @@ initDashboard id =
         , redeploySafeResult: _notAsked unit
         , redeployTokenResult: _notAsked unit
         , vouchersResult: _notAsked unit
+        , voucherProvidersResult: _notAsked unit
         }
 
 --------------------------------------------------------------------------------
@@ -190,6 +194,12 @@ type ErrTokenTransfer r = EnvControl.ErrTransfer + r
 --------------------------------------------------------------------------------
 
 type VouchersResult = RemoteReportV (ErrGetVouchers + ()) (Array Voucher)
+
+--------------------------------------------------------------------------------
+-- VoucherProvidersResult
+--------------------------------------------------------------------------------
+
+type VoucherProvidersResult = RemoteReportV (ErrGetVoucherProviders + ()) (Array VoucherProvider)
 
 --------------------------------------------------------------------------------
 -- Constructors
