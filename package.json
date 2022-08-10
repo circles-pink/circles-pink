@@ -12,6 +12,7 @@
     "pkgs/ts/storybook",
     "pkgs/ts/cli",
     "pkgs/ts/@circles-pink/web-client",
+    "pkgs/ts/@circles-pink/create-organization",
     "pkgs/ts/cors-proxy",
     "pkgs/ts/circles-directus",
     "pkgs/ts/assets",
