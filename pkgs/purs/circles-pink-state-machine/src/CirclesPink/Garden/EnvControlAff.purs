@@ -11,7 +11,7 @@ import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
 import CirclesPink.Data.User (User(..))
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
@@ -107,6 +107,7 @@ env envenv@{ request, envVars } =
   , removeTrustConnection
   , signChallenge
   , getVouchers
+  , getVoucherProviders
   , saveSession
   , restoreSession
   , getBalance
@@ -372,6 +373,21 @@ env envenv@{ request, envVars } =
     res <- client.getVouchers { body: { signatureObj } } # ExceptT # withExceptT (show >>> _errGetVouchers)
     -- let _ = spy "res" (res -# _.body)
     pure (res -# _.body)
+
+  getVoucherProviders :: EnvControl.GetVoucherProviders Aff
+  getVoucherProviders signatureObj = do
+    let
+      baseURL = envVars -# _.voucherServerHost
+      client = mkClient
+        ( defaultOpts
+            { baseUrl = baseURL
+            , extraHeaders = H.fromFoldable [ "Target-URL" /\ "http://localhost:4000/" ]
+            }
+        )
+        spec
+    res <- client.getVoucherProviders { body: { signatureObj } } # ExceptT # withExceptT (show >>> _errGetVoucherProviders)
+    pure (res -# _.body)
+
 
   -- saveSession :: EnvControl.SaveSession Aff
   -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey

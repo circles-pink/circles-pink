@@ -50,6 +50,7 @@ testEnv =
   , removeTrustConnection: \_ _ _ -> pure ""
   , signChallenge: \_ _ -> pure (SignatureObj { message: Message "", messageHash: Hash "", v: "", r: "", s: "", signature: "" })
   , getVouchers: \_ -> pure []
+  , getVoucherProviders: \_ -> pure []
   , saveSession: \_ -> pure unit
   , restoreSession: pure P.sampleKey
   , getBalance: \_ _ -> pure $ unsafePartial $ fromJust $ B.fromDecimalStr "34141123134632464543156"
@@ -104,6 +105,7 @@ liftEnv f e =
   , restoreSession: (mapExceptT f) e.restoreSession
   , signChallenge: compose2 f e.signChallenge
   , getVouchers: compose (mapExceptT f) e.getVouchers
+  , getVoucherProviders: compose (mapExceptT f) e.getVoucherProviders
   , getBalance: compose2 (mapExceptT f) e.getBalance
   , checkUBIPayout: compose2 (mapExceptT f) e.checkUBIPayout
   , requestUBIPayout: compose2 (mapExceptT f) e.requestUBIPayout
