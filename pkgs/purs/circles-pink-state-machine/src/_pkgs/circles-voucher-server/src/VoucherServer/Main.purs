@@ -19,7 +19,7 @@ import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (un, unwrap, wrap)
+import Data.Newtype (class Newtype, un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
@@ -55,11 +55,11 @@ import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
-import VoucherServer.GraphQLSchemas.GraphNode (Schema)
+import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Frackles(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -261,12 +261,7 @@ getTransactions env { toAddress } = do
         { where:
             { to: show toAddress
             }
-        } =>>
-          { from: GraphNode.from
-          , to: GraphNode.to
-          , id: GraphNode.id
-          , amount: GraphNode.amount
-          }
+        } =>> { from, to, id, amount}
     }
   case result of
     Left e -> pure $ Left $ show e
@@ -278,14 +273,48 @@ getTransactions env { toAddress } = do
     from <- Address <$> parseAddress x.from
     to <- Address <$> parseAddress x.to
     amount <- fromDecimalStr x.amount
-    in Transfer { from, to, amount: Frackles amount, id: x.id }
+    in Transfer { from, to, amount: Frackles amount, id: TransferId x.id }
 
 newtype Transfer = Transfer
   { from :: Address
   , to :: Address
-  , id :: String
+  , id :: TransferId
   , amount :: Frackles
   }
+
+
+--------------------------------------------------------------------------------
+
+getTransferMeta
+  :: ServerEnv
+  -> { transferId :: TransferId
+     }
+  -> Aff (Either String (Array TransferMeta))
+getTransferMeta env { transferId } = do
+  result <- queryGql env "get-transfer-meta"
+    { notifications:
+        { where:
+            { transfer: un TransferId transferId
+            }
+        } =>> { id, transactionHash, time}
+    }
+  case result of
+    Left e -> pure $ Left $ show e
+    Right { notifications } -> notifications # traverse mkTransferMeta # pure
+
+  where
+  mkTransferMeta :: GraphNode.Notification -> Either String TransferMeta
+  mkTransferMeta x = note "Parse error" ado
+    time <- todo
+    in TransferMeta { time, transactionHash: x.transactionHash, id: x.id  }
+
+newtype TransferMeta = TransferMeta {
+  id :: String,
+  transactionHash :: String,
+  time :: Instant
+}
+
+derive instance newtypeTransferMeta :: Newtype TransferMeta _
 
 --------------------------------------------------------------------------------
 
