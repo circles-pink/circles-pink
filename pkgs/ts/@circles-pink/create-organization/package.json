@@ -1,0 +1,10 @@
+{
+  "name": "@circles-pink/create-organization",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@circles/core": "2.11.1",
+    "@circles/timecircles": "^1.0.6",
+    "web3": "^1.7.5"
+  }
+}
