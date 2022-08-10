@@ -131,6 +131,7 @@ export const Dashboard = ({
     act(A._dashboard(A._getTrusts(unit)));
     act(A._dashboard(A._getUBIPayout(unit)));
     act(A._dashboard(A._getVouchers(getTimestamp())));
+    act(A._dashboard(A._getVoucherProviders(unit)))
 
     // Start polling tasks
     const balancePolling = setInterval(() => {

@@ -33,6 +33,7 @@ import Effect.Unsafe (unsafePerformEffect)
 import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
+import GunDB (offline)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Node.Process (exit, getEnv)
@@ -77,7 +78,20 @@ isValid web3 (SignatureObj { message, messageHash }) = do
   pure (messageValid && timestampValid)
 
 getVoucherProviders :: ServerEnv -> {} -> Aff (Either Failure (Array VoucherProvider))
-getVoucherProviders _ _ = pure $ pure []
+getVoucherProviders env _ = do
+  let
+    xbgeClient = mkClient
+      ( PC.defaultOpts
+          { baseUrl = env.xbgeEndpoint
+          , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
+          , logLevel = LogDebug
+          }
+      )
+      xbgeSpec
+  result <- xbgeClient.getVoucherProviders {}
+  case result of
+    Left e -> pure $ Left $ Error  (Response.internalError (StringBody "Internal error"))
+    Right response -> pure $ Right (response -# _.body # _.data)
 
 getVouchers :: ServerEnv -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers env { body: { signatureObj } } = do

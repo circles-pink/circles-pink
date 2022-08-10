@@ -44,7 +44,7 @@ xbgeSpec
              }
        , getVoucherProviders ::
            GET "/voucher-providers"
-             { response :: Array VoucherProvider
+             { response :: {data :: Array VoucherProvider}
              }
        , getVouchers ::
            GET "/vouchers?safeAddress=<safeAddress>"
