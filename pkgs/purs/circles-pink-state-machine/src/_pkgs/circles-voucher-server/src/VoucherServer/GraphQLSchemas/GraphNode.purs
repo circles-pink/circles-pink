@@ -11,8 +11,7 @@ type Address = String
 type Schema =
   { transfers ::
       { where ::
-          { from :: Address
-          , to :: Address
+          { to :: Address
           }
       }
         ==> Array Transfer

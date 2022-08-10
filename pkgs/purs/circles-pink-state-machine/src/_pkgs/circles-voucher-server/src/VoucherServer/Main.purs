@@ -3,17 +3,20 @@ module VoucherServer.Main (main) where
 import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address, parseAddress)
+import CirclesPink.Data.Address (Address(..), parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (mapExceptT, runExceptT)
+import Control.Comonad.Env (ask)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
+import Data.Array as A
 import Data.BN (BN, fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
-import Data.Either (Either(..))
+import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
+import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
@@ -23,12 +26,14 @@ import Data.Time.Duration (Seconds(..))
 import Data.Traversable (traverse)
 import Data.Tuple.Nested ((/\))
 import Debug (spyWith)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error, log)
+import Effect.Class.Console (error, log, logShow)
 import Effect.Exception as E
 import Effect.Now (now)
+import Effect.Timer (setInterval)
 import Effect.Unsafe (unsafePerformEffect)
 import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.Query (query_)
@@ -37,7 +42,7 @@ import GunDB (offline)
 import Node.Encoding (Encoding(..))
 import Node.FS.Sync (writeTextFile)
 import Node.Process (exit, getEnv)
-import Payload.Client (ClientError(..), mkClient)
+import Payload.Client (ClientError(..), Options, mkClient)
 import Payload.Client as PC
 import Payload.Client.ClientApi (class ClientApi)
 import Payload.Client.Options (LogLevel(..))
@@ -77,20 +82,52 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
   pure (messageValid && timestampValid)
 
+syncVouchers' :: ServerEnv -> ExceptT String Aff Unit
+syncVouchers' env = do
+  let
+    xbgeClient = mkClient (getOptions env) xbgeSpec
+
+  txs <- getTransactions env { toAddress: env.xbgeSafeAddress }
+    # ExceptT
+  vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
+    # ExceptT
+    # withExceptT show
+    <#> (\response -> response -# _.body # _.data)
+
+  let
+    vouchersLookup = vouchers
+      <#> (\all@(VoucherEncrypted { sold: { transactionId } }) -> transactionId /\ all)
+      # M.fromFoldable
+
+    unfinalizedTxs = txs # A.filter (\{id} -> not $ M.member id vouchersLookup)
+
+  --unfinalizedTxs # traverse
+
+  logShow unfinalizedTxs
+
+  pure unit
+
+syncVouchers :: ServerEnv -> Aff Unit
+syncVouchers env = do
+  result <- runExceptT $ syncVouchers' env
+  case result of
+    Left e -> logShow e
+    Right _ -> log "syncing transactions..."
+
+getOptions :: ServerEnv -> Options
+getOptions env = PC.defaultOpts
+  { baseUrl = env.xbgeEndpoint
+  , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
+  -- , logLevel = Log
+  }
+
 getVoucherProviders :: ServerEnv -> {} -> Aff (Either Failure (Array VoucherProvider))
 getVoucherProviders env _ = do
   let
-    xbgeClient = mkClient
-      ( PC.defaultOpts
-          { baseUrl = env.xbgeEndpoint
-          , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
-          , logLevel = LogDebug
-          }
-      )
-      xbgeSpec
+    xbgeClient = mkClient (getOptions env) xbgeSpec
   result <- xbgeClient.getVoucherProviders {}
   case result of
-    Left e -> pure $ Left $ Error  (Response.internalError (StringBody "Internal error"))
+    Left e -> pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
     Right response -> pure $ Right (response -# _.body # _.data)
 
 getVouchers :: ServerEnv -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
@@ -108,14 +145,7 @@ getVouchers env { body: { signatureObj } } = do
     }
 
   let
-    xbgeClient = mkClient
-      ( PC.defaultOpts
-          { baseUrl = env.xbgeEndpoint
-          , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
-          , logLevel = LogDebug
-          }
-      )
-      xbgeSpec
+    xbgeClient = mkClient (getOptions env) xbgeSpec
 
   case circlesCore of
     Left _ -> do
@@ -189,16 +219,14 @@ decryptVoucherCode key (VoucherCodeEncrypted s) = decrypt key s <#> VoucherCode
 
 getTransactions
   :: ServerEnv
-  -> { fromAddress :: SafeAddress
-     , toAddress :: SafeAddress
+  -> { toAddress :: Address
      }
-  -> Aff (Maybe (Array Transfer))
-getTransactions env { fromAddress, toAddress } = do
-  result <- queryGql "get-transactions"
+  -> Aff (Either String (Array Transfer))
+getTransactions env { toAddress } = do
+  result <- queryGql env "get-transactions"
     { transfers:
         { where:
-            { from: show fromAddress
-            , to: show toAddress
+            { to: show toAddress
             }
         } =>>
           { from: GraphNode.from
@@ -208,12 +236,12 @@ getTransactions env { fromAddress, toAddress } = do
           }
     }
   case result of
-    Left _ -> pure Nothing
+    Left e -> pure $ Left $ show e
     Right { transfers } -> transfers # traverse mkTransfer # pure
 
   where
-  mkTransfer :: GraphNode.Transfer -> Maybe Transfer
-  mkTransfer x = ado
+  mkTransfer :: GraphNode.Transfer -> Either String Transfer
+  mkTransfer x = note "Parse error" ado
     from <- parseAddress x.from
     to <- parseAddress x.to
     amount <- fromDecimalStr x.amount
@@ -239,10 +267,11 @@ queryGql
    . GqlQuery Schema query returns
   => DecodeJsonField returns
   => DecodeJson returns
-  => String
+  => ServerEnv
+  -> String
   -> query
   -> Aff (Either GQLError returns)
-queryGql s q = query_ "http://graph.circles.local/subgraphs/name/CirclesUBI/circles-subgraph" (Proxy :: Proxy Schema) s q
+queryGql env s q = query_ (env.gardenGraphApi <> "/subgraphs/name/" <> env.gardenSubgraphName) (Proxy :: Proxy Schema) s q
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
 
@@ -294,6 +323,7 @@ type ServerConfig =
   , voucherCodeSecret :: String <: "VOUCHER_CODE_SECRET"
   , xbgeAuthSecret :: String <: "XBGE_AUTH_SECRET"
   , xbgeEndpoint :: String <: "XBGE_ENDPOINT"
+  , xbgeSafeAddress :: Address <: "XBGE_SAFE_ADDRESS"
   )
 
 type ServerEnv =
@@ -310,6 +340,7 @@ type ServerEnv =
   , voucherCodeSecret :: String
   , xbgeAuthSecret :: String
   , xbgeEndpoint :: String
+  , xbgeSafeAddress :: Address
   }
 
 --------------------------------------------------------------------------------
@@ -326,7 +357,7 @@ encrypt = encryptImpl Nothing Just
 
 --------------------------------------------------------------------------------
 
-app :: Aff (Either String Server)
+app :: Aff (Either String Unit)
 app = do
   env <- liftEffect $ getEnv
   let config = lmap envErrorMessage $ fromEnv (Proxy :: _ ServerConfig) env
@@ -334,11 +365,13 @@ app = do
     Left e -> do
       error e
       liftEffect $ exit 1
-    Right parsedEnv ->
-      Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
-        { getVouchers: getVouchers parsedEnv
-        , getVoucherProviders: getVoucherProviders parsedEnv
-        }
+    Right parsedEnv -> do
+      _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
+      -- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
+      --   { getVouchers: getVouchers parsedEnv
+      --   , getVoucherProviders: getVoucherProviders parsedEnv
+      --   }
+      pure $ Right unit
 
 main :: Effect Unit
 main = launchAff_ app

@@ -34,11 +34,12 @@ instance encodeQueryParamSafeAddress :: EncodeQueryParam SafeAddress where
 xbgeSpec
   :: Spec
        { finalizeVoucherPurchase ::
-           POST "/finalize-voucher-purchase"
+           POST "/vouchers"
              { body ::
                  { safeAddress :: SafeAddress
                  , providerId :: VoucherProviderId
                  , amount :: VoucherAmount
+                 , transactionId :: String
                  }
              , response :: Unit
              }
