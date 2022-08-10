@@ -1,3 +1,5 @@
+import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
+import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import {
   VoucherOffer,
   VoucherProvider,
@@ -9,7 +11,7 @@ import { Claim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
 type BuyVouchersProps = {
-  providers: Array<VoucherProvider>;
+  providers: VoucherProvidersResult;
   theme: Theme;
 };
 
@@ -17,10 +19,14 @@ export const BuyVouchers = ({
   providers,
   theme,
 }: BuyVouchersProps): ReactElement => {
+  const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
+    providers as any
+  );
+
   return (
     <>
       <Claim color={theme.baseColor}>Buy Vouchers:</Claim>
-      {providers.map(provider => {
+      {providers_.map(provider => {
         return (
           <div key={provider.id}>
             <OfferContainer elementCount={provider.availableOffers.length}>

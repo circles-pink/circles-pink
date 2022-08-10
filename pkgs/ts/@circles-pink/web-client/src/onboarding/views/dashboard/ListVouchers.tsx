@@ -1,3 +1,5 @@
+import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import {
   Voucher,
@@ -14,7 +16,7 @@ const EXAMPLE_LOGO =
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
-  providers: Array<VoucherProvider>;
+  providers: VoucherProvidersResult;
   theme: Theme;
 };
 

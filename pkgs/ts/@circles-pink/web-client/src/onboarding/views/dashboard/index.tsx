@@ -58,29 +58,7 @@ import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
 import { VoucherOffer } from '@circles-pink/state-machine/output/VoucherServer.Types';
 
-const VOUCHER_PROVIDERS = [
-  {
-    id: 'goodbuy',
-    name: 'GoodBuy',
-    logoUrl:
-      'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435',
-    shopUrl: 'https://www.goodbuy.eu/',
-    availableOffers: [
-      {
-        amount: 5,
-        countAvailable: 29,
-      },
-      {
-        amount: 15,
-        countAvailable: 75,
-      },
-      {
-        amount: 25,
-        countAvailable: 97,
-      },
-    ],
-  },
-];
+
 
 // -----------------------------------------------------------------------------
 // Types
@@ -171,12 +149,17 @@ export const Dashboard = ({
       act(A._dashboard(A._getVouchers(getTimestamp())));
     }, VOUCHER_INTERVAL);
 
+    const VoucherProviderPolling = setInterval(() => {
+      act(A._dashboard(A._getVoucherProviders(unit)));
+    }, VOUCHER_INTERVAL);
+
     // Clear interval on unmount
     return () => {
       clearInterval(balancePolling);
       clearInterval(trustNetworkPolling);
       clearInterval(UBIPayoutPolling);
       clearInterval(VoucherPolling);
+      clearInterval(VoucherProviderPolling);
     };
   }, []);
 
@@ -428,11 +411,11 @@ export const Dashboard = ({
                 icon={mdiGiftOutline}
               >
                 <MarginY size={2}>
-                  <BuyVouchers theme={theme} providers={VOUCHER_PROVIDERS} />
+                  <BuyVouchers theme={theme} providers={stateRaw.voucherProvidersResult} />
                 </MarginY>
                 <ListVouchers
                   theme={theme}
-                  providers={VOUCHER_PROVIDERS}
+                  providers={stateRaw.voucherProvidersResult}
                   vouchersResult={state.vouchersResult}
                 />
               </LightColorFrame>
