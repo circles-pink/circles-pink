@@ -37,8 +37,8 @@ xbgeSpec
            POST "/finalize-voucher-purchase"
              { body ::
                  { safeAddress :: SafeAddress
-                 , voucherProviderId :: VoucherProviderId
-                 , voucherAmount :: VoucherAmount
+                 , providerId :: VoucherProviderId
+                 , amount :: VoucherAmount
                  }
              , response :: Unit
              }

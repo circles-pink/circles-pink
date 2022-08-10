@@ -1,5 +1,8 @@
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import {
+  Voucher,
+  VoucherProvider,
+} from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { FadeIn, getIncrementor } from 'anima-react';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
@@ -8,19 +11,6 @@ import { Theme } from '../../../context/theme';
 
 const EXAMPLE_LOGO =
   'https://cdn.shopify.com/s/files/1/0260/0819/1060/files/LOGO_GOOD_BUY_Farbe_rgb_Unterzeile_540x.png?v=1654701435';
-
-type Voucher = {
-  voucherProviderId: string;
-  voucherAmount: number;
-  voucherCode: string;
-  sold: null | SoldVoucher;
-};
-
-type SoldVoucher = {
-  transactionId: string;
-  safeAddress: string;
-  timestamp: string;
-};
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
@@ -50,18 +40,12 @@ export const ListVouchers = ({
       <Claim color={theme.baseColor}>Your Vouchers:</Claim>
       <VoucherContainer>
         {vouchers.map(voucher => (
-          <FadeIn
-            orientation={'left'}
-            delay={getDelay()}
-            key={voucher.voucherCode}
-          >
+          <FadeIn orientation={'left'} delay={getDelay()} key={voucher.code}>
             <VoucherCard
               theme={theme}
               left={<Logo src={EXAMPLE_LOGO} />}
               center={<VoucherContent theme={theme} voucher={voucher} />}
-              right={
-                <VoucherAmount amount={voucher.voucherAmount} theme={theme} />
-              }
+              right={<VoucherAmount amount={voucher.amount} theme={theme} />}
             />
           </FadeIn>
         ))}
@@ -191,8 +175,8 @@ const VoucherContent = ({
 }: VoucherContentProps): ReactElement => {
   return (
     <VoucherContentContainer theme={theme}>
-      <VoucherText theme={theme}>{voucher.voucherProviderId}</VoucherText>
-      <VoucherText theme={theme}>{voucher.voucherCode}</VoucherText>
+      <VoucherText theme={theme}>{voucher.providerId}</VoucherText>
+      <VoucherText theme={theme}>{voucher.code}</VoucherText>
     </VoucherContentContainer>
   );
 };
