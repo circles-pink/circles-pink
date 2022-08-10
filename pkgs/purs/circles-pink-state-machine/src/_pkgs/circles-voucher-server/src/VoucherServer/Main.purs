@@ -1,11 +1,10 @@
-module VoucherServer.Main where
+module VoucherServer.Main (main) where
 
 import Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import CirclesPink.Data.SafeAddress (sampleSafeAddress)
 import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
@@ -15,9 +14,7 @@ import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.Either (Either(..))
 import Data.Generic.Rep (class Generic)
-import Data.Map (Map)
-import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
@@ -37,68 +34,32 @@ import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
 import Node.Encoding (Encoding(..))
-import Node.FS.Sync (writeFile, writeTextFile)
+import Node.FS.Sync (writeTextFile)
 import Node.Process (exit, getEnv)
 import Payload.Client (ClientError(..), mkClient)
 import Payload.Client as PC
-import Payload.Headers (Headers)
+import Payload.Client.ClientApi (class ClientApi)
+import Payload.Client.Options (LogLevel(..))
 import Payload.Headers as H
-import Payload.ResponseTypes (Failure(..), Response, ResponseBody(..))
+import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server (Server, defaultOpts)
 import Payload.Server as Payload
 import Payload.Server.Response as Response
-import Payload.Spec (POST, Spec(Spec))
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
+import VoucherServer.Spec (VoucherServerSpec, spec)
 import VoucherServer.Specs.Xbge (SafeAddress, xbgeSpec)
-import VoucherServer.Types (EurCent(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProviderId(..))
+import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
-
-type Message =
-  { id :: Int
-  , text :: String
-  }
-
---------------------------------------------------------------------------------
-
---------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
 
 type ErrGetVoucher = String
 
 --------------------------------------------------------------------------------
-spec
-  :: Spec
-       { getVouchers ::
-           POST "/vouchers"
-             { body :: { signatureObj :: SignatureObj }
-             , response :: Array Voucher
-             }
-       }
-spec = Spec
-
---------------------------------------------------------------------------------
-
-sampleVoucherOne :: Voucher
-sampleVoucherOne = Voucher
-  { providerId: VoucherProviderId "goodbuy"
-  , amount: VoucherAmount $ EurCent 25
-  , code: VoucherCode "bingo"
-  , sold:
-      { transactionId: "200-4"
-      , safeAddress: show sampleSafeAddress
-      , timestamp: "1659971225399"
-      }
-  }
-
-
-
-db :: Map SafeAddress (Array Voucher)
-db = M.fromFoldable [ (wrap sampleSafeAddress) /\ [ sampleVoucherOne ] ]
 
 allowedDiff ∷ Seconds
 allowedDiff = Seconds 60.0
@@ -115,6 +76,9 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
   pure (messageValid && timestampValid)
 
+getVoucherProviders :: ServerEnv -> {} -> Aff (Either Failure (Array VoucherProvider))
+getVoucherProviders _ _ = pure $ pure []
+
 getVouchers :: ServerEnv -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
 getVouchers env { body: { signatureObj } } = do
   web3 <- newWeb3_
@@ -128,6 +92,16 @@ getVouchers env { body: { signatureObj } } = do
     , subgraphName: env.gardenSubgraphName
     , databaseSource: "graph"
     }
+
+  let
+    xbgeClient = mkClient
+      ( PC.defaultOpts
+          { baseUrl = env.xbgeEndpoint
+          , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
+          , logLevel = LogDebug
+          }
+      )
+      xbgeSpec
 
   case circlesCore of
     Left _ -> do
@@ -158,15 +132,15 @@ getVouchers env { body: { signatureObj } } = do
               log "Safe Address not found"
               pure $ Left $ Error (Response.notFound (StringBody "SAFE ADDRESS NOT FOUND"))
             Right sa -> do
-              result <- (xbgeClient env).getVouchers
+              result <- xbgeClient.getVouchers
                 { query: { safeAddress: Just $ wrap $ wrap sa }
                 }
               case result of
                 Left e -> do
                   case e of
-                    DecodeError {error, response } -> do
+                    DecodeError { error, response } -> do
                       log ("DecodeError: " <> show error)
-                      let x = unsafePerformEffect $ writeTextFile UTF8 "out.json" (_.body $ unwrap response) 
+                      let x = unsafePerformEffect $ writeTextFile UTF8 "out.json" (_.body $ unwrap response)
                       pure unit
                     StatusError _ -> log "StatusError"
                     RequestError _ -> log "RequestError"
@@ -237,15 +211,6 @@ type Transfer =
   , id :: String
   , amount :: BN
   }
-
-
-xbgeClient env = mkClient
-  ( PC.defaultOpts
-      { baseUrl = env.xbgeEndpoint
-      , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
-      }
-  )
-  xbgeSpec
 
 --------------------------------------------------------------------------------
 
@@ -355,9 +320,11 @@ app = do
     Left e -> do
       error e
       liftEffect $ exit 1
-    Right parsedEnv -> case parsedEnv.port of
-      Nothing -> Payload.start (defaultOpts { port = 4000 }) spec { getVouchers: getVouchers parsedEnv }
-      Just port -> Payload.start (defaultOpts { port = port }) spec { getVouchers: getVouchers parsedEnv }
+    Right parsedEnv ->
+      Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
+        { getVouchers: getVouchers parsedEnv
+        , getVoucherProviders: getVoucherProviders parsedEnv
+        }
 
 main :: Effect Unit
 main = launchAff_ app

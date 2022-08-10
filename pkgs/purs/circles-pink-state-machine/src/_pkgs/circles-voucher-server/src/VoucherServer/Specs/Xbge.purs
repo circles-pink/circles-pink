@@ -5,8 +5,8 @@ import Prelude
 import CirclesPink.Data.SafeAddress as C
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
-import Debug.Extra (todo)
 import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
+import Payload.Client.QueryParams (class EncodeQueryParam, encodeQueryParam)
 import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
 import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
@@ -28,6 +28,9 @@ derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
 instance encodeParamSafeAddress :: EncodeParam SafeAddress where
   encodeParam (SafeAddress x) = encodeParam $ show x
 
+instance encodeQueryParamSafeAddress :: EncodeQueryParam SafeAddress where
+  encodeQueryParam (SafeAddress x) = encodeQueryParam $ show x
+
 xbgeSpec
   :: Spec
        { finalizeVoucherPurchase ::
@@ -44,7 +47,7 @@ xbgeSpec
              { response :: Array VoucherProvider
              }
        , getVouchers ::
-           GET "/vouchers"
+           GET "/vouchers?safeAddress=<safeAddress>"
              { query :: { safeAddress :: Maybe SafeAddress }
              , response :: { data :: Array VoucherEncrypted }
              }
