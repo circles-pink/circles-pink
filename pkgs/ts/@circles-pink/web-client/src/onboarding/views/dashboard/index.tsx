@@ -58,8 +58,6 @@ import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
 import { VoucherOffer } from '@circles-pink/state-machine/output/VoucherServer.Types';
 
-
-
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -408,11 +406,14 @@ export const Dashboard = ({
             <TopMargin>
               <LightColorFrame
                 theme={theme}
-                title="Voucher"
+                title="Voucher Shop"
                 icon={mdiGiftOutline}
               >
                 <MarginY size={2}>
-                  <BuyVouchers theme={theme} providers={stateRaw.voucherProvidersResult} />
+                  <BuyVouchers
+                    theme={theme}
+                    providers={stateRaw.voucherProvidersResult}
+                  />
                 </MarginY>
                 <ListVouchers
                   theme={theme}
