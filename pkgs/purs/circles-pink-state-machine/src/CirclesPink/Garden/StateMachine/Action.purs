@@ -14,6 +14,8 @@ module CirclesPink.Garden.StateMachine.Action
   , _getTrusts
   , _getUBIPayout
   , _getUsers
+  , _getVoucherProviders
+  , _getVouchers
   , _infoGeneral
   , _infoSecurity
   , _landing
@@ -30,13 +32,13 @@ module CirclesPink.Garden.StateMachine.Action
   , _setTerms
   , _setUsername
   , _signIn
-  , _getVouchers
   , _signUp
   , _submit
   , _transfer
   , _trusts
   , _userSearch
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -240,3 +242,6 @@ _expandTrustNetwork = inj (Proxy :: _ "expandTrustNetwork")
 
 _getVouchers :: forall a v. a -> Variant (getVouchers :: a | v)
 _getVouchers = inj (Proxy :: _ "getVouchers")
+
+_getVoucherProviders :: forall a v. a -> Variant (getVoucherProviders :: a | v)
+_getVoucherProviders = inj (Proxy :: _ "getVoucherProviders")
