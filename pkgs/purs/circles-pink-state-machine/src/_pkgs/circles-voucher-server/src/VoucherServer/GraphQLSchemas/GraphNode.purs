@@ -15,6 +15,12 @@ type Schema =
           }
       }
         ==> Array Transfer
+  , notifications ::
+      { where ::
+          { transfer :: String
+          }
+      }
+        ==> Array Notification
   }
 
 type Transfer =
@@ -22,6 +28,12 @@ type Transfer =
   , to :: Address
   , id :: String
   , amount :: String
+  }
+
+type Notification =
+  { id :: String
+  , transactionHash :: String
+  , time :: String
   }
 
 prop = Proxy :: Proxy "prop"

@@ -14,7 +14,7 @@ import Data.Array as A
 import Data.BN (BN, fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
-import Data.DateTime.Instant (instant, toDateTime)
+import Data.DateTime.Instant (Instant, instant, toDateTime, unInstant)
 import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
 import Data.Map as M
@@ -23,7 +23,7 @@ import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
-import Data.Time.Duration (Seconds(..))
+import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
 import Debug (spyWith)
@@ -119,12 +119,13 @@ finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
 finalizeTx env (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions env) xbgeSpec
+    timestamp = todo
 
   xbgeClient.finalizeVoucherPurchase
     { body:
         { safeAddress: from
         , providerId: supportedProvider
-        , amount: VoucherAmount $ fracklesToEurCent amount
+        , amount: VoucherAmount $ fracklesToEurCent timestamp amount
         , transactionId: id
         }
     }
@@ -224,8 +225,12 @@ getVouchers env { body: { signatureObj } } = do
 
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
-fracklesToEurCent :: Frackles -> EurCent
-fracklesToEurCent = todo
+fracklesToEurCent :: Instant -> Frackles -> EurCent
+fracklesToEurCent timestamp (Frackles frackles) =
+  let
+    (seconds :: Seconds) = unInstant timestamp # convertDuration
+  in
+    frecklesToEuroCentImpl (unwrap seconds) frackles # EurCent
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
@@ -382,6 +387,10 @@ foreign import encryptImpl :: forall z. z -> (String -> z) -> String -> String -
 
 encrypt :: String -> String -> Maybe String
 encrypt = encryptImpl Nothing Just
+
+--------------------------------------------------------------------------------
+
+foreign import frecklesToEuroCentImpl :: Number -> BN -> Int
 
 --------------------------------------------------------------------------------
 
