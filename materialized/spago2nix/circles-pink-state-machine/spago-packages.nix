@@ -89,6 +89,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "argonaut-generic" = pkgs.stdenv.mkDerivation {
+        name = "argonaut-generic";
+        version = "v7.0.1";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-contrib/purescript-argonaut-generic.git";
+          rev = "be59a41bdce62bec453521ba4e7be27dddc82b36";
+          sha256 = "0s94c7xln9djrwzrfyc0w8ri0qirdbwlrbxksg8hzhj96447v7dm";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "argonaut-traversals" = pkgs.stdenv.mkDerivation {
         name = "argonaut-traversals";
         version = "v9.0.0";
