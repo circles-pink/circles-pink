@@ -101,7 +101,7 @@ newtype VoucherEncrypted =
     , amount :: VoucherAmount
     , code :: VoucherCodeEncrypted
     , sold ::
-        { transactionId :: String
+        { transactionId :: TransferId
         , safeAddress :: String
         , timestamp :: String
         }
@@ -121,7 +121,7 @@ newtype Voucher =
     , amount :: VoucherAmount
     , code :: VoucherCode
     , sold ::
-        { transactionId :: String
+        { transactionId :: TransferId
         , safeAddress :: String
         , timestamp :: String
         }
@@ -129,3 +129,23 @@ newtype Voucher =
 
 derive newtype instance readForeignVoucher :: ReadForeign Voucher
 derive newtype instance writeForeignVoucher :: WriteForeign Voucher
+
+--------------------------------------------------------------------------------
+
+newtype TransferId = TransferId String
+
+derive instance genericTransferId :: Generic TransferId _
+
+derive instance newtypeTransferId :: Newtype TransferId _
+
+derive newtype instance writeForeignTransferId :: WriteForeign TransferId
+
+instance showTransferId :: Show TransferId where
+  show = genericShow
+
+derive newtype instance readForeignTransferId :: ReadForeign TransferId
+
+derive newtype instance eqTransferId :: Eq TransferId
+
+derive newtype instance ordTransferId :: Ord TransferId
+

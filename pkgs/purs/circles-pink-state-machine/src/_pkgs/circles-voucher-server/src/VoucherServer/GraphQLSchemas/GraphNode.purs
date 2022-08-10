@@ -47,3 +47,7 @@ to = Proxy :: Proxy "to"
 id = Proxy :: Proxy "id"
 
 amount = Proxy :: Proxy "amount"
+
+transactionHash = Proxy :: Proxy "transactionHash"
+
+time = Proxy :: Proxy "time"

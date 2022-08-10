@@ -10,7 +10,7 @@ import Payload.Client.QueryParams (class EncodeQueryParam, encodeQueryParam)
 import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
 import TypedEnv (class ParseValue)
-import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
+import VoucherServer.Types (TransferId(..), VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
 newtype Address = Address C.Address
 
@@ -41,7 +41,7 @@ xbgeSpec
                  { safeAddress :: Address
                  , providerId :: VoucherProviderId
                  , amount :: VoucherAmount
-                 , transactionId :: String
+                 , transactionId :: TransferId
                  }
              , response :: { data :: VoucherEncrypted }
              }

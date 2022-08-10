@@ -7,6 +7,10 @@ CIRCLES_DEV := env_var_or_default('CIRCLES_DEV', 'dev')
 CIRCLES_DEV_OS := env_var_or_default('CIRCLES_DEV_OS', '')
 CIRCLES_TOOLBELT_PATH := env_var_or_default('CIRCLES_TOOLBELT_PATH', 'checkouts/circles-toolbelt')
 GARDEN_PATH := env_var_or_default('GARDEN_PATH', 'checkouts/circles-docker')
+VOUCHER_CODE_SECRET := env_var_or_default('VOUCHER_CODE_SECRET', "0")
+XBGE_AUTH_SECRET := env_var_or_default('XBGE_AUTH_SECRET', "0")
+XBGE_ENDPOINT := env_var_or_default('XBGE_ENDPOINT', "0")
+XBGE_SAFE_ADDRESS := env_var_or_default('XBGE_SAFE_ADDRESS', "0")
 
 TASKS_EXPLORER_SERVER := env_var_or_default("TASKS_EXPLORER_SERVER", "http://tasks.circles.local")
 DIRECTUS_URL := env_var_or_default("DIRECTUS_URL", "http://directus.circles.local/graphql")
@@ -129,9 +133,10 @@ dev-voucher-server:
 	export GARDEN_PROXY_FACTORY_ADRESS={{GARDEN_PROXY_FACTORY_ADRESS}}
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
-	export VOUCHER_CODE_SECRET=""
-	export XBGE_AUTH_SECRET=0
-	export XBGE_ENDPOINT=0
+	export VOUCHER_CODE_SECRET="$VOUCHER_CODE_SECRET"
+	export XBGE_AUTH_SECRET="$XBGE_AUTH_SECRET"
+	export XBGE_ENDPOINT="$XBGE_ENDPOINT"
+	export XBGE_SAFE_ADDRESS="$XBGE_SAFE_ADDRESS"
 	node ./pkgs/ts/@circles-pink/state-machine/bin/voucher-server
 
 cors-proxy-server:
