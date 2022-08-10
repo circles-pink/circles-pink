@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { crcToTc, tcToCrc } = require("@circles/timecircles");
 
 exports.decryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
   try {
@@ -21,3 +22,6 @@ exports.encryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
     return Nothing;
   }
 };
+
+exports.frecklesToEuroCentImpl = (timestamp) => (bn) =>
+  Math.round(crcToTc(timestamp, bn.toString()) / 10);
