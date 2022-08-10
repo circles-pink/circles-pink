@@ -3,7 +3,7 @@ module VoucherServer.Main (main) where
 import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address(..), parseAddress)
+import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
 import Control.Comonad.Env (ask)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, withExceptT)
@@ -23,7 +23,7 @@ import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
-import Data.Traversable (traverse)
+import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
 import Debug (spyWith)
 import Debug.Extra (todo)
@@ -57,8 +57,8 @@ import TypedEnv (type (<:), envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
-import VoucherServer.Specs.Xbge (SafeAddress, xbgeSpec)
-import VoucherServer.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
+import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
+import VoucherServer.Types (EurCent(..), Frackles(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -67,8 +67,13 @@ type ErrGetVoucher = String
 
 --------------------------------------------------------------------------------
 
-allowedDiff ∷ Seconds
+allowedDiff :: Seconds
 allowedDiff = Seconds 60.0
+
+supportedProvider :: VoucherProviderId
+supportedProvider = VoucherProviderId "goodbuy"
+
+--------------------------------------------------------------------------------
 
 isValid :: Web3 -> SignatureObj -> Aff Boolean
 isValid web3 (SignatureObj { message, messageHash }) = do
@@ -89,6 +94,7 @@ syncVouchers' env = do
 
   txs <- getTransactions env { toAddress: env.xbgeSafeAddress }
     # ExceptT
+
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
     # ExceptT
     # withExceptT show
@@ -99,13 +105,31 @@ syncVouchers' env = do
       <#> (\all@(VoucherEncrypted { sold: { transactionId } }) -> transactionId /\ all)
       # M.fromFoldable
 
-    unfinalizedTxs = txs # A.filter (\{id} -> not $ M.member id vouchersLookup)
+    unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
-  --unfinalizedTxs # traverse
+  syncedVouchers <- for unfinalizedTxs $ finalizeTx env
 
-  logShow unfinalizedTxs
+  log ("finalized the following vouchers: ")
+  logShow syncedVouchers
 
   pure unit
+
+finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
+finalizeTx env (Transfer { from, amount, id }) = do
+  let
+    xbgeClient = mkClient (getOptions env) xbgeSpec
+
+  xbgeClient.finalizeVoucherPurchase
+    { body:
+        { safeAddress: from
+        , providerId: supportedProvider
+        , amount: VoucherAmount $ fracklesToEurCent amount
+        , transactionId: id
+        }
+    }
+    # ExceptT
+    # withExceptT show
+    <#> (\response -> response -# _.body # _.data)
 
 syncVouchers :: ServerEnv -> Aff Unit
 syncVouchers env = do
@@ -199,6 +223,9 @@ getVouchers env { body: { signatureObj } } = do
 
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
+fracklesToEurCent :: Frackles -> EurCent
+fracklesToEurCent = todo
+
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
   code <- pure $ coerce x.code --   decryptVoucherCode key x.code
@@ -242,16 +269,16 @@ getTransactions env { toAddress } = do
   where
   mkTransfer :: GraphNode.Transfer -> Either String Transfer
   mkTransfer x = note "Parse error" ado
-    from <- parseAddress x.from
-    to <- parseAddress x.to
+    from <- Address <$> parseAddress x.from
+    to <- Address <$> parseAddress x.to
     amount <- fromDecimalStr x.amount
-    in { from, to, amount, id: x.id }
+    in Transfer { from, to, amount: Frackles amount, id: x.id }
 
-type Transfer =
+newtype Transfer = Transfer
   { from :: Address
   , to :: Address
   , id :: String
-  , amount :: BN
+  , amount :: Frackles
   }
 
 --------------------------------------------------------------------------------

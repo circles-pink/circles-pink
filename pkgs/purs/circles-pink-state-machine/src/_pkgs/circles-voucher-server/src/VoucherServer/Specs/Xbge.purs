@@ -2,7 +2,7 @@ module VoucherServer.Specs.Xbge where
 
 import Prelude
 
-import CirclesPink.Data.SafeAddress as C
+import CirclesPink.Data.Address as C
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
@@ -11,45 +11,45 @@ import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
 import VoucherServer.Types (VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
-newtype SafeAddress = SafeAddress C.SafeAddress
+newtype Address = Address C.Address
 
-derive instance newtypeSafeAddress :: Newtype SafeAddress _
+derive instance newtypeAddress :: Newtype Address _
 
-derive newtype instance ordSafeAddress :: Ord SafeAddress
-derive newtype instance eqSafeAddress :: Eq SafeAddress
-derive newtype instance showSafeAddress :: Show SafeAddress
-derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
+derive newtype instance ordAddress :: Ord Address
+derive newtype instance eqAddress :: Eq Address
+derive newtype instance showAddress :: Show Address
+derive newtype instance writeForeignAddress :: WriteForeign Address
 
--- instance decodeParamSafeAddress :: DecodeParam SafeAddress where
+-- instance decodeParamAddress :: DecodeParam Address where
 --   decodeParam x = decodeParam x
---     >>= (parseAddress >>> note "Could not parse SafeAddress")
---     <#> SafeAddress
+--     >>= (parseAddress >>> note "Could not parse Address")
+--     <#> Address
 
-instance encodeParamSafeAddress :: EncodeParam SafeAddress where
-  encodeParam (SafeAddress x) = encodeParam $ show x
+instance encodeParamAddress :: EncodeParam Address where
+  encodeParam (Address x) = encodeParam $ show x
 
-instance encodeQueryParamSafeAddress :: EncodeQueryParam SafeAddress where
-  encodeQueryParam (SafeAddress x) = encodeQueryParam $ show x
+instance encodeQueryParamAddress :: EncodeQueryParam Address where
+  encodeQueryParam (Address x) = encodeQueryParam $ show x
 
 xbgeSpec
   :: Spec
        { finalizeVoucherPurchase ::
            POST "/vouchers"
              { body ::
-                 { safeAddress :: SafeAddress
+                 { safeAddress :: Address
                  , providerId :: VoucherProviderId
                  , amount :: VoucherAmount
                  , transactionId :: String
                  }
-             , response :: Unit
+             , response :: { data :: VoucherEncrypted }
              }
        , getVoucherProviders ::
            GET "/voucher-providers"
-             { response :: {data :: Array VoucherProvider}
+             { response :: { data :: Array VoucherProvider }
              }
        , getVouchers ::
            GET "/vouchers?safeAddress=<safeAddress>"
-             { query :: { safeAddress :: Maybe SafeAddress }
+             { query :: { safeAddress :: Maybe Address }
              , response :: { data :: Array VoucherEncrypted }
              }
        }
