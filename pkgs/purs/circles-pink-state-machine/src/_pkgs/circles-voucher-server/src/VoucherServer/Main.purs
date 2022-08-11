@@ -48,8 +48,10 @@ import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (Resolved, Variable, envErrorMessage, fromEnv)
+import VoucherServer.Env (ServerConfig, ServerEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
+import VoucherServer.Routes.TrustUser as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
 import VoucherServer.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
@@ -381,29 +383,6 @@ queryGql env s q = query_ (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphNa
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
 
---------------------------------------------------------------------------------
-
-type ServerConfigSpec :: forall k. (Symbol -> Type -> k) -> Row k
-type ServerConfigSpec f =
-  ( port :: f "PORT" (Maybe Int)
-  , gardenApi :: f "GARDEN_API" String
-  , gardenApiUsers :: f "GARDEN_API_USERS" String
-  , gardenGraphApi :: f "GARDEN_GRAPH_API" String
-  , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
-  , gardenRelay :: f "GARDEN_RELAY" String
-  , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" String
-  , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" String
-  , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" String
-  , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" String
-  , voucherCodeSecret :: f "VOUCHER_CODE_SECRET" String
-  , xbgeAuthSecret :: f "XBGE_AUTH_SECRET" String
-  , xbgeEndpoint :: f "XBGE_ENDPOINT" String
-  , xbgeSafeAddress :: f "XBGE_SAFE_ADDRESS" Address
-  )
-
-type ServerConfig = ServerConfigSpec Variable
-
-type ServerEnv = { | ServerConfigSpec Resolved }
 
 --------------------------------------------------------------------------------
 
@@ -436,6 +415,7 @@ app = do
       _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
         { getVouchers: getVouchers parsedEnv
         , getVoucherProviders: getVoucherProviders parsedEnv
+        , trustUsers: Routes.trustUsers
         }
       pure $ Right unit
 
