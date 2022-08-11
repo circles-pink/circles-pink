@@ -1,5 +1,7 @@
 const crypto = require("crypto");
 const { crcToTc, tcToCrc } = require("@circles/timecircles");
+var web3 = require("web3");
+const Web3 = new web3();
 
 exports.decryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
   try {
@@ -23,5 +25,13 @@ exports.encryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
   }
 };
 
-exports.frecklesToEuroCentImpl = (timestamp) => (bn) =>
-  Math.round(crcToTc(timestamp, bn.toString()) / 10);
+exports.frecklesToEuroCentImpl = (timestamp) => (bn) => {
+  console.log("time:", new Date(timestamp));
+  const crc = Number.parseFloat(Web3.utils.fromWei(bn.toString(), "ether"));
+  console.log("crc:", crc);
+  const tc = crcToTc(timestamp, crc);
+  console.log("tc:", tc);
+  const eur = Math.round(tc * 10);
+  console.log("eur:", eur);
+  return eur;
+};

@@ -26,7 +26,7 @@ import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
-import Debug (spyWith)
+import Debug (spy, spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
@@ -52,7 +52,7 @@ import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, t
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -95,6 +95,8 @@ syncVouchers' env = do
   txs <- getTransactions env { toAddress: env.xbgeSafeAddress }
     # ExceptT
 
+  --let _ = spy "txs" txs
+
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
     # ExceptT
     # withExceptT show
@@ -107,7 +109,7 @@ syncVouchers' env = do
 
     unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
-  syncedVouchers <- for unfinalizedTxs $ finalizeTx env
+  syncedVouchers <- for (spy "unfinalized" unfinalizedTxs) $ finalizeTx env
 
   log ("finalized the following vouchers: ")
   logShow syncedVouchers
@@ -122,8 +124,10 @@ almostEquals
   (EurCent amount)
   (EurCent price) =
   let
-    isInLowerRange = amount >= (price - below)
-    isInUpperRange = amount <= (price + above)
+    _ = spy "amount" amount
+    _ = spy "price" (price * 100)
+    isInLowerRange = amount >= (price * 100 - below)
+    isInUpperRange = amount <= (price * 100 + above)
   in
     isInLowerRange && isInUpperRange
 
@@ -149,8 +153,11 @@ finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
 finalizeTx env (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions env) xbgeSpec
+    _ = spy "id" id
 
   (TransferMeta { time }) <- getTransferMeta env id # ExceptT
+
+  let _ = spy "time" time
 
   providers <- xbgeClient.getVoucherProviders {}
     # ExceptT
@@ -158,7 +165,7 @@ finalizeTx env (Transfer { from, amount, id }) = do
     <#> (unwrap >>> _.body >>> _.data)
 
   let
-    eur = fracklesToEurCent time amount
+    eur = frecklesToEurCent time amount
     maybeVoucherAmount = getVoucherAmount providers supportedProvider eur
 
   case maybeVoucherAmount of
@@ -183,7 +190,7 @@ syncVouchers env = do
   log "syncing transactions..."
   result <- runExceptT $ syncVouchers' env
   case result of
-    Left e -> logShow e
+    Left e -> logShow ("Could not sync transaction: " <> e)
     Right _ -> log "synced transactions."
 
 getOptions :: ServerEnv -> Options
@@ -272,12 +279,12 @@ getVouchers env { body: { signatureObj } } = do
 
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
-fracklesToEurCent :: Instant -> Frackles -> EurCent
-fracklesToEurCent timestamp (Frackles frackles) =
+frecklesToEurCent :: Instant -> Freckles -> EurCent
+frecklesToEurCent timestamp (Freckles freckles) =
   let
     (seconds :: Seconds) = unInstant timestamp # convertDuration
   in
-    frecklesToEuroCentImpl (unwrap seconds) frackles # EurCent
+    frecklesToEuroCentImpl (unwrap seconds) freckles # EurCent
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
@@ -309,13 +316,13 @@ getTransactions env { toAddress } = do
     from <- Address <$> parseAddress x.from
     to <- Address <$> parseAddress x.to
     amount <- fromDecimalStr x.amount
-    in Transfer { from, to, amount: Frackles amount, id: TransferId x.id }
+    in Transfer { from, to, amount: Freckles amount, id: TransferId x.id }
 
 newtype Transfer = Transfer
   { from :: Address
   , to :: Address
   , id :: TransferId
-  , amount :: Frackles
+  , amount :: Freckles
   }
 
 --------------------------------------------------------------------------------
@@ -324,9 +331,14 @@ getTransferMeta :: ServerEnv -> TransferId -> Aff (Either String TransferMeta)
 getTransferMeta env transferId = do
   result <- queryGql env "get-transfer-meta"
     { notifications:
-        { where: { transfer: un TransferId transferId } } =>>
+        { where:
+            { transfer: "87-0" -- un TransferId transferId
+            , safeAddress: show env.xbgeSafeAddress
+            }
+        } =>>
           { id, transactionHash, time }
     }
+  let _ = spy "notification result" result
   pure $ case result of
     Left e -> Left $ show e
     Right { notifications } -> case A.head notifications of

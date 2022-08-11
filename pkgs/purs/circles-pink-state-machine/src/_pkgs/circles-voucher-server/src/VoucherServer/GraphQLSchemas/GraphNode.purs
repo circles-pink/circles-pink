@@ -15,7 +15,8 @@ type Schema =
         ==> Array Transfer
   , notifications ::
       { where ::
-          { transfer :: String
+          { safeAddress :: Address
+          , transfer :: String
           }
       }
         ==> Array Notification
