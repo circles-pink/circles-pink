@@ -47,10 +47,14 @@ export const ListVouchers = ({
     <>
       <Claim color={theme.baseColor}>Your Vouchers:</Claim>
       <VoucherContainer>
-        {vouchers.map(voucher => {
+        {vouchers.map((voucher, index) => {
           const provider = mapInfo(providers_, voucher.providerId);
           return (
-            <FadeIn orientation={'left'} delay={getDelay()} key={voucher.code}>
+            <FadeIn
+              orientation={'left'}
+              delay={getDelay()}
+              key={`${voucher.code}-${index}`}
+            >
               <VoucherCard
                 theme={theme}
                 left={<Logo src={provider?.logoUrl} />}
@@ -217,10 +221,10 @@ const VoucherContent = ({
 };
 
 const VoucherText = styled.p<{ theme: Theme; fontSize: number }>(
-  ({ theme }) => [
+  ({ theme, fontSize }) => [
     css`
       color: ${theme.textColorDark};
-      font-size: 1.25rem;
+      font-size: ${fontSize}rem;
       margin: 0;
       padding: 0;
     `,
