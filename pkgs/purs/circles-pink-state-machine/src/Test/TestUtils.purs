@@ -7,7 +7,6 @@ import CirclesPink.Data.User (User(..))
 import Control.Error.Util (hush)
 import Data.Argonaut (decodeJson, fromString)
 import Data.Maybe (fromJust)
-import Data.Newtype (unwrap, wrap)
 import Partial.Unsafe (unsafePartial)
 
 --------------------------------------------------------------------------------

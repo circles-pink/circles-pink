@@ -6,7 +6,6 @@ import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Comonad.Env (ask)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
@@ -35,31 +34,25 @@ import Effect.Class.Console (error, log, logShow)
 import Effect.Exception as E
 import Effect.Now (now)
 import Effect.Timer (setInterval)
-import Effect.Unsafe (unsafePerformEffect)
 import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.Query (query_)
 import GraphQL.Client.Types (class GqlQuery)
-import GunDB (offline)
-import Node.Encoding (Encoding(..))
-import Node.FS.Sync (writeTextFile)
 import Node.Process (exit, getEnv)
 import Payload.Client (ClientError(..), Options, mkClient)
 import Payload.Client as PC
-import Payload.Client.ClientApi (class ClientApi)
-import Payload.Client.Options (LogLevel(..))
 import Payload.Headers as H
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
-import Payload.Server (Server, defaultOpts)
+import Payload.Server (defaultOpts)
 import Payload.Server as Payload
 import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
-import TypedEnv (type (<:), Variable, Resolved, envErrorMessage, fromEnv)
+import TypedEnv (Resolved, Variable, envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider, VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -237,7 +230,7 @@ getVouchers env { body: { signatureObj } } = do
               case result of
                 Left e -> do
                   case e of
-                    DecodeError { error, response } -> do
+                    DecodeError { error } -> do
                       log ("DecodeError: " <> show error)
                       pure unit
                     StatusError _ -> log "StatusError"
