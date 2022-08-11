@@ -54,7 +54,7 @@ import Payload.Server as Payload
 import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
-import TypedEnv (type (<:), envErrorMessage, fromEnv)
+import TypedEnv (type (<:), Variable, Resolved, envErrorMessage, fromEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
@@ -73,6 +73,12 @@ allowedDiff = Seconds 60.0
 
 supportedProvider :: VoucherProviderId
 supportedProvider = VoucherProviderId "goodbuy"
+
+mkSubgraphUrl :: String -> String -> String
+mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
+
+threshold :: Threshold EurCent
+threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 
 --------------------------------------------------------------------------------
 
@@ -99,7 +105,7 @@ syncVouchers' env = do
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
     # ExceptT
     # withExceptT show
-    <#> (\response -> response -# _.body # _.data)
+    <#> (unwrap >>> _.body >>> _.data)
 
   let
     vouchersLookup = vouchers
@@ -114,6 +120,26 @@ syncVouchers' env = do
   logShow syncedVouchers
 
   pure unit
+
+--------------------------------------------------------------------------------
+
+almostEquals :: Threshold EurCent -> EurCent -> EurCent -> Boolean
+almostEquals = todo
+
+newtype Threshold a = Threshold { above :: a, below :: a }
+
+--------------------------------------------------------------------------------
+
+getVoucherAmount :: Array VoucherProvider -> VoucherProviderId -> EurCent -> Maybe VoucherAmount
+getVoucherAmount = todo
+
+--------------------------------------------------------------------------------
+
+redeemAmount :: ServerEnv -> Address -> EurCent -> ExceptT String Aff Unit
+redeemAmount _ _ _ =
+  log "In the future we'll pay back the amount..."
+
+--------------------------------------------------------------------------------
 
 finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
 finalizeTx env (Transfer { from, amount, id }) = do
@@ -131,14 +157,15 @@ finalizeTx env (Transfer { from, amount, id }) = do
     }
     # ExceptT
     # withExceptT show
-    <#> (\response -> response -# _.body # _.data)
+    <#> (unwrap >>> _.body >>> _.data)
 
 syncVouchers :: ServerEnv -> Aff Unit
 syncVouchers env = do
+  log "syncing transactions..."
   result <- runExceptT $ syncVouchers' env
   case result of
     Left e -> logShow e
-    Right _ -> log "syncing transactions..."
+    Right _ -> log "synced transactions."
 
 getOptions :: ServerEnv -> Options
 getOptions env = PC.defaultOpts
@@ -153,7 +180,9 @@ getVoucherProviders env _ = do
     xbgeClient = mkClient (getOptions env) xbgeSpec
   result <- xbgeClient.getVoucherProviders {}
   case result of
-    Left e -> pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
+    Left e -> do
+      logShow e
+      pure $ Left $ Error (Response.internalError (StringBody "Internal error"))
     Right response -> pure $ Right (response -# _.body # _.data)
 
 getVouchers :: ServerEnv -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
@@ -210,7 +239,6 @@ getVouchers env { body: { signatureObj } } = do
                   case e of
                     DecodeError { error, response } -> do
                       log ("DecodeError: " <> show error)
-                      let x = unsafePerformEffect $ writeTextFile UTF8 "out.json" (_.body $ unwrap response)
                       pure unit
                     StatusError _ -> log "StatusError"
                     RequestError _ -> log "RequestError"
@@ -240,14 +268,6 @@ decryptVoucher key (VoucherEncrypted x) = ado
 decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
 decryptVoucherCode key (VoucherCodeEncrypted s) = decrypt key s <#> VoucherCode
 
--- do
---   txs <- getTransactions env
---     { fromAddress: SafeAddress $ C.SafeAddress sa
---     , toAddress: SafeAddress $ C.SafeAddress sa
---     }
---   let _ = spy "Transactions" txs
---   M.lookup (SafeAddress $ C.SafeAddress sa) db # fold # Right # pure
-
 --------------------------------------------------------------------------------
 
 getTransactions
@@ -258,10 +278,7 @@ getTransactions
 getTransactions env { toAddress } = do
   result <- queryGql env "get-transactions"
     { transfers:
-        { where:
-            { to: show toAddress
-            }
-        } =>> { from, to, id, amount}
+        { where: { to: show toAddress } } =>> { from, to, id, amount }
     }
   case result of
     Left e -> pure $ Left $ show e
@@ -282,7 +299,6 @@ newtype Transfer = Transfer
   , amount :: Frackles
   }
 
-
 --------------------------------------------------------------------------------
 
 getTransferMeta
@@ -293,10 +309,8 @@ getTransferMeta
 getTransferMeta env { transferId } = do
   result <- queryGql env "get-transfer-meta"
     { notifications:
-        { where:
-            { transfer: un TransferId transferId
-            }
-        } =>> { id, transactionHash, time}
+        { where: { transfer: un TransferId transferId } } =>>
+          { id, transactionHash, time }
     }
   case result of
     Left e -> pure $ Left $ show e
@@ -306,13 +320,13 @@ getTransferMeta env { transferId } = do
   mkTransferMeta :: GraphNode.Notification -> Either String TransferMeta
   mkTransferMeta x = note "Parse error" ado
     time <- todo
-    in TransferMeta { time, transactionHash: x.transactionHash, id: x.id  }
+    in TransferMeta { time, transactionHash: x.transactionHash, id: x.id }
 
-newtype TransferMeta = TransferMeta {
-  id :: String,
-  transactionHash :: String,
-  time :: Instant
-}
+newtype TransferMeta = TransferMeta
+  { id :: String
+  , transactionHash :: String
+  , time :: Instant
+  }
 
 derive instance newtypeTransferMeta :: Newtype TransferMeta _
 
@@ -333,77 +347,33 @@ queryGql
   -> String
   -> query
   -> Aff (Either GQLError returns)
-queryGql env s q = query_ (env.gardenGraphApi <> "/subgraphs/name/" <> env.gardenSubgraphName) (Proxy :: Proxy Schema) s q
+queryGql env s q = query_ (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) (Proxy :: Proxy Schema) s q
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
 
--- {
---   transfers (
---     where: 
---     {
---       from: "idFrom",
---       to: "idTo"
---     }
---   )
---   {
---     id 
---     from 
---     to 
---     amount
---   }
--- }
-
--- {
---   notifications (
---     where: 
---     {
---       transfer: "21429855-18"
---       safeAddress: "0xccdfa2fa15c9d0ba7e84a96341a54296873abba4"
---     }
---   ) 
---   {
---     id
---     safeAddress
---     transactionHash
---     transfer {from to amount}
---   }
--- }
-
 --------------------------------------------------------------------------------
 
-type ServerConfig =
-  ( port :: Maybe Int <: "PORT"
-  , gardenApi :: String <: "GARDEN_API"
-  , gardenApiUsers :: String <: "GARDEN_API_USERS"
-  , gardenGraphApi :: String <: "GARDEN_GRAPH_API"
-  , gardenSubgraphName :: String <: "GARDEN_SUBGRAPH_NAME"
-  , gardenRelay :: String <: "GARDEN_RELAY"
-  , gardenHubAddress :: String <: "GARDEN_HUB_ADDRESS"
-  , gardenProxyFactoryAddress :: String <: "GARDEN_PROXY_FACTORY_ADRESS"
-  , gardenSafeMasterAddress :: String <: "GARDEN_SAFE_MASTER_ADDRESS"
-  , gardenEthereumNodeWebSocket :: String <: "GARDEN_ETHEREUM_NODE_WS"
-  , voucherCodeSecret :: String <: "VOUCHER_CODE_SECRET"
-  , xbgeAuthSecret :: String <: "XBGE_AUTH_SECRET"
-  , xbgeEndpoint :: String <: "XBGE_ENDPOINT"
-  , xbgeSafeAddress :: Address <: "XBGE_SAFE_ADDRESS"
+type ServerConfigSpec :: forall k. (Symbol -> Type -> k) -> Row k
+type ServerConfigSpec f =
+  ( port :: f "PORT" (Maybe Int)
+  , gardenApi :: f "GARDEN_API" String
+  , gardenApiUsers :: f "GARDEN_API_USERS" String
+  , gardenGraphApi :: f "GARDEN_GRAPH_API" String
+  , gardenSubgraphName :: f "GARDEN_SUBGRAPH_NAME" String
+  , gardenRelay :: f "GARDEN_RELAY" String
+  , gardenHubAddress :: f "GARDEN_HUB_ADDRESS" String
+  , gardenProxyFactoryAddress :: f "GARDEN_PROXY_FACTORY_ADRESS" String
+  , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" String
+  , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" String
+  , voucherCodeSecret :: f "VOUCHER_CODE_SECRET" String
+  , xbgeAuthSecret :: f "XBGE_AUTH_SECRET" String
+  , xbgeEndpoint :: f "XBGE_ENDPOINT" String
+  , xbgeSafeAddress :: f "XBGE_SAFE_ADDRESS" Address
   )
 
-type ServerEnv =
-  { port :: Maybe Int
-  , gardenApi :: String
-  , gardenApiUsers :: String
-  , gardenGraphApi :: String
-  , gardenSubgraphName :: String
-  , gardenRelay :: String
-  , gardenHubAddress :: String
-  , gardenProxyFactoryAddress :: String
-  , gardenSafeMasterAddress :: String
-  , gardenEthereumNodeWebSocket :: String
-  , voucherCodeSecret :: String
-  , xbgeAuthSecret :: String
-  , xbgeEndpoint :: String
-  , xbgeSafeAddress :: Address
-  }
+type ServerConfig = ServerConfigSpec Variable
+
+type ServerEnv = { | ServerConfigSpec Resolved }
 
 --------------------------------------------------------------------------------
 
