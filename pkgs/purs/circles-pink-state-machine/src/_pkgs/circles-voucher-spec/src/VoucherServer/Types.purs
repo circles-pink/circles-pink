@@ -48,6 +48,8 @@ newtype VoucherProviderId = VoucherProviderId String
 derive instance genericVoucherProviderId :: Generic VoucherProviderId _
 derive newtype instance writeForeignVoucherProviderId :: WriteForeign VoucherProviderId
 derive newtype instance readForeignVoucherProviderId :: ReadForeign VoucherProviderId
+derive newtype instance eqVoucherProviderId :: Eq VoucherProviderId
+derive newtype instance ordVoucherProviderId :: Ord VoucherProviderId
 
 instance showVoucherProviderId :: Show VoucherProviderId where
   show = genericShow
@@ -135,17 +137,11 @@ derive newtype instance writeForeignVoucher :: WriteForeign Voucher
 newtype TransferId = TransferId String
 
 derive instance genericTransferId :: Generic TransferId _
-
 derive instance newtypeTransferId :: Newtype TransferId _
-
+derive newtype instance readForeignTransferId :: ReadForeign TransferId
 derive newtype instance writeForeignTransferId :: WriteForeign TransferId
+derive newtype instance eqTransferId :: Eq TransferId
+derive newtype instance ordTransferId :: Ord TransferId
 
 instance showTransferId :: Show TransferId where
   show = genericShow
-
-derive newtype instance readForeignTransferId :: ReadForeign TransferId
-
-derive newtype instance eqTransferId :: Eq TransferId
-
-derive newtype instance ordTransferId :: Ord TransferId
-
