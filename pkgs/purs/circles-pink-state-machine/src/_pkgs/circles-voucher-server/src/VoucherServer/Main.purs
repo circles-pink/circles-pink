@@ -6,7 +6,7 @@ import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, withExceptT)
+import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.Array as A
@@ -138,19 +138,35 @@ finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
 finalizeTx env (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions env) xbgeSpec
-    timestamp = todo
 
-  xbgeClient.finalizeVoucherPurchase
-    { body:
-        { safeAddress: from
-        , providerId: supportedProvider
-        , amount: VoucherAmount $ fracklesToEurCent timestamp amount
-        , transactionId: id
-        }
-    }
+
+  (TransferMeta { time }) <- getTransferMeta env id # ExceptT
+
+  providers <- xbgeClient.getVoucherProviders {}
     # ExceptT
     # withExceptT show
     <#> (unwrap >>> _.body >>> _.data)
+
+  let
+    eur = fracklesToEurCent time amount
+    maybeVoucherAmount = getVoucherAmount providers supportedProvider eur
+
+  case maybeVoucherAmount of
+    Nothing ->  do
+      redeemAmount env from eur
+      throwError "Invalid Voucher amount."
+    Just voucherAmount ->
+      xbgeClient.finalizeVoucherPurchase
+        { body:
+            { safeAddress: from
+            , providerId: supportedProvider
+            , amount: voucherAmount
+            , transactionId: id
+            }
+        }
+        # ExceptT
+        # withExceptT show
+        <#> (unwrap >>> _.body >>> _.data)
 
 syncVouchers :: ServerEnv -> Aff Unit
 syncVouchers env = do
@@ -294,20 +310,18 @@ newtype Transfer = Transfer
 
 --------------------------------------------------------------------------------
 
-getTransferMeta
-  :: ServerEnv
-  -> { transferId :: TransferId
-     }
-  -> Aff (Either String (Array TransferMeta))
-getTransferMeta env { transferId } = do
+getTransferMeta :: ServerEnv -> TransferId -> Aff (Either String TransferMeta)
+getTransferMeta env transferId = do
   result <- queryGql env "get-transfer-meta"
     { notifications:
         { where: { transfer: un TransferId transferId } } =>>
           { id, transactionHash, time }
     }
-  case result of
-    Left e -> pure $ Left $ show e
-    Right { notifications } -> notifications # traverse mkTransferMeta # pure
+  pure $ case result of
+    Left e -> Left $ show e
+    Right { notifications } -> case A.head notifications of
+      Just notification -> notification # mkTransferMeta
+      Nothing -> Left "Return array is empty"
 
   where
   mkTransferMeta :: GraphNode.Notification -> Either String TransferMeta
