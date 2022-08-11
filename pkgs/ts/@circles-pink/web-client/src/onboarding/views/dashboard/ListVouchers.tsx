@@ -92,13 +92,9 @@ const mapResult = (
 const mapInfo = (
   providers: Array<VoucherProvider>,
   providerId: string
-): VoucherProvider | null => {
-  providers.forEach(provider => {
-    if (provider.id === providerId) {
-      return provider;
-    }
-  });
-  return null;
+): VoucherProvider | undefined => {
+  const provider = providers.find(provider => provider.id === providerId);
+  return provider;
 };
 
 // -----------------------------------------------------------------------------
@@ -199,7 +195,7 @@ const Logo = styled.img(() => [
 
 type VoucherContentProps = {
   voucher: Voucher;
-  provider: VoucherProvider | null;
+  provider: VoucherProvider | undefined;
   theme: Theme;
 };
 
