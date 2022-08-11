@@ -77,7 +77,7 @@ instance showVoucherAmount :: Show VoucherAmount where
 
 --------------------------------------------------------------------------------
 
-newtype Frackles = Frackles BN
+newtype Freckles = Freckles BN
 
 --------------------------------------------------------------------------------
 newtype VoucherCodeEncrypted = VoucherCodeEncrypted String
