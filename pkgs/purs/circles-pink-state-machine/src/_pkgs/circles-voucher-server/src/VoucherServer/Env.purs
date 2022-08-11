@@ -1,9 +1,24 @@
 module VoucherServer.Env where
 
 
+import Prelude
+
 import Data.Maybe (Maybe)
-import TypedEnv (Variable, Resolved)
-import VoucherServer.Specs.Xbge (Address(..))
+import Network.Ethereum.Core.HexString (mkHexString)
+import Network.Ethereum.Core.Signatures (mkPrivateKey)
+import Network.Ethereum.Core.Signatures as C
+import TypedEnv (class ParseValue, Resolved, Variable)
+import VoucherServer.Specs.Xbge (Address)
+
+
+--------------------------------------------------------------------------------
+
+newtype PrivateKey = PrivateKey C.PrivateKey
+
+-- derive instance newtypePrivateKey :: Newtype PrivateKey
+
+instance parseValuePrivateKey :: ParseValue PrivateKey where
+  parseValue x = mkHexString x >>= mkPrivateKey <#> PrivateKey
 
 --------------------------------------------------------------------------------
 
@@ -23,6 +38,7 @@ type ServerConfigSpec f =
   , xbgeAuthSecret :: f "XBGE_AUTH_SECRET" String
   , xbgeEndpoint :: f "XBGE_ENDPOINT" String
   , xbgeSafeAddress :: f "XBGE_SAFE_ADDRESS" Address
+  , xbgeKey :: f "XBGE_KEY" PrivateKey
   )
 
 type ServerConfig = ServerConfigSpec Variable
