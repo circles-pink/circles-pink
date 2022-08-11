@@ -27,6 +27,9 @@ import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
 import Debug (spy, spyWith)
+import Data.Tuple.Nested (type (/\), (/\))
+import Debug (spyWith)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
@@ -415,9 +418,18 @@ app = do
       _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
         { getVouchers: getVouchers parsedEnv
         , getVoucherProviders: getVoucherProviders parsedEnv
-        , trustUsers: Routes.trustUsers parsedEnv
+        , trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
         }
       pure $ Right unit
+
+runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
+runWithLog m = do
+  result <- runExceptT m
+  case result of
+    Left (msg /\ err) -> do
+      log msg
+      pure $ Left err
+    Right x -> pure $ Right x
 
 main :: Effect Unit
 main = launchAff_ app
