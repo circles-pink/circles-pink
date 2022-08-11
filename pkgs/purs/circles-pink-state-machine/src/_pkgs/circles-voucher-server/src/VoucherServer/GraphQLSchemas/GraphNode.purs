@@ -1,7 +1,5 @@
 module VoucherServer.GraphQLSchemas.GraphNode where
 
-import Prelude
-
 import GraphQL.Client.Args (type (==>))
 import Type.Proxy (Proxy(..))
 

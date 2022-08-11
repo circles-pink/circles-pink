@@ -13,12 +13,12 @@ import Data.Array (find)
 import Data.Array as A
 import Data.BN (BN, fromDecimalStr)
 import Data.Bifunctor (lmap)
-import Data.DateTime (diff)
-import Data.DateTime.Instant (Instant, instant, toDateTime, unInstant)
+import Data.DateTime (Millisecond, Second, diff)
+import Data.DateTime.Instant (Instant, fromDateTime, instant, toDateTime, unInstant)
 import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Newtype (class Newtype, un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
@@ -337,7 +337,7 @@ getTransferMeta env transferId = do
   where
   mkTransferMeta :: GraphNode.Notification -> Either String TransferMeta
   mkTransferMeta x = note "Parse error" ado
-    time <- todo
+    time <- fromString x.time <#> Seconds <#> convertDuration >>= instant
     in TransferMeta { time, transactionHash: x.transactionHash, id: x.id }
 
 newtype TransferMeta = TransferMeta
