@@ -415,7 +415,7 @@ app = do
       _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
         { getVouchers: getVouchers parsedEnv
         , getVoucherProviders: getVoucherProviders parsedEnv
-        , trustUsers: Routes.trustUsers
+        , trustUsers: Routes.trustUsers parsedEnv
         }
       pure $ Right unit
 
