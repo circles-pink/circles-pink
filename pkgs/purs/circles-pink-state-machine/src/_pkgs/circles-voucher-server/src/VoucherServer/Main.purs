@@ -6,7 +6,7 @@ import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (ExceptT(..), catchError, lift, mapExceptT, runExcept, runExceptT, throwError, withExceptT)
+import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.Array (find)
@@ -26,10 +26,7 @@ import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
-import Debug (spy, spyWith)
-import Data.Tuple.Nested (type (/\), (/\))
 import Debug (spyWith)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
@@ -100,8 +97,6 @@ syncVouchers' env = do
   txs <- getTransactions env { toAddress: env.xbgeSafeAddress }
     # ExceptT
 
-  --let _ = spy "txs" txs
-
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
     # ExceptT
     # withExceptT show
@@ -115,7 +110,7 @@ syncVouchers' env = do
     unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
   syncedVouchers <- for unfinalizedTxs (finalizeTx env >>> runExceptT)
-     # lift
+    # lift
 
   log ("finalized the following vouchers: ")
   logShow syncedVouchers
@@ -130,8 +125,6 @@ almostEquals
   (EurCent amount)
   (EurCent price) =
   let
-    _ = spy "amount" amount
-    _ = spy "price" (price * 100)
     isInLowerRange = amount >= (price * 100 - below)
     isInUpperRange = amount <= (price * 100 + above)
   in
@@ -159,11 +152,8 @@ finalizeTx :: ServerEnv -> Transfer -> ExceptT String Aff VoucherEncrypted
 finalizeTx env (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions env) xbgeSpec
-    _ = spy "id" id
 
   (TransferMeta { time }) <- getTransferMeta env id # ExceptT
-
-  let _ = spy "time" time
 
   providers <- xbgeClient.getVoucherProviders {}
     # ExceptT
@@ -288,9 +278,9 @@ getVouchers env { body: { signatureObj } } = do
 frecklesToEurCent :: Instant -> Freckles -> EurCent
 frecklesToEurCent timestamp (Freckles freckles) =
   let
-    (seconds :: Seconds) = unInstant timestamp # convertDuration
+    ms = unInstant timestamp
   in
-    frecklesToEuroCentImpl (unwrap seconds) freckles # EurCent
+    frecklesToEuroCentImpl (unwrap ms) freckles # EurCent
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
@@ -338,13 +328,12 @@ getTransferMeta env transferId = do
   result <- queryGql env "get-transfer-meta"
     { notifications:
         { where:
-            { transfer: "87-0" -- un TransferId transferId
+            { transfer: un TransferId transferId
             , safeAddress: show env.xbgeSafeAddress
             }
         } =>>
           { id, transactionHash, time }
     }
-  let _ = spy "notification result" result
   pure $ case result of
     Left e -> Left $ show e
     Right { notifications } -> case A.head notifications of
@@ -385,7 +374,6 @@ queryGql
 queryGql env s q = query_ (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) (Proxy :: Proxy Schema) s q
   # try
   <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
-
 
 --------------------------------------------------------------------------------
 

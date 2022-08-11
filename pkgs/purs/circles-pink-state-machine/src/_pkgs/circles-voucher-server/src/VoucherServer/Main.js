@@ -26,12 +26,9 @@ exports.encryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
 };
 
 exports.frecklesToEuroCentImpl = (timestamp) => (bn) => {
-  console.log("time:", new Date(timestamp));
-  const crc = Number.parseFloat(Web3.utils.fromWei(bn.toString(), "ether"));
-  console.log("crc:", crc);
+  const freckles = bn.toString();
+  const crc = Number.parseFloat(Web3.utils.fromWei(freckles, "ether"));
   const tc = crcToTc(timestamp, crc);
-  console.log("tc:", tc);
   const eur = Math.round(tc * 10);
-  console.log("eur:", eur);
   return eur;
 };
