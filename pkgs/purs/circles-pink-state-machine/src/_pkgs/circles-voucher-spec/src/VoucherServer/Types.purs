@@ -61,6 +61,9 @@ newtype EurCent = EurCent Int
 derive instance genericEurCent :: Generic EurCent _
 derive newtype instance writeForeignEurCent :: WriteForeign EurCent
 derive newtype instance readForeignEurCent :: ReadForeign EurCent
+-- derive newtype instance semiringEurCent :: Semiring EurCent
+-- derive newtype instance eqEurCent :: Eq EurCent
+-- derive newtype instance ordEurCent :: Ord EurCent
 
 instance showEurCent :: Show EurCent where
   show = genericShow
