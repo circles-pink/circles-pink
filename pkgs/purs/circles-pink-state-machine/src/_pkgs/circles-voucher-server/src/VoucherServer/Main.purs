@@ -6,7 +6,7 @@ import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError, withExceptT)
+import Control.Monad.Except (ExceptT(..), catchError, lift, mapExceptT, runExcept, runExceptT, throwError, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
 import Data.Array (find)
@@ -109,7 +109,8 @@ syncVouchers' env = do
 
     unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
-  syncedVouchers <- for (spy "unfinalized" unfinalizedTxs) $ finalizeTx env
+  syncedVouchers <- for unfinalizedTxs (finalizeTx env >>> runExceptT)
+     # lift
 
   log ("finalized the following vouchers: ")
   logShow syncedVouchers
