@@ -27,7 +27,7 @@ type Env =
   , web3 :: Web3
   }
 
-trustUsers :: ServerEnv -> { body :: { safeAddresses :: Array Address } } -> ExceptT (String /\ Failure) Aff {}
+trustUsers :: ServerEnv -> { body :: { safeAddresses :: Array Address }} -> ExceptT (String /\ Failure) Aff {}
 trustUsers env { body: { safeAddresses } } = do
   provider <- CC.newWebSocketProvider env.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect
@@ -53,7 +53,8 @@ trustUsers env { body: { safeAddresses } } = do
     # mapExceptT liftEffect
     # withExceptT (\_ -> "Account creation error" /\ Error (Response.internalError (StringBody "Internal error")))
 
-  results :: Array (Either String Unit) <- for safeAddresses (trustUser env { web3, circlesCore, account } >>> runExceptT) # lift
+  results :: Array (Either String Unit) <- 
+    for safeAddresses (trustUser env { web3, circlesCore, account } >>> runExceptT) # lift
 
   logShow results
 
@@ -72,6 +73,7 @@ trustUser env { circlesCore, account } safeAddress = do
     _ <- CC.trustAddConnection circlesCore account
       { user: convert safeAddress
       , canSendTo: convert $ unwrap env.xbgeSafeAddress
+      , limitPercentage: 100.0
       }
       # withExceptT (\_ -> "check is trusted error")
     pure unit

@@ -218,6 +218,7 @@ trustGetNetwork cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 type TrustAddConnectionOptions =
   { user :: ChecksumAddress
   , canSendTo :: ChecksumAddress
+  , limitPercentage :: Number
   }
 
 type ErrTrustAddConnection r = ErrNative + r
@@ -227,7 +228,11 @@ trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
   where
   fn = convertCore cc -# _.trust -# _.addConnection
 
-  mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
+  mapArg2 x = x
+    { user = show x.user
+    , canSendTo = show x.canSendTo
+    , limitPercentage = x.limitPercentage
+    }
 
 --------------------------------------------------------------------------------
 -- API / trustRemoveConnection

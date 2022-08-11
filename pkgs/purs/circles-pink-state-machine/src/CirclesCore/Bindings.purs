@@ -187,7 +187,7 @@ newtype CoreTrust = CoreTrust
         )
   , addConnection ::
       Fn2Promise Account
-        { user :: String, canSendTo :: String }
+        { user :: String, canSendTo :: String, limitPercentage :: Number }
         String
   , removeConnection ::
       Fn2Promise Account
