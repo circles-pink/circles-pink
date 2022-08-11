@@ -31,17 +31,23 @@ export const BuyVouchers = ({
     <>
       <Claim color={theme.baseColor}>Buy Vouchers:</Claim>
       {providers_.map(provider => {
+        const sortedOffers = [...provider.availableOffers].sort(
+          (a, b) => a.amount - b.amount
+        );
+
         return (
           <div key={provider.id}>
             <OfferContainer elementCount={provider.availableOffers.length}>
-              {provider.availableOffers.map(offer => {
+              {sortedOffers.map(offer => {
                 return (
                   <Offer theme={theme} key={offer.amount}>
                     <Logo src={provider.logoUrl} />
-                    <div>
+                    <VoucherText fontSize={1.25}>
                       {offer.amount}€ {provider.name} voucher
-                    </div>
-                    <div>{offer.countAvailable} vouchers left!</div>
+                    </VoucherText>
+                    <VoucherText fontSize={1}>
+                      {offer.countAvailable} vouchers left!
+                    </VoucherText>
                   </Offer>
                 );
               })}
@@ -106,5 +112,17 @@ const Offer = styled.button<OfferProps>(({ theme }) => {
 const Logo = styled.img(() => [
   css`
     max-width: 10rem;
+  `,
+]);
+
+// -----------------------------------------------------------------------------
+// UI Text
+// -----------------------------------------------------------------------------
+
+const VoucherText = styled.p<{ fontSize: number }>(({ fontSize }) => [
+  css`
+    font-size: ${fontSize}rem;
+    margin: 0;
+    padding: 0;
   `,
 ]);
