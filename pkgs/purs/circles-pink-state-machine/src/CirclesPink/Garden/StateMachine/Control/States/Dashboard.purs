@@ -11,11 +11,11 @@ import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
-import CirclesPink.Data.User (User(..))
+import CirclesPink.Data.User (User)
 import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl, GetVoucherProviders)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
@@ -42,10 +42,8 @@ import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
 import Data.These (These(..), maybeThese)
-import Effect.Now (now)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import Safe.Coerce (coerce)
 import Test.TestUtils (addrA, addrB, userA)
 import Web3 (Message(..))
 
