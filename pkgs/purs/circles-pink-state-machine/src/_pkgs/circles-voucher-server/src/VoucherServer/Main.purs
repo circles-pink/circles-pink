@@ -9,6 +9,7 @@ import CirclesPink.Data.Nonce (addressToNonce)
 import Control.Monad.Except (ExceptT(..), mapExceptT, runExceptT, throwError, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
+import Data.Array (find)
 import Data.Array as A
 import Data.BN (BN, fromDecimalStr)
 import Data.Bifunctor (lmap)
@@ -52,7 +53,7 @@ import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, t
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider, VoucherProviderId(..))
+import VoucherServer.Types (EurCent(..), Frackles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -117,14 +118,25 @@ syncVouchers' env = do
 --------------------------------------------------------------------------------
 
 almostEquals :: Threshold EurCent -> EurCent -> EurCent -> Boolean
-almostEquals = todo
+almostEquals
+  (Threshold { above: (EurCent above), below: (EurCent below) })
+  (EurCent amount)
+  (EurCent price) =
+  let
+    isInLowerRange = amount >= (price - below)
+    isInUpperRange = amount <= (price + above)
+  in
+    isInLowerRange && isInUpperRange
 
 newtype Threshold a = Threshold { above :: a, below :: a }
 
 --------------------------------------------------------------------------------
 
 getVoucherAmount :: Array VoucherProvider -> VoucherProviderId -> EurCent -> Maybe VoucherAmount
-getVoucherAmount = todo
+getVoucherAmount providers providerId payedAmount = do
+  (VoucherProvider provider) <- find (\(VoucherProvider p) -> p.id == providerId) providers
+  (VoucherOffer { amount }) <- find (\(VoucherOffer { amount: (VoucherAmount amount) }) -> almostEquals threshold payedAmount amount) provider.availableOffers
+  pure amount
 
 --------------------------------------------------------------------------------
 
@@ -139,7 +151,6 @@ finalizeTx env (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions env) xbgeSpec
 
-
   (TransferMeta { time }) <- getTransferMeta env id # ExceptT
 
   providers <- xbgeClient.getVoucherProviders {}
@@ -152,7 +163,7 @@ finalizeTx env (Transfer { from, amount, id }) = do
     maybeVoucherAmount = getVoucherAmount providers supportedProvider eur
 
   case maybeVoucherAmount of
-    Nothing ->  do
+    Nothing -> do
       redeemAmount env from eur
       throwError "Invalid Voucher amount."
     Just voucherAmount ->
@@ -271,7 +282,7 @@ fracklesToEurCent timestamp (Frackles frackles) =
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
-  code <- pure $ coerce x.code --   decryptVoucherCode key x.code
+  code <- decryptVoucherCode key x.code
   in Voucher x { code = code }
 
 decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
