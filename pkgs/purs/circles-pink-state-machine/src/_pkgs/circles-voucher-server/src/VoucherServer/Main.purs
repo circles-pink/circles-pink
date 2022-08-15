@@ -53,7 +53,9 @@ import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.Env (ServerConfig, ServerEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
+import VoucherServer.MonadVoucherServer.Prod (VoucherServerProdM(..), runVoucherServerProdM)
 import VoucherServer.Routes.TrustUser as Routes
+import VoucherServer.Routes.TrustsReport as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
 import VoucherServer.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
@@ -410,8 +412,10 @@ app = do
         { getVouchers: getVouchers parsedEnv
         , getVoucherProviders: getVoucherProviders parsedEnv
         , trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
+        , trustsReport: Routes.trustsReport >>> runVoucherServerProdM
         }
       pure $ Right unit
+
 
 runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
 runWithLog m = do
