@@ -6,6 +6,7 @@ import {
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
+import { Overlay, SelectedOffer } from '.';
 import { Button } from '../../../components/forms';
 import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
@@ -13,11 +14,15 @@ import { Theme } from '../../../context/theme';
 type BuyVouchersProps = {
   providers: VoucherProvidersResult;
   theme: Theme;
+  initializeVoucherOrder: (selectedOffer: SelectedOffer) => void;
+  availableBalance: number;
 };
 
 export const BuyVouchers = ({
   providers,
   theme,
+  initializeVoucherOrder,
+  availableBalance,
 }: BuyVouchersProps): ReactElement => {
   const [providers_, setProviders_] = useState<VoucherProvider[]>(
     getData([] as VoucherProvider[])(providers as any)
@@ -46,14 +51,33 @@ export const BuyVouchers = ({
           <div key={provider.id}>
             <OfferContainer elementCount={provider.availableOffers.length}>
               {sortedOffers.map(offer => {
+                const userCanBuy = availableBalance - offer.amount * 10 > 0;
+
                 return (
-                  <Offer theme={theme} key={offer.amount}>
+                  <Offer
+                    enabled={userCanBuy}
+                    theme={theme}
+                    key={`${provider.id}-${offer.amount}`}
+                    onClick={() =>
+                      userCanBuy && initializeVoucherOrder([provider, offer])
+                    }
+                  >
                     <Logo src={provider.logoUrl} />
                     <VoucherText fontSize={1.25}>
                       {offer.amount}€ {provider.name} voucher
                     </VoucherText>
                     <VoucherText fontSize={1}>
                       {offer.countAvailable} vouchers left!
+                    </VoucherText>
+                    <br />
+
+                    <VoucherText fontSize={1.5}>
+                      {userCanBuy
+                        ? `Buy for ${offer.amount * 10} Circles`
+                        : `You need ${(
+                            offer.amount * 10 -
+                            availableBalance
+                          ).toFixed(2)} Circles`}
                     </VoucherText>
                   </Offer>
                 );
@@ -79,9 +103,10 @@ const OfferContainer = styled.div<OfferContainerProps>(({ elementCount }) => [
 
 type OfferProps = {
   theme: Theme;
+  enabled: boolean;
 };
 
-const Offer = styled.button<OfferProps>(({ theme }) => {
+const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
   const borderTopBottomRight = `
     border-top: 1px solid ${theme.darkColor};
     border-bottom: 1px solid ${theme.darkColor};
@@ -90,15 +115,16 @@ const Offer = styled.button<OfferProps>(({ theme }) => {
 
   return [
     css`
-      cursor: pointer;
+      cursor: ${enabled ? 'pointer' : 'not-allowed'};
       font-size: 2rem;
       color: ${theme.textColorDark};
       background-color: ${theme.lightColor};
       padding: 1rem;
-      &:hover {
+      ${enabled &&
+      `&:hover {
         background-color: ${theme.textColorLight};
         color: ${theme.baseColor};
-      }
+      }`}
 
       outline: none;
       border: none;

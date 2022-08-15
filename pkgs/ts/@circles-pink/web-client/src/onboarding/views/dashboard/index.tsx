@@ -56,7 +56,13 @@ import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
-import { VoucherOffer } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import {
+  VoucherOffer,
+  VoucherProvider,
+} from '@circles-pink/state-machine/output/VoucherServer.Types';
+import { ConfirmSend } from './ConfirmSend';
+import { crcToTc } from '@circles/timecircles';
+import { displayBalance } from '../../utils/timeCircles';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -69,7 +75,9 @@ export type UserData = {
   avatarUrl: string | null;
 };
 
-export type Overlay = 'SEND' | 'RECEIVE';
+export type Overlay = 'SEND' | 'RECEIVE' | 'CONFIRM_SEND';
+
+export type SelectedOffer = [VoucherProvider, VoucherOffer];
 
 // -----------------------------------------------------------------------------
 // Dashboard
@@ -93,16 +101,19 @@ export const Dashboard = ({
   const [theme] = useContext(ThemeContext);
 
   // Overlay
-  const [overlay, setOverlay] = useState<[Overlay, boolean]>(['SEND', false]);
+  const [[overlayType, isOpen], setOverlay] = useState<[Overlay, boolean]>([
+    'SEND',
+    false,
+  ]);
 
   const toggleOverlay = (type: Overlay) => {
-    if (overlay[1] && overlay[0] !== type) {
+    if (isOpen && overlayType !== type) {
       setOverlay([type, true]);
-    } else if (overlay[1] && overlay[0] === type) {
+    } else if (isOpen && overlayType === type) {
       setOverlay([type, false]);
-    } else if (!overlay[1] && overlay[0] !== type) {
+    } else if (!isOpen && overlayType !== type) {
       setOverlay([type, true]);
-    } else if (!overlay[1] && overlay[0] === type) {
+    } else if (!isOpen && overlayType === type) {
       setOverlay([type, true]);
     }
   };
@@ -110,6 +121,14 @@ export const Dashboard = ({
   // User Interaction
   // Set transfer target, when clicking on contact action
   const [overwriteTo, setOverwriteTo] = useState<Address | undefined>();
+
+  // Voucher Shop
+  const [selectedOffer, setSelectedOffer] = useState<SelectedOffer>();
+
+  const initializeVoucherOrder = (offer: SelectedOffer) => {
+    setSelectedOffer(offer);
+    toggleOverlay('CONFIRM_SEND');
+  };
 
   // animation
   const getDelay = getIncrementor(0, 0.05);
@@ -244,6 +263,22 @@ export const Dashboard = ({
     }
   }, [state.requestUBIPayoutResult, countRefreshPayout]);
 
+  // Balance for vouchers
+  const [userBalance, setUserBalance] = useState<number>(0);
+
+  useEffect(() => {
+    if (state.getBalanceResult.type === 'success') {
+      setUserBalance(
+        parseFloat(
+          displayBalance(
+            state.getBalanceResult.value.data.toString(),
+            'TIME-CIRCLES'
+          )
+        )
+      );
+    }
+  }, [state.getBalanceResult]);
+
   // -----------------------------------------------------------------------------
   // Redeploy, if token is not deployed
   // -----------------------------------------------------------------------------
@@ -299,8 +334,6 @@ export const Dashboard = ({
   // -----------------------------------------------------------------------------
   // Trust
   // -----------------------------------------------------------------------------
-
-  // const graph: Graph = new Map([[state.user.safeAddress, state.trusts]]);
 
   return (
     <UserDashboard
@@ -414,6 +447,8 @@ export const Dashboard = ({
                   <BuyVouchers
                     theme={theme}
                     providers={stateRaw.voucherProvidersResult}
+                    initializeVoucherOrder={initializeVoucherOrder}
+                    availableBalance={userBalance}
                   />
                 </MarginY>
                 <ListVouchers
@@ -445,15 +480,16 @@ export const Dashboard = ({
         </>
       }
       overlay={
-        overlay[1] ? (
+        isOpen ? (
           <Overlay
             theme={theme}
             closeOverlay={() => setOverlay(['SEND', false])}
             content={
               <DashboardOverlay
-                overlay={overlay[0]}
+                overlay={overlayType}
                 closeOverlay={() => setOverlay(['SEND', false])}
                 overwriteTo={overwriteTo}
+                selectedOffer={selectedOffer}
                 state={stateRaw}
                 act={act}
                 theme={theme}
@@ -486,11 +522,10 @@ const getTimestamp = () => Math.round(new Date().getTime() / 1000).toString();
 // UI / DashboardOverlay
 // -----------------------------------------------------------------------------
 
-type OverlayType = 'SEND' | 'RECEIVE';
-
 type DashboardOverlayProps = SendProps & {
-  overlay: OverlayType;
+  overlay: Overlay;
   closeOverlay: () => void;
+  selectedOffer?: SelectedOffer;
 };
 
 const DashboardOverlay = ({
@@ -500,15 +535,24 @@ const DashboardOverlay = ({
   theme,
   closeOverlay,
   overwriteTo,
+  selectedOffer,
 }: DashboardOverlayProps): ReactElement | null => {
   switch (overlay) {
     case 'SEND':
       return (
         <Send overwriteTo={overwriteTo} state={state} act={act} theme={theme} />
       );
-
     case 'RECEIVE':
       return <Receive state={state} act={act} theme={theme} />;
+    case 'CONFIRM_SEND':
+      return selectedOffer ? (
+        <ConfirmSend
+          selectedOffer={selectedOffer}
+          state={state}
+          act={act}
+          theme={theme}
+        />
+      ) : null;
     default:
       return null;
   }
