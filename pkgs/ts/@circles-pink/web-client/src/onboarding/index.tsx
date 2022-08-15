@@ -46,9 +46,10 @@ type Language = 'en' | 'de';
 
 type Content = {};
 
-type UserConfig = {
+export type UserConfig = {
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
+  voucherShopEnabled: boolean;
 };
 
 export type OnboardingProps = {
@@ -100,9 +101,15 @@ type ViewProps = {
   state: CirclesState;
   act: (m: CirclesAction) => void;
   cfg: CirclesConfig;
+  userConfig?: UserConfig;
 };
 
-const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
+const View = ({
+  state,
+  act,
+  cfg,
+  userConfig,
+}: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -133,7 +140,9 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
     case 'trusts':
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
-      return <Dashboard state={state.value} act={act} />;
+      return (
+        <Dashboard state={state.value} act={act} userConfig={userConfig} />
+      );
     default:
       return null;
   }
@@ -197,7 +206,7 @@ const OnboardingContent = ({
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
         <DebugProvider>
-          <View state={state} act={act} cfg={cfg} />
+          <View state={state} act={act} cfg={cfg} userConfig={userConfig} />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>
