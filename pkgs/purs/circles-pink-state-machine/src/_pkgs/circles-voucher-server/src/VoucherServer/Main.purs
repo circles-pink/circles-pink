@@ -1,4 +1,7 @@
-module VoucherServer.Main (main) where
+module VoucherServer.Main
+  ( encrypt
+  , main
+  ) where
 
 import Prelude
 
@@ -26,16 +29,15 @@ import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug (spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log, logShow)
-import Effect.Exception as E
 import Effect.Now (now)
 import Effect.Timer (setInterval)
 import GraphQL.Client.Args ((=>>))
-import GraphQL.Client.Query (query_)
+import GraphQL.Client.BaseClients.Urql (createClient)
+import GraphQL.Client.Query (query)
 import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
 import Payload.Client (ClientError(..), Options, mkClient)
@@ -371,9 +373,10 @@ queryGql
   -> String
   -> query
   -> Aff (Either GQLError returns)
-queryGql env s q = query_ (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) (Proxy :: Proxy Schema) s q
-  # try
-  <#> (lmap (spyWith "error" E.message >>> (\_ -> ConnOrParseError)))
+queryGql env s q =
+  do
+    (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
+    query client s q # try <#> (lmap (\_ -> ConnOrParseError))
 
 --------------------------------------------------------------------------------
 
