@@ -5,6 +5,6 @@
   "exclude": ["node_modules"],
   "references": [
     { "path": "../@circles-pink/web-client" },
-    { "path": "../@circles-pink/generated" }
+    { "path": "../@circles-pink/state-machine" }
   ]
 }
