@@ -11,6 +11,7 @@ VOUCHER_CODE_SECRET := env_var_or_default('VOUCHER_CODE_SECRET', "0")
 XBGE_AUTH_SECRET := env_var_or_default('XBGE_AUTH_SECRET', "0")
 XBGE_ENDPOINT := env_var_or_default('XBGE_ENDPOINT', "0")
 XBGE_SAFE_ADDRESS := env_var_or_default('XBGE_SAFE_ADDRESS', "0")
+XBGE_KEY := env_var_or_default('XBGE_KEY', "0")
 
 TASKS_EXPLORER_SERVER := env_var_or_default("TASKS_EXPLORER_SERVER", "http://tasks.circles.local")
 DIRECTUS_URL := env_var_or_default("DIRECTUS_URL", "http://directus.circles.local/graphql")
@@ -137,6 +138,7 @@ dev-voucher-server:
 	export XBGE_AUTH_SECRET="$XBGE_AUTH_SECRET"
 	export XBGE_ENDPOINT="$XBGE_ENDPOINT"
 	export XBGE_SAFE_ADDRESS="$XBGE_SAFE_ADDRESS"
+	export XBGE_KEY="$XBGE_KEY"
 	node ./pkgs/ts/@circles-pink/state-machine/bin/voucher-server
 
 cors-proxy-server:

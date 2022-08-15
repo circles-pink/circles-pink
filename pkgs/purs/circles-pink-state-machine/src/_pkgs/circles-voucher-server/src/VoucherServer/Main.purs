@@ -25,7 +25,7 @@ import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
-import Data.Tuple.Nested ((/\))
+import Data.Tuple.Nested (type (/\), (/\))
 import Debug (spyWith)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
@@ -47,7 +47,7 @@ import Payload.Server as Payload
 import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
-import TypedEnv (Resolved, Variable, envErrorMessage, fromEnv)
+import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.Env (ServerConfig, ServerEnv)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
