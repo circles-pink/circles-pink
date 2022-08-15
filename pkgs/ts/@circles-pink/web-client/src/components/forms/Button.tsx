@@ -29,7 +29,10 @@ export const Button = (props_: ButtonProps) => {
   const buttonColor = mapLoadingColor(props.prio, props.theme);
 
   return (
-    <Button_ {...props}>
+    <Button_
+      disabled={props.state === 'disabled' || props.state === 'loading'}
+      {...props}
+    >
       <ButtonContent>
         <TextWrapper state={props.state} theme={props.theme}>
           {props.icon ? (
@@ -53,18 +56,23 @@ export const Button = (props_: ButtonProps) => {
 
 type Button_Props = Required<ButtonProps>;
 
-const Button_ = styled.button<Button_Props>(({ theme, fullWidth, prio }) => {
-  const prioStyles = {
-    high: `
+const Button_ = styled.button<Button_Props>(
+  ({ theme, fullWidth, prio, state }) => {
+    const isLoading = state === 'loading';
+    const isDisabled = state === 'disabled';
+
+    const prioStyles = {
+      high: `
       background: ${theme.baseColor};
       border: 1px solid ${darken(theme.baseColor)};
       color: ${theme.textColorLight};
       &:hover {
         background: ${darken(theme.baseColor)};
+        background: ${darken(theme.baseColor)};
         color: ${theme.textColorLight};
       }
     `,
-    medium: `
+      medium: `
       background: ${theme.darkColor};
       border: 1px solid ${theme.darkColor};
       color: ${theme.textColorLight};
@@ -73,7 +81,7 @@ const Button_ = styled.button<Button_Props>(({ theme, fullWidth, prio }) => {
         color: ${theme.textColorLight};
       }
   `,
-    low: `
+      low: `
       background: ${theme.lightColor};
       border: 1px solid ${lighten(theme.darkColor)};
       color: ${theme.darkColor};
@@ -82,19 +90,21 @@ const Button_ = styled.button<Button_Props>(({ theme, fullWidth, prio }) => {
         color: ${theme.darkColor};
       }
       `,
-  }[prio];
+    }[prio];
 
-  return [
-    css`
-      outline: none;
-      border: none;
-      font-size: 1.1rem;
-      ${fullWidth && 'width: 100%;'};
-      ${prioStyles}
-    `,
-    tw`font-bold py-2 px-4 my-1 rounded-full cursor-pointer`,
-  ];
-});
+    return [
+      css`
+        outline: none;
+        border: none;
+        font-size: 1.1rem;
+        cursor: ${isLoading ? 'wait' : isDisabled ? 'not-allowed' : 'pointer'}
+          ${fullWidth && 'width: 100%;'};
+        ${prioStyles}
+      `,
+      tw`font-bold py-2 px-4 my-1 rounded-full`,
+    ];
+  }
+);
 
 // -----------------------------------------------------------------------------
 // UI
