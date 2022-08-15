@@ -156,6 +156,7 @@ in
   services.voucher-server = {
     enable = true;
     port = config.env.services.voucher-server.port;
+    xbgeSecrets = secrets.xbge;
   };
 
 }
