@@ -37,11 +37,11 @@ in
       wantedBy = [ "default.target" ];
       environment = {
         PORT = "${toString cfg.port}";
-        VOUCHER_CODE_SECRET = "${toString cfg.voucherCodeSecret}";
-        XBGE_AUTH_SECRET = "${toString cfg.authSecret}";
-        XBGE_ENDPOINT = "${toString cfg.endpoint}";
-        XBGE_SAFE_ADDRESS = "${toString cfg.safeAddress}";
-        XBGE_KEY = "${toString cfg.privKey}";
+        VOUCHER_CODE_SECRET = "${toString cfg.xbgeSecrets.voucherCodeSecret}";
+        XBGE_AUTH_SECRET = "${toString cfg.xbgeSecrets.authSecret}";
+        XBGE_ENDPOINT = "${toString cfg.xbgeSecrets.endpoint}";
+        XBGE_SAFE_ADDRESS = "${toString cfg.xbgeSecrets.safeAddress}";
+        XBGE_KEY = "${toString cfg.xbgeSecrets.privKey}";
       };
     };
   };

@@ -65,6 +65,7 @@
         gardenProxyFactoryAddress = "0x8b4404DE0CaECE4b966a9959f134f0eFDa636156";
         gardenSafeMasterAddress = "0x2CB0ebc503dE87CFD8f0eCEED8197bF7850184ae";
         gardenEthereumNodeWebSocket = "wss://dark-frosty-field.xdai.quiknode.pro";
+        xbgeSafeAddress = secrets.xbge.safeAddress;
       };
 
       services.nginx.virtualHosts = lib.mapAttrs'

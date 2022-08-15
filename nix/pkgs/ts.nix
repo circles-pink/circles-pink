@@ -251,6 +251,7 @@ rec {
       export STORYBOOK_GARDEN_PROXY_FACTORY_ADRESS="${envVars.gardenProxyFactoryAddress}"
       export STORYBOOK_GARDEN_SAFE_MASTER_ADDRESS="${envVars.gardenSafeMasterAddress}"
       export STORYBOOK_GARDEN_ETHEREUM_NODE_WS="${envVars.gardenEthereumNodeWebSocket}"
+      export STORYBOOK_XBGE_SAFE_ADDRESS="${envVars.xbgeSafeAddress}"
       cd $tmp/build/libexec/storybook/deps/storybook
 
       # node_modules need to be writeable, because storybook inevitably writes its cache in there!
