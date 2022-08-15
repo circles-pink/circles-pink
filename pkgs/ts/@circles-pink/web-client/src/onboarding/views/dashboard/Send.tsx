@@ -8,7 +8,7 @@ import { Theme } from '../../../context/theme';
 import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
 const Web3 = require('web3');
-import { DashboardProps } from '../Dashboard';
+import { DashboardProps } from '../dashboard';
 const QrScanner = require('eth-qr-scanner');
 import { t } from 'i18next';
 import {

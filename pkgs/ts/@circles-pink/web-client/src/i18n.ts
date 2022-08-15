@@ -119,6 +119,15 @@ export const resources = {
             pendingUntrust: 'Confirming ...',
           },
         },
+        voucherShop: {
+          confirmSendClaim: 'Confirm your purchase',
+          buyFrom: 'Buy voucher from:',
+          tcCostWillBe: 'You will be charged:',
+          eurAmountWillBe: 'The voucher amount is:',
+          confirmSendButton: 'Confirm',
+          confirmSendProblem:
+            'Sorry, we could not process your purchase, please try again later!',
+        },
       },
       debug: {
         claim: 'Internal tools',
@@ -249,6 +258,15 @@ export const resources = {
             pendingTrust: 'Bestätige ...',
             pendingUntrust: 'Bestätige ...',
           },
+        },
+        voucherShop: {
+          confirmSendClaim: 'Bestätige deine Transaktion',
+          buyFrom: 'Gutschein kaufen von:',
+          tcCostWillBe: 'Wir berechnen dir:',
+          eurAmountWillBe: 'Der Wert des Gutscheines ist:',
+          confirmSendButton: 'Kauf abschließen',
+          confirmSendProblem:
+            'Sorry, we could not process your purchase, please try again later!',
         },
       },
       debug: {
