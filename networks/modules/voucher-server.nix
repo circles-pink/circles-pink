@@ -3,6 +3,7 @@ with lib;
 let
   cfg = config.services.voucher-server;
 in
+with types;
 {
   options.services.voucher-server = {
     enable = mkEnableOption "voucher-server service";
