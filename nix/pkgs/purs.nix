@@ -15,7 +15,12 @@ let
       chmod -R +w $out
       
       DIR=`mktemp -d`;
+      mv $out/CirclesPink.EnvVars -t $DIR;
+      mv $out/CirclesPink.Garden.ApiScript -t $DIR;
+      mv $out/CirclesPink.Garden.TS -t $DIR;
       mv $out/Payload.* $out/VoucherServer.* $out/CirclesPink.Garden.EnvControlAff -t $DIR;
+      mv $DIR/VoucherServer.Types -t $out;
+
       purs-tsd-gen --directory $out;
       mv $DIR/* -t $out; 
 
