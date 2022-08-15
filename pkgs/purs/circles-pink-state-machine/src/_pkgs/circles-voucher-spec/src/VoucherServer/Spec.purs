@@ -2,12 +2,9 @@ module VoucherServer.Spec
   ( ErrGetVoucher
   , VoucherServerSpec
   , spec
-  )
-  where
+  ) where
 
-import Prelude
-
-import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Address (Address)
 import Payload.Spec (POST, Spec(Spec), GET)
 import VoucherServer.Types (Voucher, VoucherProvider)
 import Web3 (SignatureObj)
@@ -32,7 +29,7 @@ type VoucherServerSpec = Spec
   , trustUsers ::
       POST "/trust-users"
         { response :: {}
-        , body :: {safeAddresses :: Array Address}
+        , body :: { safeAddresses :: Array Address }
         }
   }
 

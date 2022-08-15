@@ -344,7 +344,7 @@ env envenv@{ request, envVars } =
     web3 <- mapExceptT liftEffect $ getWeb3 envVars
     circlesCore <- mapExceptT liftEffect $ getCirclesCore web3 envVars
     account <- mapExceptT liftEffect $ CC.privKeyToAccount web3 $ coerce pk
-    CC.trustAddConnection circlesCore account { user: convert other, canSendTo: convert us }
+    CC.trustAddConnection circlesCore account { user: convert other, canSendTo: convert us, limitPercentage: 50.0 }
 
   removeTrustConnection :: EnvControl.RemoveTrustConnection Aff
   removeTrustConnection pk other us = do
@@ -386,7 +386,6 @@ env envenv@{ request, envVars } =
         spec
     res <- client.getVoucherProviders { body: { signatureObj } } # ExceptT # withExceptT (show >>> _errGetVoucherProviders)
     pure (res -# _.body)
-
 
   -- saveSession :: EnvControl.SaveSession Aff
   -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
