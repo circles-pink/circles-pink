@@ -88,7 +88,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
 
 import Prelude
 
-import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, UserOptions, ErrParseAddress)
+import CirclesCore (ErrApi, ErrInvalidUrl, ErrNative, ErrParseAddress, ErrService, SafeStatus, TrustIsTrustedResult, TrustNode, UserOptions, ErrNullReturn)
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Data.User (User)
@@ -197,12 +197,12 @@ type GeneratePrivateKey m = m PrivateKey
 
 --------------------------------------------------------------------------------
 -- Trust Add Connection
-type ErrAddTrustConnection r = ErrNative + ErrInvalidUrl + r
+type ErrAddTrustConnection r = ErrNative + ErrInvalidUrl + ErrNullReturn + r
 
 type AddTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrAddTrustConnection + r) m String
 
 -- Trust Remove Connection
-type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + r
+type ErrRemoveTrustConnection r = ErrNative + ErrInvalidUrl + ErrNullReturn + r
 
 type RemoveTrustConnection m = forall r. PrivateKey -> Address -> Address -> ExceptV (ErrRemoveTrustConnection + r) m String
 
@@ -272,7 +272,7 @@ type ErrRequestUBIPayout r = ErrNative + ErrInvalidUrl + r
 type RequestUBIPayout m = forall r. PrivateKey -> Address -> ExceptV (ErrRequestUBIPayout + r) m String
 
 --------------------------------------------------------------------------------
-type ErrTransfer r = ErrNative + ErrInvalidUrl + r
+type ErrTransfer r = ErrNative + ErrInvalidUrl + ErrNullReturn + r
 
 type Transfer m = forall r. PrivateKey -> Address -> Address -> BN -> String -> ExceptV (ErrTransfer + r) m String
 

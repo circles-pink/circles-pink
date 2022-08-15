@@ -205,16 +205,19 @@ type ErrTrustGetTrustsResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
   , errParseAddress :: String
+  , errNullReturn :: Unit
   )
 
 type ErrTrustAddConnectionResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
+  , errNullReturn :: Unit
   )
 
 type ErrTrustRemoveConnectionResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
+  , errNullReturn :: Unit
   )
 
 type ErrTokenGetBalanceResolved = Variant
@@ -239,6 +242,7 @@ type ErrGetVouchersResolved = Variant
 type ErrTokenTransferResolved = Variant
   ( errNative :: NativeError
   , errInvalidUrl :: String
+  , errNullReturn :: Unit
   )
 
 type ErrDashboardStateResolved = Variant

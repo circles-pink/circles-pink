@@ -69,6 +69,7 @@
   , "undefined"
   , "unfoldable"
   , "unsafe-coerce"
+  , "untagged-union"
   , "uri"
   , "variant"
   , "web-html"
