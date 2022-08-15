@@ -17,10 +17,11 @@ export default {
 
 const userConfig = {
   onTrackingEvent: (te) => console.log("Tracking Event", te),
+  voucherShopEnabled: false,
 };
 
 export const InfoGeneral = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.infoGeneral} userConfig={userConfig}/>
+  <Onboarding {...args} initState={Steps.infoGeneral} userConfig={userConfig} />
 );
 
 export const AskUsername = (args): ReactElement => (
@@ -32,7 +33,11 @@ export const AskEmail = (args): ReactElement => (
 );
 
 export const InfoSecurity = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.infoSecurity} userConfig={userConfig} />
+  <Onboarding
+    {...args}
+    initState={Steps.infoSecurity}
+    userConfig={userConfig}
+  />
 );
 
 export const MagicWords = (args): ReactElement => (

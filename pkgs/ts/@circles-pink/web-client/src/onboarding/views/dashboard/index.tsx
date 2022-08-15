@@ -63,6 +63,7 @@ import {
 import { ConfirmSend } from './ConfirmSend';
 import { crcToTc } from '@circles/timecircles';
 import { displayBalance } from '../../utils/timeCircles';
+import { UserConfig } from '../..';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -86,11 +87,13 @@ export type SelectedOffer = [VoucherProvider, VoucherOffer];
 export type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
+  userConfig?: UserConfig;
 };
 
 export const Dashboard = ({
   state: stateRaw,
   act,
+  userConfig,
 }: DashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -436,29 +439,31 @@ export const Dashboard = ({
             </FadeIn>
           </MainContent>
 
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <TopMargin>
-              <LightColorFrame
-                theme={theme}
-                title="Voucher Shop"
-                icon={mdiGiftOutline}
-              >
-                <MarginY size={2}>
-                  <BuyVouchers
+          {userConfig?.voucherShopEnabled && (
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TopMargin>
+                <LightColorFrame
+                  theme={theme}
+                  title="Voucher Shop"
+                  icon={mdiGiftOutline}
+                >
+                  <MarginY size={2}>
+                    <BuyVouchers
+                      theme={theme}
+                      providers={stateRaw.voucherProvidersResult}
+                      initializeVoucherOrder={initializeVoucherOrder}
+                      availableBalance={userBalance}
+                    />
+                  </MarginY>
+                  <ListVouchers
                     theme={theme}
                     providers={stateRaw.voucherProvidersResult}
-                    initializeVoucherOrder={initializeVoucherOrder}
-                    availableBalance={userBalance}
+                    vouchersResult={state.vouchersResult}
                   />
-                </MarginY>
-                <ListVouchers
-                  theme={theme}
-                  providers={stateRaw.voucherProvidersResult}
-                  vouchersResult={state.vouchersResult}
-                />
-              </LightColorFrame>
-            </TopMargin>
-          </FadeIn>
+                </LightColorFrame>
+              </TopMargin>
+            </FadeIn>
+          )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
