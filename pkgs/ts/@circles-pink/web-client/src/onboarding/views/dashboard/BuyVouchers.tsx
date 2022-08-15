@@ -4,7 +4,7 @@ import {
   VoucherOffer,
   VoucherProvider,
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 import { Button } from '../../../components/forms';
 import { Claim, SubClaim } from '../../../components/text';
@@ -19,9 +19,16 @@ export const BuyVouchers = ({
   providers,
   theme,
 }: BuyVouchersProps): ReactElement => {
-  const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
-    providers as any
+  const [providers_, setProviders_] = useState<VoucherProvider[]>(
+    getData([] as VoucherProvider[])(providers as any)
   );
+
+  useEffect(() => {
+    const providerResult = getData([] as VoucherProvider[])(providers as any);
+    if (providerResult.length > 0) {
+      setProviders_(providerResult);
+    }
+  }, [providers]);
 
   if (providers_.length === 0) {
     return <SubClaim>Currently there were no vouchers available.</SubClaim>;
@@ -75,7 +82,7 @@ type OfferProps = {
 };
 
 const Offer = styled.button<OfferProps>(({ theme }) => {
-  const borderWithoutLeft = `
+  const borderTopBottomRight = `
     border-top: 1px solid ${theme.darkColor};
     border-bottom: 1px solid ${theme.darkColor};
     border-right: 1px solid ${theme.darkColor};
@@ -83,23 +90,24 @@ const Offer = styled.button<OfferProps>(({ theme }) => {
 
   return [
     css`
-      outline: none;
-      border: none;
       cursor: pointer;
       font-size: 2rem;
       color: ${theme.textColorDark};
       background-color: ${theme.lightColor};
-      ${borderWithoutLeft}
       padding: 1rem;
+      &:hover {
+        background-color: ${theme.textColorLight};
+        color: ${theme.baseColor};
+      }
+
+      outline: none;
+      border: none;
+      ${borderTopBottomRight}
       &:first-of-type {
         border: 1px solid ${theme.darkColor};
       }
       &:last-of-type {
-        ${borderWithoutLeft}
-      }
-      &:hover {
-        background-color: ${theme.textColorLight};
-        color: ${theme.baseColor};
+        ${borderTopBottomRight}
       }
     `,
   ];
