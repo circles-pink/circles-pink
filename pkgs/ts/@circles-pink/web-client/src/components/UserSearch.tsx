@@ -49,6 +49,7 @@ type Overlay = 'SEND' | 'RECEIVE';
 type UserSearchProps = {
   title?: string;
   trusts: Trusts;
+  ownSafeAddress: Address;
   theme: Theme;
   icon: any;
   actionRow?: ReactElement | ReactElement[] | string;
@@ -59,7 +60,14 @@ type UserSearchProps = {
 };
 
 export const UserSearch = (props: UserSearchProps) => {
-  const { title, trusts: allTrusts, theme, icon, actionRow } = props;
+  const {
+    title,
+    trusts: allTrusts,
+    ownSafeAddress,
+    theme,
+    icon,
+    actionRow,
+  } = props;
 
   // Paginate trusts
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -98,6 +106,8 @@ export const UserSearch = (props: UserSearchProps) => {
 
       return addrToString(addressA).localeCompare(addrToString(addressB));
     })
+    // Filter out own user
+    .filter((t: Trust) => getAddress(t.user) !== ownSafeAddress)
     // Get slice on current page
     .slice(paginationInfo.startIndex, paginationInfo.endIndex + 1);
 
