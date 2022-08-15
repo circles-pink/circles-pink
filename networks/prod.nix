@@ -19,6 +19,13 @@
           "initialAdminEmail" = "";
           "initialAdminPassword" = "";
         };
+        "xbge" = {
+          "voucherCodeSecret" = "";
+          "authSecret" = "";
+          "endpoint" = "";
+          "safeAddress" = "";
+          "privKey" = "";
+        };
       };
 
       secretsFile = /secrets.json;
