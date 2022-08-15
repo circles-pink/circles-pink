@@ -10,9 +10,8 @@ module CirclesPink.Garden.StateMachine.State.Trusts
 import Prelude
 
 import CirclesCore (SafeStatus, TrustNode)
-import CirclesCore as CC
 import CirclesPink.Data.PrivateKey (PrivateKey)
-import CirclesPink.Data.User (User(..))
+import CirclesPink.Data.User (User)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import Data.Variant (Variant, inj)
 import RemoteReport (RemoteReport)

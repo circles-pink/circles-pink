@@ -5,6 +5,7 @@ import {
   CirclesConfig,
   mkControl,
   mkControlTestEnv,
+  // @ts-ignore
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
 import {
   CirclesState,
