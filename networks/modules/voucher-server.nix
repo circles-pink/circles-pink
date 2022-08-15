@@ -9,6 +9,18 @@ in
     port = mkOption {
       type = types.int;
     };
+    xbgeSecrets = mkOption {
+      type = submodule
+        {
+          options = {
+            voucherCodeSecret = mkOption { type = str; };
+            authSecret = mkOption { type = str; };
+            endpoint = mkOption { type = str; };
+            safeAddress = mkOption { type = str; };
+            privKey = mkOption { type = str; };
+          };
+        };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -25,6 +37,11 @@ in
       wantedBy = [ "default.target" ];
       environment = {
         PORT = "${toString cfg.port}";
+        VOUCHER_CODE_SECRET = "${toString cfg.voucherCodeSecret}";
+        XBGE_AUTH_SECRET = "${toString cfg.authSecret}";
+        XBGE_ENDPOINT = "${toString cfg.endpoint}";
+        XBGE_SAFE_ADDRESS = "${toString cfg.safeAddress}";
+        XBGE_KEY = "${toString cfg.privKey}";
       };
     };
   };

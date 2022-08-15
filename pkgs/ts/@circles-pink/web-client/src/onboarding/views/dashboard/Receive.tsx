@@ -2,7 +2,7 @@ import React from 'react';
 import { CenterText, JustifyAround } from '../../../components/helper';
 import { Claim, Text } from '../../../components/text';
 import { Theme } from '../../../context/theme';
-import { DashboardProps } from '../Dashboard';
+import { DashboardProps } from '../dashboard';
 import QrCode from 'react-qrcode-svg';
 import tw, { styled } from 'twin.macro';
 import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
