@@ -5,6 +5,7 @@ module Structural
   ) where
 
 import Prelude
+
 import Control.Promise (Promise)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3, Fn4)
@@ -13,6 +14,7 @@ import Foreign (Foreign)
 import Foreign.Object (Object)
 import Prim.RowList (class RowToList, Cons, Nil)
 import Type.Proxy (Proxy)
+import Untagged.Union (OneOf)
 
 --------------------------------------------------------------------------------
 instance structuralInt :: Structural Int
@@ -46,6 +48,8 @@ instance structuralForeign :: Structural Foreign
 instance structuralObject :: Structural a => Structural (Object a)
 
 instance structuralBigInt :: Structural BigInt
+
+instance structuralOneOf :: (Structural a, Structural b) => Structural (OneOf a b)
 
 class Structural :: forall k. k -> Constraint
 class Structural a

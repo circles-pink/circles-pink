@@ -137,6 +137,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "assert" = pkgs.stdenv.mkDerivation {
+        name = "assert";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-assert.git";
+          rev = "71a3b1f3b9917c23691fdbb1858de171be871a10";
+          sha256 = "0r1l7j67an8dy1w4xdpr8nc30lsxv31xwqph9mkfh3nd49jlyyd3";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "avar" = pkgs.stdenv.mkDerivation {
         name = "avar";
         version = "v4.0.0";
@@ -742,6 +754,18 @@ let
           url = "https://github.com/purescript/purescript-lists.git";
           rev = "6383c4f202b3f69474f9f7da182c2d42fcc3111c";
           sha256 = "0xmg918s3mqvfvwgjfqcs1yvcz6hy2n7h3ygqz2iyvk868gz25qs";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "literals" = pkgs.stdenv.mkDerivation {
+        name = "literals";
+        version = "v0.2.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/jvliwanag/purescript-literals.git";
+          rev = "11457380e1b28c9526c41381eeb0ee840982db5c";
+          sha256 = "1jjnpfmh9qfmffyrmcfnn9p25irmsmaji6lwrsrd2r9xdhpzmqg7";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
@@ -1606,6 +1630,18 @@ let
           url = "https://github.com/purescript-contrib/purescript-unsafe-reference.git";
           rev = "d4e11a0f291fe8db9855c8bec89fd50b4e48d043";
           sha256 = "103bax2g6g97k868j66rm6658qv6ix1kk3736c0lq1p47raqf3fb";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "untagged-union" = pkgs.stdenv.mkDerivation {
+        name = "untagged-union";
+        version = "v0.3.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/jvliwanag/purescript-untagged-union.git";
+          rev = "364e172e759ebe722bd7ec12a599d532b527c0ef";
+          sha256 = "06013431acz8xry9dish8p2qyj18bi505fgfikpjiblxgjazl9zx";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";

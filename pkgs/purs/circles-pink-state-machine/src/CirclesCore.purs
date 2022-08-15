@@ -3,6 +3,7 @@ module CirclesCore
   , ErrApi
   , ErrInvalidUrl
   , ErrNative
+  , ErrNullReturn
   , ErrNewCirclesCore
   , ErrNewWebSocketProvider
   , ErrParseAddress
@@ -88,7 +89,7 @@ import CirclesCore.Bindings (Options, Provider, CirclesCore, Account, TrustIsTru
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn1, mapFn2)
-import Control.Monad.Except (ExceptT(..))
+import Control.Monad.Except (ExceptT(..), throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.BN (BN)
@@ -99,6 +100,7 @@ import Data.Newtype (class Newtype, unwrap)
 import Data.Newtype.Extra ((-#))
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Compat (fromEffectFnAff)
@@ -109,6 +111,7 @@ import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Simple.JSON (class ReadForeign, class WriteForeign)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
+import Untagged.Union as UU
 import Web3 as W3
 
 --------------------------------------------------------------------------------
@@ -221,10 +224,10 @@ type TrustAddConnectionOptions =
   , limitPercentage :: Number
   }
 
-type ErrTrustAddConnection r = ErrNative + r
+type ErrTrustAddConnection r = ErrNative + ErrNullReturn + r
 
 trustAddConnection :: forall r. B.CirclesCore -> B.Account -> TrustAddConnectionOptions -> Result (ErrTrustAddConnection r) String
-trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
+trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.trust -# _.addConnection
 
@@ -234,6 +237,10 @@ trustAddConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
     , limitPercentage = x.limitPercentage
     }
 
+  mapOk x = case UU.toEither1 x of
+    Left str -> pure str
+    Right _ -> throwError $ inj (Proxy :: _ "errNullReturn") unit
+
 --------------------------------------------------------------------------------
 -- API / trustRemoveConnection
 --------------------------------------------------------------------------------
@@ -242,14 +249,18 @@ type TrustRemoveConnectionOptions =
   , canSendTo :: ChecksumAddress
   }
 
-type ErrTrustRemoveConnection r = ErrNative + r
+type ErrTrustRemoveConnection r = ErrNative + ErrNullReturn + r
 
 trustRemoveConnection :: forall r. B.CirclesCore -> B.Account -> TrustRemoveConnectionOptions -> Result (ErrTrustRemoveConnection r) String
-trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
+trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.trust -# _.removeConnection
 
   mapArg2 x = x { user = show x.user, canSendTo = show x.canSendTo }
+
+  mapOk x = case UU.toEither1 x of
+    Left str -> pure str
+    Right _ -> throwError $ inj (Proxy :: _ "errNullReturn") unit
 
 --------------------------------------------------------------------------------
 -- API / userRegister
@@ -483,14 +494,18 @@ type TokenTransferOptions =
   , paymentNote :: String
   }
 
-type ErrTokenTransfer r = ErrNative + r
+type ErrTokenTransfer r = ErrNative + ErrNullReturn + r
 
 tokenTransfer :: forall r. B.CirclesCore -> B.Account -> TokenTransferOptions -> Result (ErrTokenTransfer r) String
-tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
+tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   where
   fn = convertCore cc -# _.token -# _.transfer
 
   mapArg2 x = x { from = show x.from, to = show x.to }
+
+  mapOk x = case UU.toEither1 x of
+    Left str -> pure str
+    Right _ -> throwError $ inj (Proxy :: _ "errNullReturn") unit
 
 --------------------------------------------------------------------------------
 -- API / utilsRequestRelayer
@@ -548,6 +563,8 @@ type ErrNative r = (errNative :: NativeError | r)
 type ErrInvalidUrl r = (errInvalidUrl :: String | r)
 
 type ErrApi r = (errApi :: ApiError | r)
+
+type ErrNullReturn r = (errNullReturn :: Unit | r)
 
 type ErrService r = (errService :: Unit | r)
 

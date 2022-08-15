@@ -34,8 +34,10 @@ import Data.Function.Uncurried (Fn2, Fn3, Fn4, Fn1)
 import Data.Newtype (class Newtype)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
+import Foreign (Foreign)
 import Structural (class Structural)
 import Unsafe.Coerce (unsafeCoerce)
+import Untagged.Union (type (|+|))
 import Web3 (Web3)
 
 --------------------------------------------------------------------------------
@@ -163,7 +165,7 @@ newtype CoreToken = CoreToken
         , value :: BN
         , paymentNote :: String
         }
-        String
+        (String |+| { data :: Foreign })
   }
 
 derive instance newtypeCoreToken :: Newtype CoreToken _
@@ -188,11 +190,11 @@ newtype CoreTrust = CoreTrust
   , addConnection ::
       Fn2Promise Account
         { user :: String, canSendTo :: String, limitPercentage :: Number }
-        String
+        (String |+| { data :: Foreign })
   , removeConnection ::
       Fn2Promise Account
         { user :: String, canSendTo :: String }
-        String
+        (String |+| { data :: Foreign })
   }
 
 derive instance newtypeCoreTrust :: Newtype CoreTrust _

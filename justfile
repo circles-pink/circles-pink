@@ -237,6 +237,9 @@ purs-tsd-gen:
 increase-file-watchers:
 	sudo sysctl fs.inotify.max_user_watches=327680 && sudo sysctl -p
 
+apps-on-port port:
+	sudo lsof -t -i:{{port}}
+
 ################################################################################
 # All Makefile tasks
 ################################################################################
