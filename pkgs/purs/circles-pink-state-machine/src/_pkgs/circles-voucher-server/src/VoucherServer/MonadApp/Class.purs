@@ -4,9 +4,7 @@ import VoucherServer.Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
-import Data.Newtype (class Newtype)
 import Payload.ResponseTypes (Response)
-import Payload.Server.Response as Response
 import VoucherServer.EnvVars (AppEnvVars)
 
 --------------------------------------------------------------------------------

@@ -7,10 +7,12 @@ module VoucherServer.EnvVars
 
 import Prelude
 
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe, fromJust)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkPrivateKey)
 import Network.Ethereum.Core.Signatures as C
+import Partial.Unsafe (unsafePartial)
+import Test.QuickCheck (class Arbitrary)
 import TypedEnv (class ParseValue, Resolved, Variable)
 import VoucherServer.Specs.Xbge (Address)
 
@@ -43,9 +45,22 @@ type AppEnvVars = { | MkAppEnvVars Resolved }
 
 newtype PrivateKey = PrivateKey C.PrivateKey
 
+instance arbitraryPrivateKey :: Arbitrary PrivateKey where
+  arbitrary = pure sampleKey
+
 -- derive instance newtypePrivateKey :: Newtype PrivateKey
 
 instance parseValuePrivateKey :: ParseValue PrivateKey where
-  parseValue x = mkHexString x >>= mkPrivateKey <#> PrivateKey
+  parseValue = parsePrivKey
+
+parsePrivKey :: String -> Maybe PrivateKey
+parsePrivKey x = mkHexString x >>= mkPrivateKey <#> PrivateKey
+
+sampleKey :: PrivateKey
+sampleKey = 
+  unsafePartial $
+  fromJust $
+  parsePrivKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
+
 
 --------------------------------------------------------------------------------

@@ -50,11 +50,12 @@ import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
-import VoucherServer.EnvVars (AppEnvVarsSpec, AppEnvVars)
+import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
-import VoucherServer.Routes.TrustUser as Routes
-import VoucherServer.Routes.TrustsReport as Routes
+import VoucherServer.MonadApp (mkProdEnv, runAppProdM)
+import VoucherServer.Routes.TrustUser (trustUsers) as Routes
+import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
 import VoucherServer.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
@@ -398,28 +399,28 @@ foreign import frecklesToEuroCentImpl :: Number -> BN -> Int
 --------------------------------------------------------------------------------
 
 app :: Aff (Either String Unit)
-app = todo --do
-  -- env <- liftEffect $ getEnv
-  -- let config = lmap envErrorMessage $ fromEnv (Proxy :: _ ServerConfig) env
-  -- case config of
-  --   Left e -> do
-  --     error e
-  --     liftEffect $ exit 1
-  --   Right parsedEnv -> do
-  --     prodEnv_ <- mkProdEnv parsedEnv # runExceptT
-  --     case prodEnv_ of
-  --       Left e -> do
-  --         error $ CC.printErr e
-  --         liftEffect $ exit 1
-  --       Right prodEnv -> do
-  --         _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
-  --         _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
-  --           { getVouchers: getVouchers parsedEnv
-  --           , getVoucherProviders: getVoucherProviders parsedEnv
-  --           , trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
-  --           , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
-  --           }
-  --         pure $ Right unit
+app = do
+  env <- liftEffect $ getEnv
+  let config = lmap envErrorMessage $ fromEnv (Proxy :: _ AppEnvVarsSpec) env
+  case config of
+    Left e -> do
+      error e
+      liftEffect $ exit 1
+    Right parsedEnv -> do
+      prodEnv_ <- mkProdEnv parsedEnv # runExceptT
+      case prodEnv_ of
+        Left e -> do
+          error $ CC.printErr e
+          liftEffect $ exit 1
+        Right prodEnv -> do
+          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
+          _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
+            { getVouchers: getVouchers parsedEnv
+            , getVoucherProviders: getVoucherProviders parsedEnv
+            , trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
+            , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
+            }
+          pure $ Right unit
 
 
 runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
