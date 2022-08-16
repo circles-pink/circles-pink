@@ -7,24 +7,24 @@
       lib = pkgs.lib;
 
       mockSecrets = {
-        "notion-token" = "";
+        "notion-token" = "MOCKED-SECRET";
         "directus" = {
-          "adminToken" = "";
-          "dbHost" = "";
-          "dbUser" = "";
-          "dbName" = "";
-          "dbPassword" = "";
-          "secret" = "";
-          "key" = "";
-          "initialAdminEmail" = "";
-          "initialAdminPassword" = "";
+          "adminToken" = "MOCKED-SECRET";
+          "dbHost" = "MOCKED-SECRET";
+          "dbUser" = "MOCKED-SECRET";
+          "dbName" = "MOCKED-SECRET";
+          "dbPassword" = "MOCKED-SECRET";
+          "secret" = "MOCKED-SECRET";
+          "key" = "MOCKED-SECRET";
+          "initialAdminEmail" = "MOCKED-SECRET";
+          "initialAdminPassword" = "MOCKED-SECRET";
         };
         "xbge" = {
-          "voucherCodeSecret" = "";
-          "authSecret" = "";
-          "endpoint" = "";
-          "safeAddress" = "";
-          "privKey" = "";
+          "voucherCodeSecret" = "MOCKED-SECRET";
+          "authSecret" = "MOCKED-SECRET";
+          "endpoint" = "MOCKED-SECRET";
+          "safeAddress" = "MOCKED-SECRET";
+          "privKey" = "MOCKED-SECRET";
         };
       };
 
@@ -36,7 +36,7 @@
           let
             json = builtins.fromJSON (builtins.readFile secretsFile);
           in
-          if json ? "secrets" then json.secrets else mockSecrets
+          if json then json else mockSecrets
         else mockSecrets;
 
     in
