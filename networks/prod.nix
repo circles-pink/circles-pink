@@ -36,7 +36,7 @@
           let
             json = builtins.fromJSON (builtins.readFile secretsFile);
           in
-          json
+          builtins.trace json json
         else mockSecrets;
 
     in
