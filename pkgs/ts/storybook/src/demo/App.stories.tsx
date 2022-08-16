@@ -19,17 +19,13 @@ export default {
 export const GardenAPI = (args): ReactElement => {
   const [content, setContent] = useState<{}>();
 
-  const userConfig = {
-    onTrackingEvent: (te) => console.log("Tracking Event", te),
-    voucherShopEnabled: false,
-  };
-
   return (
     <Onboarding
-      content={content}
       {...args}
       initState={initLanding}
-      userConfig={userConfig}
+      content={content}
+      onTrackingEvent={(te) => console.log("Tracking Event", te)}
+      voucherShopEnabled={true}
     />
   );
 };

@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
 import { Onboarding } from "@circles-pink/web-client/src/onboarding";
 import { onboardingArgs } from "../onboardingArgs";
-import { initLogin } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
+import { initLogin } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login";
 
 export default {
   title: "Components/Onboarding/Login",

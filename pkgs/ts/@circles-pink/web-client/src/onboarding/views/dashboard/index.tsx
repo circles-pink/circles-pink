@@ -87,13 +87,13 @@ export type SelectedOffer = [VoucherProvider, VoucherOffer];
 export type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
-  userConfig?: UserConfig;
+  cfg?: UserConfig;
 };
 
 export const Dashboard = ({
   state: stateRaw,
   act,
-  userConfig,
+  cfg,
 }: DashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -439,7 +439,7 @@ export const Dashboard = ({
             </FadeIn>
           </MainContent>
 
-          {userConfig?.voucherShopEnabled && (
+          {cfg?.voucherShopEnabled && (
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TopMargin>
                 <LightColorFrame
