@@ -51,6 +51,7 @@
   , "payload"
   , "prelude"
   , "psci-support"
+  , "quickcheck"
   , "record"
   , "safe-coerce"
   , "simple-json"

@@ -9,6 +9,7 @@ import Payload.Client.EncodeParam (class EncodeParam, encodeParam)
 import Payload.Client.QueryParams (class EncodeQueryParam, encodeQueryParam)
 import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
+import Test.QuickCheck (class Arbitrary)
 import TypedEnv (class ParseValue)
 import VoucherServer.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
@@ -32,6 +33,12 @@ instance encodeParamAddress :: EncodeParam Address where
 
 instance encodeQueryParamAddress :: EncodeQueryParam Address where
   encodeQueryParam (Address x) = encodeQueryParam $ show x
+
+instance arbitraryAddress :: Arbitrary Address where
+  arbitrary = pure sampleAddress
+
+sampleAddress :: Address
+sampleAddress = Address C.sampleAddress
 
 xbgeSpec
   :: Spec
