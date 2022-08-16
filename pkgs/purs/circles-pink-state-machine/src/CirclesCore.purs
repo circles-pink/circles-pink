@@ -3,9 +3,10 @@ module CirclesCore
   , ErrApi
   , ErrInvalidUrl
   , ErrNative
-  , ErrNullReturn
   , ErrNewCirclesCore
   , ErrNewWebSocketProvider
+  , ErrNullReturn
+  , ErrOrganizationIsOrganization
   , ErrParseAddress
   , ErrPrivKeyToAccount
   , ErrSafeDeploy
@@ -28,6 +29,7 @@ module CirclesCore
   , ErrUserResolve
   , NativeError
   , Nonce(..)
+  , OrganizationIsOrganizationOptions
   , ResolveOptions
   , SafeAddress(..)
   , SafeDeployOptions
@@ -53,6 +55,7 @@ module CirclesCore
   , newCirclesCore
   , newWeb3
   , newWebSocketProvider
+  , organizationIsOrganization
   , printErr
   , privKeyToAccount
   , safeDeploy
@@ -505,6 +508,22 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
   mapOk x = case UU.toEither1 x of
     Left str -> pure str
     Right _ -> throwError $ inj (Proxy :: _ "errNullReturn") unit
+
+--------------------------------------------------------------------------------
+-- API / organizationIsOrganization
+--------------------------------------------------------------------------------
+type OrganizationIsOrganizationOptions =
+  { safeAddress :: ChecksumAddress
+  }
+
+type ErrOrganizationIsOrganization r = ErrService + ErrNative + r
+
+organizationIsOrganization :: forall r. B.CirclesCore -> B.Account -> OrganizationIsOrganizationOptions -> Result (ErrOrganizationIsOrganization r) Boolean
+organizationIsOrganization cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
+  where
+  fn = convertCore cc -# _.organization -# _.isOrganization
+
+  mapArg2 x = x { safeAddress = show x.safeAddress }
 
 --------------------------------------------------------------------------------
 -- API / utilsRequestRelayer
