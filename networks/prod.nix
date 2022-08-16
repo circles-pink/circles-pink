@@ -28,7 +28,7 @@
         };
       };
 
-      secretsFile = /secrets.json;
+      secretsFile = /var/lib/hercules-ci-agent/secrets/secrets.json;
 
       secrets =
         if builtins.pathExists secretsFile
@@ -36,7 +36,7 @@
           let
             json = builtins.fromJSON (builtins.readFile secretsFile);
           in
-          builtins.trace json json
+          json.secrets.data
         else mockSecrets;
 
     in

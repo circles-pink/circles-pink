@@ -172,8 +172,6 @@
                       ssh -o "StrictHostKeyChecking no" root@circles.pink whoami
                       mkdir -p ~/.config/nix
                       echo 'experimental-features = nix-command flakes' >>~/.config/nix/nix.conf
-                      readSecretJSON secrets '.' > /secrets.json
-                      cat /secrets.json
                     '';
 
                     secretsMap = {
