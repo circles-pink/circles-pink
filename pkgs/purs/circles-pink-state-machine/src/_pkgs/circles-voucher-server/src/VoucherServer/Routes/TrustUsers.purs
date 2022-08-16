@@ -18,7 +18,7 @@ import Effect.Class.Console (logShow)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
-import VoucherServer.Env (PrivateKey(..), ServerEnv)
+import VoucherServer.EnvVars (PrivateKey(..), AppEnvVars)
 import Web3 (Web3)
 
 type Env =
@@ -27,7 +27,7 @@ type Env =
   , web3 :: Web3
   }
 
-trustUsers :: ServerEnv -> { body :: { safeAddresses :: Array Address }} -> ExceptT (String /\ Failure) Aff {}
+trustUsers :: AppEnvVars -> { body :: { safeAddresses :: Array Address }} -> ExceptT (String /\ Failure) Aff {}
 trustUsers env { body: { safeAddresses } } = do
   provider <- CC.newWebSocketProvider env.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect
@@ -60,7 +60,7 @@ trustUsers env { body: { safeAddresses } } = do
 
   pure {}
 
-trustUser :: ServerEnv -> Env -> Address -> ExceptT String Aff Unit
+trustUser :: AppEnvVars -> Env -> Address -> ExceptT String Aff Unit
 trustUser env { circlesCore, account } safeAddress = do
   (TrustIsTrustedResult { isTrusted }) <-
     CC.trustIsTrusted circlesCore account
