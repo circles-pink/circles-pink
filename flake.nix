@@ -113,13 +113,10 @@
                 # Change the prompt to show that you are in a devShell
                 shellHook = "";
               };
-
-
           }));
 
       general =
         {
-
           checks = {
             x86_64-linux =
               let
@@ -152,7 +149,6 @@
               network = {
                 storage.memory = { };
               };
-
             }
             // (import ./networks/prod.nix { inherit pkgs; });
 
@@ -179,8 +175,8 @@
                       "ssh" = "default-ssh";
                       "secrets" = "secrets";
                     };
-                    forgetState = true;
 
+                    forgetState = true;
                   });
               publish = effects.runIf (src.ref == "refs/heads/main")
                 (effects.mkEffect {
