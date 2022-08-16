@@ -36,7 +36,7 @@
           let
             json = builtins.fromJSON (builtins.readFile secretsFile);
           in
-          if json ? "secrets" then json.secrets.data else mockSecrets
+          if json ? "secrets" then json.secrets else mockSecrets
         else mockSecrets;
 
     in
