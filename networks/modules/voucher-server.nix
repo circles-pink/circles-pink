@@ -51,7 +51,6 @@ with types;
         Restart = "on-failure";
       };
       wantedBy = [ "default.target" ];
-
       environment = {
         PORT = "${toString cfg.port}";
         VOUCHER_CODE_SECRET = "${toString cfg.xbgeSecrets.voucherCodeSecret}";
