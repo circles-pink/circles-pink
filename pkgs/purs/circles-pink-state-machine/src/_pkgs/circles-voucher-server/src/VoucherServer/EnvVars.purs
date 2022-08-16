@@ -1,5 +1,9 @@
-module VoucherServer.Env where
-
+module VoucherServer.EnvVars
+  ( MkAppEnvVars
+  , PrivateKey(..)
+  , AppEnvVars
+  , AppEnvVarsSpec
+  ) where
 
 import Prelude
 
@@ -10,20 +14,8 @@ import Network.Ethereum.Core.Signatures as C
 import TypedEnv (class ParseValue, Resolved, Variable)
 import VoucherServer.Specs.Xbge (Address)
 
-
---------------------------------------------------------------------------------
-
-newtype PrivateKey = PrivateKey C.PrivateKey
-
--- derive instance newtypePrivateKey :: Newtype PrivateKey
-
-instance parseValuePrivateKey :: ParseValue PrivateKey where
-  parseValue x = mkHexString x >>= mkPrivateKey <#> PrivateKey
-
---------------------------------------------------------------------------------
-
-type ServerConfigSpec :: forall k. (Symbol -> Type -> k) -> Row k
-type ServerConfigSpec f =
+type MkAppEnvVars :: forall k. (Symbol -> Type -> k) -> Row k
+type MkAppEnvVars f =
   ( port :: f "PORT" (Maybe Int)
   , gardenApi :: f "GARDEN_API" String
   , gardenApiUsers :: f "GARDEN_API_USERS" String
@@ -41,6 +33,19 @@ type ServerConfigSpec f =
   , xbgeKey :: f "XBGE_KEY" PrivateKey
   )
 
-type ServerConfig = ServerConfigSpec Variable
+type AppEnvVarsSpec = MkAppEnvVars Variable
 
-type ServerEnv = { | ServerConfigSpec Resolved }
+type AppEnvVars = { | MkAppEnvVars Resolved }
+
+--------------------------------------------------------------------------------
+-- Newtypes
+--------------------------------------------------------------------------------
+
+newtype PrivateKey = PrivateKey C.PrivateKey
+
+-- derive instance newtypePrivateKey :: Newtype PrivateKey
+
+instance parseValuePrivateKey :: ParseValue PrivateKey where
+  parseValue x = mkHexString x >>= mkPrivateKey <#> PrivateKey
+
+--------------------------------------------------------------------------------

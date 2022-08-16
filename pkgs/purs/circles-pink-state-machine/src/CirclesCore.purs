@@ -590,7 +590,7 @@ _errParseAddress = inj (Proxy :: _ "errParseAddress")
 --------------------------------------------------------------------------------
 -- Err composition
 --------------------------------------------------------------------------------
-type Err r = ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
+type Err r = ErrParseAddress + ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
 
 printErr :: Variant (Err ()) -> String
 printErr =
@@ -599,6 +599,7 @@ printErr =
     # on (Proxy :: _ "errService") (\_ -> "service error")
     # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
     # on (Proxy :: _ "errApi") (\e -> "Api Error: " <> show e)
+    # on (Proxy :: _ "errParseAddress") (\e -> "ParseAddress error: " <> show e)
 
 --------------------------------------------------------------------------------
 -- Error types
