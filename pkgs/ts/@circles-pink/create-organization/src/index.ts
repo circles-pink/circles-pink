@@ -22,27 +22,27 @@ const generateDeterministicNonceFromName = (str: string) => {
 
 // sampleCore and sampleAccount must be parametrized with creator priv key!
 
-const creatorSafeAddress = "0x6ea9a9993b5372317a9679f8dd21668288484989";
+// const creatorSafeAddress = "0x5EA7424E7a512d6caAD95a8B1335c4159Fb29791";
 
 // Find the nonce
-const nonce = generateDeterministicNonceFromName("xbge");
-console.log(nonce);
+const nonce = generateDeterministicNonceFromName("ExpeditionGrundeinkommen");
+console.log("nonce:", nonce);
 
 // Get a fresh safe Address
-// sampleCore.safe.prepareDeploy(sampleAccount,{nonce: 122794568}).then(console.log)
-const safeAddress = "0x315708c65B3A0e12604C287108638C6163581415";
+// sampleCore.safe.prepareDeploy(sampleAccount,{nonce: 95134672}).then(console.log)
+const safeAddress = "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D";
 
 // Register organization user
-// sampleCore.user.register(sampleAccount, { nonce: 122794568, safeAddress: "0x315708c65B3A0e12604C287108638C6163581415", username: "xbge", email: "info@xbge.de", avatarUrl: "https://sample-image.de" }).then(console.log)
+// sampleCore.user.register(sampleAccount, { nonce: 95134672, safeAddress: "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D", username: "ExpeditionGrundeinkommen", email: "info@expedition-grundeinkommen.de", avatarUrl: "https://directus.expedition-grundeinkommen.de/assets/ca35d273-d6b1-490b-b80e-12449bce5ef1" }).then(console.log)
 // returns true
 
 // Deploy safe for Organization
-// sampleCore.safe.deployForOrganization(sampleAccount, { safeAddress: "0x315708c65B3A0e12604C287108638C6163581415" }).then(console.log)
+// sampleCore.safe.deployForOrganization(sampleAccount, { safeAddress: "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D" }).then(console.log)
 // returns true
 
 // Deploy Organization to the HUB
-// sampleCore.organization.deploy(sampleAccount, { safeAddress: "0x315708c65B3A0e12604C287108638C6163581415" }).then(console.log)
-// returns tx hash, e.g.: 0x7df61d841507513191662075d5b18909754dfea9479ba0fb2958419ba4176dc2
+// sampleCore.organization.deploy(sampleAccount, { safeAddress: "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D" }).then(console.log)
+// returns tx hash, e.g.: 0xea73fefd3ecd7a501db7842d662574edc4f3d216de2242f809f0218f9d763474
 
 const timeCircles = tcToCrc(Date.now(), Number(1));
 console.log(timeCircles);
@@ -62,5 +62,9 @@ console.log("freckles", freckles);
 // console.log(amount);
 
 // Prefund Org account
-// sampleCore.organization.prefund(sampleAccount, { from: "0x6eA9a9993B5372317a9679f8dD21668288484989", to: "0x315708c65B3A0e12604C287108638C6163581415", value: new BN("377124244451084170") }).then(console.log)
-// returns tx hash, e.g.: 0x65b83027bf2b5303f25b74c715e53d44bc413496a51a27fd55796f4731d2e98d
+// sampleCore.organization.prefund(sampleAccount, { from: "0x5EA7424E7a512d6caAD95a8B1335c4159Fb29791", to: "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D", value: new BN("377125662824620100") }).then(console.log)
+// returns tx hash, e.g.: 0xe6ecd6bc02111abaa68c78ae675d809223b473c581a20c69ede5bc9b96ef8204
+
+// Trust new users
+// sampleCore.trust.addConnection(sampleAccount, { user: "0xCCdfA2fa15C9d0Ba7e84A96341a54296873ABBa4", canSendTo: "0xB9AE1Ce83a6548f1395ddfC36673957B98Eb234D", limitPercentage: 100 }).then(console.log)
+// returns tx hash, e.g.: 0xc982dda4a3d3d6bf9ef33eb7667118e5bed9f3c82a170348a0776cb67c921ea4
