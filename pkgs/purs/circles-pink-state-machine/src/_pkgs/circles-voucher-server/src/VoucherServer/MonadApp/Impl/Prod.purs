@@ -13,16 +13,15 @@ import Data.Array as A
 import Data.Either (Either(..))
 import Data.Newtype (class Newtype, wrap)
 import Data.Set as Set
-import Debug.Extra (todo)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
-import Payload.ResponseTypes (Failure, Response)
+import Payload.ResponseTypes (Failure(..), Response(..), ResponseBody(..))
 import Payload.Server.Response (internalError)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), apiErrorToFailure, apiErrorToLog)
+import VoucherServer.MonadApp.Class (printError, class MonadApp, AppEnv(..), AppError(..), errorToLog)
 
 newtype AppProdM a = AppProdM
   ( ReaderT (AppEnv AppProdM)
@@ -78,15 +77,17 @@ mkProdEnv envVars = do
     
     }
 
--- runAppProdM :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either Failure a)
--- runAppProdM env (AppProdM x) = do
---   result <- runExceptT $ runReaderT x env
---   case result of
---     Left err -> do
---       log ("ERROR: " <> apiErrorToLog err)
---       pure $ Left $ apiErrorToFailure err
---     Right y -> pure $ Right y
+runAppProdM :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either Failure a)
+runAppProdM env (AppProdM x) = do
+  result <- runExceptT $ runReaderT x env
+  case result of
+    Left res@(Response {body}) -> do
+      log ("ERROR: " <> errorToLog body)
+      pure $ Left $ Error $ mapResponse (StringBody <<< printError) res
+    Right y -> pure $ Right y
 
+mapResponse :: forall a b. (a -> b) -> Response a -> Response b
+mapResponse f (Response r) = Response r { body = f r.body }
 
 
 --------------------------------------------------------------------------------

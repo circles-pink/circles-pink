@@ -8,15 +8,16 @@ import CirclesPink.Data.Address as C
 import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.Either (Either(..))
+import Data.Newtype as N
 import Data.Set as Set
 import Debug.Extra (todo)
-import Debug.Extra (todo)
-import Payload.ResponseTypes (Response(..))
+import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
 import Safe.Coerce (coerce)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
+import Test.TestUtils (addrA, addrB, addrC)
+import VoucherServer.MonadApp (class MonadApp, AppEnv(..), modifyAppEnv, runAppTestM, testEnv)
 
 trustsReport
   :: forall m
@@ -32,11 +33,15 @@ trustsReport { body: { addresses } } = do
   pure $ Res.ok { trusted: yes, notTrusted: no }
 
 spec :: Spec Unit
-spec =
+spec = 
   describe "Route trustsReport" do
+    let
+      env = testEnv
+        # modifyAppEnv (\r -> r { getTrusts = \_ -> pure $ Set.fromFoldable [ addrA, addrB ] })
+
     it "foo" do
-      trustsReport { body: { addresses: [] } }
-        # runAppTestM testEnv
+      trustsReport { body: { addresses: [ addrA, addrB, addrC ] } }
+        # runAppTestM env
         # shouldEqual
         $ Right
-        $ Res.ok { trusted: [], notTrusted: [] }
+        $ Res.ok { trusted: [ addrA, addrB ], notTrusted: [] }

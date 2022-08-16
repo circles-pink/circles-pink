@@ -22,7 +22,7 @@ import Effect.Class.Console (log)
 import Payload.ResponseTypes (Failure, Response)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), apiErrorToFailure, apiErrorToLog)
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 --------------------------------------------------------------------------------
 -- Type
@@ -30,7 +30,7 @@ import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), a
 
 newtype AppTestM a = AppTestM
   ( ReaderT (AppEnv AppTestM)
-      (ExceptT AppError Identity)
+      (ExceptT (Response AppError) Identity)
       a
   )
 
@@ -40,7 +40,7 @@ derive newtype instance applicATMiveATM ::  Applicative AppTestM
 derive newtype instance functorATM ::  Functor AppTestM
 derive newtype instance bindATM ::  Bind AppTestM
 derive newtype instance monadATM ::  Monad AppTestM
-derive newtype instance monadThrowATM ::  MonadThrow AppError AppTestM
+derive newtype instance monadThrowATM ::  MonadThrow (Response AppError) AppTestM
 derive newtype instance monadAskATM ::  MonadAsk (AppEnv AppTestM) AppTestM
 
 instance monadAppATM :: MonadApp AppTestM
@@ -55,12 +55,11 @@ testEnv :: AppEnv AppTestM
 testEnv = todo --sample
 
 runAppTestM :: forall a. AppEnv AppTestM -> AppTestM a -> (Either (Response AppError) a)
-runAppTestM = todo
--- runAppTestM env (AppTestM x) = do
---   result <- runExceptT $ runReaderT x env
---   case result of
---     Left err -> do
---       log ("ERROR: " <> apiErrorToLog err)
---       pure $ Left $ apiErrorToFailure err
---     Right y -> pure $ Right y
+runAppTestM = do
+  result <- runExceptT $ runReaderT x env
+  case result of
+    Left err -> do
+      log ("ERROR: " <> apiErrorToLog err)
+      pure $ Left $ apiErrorToFailure err
+    Right y -> pure $ Right y
 

@@ -4,6 +4,7 @@ import VoucherServer.Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
+import Data.Newtype (class Newtype)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Response
 import VoucherServer.EnvVars (AppEnvVars)
@@ -42,13 +43,13 @@ type CCErrAll = Variant
       + ()
   )
 
-apiErrorToFailure :: AppError -> ResponseBody
-apiErrorToFailure = case _ of
-  ErrCirclesCore _ ->  StringBody "INTERNAL SERVER ERROR"
-  ErrUnknown -> StringBody "INTERNAL SERVER ERROR"
+printError :: AppError -> String
+printError = case _ of
+  ErrCirclesCore _ -> "INTERNAL SERVER ERROR"
+  ErrUnknown -> "INTERNAL SERVER ERROR"
 
-apiErrorToLog :: AppError -> String
-apiErrorToLog = case _ of
+errorToLog :: AppError -> String
+errorToLog = case _ of
   ErrCirclesCore _ -> "ohh!"
   ErrUnknown -> "noo!"
 
@@ -56,8 +57,12 @@ apiErrorToLog = case _ of
 -- Env
 --------------------------------------------------------------------------------
 
-newtype AppEnv m = AppEnv
+newtype AppEnv m = AppEnv (AppEnv' m)
+
+type AppEnv' m =
   { getTrusts :: Address -> m (Set Address)
   , envVars :: AppEnvVars
   }
 
+modifyAppEnv :: forall m. (AppEnv' m -> AppEnv' m) -> AppEnv m -> AppEnv m
+modifyAppEnv f (AppEnv r) = AppEnv $ f r
