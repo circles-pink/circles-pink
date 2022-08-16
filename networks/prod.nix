@@ -28,7 +28,7 @@
         };
       };
 
-      secretsFile = /var/lib/hercules-ci-agent/secrets/secrets.json;
+      secretsFile = /secrets.json;
 
       secrets =
         if builtins.pathExists secretsFile

@@ -137,7 +137,8 @@ agent-get-secrets:
 	scp root@hercules.teal.ooo:/var/lib/hercules-ci-agent/secrets/secrets.json .
 
 agent-push-secrets:
-	scp ./secrets.json root@hercules.teal.ooo:/var/lib/hercules-ci-agent/secrets/secrets.json
+	scp ./secrets.json root@hercules.teal.ooo:/var/lib/hercules-ci-agent/secrets/secrets.json; \
+	scp ./secrets.json root@hercules.teal.ooo:/secrets.json;
 
 directus-dump-schema:
 	nixops ssh -d circles-pink-vm webserver \
