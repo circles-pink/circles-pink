@@ -57,7 +57,9 @@ export type OnboardingProps = {
   lang?: Language;
   baseColor?: string;
   content?: Content;
-  userConfig?: UserConfig;
+  email?: string | ((email: string) => void);
+  onTrackingEvent?: (json: unknown) => void;
+  voucherShopEnabled?: boolean;
   testEnv?: Boolean;
 };
 
@@ -100,16 +102,10 @@ const getSkipStates = (cfg: CirclesConfig): CirclesState['type'][] => {
 type ViewProps = {
   state: CirclesState;
   act: (m: CirclesAction) => void;
-  cfg: CirclesConfig;
-  userConfig?: UserConfig;
+  cfg: UserConfig;
 };
 
-const View = ({
-  state,
-  act,
-  cfg,
-  userConfig,
-}: ViewProps): ReactElement | null => {
+const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -140,26 +136,24 @@ const View = ({
     case 'trusts':
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
-      return (
-        <Dashboard state={state.value} act={act} userConfig={userConfig} />
-      );
+      return <Dashboard state={state.value} act={act} cfg={cfg} />;
     default:
       return null;
   }
 };
 
-const mkCfg = (userCfg: UserConfig): CirclesConfig => {
-  if (typeof userCfg.email === 'string') {
+const mkCfg = (uCfg: UserConfig): CirclesConfig => {
+  if (typeof uCfg.email === 'string') {
     return {
-      extractEmail: fromFpTsEither(E.left(userCfg.email)),
+      extractEmail: fromFpTsEither(E.left(uCfg.email)),
     };
   }
 
   return {
     extractEmail: fromFpTsEither(
       E.right((email: string) => () => {
-        if (userCfg && userCfg.email && typeof userCfg.email !== 'string') {
-          userCfg.email(email);
+        if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
+          uCfg.email(email);
         }
         return unit;
       })
@@ -172,15 +166,23 @@ const OnboardingContent = ({
   lang = 'en',
   baseColor,
   content = {},
-  userConfig,
+  email = () => {},
+  onTrackingEvent,
+  voucherShopEnabled = false,
   testEnv = false,
 }: OnboardingProps): ReactElement => {
-  const cfg_ =
-    userConfig && userConfig.email ? mkCfg(userConfig) : cfgDefaultRight;
+  const userConfig: UserConfig = {
+    email,
+    onTrackingEvent,
+    voucherShopEnabled,
+  };
+
+  const cfg_ = email ? mkCfg(userConfig) : cfgDefaultRight;
 
   const cfg = {
+    ...userConfig,
     ...cfg_,
-    onTrackingEvent: userConfig?.onTrackingEvent
+    onTrackingEvent: onTrackingEvent
       ? Just.create((x: TrackingEvent) => () => {
           if (!userConfig?.onTrackingEvent) return;
           return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
@@ -206,7 +208,7 @@ const OnboardingContent = ({
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
         <DebugProvider>
-          <View state={state} act={act} cfg={cfg} userConfig={userConfig} />
+          <View state={state} act={act} cfg={cfg} />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>

@@ -4,7 +4,7 @@
   "include": ["src"],
   "exclude": ["node_modules"],
   "references": [
-    { "path": "../@circles-pink/web-client" },
-    { "path": "../@circles-pink/state-machine" }
+    // { "path": "../@circles-pink/web-client" },
+    // { "path": "../@circles-pink/state-machine" }
   ]
 }
