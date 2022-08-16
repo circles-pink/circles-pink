@@ -2,6 +2,7 @@ module CirclesCore.Bindings
   ( Account
   , CirclesCore
   , CirclesCore_(..)
+  , CoreOrganization(..)
   , CoreSafe(..)
   , CoreToken(..)
   , CoreTrust(..)
@@ -106,6 +107,7 @@ newtype CirclesCore_ = CirclesCore_
   , safe :: CoreSafe
   , token :: CoreToken
   , utils :: CoreUtils
+  , organization :: CoreOrganization
   }
 
 derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
@@ -201,6 +203,12 @@ derive instance newtypeCoreTrust :: Newtype CoreTrust _
 
 derive newtype instance structuralCoreTrust :: Structural CoreTrust
 
+--------------------------------------------------------------------------------
+newtype CoreOrganization = CoreOrganization
+  { isOrganization :: Fn2Promise Account { safeAddress :: String } Boolean
+  }
+
+derive instance newtypeCoreOrganization :: Newtype CoreOrganization _
 --------------------------------------------------------------------------------
 newtype CoreUtils = CoreUtils
   { toFreckles ::
