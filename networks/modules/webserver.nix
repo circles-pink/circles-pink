@@ -157,7 +157,17 @@ in
     enable = true;
     port = config.env.services.voucher-server.port;
     xbgeSecrets = secrets.xbge;
-    gardenEnv = config.env.envVars;
+    gardenEnv = {
+      gardenApi = config.env.envVars.gardenApi;
+      gardenApiUsers = config.env.envVars.gardenApiUsers;
+      gardenGraphApi = config.env.envVars.gardenGraphApi;
+      gardenSubgraphName = config.env.envVars.gardenSubgraphName;
+      gardenRelay = config.env.envVars.gardenRelay;
+      gardenHubAddress = config.env.envVars.gardenHubAddress;
+      gardenProxyFactoryAddress = config.env.envVars.gardenProxyFactoryAddress;
+      gardenSafeMasterAddress = config.env.envVars.gardenSafeMasterAddress;
+      gardenEthereumNodeWebSocket = config.env.envVars.gardenEthereumNodeWebSocket;
+    };
   };
 
 }
