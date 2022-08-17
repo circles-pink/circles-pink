@@ -32,13 +32,13 @@ trustsReport { body: { addresses } } = do
   pure $ Res.ok { trusted: yes, notTrusted: no }
 
 spec :: Spec Unit
-spec =
+spec = do
   describe "Route trustsReport" do
     let
       env = testEnv
         # modifyAppEnv (\r -> r { getTrusts = \_ -> pure $ Set.fromFoldable [ addrA, addrB ] })
 
-    it "foo" do
+    it "returns the trusted and untrusted addresses" do
       trustsReport { body: { addresses: [ addrA, addrB, addrC ] } }
         # runAppTestM env
         # shouldEqual

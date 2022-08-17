@@ -58,6 +58,7 @@
   , "spec"
   , "stadium"
   , "strings"
+  , "stringutils"
   , "sunde"
   , "test-unit"
   , "these"
