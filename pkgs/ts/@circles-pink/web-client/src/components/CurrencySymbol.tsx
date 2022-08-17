@@ -27,21 +27,29 @@ export const CurrencySymbol = (_props: _CurrencySymbolProps) => {
   };
 
   useEffect(() => {
+    let timeout: any;
     if (_props.isLoading) {
       setIsAnimPulse(true);
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         setIsAnimPulse(false);
       }, 2000);
     }
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [_props.isLoading, isAnimPulse]);
 
   useEffect(() => {
+    let timeout: any;
     if (_props.isRequesting) {
       setIsAnimRotate(true);
-      setTimeout(() => {
+      timeout = setTimeout(() => {
         setIsAnimRotate(false);
       }, 2000);
     }
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [_props.isRequesting, isAnimRotate]);
 
   return (

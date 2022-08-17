@@ -8,28 +8,54 @@ import {
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { t } from 'i18next';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, {
+  ReactElement,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { css, styled } from 'twin.macro';
-import { Claim, SubClaim } from '../../../components/text';
+import { CirclesCurrency } from '../../../assets/CirclesCurrency';
+import { CurrencySymbol } from '../../../components/CurrencySymbol';
+import { LoadingCircles } from '../../../components/LoadingCircles';
+import { Claim, LoadingText, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
   providers: VoucherProvidersResult;
   theme: Theme;
+  justBoughtVoucher: boolean;
+  setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
 };
 
 export const ListVouchers = ({
   vouchersResult,
   theme,
   providers,
+  justBoughtVoucher,
+  setJustBoughtVoucher,
 }: ListVouchersProps): ReactElement | null => {
   const [vouchers, setVouchers] = useState<Array<Voucher>>(
     mapResult(vouchersResult)
   );
+  const [vouchersBeforePurchase, setVouchersBeforePurchase] = useState(
+    vouchers.length
+  );
+
   const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
     providers as any
   );
+
+  useEffect(() => {
+    if (justBoughtVoucher && vouchersBeforePurchase === vouchers.length) {
+    } else if (
+      justBoughtVoucher &&
+      vouchersBeforePurchase !== vouchers.length
+    ) {
+      setJustBoughtVoucher(false);
+    }
+  }, [justBoughtVoucher, vouchers]);
 
   useEffect(() => {
     if (vouchersResult.type === 'success') {
@@ -45,7 +71,7 @@ export const ListVouchers = ({
       <Claim color={theme.baseColor}>
         {t('dashboard.voucherShop.listDescription')}
       </Claim>
-      {vouchers.length > 0 ? (
+      {vouchers.length > 0 || justBoughtVoucher ? (
         <VoucherContainer>
           {vouchers.map((voucher, index) => {
             const provider = mapInfo(providers_, voucher.providerId);
@@ -72,6 +98,40 @@ export const ListVouchers = ({
               </FadeIn>
             );
           })}
+          {justBoughtVoucher && (
+            <FadeIn
+              orientation={'left'}
+              delay={getDelay()}
+              key={`NewlyBoughtVoucher`}
+            >
+              <VoucherCard
+                theme={theme}
+                left={
+                  <CurrencySymbol
+                    color={theme.baseColor}
+                    isLoading={true}
+                    isRequesting={true}
+                    size={4}
+                  />
+                }
+                center={
+                  <>
+                    <LoadingText
+                      theme={theme}
+                      children={t('dashboard.voucherShop.waitingFor')}
+                      fontSize={2}
+                    />
+                    <LoadingText
+                      theme={theme}
+                      children={t('dashboard.voucherShop.voucher')}
+                      fontSize={2}
+                    />
+                  </>
+                }
+                right={<></>}
+              />
+            </FadeIn>
+          )}
         </VoucherContainer>
       ) : (
         <SubClaim>{t('dashboard.voucherShop.listNoVouchers')}</SubClaim>
@@ -108,9 +168,13 @@ const mapInfo = (
 
 const VoucherContainer = styled.div(() => [
   css`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 1rem;
+
+    @media (min-width: 1000px) {
+      grid-template-columns: 1fr 1fr;
+    }
   `,
 ]);
 

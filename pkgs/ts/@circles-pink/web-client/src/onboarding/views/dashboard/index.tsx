@@ -2,6 +2,7 @@ import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateM
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, {
   ReactElement,
+  SetStateAction,
   useContext,
   useEffect,
   useMemo,
@@ -127,6 +128,7 @@ export const Dashboard = ({
 
   // Voucher Shop
   const [selectedOffer, setSelectedOffer] = useState<SelectedOffer>();
+  const [justBoughtVoucher, setJustBoughtVoucher] = useState(false);
 
   const initializeVoucherOrder = (offer: SelectedOffer) => {
     setSelectedOffer(offer);
@@ -162,15 +164,15 @@ export const Dashboard = ({
       act(A._dashboard(A._getTrusts(unit)));
     }, TRUST_NETWORK_INTERVAL);
 
-    const UBIPayoutPolling = setInterval(() => {
+    const ubiPayoutPolling = setInterval(() => {
       act(A._dashboard(A._getTrusts(unit)));
     }, UBI_PAYOUT_INTERVAL);
 
-    const VoucherPolling = setInterval(() => {
+    const voucherPolling = setInterval(() => {
       act(A._dashboard(A._getVouchers(getTimestamp())));
     }, VOUCHER_INTERVAL);
 
-    const VoucherProviderPolling = setInterval(() => {
+    const voucherProviderPolling = setInterval(() => {
       act(A._dashboard(A._getVoucherProviders(unit)));
     }, VOUCHER_INTERVAL);
 
@@ -178,11 +180,34 @@ export const Dashboard = ({
     return () => {
       clearInterval(balancePolling);
       clearInterval(trustNetworkPolling);
-      clearInterval(UBIPayoutPolling);
-      clearInterval(VoucherPolling);
-      clearInterval(VoucherProviderPolling);
+      clearInterval(ubiPayoutPolling);
+      clearInterval(voucherPolling);
+      clearInterval(voucherProviderPolling);
     };
   }, []);
+
+  // Increased polling after voucher buy
+  useEffect(() => {
+    let balancePolling: any, voucherPolling: any;
+
+    if (justBoughtVoucher) {
+      balancePolling = setInterval(() => {
+        act(A._dashboard(A._getBalance(unit)));
+      }, 1500);
+
+      voucherPolling = setInterval(() => {
+        act(A._dashboard(A._getVouchers(getTimestamp())));
+      }, 3000);
+    } else if (!justBoughtVoucher && (balancePolling || voucherPolling)) {
+      clearInterval(balancePolling);
+      clearInterval(voucherPolling);
+    }
+
+    return () => {
+      clearInterval(balancePolling);
+      clearInterval(voucherPolling);
+    };
+  }, [justBoughtVoucher]);
 
   // -----------------------------------------------------------------------------
   // Data polling - Balance
@@ -216,13 +241,10 @@ export const Dashboard = ({
           newBalance === initBalTransfer &&
           countRefreshTransfer < MAX_RETRYS
         ) {
-          // console.log('Update:', countRefreshTransfer + 1);
           setTimeout(() => {
             act(A._dashboard(A._getBalance(unit)));
             setCountRefreshTransfer(countRefreshTransfer + 1);
           }, RETRY_INTERVAL);
-        } else {
-          // console.log('Finished after:', countRefreshTransfer);
         }
         break;
       default:
@@ -252,13 +274,10 @@ export const Dashboard = ({
             : null;
 
         if (newBalance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
-          // console.log('Update:', countRefreshPayout + 1);
           setTimeout(() => {
             act(A._dashboard(A._getBalance(unit)));
             setCountRefreshPayout(countRefreshPayout + 1);
           }, RETRY_INTERVAL);
-        } else {
-          // console.log('Finished after:', countRefreshPayout);
         }
         break;
       default:
@@ -459,6 +478,8 @@ export const Dashboard = ({
                     theme={theme}
                     providers={stateRaw.voucherProvidersResult}
                     vouchersResult={state.vouchersResult}
+                    justBoughtVoucher={justBoughtVoucher}
+                    setJustBoughtVoucher={setJustBoughtVoucher}
                   />
                 </LightColorFrame>
               </TopMargin>
@@ -495,6 +516,7 @@ export const Dashboard = ({
                 closeOverlay={() => setOverlay(['SEND', false])}
                 overwriteTo={overwriteTo}
                 selectedOffer={selectedOffer}
+                setJustBoughtVoucher={setJustBoughtVoucher}
                 state={stateRaw}
                 act={act}
                 theme={theme}
@@ -531,6 +553,7 @@ type DashboardOverlayProps = SendProps & {
   overlay: Overlay;
   closeOverlay: () => void;
   selectedOffer?: SelectedOffer;
+  setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
 };
 
 const DashboardOverlay = ({
@@ -539,6 +562,7 @@ const DashboardOverlay = ({
   act,
   theme,
   closeOverlay,
+  setJustBoughtVoucher,
   overwriteTo,
   selectedOffer,
 }: DashboardOverlayProps): ReactElement | null => {
@@ -556,10 +580,9 @@ const DashboardOverlay = ({
           state={state}
           act={act}
           theme={theme}
+          setJustBoughtVoucher={setJustBoughtVoucher}
         />
       ) : null;
-    default:
-      return null;
   }
 };
 
