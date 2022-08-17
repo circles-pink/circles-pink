@@ -37,7 +37,7 @@ import Effect.Timer (clearTimeout, setTimeout)
 import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
-import Payload.Client (defaultOpts, mkClient)
+import Payload.Client (defaultOpts, mkGuardedClient)
 import Payload.Headers as H
 import Safe.Coerce (coerce)
 import StringStorage (StringStorage)
@@ -363,7 +363,7 @@ env envenv@{ request, envVars } =
   getVouchers signatureObj = do
     let
       baseURL = envVars -# _.voucherServerHost
-      client = mkClient
+      client = mkGuardedClient
         ( defaultOpts
             { baseUrl = baseURL
             , extraHeaders = H.fromFoldable
@@ -380,7 +380,7 @@ env envenv@{ request, envVars } =
   getVoucherProviders signatureObj = do
     let
       baseURL = envVars -# _.voucherServerHost
-      client = mkClient
+      client = mkGuardedClient
         ( defaultOpts
             { baseUrl = baseURL
             , extraHeaders = H.fromFoldable

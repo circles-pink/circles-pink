@@ -38,6 +38,14 @@ with types;
           };
         };
     };
+    env = mkOption {
+      type = submodule
+        {
+          options = {
+            voucherServerBasicAuth = mkOption { type = str; };
+          };
+        };
+    };
   };
   config = mkIf cfg.enable {
     environment.systemPackages = [ pkgs.circles-pink.voucher-server ];
@@ -67,6 +75,7 @@ with types;
         GARDEN_PROXY_FACTORY_ADRESS = "${toString cfg.gardenEnv.gardenProxyFactoryAddress}";
         GARDEN_SAFE_MASTER_ADDRESS = "${toString cfg.gardenEnv.gardenSafeMasterAddress}";
         GARDEN_ETHEREUM_NODE_WS = "${toString cfg.gardenEnv.gardenEthereumNodeWebSocket}";
+        VOUCHER_SERVER_BASIC_AUTH = "${toString cfg.env.voucherServerBasicAuth}";
       };
     };
   };

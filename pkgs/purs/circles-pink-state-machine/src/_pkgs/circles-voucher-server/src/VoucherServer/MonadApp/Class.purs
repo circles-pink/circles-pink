@@ -24,6 +24,7 @@ class
 data AppError
   = ErrCirclesCore CCErrAll
   | ErrUnknown
+  | ErrBasicAuth
 
 derive instance genericVSE :: Generic AppError _
 derive instance eqVSE :: Eq AppError
@@ -43,13 +44,15 @@ type CCErrAll = Variant
 
 printError :: AppError -> String
 printError = case _ of
-  ErrCirclesCore _ -> "INTERNAL SERVER ERROR"
-  ErrUnknown -> "INTERNAL SERVER ERROR"
+  ErrCirclesCore _ -> "Internal server error"
+  ErrUnknown -> "Internal server error"
+  ErrBasicAuth -> "Authorization failed"
 
 errorToLog :: AppError -> String
 errorToLog = case _ of
-  ErrCirclesCore _ -> "ohh!"
-  ErrUnknown -> "noo!"
+  ErrCirclesCore _ -> "Circles Core Error"
+  ErrUnknown -> "Unknown error"
+  ErrBasicAuth -> "Basic Authentication failed"
 
 --------------------------------------------------------------------------------
 -- Env

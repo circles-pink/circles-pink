@@ -38,6 +38,7 @@
   , "node-child-process"
   , "node-fs"
   , "node-fs-aff"
+  , "node-http"
   , "node-process"
   , "now"
   , "nullable"

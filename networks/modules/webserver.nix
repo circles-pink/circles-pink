@@ -197,6 +197,9 @@ in
       gardenSafeMasterAddress = config.env.envVars.gardenSafeMasterAddress;
       gardenEthereumNodeWebSocket = config.env.envVars.gardenEthereumNodeWebSocket;
     };
+    env = {
+      voucherServerBasicAuth = secrets.voucherServerBasicAuth;
+    };
   };
 
 }
