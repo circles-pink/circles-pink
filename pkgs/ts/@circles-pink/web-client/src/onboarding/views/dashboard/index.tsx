@@ -444,7 +444,7 @@ export const Dashboard = ({
               <TopMargin>
                 <LightColorFrame
                   theme={theme}
-                  title="Voucher Shop"
+                  title={t('dashboard.voucherShop.shopTitle')}
                   icon={mdiGiftOutline}
                 >
                   <MarginY size={2}>

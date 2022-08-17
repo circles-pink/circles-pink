@@ -4,6 +4,7 @@ import {
   VoucherOffer,
   VoucherProvider,
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 import { Overlay, SelectedOffer } from '.';
@@ -36,12 +37,14 @@ export const BuyVouchers = ({
   }, [providers]);
 
   if (providers_.length === 0) {
-    return <SubClaim>Currently there were no vouchers available.</SubClaim>;
+    return <SubClaim>{t('dashboard.voucherShop.buyNoVouchers')}</SubClaim>;
   }
 
   return (
     <>
-      <Claim color={theme.baseColor}>Buy Vouchers:</Claim>
+      <Claim color={theme.baseColor}>
+        {t('dashboard.voucherShop.buyDescription')}
+      </Claim>
       {providers_.map(provider => {
         const sortedOffers = [...provider.availableOffers].sort(
           (a, b) => a.amount - b.amount
@@ -64,17 +67,21 @@ export const BuyVouchers = ({
                   >
                     <Logo src={provider.logoUrl} />
                     <VoucherText fontSize={1.25}>
-                      {offer.amount}€ {provider.name} voucher
+                      {offer.amount}€ {provider.name}{' '}
+                      {t('dashboard.voucherShop.voucher')}
                     </VoucherText>
                     <VoucherText fontSize={1}>
-                      {offer.countAvailable} vouchers left!
+                      {offer.countAvailable}{' '}
+                      {t('dashboard.voucherShop.vouchersLeft')}
                     </VoucherText>
                     <br />
 
                     <VoucherText fontSize={1.5}>
                       {userCanBuy
-                        ? `Buy for ${offer.amount * 10} Circles`
-                        : `You need ${(
+                        ? `${t('dashboard.voucherShop.buyFor')} ${
+                            offer.amount * 10
+                          } Circles`
+                        : `${t('dashboard.voucherShop.youNeed')} ${(
                             offer.amount * 10 -
                             availableBalance
                           ).toFixed(2)} Circles`}

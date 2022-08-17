@@ -7,6 +7,7 @@ import {
   VoucherProvider,
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { FadeIn, getIncrementor } from 'anima-react';
+import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 import { Claim, SubClaim } from '../../../components/text';
@@ -40,12 +41,14 @@ export const ListVouchers = ({
   const getDelay = getIncrementor(0, 0.25);
 
   if (vouchers.length === 0) {
-    return <SubClaim>You don't have any vouchers yet.</SubClaim>;
+    return <SubClaim>{t('dashboard.voucherShop.listNoVouchers')}</SubClaim>;
   }
 
   return (
     <>
-      <Claim color={theme.baseColor}>Your Vouchers:</Claim>
+      <Claim color={theme.baseColor}>
+        {t('dashboard.voucherShop.listDescription')}
+      </Claim>
       <VoucherContainer>
         {vouchers.map((voucher, index) => {
           const provider = mapInfo(providers_, voucher.providerId);
