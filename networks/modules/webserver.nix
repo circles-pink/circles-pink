@@ -117,10 +117,10 @@ in
         };
         "${lib.mkDomain config.env.services.voucher-server.url}" =
           let
-            clientUrl =
+            corsRegex =
               if config.env.isDev
-              then "http://circles.local"
-              else "https://circles.pink";
+              then "^http://circles\\.local$"
+              else "^https://(circles\\.pink|(next\\.)?expedition-grundeinkommen\\.de|(www\\.)?volksentscheid-grundeinkommen\\.de)$";
           in
           {
             locations."/" = {
@@ -129,10 +129,12 @@ in
                 proxy_set_header HOST $host;
                 proxy_set_header X-Real-IP $remote_addr;
 
-                add_header 'Access-Control-Allow-Origin' '${clientUrl}' always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
-                add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Origin,X-Auth-Token,Authorization,Accept,Client-Security-Token' always;
-                add_header 'Access-Control-Allow-Methods' 'OPTIONS, GET, POST, PATCH, PUT, DELETE' always;
+                if ($http_origin ~ '${corsRegex}') {
+                  add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+                  add_header 'Access-Control-Allow-Credentials' 'true' always;
+                  add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Origin,X-Auth-Token,Authorization,Accept,Client-Security-Token' always;
+                  add_header 'Access-Control-Allow-Methods' 'OPTIONS, GET, POST, PATCH, PUT, DELETE' always;
+                }
               '';
             };
           };
