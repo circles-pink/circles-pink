@@ -127,7 +127,7 @@ const ConfirmDialog = ({ theme, provider, eurAmount }: ConfirmDialogProps) => {
         <br />
         {`${t('dashboard.voucherShop.tcCostWillBe')} ${crcAmount} CRC`}
         <br />
-        {`${t('dashboard.voucherShop.eurAmountWillBe')} ${crcAmount} €`}
+        {`${t('dashboard.voucherShop.eurAmountWillBe')} ${eurAmount} €`}
       </SubClaim>
     </>
   );
