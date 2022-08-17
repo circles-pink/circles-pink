@@ -135,6 +135,17 @@ in
                   add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Origin,X-Auth-Token,Authorization,Accept,Client-Security-Token' always;
                   add_header 'Access-Control-Allow-Methods' 'OPTIONS, GET, POST, PATCH, PUT, DELETE' always;
                 }
+
+                if ($request_method = 'OPTIONS') {
+                  add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+                  add_header 'Access-Control-Allow-Credentials' 'true' always;
+                  add_header 'Access-Control-Allow-Headers' 'Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range' always;
+                  add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS,PUT,DELETE,PATCH' always;
+                  add_header 'Access-Control-Max-Age' 1728000 always;
+                  add_header 'Content-Type' 'text/plain charset=UTF-8' always;
+                  add_header 'Content-Length' 0 always;
+                  return 204;
+                }
               '';
             };
           };
