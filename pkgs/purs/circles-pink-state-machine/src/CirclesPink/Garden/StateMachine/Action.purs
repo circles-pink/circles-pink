@@ -16,7 +16,6 @@ module CirclesPink.Garden.StateMachine.Action
   , _getUsers
   , _getVoucherProviders
   , _getVouchers
-  , _infoGeneral
   , _infoSecurity
   , _landing
   , _login
@@ -37,8 +36,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _transfer
   , _trusts
   , _userSearch
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -49,14 +47,9 @@ import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 
 type CirclesAction = Variant
-  ( infoGeneral ::
+  ( askUsername ::
       Variant
-        ( next :: Unit
-        )
-  , askUsername ::
-      Variant
-        ( prev :: Unit
-        , setUsername :: String
+        ( setUsername :: String
         , next :: Unit
         )
   , askEmail ::
@@ -134,8 +127,6 @@ type CirclesAction = Variant
   )
 
 ----
-_infoGeneral :: forall a v. a -> Variant (infoGeneral :: a | v)
-_infoGeneral = inj (Proxy :: _ "infoGeneral")
 
 _askUsername :: forall a v. a -> Variant (askUsername :: a | v)
 _askUsername = inj (Proxy :: _ "askUsername")

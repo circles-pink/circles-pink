@@ -7,14 +7,9 @@ import Type.Data.List (type (:>), Nil')
 
 --------------------------------------------------------------------------------
 type CirclesProtocol = P.Protocol
-  ( infoGeneral ::
+  ( askUsername ::
       P.State
-        ( next :: P.Action ("askUsername" :> Nil')
-        )
-  , askUsername ::
-      P.State
-        ( prev :: P.Action ("infoGeneral" :> Nil')
-        , setUsername :: P.Action ("askUsername" :> Nil')
+        ( setUsername :: P.Action ("askUsername" :> Nil')
         , next :: P.Action ("askUsername" :> "askEmail" :> "infoSecurity" :> Nil')
         )
   , askEmail ::
@@ -60,7 +55,7 @@ type CirclesProtocol = P.Protocol
   , login ::
       P.State
         ( login :: P.Action ("login" :> "dashboard" :> "trusts" :> Nil')
-        , signUp :: P.Action ("infoGeneral" :> Nil')
+        , signUp :: P.Action ("askUsername" :> Nil')
         , setMagicWords :: P.Action ("login" :> Nil')
         )
   , trusts ::
@@ -75,7 +70,7 @@ type CirclesProtocol = P.Protocol
         )
   , landing ::
       P.State
-        ( signUp :: P.Action ("infoGeneral" :> Nil')
+        ( signUp :: P.Action ("askUsername" :> Nil')
         , signIn :: P.Action ("login" :> Nil')
         , checkForSession :: P.Action ("landing" :> "trusts" :> "dashboard" :> Nil')
 

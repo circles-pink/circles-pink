@@ -8,7 +8,6 @@ module CirclesPink.Garden.StateMachine.State
   , ErrLandingStateResolved
   , ErrSubmit
   , ErrSubmitResolved
-  , InfoGeneralState
   , InfoSecurityState
   , LandingState
   , LandingStateCheckSessionResult
@@ -20,7 +19,6 @@ module CirclesPink.Garden.StateMachine.State
   , _askEmail
   , _askUsername
   , _debug
-  , _infoGeneral
   , _infoSecurity
   , _landing
   , _magicWords
@@ -92,8 +90,6 @@ type UserData =
   , submitResult :: UserDataSubmitResult
   }
 
-type InfoGeneralState = UserData
-
 type AskUsernameState = UserData
 
 type AskEmailState = UserData
@@ -106,8 +102,7 @@ type SubmitState = UserData
 
 --------------------------------------------------------------------------------
 type CirclesState = Variant
-  ( infoGeneral :: UserData
-  , askUsername :: UserData
+  ( askUsername :: UserData
   , askEmail :: UserData
   , infoSecurity :: UserData
   , magicWords :: UserData
@@ -148,9 +143,9 @@ type DebugState =
   }
 
 -- init :: CirclesState
-init :: forall v. Variant (infoGeneral :: UserData | v)
+init :: forall v. Variant (askUsername :: UserData | v)
 init =
-  _infoGeneral
+  _askUsername
     { direction: D._forwards
     , username: ""
     , usernameApiResult: _notAsked unit
@@ -169,8 +164,6 @@ initDebug =
     }
 
 --------------------------------------------------------------------------------
-_infoGeneral :: forall a v. a -> Variant (infoGeneral :: a | v)
-_infoGeneral = inj (Proxy :: _ "infoGeneral")
 
 _askUsername :: forall a v. a -> Variant (askUsername :: a | v)
 _askUsername = inj (Proxy :: _ "askUsername")

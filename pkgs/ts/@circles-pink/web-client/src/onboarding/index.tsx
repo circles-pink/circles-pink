@@ -14,7 +14,6 @@ import {
 import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
-  InfoGeneral,
   AskEmail,
   InfoSecurity,
   MagicWords,
@@ -119,8 +118,6 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
   switch (state.type) {
     case 'landing':
       return <Landing state={state.value} act={act} />;
-    case 'infoGeneral':
-      return <InfoGeneral state={state.value} act={act} skip={skip} />;
     case 'askUsername':
       return <AskUsername state={state.value} act={act} skip={skip} />;
     case 'askEmail':

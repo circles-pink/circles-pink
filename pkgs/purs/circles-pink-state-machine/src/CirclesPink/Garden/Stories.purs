@@ -54,7 +54,6 @@ type SignUpUserOpts =
 signUpUser :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> SignUpUserOpts -> m Unit
 signUpUser env cfg opts = do
   act env cfg $ A._landing $ A._signUp unit
-  act env cfg $ A._infoGeneral $ A._next unit
   act env cfg $ A._askUsername $ A._setUsername opts.username
   act env cfg $ A._askUsername $ A._next unit
   act env cfg $ A._askEmail $ A._setEmail opts.email
