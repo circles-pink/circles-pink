@@ -9,6 +9,7 @@ pkgs/ts/@circles-pink/state-machine/output/
 /tmp
 pkgs/ts/assets/src
 secrets.json
+secrets-dev.json
 yarn-error.log
 *.buildinfo
 ts-dist/
