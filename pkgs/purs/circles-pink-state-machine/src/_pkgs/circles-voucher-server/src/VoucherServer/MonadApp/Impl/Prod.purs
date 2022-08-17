@@ -10,22 +10,20 @@ import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Convertable (convert)
 import Data.Array as A
-import Data.Either (Either(..))
+import Data.Either (Either)
 import Data.Newtype (class Newtype, wrap)
 import Data.Set as Set
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
-import Payload.ResponseTypes (Failure(..), Response(..), ResponseBody(..))
-import Payload.Server.Response (internalError)
+import Payload.ResponseTypes (Response(..))
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.MonadApp.Class (printError, class MonadApp, AppEnv(..), AppError(..), errorToLog)
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 newtype AppProdM a = AppProdM
   ( ReaderT (AppEnv AppProdM)
-      (ExceptT (Response AppError) Aff)
+      (ExceptT AppError Aff)
       a
   )
 
@@ -35,7 +33,7 @@ derive newtype instance applicativeAPM ::  Applicative AppProdM
 derive newtype instance functorAPM ::  Functor AppProdM
 derive newtype instance bindAPM ::  Bind AppProdM
 derive newtype instance monadAPM ::  Monad AppProdM
-derive newtype instance monadThrowAPM ::  MonadThrow (Response AppError) AppProdM
+derive newtype instance monadThrowAPM ::  MonadThrow AppError AppProdM
 derive newtype instance monadAskAPM ::  MonadAsk (AppEnv AppProdM) AppProdM
 derive newtype instance monadEffectAPM ::  MonadEffect AppProdM
 derive newtype instance monadAffAPM ::  MonadAff AppProdM
@@ -77,14 +75,9 @@ mkProdEnv envVars = do
     
     }
 
-runAppProdM :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either Failure a)
-runAppProdM env (AppProdM x) = do
-  result <- runExceptT $ runReaderT x env
-  case result of
-    Left res@(Response {body}) -> do
-      log ("ERROR: " <> errorToLog body)
-      pure $ Left $ Error $ mapResponse (StringBody <<< printError) res
-    Right y -> pure $ Right y
+runAppProdM :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either AppError a)
+runAppProdM env (AppProdM x) = runExceptT $ runReaderT x env
+  
 
 mapResponse :: forall a b. (a -> b) -> Response a -> Response b
 mapResponse f (Response r) = Response r { body = f r.body }
@@ -96,7 +89,7 @@ mapResponse f (Response r) = Response r { body = f r.body }
 
 fromCCAff :: forall a. ExceptV (CC.Err ()) Aff a -> AppProdM a
 fromCCAff x = x
-  # withExceptT (internalError <<< ErrCirclesCore)
+  # withExceptT ErrCirclesCore
   # runExceptT
   # liftAff
   >>= liftEither

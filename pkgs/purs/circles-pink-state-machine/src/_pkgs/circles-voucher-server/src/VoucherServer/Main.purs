@@ -54,7 +54,8 @@ import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
-import VoucherServer.MonadApp (mkProdEnv, runAppProdM)
+import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, mkProdEnv, runAppProdM)
+import VoucherServer.MonadApp.Class (errorToFailure)
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
@@ -419,16 +420,26 @@ app = do
               { getVouchers: getVouchers parsedEnv
               , getVoucherProviders: getVoucherProviders parsedEnv
               --, trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
-              , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
+              , trustsReport: Routes.trustsReport >>> runRoute prodEnv
               }
-            guards = {
-              basicAuth : basicAuthGuard >>> runAppProdM prodEnv
-            }
+            guards =
+              { basicAuth: basicAuthGuard >>> runRoute prodEnv
+              }
           _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
-          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) 
-                spec
-                { guards, handlers }
+          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port })
+            spec
+            { guards, handlers }
           pure $ Right unit
+
+runRoute :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either Failure a)
+runRoute env x = do
+  result <- runAppProdM env x
+  case result of
+    Left appError -> do
+      log $ errorToLog appError
+      pure $ Left $ errorToFailure appError
+    Right ok -> pure $ Right ok 
+   
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
 -- runWithLog m = do
