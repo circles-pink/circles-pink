@@ -4,7 +4,7 @@ import VoucherServer.Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
-import Payload.ResponseTypes (Response)
+import Payload.Server.Response as Res
 import VoucherServer.EnvVars (AppEnvVars)
 
 --------------------------------------------------------------------------------
@@ -12,7 +12,7 @@ import VoucherServer.EnvVars (AppEnvVars)
 --------------------------------------------------------------------------------
 
 class
-  ( MonadThrow (Response AppError) m
+  ( MonadThrow AppError m
   , MonadAsk (AppEnv m) m
   ) <=
   MonadApp m
@@ -42,11 +42,11 @@ type CCErrAll = Variant
       + ()
   )
 
-printError :: AppError -> String
-printError = case _ of
-  ErrCirclesCore _ -> "Internal server error"
-  ErrUnknown -> "Internal server error"
-  ErrBasicAuth -> "Authorization failed"
+errorToFailure :: AppError -> Failure
+errorToFailure = case _ of
+  ErrCirclesCore _ -> Error $ Res.internalError $ StringBody "Internal server error"
+  ErrUnknown -> Error $ Res.internalError $ StringBody "Internal server error"
+  ErrBasicAuth -> Error $ Res.internalError $ StringBody "Authorization failed"
 
 errorToLog :: AppError -> String
 errorToLog = case _ of

@@ -13,7 +13,6 @@ import Foreign.Object as Object
 import Node.HTTP as HTTP
 import Payload.Headers (Headers)
 import Payload.Headers as Headers
-import Payload.Server.Response as Res
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 basicAuthGuard :: forall m. MonadApp m => HTTP.Request -> m Unit
@@ -22,7 +21,7 @@ basicAuthGuard req = do
   let headers = getHeaders req
   case Headers.lookup "Authorization" headers of
     Just tok | tok == ("Basic " <> envVars.voucherServerBasicAuth) -> pure unit
-    _ -> throwError $ Res.unauthorized ErrBasicAuth
+    _ -> throwError ErrBasicAuth
 
 getHeaders :: HTTP.Request -> Headers
 getHeaders req = Headers.fromFoldable headersArr
