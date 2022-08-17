@@ -15,7 +15,8 @@
     "outDir": "dist",
     "jsx": "react",
     "noImplicitAny": true,
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "include": ["src", "types"],
   "exclude": ["node_modules"]
