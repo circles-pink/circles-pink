@@ -28,7 +28,7 @@ import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..), convertDuration)
 import Data.Traversable (for, traverse)
-import Data.Tuple.Nested (type (/\), (/\))
+import Data.Tuple.Nested ((/\))
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
 import Effect.Class (liftEffect)
@@ -54,7 +54,6 @@ import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.MonadApp (mkProdEnv, runAppProdM)
-import VoucherServer.Routes.TrustUser (trustUsers) as Routes
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
@@ -417,20 +416,20 @@ app = do
           _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
             { getVouchers: getVouchers parsedEnv
             , getVoucherProviders: getVoucherProviders parsedEnv
-            , trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
+            --, trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
             , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
             }
           pure $ Right unit
 
 
-runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
-runWithLog m = do
-  result <- runExceptT m
-  case result of
-    Left (msg /\ err) -> do
-      log msg
-      pure $ Left err
-    Right x -> pure $ Right x
+-- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
+-- runWithLog m = do
+--   result <- runExceptT m
+--   case result of
+--     Left (msg /\ err) -> do
+--       log msg
+--       pure $ Left err
+--     Right x -> pure $ Right x
 
 main :: Effect Unit
 main = launchAff_ app
