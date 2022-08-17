@@ -54,6 +54,11 @@ in
       type = attrsOf str;
     };
 
+    isDev = mkOption {
+      type = bool;
+      default = false;
+    };
+
   };
 
   config = mkIf cfg.enable { };
