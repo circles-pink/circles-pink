@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
-import { Claim, LoadingText } from './text';
+import { Claim } from './text';
 import ReactTooltip from 'react-tooltip';
 import {
   mdiAccountArrowLeft,
@@ -47,6 +47,7 @@ import { Tuple } from '@circles-pink/state-machine/output/Data.FpTs.Tuple';
 import * as O from 'fp-ts/Option';
 import { TsTrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 import { Pair } from '@circles-pink/state-machine/output/Data.FpTs.Pair';
+import { TrustStatusMessage } from './TrustStatusMessage';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -352,15 +353,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
       <TableData></TableData>
       <TableData>
         <JustifyAroundCenter>
-          <FadeIn orientation={'left'} delay={getDelay()}>
-            <TrustActionMessageContainer>
-              <TrustActionMessage>
-                <LoadingText theme={theme} fontSize={1.6}>
-                  {mapStatusMessage(c.trustState)}
-                </LoadingText>
-              </TrustActionMessage>
-            </TrustActionMessageContainer>
-          </FadeIn>
+          <TrustStatusMessage theme={theme} trustState={c.trustState} />
           <FadeIn orientation={'left'} delay={getDelay()}>
             <>
               {loadingTrust || loadingUntrust ? (
@@ -460,24 +453,6 @@ const Clickable = styled.div<ClickableProps>(({ clickable }) => [
 const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
 const JustifyAround = tw.div`flex justify-around`;
-const TrustActionMessageContainer = tw.div`relative w-6 h-6`;
-const TrustActionMessage = tw.span`absolute right-0 top-0`;
-
-// -----------------------------------------------------------------------------
-// Util
-// -----------------------------------------------------------------------------
-
-const mapStatusMessage = (trustState: TrustState.TrustState) => {
-  if (TrustState.isLoadingTrust(trustState)) {
-    return t('dashboard.trustList.message.loadingTrust');
-  } else if (TrustState.isLoadingUntrust(trustState)) {
-    return t('dashboard.trustList.message.loadingUntrust');
-  } else if (TrustState.isPendingTrust(trustState)) {
-    return t('dashboard.trustList.message.pendingTrust');
-  } else if (TrustState.isPendingUntrust(trustState)) {
-    return t('dashboard.trustList.message.pendingUntrust');
-  }
-};
 
 // -----------------------------------------------------------------------------
 // Tooltip mapping

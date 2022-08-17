@@ -25,7 +25,6 @@ export const GardenAPI = (args): ReactElement => {
       initState={initLanding}
       content={content}
       onTrackingEvent={(te) => console.log("Tracking Event", te)}
-      voucherShopEnabled={true}
     />
   );
 };
