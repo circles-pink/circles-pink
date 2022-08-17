@@ -5,7 +5,7 @@
     let
       pkgs = (import ../default.nix).outputs.legacyPackages.x86_64-linux.pkgs;
 
-      secrets = (builtins.fromJSON (builtins.readFile ../secrets.json)).secrets.data;
+      secrets = (builtins.fromJSON (builtins.readFile ../secrets-dev.json)).secrets.data;
 
       lib = pkgs.lib;
 
@@ -33,7 +33,10 @@
         gardenProxyFactoryAddress = "0xD833215cBcc3f914bD1C9ece3EE7BF8B14f841bb";
         gardenSafeMasterAddress = "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550";
         gardenEthereumNodeWebSocket = "ws://localhost:8545";
+        xbgeSafeAddress = secrets.xbge.safeAddress;
       };
+
+      env.isDev = true;
 
       deployment.targetEnv = "virtualbox";
       deployment.virtualbox.memorySize = 1024 * 4; # megabytes
