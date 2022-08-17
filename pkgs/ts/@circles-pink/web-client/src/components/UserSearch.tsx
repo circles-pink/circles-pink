@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
-import { Claim, LoadingText } from './text';
 import ReactTooltip from 'react-tooltip';
 import {
   mdiAccountArrowLeft,
@@ -20,12 +19,10 @@ import {
   mdiWeatherCloudyClock,
 } from '@mdi/js';
 import Icon from '@mdi/react';
-import { darken } from '../onboarding/utils/colorUtils';
 import { JustifyAroundCenter, JustifyStartCenter } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,
-  DefaultView,
   Trust,
   Trusts,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
@@ -43,6 +40,7 @@ import {
 } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { LightColorFrame } from './TrustUserList';
+import { TrustStatusMessage } from './TrustStatusMessage';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -286,15 +284,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
       <TableData></TableData>
       <TableData>
         <JustifyAroundCenter>
-          <FadeIn orientation={'left'} delay={getDelay()}>
-            <TrustActionMessageContainer>
-              <TrustActionMessage>
-                <LoadingText theme={theme} fontSize={1.6}>
-                  {mapStatusMessage(c.trustState)}
-                </LoadingText>
-              </TrustActionMessage>
-            </TrustActionMessageContainer>
-          </FadeIn>
+          <TrustStatusMessage theme={theme} trustState={c.trustState} />
           <FadeIn orientation={'left'} delay={getDelay()}>
             <>
               {loadingTrust || loadingUntrust ? (
@@ -314,21 +304,6 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
     </TableRow>
   );
 };
-
-// -----------------------------------------------------------------------------
-// UI / Frame
-// -----------------------------------------------------------------------------
-
-type FameProps = {
-  theme: Theme;
-};
-
-const Frame = styled.div<FameProps>(({ theme }: FameProps) => [
-  tw`block lg:p-8 md:p-8 p-4 border border-gray-800 shadow-xl rounded-xl`,
-  css`
-    background-color: ${theme.lightColor};
-  `,
-]);
 
 // -----------------------------------------------------------------------------
 // UI / Table
@@ -368,24 +343,6 @@ const Clickable = styled.div<ClickableProps>(({ clickable }) => [
 const Title = tw.div`mb-4`;
 const JustifyBetween = tw.div`flex justify-between`;
 const JustifyAround = tw.div`flex justify-around`;
-const TrustActionMessageContainer = tw.div`relative w-6 h-6`;
-const TrustActionMessage = tw.span`absolute right-0 top-0`;
-
-// -----------------------------------------------------------------------------
-// Util
-// -----------------------------------------------------------------------------
-
-const mapStatusMessage = (trustState: TrustState.TrustState) => {
-  if (TrustState.isLoadingTrust(trustState)) {
-    return t('dashboard.trustList.message.loadingTrust');
-  } else if (TrustState.isLoadingUntrust(trustState)) {
-    return t('dashboard.trustList.message.loadingUntrust');
-  } else if (TrustState.isPendingTrust(trustState)) {
-    return t('dashboard.trustList.message.pendingTrust');
-  } else if (TrustState.isPendingUntrust(trustState)) {
-    return t('dashboard.trustList.message.pendingUntrust');
-  }
-};
 
 // -----------------------------------------------------------------------------
 // Tooltip mapping
