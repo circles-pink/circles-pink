@@ -66,12 +66,12 @@ export const resources = {
           'You should write this on a sheet of paper to keep your Coins save.',
         copyBtn: 'Copy to clipboard',
         copiedInfo: 'Copied!',
-        newPhraseBtn: 'Generate new Phrase',
+        newPhraseBtn: 'Give me different words',
       },
       submit: {
-        claim: 'This is your data',
+        claim: 'Register user {{user}}',
         subClaim:
-          'If everything is correct you can hit submit and create your Wallet',
+          'If you like your username and saved your private key, hit Submit and register your Circles account!',
       },
       trusts: {
         claim: 'Hey there!',
@@ -212,12 +212,12 @@ export const resources = {
           'Wenn du sie verlierst, dann kann dein Account nicht wiederhergestellt werden. All deine Vertrauensbeziehungen sind damit dann unzugänglich.',
         copyBtn: 'In die Zwischenablage kopieren',
         copiedInfo: 'Kopiert!',
-        newPhraseBtn: 'Neuen Schlüssel generieren',
+        newPhraseBtn: 'Gib mir schönere Worte!',
       },
       submit: {
-        claim: 'Diese Daten hast du angegeben',
+        claim: 'Nutzer:in {{user}} anlegen',
         subClaim:
-          'Wenn alles stimmt kannst du sie abschicken. Damit ist dein Nutzername dann vorgemerkt. Um die Aktivierung abzuschließen, musst du im nächsten Schritt drei Menschen die dir vertrauen.',
+          'Wenn dein Name dir gefällt und du deinen privaten Schlüssel gespeichert hast, kannst du die Daten abschicken. Damit ist dein Nutzer:innenname vorgemerkt. Um die Aktivierung abzuschließen, musst du im nächsten Schritt drei Menschen finden, die dir vertrauen.',
       },
       trusts: {
         claim: 'Hallöchen!',

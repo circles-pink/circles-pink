@@ -118,6 +118,14 @@ export const MagicWords = ({
                 prio={'low'}
                 theme={theme}
                 fullWidth={true}
+                onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
+              >
+                {t('magicWords.newPhraseBtn')}
+              </Button>
+              <Button
+                prio={'low'}
+                theme={theme}
+                fullWidth={true}
                 onClick={() => copyToClipboard()}
               >
                 {copyNotify ? (
@@ -127,14 +135,6 @@ export const MagicWords = ({
                 ) : (
                   t('magicWords.copyBtn')
                 )}
-              </Button>
-              <Button
-                prio={'low'}
-                theme={theme}
-                fullWidth={true}
-                onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
-              >
-                {t('magicWords.newPhraseBtn')}
               </Button>
             </TwoButtonRow>
           </FadeIn>

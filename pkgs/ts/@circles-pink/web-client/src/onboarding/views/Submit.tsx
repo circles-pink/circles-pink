@@ -36,21 +36,25 @@ export const Submit = ({ state, act, skip }: SubmitProps): ReactElement => {
       text={
         <Text>
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <Claim color={theme.baseColor}>{t('submit.claim')}</Claim>
+            <Claim color={theme.baseColor}>
+              {t('submit.claim').replace('{{user}}', `"${state.username}"`)}
+            </Claim>
           </FadeIn>
 
           <FadeIn orientation={orientation} delay={getDelay()}>
             <SubClaim>{t('submit.subClaim')}</SubClaim>
           </FadeIn>
 
-          <FadeIn orientation={orientation} delay={getDelay()}>
-            <SubClaim>Username: {state.username}</SubClaim>
-          </FadeIn>
-          {state.email && (
+          {/* <FadeIn orientation={orientation} delay={getDelay()}>
+            <SubClaim>
+              {t('submit.username')} {state.username}
+            </SubClaim>
+          </FadeIn> */}
+          {/* {state.email && (
             <FadeIn orientation={orientation} delay={getDelay()}>
               <SubClaim>Email: {state.email}</SubClaim>
             </FadeIn>
-          )}
+          )} */}
         </Text>
       }
       control={
