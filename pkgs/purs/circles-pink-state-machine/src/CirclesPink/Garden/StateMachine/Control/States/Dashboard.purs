@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Data.Address (Address, parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (TrustNode(..), initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode, initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User)
@@ -44,7 +44,7 @@ import Data.Pair ((~))
 import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
-import Data.These (These(..), maybeThese)
+import Data.These (maybeThese)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Test.TestUtils (addrA, addrB, userA)

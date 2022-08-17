@@ -16,11 +16,10 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
 import PursTsGen (class GenToTsDefSum, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType, toPursType, toTsType)
-import PursTsGen as P
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Class.ToTsType as P
+import PursTsGen.Class.ToTsType (class ToTsType, toTsType) as P
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
