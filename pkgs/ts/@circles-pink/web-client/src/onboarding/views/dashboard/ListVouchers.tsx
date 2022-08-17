@@ -1,4 +1,3 @@
-import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { getData } from '@circles-pink/state-machine/output/RemoteReport';
@@ -15,9 +14,7 @@ import React, {
   useState,
 } from 'react';
 import { css, styled } from 'twin.macro';
-import { CirclesCurrency } from '../../../assets/CirclesCurrency';
 import { CurrencySymbol } from '../../../components/CurrencySymbol';
-import { LoadingCircles } from '../../../components/LoadingCircles';
 import { Claim, LoadingText, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 

@@ -24,15 +24,11 @@ import { ThemeContext } from '../../../context/theme';
 import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
-  mdiCog,
   mdiGiftOutline,
-  mdiGraph,
   mdiGraphOutline,
   mdiHandCoin,
   mdiLan,
-  mdiLogout,
   mdiMagnify,
-  mdiTicketPercentOutline,
 } from '@mdi/js';
 import {
   LightColorFrame,
@@ -62,7 +58,6 @@ import {
   VoucherProvider,
 } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { ConfirmSend } from './ConfirmSend';
-import { crcToTc } from '@circles/timecircles';
 import { displayBalance } from '../../utils/timeCircles';
 import { UserConfig } from '../..';
 
