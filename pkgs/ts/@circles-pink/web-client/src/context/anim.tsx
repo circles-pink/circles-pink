@@ -14,8 +14,8 @@ export type AnimState = {
 type AnimProviderProps = { state: CirclesState; children: ReactElement };
 
 const initAnimState: AnimState = {
-  selected: 'infoGeneral',
-  prevSelected: 'infoGeneral',
+  selected: 'askUsername',
+  prevSelected: 'askUsername',
   lastAction: 0,
 };
 

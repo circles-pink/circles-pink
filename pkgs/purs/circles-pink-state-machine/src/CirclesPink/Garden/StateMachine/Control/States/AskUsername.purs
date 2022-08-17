@@ -18,13 +18,11 @@ askUsername
    . Monad m
   => EnvControl m
   -> CirclesConfig m
-  -> { prev :: ActionHandler' m Unit S.UserData ("infoGeneral" :: S.UserData)
-     , setUsername :: ActionHandler' m String S.UserData ("askUsername" :: S.UserData)
+  -> { setUsername :: ActionHandler' m String S.UserData ("askUsername" :: S.UserData)
      , next :: ActionHandler' m Unit S.UserData ("askUsername" :: S.UserData, "askEmail" :: S.UserData, "infoSecurity" :: S.UserData)
      }
 askUsername env cfg =
-  { prev: \set _ _ -> set \st -> S._infoGeneral st { direction = D._backwards }
-  , setUsername
+  { setUsername
   , next
   }
   where

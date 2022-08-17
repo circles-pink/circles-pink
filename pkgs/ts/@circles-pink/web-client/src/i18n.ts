@@ -32,10 +32,6 @@ export const resources = {
           userNotFound: 'No user found for this private key!',
         },
       },
-      infoGeneral: {
-        claim: 'Happy to have you here!',
-        subClaim: "Let's get you a circles Wallet!",
-      },
       askUsername: {
         claim: 'Tell me your Name!',
         subClaim: 'Choose wisely, you can not change it later!',
@@ -179,11 +175,6 @@ export const resources = {
           invalidMnemonic: 'Bitte prüfe deinen Privaten Schlüssel!',
           userNotFound: 'Zu diesem Schlüssel existiert kein:e User:in.',
         },
-      },
-      infoGeneral: {
-        claim: 'Schön, dass du dabei bist!',
-        subClaim:
-          'Lege eine neue Wallet an und werde Teil des Vertrauensnetzwerks!',
       },
       askUsername: {
         claim: 'Wie möchtest du dich nennen?',

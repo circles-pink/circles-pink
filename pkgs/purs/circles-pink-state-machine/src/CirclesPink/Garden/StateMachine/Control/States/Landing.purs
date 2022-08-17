@@ -13,7 +13,7 @@ landing
   :: forall m
    . Monad m
   => EnvControl m
-  -> { signUp :: ActionHandler' m Unit S.LandingState ("infoGeneral" :: S.UserData)
+  -> { signUp :: ActionHandler' m Unit S.LandingState ("askUsername" :: S.UserData)
      , signIn :: ActionHandler' m Unit S.LandingState ("login" :: S.LoginState)
      , checkForSession :: ActionHandler' m Unit S.LandingState ("landing" :: S.LandingState, "trusts" :: S.TrustState, "dashboard" :: S.DashboardState)
      }

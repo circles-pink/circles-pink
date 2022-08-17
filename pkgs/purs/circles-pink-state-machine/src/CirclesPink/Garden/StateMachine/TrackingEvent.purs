@@ -6,7 +6,6 @@ module CirclesPink.Garden.StateMachine.TrackingEvent
   , _askEmail
   , _askUsername
   , _dashboard
-  , _infoGeneral
   , _infoSecurity
   , _landing
   , _login
@@ -56,8 +55,7 @@ instance encodeJsonTrackingEventInst :: EncodeJson TrackingEvent where
 
 newtype TrackedCirclesState = TrackedCirclesState
   ( Variant
-      ( infoGeneral :: Unit
-      , askUsername :: Unit
+      ( askUsername :: Unit
       , askEmail :: Unit
       , infoSecurity :: Unit
       , magicWords :: Unit
@@ -104,11 +102,7 @@ convertRemoteData (RemoteData v) =
 
 newtype TrackedCirclesAction = TrackedCirclesAction
   ( Variant
-      ( infoGeneral ::
-          Variant
-            ( next :: Unit
-            )
-      , askUsername ::
+      ( askUsername ::
           Variant
             ( prev :: Unit
             , next :: Unit
@@ -177,8 +171,7 @@ fromStateUpdate { prev, next } = if prev' /= next' then NewState <$> next' else 
 
 convertState :: CirclesState -> Maybe TrackedCirclesState
 convertState = case_ # onMatch
-  { infoGeneral: \_ -> Just $ wrap $ inj _infoGeneral unit
-  , askUsername: \_ -> Just $ wrap $ inj _askUsername unit
+  { askUsername: \_ -> Just $ wrap $ inj _askUsername unit
   , askEmail: \_ -> Just $ wrap $ inj _askEmail unit
   , infoSecurity: \_ -> Just $ wrap $ inj _infoSecurity unit
   , magicWords: \_ -> Just $ wrap $ inj _magicWords unit
@@ -197,15 +190,9 @@ convertState = case_ # onMatch
 
 convertAction :: CirclesAction -> Maybe TrackedCirclesAction
 convertAction = default Nothing # onMatch
-  { infoGeneral:
-      case_ # onMatch
-        { next: \_ -> Just $ wrap $ inj _infoGeneral $ inj _next unit
-        }
-
-  , askUsername:
+  { askUsername:
       default Nothing # onMatch
         { next: \_ -> Just $ wrap $ inj _askUsername $ inj _next unit
-        , prev: \_ -> Just $ wrap $ inj _askUsername $ inj _prev unit
         }
 
   , askEmail:
@@ -264,7 +251,6 @@ convertAction = default Nothing # onMatch
 -- Proxies
 --------------------------------------------------------------------------------
 
-_infoGeneral = Proxy :: Proxy "infoGeneral"
 _askUsername = Proxy :: Proxy "askUsername"
 _askEmail = Proxy :: Proxy "askEmail"
 _infoSecurity = Proxy :: Proxy "infoSecurity"

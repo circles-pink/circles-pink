@@ -12,7 +12,6 @@ import * as O from 'fp-ts/lib/Option';
 const StepIndicatorContainer = tw.div`p-4`;
 
 const circlesStates: CirclesState['type'][] = [
-  'infoGeneral',
   'askUsername',
   'askEmail',
   'infoSecurity',

@@ -20,7 +20,7 @@ login
    . Monad m
   => EnvControl m
   -> { login :: ActionHandler' m Unit S.LoginState ("trusts" :: S.TrustState, "login" :: S.LoginState, "dashboard" :: S.DashboardState)
-     , signUp :: ActionHandler' m Unit S.LoginState ("infoGeneral" :: S.UserData)
+     , signUp :: ActionHandler' m Unit S.LoginState ("askUsername" :: S.UserData)
      , setMagicWords :: ActionHandler' m String S.LoginState ("login" :: S.LoginState)
      }
 login env =

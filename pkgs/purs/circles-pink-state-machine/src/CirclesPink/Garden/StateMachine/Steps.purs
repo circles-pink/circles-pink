@@ -1,7 +1,6 @@
 module CirclesPink.Garden.StateMachine.Steps
   ( askEmail
   , askUsername
-  , infoGeneral
   , infoSecurity
   , magicWords
   , submit
@@ -27,7 +26,7 @@ import Stadium.Control (toMonadState)
 testConfig :: forall m. Monad m => CirclesConfig m
 testConfig = CirclesConfig
   { extractEmail: Right $ const $ pure unit
-  , onTrackingEvent : Nothing
+  , onTrackingEvent: Nothing
   }
 
 act :: CirclesAction -> (TestScriptT Identity) Unit
@@ -40,13 +39,10 @@ act ac = (toMonadState $ circlesControl testEnv testConfig) ac
 execTestScriptM :: forall a. CirclesState -> TestScriptT Identity a -> CirclesState
 execTestScriptM x1 x2 = execTestScriptT testConfig x1 x2 <#> fst # unwrap
 
-infoGeneral :: CirclesState
-infoGeneral = S.init
-
 askUsername :: CirclesState
 askUsername =
-  execTestScriptM infoGeneral do
-    act $ A._infoGeneral $ A._next unit
+  execTestScriptM S.init do
+    act $ A._askUsername $ A._next unit
     act $ A._askUsername $ A._setUsername "fooo"
 
 askEmail :: CirclesState

@@ -20,10 +20,6 @@ const userConfig = {
   voucherShopEnabled: false,
 };
 
-export const InfoGeneral = (args): ReactElement => (
-  <Onboarding {...args} initState={Steps.infoGeneral} userConfig={userConfig} />
-);
-
 export const AskUsername = (args): ReactElement => (
   <Onboarding {...args} initState={Steps.askUsername} userConfig={userConfig} />
 );
