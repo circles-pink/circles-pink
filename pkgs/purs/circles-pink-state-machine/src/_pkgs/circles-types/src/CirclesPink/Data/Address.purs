@@ -25,8 +25,6 @@ import TypedEnv (class ParseValue)
 
 --import Payload.Server.Params (class DecodeParam, decodeParam)
 --import Simple.JSON (class ReadForeign, class WriteForeign)
-import PursTs.Class (class ToTsDef)
-import Simple.JSON (class ReadForeign, class WriteForeign)
 import PursTsGen (class ToTsDef, class ToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
 
