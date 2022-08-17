@@ -1,7 +1,7 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, { ReactElement, useContext, useEffect } from 'react';
-import { Button } from '../../components/forms';
+import { Button, ButtonLinkLike } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
@@ -11,7 +11,11 @@ import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import tw from 'twin.macro';
 import { LoadingCircles } from '../../components/LoadingCircles';
-import { TwoButtonRow } from '../../components/helper';
+import {
+  JustifyBetween,
+  JustifyStartCenter,
+  TwoButtonRow,
+} from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { LandingState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 
@@ -59,7 +63,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
       }
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <TwoButtonRow>
+          {/* <TwoButtonRow>
             <Button
               prio={'medium'}
               theme={theme}
@@ -74,7 +78,24 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             >
               {t('signUpButton')}
             </Button>
-          </TwoButtonRow>
+          </TwoButtonRow> */}
+          <Button
+            prio={'high'}
+            theme={theme}
+            onClick={() => act(A._landing(A._signUp(unit)))}
+          >
+            {t('signUpButton')}
+          </Button>
+        </FadeIn>
+      }
+      mainContent={
+        <FadeIn orientation={orientation} delay={getDelay()}>
+          <JustifyStartCenter>
+            <SubClaim>{t('landing.loginWithKey')}</SubClaim>
+            <ButtonLinkLike onClick={() => act(A._landing(A._signIn(unit)))}>
+              {t('signInButton')}
+            </ButtonLinkLike>
+          </JustifyStartCenter>
         </FadeIn>
       }
       debug={<StateMachineDebugger state={state} />}

@@ -19,7 +19,9 @@ export const resources = {
       debugButton: 'Core to window Object',
       landing: {
         claim: 'Welcome to Circles',
-        subClaim: 'Create a new Wallet or restore your existing one.',
+        subClaim: 'Create a new Circles account (Wallet).',
+        loginWithKey:
+          'If you already have a secret key, you can restore your wallet here:',
       },
       login: {
         claim: 'Welcome back',
@@ -165,6 +167,8 @@ export const resources = {
         claim: 'Probier das Grundeinkommen auf der Blockchain!',
         subClaim:
           'Um Teil des Circles Netzwerks zu werden, kannst du hier einen neuen Circles Account (Wallet) erstellen.',
+        loginWithKey:
+          'Wenn du schon einen Account hast, stelle deine Wallet hier wieder her:',
       },
       login: {
         claim: 'Willkommen zurück!',
