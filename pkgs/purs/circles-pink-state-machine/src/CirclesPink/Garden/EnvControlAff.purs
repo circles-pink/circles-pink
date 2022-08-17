@@ -59,6 +59,7 @@ newtype EnvVars = EnvVars
   , gardenSafeMasterAddress :: String
   , gardenEthereumNodeWebSocket :: String
   , voucherServerHost :: String
+  , isDev :: Boolean
   }
 
 derive instance newtypeEnvVars :: Newtype EnvVars _
@@ -365,7 +366,9 @@ env envenv@{ request, envVars } =
       client = mkClient
         ( defaultOpts
             { baseUrl = baseURL
-            , extraHeaders = H.fromFoldable [ "Target-URL" /\ "http://localhost:4000/" ]
+            , extraHeaders = H.fromFoldable
+                if envVars -# _.isDev then [ "Target-URL" /\ "http://localhost:4000/" ]
+                else []
             }
         )
         spec
@@ -380,7 +383,9 @@ env envenv@{ request, envVars } =
       client = mkClient
         ( defaultOpts
             { baseUrl = baseURL
-            , extraHeaders = H.fromFoldable [ "Target-URL" /\ "http://localhost:4000/" ]
+            , extraHeaders = H.fromFoldable
+                if envVars -# _.isDev then [ "Target-URL" /\ "http://localhost:4000/" ]
+                else []
             }
         )
         spec

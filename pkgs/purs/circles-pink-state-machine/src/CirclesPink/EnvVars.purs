@@ -31,6 +31,7 @@ type Config f =
   , gardenSafeMasterAddress :: f "GARDEN_SAFE_MASTER_ADDRESS" ChecksumAddress
   , gardenEthereumNodeWebSocket :: f "GARDEN_ETHEREUM_NODE_WS" URI
   , voucherServerHost :: f "VOUCHER_SERVER_HOST" URI
+  , isDev :: f "IS_DEV" Boolean
   )
 
 --------------------------------------------------------------------------------
@@ -51,6 +52,7 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenSafeMasterAddress: show :: ChecksumAddress -> _
       , gardenEthereumNodeWebSocket: U.print
       , voucherServerHost: U.print
+      , isDev : identity :: Boolean -> _
       }
       env
       # E.EnvVars

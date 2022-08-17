@@ -119,6 +119,7 @@ dev-storybook_:
 	export STORYBOOK_GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
 	export STORYBOOK_VOUCHER_SERVER_HOST={{VOUCHER_SERVER_HOST}}
 	export STORYBOOK_XBGE_SAFE_ADDRESS={{XBGE_SAFE_ADDRESS}}
+	export STORYBOOK_IS_DEV=true
 	yarn workspace storybook run storybook
 
 dev-voucher-server:
