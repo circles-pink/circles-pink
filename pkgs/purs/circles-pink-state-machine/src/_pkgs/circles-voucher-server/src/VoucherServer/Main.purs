@@ -287,7 +287,8 @@ frecklesToEurCent timestamp (Freckles freckles) =
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
-  code <- decryptVoucherCode key x.code
+  let _ = decryptVoucherCode key x.code
+  let code = VoucherCode "Dummy Voucher Code"
   in Voucher x { code = code }
 
 decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
@@ -420,7 +421,6 @@ app = do
             , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
             }
           pure $ Right unit
-
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
 -- runWithLog m = do
