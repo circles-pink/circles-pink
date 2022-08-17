@@ -77,23 +77,13 @@ export const AskUsername = ({
       // debug={<pre>{JSON.stringify(state.usernameApiResult, null, 2)}</pre>}
       control={
         <FadeIn orientation={orientation} delay={getDelay()}>
-          <TwoButtonRow>
-            <Button
-              theme={theme}
-              prio={'medium'}
-              onClick={() => act(A._askUsername(A._prev(unit)))}
-            >
-              {t('prevButton')}
-            </Button>
-
-            <Button
-              prio={'high'}
-              theme={theme}
-              onClick={() => act(A._askUsername(A._next(unit)))}
-            >
-              {t('nextButton')}
-            </Button>
-          </TwoButtonRow>
+          <Button
+            prio={'high'}
+            theme={theme}
+            onClick={() => act(A._askUsername(A._next(unit)))}
+          >
+            {t('nextButton')}
+          </Button>
         </FadeIn>
       }
       debug={<StateMachineDebugger state={state} />}
