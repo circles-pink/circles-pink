@@ -133,9 +133,9 @@ genericToTsDef name _ = genericToTsDef' name (Proxy :: _ a) (Proxy :: _ rep)
 -- Spec
 --------------------------------------------------------------------------------
 
-data MyThese a b = This a | That b | Both a b
+-- data MyThese a b = This a | That b | Both a b
 
-derive instance genericMyThese :: Generic (MyThese a b) _
+-- derive instance genericMyThese :: Generic (MyThese a b) _
 
 -- spec :: Spec Unit
 -- spec = describe "CirclesPink.GenerateTSD.Generic" do

@@ -44,7 +44,7 @@ import Data.Pair ((~))
 import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
-import Data.These (maybeThese)
+import Data.These (These(..), maybeThese)
 import Foreign.Object (insert)
 import RemoteData (RemoteData, _failure, _loading, _success)
 import Test.TestUtils (addrA, addrB, userA)
