@@ -39,9 +39,10 @@ const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
     position: fixed;
     top: 50%;
     left: 50%;
-    /* bring your own prefixes */
     transform: translate(-50%, -50%);
     min-height: 6rem;
+    max-height: 95vh;
+    overflow-y: auto;
   `,
 ]);
 
