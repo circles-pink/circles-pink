@@ -9,8 +9,10 @@ module CirclesPink.Data.Address
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Array.NonEmpty as NEA
 import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype, wrap)
+import Data.String.Utils as Str
 import FpTs.Class (class FpTs)
 import GraphQL.Client.Args (class ArgGql)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
@@ -18,6 +20,8 @@ import Network.Ethereum.Core.Signatures (mkAddress) as Exp
 import Network.Ethereum.Core.Signatures as W3
 import Partial.Unsafe (unsafePartial)
 import Simple.JSON (class ReadForeign, class WriteForeign)
+import Test.QuickCheck (class Arbitrary)
+import Test.QuickCheck.Gen as G
 import TypedEnv (class ParseValue)
 
 --import Payload.Server.Params (class DecodeParam, decodeParam)
@@ -34,6 +38,14 @@ derive newtype instance encodeJson :: EncodeJson Address
 derive newtype instance readForeignAddress :: ReadForeign Address
 derive newtype instance writeForeignAddress :: WriteForeign Address
 
+instance arbitraryAddr :: Arbitrary Address where
+  arbitrary = unsafePartial do
+    let
+      chars = "0123456789abcdef"
+      len = 40
+      chars' = chars # Str.toCharArray # NEA.fromArray # fromJust
+    str <- chars' <#> pure # G.oneOf # G.vectorOf len <#> Str.fromCharArray
+    parseAddress str # fromJust # pure
 
 instance parseValueAddress :: ParseValue Address where
   parseValue = parseAddress
