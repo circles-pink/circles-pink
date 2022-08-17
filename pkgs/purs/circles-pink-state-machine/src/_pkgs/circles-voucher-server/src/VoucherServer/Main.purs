@@ -53,6 +53,7 @@ import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
+import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.MonadApp (mkProdEnv, runAppProdM)
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
@@ -413,13 +414,20 @@ app = do
           error $ CC.printErr e
           liftEffect $ exit 1
         Right prodEnv -> do
-          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
-          _ <- Payload.start (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) spec
-            { getVouchers: getVouchers parsedEnv
-            , getVoucherProviders: getVoucherProviders parsedEnv
-            --, trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
-            , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
+          let
+            handlers =
+              { getVouchers: getVouchers parsedEnv
+              , getVoucherProviders: getVoucherProviders parsedEnv
+              --, trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
+              , trustsReport: Routes.trustsReport >>> runAppProdM prodEnv
+              }
+            guards = {
+              basicAuth : basicAuthGuard >>> runAppProdM prodEnv
             }
+          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
+          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port }) 
+                spec
+                { guards, handlers }
           pure $ Right unit
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)

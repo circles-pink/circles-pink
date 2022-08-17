@@ -33,8 +33,9 @@ type MkAppEnvVars f =
   , xbgeEndpoint :: f "XBGE_ENDPOINT" String
   , xbgeSafeAddress :: f "XBGE_SAFE_ADDRESS" Address
   , xbgeKey :: f "XBGE_KEY" PrivateKey
+  , voucherServerBasicAuth :: f "VOUCHER_SERVER_BASIC_AUTH" String
   )
-
+ 
 type AppEnvVarsSpec = MkAppEnvVars Variable
 
 type AppEnvVars = { | MkAppEnvVars Resolved }

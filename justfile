@@ -26,6 +26,8 @@ GARDEN_PROXY_FACTORY_ADRESS := env_var_or_default("GARDEN_PROXY_FACTORY_ADRESS",
 GARDEN_SAFE_MASTER_ADDRESS := env_var_or_default("GARDEN_SAFE_MASTER_ADDRESS", "0xC89Ce4735882C9F0f0FE26686c53074E09B0D550")
 GARDEN_ETHEREUM_NODE_WS := env_var_or_default("GARDEN_ETHEREUM_NODE_WS", "ws://localhost:8545")
 
+VOUCHER_SERVER_BASIC_AUTH := env_var_or_default("VOUCHER_SERVER_BASIC_AUTH", "")
+
 PURS_OUTPUT := "pkgs/ts/@circles-pink/state-machine/output"
 PURS_TARGET_PACKAGE := "pkgs/ts/@circles-pink/state-machine"
 
@@ -140,6 +142,7 @@ dev-voucher-server:
 	export XBGE_ENDPOINT={{XBGE_ENDPOINT}}
 	export XBGE_SAFE_ADDRESS={{XBGE_SAFE_ADDRESS}}
 	export XBGE_KEY={{XBGE_KEY}}
+	export VOUCHER_SERVER_BASIC_AUTH={{VOUCHER_SERVER_BASIC_AUTH}}
 	node ./pkgs/ts/@circles-pink/state-machine/bin/voucher-server
 
 cors-proxy-server:

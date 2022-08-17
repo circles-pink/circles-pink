@@ -26,6 +26,7 @@
           "safeAddress" = "MOCKED-SECRET";
           "privKey" = "MOCKED-SECRET";
         };
+        "voucherServerBasicAuth" = "MOCKED-SECRET";
       };
 
       secretsFile = /secrets.json;

@@ -21,7 +21,9 @@ import VoucherServer.MonadApp (class MonadApp, AppEnv(..), modifyAppEnv, runAppT
 trustsReport
   :: forall m
    . MonadApp m
-  => { body :: { addresses :: Array C.Address } }
+  => { guards :: { basicAuth :: Unit }
+     , body :: { addresses :: Array C.Address }
+     }
   -> m (Response { trusted :: Array C.Address, notTrusted :: Array C.Address })
 trustsReport { body: { addresses } } = do
   AppEnv { getTrusts, envVars } <- ask
@@ -39,7 +41,9 @@ spec = do
         # modifyAppEnv (\r -> r { getTrusts = \_ -> pure $ Set.fromFoldable [ addrA, addrB ] })
 
     it "returns the trusted and untrusted addresses" do
-      trustsReport { body: { addresses: [ addrA, addrB, addrC ] } }
+      trustsReport { 
+        guards: {basicAuth : unit},
+        body: { addresses: [ addrA, addrB, addrC ] } }
         # runAppTestM env
         # shouldEqual
         $ Right
