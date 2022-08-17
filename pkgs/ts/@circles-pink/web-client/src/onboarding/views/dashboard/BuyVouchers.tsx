@@ -1,14 +1,10 @@
 import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { getData } from '@circles-pink/state-machine/output/RemoteReport';
-import {
-  VoucherOffer,
-  VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Types';
+import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
 import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
-import { Overlay, SelectedOffer } from '.';
-import { Button } from '../../../components/forms';
+import { SelectedOffer } from '.';
 import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
@@ -107,7 +103,8 @@ type OfferContainerProps = {
 const OfferContainer = styled.div<OfferContainerProps>(({ elementCount }) => [
   css`
     display: grid;
-    grid-template-columns: repeat(${elementCount}, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    grid-gap: 1px;
   `,
 ]);
 
@@ -117,16 +114,11 @@ type OfferProps = {
 };
 
 const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
-  const borderTopBottomRight = `
-    border-top: 1px solid ${theme.darkColor};
-    border-bottom: 1px solid ${theme.darkColor};
-    border-right: 1px solid ${theme.darkColor};
-  `;
-
   return [
     css`
       cursor: ${enabled ? 'pointer' : 'not-allowed'};
       font-size: 2rem;
+      min-width: 20rem;
       color: ${theme.textColorDark};
       background-color: ${theme.lightColor};
       padding: 1rem;
@@ -136,15 +128,8 @@ const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
         color: ${theme.baseColor};
       }`}
 
-      outline: none;
+      outline: 1px solid ${theme.textColorDark};
       border: none;
-      ${borderTopBottomRight}
-      &:first-of-type {
-        border: 1px solid ${theme.darkColor};
-      }
-      &:last-of-type {
-        ${borderTopBottomRight}
-      }
     `,
   ];
 });

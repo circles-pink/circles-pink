@@ -1,6 +1,6 @@
 import { mdiCashFast } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import React, { useEffect, useState } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 import { Button } from '../../../components/forms';
 import { JustifyEnd } from '../../../components/helper';
 import { Claim, SubClaim } from '../../../components/text';
@@ -15,8 +15,6 @@ import {
   defaultView,
   parseAddress,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import styled from '@emotion/styled';
-import tw, { theme } from 'twin.macro';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { Option } from 'fp-ts/lib/Option';
 import { toFpTsOption } from '../../../utils/fpTs';
@@ -31,6 +29,7 @@ import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServe
 export type ConfirmSendProps = DashboardProps & {
   theme: Theme;
   selectedOffer: SelectedOffer;
+  setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
 };
 
 export const ConfirmSend = ({
@@ -38,6 +37,7 @@ export const ConfirmSend = ({
   act,
   theme,
   selectedOffer: [provider, offer],
+  setJustBoughtVoucher,
 }: ConfirmSendProps) => {
   const state = (defaultView as any)(stateRaw) as DefaultView;
 
@@ -58,6 +58,12 @@ export const ConfirmSend = ({
   useEffect(() => {
     setValue(eurToCrc(offer.amount));
   }, [provider, offer]);
+
+  useEffect(() => {
+    if (state.transferResult.type === 'success') {
+      setJustBoughtVoucher(true);
+    }
+  }, [state.transferResult.type]);
 
   // Util
   const transact = (fromAddr: Address, toAddr: Address) =>
