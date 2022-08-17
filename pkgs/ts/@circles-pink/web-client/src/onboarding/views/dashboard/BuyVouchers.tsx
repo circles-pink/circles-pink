@@ -36,63 +36,66 @@ export const BuyVouchers = ({
     }
   }, [providers]);
 
-  if (providers_.length === 0) {
-    return <SubClaim>{t('dashboard.voucherShop.buyNoVouchers')}</SubClaim>;
-  }
-
   return (
     <>
       <Claim color={theme.baseColor}>
         {t('dashboard.voucherShop.buyDescription')}
       </Claim>
-      {providers_.map(provider => {
-        const sortedOffers = [...provider.availableOffers].sort(
-          (a, b) => a.amount - b.amount
-        );
+      {providers_.length > 0 ? (
+        <>
+          {providers_.map(provider => {
+            const sortedOffers = [...provider.availableOffers].sort(
+              (a, b) => a.amount - b.amount
+            );
 
-        return (
-          <div key={provider.id}>
-            <OfferContainer elementCount={provider.availableOffers.length}>
-              {sortedOffers.map(offer => {
-                const userCanBuy = availableBalance - offer.amount * 10 > 0;
+            return (
+              <div key={provider.id}>
+                <OfferContainer elementCount={provider.availableOffers.length}>
+                  {sortedOffers.map(offer => {
+                    const userCanBuy = availableBalance - offer.amount * 10 > 0;
 
-                return (
-                  <Offer
-                    enabled={userCanBuy}
-                    theme={theme}
-                    key={`${provider.id}-${offer.amount}`}
-                    onClick={() =>
-                      userCanBuy && initializeVoucherOrder([provider, offer])
-                    }
-                  >
-                    <Logo src={provider.logoUrl} />
-                    <VoucherText fontSize={1.25}>
-                      {offer.amount}€ {provider.name}{' '}
-                      {t('dashboard.voucherShop.voucher')}
-                    </VoucherText>
-                    <VoucherText fontSize={1}>
-                      {offer.countAvailable}{' '}
-                      {t('dashboard.voucherShop.vouchersLeft')}
-                    </VoucherText>
-                    <br />
+                    return (
+                      <Offer
+                        enabled={userCanBuy}
+                        theme={theme}
+                        key={`${provider.id}-${offer.amount}`}
+                        onClick={() =>
+                          userCanBuy &&
+                          initializeVoucherOrder([provider, offer])
+                        }
+                      >
+                        <Logo src={provider.logoUrl} />
+                        <VoucherText fontSize={1.25}>
+                          {offer.amount}€ {provider.name}{' '}
+                          {t('dashboard.voucherShop.voucher')}
+                        </VoucherText>
+                        <VoucherText fontSize={1}>
+                          {offer.countAvailable}{' '}
+                          {t('dashboard.voucherShop.vouchersLeft')}
+                        </VoucherText>
+                        <br />
 
-                    <VoucherText fontSize={1.5}>
-                      {userCanBuy
-                        ? `${t('dashboard.voucherShop.buyFor')} ${
-                            offer.amount * 10
-                          } Circles`
-                        : `${t('dashboard.voucherShop.youNeed')} ${(
-                            offer.amount * 10 -
-                            availableBalance
-                          ).toFixed(2)} Circles`}
-                    </VoucherText>
-                  </Offer>
-                );
-              })}
-            </OfferContainer>
-          </div>
-        );
-      })}
+                        <VoucherText fontSize={1.5}>
+                          {userCanBuy
+                            ? `${t('dashboard.voucherShop.buyFor')} ${
+                                offer.amount * 10
+                              } Circles`
+                            : `${t('dashboard.voucherShop.youNeed')} ${(
+                                offer.amount * 10 -
+                                availableBalance
+                              ).toFixed(2)} Circles`}
+                        </VoucherText>
+                      </Offer>
+                    );
+                  })}
+                </OfferContainer>
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <SubClaim>{t('dashboard.voucherShop.buyNoVouchers')}</SubClaim>
+      )}
     </>
   );
 };

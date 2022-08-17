@@ -163,7 +163,7 @@ export const resources = {
       landing: {
         claim: 'Probier das Grundeinkommen auf der Blockchain!',
         subClaim:
-          'Um Teil des Circles Netzwerks zu werden, kannst du hier eine neue Wallet erstellen, oder wiederherstellen, wenn du schon eine hast.',
+          'Um Teil des Circles Netzwerks zu werden, kannst du hier einen neuen Circles Account (Wallet) erstellen.',
       },
       login: {
         claim: 'Willkommen zurück!',
@@ -183,7 +183,7 @@ export const resources = {
       askUsername: {
         claim: 'Wie möchtest du dich nennen?',
         subClaim:
-          'Das ist der Name, mit dem du im Circles Netzwerk gefunden wirst. Überlege gut, du kannst den Namen später nicht mehr ändern!',
+          'Das ist der Name, mit dem du im Circles Netzwerk gefunden wirst. Achtung, du kannst deinen Namen später nicht mehr ändern!',
         usernamePlaceholder: 'Dein einzigartiger Nutzername',
         validation: {
           charFail: 'Bitte nutze nur Buchstaben und Zahlen!',
@@ -221,7 +221,7 @@ export const resources = {
       submit: {
         claim: 'Diese Daten hast du angegeben',
         subClaim:
-          'Wenn alles stimmt kannst du sie abschicken. Damit ist dein Nutzername dann vorgemerkt. Wie du deinen Account aktivierst, erfährst du im nächsten Schritt.',
+          'Wenn alles stimmt kannst du sie abschicken. Damit ist dein Nutzername dann vorgemerkt. Um die Aktivierung abzuschließen, musst du im nächsten Schritt drei Menschen die dir vertrauen.',
       },
       trusts: {
         claim: 'Hallöchen!',
@@ -274,7 +274,7 @@ export const resources = {
           buyNoVouchers:
             'Im Moment gibt es keine Gutscheine, versuche es später nochmal!',
           listDescription: 'Deine Gutscheine:',
-          listNoVouchers: 'Du hast noch keine Gutscheine.',
+          listNoVouchers: 'Du hast noch keine Gutscheine gekauft.',
           confirmSendClaim: 'Bestätige deine Transaktion',
           buyFrom: 'Gutschein kaufen von:',
           tcCostWillBe: 'Wir berechnen dir:',
