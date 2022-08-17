@@ -31,12 +31,16 @@ export const Overlay = (props: OverlayProps) => {
 type FrameProps = OverlayProps;
 
 const Frame = styled.div<FrameProps>(({ theme }: FrameProps) => [
-  tw`absolute block p-8 shadow-xl rounded-xl lg:w-3/5 w-11/12 mx-auto`,
+  tw`block p-8 shadow-xl rounded-xl lg:w-3/5 w-11/12 mx-auto`,
   css`
     background-color: ${'white'};
     border: 2px solid ${theme.baseColor};
     z-index: 100;
-    top: 22.5%;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
     min-height: 6rem;
   `,
 ]);

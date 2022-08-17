@@ -120,6 +120,11 @@ export const resources = {
           },
         },
         voucherShop: {
+          shopTitle: 'Voucher Shop',
+          buyDescription: 'Buy Vouchers:',
+          buyNoVouchers: 'Currently there were no vouchers available.',
+          listDescription: 'Your Vouchers:',
+          listNoVouchers: "You don't have any vouchers yet.",
           confirmSendClaim: 'Confirm your purchase',
           buyFrom: 'Buy voucher from:',
           tcCostWillBe: 'You will be charged:',
@@ -127,6 +132,10 @@ export const resources = {
           confirmSendButton: 'Confirm',
           confirmSendProblem:
             'Sorry, we could not process your purchase, please try again later!',
+          buyFor: 'Buy for',
+          youNeed: 'You need',
+          vouchersLeft: 'Vouchers left!',
+          voucher: 'voucher',
         },
       },
       debug: {
@@ -260,13 +269,23 @@ export const resources = {
           },
         },
         voucherShop: {
+          shopTitle: 'Gutschein Shop',
+          buyDescription: 'Gutscheine kaufen:',
+          buyNoVouchers:
+            'Im Moment gibt es keine Gutscheine, versuche es später nochmal!',
+          listDescription: 'Deine Gutscheine:',
+          listNoVouchers: 'Du hast noch keine Gutscheine.',
           confirmSendClaim: 'Bestätige deine Transaktion',
           buyFrom: 'Gutschein kaufen von:',
           tcCostWillBe: 'Wir berechnen dir:',
           eurAmountWillBe: 'Der Wert des Gutscheines ist:',
           confirmSendButton: 'Kauf abschließen',
           confirmSendProblem:
-            'Sorry, we could not process your purchase, please try again later!',
+            'Leider konnten wir deinen Kauf nicht abschließen. Bitte versuche es später nochmal!',
+          buyFor: 'Kaufen für',
+          youNeed: 'Dir fehlen',
+          vouchersLeft: 'Gutscheine übrig!',
+          voucher: 'Gutschein',
         },
       },
       debug: {
