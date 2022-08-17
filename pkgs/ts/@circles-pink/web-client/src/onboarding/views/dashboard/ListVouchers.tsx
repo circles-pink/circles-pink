@@ -40,40 +40,42 @@ export const ListVouchers = ({
   // animation
   const getDelay = getIncrementor(0, 0.25);
 
-  if (vouchers.length === 0) {
-    return <SubClaim>{t('dashboard.voucherShop.listNoVouchers')}</SubClaim>;
-  }
-
   return (
     <>
       <Claim color={theme.baseColor}>
         {t('dashboard.voucherShop.listDescription')}
       </Claim>
-      <VoucherContainer>
-        {vouchers.map((voucher, index) => {
-          const provider = mapInfo(providers_, voucher.providerId);
-          return (
-            <FadeIn
-              orientation={'left'}
-              delay={getDelay()}
-              key={`${voucher.code}-${index}`}
-            >
-              <VoucherCard
-                theme={theme}
-                left={<Logo src={provider?.logoUrl} />}
-                center={
-                  <VoucherContent
-                    provider={provider}
-                    theme={theme}
-                    voucher={voucher}
-                  />
-                }
-                right={<VoucherAmount amount={voucher.amount} theme={theme} />}
-              />
-            </FadeIn>
-          );
-        })}
-      </VoucherContainer>
+      {vouchers.length > 0 ? (
+        <VoucherContainer>
+          {vouchers.map((voucher, index) => {
+            const provider = mapInfo(providers_, voucher.providerId);
+            return (
+              <FadeIn
+                orientation={'left'}
+                delay={getDelay()}
+                key={`${voucher.code}-${index}`}
+              >
+                <VoucherCard
+                  theme={theme}
+                  left={<Logo src={provider?.logoUrl} />}
+                  center={
+                    <VoucherContent
+                      provider={provider}
+                      theme={theme}
+                      voucher={voucher}
+                    />
+                  }
+                  right={
+                    <VoucherAmount amount={voucher.amount} theme={theme} />
+                  }
+                />
+              </FadeIn>
+            );
+          })}
+        </VoucherContainer>
+      ) : (
+        <SubClaim>{t('dashboard.voucherShop.listNoVouchers')}</SubClaim>
+      )}
     </>
   );
 };
