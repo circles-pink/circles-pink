@@ -2,8 +2,7 @@ module VoucherServer.MonadApp.Impl.Test
   ( AppTestM(..)
   , runAppTestM
   , testEnv
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -15,7 +14,7 @@ import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
 import Test.QuickCheck (arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), CirclesCoreEnv(..), GraphNodeEnv(..))
 
 --------------------------------------------------------------------------------
 -- Type
@@ -45,9 +44,11 @@ instance monadAppATM :: MonadApp AppTestM
 testEnv :: AppEnv AppTestM
 testEnv = AppEnv
   { envVars: evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
-  , getTrusts: \_ -> throwError ErrUnknown
-  , graphNode:
-      { -- getTransferMeta: \_ -> throwError ErrUnknown
+  , graphNode: GraphNodeEnv
+      { getTransferMeta: \_ -> throwError ErrUnknown
+      }
+  , circlesCore: CirclesCoreEnv
+      { getTrusts: \_ -> throwError ErrUnknown
       }
   }
 
