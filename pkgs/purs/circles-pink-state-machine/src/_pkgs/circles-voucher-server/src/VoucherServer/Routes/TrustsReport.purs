@@ -22,6 +22,10 @@ import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
 import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), _AppEnv, _CirclesCoreEnv, _circlesCore, _getTrusts)
 
+--------------------------------------------------------------------------------
+-- Route
+--------------------------------------------------------------------------------
+
 trustsReport
   :: forall m
    . MonadApp m
@@ -39,6 +43,10 @@ trustsReport { body: { addresses } } = do
   let { yes, no } = A.partition (_ `Set.member` xbgeTrusts) addresses
 
   pure $ Res.ok { trusted: yes, notTrusted: no }
+
+--------------------------------------------------------------------------------
+-- Spec
+--------------------------------------------------------------------------------
 
 spec :: Spec Unit
 spec = do

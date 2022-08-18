@@ -13,6 +13,38 @@ import Test.QuickCheck (class Arbitrary)
 import TypedEnv (class ParseValue)
 import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
+--------------------------------------------------------------------------------
+-- Payload Spec
+--------------------------------------------------------------------------------
+
+xbgeSpec
+  :: Spec
+       { finalizeVoucherPurchase ::
+           POST "/vouchers"
+             { body ::
+                 { safeAddress :: Address
+                 , providerId :: VoucherProviderId
+                 , amount :: VoucherAmount
+                 , transactionId :: TransferId
+                 }
+             , response :: { data :: VoucherEncrypted }
+             }
+       , getVoucherProviders ::
+           GET "/vouchers/providers"
+             { response :: { data :: Array VoucherProvider }
+             }
+       , getVouchers ::
+           GET "/vouchers?safeAddress=<safeAddress>"
+             { query :: { safeAddress :: Maybe Address }
+             , response :: { data :: Array VoucherEncrypted }
+             }
+       }
+xbgeSpec = Spec
+
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
 newtype Address = Address C.Address
 
 derive instance newtypeAddress :: Newtype Address _
@@ -39,27 +71,3 @@ instance arbitraryAddress :: Arbitrary Address where
 
 sampleAddress :: Address
 sampleAddress = Address C.sampleAddress
-
-xbgeSpec
-  :: Spec
-       { finalizeVoucherPurchase ::
-           POST "/vouchers"
-             { body ::
-                 { safeAddress :: Address
-                 , providerId :: VoucherProviderId
-                 , amount :: VoucherAmount
-                 , transactionId :: TransferId
-                 }
-             , response :: { data :: VoucherEncrypted }
-             }
-       , getVoucherProviders ::
-           GET "/vouchers/providers"
-             { response :: { data :: Array VoucherProvider }
-             }
-       , getVouchers ::
-           GET "/vouchers?safeAddress=<safeAddress>"
-             { query :: { safeAddress :: Maybe Address }
-             , response :: { data :: Array VoucherEncrypted }
-             }
-       }
-xbgeSpec = Spec

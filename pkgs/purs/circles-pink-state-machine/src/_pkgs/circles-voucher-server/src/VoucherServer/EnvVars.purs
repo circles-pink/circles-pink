@@ -17,6 +17,10 @@ import Test.QuickCheck (class Arbitrary)
 import TypedEnv (class ParseValue, Resolved, Variable)
 import VoucherServer.Specs.Xbge (Address)
 
+--------------------------------------------------------------------------------
+-- EnvVars
+--------------------------------------------------------------------------------
+
 type MkAppEnvVars :: forall k. (Symbol -> Type -> k) -> Row k
 type MkAppEnvVars f =
   ( port :: f "PORT" (Maybe Int)
@@ -36,7 +40,7 @@ type MkAppEnvVars f =
   , xbgeKey :: f "XBGE_KEY" PrivateKey
   , voucherServerBasicAuth :: f "VOUCHER_SERVER_BASIC_AUTH" String
   )
- 
+
 type AppEnvVarsSpec = MkAppEnvVars Variable
 
 newtype AppEnvVars = AppEnvVars { | MkAppEnvVars Resolved }
@@ -62,10 +66,8 @@ parsePrivKey :: String -> Maybe PrivateKey
 parsePrivKey x = mkHexString x >>= mkPrivateKey <#> PrivateKey
 
 sampleKey :: PrivateKey
-sampleKey = 
-  unsafePartial $
-  fromJust $
-  parsePrivKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"
-
-
---------------------------------------------------------------------------------
+sampleKey =
+  unsafePartial
+    $ fromJust
+    $
+      parsePrivKey "68135baae5b1856359041566a8d32c0374b355a4f12dd7a0690d00b76559e19c"

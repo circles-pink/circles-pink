@@ -50,7 +50,7 @@ import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
-import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, to)
+import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, runAppProdM)
@@ -72,7 +72,6 @@ type ErrGetVoucher = String
 
 allowedDiff :: Seconds
 allowedDiff = Seconds 60.0
-
 
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
@@ -240,10 +239,14 @@ getTransactions
      }
   -> Aff (Either String (Array Transfer))
 getTransactions env { toAddress } = do
-  result <- queryGql env "get-transactions"
-    { transfers:
-        { where: { to: show toAddress } } =>> { from, to, id, amount }
-    }
+  result <-
+    let
+      { from, to, id, amount } = selectors
+    in
+      queryGql env "get-transactions"
+        { transfers:
+            { where: { to: show toAddress } } =>> { from, to, id, amount }
+        }
   case result of
     Left e -> pure $ Left $ show e
     Right { transfers } -> transfers # traverse mkTransfer # pure
