@@ -1,13 +1,14 @@
 module VoucherServer.EnvVars
   ( MkAppEnvVars
   , PrivateKey(..)
-  , AppEnvVars
+  , AppEnvVars(..)
   , AppEnvVarsSpec
   ) where
 
 import Prelude
 
 import Data.Maybe (Maybe, fromJust)
+import Data.Newtype (class Newtype)
 import Network.Ethereum.Core.HexString (mkHexString)
 import Network.Ethereum.Core.Signatures (mkPrivateKey)
 import Network.Ethereum.Core.Signatures as C
@@ -38,7 +39,10 @@ type MkAppEnvVars f =
  
 type AppEnvVarsSpec = MkAppEnvVars Variable
 
-type AppEnvVars = { | MkAppEnvVars Resolved }
+newtype AppEnvVars = AppEnvVars { | MkAppEnvVars Resolved }
+
+derive newtype instance arbitraryAppEnvVars :: Arbitrary AppEnvVars
+derive instance newtypeAppEnvVars :: Newtype AppEnvVars _
 
 --------------------------------------------------------------------------------
 -- Newtypes

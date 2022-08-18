@@ -17,6 +17,7 @@ import Safe.Coerce (coerce)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC)
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
 import VoucherServer.MonadApp.Class (_getTrusts)
 
@@ -28,7 +29,7 @@ trustsReport
      }
   -> m (Response { trusted :: Array C.Address, notTrusted :: Array C.Address })
 trustsReport { body: { addresses } } = do
-  AppEnv { getTrusts, envVars } <- ask
+  AppEnv { getTrusts, envVars: AppEnvVars envVars } <- ask
   xbgeTrusts <- getTrusts $ coerce envVars.xbgeSafeAddress
 
   let { yes, no } = A.partition (_ `Set.member` xbgeTrusts) addresses

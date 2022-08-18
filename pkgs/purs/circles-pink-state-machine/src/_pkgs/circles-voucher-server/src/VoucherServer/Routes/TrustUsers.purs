@@ -18,7 +18,7 @@ import Effect.Class.Console (logShow)
 import Payload.ResponseTypes (Failure(..), ResponseBody(..))
 import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
-import VoucherServer.EnvVars (PrivateKey(..), AppEnvVars)
+import VoucherServer.EnvVars (AppEnvVars(..), PrivateKey(..))
 import Web3 (Web3)
 
 type Env =
@@ -28,7 +28,7 @@ type Env =
   }
 
 trustUsers :: AppEnvVars -> { body :: { safeAddresses :: Array Address }} -> ExceptT (String /\ Failure) Aff {}
-trustUsers env { body: { safeAddresses } } = do
+trustUsers (AppEnvVars env) { body: { safeAddresses } } = do
   provider <- CC.newWebSocketProvider env.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect
     # withExceptT (\_ -> "Provider error" /\ Error (Response.internalError (StringBody "Internal error")))
@@ -54,14 +54,14 @@ trustUsers env { body: { safeAddresses } } = do
     # withExceptT (\_ -> "Account creation error" /\ Error (Response.internalError (StringBody "Internal error")))
 
   results :: Array (Either String Unit) <- 
-    for safeAddresses (trustUser env { web3, circlesCore, account } >>> runExceptT) # lift
+    for safeAddresses (trustUser (AppEnvVars env) { web3, circlesCore, account } >>> runExceptT) # lift
 
   logShow results
 
   pure {}
 
 trustUser :: AppEnvVars -> Env -> Address -> ExceptT String Aff Unit
-trustUser env { circlesCore, account } safeAddress = do
+trustUser (AppEnvVars env) { circlesCore, account } safeAddress = do
   (TrustIsTrustedResult { isTrusted }) <-
     CC.trustIsTrusted circlesCore account
       { safeAddress: convert safeAddress, limit: 5 }
