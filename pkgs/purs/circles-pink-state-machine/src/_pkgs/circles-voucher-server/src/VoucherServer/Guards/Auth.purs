@@ -13,11 +13,12 @@ import Foreign.Object as Object
 import Node.HTTP as HTTP
 import Payload.Headers (Headers)
 import Payload.Headers as Headers
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 basicAuthGuard :: forall m. MonadApp m => HTTP.Request -> m Unit
 basicAuthGuard req = do
-  AppEnv {envVars} <- ask
+  AppEnv {envVars: AppEnvVars envVars } <- ask
   let headers = getHeaders req
   case Headers.lookup "Authorization" headers of
     Just tok | tok == ("Basic " <> envVars.voucherServerBasicAuth) -> pure unit

@@ -18,7 +18,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Payload.ResponseTypes (Response(..))
 import Safe.Coerce (coerce)
-import VoucherServer.EnvVars (AppEnvVars)
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 newtype AppProdM a = AppProdM
@@ -40,7 +40,7 @@ derive newtype instance monadAffAPM :: MonadAff AppProdM
 instance monadVoucherServerAffAPM :: MonadApp AppProdM
 
 mkProdEnv :: AppEnvVars -> ExceptV (CC.Err ()) Aff (AppEnv AppProdM)
-mkProdEnv envVars = do
+mkProdEnv (AppEnvVars envVars) = do
   provider <- CC.newWebSocketProvider envVars.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect
 
@@ -63,7 +63,7 @@ mkProdEnv envVars = do
     # mapExceptT liftEffect
 
   pure $ AppEnv
-    { envVars
+    { envVars: AppEnvVars envVars
 
     , getTrusts: \safeAddress ->
         CC.trustGetNetwork circlesCore account

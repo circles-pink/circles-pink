@@ -50,7 +50,7 @@ import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
-import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
+import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
@@ -96,11 +96,11 @@ isValid web3 (SignatureObj { message, messageHash }) = do
   pure (messageValid && timestampValid)
 
 syncVouchers' :: AppEnv AppProdM -> ExceptT String Aff Unit
-syncVouchers' appEnv@(AppEnv {envVars}) = do
+syncVouchers' appEnv@(AppEnv { envVars: AppEnvVars envVars }) = do
   let
-    xbgeClient = mkClient (getOptions envVars) xbgeSpec
+    xbgeClient = mkClient (getOptions (AppEnvVars envVars)) xbgeSpec
 
-  txs <- getTransactions envVars { toAddress: envVars.xbgeSafeAddress }
+  txs <- getTransactions (AppEnvVars envVars) { toAddress: envVars.xbgeSafeAddress }
     # ExceptT
 
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
@@ -155,7 +155,7 @@ redeemAmount _ _ _ =
 --------------------------------------------------------------------------------
 
 finalizeTx :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
-finalizeTx (AppEnv {envVars}) (Transfer { from, amount, id }) = do
+finalizeTx (AppEnv { envVars }) (Transfer { from, amount, id }) = do
   let
     xbgeClient = mkClient (getOptions envVars) xbgeSpec
 
@@ -196,7 +196,7 @@ syncVouchers appEnv = do
     Right _ -> log "synced transactions."
 
 getOptions :: AppEnvVars -> Options
-getOptions env = PC.defaultOpts
+getOptions (AppEnvVars env) = PC.defaultOpts
   { baseUrl = env.xbgeEndpoint
   , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
   -- , logLevel = Log
@@ -214,7 +214,7 @@ getVoucherProviders env _ = do
     Right response -> pure $ Right (response -# _.body # _.data)
 
 getVouchers :: AppEnvVars -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
-getVouchers env { body: { signatureObj } } = do
+getVouchers (AppEnvVars env) { body: { signatureObj } } = do
   web3 <- newWeb3_
   circlesCore <- runExceptT $ mapExceptT liftEffect $ CC.newCirclesCore web3
     { apiServiceEndpoint: env.gardenApi
@@ -228,7 +228,7 @@ getVouchers env { body: { signatureObj } } = do
     }
 
   let
-    xbgeClient = mkClient (getOptions env) xbgeSpec
+    xbgeClient = mkClient (getOptions (AppEnvVars env)) xbgeSpec
 
   case circlesCore of
     Left _ -> do
@@ -321,14 +321,11 @@ getTransactions env { toAddress } = do
     amount <- fromDecimalStr x.amount
     in Transfer { from, to, amount: Freckles amount, id: TransferId x.id }
 
-
-
-
 --------------------------------------------------------------------------------
 
 getTransferMeta :: AppEnvVars -> TransferId -> Aff (Either String TransferMeta)
-getTransferMeta env transferId = do
-  result <- queryGql env "get-transfer-meta"
+getTransferMeta (AppEnvVars env) transferId = do
+  result <- queryGql (AppEnvVars env) "get-transfer-meta"
     { notifications:
         { where:
             { transfer: un TransferId transferId
@@ -349,7 +346,6 @@ getTransferMeta env transferId = do
     time <- fromString x.time <#> Seconds <#> convertDuration >>= instant
     in TransferMeta { time, transactionHash: x.transactionHash, id: x.id }
 
-
 --------------------------------------------------------------------------------
 
 data GQLError = ConnOrParseError
@@ -367,7 +363,7 @@ queryGql
   -> String
   -> query
   -> Aff (Either GQLError returns)
-queryGql env s q =
+queryGql (AppEnvVars env) s q =
   do
     (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
     query client s q # try <#> (lmap (\_ -> ConnOrParseError))
@@ -393,7 +389,10 @@ foreign import frecklesToEuroCentImpl :: Number -> BN -> Int
 app :: Aff (Either String Unit)
 app = do
   env <- liftEffect $ getEnv
-  let config = lmap envErrorMessage $ fromEnv (Proxy :: _ AppEnvVarsSpec) env
+  let
+    config = fromEnv (Proxy :: _ AppEnvVarsSpec) env
+      # lmap envErrorMessage
+      <#> AppEnvVars
   case config of
     Left e -> do
       error e
@@ -416,7 +415,7 @@ app = do
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
           _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers prodEnv)
-          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port })
+          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 (unwrap parsedEnv).port })
             spec
             { guards, handlers }
           pure $ Right unit
@@ -428,8 +427,7 @@ runRoute env x = do
     Left appError -> do
       log $ errorToLog appError
       pure $ Left $ errorToFailure appError
-    Right ok -> pure $ Right ok 
-   
+    Right ok -> pure $ Right ok
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
 -- runWithLog m = do
