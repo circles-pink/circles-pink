@@ -20,7 +20,7 @@ import { Option } from 'fp-ts/lib/Option';
 import { toFpTsOption } from '../../../utils/fpTs';
 import { env } from '../../../env';
 import BN from 'bn.js';
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 
 // -----------------------------------------------------------------------------
 // ConfirmSend Circles

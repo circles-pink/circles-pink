@@ -20,7 +20,7 @@ let
       mv $out/CirclesPink.Garden.TS -t $DIR;
       mv $out/Test.CirclesPinkStateMachine.Main -t $DIR;
       mv $out/Payload.* $out/VoucherServer.* $out/CirclesPink.Garden.EnvControlAff -t $DIR;
-      mv $DIR/VoucherServer.Types -t $out;
+      mv $DIR/VoucherServer.Spec.Types -t $out;
 
       purs-tsd-gen --directory $out;
       mv $DIR/* -t $out; 

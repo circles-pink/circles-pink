@@ -4,7 +4,7 @@ import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import {
   Voucher,
   VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Types';
+} from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { t } from 'i18next';
 import React, {

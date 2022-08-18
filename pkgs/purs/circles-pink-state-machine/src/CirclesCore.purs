@@ -510,6 +510,23 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
     Right _ -> throwError $ inj (Proxy :: _ "errNullReturn") unit
 
 --------------------------------------------------------------------------------
+-- API / getPaymentNote
+--------------------------------------------------------------------------------
+-- type GetPaymentNoteOptions =
+--   { transactionHash :: String
+--   }
+
+-- type ErrGetPaymentNote r = ErrNative + r
+
+-- tokenGetPaymentNote :: forall r. B.CirclesCore -> B.Account -> GetPaymentNoteOptions -> Result (ErrGetPaymentNote r) String
+-- tokenGetPaymentNote cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
+--   where
+--   fn = convertCore cc -# _.token -# _.getPaymentNote
+
+--   mapArg2 x = x { transactionHash = x.transactionHash }
+
+
+--------------------------------------------------------------------------------
 -- API / organizationIsOrganization
 --------------------------------------------------------------------------------
 type OrganizationIsOrganizationOptions =
