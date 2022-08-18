@@ -54,3 +54,14 @@ export const MarginX = styled.div<MarginXProps>(({ size, children }) => [
     margin: 0 ${size}rem;
   `,
 ]);
+
+type MarginTProps = {
+  size: number;
+  children: ReactElement | ReactElement[] | string;
+};
+
+export const MarginT = styled.div<MarginYProps>(({ size, children }) => [
+  css`
+    margin-top: ${size}rem;
+  `,
+]);

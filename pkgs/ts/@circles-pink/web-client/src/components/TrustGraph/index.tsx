@@ -96,7 +96,7 @@ export const TrustGraph = ({
   theme,
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
-  const [layout, setLayout] = useState<LayoutOptions>(cise);
+  const [layout, setLayout] = useState<LayoutOptions>(concentric);
 
   const elements = getElementsFromData(graph);
 
@@ -182,6 +182,13 @@ export const TrustGraph = ({
       <ButtonRow>
         <Button
           theme={theme}
+          prio={layout.name === 'concentric' ? 'medium' : 'low'}
+          onClick={() => setLayout(concentric)}
+        >
+          Circles
+        </Button>
+        <Button
+          theme={theme}
           prio={layout.name === 'cise' ? 'medium' : 'low'}
           onClick={() => setLayout(cise)}
         >
@@ -192,14 +199,7 @@ export const TrustGraph = ({
           prio={layout.name === 'cose-bilkent' ? 'medium' : 'low'}
           onClick={() => setLayout(coseBilkent)}
         >
-          Cose Bilkent
-        </Button>
-        <Button
-          theme={theme}
-          prio={layout.name === 'concentric' ? 'medium' : 'low'}
-          onClick={() => setLayout(concentric)}
-        >
-          Concentric
+          Cose
         </Button>
       </ButtonRow>
     </>

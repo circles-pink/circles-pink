@@ -8,8 +8,8 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Button, Input } from '../../../components/forms';
-import { Text } from '../../../components/text';
+import { Button, ButtonLinkLike, Input } from '../../../components/forms';
+import { JustText, SubClaim, Text } from '../../../components/text';
 import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
@@ -34,6 +34,8 @@ import { TrustUserList } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
+  JustifyStartCenter,
+  MarginT,
   MarginY,
   TwoButtonRow,
 } from '../../../components/helper';
@@ -377,10 +379,6 @@ export const Dashboard = ({
               requestUBIPayoutResult={state.requestUBIPayoutResult}
             />
           </FadeIn>
-
-          {/* <FadeIn orientation={orientation} delay={getDelay()}>
-            <TrustGraph graph={graph} />
-          </FadeIn> */}
         </Text>
       }
       control={
@@ -476,6 +474,24 @@ export const Dashboard = ({
                     justBoughtVoucher={justBoughtVoucher}
                     setJustBoughtVoucher={setJustBoughtVoucher}
                   />
+
+                  <MarginT size={3}>
+                    <JustifyStartCenter>
+                      <JustText>
+                        {t('dashboard.voucherShop.buyAtMarketPlace')}
+                      </JustText>
+                      <ButtonLinkLike
+                        onClick={() =>
+                          window.open(
+                            'https://market.joincircles.net/',
+                            '_blank'
+                          )
+                        }
+                      >
+                        {t('dashboard.voucherShop.toTheMarketPlace')}
+                      </ButtonLinkLike>
+                    </JustifyStartCenter>
+                  </MarginT>
                 </LightColorFrame>
               </TopMargin>
             </FadeIn>
