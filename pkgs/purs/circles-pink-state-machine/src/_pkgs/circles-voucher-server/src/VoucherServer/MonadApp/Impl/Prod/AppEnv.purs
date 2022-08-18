@@ -2,10 +2,9 @@ module VoucherServer.MonadApp.Impl.Prod.AppEnv where
 
 import Prelude
 
-import Control.Monad.Except (ExceptT)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Except (ExceptT, runExceptT)
+import Control.Monad.Reader (ReaderT, ask, runReaderT)
 import Data.Either (Either)
-import Debug.Extra (todo)
 import Effect.Aff (Aff)
 import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.MonadApp (AppEnv(..), AppError, AppProdM)
@@ -31,4 +30,4 @@ mkAppEnv = do
 
 
 runM :: forall a. AppEnvVars -> M a -> Aff (Either AppError a)
-runM = todo
+runM env x = runExceptT $ runReaderT x env
