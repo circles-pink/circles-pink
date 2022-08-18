@@ -12,8 +12,8 @@ import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
 import Type.Proxy (Proxy(..))
 import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.Spec.Types (TransferId, VoucherAmount(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
-import VoucherServer.Specs.Xbge (Address(..))
+import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
+import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (TransferMeta)
 
 --------------------------------------------------------------------------------
