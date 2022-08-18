@@ -1,5 +1,7 @@
 module VoucherServer.GraphQLSchemas.GraphNode where
 
+import Prelude
+
 import GraphQL.Client.Args (type (==>))
 import Type.Proxy (Proxy(..))
 
@@ -50,3 +52,14 @@ amount = Proxy :: Proxy "amount"
 transactionHash = Proxy :: Proxy "transactionHash"
 
 time = Proxy :: Proxy "time"
+
+selectors
+  :: { transactionHash :: Proxy "transactionHash"
+     , amount :: Proxy "amount"
+     , prop :: Proxy "prop"
+     , name :: Proxy "name"
+     , from :: Proxy "from"
+     , time :: Proxy "time"
+     , id :: Proxy "id"
+     }
+selectors = one

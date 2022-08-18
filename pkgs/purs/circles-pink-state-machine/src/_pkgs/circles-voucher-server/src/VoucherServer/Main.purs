@@ -22,7 +22,7 @@ import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (class Newtype, un, unwrap, wrap)
+import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
@@ -54,8 +54,9 @@ import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
-import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, mkProdEnv, runAppProdM)
+import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, runAppProdM)
 import VoucherServer.MonadApp.Class (errorToFailure)
+import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
@@ -398,10 +399,10 @@ app = do
       error e
       liftEffect $ exit 1
     Right parsedEnv -> do
-      prodEnv_ <- mkProdEnv parsedEnv # runExceptT
+      prodEnv_ <- Prod.mkAppEnv # Prod.runM parsedEnv 
       case prodEnv_ of
         Left e -> do
-          error $ CC.printErr e
+          error $ errorToLog e
           liftEffect $ exit 1
         Right prodEnv -> do
           let

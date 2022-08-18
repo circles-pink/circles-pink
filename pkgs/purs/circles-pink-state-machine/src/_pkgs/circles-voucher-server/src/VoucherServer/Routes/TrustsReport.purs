@@ -10,6 +10,7 @@ import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.Either (Either(..))
 import Data.Lens (set)
+import Data.Lens.Record (prop)
 import Data.Set as Set
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
@@ -19,7 +20,7 @@ import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
-import VoucherServer.MonadApp.Class (_getTrusts)
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), _AppEnv, _CirclesCoreEnv, _circlesCore, _getTrusts)
 
 trustsReport
   :: forall m
@@ -29,7 +30,10 @@ trustsReport
      }
   -> m (Response { trusted :: Array C.Address, notTrusted :: Array C.Address })
 trustsReport { body: { addresses } } = do
-  AppEnv { getTrusts, envVars: AppEnvVars envVars } <- ask
+  AppEnv
+    { circlesCore: CirclesCoreEnv { getTrusts }
+    , envVars: AppEnvVars envVars
+    } <- ask
   xbgeTrusts <- getTrusts $ coerce envVars.xbgeSafeAddress
 
   let { yes, no } = A.partition (_ `Set.member` xbgeTrusts) addresses
@@ -41,12 +45,13 @@ spec = do
   describe "Route trustsReport" do
     let
       env = testEnv
-        # set _getTrusts (\_ -> pure $ Set.fromFoldable [ addrA, addrB ])
+        # set (_AppEnv <<< prop _circlesCore <<< _CirclesCoreEnv <<< prop _getTrusts) (\_ -> pure $ Set.fromFoldable [ addrA, addrB ])
 
     it "returns the trusted and untrusted addresses" do
-      trustsReport { 
-        guards: {basicAuth : unit},
-        body: { addresses: [ addrA, addrB, addrC ] } }
+      trustsReport
+        { guards: { basicAuth: unit }
+        , body: { addresses: [ addrA, addrB, addrC ] }
+        }
         # runAppTestM env
         # shouldEqual
         $ Right
