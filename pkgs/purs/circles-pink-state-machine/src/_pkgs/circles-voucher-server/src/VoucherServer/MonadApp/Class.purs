@@ -68,7 +68,7 @@ errorToFailure = case _ of
 
 errorToLog :: AppError -> String
 errorToLog = case _ of
-  ErrCirclesCore _ -> "Circles Core Error"
+  ErrCirclesCore e -> "Circles Core Error: " <> CC.printErr e
   ErrUnknown -> "Unknown error"
   ErrBasicAuth -> "Basic Authentication failed"
   ErrGraphQL -> "Graph QL Error"
