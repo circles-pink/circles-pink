@@ -604,11 +604,12 @@ const DashboardOverlay = ({
 
 type UserHandleProps = { color?: string };
 
-const UserHandle = styled.h2<UserHandleProps>(({ color }) => [
+const UserHandle = styled.span<UserHandleProps>(({ color }) => [
   tw`flex justify-around text-lg`,
   css`
     margin: 0;
     padding: 0;
+    font-weight: 600;
     color: ${color || 'black'};
   `,
 ]);

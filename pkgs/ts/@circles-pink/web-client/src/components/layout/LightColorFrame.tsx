@@ -24,16 +24,16 @@ export const LightColorFrame = ({
 }: FameProps): ReactElement => {
   return (
     <LightColorFrame_ theme={theme}>
-      <Title>
+      <HeadSection>
         <JustifyBetween>
-          <Claim color={theme.darkColor}>{title}</Claim>
+          <CardTitle color={theme.darkColor}>{title}</CardTitle>
           {icon ? (
             <Icon path={icon} size={1.5} color={theme.darkColor} />
           ) : (
             <></>
           )}
         </JustifyBetween>
-      </Title>
+      </HeadSection>
       <>{children}</>
     </LightColorFrame_>
   );
@@ -51,4 +51,16 @@ const LightColorFrame_ = styled.div<FameProps>(({ theme }: FameProps) => [
 // UI
 // -----------------------------------------------------------------------------
 
-const Title = tw.div`mb-4`;
+const HeadSection = tw.div`mb-4`;
+
+type CardTitleProps = {
+  color: string;
+};
+export const CardTitle = styled.h2<CardTitleProps>(({ color }) => [
+  tw`mb-2 text-3xl sm:text-4xl font-extrabold tracking-tight block`,
+  css`
+    color: ${color};
+    margin: 0;
+    padding: 0;
+  `,
+]);
