@@ -3,27 +3,18 @@ module VoucherServer.Sync where
 import Prelude
 
 import Control.Monad.Error.Class (catchError, liftMaybe, throwError)
-import Control.Monad.Except (ExceptT(..), withExceptT)
 import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant, unInstant)
 import Data.Maybe (Maybe)
 import Data.Newtype (un, unwrap)
-import Effect.Aff (Aff)
 import Payload.ResponseTypes (Response(..))
-import VoucherServer.GraphQLSchemas.GraphNode (transactionHash)
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..), AppError(..), AppProdM, errorToLog, runAppProdM)
+import VoucherServer.MonadApp (class MonadApp, AppEnv(..), AppError(..))
 import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), GraphNodeEnv(..))
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted, VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
-
-finalizeTx' :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
-finalizeTx' appEnv trans = finalizeTx trans
-  # runAppProdM appEnv
-  # ExceptT
-  # withExceptT errorToLog
 
 threshold :: Threshold EurCent
 threshold = Threshold { above: EurCent 5, below: EurCent 5 }

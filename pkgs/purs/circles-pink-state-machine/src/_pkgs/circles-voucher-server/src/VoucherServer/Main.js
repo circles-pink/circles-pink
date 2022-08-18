@@ -24,11 +24,3 @@ exports.encryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
     return Nothing;
   }
 };
-
-exports.frecklesToEuroCentImpl = (timestamp) => (bn) => {
-  const freckles = bn.toString();
-  const crc = Number.parseFloat(Web3.utils.fromWei(freckles, "ether"));
-  const tc = crcToTc(timestamp, crc);
-  const eur = Math.round(tc * 10);
-  return eur;
-};
