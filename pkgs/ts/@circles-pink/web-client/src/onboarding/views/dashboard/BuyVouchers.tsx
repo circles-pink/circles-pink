@@ -103,7 +103,7 @@ type OfferContainerProps = {
 const OfferContainer = styled.div<OfferContainerProps>(({ elementCount }) => [
   css`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
     grid-gap: 1px;
   `,
 ]);
@@ -118,7 +118,6 @@ const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
     css`
       cursor: ${enabled ? 'pointer' : 'not-allowed'};
       font-size: 2rem;
-      min-width: 20rem;
       color: ${theme.textColorDark};
       background-color: ${theme.lightColor};
       padding: 1rem;

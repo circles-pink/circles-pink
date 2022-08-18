@@ -1,5 +1,6 @@
 import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { isLoading } from '@circles-pink/state-machine/output/RemoteData';
 import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import {
   Voucher,
@@ -20,7 +21,7 @@ import { Theme } from '../../../context/theme';
 
 type ListVouchersProps = {
   vouchersResult: DefaultView['vouchersResult'];
-  providers: VoucherProvidersResult;
+  providersResult: VoucherProvidersResult;
   theme: Theme;
   justBoughtVoucher: boolean;
   setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
@@ -29,19 +30,35 @@ type ListVouchersProps = {
 export const ListVouchers = ({
   vouchersResult,
   theme,
-  providers,
+  providersResult,
   justBoughtVoucher,
   setJustBoughtVoucher,
 }: ListVouchersProps): ReactElement | null => {
+  // Vouchers
   const [vouchers, setVouchers] = useState<Array<Voucher>>(
     mapResult(vouchersResult)
   );
-  const [vouchersBeforePurchase, setVouchersBeforePurchase] = useState(
-    vouchers.length
+
+  useEffect(() => {
+    if (vouchersResult.type === 'success') {
+      setVouchers(mapResult(vouchersResult));
+    }
+  }, [vouchersResult]);
+
+  // VoucherProviders
+  const [providers, setProviders] = useState<VoucherProvider[]>(
+    getData([] as VoucherProvider[])(providersResult as any)
   );
 
-  const providers_: VoucherProvider[] = getData([] as VoucherProvider[])(
-    providers as any
+  useEffect(() => {
+    if (!isLoading(providersResult as any)) {
+      setProviders(getData([] as VoucherProvider[])(providersResult as any));
+    }
+  }, [providersResult]);
+
+  // Incoming voucher
+  const [vouchersBeforePurchase, setVouchersBeforePurchase] = useState(
+    vouchers.length
   );
 
   useEffect(() => {
@@ -54,12 +71,6 @@ export const ListVouchers = ({
     }
   }, [justBoughtVoucher, vouchers]);
 
-  useEffect(() => {
-    if (vouchersResult.type === 'success') {
-      setVouchers(mapResult(vouchersResult));
-    }
-  }, [vouchersResult]);
-
   // animation
   const getDelay = getIncrementor(0, 0.25);
 
@@ -71,7 +82,7 @@ export const ListVouchers = ({
       {vouchers.length > 0 || justBoughtVoucher ? (
         <VoucherContainer>
           {vouchers.map((voucher, index) => {
-            const provider = mapInfo(providers_, voucher.providerId);
+            const provider = mapInfo(providers, voucher.providerId);
             return (
               <FadeIn
                 orientation={'left'}
@@ -213,7 +224,6 @@ const Card = styled.div(() => [
   css`
     background-color: white;
     padding: 1rem 2rem;
-    min-width: 20rem;
     position: relative;
   `,
 ]);
@@ -225,6 +235,11 @@ const CardContent = styled.div(() => [
     gap: 1rem;
     grid-template-columns: 1.5fr 2fr 0.25fr;
     align-items: center;
+
+    @media (max-width: 450px) {
+      display: flex;
+      flex-wrap: wrap;
+    }
   `,
 ]);
 
@@ -320,5 +335,9 @@ const Amount = styled.div<VoucherAmountProps>(({ theme }) => [
     color: ${theme.baseColor};
     font-size: 2rem;
     font-weight: 600;
+
+    @media (max-width: 450px) {
+      transform: rotate(0deg);
+    }
   `,
 ]);
