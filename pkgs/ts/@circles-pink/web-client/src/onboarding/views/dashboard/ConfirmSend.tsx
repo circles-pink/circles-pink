@@ -61,9 +61,10 @@ export const ConfirmSend = ({
 
   useEffect(() => {
     if (state.transferResult.type === 'success') {
+      console.log('Show dummy voucher');
       setJustBoughtVoucher(true);
     }
-  }, [state.transferResult.type]);
+  }, [state.transferResult]);
 
   // Util
   const transact = (fromAddr: Address, toAddr: Address) =>
