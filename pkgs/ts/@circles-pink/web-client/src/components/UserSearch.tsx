@@ -217,105 +217,97 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
       <GridRow
         minHeight={ROW_HEIGHT}
         fields={[
+          { width: 0, align: 'LEFT', content: <ReactTooltip /> },
           {
             width: USERNAME_WIDTH,
             content: (
-              <>
-                <ReactTooltip />
-                <FadeIn orientation={'left'} delay={getDelay()}>
-                  <JustifyStartCenter>
-                    <div>
-                      <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
-                    </div>
-                    <Username theme={theme} data-tip={userIdent}>
-                      {userIdent}
-                    </Username>
-                  </JustifyStartCenter>
-                </FadeIn>
-              </>
+              <FadeIn orientation={'left'} delay={getDelay()}>
+                <JustifyStartCenter>
+                  <div>
+                    <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
+                  </div>
+                  <Username theme={theme} data-tip={userIdent}>
+                    {userIdent}
+                  </Username>
+                </JustifyStartCenter>
+              </FadeIn>
             ),
             align: 'LEFT',
           },
           {
             width: RELATION_WIDTH,
             content: (
-              <>
-                <ReactTooltip />
-                <JustifyAroundCenter>
-                  <FadeIn orientation={'left'} delay={getDelay()}>
-                    <Icon
-                      path={
-                        isTrusted || pendingUntrust || loadingUntrust
-                          ? mdiAccountArrowLeft
-                          : mdiAccountCancel
-                      }
-                      size={1.6}
-                      color={
-                        isTrusted || pendingUntrust || loadingUntrust
-                          ? theme.baseColor
-                          : 'white'
-                      }
-                      data-tip={mapToolTipRelRec(isTrusted, userIdent)}
-                    />
-                  </FadeIn>
-                  <FadeIn orientation={'left'} delay={getDelay()}>
-                    <Icon
-                      path={
-                        c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
-                      }
-                      size={1.6}
-                      color={c.isOutgoing ? theme.baseColor : 'white'}
-                      data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
-                    />
-                  </FadeIn>
-                </JustifyAroundCenter>
-              </>
+              <JustifyAroundCenter>
+                <FadeIn orientation={'left'} delay={getDelay()}>
+                  <Icon
+                    path={
+                      isTrusted || pendingUntrust || loadingUntrust
+                        ? mdiAccountArrowLeft
+                        : mdiAccountCancel
+                    }
+                    size={1.6}
+                    color={
+                      isTrusted || pendingUntrust || loadingUntrust
+                        ? theme.baseColor
+                        : 'white'
+                    }
+                    data-tip={mapToolTipRelRec(isTrusted, userIdent)}
+                  />
+                </FadeIn>
+                <FadeIn orientation={'left'} delay={getDelay()}>
+                  <Icon
+                    path={
+                      c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
+                    }
+                    size={1.6}
+                    color={c.isOutgoing ? theme.baseColor : 'white'}
+                    data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+                  />
+                </FadeIn>
+              </JustifyAroundCenter>
             ),
             align: 'CENTER',
           },
           {
             width: ACTION_WIDTH,
             content: (
-              <>
-                <ReactTooltip />
-                <JustifyAroundCenter>
-                  <FadeIn orientation={'left'} delay={getDelay()}>
-                    <Clickable
-                      clickable={c.isOutgoing}
-                      onClick={() => {
-                        if (c.isOutgoing) {
-                          if (toggleOverlay && setOverwriteTo) {
-                            setOverwriteTo(getAddress(c.user));
-                            toggleOverlay('SEND');
-                          }
+              <JustifyAroundCenter>
+                <FadeIn orientation={'left'} delay={getDelay()}>
+                  <Clickable
+                    clickable={c.isOutgoing}
+                    onClick={() => {
+                      if (c.isOutgoing) {
+                        if (toggleOverlay && setOverwriteTo) {
+                          setOverwriteTo(getAddress(c.user));
+                          toggleOverlay('SEND');
                         }
-                      }}
-                    >
-                      <Icon
-                        path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-                        size={1.75}
-                        color={c.isOutgoing ? theme.baseColor : 'white'}
-                        data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
-                      />
-                    </Clickable>
-                  </FadeIn>
-                  <FadeIn orientation={'left'} delay={getDelay()}>
-                    <Clickable
-                      clickable={true}
-                      onClick={() => {
-                        isUntrusted ? addTrust(c.user) : removeTrust(c.user);
-                      }}
-                    >
-                      <Icon
-                        path={isTrusted ? mdiHeart : mdiHeartOutline}
-                        size={1.5}
-                        color={isTrusted ? theme.baseColor : 'white'}
-                        data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                      />
-                    </Clickable>
-                  </FadeIn>
-                </JustifyAroundCenter>
-              </>
+                      }
+                    }}
+                  >
+                    <Icon
+                      path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+                      size={1.75}
+                      color={c.isOutgoing ? theme.baseColor : 'white'}
+                      data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
+                    />
+                  </Clickable>
+                </FadeIn>
+                <FadeIn orientation={'left'} delay={getDelay()}>
+                  <Clickable
+                    clickable={true}
+                    onClick={() => {
+                      isUntrusted ? addTrust(c.user) : removeTrust(c.user);
+                    }}
+                  >
+                    <Icon
+                      path={isTrusted ? mdiHeart : mdiHeartOutline}
+                      size={1.5}
+                      color={isTrusted ? theme.baseColor : 'white'}
+                      data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                    />
+                  </Clickable>
+                </FadeIn>
+              </JustifyAroundCenter>
             ),
             align: 'CENTER',
           },
@@ -327,59 +319,51 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
     <GridRow
       minHeight={ROW_HEIGHT}
       fields={[
+        { width: 0, align: 'LEFT', content: <ReactTooltip /> },
         {
           width: USERNAME_WIDTH,
           content: (
-            <>
-              <ReactTooltip />
-              <FadeIn orientation={'left'} delay={getDelay()}>
-                <JustifyStartCenter>
-                  <div>
-                    <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
-                  </div>
-                  <Username theme={theme} data-tip={userIdent}>
-                    {userIdent}
-                  </Username>
-                </JustifyStartCenter>
-              </FadeIn>
-            </>
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <JustifyStartCenter>
+                <div>
+                  <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
+                </div>
+                <Username theme={theme} data-tip={userIdent}>
+                  {userIdent}
+                </Username>
+              </JustifyStartCenter>
+            </FadeIn>
           ),
           align: 'LEFT',
         },
         {
           width: RELATION_WIDTH * 2,
           content: (
-            <>
-              <ReactTooltip />
-              <TrustStatusMessage theme={theme} trustState={c.trustState} />
-            </>
+            <TrustStatusMessage theme={theme} trustState={c.trustState} />
           ),
           align: 'RIGHT',
         },
         {
           width: ACTION_WIDTH / 2,
           content: (
-            <>
-              <ReactTooltip />
-              <FadeIn orientation={'left'} delay={getDelay()}>
-                <>
-                  {loadingTrust || loadingUntrust ? (
-                    <LoadingCircles
-                      count={1}
-                      width={35}
-                      color={theme.baseColor}
-                    />
-                  ) : (
-                    <Icon
-                      path={mdiWeatherCloudyClock}
-                      size={1.5}
-                      color={theme.baseColor}
-                      data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                    />
-                  )}
-                </>
-              </FadeIn>
-            </>
+            <FadeIn orientation={'left'} delay={getDelay()}>
+              <>
+                {loadingTrust || loadingUntrust ? (
+                  <LoadingCircles
+                    count={1}
+                    width={35}
+                    color={theme.baseColor}
+                  />
+                ) : (
+                  <Icon
+                    path={mdiWeatherCloudyClock}
+                    size={1.5}
+                    color={theme.baseColor}
+                    data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                  />
+                )}
+              </>
+            </FadeIn>
           ),
           align: 'LEFT',
         },
