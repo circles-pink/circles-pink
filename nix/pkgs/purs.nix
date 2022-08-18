@@ -19,7 +19,6 @@ let
       mv $out/CirclesPink.Garden.ApiScript -t $DIR;
       mv $out/CirclesPink.Garden.TS -t $DIR;
       mv $out/Test.CirclesPinkStateMachine.Main -t $DIR;
-	    mv $out/Test.AllTests.Main -t $DIR;
       mv $out/Payload.* $out/VoucherServer.* $out/CirclesPink.Garden.EnvControlAff -t $DIR;
       mv $DIR/VoucherServer.Types -t $out;
 
