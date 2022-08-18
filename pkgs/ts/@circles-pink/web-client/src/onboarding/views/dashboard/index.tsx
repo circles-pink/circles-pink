@@ -471,7 +471,7 @@ export const Dashboard = ({
                   </MarginY>
                   <ListVouchers
                     theme={theme}
-                    providers={stateRaw.voucherProvidersResult}
+                    providersResult={stateRaw.voucherProvidersResult}
                     vouchersResult={state.vouchersResult}
                     justBoughtVoucher={justBoughtVoucher}
                     setJustBoughtVoucher={setJustBoughtVoucher}
