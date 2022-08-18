@@ -57,18 +57,23 @@ export const ListVouchers = ({
   }, [providersResult]);
 
   // Incoming voucher
-  const [vouchersBeforePurchase, setVouchersBeforePurchase] = useState(
-    vouchers.length
-  );
+  const [previousVouchersLength, setPreviousVouchersLength] = useState(0);
 
   useEffect(() => {
-    if (justBoughtVoucher && vouchersBeforePurchase === vouchers.length) {
-      console.log('No new Vouchers');
+    if (vouchers.length !== previousVouchersLength) {
+      setJustBoughtVoucher(false);
+      setPreviousVouchersLength(vouchers.length);
+    }
+  }, [vouchers]);
+
+  useEffect(() => {
+    if (justBoughtVoucher && previousVouchersLength === vouchers.length) {
+      // console.log('No new Vouchers');
     } else if (
       justBoughtVoucher &&
-      vouchersBeforePurchase !== vouchers.length
+      previousVouchersLength !== vouchers.length
     ) {
-      console.log('New Voucher arrived');
+      // console.log('New Voucher arrived');
       setJustBoughtVoucher(false);
     }
   }, [justBoughtVoucher, vouchers]);

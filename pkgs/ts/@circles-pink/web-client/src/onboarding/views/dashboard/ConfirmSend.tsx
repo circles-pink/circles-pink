@@ -61,7 +61,7 @@ export const ConfirmSend = ({
 
   useEffect(() => {
     if (state.transferResult.type === 'success') {
-      console.log('Show waiting voucher');
+      // console.log('Show waiting voucher');
       setJustBoughtVoucher(true);
     }
   }, [state.transferResult]);
