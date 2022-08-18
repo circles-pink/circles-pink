@@ -63,10 +63,12 @@ export const ListVouchers = ({
 
   useEffect(() => {
     if (justBoughtVoucher && vouchersBeforePurchase === vouchers.length) {
+      console.log('No new Vouchers');
     } else if (
       justBoughtVoucher &&
       vouchersBeforePurchase !== vouchers.length
     ) {
+      console.log('New Voucher arrived');
       setJustBoughtVoucher(false);
     }
   }, [justBoughtVoucher, vouchers]);
