@@ -6,7 +6,7 @@ module VoucherServer.MonadApp.Impl.Test
 
 import Prelude
 
-import Control.Monad.Error.Class (class MonadThrow, throwError)
+import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError)
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
@@ -33,6 +33,7 @@ derive newtype instance functorATM :: Functor AppTestM
 derive newtype instance bindATM :: Bind AppTestM
 derive newtype instance monadATM :: Monad AppTestM
 derive newtype instance monadThrowATM :: MonadThrow AppError AppTestM
+derive newtype instance monadErrorATM :: MonadError AppError AppTestM
 derive newtype instance monadAskATM :: MonadAsk (AppEnv AppTestM) AppTestM
 
 instance monadAppATM :: MonadApp AppTestM
@@ -49,6 +50,10 @@ testEnv = AppEnv
       }
   , circlesCore: CirclesCoreEnv
       { getTrusts: \_ -> throwError ErrUnknown
+      }
+  , xbgeClient:
+      { getVoucherProviders: \_ -> throwError ErrUnknown
+      , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
       }
   }
 
