@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.PrivateKey.Type (PrivateKey(..))
-import Control.Monad.Error.Class (class MonadThrow, liftEither)
+import Control.Monad.Error.Class (class MonadThrow, liftEither, throwError)
 import Control.Monad.Except (ExceptT, mapExceptT, runExceptT, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
@@ -27,16 +27,16 @@ newtype AppProdM a = AppProdM
       a
   )
 
-derive instance newtypeAPM ::  Newtype (AppProdM a) _
-derive newtype instance applyAPM ::  Apply AppProdM
-derive newtype instance applicativeAPM ::  Applicative AppProdM
-derive newtype instance functorAPM ::  Functor AppProdM
-derive newtype instance bindAPM ::  Bind AppProdM
-derive newtype instance monadAPM ::  Monad AppProdM
-derive newtype instance monadThrowAPM ::  MonadThrow AppError AppProdM
-derive newtype instance monadAskAPM ::  MonadAsk (AppEnv AppProdM) AppProdM
-derive newtype instance monadEffectAPM ::  MonadEffect AppProdM
-derive newtype instance monadAffAPM ::  MonadAff AppProdM
+derive instance newtypeAPM :: Newtype (AppProdM a) _
+derive newtype instance applyAPM :: Apply AppProdM
+derive newtype instance applicativeAPM :: Applicative AppProdM
+derive newtype instance functorAPM :: Functor AppProdM
+derive newtype instance bindAPM :: Bind AppProdM
+derive newtype instance monadAPM :: Monad AppProdM
+derive newtype instance monadThrowAPM :: MonadThrow AppError AppProdM
+derive newtype instance monadAskAPM :: MonadAsk (AppEnv AppProdM) AppProdM
+derive newtype instance monadEffectAPM :: MonadEffect AppProdM
+derive newtype instance monadAffAPM :: MonadAff AppProdM
 instance monadVoucherServerAffAPM :: MonadApp AppProdM
 
 mkProdEnv :: AppEnvVars -> ExceptV (CC.Err ()) Aff (AppEnv AppProdM)
@@ -72,16 +72,18 @@ mkProdEnv envVars = do
           <#> A.filter (_.isOutgoing)
             >>> map (_.safeAddress >>> wrap)
             >>> Set.fromFoldable
-    
+
+    , graphNode:
+        { -- transferMeta: \_ -> throwError ErrUnknown
+        }
+
     }
 
 runAppProdM :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either AppError a)
 runAppProdM env (AppProdM x) = runExceptT $ runReaderT x env
-  
 
 mapResponse :: forall a b. (a -> b) -> Response a -> Response b
 mapResponse f (Response r) = Response r { body = f r.body }
-
 
 --------------------------------------------------------------------------------
 -- Util

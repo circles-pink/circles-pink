@@ -8,7 +8,7 @@ import Prelude
 
 import CirclesPink.Data.Address (Address)
 import Payload.Spec (type (:), GET, Guards, POST, Spec(Spec), Nil)
-import VoucherServer.Types (Voucher, VoucherProvider)
+import VoucherServer.Spec.Types (Voucher, VoucherProvider)
 import Web3 (SignatureObj)
 
 --------------------------------------------------------------------------------

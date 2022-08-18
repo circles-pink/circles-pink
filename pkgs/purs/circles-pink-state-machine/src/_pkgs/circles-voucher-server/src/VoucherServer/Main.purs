@@ -54,12 +54,13 @@ import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
-import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, mkProdEnv, runAppProdM)
+import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, mkProdEnv, runAppProdM)
 import VoucherServer.MonadApp.Class (errorToFailure)
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
+import VoucherServer.Spec.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Types (Transfer(..), TransferMeta(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -94,12 +95,12 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
   pure (messageValid && timestampValid)
 
-syncVouchers' :: AppEnvVars -> ExceptT String Aff Unit
-syncVouchers' env = do
+syncVouchers' :: AppEnv AppProdM -> ExceptT String Aff Unit
+syncVouchers' appEnv@(AppEnv {envVars}) = do
   let
-    xbgeClient = mkClient (getOptions env) xbgeSpec
+    xbgeClient = mkClient (getOptions envVars) xbgeSpec
 
-  txs <- getTransactions env { toAddress: env.xbgeSafeAddress }
+  txs <- getTransactions envVars { toAddress: envVars.xbgeSafeAddress }
     # ExceptT
 
   vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
@@ -114,7 +115,7 @@ syncVouchers' env = do
 
     unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
-  syncedVouchers <- for unfinalizedTxs (finalizeTx env >>> runExceptT)
+  syncedVouchers <- for unfinalizedTxs (finalizeTx appEnv >>> runExceptT)
     # lift
 
   log ("finalized the following vouchers: ")
@@ -153,12 +154,12 @@ redeemAmount _ _ _ =
 
 --------------------------------------------------------------------------------
 
-finalizeTx :: AppEnvVars -> Transfer -> ExceptT String Aff VoucherEncrypted
-finalizeTx env (Transfer { from, amount, id }) = do
+finalizeTx :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
+finalizeTx (AppEnv {envVars}) (Transfer { from, amount, id }) = do
   let
-    xbgeClient = mkClient (getOptions env) xbgeSpec
+    xbgeClient = mkClient (getOptions envVars) xbgeSpec
 
-  (TransferMeta { time }) <- getTransferMeta env id # ExceptT
+  (TransferMeta { time }) <- getTransferMeta envVars id # ExceptT
 
   providers <- xbgeClient.getVoucherProviders {}
     # ExceptT
@@ -171,7 +172,7 @@ finalizeTx env (Transfer { from, amount, id }) = do
 
   case maybeVoucherAmount of
     Nothing -> do
-      redeemAmount env from eur
+      redeemAmount envVars from eur
       throwError "Invalid Voucher amount."
     Just voucherAmount ->
       xbgeClient.finalizeVoucherPurchase
@@ -186,10 +187,10 @@ finalizeTx env (Transfer { from, amount, id }) = do
         # withExceptT show
         <#> (unwrap >>> _.body >>> _.data)
 
-syncVouchers :: AppEnvVars -> Aff Unit
-syncVouchers env = do
+syncVouchers :: AppEnv AppProdM -> Aff Unit
+syncVouchers appEnv = do
   log "syncing transactions..."
-  result <- runExceptT $ syncVouchers' env
+  result <- runExceptT $ syncVouchers' appEnv
   case result of
     Left e -> logShow ("Could not sync transaction: " <> e)
     Right _ -> log "synced transactions."
@@ -320,12 +321,8 @@ getTransactions env { toAddress } = do
     amount <- fromDecimalStr x.amount
     in Transfer { from, to, amount: Freckles amount, id: TransferId x.id }
 
-newtype Transfer = Transfer
-  { from :: Address
-  , to :: Address
-  , id :: TransferId
-  , amount :: Freckles
-  }
+
+
 
 --------------------------------------------------------------------------------
 
@@ -352,13 +349,6 @@ getTransferMeta env transferId = do
     time <- fromString x.time <#> Seconds <#> convertDuration >>= instant
     in TransferMeta { time, transactionHash: x.transactionHash, id: x.id }
 
-newtype TransferMeta = TransferMeta
-  { id :: String
-  , transactionHash :: String
-  , time :: Instant
-  }
-
-derive instance newtypeTransferMeta :: Newtype TransferMeta _
 
 --------------------------------------------------------------------------------
 
@@ -425,7 +415,7 @@ app = do
             guards =
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
-          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers parsedEnv)
+          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers prodEnv)
           _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port })
             spec
             { guards, handlers }

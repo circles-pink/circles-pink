@@ -1,4 +1,4 @@
-module VoucherServer.Types where
+module VoucherServer.Spec.Types where
 
 import Prelude
 
@@ -148,3 +148,4 @@ derive newtype instance ordTransferId :: Ord TransferId
 
 instance showTransferId :: Show TransferId where
   show = genericShow
+

@@ -1,4 +1,9 @@
-module VoucherServer.MonadApp.Impl.Test where
+module VoucherServer.MonadApp.Impl.Test
+  ( AppTestM(..)
+  , runAppTestM
+  , testEnv
+  )
+  where
 
 import Prelude
 
@@ -39,8 +44,11 @@ instance monadAppATM :: MonadApp AppTestM
 
 testEnv :: AppEnv AppTestM
 testEnv = AppEnv
-  { getTrusts: \_ -> throwError ErrUnknown
-  , envVars: evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
+  { envVars: evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
+  , getTrusts: \_ -> throwError ErrUnknown
+  , graphNode:
+      { -- getTransferMeta: \_ -> throwError ErrUnknown
+      }
   }
 
 runAppTestM :: forall a. AppEnv AppTestM -> AppTestM a -> Either AppError a

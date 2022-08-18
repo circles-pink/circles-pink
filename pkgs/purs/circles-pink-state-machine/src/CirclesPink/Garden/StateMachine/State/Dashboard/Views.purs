@@ -54,7 +54,7 @@ import Foreign.Object (Object, values)
 import FpTs.Class (toFpTs)
 import RemoteData (RemoteData, isLoading)
 import RemoteReport (RemoteReport)
-import VoucherServer.Types (Voucher)
+import VoucherServer.Spec.Types (Voucher)
 
 --------------------------------------------------------------------------------
 -- globalLoading
