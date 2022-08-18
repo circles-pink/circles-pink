@@ -56,7 +56,7 @@ import { BuyVouchers } from './BuyVouchers';
 import {
   VoucherOffer,
   VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Types';
+} from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
 import { UserConfig } from '../..';

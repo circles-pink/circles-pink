@@ -1,6 +1,6 @@
 import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { getData } from '@circles-pink/state-machine/output/RemoteReport';
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Types';
+import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';

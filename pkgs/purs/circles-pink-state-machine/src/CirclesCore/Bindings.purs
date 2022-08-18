@@ -33,6 +33,7 @@ import Data.BN (BN)
 import Data.BigInt (BigInt)
 import Data.Function.Uncurried (Fn2, Fn3, Fn4, Fn1)
 import Data.Newtype (class Newtype)
+import Data.Nullable (Nullable)
 import Effect (Effect)
 import Effect.Aff.Compat (EffectFnAff)
 import Foreign (Foreign)
@@ -168,6 +169,7 @@ newtype CoreToken = CoreToken
         , paymentNote :: String
         }
         (String |+| { data :: Foreign })
+  , getPaymentNote :: Fn2Promise Account { transactionHash :: String } (Nullable String)
   }
 
 derive instance newtypeCoreToken :: Newtype CoreToken _
