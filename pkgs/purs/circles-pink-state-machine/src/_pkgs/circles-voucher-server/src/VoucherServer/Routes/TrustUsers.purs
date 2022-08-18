@@ -21,6 +21,23 @@ import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..), PrivateKey(..))
 import Web3 (Web3)
 
+
+-- trustUsers' :: forall m. MonadApp m => { body :: { safeAddresses :: Array Address }} -> m {}
+-- trustUsers' {body : {safeAddresses}} = do  
+--   results :: Array (Either String Unit) <- 
+--     for safeAddresses (trustUser (AppEnvVars env) { web3, circlesCore, account } >>> runExceptT) # lift
+--   pure {}
+
+-- trustUser :: forall m. MonadApp m => Address -> m Unit
+-- trustUser safeAddress = do
+--   trustAddConnection 
+--      { user: convert safeAddress
+--       , canSendTo: convert $ unwrap env.xbgeSafeAddress
+--       , limitPercentage: 100.0
+--       }
+
+--------------------------------------------------------------------------------
+
 type Env =
   { circlesCore :: CirclesCore
   , account :: Account
