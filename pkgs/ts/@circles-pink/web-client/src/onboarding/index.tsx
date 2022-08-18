@@ -25,7 +25,7 @@ import {
 } from './views';
 
 // Style
-import { ThemeProvider, ThemeContext } from '../context/theme';
+import { ThemeProvider, ThemeContext, Theme } from '../context/theme';
 import { AnimProvider } from '../context/anim';
 import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import {
@@ -54,7 +54,7 @@ export type UserConfig = {
 export type OnboardingProps = {
   initState?: CirclesState;
   lang?: Language;
-  baseColor?: string;
+  theme?: Theme;
   content?: Content;
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
@@ -162,7 +162,7 @@ const mkCfg = (uCfg: UserConfig): CirclesConfig => {
 const OnboardingContent = ({
   initState,
   lang = 'en',
-  baseColor,
+  theme,
   content = {},
   email = () => {},
   onTrackingEvent,
@@ -194,13 +194,16 @@ const OnboardingContent = ({
     (initState as unknown as CirclesState) || (init as unknown as CirclesState),
     control
   );
-  const [theme, setTheme] = useContext(ThemeContext);
+  const [_theme, setTheme] = useContext(ThemeContext);
 
   i18n.changeLanguage(lang);
 
   useEffect(() => {
-    if (baseColor) setTheme({ ...theme, baseColor });
-  }, [baseColor]);
+    if (theme) {
+      const mergedTheme = { ..._theme, ...theme };
+      setTheme(mergedTheme);
+    }
+  }, [theme]);
 
   return (
     <AnimProvider state={state}>
