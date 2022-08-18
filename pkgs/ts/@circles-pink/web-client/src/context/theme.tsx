@@ -13,12 +13,22 @@ export type Theme = {
 
 export const defaultTheme: Theme = {
   baseColor: chroma('#FF69B4').hex(),
-  cardColor: chroma('#40376E').hex(),
+  cardColor: chroma('#CFD6EA').hex(),
   darkColor: chroma('#65655E').hex(),
   lightColor: chroma('#CFD6EA').hex(),
   textColorDark: chroma('#7e7e7e').hex(),
   textColorLight: chroma('#fff').hex(),
   bgColor: chroma('#f9fafb').hex(),
+};
+
+export const defaultThemeXbge: Theme = {
+  baseColor: chroma('#FB8298').hex(),
+  cardColor: chroma('#f9ccd4').hex(),
+  darkColor: chroma('#65655E').hex(),
+  lightColor: chroma('#f9ccd4').hex(),
+  textColorDark: chroma('#7e7e7e').hex(),
+  textColorLight: chroma('#fff').hex(),
+  bgColor: chroma('#fff').hex(),
 };
 
 export type ThemeContextType = Theme & {
@@ -38,7 +48,7 @@ type ThemeProviderProps = {
 };
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [theme, setTheme] = useState<Theme>(defaultThemeXbge);
 
   return (
     <ThemeContext.Provider value={[theme, setTheme]}>

@@ -17,6 +17,7 @@ type ShimmeringTextProps = LoadingTextProps;
 
 const ShimmeringText = styled.p<ShimmeringTextProps>(({ theme, fontSize }) => [
   css`
+    white-space: nowrap;
     padding: 0;
     margin: 0;
     box-sizing: border-box;

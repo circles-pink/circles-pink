@@ -8,10 +8,10 @@ import tw, { css, styled } from 'twin.macro';
 export const JustifyEnd = tw.div`flex justify-end`;
 export const JustifyStart = tw.div`flex justify-start`;
 export const JustifyEndCenter = tw.div`flex justify-end items-center`;
-export const JustifyStartCenter = tw.div`flex justify-start items-center`;
+export const JustifyStartCenter = tw.div`flex justify-start items-center gap-x-0.5`;
 export const JustifyAround = tw.div`flex justify-around`;
 export const JustifyBetween = tw.div`flex justify-between`;
-export const JustifyAroundCenter = tw.div`flex justify-around items-center`;
+export const JustifyAroundCenter = tw.div`flex justify-around items-center gap-x-0.5`;
 export const JustifyBetweenCenter = tw.div`flex justify-between items-center`;
 
 // -----------------------------------------------------------------------------
@@ -41,5 +41,16 @@ type MarginYProps = {
 export const MarginY = styled.div<MarginYProps>(({ size, children }) => [
   css`
     margin: ${size}rem 0;
+  `,
+]);
+
+type MarginXProps = {
+  size: number;
+  children: ReactElement | ReactElement[] | string;
+};
+
+export const MarginX = styled.div<MarginXProps>(({ size, children }) => [
+  css`
+    margin: 0 ${size}rem;
   `,
 ]);

@@ -8,6 +8,7 @@ import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
 import { Claim } from './text';
 import ReactTooltip from 'react-tooltip';
+import { GridRow } from './GridRow';
 import {
   mdiAccountArrowLeft,
   mdiAccountArrowRight,
@@ -21,7 +22,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import { JustifyAroundCenter, JustifyStartCenter } from './helper';
+import { JustifyAroundCenter, JustifyStartCenter, MarginX } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,
@@ -48,6 +49,20 @@ import * as O from 'fp-ts/Option';
 import { TsTrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 import { Pair } from '@circles-pink/state-machine/output/Data.FpTs.Pair';
 import { TrustStatusMessage } from './TrustStatusMessage';
+import { LightColorFrame } from './layout';
+
+// -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+export const USERNAME_WIDTH = 2;
+export const RELATION_WIDTH = 1.25;
+export const ACTION_WIDTH = 1.25;
+export const ROW_HEIGHT = 3;
+
+// -----------------------------------------------------------------------------
+// Types
+// -----------------------------------------------------------------------------
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -118,31 +133,31 @@ export const TrustUserList = (props: TrustUserListProps) => {
 
   const allTrusts: Trust[] = [...graph.nodes]
     // Sort by username and safeAddress
-    // .sort((a, b) => {
-    //   const usernameA = pipe(
-    //     a[1],
-    //     either(() => '')(x => (x as User).username)
-    //   );
-    //   const usernameB = pipe(
-    //     b[1],
-    //     either(() => '')(x => (x as User).username)
-    //   );
+    .sort((a, b) => {
+      const usernameA = pipe(
+        a[1],
+        either(() => '')(x => (x as User).username)
+      );
+      const usernameB = pipe(
+        b[1],
+        either(() => '')(x => (x as User).username)
+      );
 
-    //   const result = usernameA.localeCompare(usernameB);
+      const result = usernameA.localeCompare(usernameB);
 
-    //   if (result !== 0) return result;
+      if (result !== 0) return result;
 
-    //   const addressA = pipe(
-    //     a[1],
-    //     either(x => x as Address)(x => (x as User).safeAddress)
-    //   );
-    //   const addressB = pipe(
-    //     b[1],
-    //     either(x => x as Address)(x => (x as User).safeAddress)
-    //   );
+      const addressA = pipe(
+        a[1],
+        either(x => x as Address)(x => (x as User).safeAddress)
+      );
+      const addressB = pipe(
+        b[1],
+        either(x => x as Address)(x => (x as User).safeAddress)
+      );
 
-    //   return addrToString(addressA).localeCompare(addrToString(addressB));
-    // })
+      return addrToString(addressA).localeCompare(addrToString(addressB));
+    })
     .filter(n => n[0] !== ownAddress)
     .filter(
       n =>
@@ -181,39 +196,52 @@ export const TrustUserList = (props: TrustUserListProps) => {
   return (
     <LightColorFrame theme={theme} title={title} icon={icon}>
       <>{actionRow}</>
-      <TableContainer>
-        <Table>
-          {trusts.length > 0 && (
-            <TableHeader>
-              <TableRow theme={theme}>
-                <TableHead>{t('dashboard.trustList.tableHead.user')}</TableHead>
-                <TableHead>
-                  <JustifyAround>
+      <ListContainer>
+        {trusts.length > 0 && (
+          <GridRow
+            minHeight={ROW_HEIGHT}
+            fields={[
+              {
+                width: USERNAME_WIDTH,
+                content: (
+                  <HeadingRowText theme={theme}>
+                    {t('dashboard.trustList.tableHead.user')}
+                  </HeadingRowText>
+                ),
+                align: 'LEFT',
+              },
+              {
+                width: RELATION_WIDTH,
+                content: (
+                  <HeadingRowText theme={theme}>
                     {t('dashboard.trustList.tableHead.relation')}
-                  </JustifyAround>
-                </TableHead>
-                <TableHead>
-                  <JustifyAround>
+                  </HeadingRowText>
+                ),
+                align: 'CENTER',
+              },
+              {
+                width: ACTION_WIDTH,
+                content: (
+                  <HeadingRowText theme={theme}>
                     {t('dashboard.trustList.tableHead.action')}
-                  </JustifyAround>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-          )}
+                  </HeadingRowText>
+                ),
+                align: 'CENTER',
+              },
+            ]}
+          />
+        )}
 
-          <TableBody>
-            {trusts.map(c => {
-              return (
-                <ContentRow
-                  key={addrToString(getAddress(c.user))}
-                  c={c}
-                  {...props}
-                />
-              );
-            })}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        {trusts.map(c => {
+          return (
+            <ContentRow
+              key={addrToString(getAddress(c.user))}
+              c={c}
+              {...props}
+            />
+          );
+        })}
+      </ListContainer>
       <>
         {paginationInfo.totalPages > 1 && (
           <JustifyAroundCenter>
@@ -259,186 +287,200 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
 
   if (inSync) {
     return (
-      <TableRow theme={theme}>
-        <TableData>
-          <FadeIn orientation={'left'} delay={getDelay()}>
-            <JustifyStartCenter>
-              <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
-              <b>{userIdent}</b>
-            </JustifyStartCenter>
-          </FadeIn>
-        </TableData>
-        <TableData>
-          <ReactTooltip />
-          <JustifyAroundCenter>
-            <FadeIn orientation={'left'} delay={getDelay()}>
-              <Icon
-                path={
-                  isTrusted || pendingUntrust || loadingUntrust
-                    ? mdiAccountArrowLeft
-                    : mdiAccountCancel
-                }
-                size={1.6}
-                color={
-                  isTrusted || pendingUntrust || loadingUntrust
-                    ? theme.baseColor
-                    : 'white'
-                }
-                data-tip={mapToolTipRelRec(isTrusted, userIdent)}
-              />
-            </FadeIn>
-            <FadeIn orientation={'left'} delay={getDelay()}>
-              <Icon
-                path={c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
-                size={1.6}
-                color={c.isOutgoing ? theme.baseColor : 'white'}
-                data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
-              />
-            </FadeIn>
-          </JustifyAroundCenter>
-        </TableData>
-        <TableData>
-          <JustifyAroundCenter>
-            <FadeIn orientation={'left'} delay={getDelay()}>
-              <Clickable
-                clickable={c.isOutgoing}
-                onClick={() => {
-                  if (c.isOutgoing) {
-                    if (toggleOverlay && setOverwriteTo) {
-                      setOverwriteTo(getAddress(c.user));
-                      toggleOverlay('SEND');
-                    }
-                  }
-                }}
-              >
-                <Icon
-                  path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-                  size={1.75}
-                  color={c.isOutgoing ? theme.baseColor : 'white'}
-                  data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
-                />
-              </Clickable>
-            </FadeIn>
-
-            <FadeIn orientation={'left'} delay={getDelay()}>
-              <Clickable
-                clickable={true}
-                onClick={() => {
-                  isUntrusted ? addTrust(c.user) : removeTrust(c.user);
-                }}
-              >
-                <Icon
-                  path={isTrusted ? mdiHeart : mdiHeartOutline}
-                  size={1.5}
-                  color={isTrusted ? theme.baseColor : 'white'}
-                  data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                />
-              </Clickable>
-            </FadeIn>
-          </JustifyAroundCenter>
-        </TableData>
-      </TableRow>
+      <GridRow
+        minHeight={ROW_HEIGHT}
+        fields={[
+          {
+            width: USERNAME_WIDTH,
+            content: (
+              <>
+                <ReactTooltip />
+                <FadeIn orientation={'left'} delay={getDelay()}>
+                  <JustifyStartCenter>
+                    <div>
+                      <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
+                    </div>
+                    <Username theme={theme} data-tip={userIdent}>
+                      {userIdent}
+                    </Username>
+                  </JustifyStartCenter>
+                </FadeIn>
+              </>
+            ),
+            align: 'LEFT',
+          },
+          {
+            width: RELATION_WIDTH,
+            content: (
+              <>
+                <ReactTooltip />
+                <JustifyAroundCenter>
+                  <FadeIn orientation={'left'} delay={getDelay()}>
+                    <Icon
+                      path={
+                        isTrusted || pendingUntrust || loadingUntrust
+                          ? mdiAccountArrowLeft
+                          : mdiAccountCancel
+                      }
+                      size={1.6}
+                      color={
+                        isTrusted || pendingUntrust || loadingUntrust
+                          ? theme.baseColor
+                          : 'white'
+                      }
+                      data-tip={mapToolTipRelRec(isTrusted, userIdent)}
+                    />
+                  </FadeIn>
+                  <FadeIn orientation={'left'} delay={getDelay()}>
+                    <Icon
+                      path={
+                        c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
+                      }
+                      size={1.6}
+                      color={c.isOutgoing ? theme.baseColor : 'white'}
+                      data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+                    />
+                  </FadeIn>
+                </JustifyAroundCenter>
+              </>
+            ),
+            align: 'CENTER',
+          },
+          {
+            width: ACTION_WIDTH,
+            content: (
+              <>
+                <ReactTooltip />
+                <JustifyAroundCenter>
+                  <FadeIn orientation={'left'} delay={getDelay()}>
+                    <Clickable
+                      clickable={c.isOutgoing}
+                      onClick={() => {
+                        if (c.isOutgoing) {
+                          if (toggleOverlay && setOverwriteTo) {
+                            setOverwriteTo(getAddress(c.user));
+                            toggleOverlay('SEND');
+                          }
+                        }
+                      }}
+                    >
+                      <Icon
+                        path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+                        size={1.75}
+                        color={c.isOutgoing ? theme.baseColor : 'white'}
+                        data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
+                      />
+                    </Clickable>
+                  </FadeIn>
+                  <FadeIn orientation={'left'} delay={getDelay()}>
+                    <Clickable
+                      clickable={true}
+                      onClick={() => {
+                        isUntrusted ? addTrust(c.user) : removeTrust(c.user);
+                      }}
+                    >
+                      <Icon
+                        path={isTrusted ? mdiHeart : mdiHeartOutline}
+                        size={1.5}
+                        color={isTrusted ? theme.baseColor : 'white'}
+                        data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                      />
+                    </Clickable>
+                  </FadeIn>
+                </JustifyAroundCenter>
+              </>
+            ),
+            align: 'CENTER',
+          },
+        ]}
+      />
     );
   }
   return (
-    <TableRow theme={theme}>
-      <TableData>
-        <FadeIn orientation={'left'} delay={getDelay()}>
-          <JustifyStartCenter>
-            <Icon path={mdiAt} size={1.5} color={theme.baseColor} />
-            <b>{userIdent}</b>
-          </JustifyStartCenter>
-        </FadeIn>
-      </TableData>
-      <TableData></TableData>
-      <TableData>
-        <JustifyAroundCenter>
-          <TrustStatusMessage theme={theme} trustState={c.trustState} />
-          <FadeIn orientation={'left'} delay={getDelay()}>
+    <GridRow
+      minHeight={ROW_HEIGHT}
+      fields={[
+        {
+          width: USERNAME_WIDTH,
+          content: (
             <>
-              {loadingTrust || loadingUntrust ? (
-                <LoadingCircles count={1} width={35} color={theme.baseColor} />
-              ) : (
-                <Icon
-                  path={mdiWeatherCloudyClock}
-                  size={1.5}
-                  color={theme.baseColor}
-                  data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                />
-              )}
+              <ReactTooltip />
+              <FadeIn orientation={'left'} delay={getDelay()}>
+                <JustifyStartCenter>
+                  <div>
+                    <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
+                  </div>
+                  <Username theme={theme} data-tip={userIdent}>
+                    {userIdent}
+                  </Username>
+                </JustifyStartCenter>
+              </FadeIn>
             </>
-          </FadeIn>
-        </JustifyAroundCenter>
-      </TableData>
-    </TableRow>
+          ),
+          align: 'LEFT',
+        },
+        {
+          width: RELATION_WIDTH * 2,
+          content: (
+            <>
+              <ReactTooltip />
+              <TrustStatusMessage theme={theme} trustState={c.trustState} />
+            </>
+          ),
+          align: 'RIGHT',
+        },
+        {
+          width: ACTION_WIDTH / 2,
+          content: (
+            <>
+              <ReactTooltip />
+              <FadeIn orientation={'left'} delay={getDelay()}>
+                <>
+                  {loadingTrust || loadingUntrust ? (
+                    <LoadingCircles
+                      count={1}
+                      width={35}
+                      color={theme.baseColor}
+                    />
+                  ) : (
+                    <Icon
+                      path={mdiWeatherCloudyClock}
+                      size={1.5}
+                      color={theme.baseColor}
+                      data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                    />
+                  )}
+                </>
+              </FadeIn>
+            </>
+          ),
+          align: 'LEFT',
+        },
+      ]}
+    />
   );
 };
-
-// -----------------------------------------------------------------------------
-// UI / LightColorFrame
-// -----------------------------------------------------------------------------
-
-type FameProps = {
-  theme: Theme;
-  title?: string;
-  icon?: string;
-  children: ReactElement | ReactElement[] | string;
-};
-
-export const LightColorFrame = ({
-  theme,
-  title,
-  icon,
-  children,
-}: FameProps): ReactElement => {
-  return (
-    <LightColorFrame_ theme={theme}>
-      <Title>
-        <JustifyBetween>
-          <Claim color={darken(theme.lightColor, 2)}>{title}</Claim>
-          {icon ? (
-            <Icon path={icon} size={1.5} color={darken(theme.lightColor, 2)} />
-          ) : (
-            <></>
-          )}
-        </JustifyBetween>
-      </Title>
-      <>{children}</>
-    </LightColorFrame_>
-  );
-};
-
-const LightColorFrame_ = styled.div<FameProps>(({ theme }: FameProps) => [
-  tw`block lg:p-8 md:p-8 p-4 border border-gray-800 shadow-xl rounded-xl`,
-  css`
-    background-color: ${theme.lightColor};
-  `,
-]);
 
 // -----------------------------------------------------------------------------
 // UI / Table
 // -----------------------------------------------------------------------------
 
-const TableContainer = tw.div`overflow-hidden overflow-x-auto border border-gray-100 rounded`;
-const Table = tw.table`min-w-full text-sm divide-y divide-gray-200`;
-const TableHeader = tw.thead`lg:px-4 md:px-4 px-2 lg:text-lg md:text-lg text-left whitespace-nowrap`;
-const TableHead = tw.th`lg:px-4 md:px-4 px-2 text-left whitespace-nowrap`;
-const TableBody = tw.tbody`divide-y divide-gray-100`;
-const TableData = styled.td(() => [
-  tw`lg:px-4 md:px-4 px-2 py-2 text-lg whitespace-nowrap`,
-  css`
-    height: 4.25rem;
-  `,
-]);
+export const ListContainer = tw.div`max-w-full border border-gray-100 rounded`;
 
-type TableRowProps = {
+type HeadingRowTextProps = {
   theme: Theme;
 };
-const TableRow = styled.tr<TableRowProps>(({ theme }: TableRowProps) => [
-  css`
-    color: ${theme.darkColor};
-  `,
-]);
+
+export const HeadingRowText = styled.b<HeadingRowTextProps>(
+  ({ theme }: HeadingRowTextProps) => [
+    tw`lg:text-lg md:text-lg text-left whitespace-nowrap`,
+    css`
+      color: ${theme.darkColor};
+      padding: 0;
+      margin: 0;
+    `,
+  ]
+);
 
 // -----------------------------------------------------------------------------
 // UI
@@ -446,13 +488,23 @@ const TableRow = styled.tr<TableRowProps>(({ theme }: TableRowProps) => [
 type ClickableProps = {
   clickable: boolean;
 };
-const Clickable = styled.div<ClickableProps>(({ clickable }) => [
+export const Clickable = styled.div<ClickableProps>(({ clickable }) => [
   clickable ? tw`cursor-pointer` : tw`cursor-not-allowed`,
 ]);
 
-const Title = tw.div`mb-4`;
-const JustifyBetween = tw.div`flex justify-between`;
-const JustifyAround = tw.div`flex justify-around`;
+type UsernameProps = {
+  theme: Theme;
+};
+
+export const Username = styled.b<UsernameProps>(({ theme }: UsernameProps) => [
+  tw`lg:text-lg md:text-lg text-left whitespace-nowrap`,
+  css`
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    color: ${theme.darkColor};
+  `,
+]);
 
 // -----------------------------------------------------------------------------
 // Tooltip mapping

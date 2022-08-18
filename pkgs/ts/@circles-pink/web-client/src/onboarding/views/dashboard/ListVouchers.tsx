@@ -76,7 +76,7 @@ export const ListVouchers = ({
 
   return (
     <>
-      <Claim color={theme.baseColor}>
+      <Claim color={theme.textColorDark}>
         {t('dashboard.voucherShop.listDescription')}
       </Claim>
       {vouchers.length > 0 || justBoughtVoucher ? (

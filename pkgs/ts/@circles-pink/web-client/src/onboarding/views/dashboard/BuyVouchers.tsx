@@ -34,7 +34,7 @@ export const BuyVouchers = ({
 
   return (
     <>
-      <Claim color={theme.baseColor}>
+      <Claim color={theme.textColorDark}>
         {t('dashboard.voucherShop.buyDescription')}
       </Claim>
       {providers_.length > 0 ? (
@@ -118,8 +118,8 @@ const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
     css`
       cursor: ${enabled ? 'pointer' : 'not-allowed'};
       font-size: 2rem;
-      color: ${theme.textColorDark};
-      background-color: ${theme.lightColor};
+      color: ${theme.darkColor};
+      background-color: ${theme.cardColor};
       padding: 1rem;
       ${enabled &&
       `&:hover {
@@ -127,7 +127,7 @@ const Offer = styled.button<OfferProps>(({ theme, enabled }) => {
         color: ${theme.baseColor};
       }`}
 
-      outline: 1px solid ${theme.textColorDark};
+      outline: 1px solid ${theme.darkColor};
       border: none;
     `,
   ];
