@@ -17,6 +17,7 @@ export const resources = {
       getTrustsButton: 'Get Trust Network',
       addTrustsButton: 'Trust',
       debugButton: 'Core to window Object',
+      mayTakeSomeTime: 'This action may take a little while.',
       landing: {
         claim: 'Welcome to Circles',
         subClaim: 'Create a new Circles account (Wallet).',
@@ -135,6 +136,9 @@ export const resources = {
           waitingFor: 'Waiting for',
           vouchersLeft: 'Vouchers left!',
           voucher: 'voucher',
+          buyAtMarketPlace:
+            'You can also buy many products at the Circles market:',
+          toTheMarketPlace: 'To the market',
         },
       },
       debug: {
@@ -159,6 +163,8 @@ export const resources = {
       getTrustsButton: 'Vertrauensnetzwerk abfragen',
       addTrustsButton: 'Vertrauen',
       debugButton: 'Core ans window Object',
+      mayTakeSomeTime:
+        'Diese Aktion kann mitunter ein bis zwei Minuten dauern.',
       landing: {
         claim: 'Probier das Grundeinkommen auf der Blockchain!',
         subClaim:
@@ -239,7 +245,7 @@ export const resources = {
         sendButton: 'Senden',
         receiveButton: 'Empfangen',
         searchButton: 'Suchen',
-        trustNetworkTitle: 'Trust Netzwerk',
+        trustNetworkTitle: 'Mein Netzwerk',
         exploreTitle: 'Erkunden',
         userSearchPlaceholder: 'Nutzer:innen suchen',
         sendClaim: 'Circles überweisen',
@@ -265,7 +271,7 @@ export const resources = {
           },
         },
         voucherShop: {
-          shopTitle: 'Gutschein Shop',
+          shopTitle: 'Circles einlösen',
           buyDescription: 'Gutscheine kaufen:',
           buyNoVouchers:
             'Im Moment gibt es keine Gutscheine, versuche es später nochmal!',
@@ -283,6 +289,9 @@ export const resources = {
           waitingFor: 'Warte auf',
           vouchersLeft: 'Gutscheine übrig!',
           voucher: 'Gutschein',
+          buyAtMarketPlace:
+            'Außerdem kannst du diverse Produkte auf dem Circles Marktplatz erwerben:',
+          toTheMarketPlace: 'Zum Marktplatz',
         },
       },
       debug: {
