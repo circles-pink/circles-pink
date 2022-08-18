@@ -524,6 +524,7 @@ export const Dashboard = ({
         <>
           <StateMachineDebugger state={state} />
           <Button
+            theme={theme}
             onClick={() => act(A._dashboard(A._redeploySafeAndToken(unit)))}
           >
             Redeploy!

@@ -1,13 +1,13 @@
 import React from 'react';
 import { styled } from 'twin.macro';
-import { defaultTheme, Theme } from '../../context/theme';
+import { Theme } from '../../context/theme';
 
 type HeadingPrps = {
   children: string;
   theme?: Theme;
 };
 
-export const Heading = ({ children, theme = defaultTheme }: HeadingPrps) => {
+export const Heading = ({ children }: HeadingPrps) => {
   return <Headline>{children}</Headline>;
 };
 
