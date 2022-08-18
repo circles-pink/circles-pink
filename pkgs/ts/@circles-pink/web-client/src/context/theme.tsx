@@ -11,24 +11,14 @@ export type Theme = {
   bgColor: string;
 };
 
-// export const defaultTheme: Theme = {
-//   baseColor: chroma('#FF69B4').hex(),
-//   cardColor: chroma('#CFD6EA').hex(),
-//   darkColor: chroma('#65655E').hex(),
-//   lightColor: chroma('#CFD6EA').hex(),
-//   textColorDark: chroma('#7e7e7e').hex(),
-//   textColorLight: chroma('#fff').hex(),
-//   bgColor: chroma('#f9fafb').hex(),
-// };
-
 export const defaultTheme: Theme = {
-  baseColor: chroma('#FB8298').hex(),
-  cardColor: chroma('#f9ccd4').hex(),
+  baseColor: chroma('#FF69B4').hex(),
+  cardColor: chroma('#CFD6EA').hex(),
   darkColor: chroma('#65655E').hex(),
-  lightColor: chroma('#FFEBEE').hex(),
+  lightColor: chroma('#DCE4FA').hex(),
   textColorDark: chroma('#7e7e7e').hex(),
   textColorLight: chroma('#fff').hex(),
-  bgColor: chroma('#fff').hex(),
+  bgColor: chroma('#f9fafb').hex(),
 };
 
 export type ThemeContextType = Theme & {
