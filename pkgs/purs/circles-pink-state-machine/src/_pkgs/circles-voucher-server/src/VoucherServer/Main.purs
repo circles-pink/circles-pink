@@ -224,8 +224,7 @@ getVouchers (AppEnvVars env) { body: { signatureObj } } = do
 
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
-  let _ = decryptVoucherCode key x.code
-  let code = VoucherCode "Dummy Voucher Code"
+  code <- decryptVoucherCode key x.code
   in Voucher x { code = code }
 
 decryptVoucherCode :: String -> VoucherCodeEncrypted -> Maybe VoucherCode
