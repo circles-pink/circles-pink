@@ -649,7 +649,7 @@ printErr =
     # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
     # on (Proxy :: _ "errApi") (\e -> "Api Error: " <> show e)
     # on (Proxy :: _ "errParseAddress") (\e -> "ParseAddress error: " <> show e)
-    # on (Proxy :: _ "errNotGivenOrAllowed") (\e -> "Not given or allowed.")
+    # on (Proxy :: _ "errNotGivenOrAllowed") (\_ -> "Not given or allowed.")
 
 --------------------------------------------------------------------------------
 -- Error types
