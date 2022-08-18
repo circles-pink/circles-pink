@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react';
 import { LoadingCircles } from '../LoadingCircles';
 import { JustifyAroundCenter } from '../helper';
 import Icon from '@mdi/react';
-import { defaultTheme, Theme } from '../../context/theme';
+import { Theme } from '../../context/theme';
 
 // -----------------------------------------------------------------------------
 // UI / Button
@@ -15,7 +15,7 @@ export type ButtonPrio = 'high' | 'medium' | 'low';
 export type ButtonState = 'disabled' | 'loading' | 'enabled';
 
 type ButtonProps = {
-  theme?: Theme;
+  theme: Theme;
   fullWidth?: boolean;
   state?: ButtonState;
   children?: ReactNode;
@@ -80,13 +80,13 @@ const Button_ = styled.button<Button_Props>(
         background: ${lighten(theme.darkColor, 0.2)};
         color: ${theme.textColorLight};
       }
-  `,
+    `,
       low: `
       background: ${theme.lightColor};
       border: 1px solid ${lighten(theme.darkColor)};
       color: ${theme.darkColor};
       &:hover {
-        background: ${lighten(theme.lightColor, 0.75)};
+        background: ${lighten(theme.cardColor, 0.75)};
         color: ${theme.darkColor};
       }
       `,
@@ -97,8 +97,8 @@ const Button_ = styled.button<Button_Props>(
         outline: none;
         border: none;
         font-size: 1.1rem;
-        cursor: ${isLoading ? 'wait' : isDisabled ? 'not-allowed' : 'pointer'}
-          ${fullWidth && 'width: 100%;'};
+        cursor: ${isLoading ? 'wait' : isDisabled ? 'not-allowed' : 'pointer'};
+        ${fullWidth && 'width: 100%;'}
         ${prioStyles}
       `,
       tw`font-bold py-2 px-4 my-1 rounded-full`,
@@ -149,7 +149,7 @@ const Loading = ({ color }: LoadingProps) => {
 const normalizeProps = (props: ButtonProps): Required<ButtonProps> => {
   return {
     state: props.state || 'enabled',
-    theme: props.theme || defaultTheme,
+    theme: props.theme,
     fullWidth: props.fullWidth === undefined ? false : props.fullWidth,
     children: props.children || 'ok',
     onClick: props.onClick || (() => {}),

@@ -181,18 +181,21 @@ export const TrustGraph = ({
       <br />
       <ButtonRow>
         <Button
+          theme={theme}
           prio={layout.name === 'cise' ? 'medium' : 'low'}
           onClick={() => setLayout(cise)}
         >
           Cise
         </Button>
         <Button
+          theme={theme}
           prio={layout.name === 'cose-bilkent' ? 'medium' : 'low'}
           onClick={() => setLayout(coseBilkent)}
         >
           Cose Bilkent
         </Button>
         <Button
+          theme={theme}
           prio={layout.name === 'concentric' ? 'medium' : 'low'}
           onClick={() => setLayout(concentric)}
         >
