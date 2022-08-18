@@ -3,13 +3,17 @@ module VoucherServer.MonadApp.Class where
 import VoucherServer.Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address)
+import CirclesPink.Data.Address as C
+import Control.Monad.Error.Class (class MonadError)
 import Data.Lens (Lens', lens')
 import Data.Tuple.Nested ((/\))
+import Payload.Client (ClientError)
+import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
 import Type.Proxy (Proxy(..))
 import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.Spec.Types (TransferId)
+import VoucherServer.Spec.Types (TransferId, VoucherAmount(..), VoucherEncrypted(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Specs.Xbge (Address(..))
 import VoucherServer.Types (TransferMeta)
 
 --------------------------------------------------------------------------------
@@ -17,7 +21,7 @@ import VoucherServer.Types (TransferMeta)
 --------------------------------------------------------------------------------
 
 class
-  ( MonadThrow AppError m
+  ( MonadError AppError m
   , MonadAsk (AppEnv m) m
   ) <=
   MonadApp m
@@ -32,6 +36,7 @@ data AppError
   | ErrBasicAuth
   | ErrGraphQL
   | ErrGraphQLParse String
+  | ErrPayloadClient ClientError
 
 derive instance genericVSE :: Generic AppError _
 derive instance eqVSE :: Eq AppError
@@ -56,6 +61,7 @@ errorToFailure = case _ of
   ErrBasicAuth -> Error $ Res.internalError $ StringBody "Authorization failed"
   ErrGraphQL -> internalServerError
   ErrGraphQLParse _ -> internalServerError
+  ErrPayloadClient _ -> internalServerError
   where
   internalServerError = Error $ Res.internalError $ StringBody "Internal server error"
 
@@ -66,6 +72,7 @@ errorToLog = case _ of
   ErrBasicAuth -> "Basic Authentication failed"
   ErrGraphQL -> "Graph QL Error"
   ErrGraphQLParse msg -> "Graph QL Parse Error: " <> msg
+  ErrPayloadClient _ -> "Payload client error"
 
 --------------------------------------------------------------------------------
 -- Env
@@ -79,6 +86,7 @@ type AppEnv' m =
   { envVars :: AppEnvVars
   , graphNode :: GraphNodeEnv m
   , circlesCore :: CirclesCoreEnv m
+  , xbgeClient :: XbgeClientEnv m
   }
 
 type GraphNodeEnv' m =
@@ -89,9 +97,26 @@ type CirclesCoreEnv' m =
   { getTrusts :: CirclesCoreEnv_getTrusts m
   }
 
-type CirclesCoreEnv_getTrusts m = Address -> m (Set Address)
+type XbgeClientEnv m =
+  { getVoucherProviders :: XbgeClientEnv_getVoucherProviders m
+  , finalizeVoucherPurchase :: XbgeClientEnv_finalizeVoucherPurchase m
+  }
+
+type CirclesCoreEnv_getTrusts m = C.Address -> m (Set C.Address)
 
 type GraphNodeEnv_getTransferMeta m = TransferId -> m TransferMeta
+
+type XbgeClientEnv_getVoucherProviders m = {} -> m (Response { data :: Array VoucherProvider })
+
+type XbgeClientEnv_finalizeVoucherPurchase m =
+  { body ::
+      { safeAddress :: Address
+      , providerId :: VoucherProviderId
+      , amount :: VoucherAmount
+      , transactionId :: TransferId
+      }
+  }
+  -> m (Response { data :: VoucherEncrypted })
 
 --------------------------------------------------------------------------------
 
@@ -103,7 +128,6 @@ _CirclesCoreEnv = lens' (\(CirclesCoreEnv x) -> x /\ CirclesCoreEnv)
 
 _GraphNodeEnv :: forall m. Lens' (GraphNodeEnv m) (GraphNodeEnv' m)
 _GraphNodeEnv = lens' (\(GraphNodeEnv x) -> x /\ GraphNodeEnv)
-
 
 modifyAppEnv :: forall m. (AppEnv' m -> AppEnv' m) -> AppEnv m -> AppEnv m
 modifyAppEnv f (AppEnv r) = AppEnv $ f r

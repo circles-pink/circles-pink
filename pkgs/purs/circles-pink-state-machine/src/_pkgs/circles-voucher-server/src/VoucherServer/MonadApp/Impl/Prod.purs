@@ -2,7 +2,7 @@ module VoucherServer.MonadApp.Impl.Prod where
 
 import Prelude
 
-import Control.Monad.Error.Class (class MonadThrow)
+import Control.Monad.Error.Class (class MonadError, class MonadThrow)
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either)
@@ -28,6 +28,7 @@ derive newtype instance functorAPM :: Functor AppProdM
 derive newtype instance bindAPM :: Bind AppProdM
 derive newtype instance monadAPM :: Monad AppProdM
 derive newtype instance monadThrowAPM :: MonadThrow AppError AppProdM
+derive newtype instance monadErrorAPM :: MonadError AppError AppProdM
 derive newtype instance monadAskAPM :: MonadAsk (AppEnv AppProdM) AppProdM
 derive newtype instance monadEffectAPM :: MonadEffect AppProdM
 derive newtype instance monadAffAPM :: MonadAff AppProdM
