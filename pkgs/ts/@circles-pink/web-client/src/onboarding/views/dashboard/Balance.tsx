@@ -65,10 +65,11 @@ export const Balance = ({
 
 type AmountProps = { color?: string };
 
-const Amount = styled.h2<AmountProps>(({ color }) => [
+const Amount = styled.span<AmountProps>(({ color }) => [
   tw`text-5xl mr-2 my-2`,
   css`
     color: ${color || 'black'};
+    font-weight: 600;
   `,
 ]);
 

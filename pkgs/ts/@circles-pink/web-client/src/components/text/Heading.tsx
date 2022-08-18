@@ -1,5 +1,5 @@
 import React from 'react';
-import { styled } from 'twin.macro';
+import { css, styled } from 'twin.macro';
 import { Theme } from '../../context/theme';
 
 type HeadingPrps = {
@@ -15,6 +15,10 @@ export const Heading = ({ children }: HeadingPrps) => {
 // UI
 // -----------------------------------------------------------------------------
 
-const Headline = styled.h2(() => {
-  return [];
+const Headline = styled.span(() => {
+  return [
+    css`
+      font-weight: 600;
+    `,
+  ];
 });
