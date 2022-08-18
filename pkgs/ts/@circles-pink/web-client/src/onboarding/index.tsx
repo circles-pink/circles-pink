@@ -63,6 +63,7 @@ export type OnboardingProps = {
 };
 
 export const Onboarding = (props: OnboardingProps) => {
+  if (window === undefined) return null;
   return (
     <ThemeProvider>
       <Frame>

@@ -61,7 +61,6 @@ export const Send = ({
   useEffect(() => {
     // Needs to be required after mount
     QrScanner = require('eth-qr-scanner');
-    console.log(QrScanner);
   }, []);
 
   // Util
