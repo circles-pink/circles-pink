@@ -80,8 +80,7 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  )
-  where
+  ) where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
@@ -530,7 +529,7 @@ tokenGetPaymentNote cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 
   mapArg2 x = x { transactionHash = x.transactionHash }
 
-  mapOk x = N.toMaybe x # note (inj (Proxy :: _ "notGivenOrAllowed") unit) # liftEither
+  mapOk x = N.toMaybe x # note (inj (Proxy :: _ "errNotGivenOrAllowed") unit) # liftEither
 
 --------------------------------------------------------------------------------
 -- API / organizationIsOrganization
@@ -611,7 +610,7 @@ type ErrService r = (errService :: Unit | r)
 
 type ErrParseAddress r = (errParseAddress :: String | r)
 
-type ErrNotGivenOrAllowed r = (notGivenOrAllowed :: Unit | r)
+type ErrNotGivenOrAllowed r = (errNotGivenOrAllowed :: Unit | r)
 
 --------------------------------------------------------------------------------
 -- Err constructors
@@ -634,7 +633,13 @@ _errParseAddress = inj (Proxy :: _ "errParseAddress")
 --------------------------------------------------------------------------------
 -- Err composition
 --------------------------------------------------------------------------------
-type Err r = ErrParseAddress + ErrNative + ErrService + ErrInvalidUrl + ErrApi + r
+type Err r = ErrParseAddress
+  + ErrNative
+  + ErrService
+  + ErrInvalidUrl
+  + ErrApi
+  + ErrNotGivenOrAllowed
+  + r
 
 printErr :: Variant (Err ()) -> String
 printErr =
@@ -644,6 +649,7 @@ printErr =
     # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
     # on (Proxy :: _ "errApi") (\e -> "Api Error: " <> show e)
     # on (Proxy :: _ "errParseAddress") (\e -> "ParseAddress error: " <> show e)
+    # on (Proxy :: _ "errNotGivenOrAllowed") (\e -> "Not given or allowed.")
 
 --------------------------------------------------------------------------------
 -- Error types
