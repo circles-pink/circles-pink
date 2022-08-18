@@ -51,6 +51,7 @@ type CCErrAll = Variant
       + CC.ErrService
       + CC.ErrInvalidUrl
       + CC.ErrApi
+      + CC.ErrNotGivenOrAllowed
       + ()
   )
 
@@ -95,6 +96,7 @@ type GraphNodeEnv' m =
 
 type CirclesCoreEnv' m =
   { getTrusts :: CirclesCoreEnv_getTrusts m
+  , getPaymentNote :: CirclesCoreEnv_getPaymentNote m
   }
 
 type XbgeClientEnv m =
@@ -103,6 +105,8 @@ type XbgeClientEnv m =
   }
 
 type CirclesCoreEnv_getTrusts m = C.Address -> m (Set C.Address)
+
+type CirclesCoreEnv_getPaymentNote m = String -> m String
 
 type GraphNodeEnv_getTransferMeta m = TransferId -> m TransferMeta
 

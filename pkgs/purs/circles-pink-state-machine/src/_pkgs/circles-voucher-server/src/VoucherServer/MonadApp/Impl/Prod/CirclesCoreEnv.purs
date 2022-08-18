@@ -18,8 +18,8 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (AppError(..), AppProdM)
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv_getTrusts)
+import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv_getTrusts, CirclesCoreEnv_getPaymentNote)
 import Web3 (Web3)
 
 type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
@@ -33,26 +33,34 @@ type CirclesValues =
 
 mkCirclesCoreEnv :: M (CirclesCoreEnv AppProdM)
 mkCirclesCoreEnv = do
-  getTrusts <- mkGetTrusts
-  pure $ CirclesCoreEnv { getTrusts }
+  circlesValues <- getCirclesValues
 
-mkGetTrusts :: M (CirclesCoreEnv_getTrusts AppProdM)
-mkGetTrusts = do
-  { circlesCore, account } <- getCirclesValues
+  pure $ CirclesCoreEnv
+    { getTrusts: mkGetTrusts circlesValues
+    , getPaymentNote : mkGetPaymentNote circlesValues
+    }
 
-  pure \safeAddress ->
-    CC.trustGetNetwork circlesCore account
-      { safeAddress: convert safeAddress }
-      # liftCirclesCore
-      <#> A.filter _.isOutgoing
-        >>> map (_.safeAddress >>> wrap)
-        >>> Set.fromFoldable
+mkGetTrusts :: CirclesValues -> CirclesCoreEnv_getTrusts AppProdM
+mkGetTrusts { circlesCore, account } safeAddress =
+  CC.trustGetNetwork circlesCore account
+    { safeAddress: convert safeAddress }
+    # liftCirclesCore
+    <#> A.filter _.isOutgoing
+      >>> map (_.safeAddress >>> wrap)
+      >>> Set.fromFoldable
+
+mkGetPaymentNote :: CirclesValues -> CirclesCoreEnv_getPaymentNote AppProdM
+mkGetPaymentNote { circlesCore, account } transactionHash =
+  CC.tokenGetPaymentNote circlesCore account
+    { transactionHash }
+    # liftCirclesCore
+
 
 --------------------------------------------------------------------------------
 -- Util
 --------------------------------------------------------------------------------
 
-liftCirclesCore :: forall a m. MonadAff m => MonadThrow AppError m => ExceptV (CC.Err ()) Aff a -> m a
+liftCirclesCore :: forall a m. MonadAff m => MonadThrow AppError m => ExceptT CCErrAll Aff a -> m a
 liftCirclesCore x = x
   # withExceptT ErrCirclesCore
   # runExceptT

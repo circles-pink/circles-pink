@@ -5,6 +5,7 @@ module CirclesCore
   , ErrNative
   , ErrNewCirclesCore
   , ErrNewWebSocketProvider
+  , ErrNotGivenOrAllowed
   , ErrNullReturn
   , ErrOrganizationIsOrganization
   , ErrParseAddress
@@ -67,6 +68,7 @@ module CirclesCore
   , tokenCheckUBIPayout
   , tokenDeploy
   , tokenGetBalance
+  , tokenGetPaymentNote
   , tokenRequestUBIPayout
   , tokenTransfer
   , trustAddConnection
@@ -78,7 +80,8 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  ) where
+  )
+  where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
@@ -92,6 +95,7 @@ import CirclesCore.Bindings (Options, Provider, CirclesCore, Account, TrustIsTru
 import CirclesCore.Bindings (convertCore)
 import CirclesCore.Bindings as B
 import CirclesCore.FfiUtils (mapFn1, mapFn2)
+import Control.Monad.Error.Class (liftEither)
 import Control.Monad.Except (ExceptT(..), throwError)
 import Control.Monad.Except.Checked (ExceptV)
 import Data.Argonaut (class DecodeJson, class EncodeJson)
@@ -101,6 +105,7 @@ import Data.BigInt (BigInt)
 import Data.Either (Either(..), note)
 import Data.Newtype (class Newtype, unwrap)
 import Data.Newtype.Extra ((-#))
+import Data.Nullable as N
 import Data.Traversable (traverse)
 import Data.Variant (Variant, case_, inj, on)
 import Effect (Effect)
@@ -512,19 +517,20 @@ tokenTransfer cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 --------------------------------------------------------------------------------
 -- API / getPaymentNote
 --------------------------------------------------------------------------------
--- type GetPaymentNoteOptions =
---   { transactionHash :: String
---   }
+type GetPaymentNoteOptions =
+  { transactionHash :: String
+  }
 
--- type ErrGetPaymentNote r = ErrNative + r
+type ErrGetPaymentNote r = ErrNative + ErrNotGivenOrAllowed + r
 
--- tokenGetPaymentNote :: forall r. B.CirclesCore -> B.Account -> GetPaymentNoteOptions -> Result (ErrGetPaymentNote r) String
--- tokenGetPaymentNote cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative pure
---   where
---   fn = convertCore cc -# _.token -# _.getPaymentNote
+tokenGetPaymentNote :: forall r. B.CirclesCore -> B.Account -> GetPaymentNoteOptions -> Result (ErrGetPaymentNote r) String
+tokenGetPaymentNote cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
+  where
+  fn = convertCore cc -# _.token -# _.getPaymentNote
 
---   mapArg2 x = x { transactionHash = x.transactionHash }
+  mapArg2 x = x { transactionHash = x.transactionHash }
 
+  mapOk x = N.toMaybe x # note (inj (Proxy :: _ "notGivenOrAllowed") unit) # liftEither
 
 --------------------------------------------------------------------------------
 -- API / organizationIsOrganization
@@ -604,6 +610,8 @@ type ErrNullReturn r = (errNullReturn :: Unit | r)
 type ErrService r = (errService :: Unit | r)
 
 type ErrParseAddress r = (errParseAddress :: String | r)
+
+type ErrNotGivenOrAllowed r = (notGivenOrAllowed :: Unit | r)
 
 --------------------------------------------------------------------------------
 -- Err constructors
