@@ -184,7 +184,7 @@ export const Dashboard = ({
     let balancePolling: any, voucherPolling: any;
 
     if (justBoughtVoucher) {
-      console.log('Initialize faster polling..');
+      // console.log('Initialize faster polling..');
       balancePolling = setInterval(() => {
         act(A._dashboard(A._getBalance(unit)));
       }, 1500);
@@ -192,8 +192,8 @@ export const Dashboard = ({
       voucherPolling = setInterval(() => {
         act(A._dashboard(A._getVouchers(getTimestamp())));
       }, 3000);
-    } else if (!justBoughtVoucher && (balancePolling || voucherPolling)) {
-      console.log('Finish faster polling');
+    } else if (!justBoughtVoucher) {
+      // console.log('Finish faster polling');
       clearInterval(balancePolling);
       clearInterval(voucherPolling);
     }
