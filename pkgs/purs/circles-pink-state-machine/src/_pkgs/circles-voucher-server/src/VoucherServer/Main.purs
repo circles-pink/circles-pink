@@ -9,15 +9,14 @@ import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
 import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, throwError, withExceptT)
+import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, withExceptT)
 import Convertable (convert)
 import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
-import Data.Array (find)
 import Data.Array as A
-import Data.BN (BN, fromDecimalStr)
+import Data.BN (fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
-import Data.DateTime.Instant (Instant, instant, toDateTime, unInstant)
+import Data.DateTime.Instant (instant, toDateTime)
 import Data.Either (Either(..), note)
 import Data.Generic.Rep (class Generic)
 import Data.Map as M
@@ -26,7 +25,7 @@ import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Show.Generic (genericShow)
-import Data.Time.Duration (Seconds(..), convertDuration)
+import Data.Time.Duration (Seconds(..))
 import Data.Traversable (for, traverse)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
@@ -51,7 +50,7 @@ import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
-import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, time, to, transactionHash)
+import VoucherServer.GraphQLSchemas.GraphNode (Schema, amount, from, id, to)
 import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, runAppProdM)
@@ -59,9 +58,10 @@ import VoucherServer.MonadApp.Class (errorToFailure)
 import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
-import VoucherServer.Spec.Types (EurCent(..), Freckles(..), TransferId(..), Voucher(..), VoucherAmount(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.Spec.Types (Freckles(..), TransferId(..), Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
-import VoucherServer.Types (Transfer(..), TransferMeta(..))
+import VoucherServer.Sync as Sync
+import VoucherServer.Types (Transfer(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -73,14 +73,9 @@ type ErrGetVoucher = String
 allowedDiff :: Seconds
 allowedDiff = Seconds 60.0
 
-supportedProvider :: VoucherProviderId
-supportedProvider = VoucherProviderId "goodbuy"
 
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
-
-threshold :: Threshold EurCent
-threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 
 --------------------------------------------------------------------------------
 
@@ -116,7 +111,7 @@ syncVouchers' appEnv@(AppEnv { envVars: AppEnvVars envVars }) = do
 
     unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
 
-  syncedVouchers <- for unfinalizedTxs (finalizeTx appEnv >>> runExceptT)
+  syncedVouchers <- for unfinalizedTxs (finalizeTx' appEnv >>> runExceptT)
     # lift
 
   log ("finalized the following vouchers: ")
@@ -124,69 +119,15 @@ syncVouchers' appEnv@(AppEnv { envVars: AppEnvVars envVars }) = do
 
   pure unit
 
---------------------------------------------------------------------------------
-
-almostEquals :: Threshold EurCent -> EurCent -> EurCent -> Boolean
-almostEquals
-  (Threshold { above: (EurCent above), below: (EurCent below) })
-  (EurCent amount)
-  (EurCent price) =
-  let
-    isInLowerRange = amount >= (price * 100 - below)
-    isInUpperRange = amount <= (price * 100 + above)
-  in
-    isInLowerRange && isInUpperRange
-
 newtype Threshold a = Threshold { above :: a, below :: a }
 
 --------------------------------------------------------------------------------
 
-getVoucherAmount :: Array VoucherProvider -> VoucherProviderId -> EurCent -> Maybe VoucherAmount
-getVoucherAmount providers providerId payedAmount = do
-  (VoucherProvider provider) <- find (\(VoucherProvider p) -> p.id == providerId) providers
-  (VoucherOffer { amount }) <- find (\(VoucherOffer { amount: (VoucherAmount amount) }) -> almostEquals threshold payedAmount amount) provider.availableOffers
-  pure amount
-
---------------------------------------------------------------------------------
-
-redeemAmount :: AppEnvVars -> Address -> EurCent -> ExceptT String Aff Unit
-redeemAmount _ _ _ =
-  log "In the future we'll pay back the amount..."
-
---------------------------------------------------------------------------------
-
-finalizeTx :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
-finalizeTx (AppEnv { envVars }) (Transfer { from, amount, id }) = do
-  let
-    xbgeClient = mkClient (getOptions envVars) xbgeSpec
-
-  (TransferMeta { time }) <- getTransferMeta envVars id # ExceptT
-
-  providers <- xbgeClient.getVoucherProviders {}
-    # ExceptT
-    # withExceptT show
-    <#> (unwrap >>> _.body >>> _.data)
-
-  let
-    eur = frecklesToEurCent time amount
-    maybeVoucherAmount = getVoucherAmount providers supportedProvider eur
-
-  case maybeVoucherAmount of
-    Nothing -> do
-      redeemAmount envVars from eur
-      throwError "Invalid Voucher amount."
-    Just voucherAmount ->
-      xbgeClient.finalizeVoucherPurchase
-        { body:
-            { safeAddress: from
-            , providerId: supportedProvider
-            , amount: voucherAmount
-            , transactionId: id
-            }
-        }
-        # ExceptT
-        # withExceptT show
-        <#> (unwrap >>> _.body >>> _.data)
+finalizeTx' :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
+finalizeTx' appEnv trans = Sync.finalizeTx trans
+  # runAppProdM appEnv
+  # ExceptT
+  # withExceptT errorToLog
 
 syncVouchers :: AppEnv AppProdM -> Aff Unit
 syncVouchers appEnv = do
@@ -282,13 +223,6 @@ getVouchers (AppEnvVars env) { body: { signatureObj } } = do
 
         else pure $ Left $ Error (Response.unauthorized (StringBody "UNAUTHORIZED"))
 
-frecklesToEurCent :: Instant -> Freckles -> EurCent
-frecklesToEurCent timestamp (Freckles freckles) =
-  let
-    ms = unInstant timestamp
-  in
-    frecklesToEuroCentImpl (unwrap ms) freckles # EurCent
-
 decryptVoucher :: String -> VoucherEncrypted -> Maybe Voucher
 decryptVoucher key (VoucherEncrypted x) = ado
   let _ = decryptVoucherCode key x.code
@@ -321,31 +255,6 @@ getTransactions env { toAddress } = do
     to <- Address <$> parseAddress x.to
     amount <- fromDecimalStr x.amount
     in Transfer { from, to, amount: Freckles amount, id: TransferId x.id }
-
---------------------------------------------------------------------------------
-
-getTransferMeta :: AppEnvVars -> TransferId -> Aff (Either String TransferMeta)
-getTransferMeta (AppEnvVars env) transferId = do
-  result <- queryGql (AppEnvVars env) "get-transfer-meta"
-    { notifications:
-        { where:
-            { transfer: un TransferId transferId
-            , safeAddress: show env.xbgeSafeAddress
-            }
-        } =>>
-          { id, transactionHash, time }
-    }
-  pure $ case result of
-    Left e -> Left $ show e
-    Right { notifications } -> case A.head notifications of
-      Just notification -> notification # mkTransferMeta
-      Nothing -> Left "Return array is empty"
-
-  where
-  mkTransferMeta :: GraphNode.Notification -> Either String TransferMeta
-  mkTransferMeta x = note "Parse error" ado
-    time <- fromString x.time <#> Seconds <#> convertDuration >>= instant
-    in TransferMeta { time, transactionHash: x.transactionHash, id: x.id }
 
 --------------------------------------------------------------------------------
 
@@ -383,10 +292,6 @@ encrypt = encryptImpl Nothing Just
 
 --------------------------------------------------------------------------------
 
-foreign import frecklesToEuroCentImpl :: Number -> BN -> Int
-
---------------------------------------------------------------------------------
-
 app :: Aff (Either String Unit)
 app = do
   env <- liftEffect $ getEnv
@@ -399,7 +304,7 @@ app = do
       error e
       liftEffect $ exit 1
     Right parsedEnv -> do
-      prodEnv_ <- Prod.mkAppEnv # Prod.runM parsedEnv 
+      prodEnv_ <- Prod.mkAppEnv # Prod.runM parsedEnv
       case prodEnv_ of
         Left e -> do
           error $ errorToLog e

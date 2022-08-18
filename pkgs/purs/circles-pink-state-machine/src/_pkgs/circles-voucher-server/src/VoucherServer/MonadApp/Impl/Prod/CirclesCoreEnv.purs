@@ -7,7 +7,6 @@ import CirclesCore as CC
 import CirclesPink.Data.PrivateKey (PrivateKey(..))
 import Control.Monad.Error.Class (class MonadThrow, liftEither)
 import Control.Monad.Except (ExceptT, mapExceptT, runExceptT, withExceptT)
-import Control.Monad.Except.Checked (ExceptV)
 import Control.Monad.Reader (ReaderT, ask)
 import Convertable (convert)
 import Data.Array as A
