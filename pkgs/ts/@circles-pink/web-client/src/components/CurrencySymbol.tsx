@@ -34,9 +34,6 @@ export const CurrencySymbol = (_props: _CurrencySymbolProps) => {
         setIsAnimPulse(false);
       }, 2000);
     }
-    return () => {
-      clearTimeout(timeout);
-    };
   }, [_props.isLoading, isAnimPulse]);
 
   useEffect(() => {
@@ -47,9 +44,6 @@ export const CurrencySymbol = (_props: _CurrencySymbolProps) => {
         setIsAnimRotate(false);
       }, 2000);
     }
-    return () => {
-      clearTimeout(timeout);
-    };
   }, [_props.isRequesting, isAnimRotate]);
 
   return (
