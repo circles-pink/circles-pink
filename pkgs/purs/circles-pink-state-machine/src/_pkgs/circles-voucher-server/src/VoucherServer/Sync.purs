@@ -34,10 +34,11 @@ finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx (Transfer { from, amount, id }) = do
   AppEnv
     { graphNode: GraphNodeEnv { getTransferMeta }
-    , xbgeClient
+    , xbgeClient: { getVoucherProviders, finalizeVoucherPurchase }
     } <- ask
+
   TransferMeta { time } <- getTransferMeta id
-  providers <- xbgeClient.getVoucherProviders {}
+  providers <- getVoucherProviders {}
     <#> getResponseData
 
   let eur = frecklesToEurCent time amount
@@ -50,7 +51,7 @@ finalizeTx (Transfer { from, amount, id }) = do
         redeemAmount from eur
         throwError ErrUnknown
 
-  xbgeClient.finalizeVoucherPurchase
+  finalizeVoucherPurchase
     { body:
         { safeAddress: from
         , providerId: supportedProvider
@@ -59,7 +60,6 @@ finalizeTx (Transfer { from, amount, id }) = do
         }
     }
     <#> getResponseData
-
 
 redeemAmount :: forall m. MonadApp m => Address -> EurCent -> m Unit
 redeemAmount _ _ =

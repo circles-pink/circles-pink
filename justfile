@@ -233,8 +233,10 @@ purs-tsd-gen:
 	mv {{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript -t $DIR ; \
 	mv {{PURS_OUTPUT}}/CirclesPink.Garden.TS -t $DIR ; \
 	mv {{PURS_OUTPUT}}/Test.VoucherServer.Main -t $DIR; \
+	mv {{PURS_OUTPUT}}/Test.CirclesPinkStateMachine.Main -t $DIR; \
+	mv {{PURS_OUTPUT}}/Test.AllTests.Main -t $DIR; \
 	mv {{PURS_OUTPUT}}/Payload.* {{PURS_OUTPUT}}/VoucherServer.* {{PURS_OUTPUT}}/CirclesPink.Garden.EnvControlAff -t $DIR ; \
-	mv $DIR/VoucherServer.Types -t {{PURS_OUTPUT}} ; \
+	mv $DIR/VoucherServer.Spec.Types -t {{PURS_OUTPUT}} ; \
 	purs-tsd-gen --directory {{PURS_OUTPUT}} ; \
 	mv $DIR/* -t {{PURS_OUTPUT}} ; \
 
