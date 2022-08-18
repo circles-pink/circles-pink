@@ -12,8 +12,9 @@ import Data.Maybe (Maybe)
 import Data.Newtype (un, unwrap)
 import Effect.Aff (Aff)
 import Payload.ResponseTypes (Response(..))
+import VoucherServer.GraphQLSchemas.GraphNode (transactionHash)
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..), AppError(..), AppProdM, errorToLog, runAppProdM)
-import VoucherServer.MonadApp.Class (GraphNodeEnv(..))
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), GraphNodeEnv(..))
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted, VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
@@ -24,9 +25,6 @@ finalizeTx' appEnv trans = finalizeTx trans
   # ExceptT
   # withExceptT errorToLog
 
-supportedProvider :: VoucherProviderId
-supportedProvider = VoucherProviderId "goodbuy"
-
 threshold :: Threshold EurCent
 threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 
@@ -34,17 +32,20 @@ finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx (Transfer { from, amount, id }) = do
   AppEnv
     { graphNode: GraphNodeEnv { getTransferMeta }
+    , circlesCore: CirclesCoreEnv { getPaymentNote }
     , xbgeClient: { getVoucherProviders, finalizeVoucherPurchase }
     } <- ask
 
-  TransferMeta { time } <- getTransferMeta id
+  TransferMeta { time, transactionHash } <- getTransferMeta id
   providers <- getVoucherProviders {}
     <#> getResponseData
 
   let eur = frecklesToEurCent time amount
 
+  providerId <- getPaymentNote transactionHash <#> VoucherProviderId
+
   voucherAmount <-
-    ( getVoucherAmount providers supportedProvider eur
+    ( getVoucherAmount providers providerId eur
         # liftMaybe ErrUnknown
     )
       `catchError` \_debug -> do
@@ -54,7 +55,7 @@ finalizeTx (Transfer { from, amount, id }) = do
   finalizeVoucherPurchase
     { body:
         { safeAddress: from
-        , providerId: supportedProvider
+        , providerId
         , amount: voucherAmount
         , transactionId: id
         }

@@ -6,6 +6,7 @@ module VoucherServer.MonadApp.Impl.Test
 
 import Prelude
 
+import CirclesCore (tokenGetPaymentNote)
 import Control.Monad.Error.Class (class MonadError, class MonadThrow, throwError)
 import Control.Monad.Except (ExceptT, runExceptT)
 import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
@@ -50,6 +51,7 @@ testEnv = AppEnv
       }
   , circlesCore: CirclesCoreEnv
       { getTrusts: \_ -> throwError ErrUnknown
+      , getPaymentNote: \_ -> throwError ErrUnknown
       }
   , xbgeClient:
       { getVoucherProviders: \_ -> throwError ErrUnknown
