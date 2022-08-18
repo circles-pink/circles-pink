@@ -1,6 +1,6 @@
 import { mdiCashFast, mdiQrcodeScan } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import React, { useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Button, Input } from '../../../components/forms';
 import { JustifyEnd } from '../../../components/helper';
 import { Claim } from '../../../components/text';
@@ -9,7 +9,6 @@ import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
 const Web3 = require('web3');
 import { DashboardProps } from '../dashboard';
-const QrScanner = require('eth-qr-scanner');
 import { t } from 'i18next';
 import {
   DefaultView,
@@ -27,6 +26,11 @@ import { toFpTsOption } from '../../../utils/fpTs';
 // -----------------------------------------------------------------------------
 // Send Circles
 // -----------------------------------------------------------------------------
+
+let QrScanner: React.ReactElement<
+  any,
+  string | React.JSXElementConstructor<any>
+>;
 
 export type SendProps = DashboardProps & {
   theme: Theme;
@@ -51,6 +55,14 @@ export const Send = ({
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
 
   const optionAddr: Option<Address> = toFpTsOption(parseAddress(to));
+
+  // QR Scanner
+
+  useEffect(() => {
+    // Needs to be required after mount
+    QrScanner = require('eth-qr-scanner');
+    console.log(QrScanner);
+  }, []);
 
   // Util
   const transact = (fromAddr: Address, toAddr: Address) =>
@@ -83,6 +95,7 @@ export const Send = ({
       <Claim color={theme.baseColor}>{t('dashboard.sendClaim')}</Claim>
       <div>
         {scannerOpen && (
+          //@ts-ignore
           <QrScanner
             delay={300}
             onError={handleError}
