@@ -11,7 +11,7 @@ import Payload.Spec (POST, Spec(..), GET)
 import Simple.JSON (class WriteForeign)
 import Test.QuickCheck (class Arbitrary)
 import TypedEnv (class ParseValue)
-import VoucherServer.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
+import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 
 newtype Address = Address C.Address
 

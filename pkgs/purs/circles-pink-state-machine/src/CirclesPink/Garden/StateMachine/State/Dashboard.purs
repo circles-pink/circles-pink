@@ -56,7 +56,7 @@ import RemoteData (RemoteData, _notAsked)
 import RemoteReport (RemoteReport)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import VoucherServer.Types (Voucher, VoucherProvider)
+import VoucherServer.Spec.Types (Voucher, VoucherProvider)
 
 --------------------------------------------------------------------------------
 -- DashboardState

@@ -102,7 +102,7 @@ import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
-import VoucherServer.Types (Voucher, VoucherProvider)
+import VoucherServer.Spec.Types (Voucher, VoucherProvider)
 import Web3 (Message, SignatureObj)
 
 --------------------------------------------------------------------------------

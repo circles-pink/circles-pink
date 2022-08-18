@@ -4,8 +4,15 @@ import VoucherServer.Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
+import Data.Lens (Lens', lens')
+import Data.Lens.Record (prop)
+import Data.Newtype (class Newtype)
+import Data.Tuple.Nested (type (/\), (/\))
 import Payload.Server.Response as Res
+import Type.Proxy (Proxy(..))
 import VoucherServer.EnvVars (AppEnvVars)
+import VoucherServer.Spec.Types (TransferId(..))
+import VoucherServer.Types (TransferMeta(..))
 
 --------------------------------------------------------------------------------
 -- Class
@@ -61,9 +68,26 @@ errorToLog = case _ of
 newtype AppEnv m = AppEnv (AppEnv' m)
 
 type AppEnv' m =
-  { getTrusts :: Address -> m (Set Address)
-  , envVars :: AppEnvVars
+  { envVars :: AppEnvVars
+  , getTrusts :: AppEnv_getTrusts m
+  , graphNode :: AppEnv_graphNode m
   }
+
+type AppEnv_getTrusts m = Address -> m (Set Address)
+
+type AppEnv_graphNode m =
+  { -- getTransferMeta :: AppEnv_graphNode_getTransferMeta m
+  }
+
+type AppEnv_graphNode_getTransferMeta m = TransferId -> m TransferMeta
+
+--------------------------------------------------------------------------------
+
+_AppEnv :: forall m. Lens' (AppEnv m) (AppEnv' m)
+_AppEnv = lens' (\(AppEnv x) -> x /\ AppEnv)
 
 modifyAppEnv :: forall m. (AppEnv' m -> AppEnv' m) -> AppEnv m -> AppEnv m
 modifyAppEnv f (AppEnv r) = AppEnv $ f r
+
+_getTrusts :: forall m. Lens' (AppEnv m) (AppEnv_getTrusts m)
+_getTrusts = _AppEnv <<< prop (Proxy :: _ "getTrusts")

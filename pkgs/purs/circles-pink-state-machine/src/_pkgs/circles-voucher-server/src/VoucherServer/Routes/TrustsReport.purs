@@ -9,6 +9,7 @@ import CirclesPink.Data.Address as C
 import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.Either (Either(..))
+import Data.Lens (set)
 import Data.Set as Set
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
@@ -16,7 +17,8 @@ import Safe.Coerce (coerce)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC)
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..), modifyAppEnv, runAppTestM, testEnv)
+import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
+import VoucherServer.MonadApp.Class (_getTrusts)
 
 trustsReport
   :: forall m
@@ -38,7 +40,7 @@ spec = do
   describe "Route trustsReport" do
     let
       env = testEnv
-        # modifyAppEnv (\r -> r { getTrusts = \_ -> pure $ Set.fromFoldable [ addrA, addrB ] })
+        # set _getTrusts (\_ -> pure $ Set.fromFoldable [ addrA, addrB ])
 
     it "returns the trusted and untrusted addresses" do
       trustsReport { 
