@@ -3,11 +3,13 @@ module VoucherServer.GraphQLSchemas.GraphNode where
 import Prelude
 
 import GraphQL.Client.Args (type (==>))
-import Type.Proxy (Proxy(..))
+import Type.Proxy (Proxy)
 
 type Address = String
 
+--------------------------------------------------------------------------------
 -- Schema
+--------------------------------------------------------------------------------
 type Schema =
   { transfers ::
       { where ::
@@ -24,6 +26,10 @@ type Schema =
         ==> Array Notification
   }
 
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
 type Transfer =
   { from :: Address
   , to :: Address
@@ -37,21 +43,9 @@ type Notification =
   , time :: String
   }
 
-prop = Proxy :: Proxy "prop"
-
-name = Proxy :: Proxy "name"
-
-from = Proxy :: Proxy "from"
-
-to = Proxy :: Proxy "to"
-
-id = Proxy :: Proxy "id"
-
-amount = Proxy :: Proxy "amount"
-
-transactionHash = Proxy :: Proxy "transactionHash"
-
-time = Proxy :: Proxy "time"
+--------------------------------------------------------------------------------
+-- Selectors
+--------------------------------------------------------------------------------
 
 selectors
   :: { transactionHash :: Proxy "transactionHash"
@@ -61,5 +55,6 @@ selectors
      , from :: Proxy "from"
      , time :: Proxy "time"
      , id :: Proxy "id"
+     , to :: Proxy "to"
      }
 selectors = one

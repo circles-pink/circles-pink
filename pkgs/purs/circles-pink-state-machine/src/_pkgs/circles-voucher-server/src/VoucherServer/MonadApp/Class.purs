@@ -123,6 +123,8 @@ type XbgeClientEnv_finalizeVoucherPurchase m =
   -> m (Response { data :: VoucherEncrypted })
 
 --------------------------------------------------------------------------------
+-- Lenses
+--------------------------------------------------------------------------------
 
 _AppEnv :: forall m. Lens' (AppEnv m) (AppEnv' m)
 _AppEnv = lens' (\(AppEnv x) -> x /\ AppEnv)

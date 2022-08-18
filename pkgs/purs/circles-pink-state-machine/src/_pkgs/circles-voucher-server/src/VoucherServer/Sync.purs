@@ -16,8 +16,22 @@ import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), V
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
 
+--------------------------------------------------------------------------------
+-- Types
+--------------------------------------------------------------------------------
+
+newtype Threshold a = Threshold { above :: a, below :: a }
+
+--------------------------------------------------------------------------------
+-- Constants
+--------------------------------------------------------------------------------
+
 threshold :: Threshold EurCent
 threshold = Threshold { above: EurCent 5, below: EurCent 5 }
+
+--------------------------------------------------------------------------------
+-- Sync
+--------------------------------------------------------------------------------
 
 finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx (Transfer { from, amount, id }) = do
@@ -58,6 +72,10 @@ redeemAmount _ _ =
   -- log "In the future we'll pay back the amount..."
   pure unit
 
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
+
 getVoucherAmount :: Array VoucherProvider -> VoucherProviderId -> EurCent -> Maybe VoucherAmount
 getVoucherAmount providers providerId payedAmount = do
   (VoucherProvider provider) <- A.find (\(VoucherProvider p) -> p.id == providerId) providers
@@ -75,8 +93,6 @@ almostEquals
   in
     isInLowerRange && isInUpperRange
 
-newtype Threshold a = Threshold { above :: a, below :: a }
-
 frecklesToEurCent :: Instant -> Freckles -> EurCent
 frecklesToEurCent timestamp (Freckles freckles) =
   let
@@ -84,7 +100,11 @@ frecklesToEurCent timestamp (Freckles freckles) =
   in
     frecklesToEuroCentImpl (unwrap ms) freckles # EurCent
 
-foreign import frecklesToEuroCentImpl :: Number -> BN -> Int
-
 getResponseData :: forall r a. Response { data :: a | r } -> a
 getResponseData = un Response >>> _.body >>> _.data
+
+--------------------------------------------------------------------------------
+-- FFI
+--------------------------------------------------------------------------------
+
+foreign import frecklesToEuroCentImpl :: Number -> BN -> Int

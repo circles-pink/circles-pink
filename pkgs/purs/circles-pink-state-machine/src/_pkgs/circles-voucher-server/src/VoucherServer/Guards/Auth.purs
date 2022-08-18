@@ -1,7 +1,6 @@
 module VoucherServer.Guards.Auth
   ( basicAuthGuard
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -16,13 +15,21 @@ import Payload.Headers as Headers
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
+--------------------------------------------------------------------------------
+-- Guard
+--------------------------------------------------------------------------------
+
 basicAuthGuard :: forall m. MonadApp m => HTTP.Request -> m Unit
 basicAuthGuard req = do
-  AppEnv {envVars: AppEnvVars envVars } <- ask
+  AppEnv { envVars: AppEnvVars envVars } <- ask
   let headers = getHeaders req
   case Headers.lookup "Authorization" headers of
     Just tok | tok == ("Basic " <> envVars.voucherServerBasicAuth) -> pure unit
     _ -> throwError ErrBasicAuth
+
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
 
 getHeaders :: HTTP.Request -> Headers
 getHeaders req = Headers.fromFoldable headersArr
