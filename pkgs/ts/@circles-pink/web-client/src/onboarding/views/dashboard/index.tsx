@@ -30,10 +30,7 @@ import {
   mdiLan,
   mdiMagnify,
 } from '@mdi/js';
-import {
-  LightColorFrame,
-  TrustUserList,
-} from '../../../components/TrustUserList';
+import { TrustUserList } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
@@ -60,6 +57,7 @@ import {
 import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
 import { UserConfig } from '../..';
+import { LightColorFrame } from '../../../components/layout';
 
 // -----------------------------------------------------------------------------
 // Types
