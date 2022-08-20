@@ -22,7 +22,7 @@ import GraphQL.Client.Types (Client)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
-import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv_getTransferMeta)
+import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv'getTransferMeta)
 import VoucherServer.Spec.Types (TransferId(..))
 import VoucherServer.Types (TransferMeta(..))
 
@@ -39,7 +39,7 @@ mkClient (AppEnvVars env) =
     }
     # liftEffect
 
-mkGetTransferMeta :: M (GraphNodeEnv_getTransferMeta AppProdM)
+mkGetTransferMeta :: M (GraphNodeEnv'getTransferMeta AppProdM)
 mkGetTransferMeta = do
   appEnvVars@(AppEnvVars env) <- ask
 

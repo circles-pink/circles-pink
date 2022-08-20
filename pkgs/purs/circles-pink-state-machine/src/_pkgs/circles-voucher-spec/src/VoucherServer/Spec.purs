@@ -32,11 +32,11 @@ type VoucherServerSpec = Spec
             { response ::
                 Array VoucherProvider
             }
-      -- , trustUsers ::
-      --     POST "/trust-users"
-      --       { response :: {}
-      --       , body :: { safeAddresses :: Array Address }
-      --       }
+      , trustUsers ::
+          POST "/trust-users"
+            { response :: {}
+            , body :: { safeAddresses :: Array Address }
+            }
       , trustsReport ::
           POST "/trusts-report"
             { body :: { addresses :: Array Address }

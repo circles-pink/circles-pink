@@ -57,6 +57,7 @@ import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, runAppProdM)
 import VoucherServer.MonadApp.Class (errorToFailure)
 import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
+import VoucherServer.Routes.TrustUsers (trustUsers) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Spec.Types (Freckles(..), TransferId(..), Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
 import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
@@ -316,7 +317,7 @@ app = do
             handlers =
               { getVouchers: getVouchers parsedEnv
               , getVoucherProviders: getVoucherProviders parsedEnv
-              --, trustUsers: Routes.trustUsers parsedEnv >>> runWithLog
+              , trustUsers: Routes.trustUsers >>> runRoute prodEnv
               , trustsReport: Routes.trustsReport >>> runRoute prodEnv
               }
             guards =
