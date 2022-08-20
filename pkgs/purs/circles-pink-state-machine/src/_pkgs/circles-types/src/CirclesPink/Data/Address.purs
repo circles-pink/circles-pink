@@ -38,7 +38,7 @@ derive newtype instance encodeJson :: EncodeJson Address
 derive newtype instance readForeignAddress :: ReadForeign Address
 derive newtype instance writeForeignAddress :: WriteForeign Address
 
-instance arbitraryAddr :: Arbitrary Address where
+instance Arbitrary Address where
   arbitrary = unsafePartial do
     let
       chars = "0123456789abcdef"
@@ -47,10 +47,10 @@ instance arbitraryAddr :: Arbitrary Address where
     str <- chars' <#> pure # G.oneOf # G.vectorOf len <#> Str.fromCharArray
     parseAddress str # fromJust # pure
 
-instance parseValueAddress :: ParseValue Address where
+instance ParseValue Address where
   parseValue = parseAddress
 
-instance fpTs :: FpTs Address Address where
+instance FpTs Address Address where
   toFpTs = identity
   fromFpTs = identity
 
@@ -58,7 +58,7 @@ instance fpTs :: FpTs Address Address where
 --   decodeParam x = decodeParam x
 --     >>= (parseAddress >>> note "Could not parse Address")
 
-instance argGqlAddress :: ArgGql Address String
+instance ArgGql Address String
 
 sampleAddress :: Address
 sampleAddress = unsafeMkAddress "fb7dc4d8f841af32d777e698d6c71409e85955d9"

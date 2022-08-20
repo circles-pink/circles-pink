@@ -2,10 +2,12 @@ module VoucherServer.MonadApp.Class where
 
 import VoucherServer.Prelude
 
+import CirclesCore (TrustAddConnectionOptions)
 import CirclesCore as CC
 import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
 import Data.Lens (Lens', lens')
+import Data.Lens.Record (prop)
 import Data.Tuple.Nested ((/\))
 import Payload.Client (ClientError)
 import Payload.ResponseTypes (Response)
@@ -52,6 +54,7 @@ type CCErrAll = Variant
       + CC.ErrInvalidUrl
       + CC.ErrApi
       + CC.ErrNotGivenOrAllowed
+      + CC.ErrNullReturn
       + ()
   )
 
@@ -76,13 +79,10 @@ errorToLog = case _ of
   ErrPayloadClient _ -> "Payload client error"
 
 --------------------------------------------------------------------------------
--- Env
+-- AppEnv
 --------------------------------------------------------------------------------
 
 newtype AppEnv m = AppEnv (AppEnv' m)
-newtype CirclesCoreEnv m = CirclesCoreEnv (CirclesCoreEnv' m)
-newtype GraphNodeEnv m = GraphNodeEnv (GraphNodeEnv' m)
-
 type AppEnv' m =
   { envVars :: AppEnvVars
   , graphNode :: GraphNodeEnv m
@@ -90,29 +90,50 @@ type AppEnv' m =
   , xbgeClient :: XbgeClientEnv m
   }
 
+--------------------------------------------------------------------------------
+-- GraphNodeEnv
+--------------------------------------------------------------------------------
+
+newtype GraphNodeEnv m = GraphNodeEnv (GraphNodeEnv' m)
+
 type GraphNodeEnv' m =
-  { getTransferMeta :: GraphNodeEnv_getTransferMeta m
+  { getTransferMeta :: GraphNodeEnv'getTransferMeta m
   }
+
+type GraphNodeEnv'getTransferMeta m = TransferId -> m TransferMeta
+
+--------------------------------------------------------------------------------
+-- CirclesCoreEnv
+--------------------------------------------------------------------------------
+
+newtype CirclesCoreEnv m = CirclesCoreEnv (CirclesCoreEnv' m)
 
 type CirclesCoreEnv' m =
-  { getTrusts :: CirclesCoreEnv_getTrusts m
-  , getPaymentNote :: CirclesCoreEnv_getPaymentNote m
+  { getTrusts ::
+      CirclesCoreEnv'getTrusts m
+  , getPaymentNote ::
+      CirclesCoreEnv'getPaymentNote m
+  , trustAddConnection ::
+      CirclesCoreEnv'trustAddConnection m
   }
 
+type CirclesCoreEnv'getTrusts m = C.Address -> m (Set C.Address)
+
+type CirclesCoreEnv'getPaymentNote m = String -> m String
+
+type CirclesCoreEnv'trustAddConnection m = TrustAddConnectionOptions -> m String
+
+--------------------------------------------------------------------------------
+-- XbgeClientEnv
+--------------------------------------------------------------------------------
 type XbgeClientEnv m =
-  { getVoucherProviders :: XbgeClientEnv_getVoucherProviders m
-  , finalizeVoucherPurchase :: XbgeClientEnv_finalizeVoucherPurchase m
+  { getVoucherProviders :: XbgeClientEnv'getVoucherProviders m
+  , finalizeVoucherPurchase :: XbgeClientEnv'finalizeVoucherPurchase m
   }
 
-type CirclesCoreEnv_getTrusts m = C.Address -> m (Set C.Address)
+type XbgeClientEnv'getVoucherProviders m = {} -> m (Response { data :: Array VoucherProvider })
 
-type CirclesCoreEnv_getPaymentNote m = String -> m String
-
-type GraphNodeEnv_getTransferMeta m = TransferId -> m TransferMeta
-
-type XbgeClientEnv_getVoucherProviders m = {} -> m (Response { data :: Array VoucherProvider })
-
-type XbgeClientEnv_finalizeVoucherPurchase m =
+type XbgeClientEnv'finalizeVoucherPurchase m =
   { body ::
       { safeAddress :: Address
       , providerId :: VoucherProviderId
@@ -140,3 +161,8 @@ modifyAppEnv f (AppEnv r) = AppEnv $ f r
 
 _getTrusts = Proxy :: Proxy "getTrusts"
 _circlesCore = Proxy :: Proxy "circlesCore"
+
+_envVars = Proxy :: Proxy "envVars"
+
+_a :: forall m. Lens' (AppEnv m) (CirclesCoreEnv' m)
+_a = _AppEnv <<< prop _circlesCore <<< _CirclesCoreEnv

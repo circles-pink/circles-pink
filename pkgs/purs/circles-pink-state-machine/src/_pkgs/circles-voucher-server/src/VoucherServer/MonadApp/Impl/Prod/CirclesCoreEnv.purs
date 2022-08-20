@@ -18,10 +18,12 @@ import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv_getTrusts, CirclesCoreEnv_getPaymentNote)
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv'getPaymentNote, CirclesCoreEnv'getTrusts, CirclesCoreEnv'trustAddConnection)
 import Web3 (Web3)
 
 type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
+
+type N = AppProdM
 
 type CirclesValues =
   { provider :: Provider
@@ -30,30 +32,37 @@ type CirclesValues =
   , account :: Account
   }
 
-mkCirclesCoreEnv :: M (CirclesCoreEnv AppProdM)
+mkCirclesCoreEnv :: M (CirclesCoreEnv N)
 mkCirclesCoreEnv = do
-  circlesValues <- getCirclesValues
+  { circlesCore, account } <- getCirclesValues
+
+  let
+    getTrusts :: CirclesCoreEnv'getTrusts N
+    getTrusts safeAddress =
+      CC.trustGetNetwork circlesCore account
+        { safeAddress: convert safeAddress }
+        # liftCirclesCore
+        <#> A.filter _.isOutgoing
+          >>> map (_.safeAddress >>> wrap)
+          >>> Set.fromFoldable
+
+    getPaymentNote :: CirclesCoreEnv'getPaymentNote N
+    getPaymentNote transactionHash =
+      CC.tokenGetPaymentNote circlesCore account
+        { transactionHash }
+        # liftCirclesCore
+
+    trustAddConnection :: CirclesCoreEnv'trustAddConnection N
+    trustAddConnection opts = 
+      CC.trustAddConnection circlesCore account
+        opts
+        # liftCirclesCore
 
   pure $ CirclesCoreEnv
-    { getTrusts: mkGetTrusts circlesValues
-    , getPaymentNote : mkGetPaymentNote circlesValues
+    { getTrusts
+    , getPaymentNote
+    , trustAddConnection
     }
-
-mkGetTrusts :: CirclesValues -> CirclesCoreEnv_getTrusts AppProdM
-mkGetTrusts { circlesCore, account } safeAddress =
-  CC.trustGetNetwork circlesCore account
-    { safeAddress: convert safeAddress }
-    # liftCirclesCore
-    <#> A.filter _.isOutgoing
-      >>> map (_.safeAddress >>> wrap)
-      >>> Set.fromFoldable
-
-mkGetPaymentNote :: CirclesValues -> CirclesCoreEnv_getPaymentNote AppProdM
-mkGetPaymentNote { circlesCore, account } transactionHash =
-  CC.tokenGetPaymentNote circlesCore account
-    { transactionHash }
-    # liftCirclesCore
-
 
 --------------------------------------------------------------------------------
 -- Util

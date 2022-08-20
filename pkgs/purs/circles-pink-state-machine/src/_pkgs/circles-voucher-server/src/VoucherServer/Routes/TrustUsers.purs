@@ -1,96 +1,30 @@
-module VoucherServer.Routes.TrustUser where
+module VoucherServer.Routes.TrustUsers where
 
 import Prelude
 
-import CirclesCore (Account, CirclesCore)
-import CirclesCore as CC
-import CirclesCore.Bindings (TrustIsTrustedResult(..))
 import CirclesPink.Data.Address (Address)
-import Control.Monad.Except (ExceptT, lift, mapExceptT, runExceptT, throwError, withExceptT)
+import Control.Monad.Reader (asks)
 import Convertable (convert)
-import Data.Either (Either)
+import Data.Lens (view)
+import Data.Lens.Record (prop)
 import Data.Newtype (unwrap)
 import Data.Traversable (for)
-import Data.Tuple.Nested (type (/\), (/\))
-import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (logShow)
-import Payload.ResponseTypes (Failure(..), ResponseBody(..))
-import Payload.Server.Response as Response
-import Safe.Coerce (coerce)
-import VoucherServer.EnvVars (AppEnvVars(..), PrivateKey(..))
-import Web3 (Web3)
+import VoucherServer.EnvVars (AppEnvVars(..))
+import VoucherServer.MonadApp (class MonadApp)
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), _AppEnv, _circlesCore, _envVars)
 
-
--- trustUsers' :: forall m. MonadApp m => { body :: { safeAddresses :: Array Address }} -> m {}
--- trustUsers' {body : {safeAddresses}} = do  
---   results :: Array (Either String Unit) <- 
---     for safeAddresses (trustUser (AppEnvVars env) { web3, circlesCore, account } >>> runExceptT) # lift
---   pure {}
-
--- trustUser :: forall m. MonadApp m => Address -> m Unit
--- trustUser safeAddress = do
---   trustAddConnection 
---      { user: convert safeAddress
---       , canSendTo: convert $ unwrap env.xbgeSafeAddress
---       , limitPercentage: 100.0
---       }
-
---------------------------------------------------------------------------------
-
-type Env =
-  { circlesCore :: CirclesCore
-  , account :: Account
-  , web3 :: Web3
-  }
-
-trustUsers :: AppEnvVars -> { body :: { safeAddresses :: Array Address }} -> ExceptT (String /\ Failure) Aff {}
-trustUsers (AppEnvVars env) { body: { safeAddresses } } = do
-  provider <- CC.newWebSocketProvider env.gardenEthereumNodeWebSocket
-    # mapExceptT liftEffect
-    # withExceptT (\_ -> "Provider error" /\ Error (Response.internalError (StringBody "Internal error")))
-
-  web3 <- liftEffect $ CC.newWeb3 provider
-
-  circlesCore <-
-    CC.newCirclesCore web3
-      { apiServiceEndpoint: env.gardenApi
-      , graphNodeEndpoint: env.gardenGraphApi
-      , hubAddress: env.gardenHubAddress
-      , proxyFactoryAddress: env.gardenProxyFactoryAddress
-      , relayServiceEndpoint: env.gardenRelay
-      , safeMasterAddress: env.gardenSafeMasterAddress
-      , subgraphName: env.gardenSubgraphName
-      , databaseSource: "graph"
-      }
-      # mapExceptT liftEffect
-      # withExceptT (\_ -> "CirclesCore error" /\ Error (Response.internalError (StringBody "Internal error")))
-
-  account <- CC.privKeyToAccount web3 (coerce env.xbgeKey)
-    # mapExceptT liftEffect
-    # withExceptT (\_ -> "Account creation error" /\ Error (Response.internalError (StringBody "Internal error")))
-
-  results :: Array (Either String Unit) <- 
-    for safeAddresses (trustUser (AppEnvVars env) { web3, circlesCore, account } >>> runExceptT) # lift
-
-  logShow results
-
+trustUsers :: forall m. MonadApp m => { body :: { safeAddresses :: Array Address }} -> m {}
+trustUsers {body : {safeAddresses}} = do  
+  _ <- for safeAddresses trustUser
   pure {}
 
-trustUser :: AppEnvVars -> Env -> Address -> ExceptT String Aff Unit
-trustUser (AppEnvVars env) { circlesCore, account } safeAddress = do
-  (TrustIsTrustedResult { isTrusted }) <-
-    CC.trustIsTrusted circlesCore account
-      { safeAddress: convert safeAddress, limit: 5 }
-      # withExceptT (\_ -> "check is trusted error")
+trustUser :: forall m. MonadApp m => Address -> m String
+trustUser safeAddress = do
+  CirclesCoreEnv circlesCore <- asks $ view $ _AppEnv <<< prop _circlesCore
+  AppEnvVars envVars <- asks $ view $ _AppEnv <<< prop _envVars
 
-  if isTrusted then
-    throwError "Already Trusted"
-  else do
-    _ <- CC.trustAddConnection circlesCore account
-      { user: convert safeAddress
-      , canSendTo: convert $ unwrap env.xbgeSafeAddress
-      , limitPercentage: 100.0
-      }
-      # withExceptT (\_ -> "check is trusted error")
-    pure unit
+  circlesCore.trustAddConnection
+    { user: convert safeAddress
+    , canSendTo: convert $ unwrap envVars.xbgeSafeAddress
+    , limitPercentage: 100.0
+    }

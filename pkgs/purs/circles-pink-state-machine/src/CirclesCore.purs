@@ -639,6 +639,7 @@ type Err r = ErrParseAddress
   + ErrInvalidUrl
   + ErrApi
   + ErrNotGivenOrAllowed
+  + ErrNullReturn
   + r
 
 printErr :: Variant (Err ()) -> String
@@ -649,6 +650,7 @@ printErr =
     # on (Proxy :: _ "errInvalidUrl") (\url -> "Invalid URL: " <> url)
     # on (Proxy :: _ "errApi") (\e -> "Api Error: " <> show e)
     # on (Proxy :: _ "errParseAddress") (\e -> "ParseAddress error: " <> show e)
+    # on (Proxy :: _ "errNullReturn") (\_ -> "Null return")
     # on (Proxy :: _ "errNotGivenOrAllowed") (\_ -> "Not given or allowed.")
 
 --------------------------------------------------------------------------------

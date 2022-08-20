@@ -26,17 +26,17 @@ newtype AppTestM a = AppTestM
       a
   )
 
-derive instance newtypeATM :: Newtype (AppTestM a) _
-derive newtype instance applyATM :: Apply AppTestM
-derive newtype instance applicATMiveATM :: Applicative AppTestM
-derive newtype instance functorATM :: Functor AppTestM
-derive newtype instance bindATM :: Bind AppTestM
-derive newtype instance monadATM :: Monad AppTestM
-derive newtype instance monadThrowATM :: MonadThrow AppError AppTestM
-derive newtype instance monadErrorATM :: MonadError AppError AppTestM
-derive newtype instance monadAskATM :: MonadAsk (AppEnv AppTestM) AppTestM
+derive instance Newtype (AppTestM a) _
+derive newtype instance Apply AppTestM
+derive newtype instance Applicative AppTestM
+derive newtype instance Functor AppTestM
+derive newtype instance Bind AppTestM
+derive newtype instance Monad AppTestM
+derive newtype instance MonadThrow AppError AppTestM
+derive newtype instance MonadError AppError AppTestM
+derive newtype instance MonadAsk (AppEnv AppTestM) AppTestM
 
-instance monadAppATM :: MonadApp AppTestM
+instance MonadApp AppTestM
 
 --------------------------------------------------------------------------------
 -- Type
@@ -51,6 +51,7 @@ testEnv = AppEnv
   , circlesCore: CirclesCoreEnv
       { getTrusts: \_ -> throwError ErrUnknown
       , getPaymentNote: \_ -> throwError ErrUnknown
+      , trustAddConnection: \_ -> throwError ErrUnknown
       }
   , xbgeClient:
       { getVoucherProviders: \_ -> throwError ErrUnknown
