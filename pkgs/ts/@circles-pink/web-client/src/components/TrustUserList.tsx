@@ -412,16 +412,20 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
     <GridRow
       minHeight={ROW_HEIGHT}
       fields={[
-        { width: 0, align: 'LEFT', content: <ReactTooltip /> },
         {
           width: USERNAME_WIDTH,
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <JustifyStartCenter>
+                <ReactTooltip id="username" />
                 <div>
                   <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                 </div>
-                <Username theme={theme} data-tip={userIdent}>
+                <Username
+                  theme={theme}
+                  data-tip={userIdent}
+                  data-for="username"
+                >
                   {userIdent}
                 </Username>
               </JustifyStartCenter>
@@ -442,6 +446,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <>
+                <ReactTooltip id="action" />
                 {loadingTrust || loadingUntrust ? (
                   <LoadingCircles
                     count={1}
@@ -453,6 +458,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                     path={mdiWeatherCloudyClock}
                     size={1.5}
                     color={theme.baseColor}
+                    data-for="action"
                     data-tip={mapToolTipTrust(isTrusted, userIdent)}
                   />
                 )}
