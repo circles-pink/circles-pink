@@ -290,16 +290,20 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
       <GridRow
         minHeight={ROW_HEIGHT}
         fields={[
-          { width: 0, align: 'LEFT', content: <ReactTooltip /> },
           {
             width: USERNAME_WIDTH,
             content: (
               <FadeIn orientation={'left'} delay={getDelay()}>
                 <JustifyStartCenter>
+                  <ReactTooltip id="username" />
                   <div>
                     <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                   </div>
-                  <Username theme={theme} data-tip={userIdent}>
+                  <Username
+                    theme={theme}
+                    data-for="username"
+                    data-tip={userIdent}
+                  >
                     {userIdent}
                   </Username>
                 </JustifyStartCenter>
@@ -312,30 +316,38 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             content: (
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
-                  <Icon
-                    path={
-                      isTrusted || pendingUntrust || loadingUntrust
-                        ? mdiAccountArrowLeft
-                        : mdiAccountCancel
-                    }
-                    size={1.6}
-                    color={
-                      isTrusted || pendingUntrust || loadingUntrust
-                        ? theme.baseColor
-                        : 'white'
-                    }
-                    data-tip={mapToolTipRelRec(isTrusted, userIdent)}
-                  />
+                  <>
+                    <ReactTooltip id="relation-from" />
+                    <Icon
+                      path={
+                        isTrusted || pendingUntrust || loadingUntrust
+                          ? mdiAccountArrowLeft
+                          : mdiAccountCancel
+                      }
+                      size={1.6}
+                      color={
+                        isTrusted || pendingUntrust || loadingUntrust
+                          ? theme.baseColor
+                          : 'white'
+                      }
+                      data-for="relation-from"
+                      data-tip={mapToolTipRelRec(isTrusted, userIdent)}
+                    />
+                  </>
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
-                  <Icon
-                    path={
-                      c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
-                    }
-                    size={1.6}
-                    color={c.isOutgoing ? theme.baseColor : 'white'}
-                    data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
-                  />
+                  <>
+                    <ReactTooltip id="relation-to" />
+                    <Icon
+                      path={
+                        c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
+                      }
+                      size={1.6}
+                      color={c.isOutgoing ? theme.baseColor : 'white'}
+                      data-for="relation-to"
+                      data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+                    />
+                  </>
                 </FadeIn>
               </JustifyAroundCenter>
             ),
@@ -346,39 +358,47 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             content: (
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
-                  <Clickable
-                    clickable={c.isOutgoing}
-                    onClick={() => {
-                      if (c.isOutgoing) {
-                        if (toggleOverlay && setOverwriteTo) {
-                          setOverwriteTo(getAddress(c.user));
-                          toggleOverlay('SEND');
+                  <>
+                    <ReactTooltip id="action-send" />
+                    <Clickable
+                      clickable={c.isOutgoing}
+                      onClick={() => {
+                        if (c.isOutgoing) {
+                          if (toggleOverlay && setOverwriteTo) {
+                            setOverwriteTo(getAddress(c.user));
+                            toggleOverlay('SEND');
+                          }
                         }
-                      }
-                    }}
-                  >
-                    <Icon
-                      path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
-                      size={1.75}
-                      color={c.isOutgoing ? theme.baseColor : 'white'}
-                      data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
-                    />
-                  </Clickable>
+                      }}
+                    >
+                      <Icon
+                        path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
+                        size={1.75}
+                        color={c.isOutgoing ? theme.baseColor : 'white'}
+                        data-for="action-send"
+                        data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
+                      />
+                    </Clickable>
+                  </>
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
-                  <Clickable
-                    clickable={true}
-                    onClick={() => {
-                      isUntrusted ? addTrust(c.user) : removeTrust(c.user);
-                    }}
-                  >
-                    <Icon
-                      path={isTrusted ? mdiHeart : mdiHeartOutline}
-                      size={1.5}
-                      color={isTrusted ? theme.baseColor : 'white'}
-                      data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                    />
-                  </Clickable>
+                  <>
+                    <ReactTooltip id="action-trust" />
+                    <Clickable
+                      clickable={true}
+                      onClick={() => {
+                        isUntrusted ? addTrust(c.user) : removeTrust(c.user);
+                      }}
+                    >
+                      <Icon
+                        path={isTrusted ? mdiHeart : mdiHeartOutline}
+                        size={1.5}
+                        color={isTrusted ? theme.baseColor : 'white'}
+                        data-for="action-trust"
+                        data-tip={mapToolTipTrust(isTrusted, userIdent)}
+                      />
+                    </Clickable>
+                  </>
                 </FadeIn>
               </JustifyAroundCenter>
             ),
