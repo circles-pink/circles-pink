@@ -242,6 +242,19 @@ export const resources = {
         xbgeSpecial: {
           sendButton: 'Circles Senden',
           receiveButton: 'Circles Empfangen',
+          whatToBuyForCircles:
+            'Mit deinen Circles kannst du Gutscheine für die Shops von {{providers}} erhalten.',
+          howToActivateVoucherShop:
+            'Um Zugang zum Gutschein-Shop zu erhalten, musst du mindestens 20 Unterschriften für den Volksentscheid sammeln und einreichen. Natürlich haben wir auch einige {{collectionTipps}} für dich.',
+          collectionTipps: 'Tipps zum Sammeln',
+          bringSignaturesTo:
+            'Die Unterschriften kannst du einfach bei deinem Kiezteam abgeben, per Post einsenden oder persönlich beim Expeditionsbüro in der Gneisenaustr. 63 vorbeibringen.',
+          myWalletTitle: 'Meine Circles-Wallet',
+          yourBalance: 'Dein Kontostand:',
+          welcomeGeneral:
+            'Willkommen! Deine Wallet ist aktiv, und du erhältst jeden Tag 24 Circles - das entspricht 72 € im Monat.',
+          welcomeUser:
+            'Du bist mit dem Benutzernamen @{{user}} bei Circles angemeldet.',
         },
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
@@ -294,8 +307,8 @@ export const resources = {
           vouchersLeft: 'Gutscheine übrig!',
           voucher: 'Gutschein',
           buyAtMarketPlace:
-            'Außerdem kannst du diverse Produkte auf dem Circles Marktplatz erwerben:',
-          toTheMarketPlace: 'Zum Marktplatz',
+            'In der Zwischenzeit kannst du auch schon Produkte auf dem {{toTheMarketPlace}} erwerben.',
+          toTheMarketPlace: 'Circles-Marktplatz',
         },
       },
       debug: {

@@ -43,7 +43,7 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
             <Input
               autoFocus
               // indicatorColor={mapIndicatorColors(state.usernameApiResult)}
-              type="text"
+              type="password"
               value={state.magicWords}
               placeholder={t('debug.magicWordsPlaceholder')}
               onChange={e => act(A._debug(A._setMagicWords(e.target.value)))}

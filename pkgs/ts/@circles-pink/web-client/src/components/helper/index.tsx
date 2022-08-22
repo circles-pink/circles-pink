@@ -28,40 +28,50 @@ export const Status = tw.div`text-red-600`;
 
 export const TwoButtonRow = tw.span`grid grid-cols-2 gap-2`;
 export const ButtonRow = tw.span`grid grid-flow-col gap-2`;
+export const TwoButtonCol = tw.span``;
 
 // -----------------------------------------------------------------------------
 // Margin
 // -----------------------------------------------------------------------------
 
-type MarginYProps = {
-  size: number;
+type MarginProps = {
+  top?: number;
+  bottom?: number;
+  right?: number;
+  left?: number;
   children: ReactElement | ReactElement[] | string;
 };
 
-export const MarginY = styled.div<MarginYProps>(({ size, children }) => [
-  css`
-    margin: ${size}rem 0;
-  `,
-]);
+export const Margin = styled.div<MarginProps>(
+  ({ top = 0, bottom = 0, right = 0, left = 0 }) => [
+    css`
+      margin-top: ${top}rem;
+      margin-bottom: ${bottom}rem;
+      margin-right: ${right}rem;
+      margin-left: ${left}rem;
+    `,
+  ]
+);
 
-type MarginXProps = {
-  size: number;
+// -----------------------------------------------------------------------------
+// Padding
+// -----------------------------------------------------------------------------
+
+type PaddingProps = {
+  top?: number;
+  bottom?: number;
+  right?: number;
+  left?: number;
   children: ReactElement | ReactElement[] | string;
 };
 
-export const MarginX = styled.div<MarginXProps>(({ size, children }) => [
-  css`
-    margin: 0 ${size}rem;
-  `,
-]);
-
-type MarginTProps = {
-  size: number;
-  children: ReactElement | ReactElement[] | string;
-};
-
-export const MarginT = styled.div<MarginYProps>(({ size, children }) => [
-  css`
-    margin-top: ${size}rem;
-  `,
-]);
+export const Padding = styled.div<PaddingProps>(
+  ({ top = 0, bottom = 0, right = 0, left = 0 }) => [
+    css`
+      padding-top: ${top}rem;
+      padding-bottom: ${bottom}rem;
+      padding-right: ${right}rem;
+      padding-left: ${left}rem;
+    `,
+  ]
+);
