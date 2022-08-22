@@ -52,5 +52,5 @@ const Frame = styled.div((props: FrameProps) => [
 // UI / Layout Components
 // -----------------------------------------------------------------------------
 
-const CardBody = tw.div`max-w-7xl py-4 mx-auto px-4 sm:px-6 lg:px-8`;
+const CardBody = tw.div`max-w-7xl mx-auto sm:p-6 lg:p-8`;
 const Debug = tw.div`p-8`;
