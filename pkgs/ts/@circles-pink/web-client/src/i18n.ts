@@ -239,6 +239,10 @@ export const resources = {
           'Ich weiß was ich tue und möchte meinen Safe selbst funden.',
       },
       dashboard: {
+        xbgeSpecial: {
+          sendButton: 'Circles Senden',
+          receiveButton: 'Circles Empfangen',
+        },
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
         debugTitle: 'Dashboard actions zum ausprobieren:',
