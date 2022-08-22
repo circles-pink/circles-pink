@@ -12,5 +12,6 @@ export const JustText = styled.p<JustTextProps>(({ fontSize = 1 }) => [
     font-size: ${fontSize}rem;
     margin: 0;
     padding: 0;
+    line-height: 1.5;
   `,
 ]);

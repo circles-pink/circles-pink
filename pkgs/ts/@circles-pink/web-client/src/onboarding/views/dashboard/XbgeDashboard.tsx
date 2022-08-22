@@ -494,7 +494,7 @@ export const XbgeDashboard = ({
                             fontSize={1.25}
                             onClick={() =>
                               window.open(
-                                'https://www.volksentscheid-grundeinkommen.de/mitmachen',
+                                'https://www.volksentscheid-grundeinkommen.de/mitmachen#sammeltipps',
                                 '_blank'
                               )
                             }

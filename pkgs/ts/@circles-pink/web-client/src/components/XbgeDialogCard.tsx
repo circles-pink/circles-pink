@@ -4,28 +4,27 @@ import { DebugContext } from '../context/debug';
 import { Theme, ThemeContext } from '../context/theme';
 
 // -----------------------------------------------------------------------------
-// XbgeUserDashboard
+// XbgeDialogCard
 // -----------------------------------------------------------------------------
 
-type XbgeUserDashboardProps = {
+type XbgeDialogCardProps = {
   mainContent?: ReactElement;
-  overlay?: ReactElement | null;
-  debug?: ReactElement | ReactElement[];
+  debug?: ReactElement;
 };
 
-export const XbgeUserDashboard = ({
+export const XbgeDialogCard = ({
   mainContent,
-  overlay,
   debug,
-}: XbgeUserDashboardProps): ReactElement => {
+}: XbgeDialogCardProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const [debugContext] = useContext(DebugContext);
 
   return (
     <>
       <Frame theme={theme}>
-        {overlay}
-        <CardBody>{mainContent}</CardBody>
+        <CardBody>
+          <MainContent>{mainContent}</MainContent>
+        </CardBody>
       </Frame>
       {debugContext && <Debug>{debug}</Debug>}
     </>
@@ -52,5 +51,6 @@ const Frame = styled.div((props: FrameProps) => [
 // UI / Layout Components
 // -----------------------------------------------------------------------------
 
-const CardBody = tw.div`max-w-7xl py-4 mx-auto px-4 sm:px-6 lg:px-8`;
+const CardBody = tw.div`max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8`;
+const MainContent = tw.div`w-full`;
 const Debug = tw.div`p-8`;

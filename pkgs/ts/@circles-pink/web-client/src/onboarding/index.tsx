@@ -41,6 +41,7 @@ import { fromFpTsEither } from '../utils/fpTs';
 import * as E from 'fp-ts/Either';
 import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
 import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
+import { XbgeTrusts } from './views/XbgeTrusts';
 
 type Language = 'en' | 'de';
 
@@ -140,6 +141,9 @@ const View = ({
     case 'login':
       return <Login state={state.value} act={act} />;
     case 'trusts':
+      if (xbgeCampaign) {
+        return <XbgeTrusts state={state.value} act={act} />;
+      }
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
       if (xbgeCampaign) {
