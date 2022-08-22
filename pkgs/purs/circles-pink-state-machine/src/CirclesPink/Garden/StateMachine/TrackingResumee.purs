@@ -1,6 +1,9 @@
 module CirclesPink.Garden.StateMachine.TrackingResumee
-  ( Resumee
+  ( Instant(..)
+  , Resumee
   , StepName(..)
+  , decodeJsonResumee
+  , encodeJsonResumee
   , fromAction
   , fromStateUpdate
   , init
@@ -11,14 +14,28 @@ import Prelude
 
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Garden.StateMachine (CirclesAction, CirclesState)
-import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Argonaut.Encode.Generic (genericEncodeJson)
-import Data.DateTime.Instant (Instant)
+import Data.DateTime.Instant (instant)
+import Data.DateTime.Instant as DT
+import Data.Either (Either, note)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, un, wrap)
 import Data.Newtype.Extra ((-#))
+import Data.Time.Duration (Milliseconds(..))
 import Data.Variant (case_, default, onMatch)
+
+newtype Instant = Instant DT.Instant
+
+derive instance Newtype Instant _
+
+instance EncodeJson Instant where
+  encodeJson = un Instant >>> DT.unInstant >>> un Milliseconds >>> encodeJson
+
+instance DecodeJson Instant where
+  decodeJson x = decodeJson x <#> Milliseconds >>= instant >>> note (TypeMismatch "Not an instant") <#> Instant
 
 data StepName
   = Debug
@@ -51,6 +68,12 @@ type Resumee =
   , lastLogin :: Instant
   }
 
+encodeJsonResumee :: Resumee -> Json
+encodeJsonResumee = encodeJson
+
+decodeJsonResumee :: Json -> Either JsonDecodeError Resumee
+decodeJsonResumee = decodeJson
+
 init :: Resumee
 init =
   { lastState: AskUserName
@@ -58,7 +81,7 @@ init =
   , triggeredSends: 0
   , triggeredTrusts: 0
   , triggeredUntrusts: 0
-  , lastLogin: bottom
+  , lastLogin: wrap bottom
   }
 
 getStepName :: CirclesState -> StepName

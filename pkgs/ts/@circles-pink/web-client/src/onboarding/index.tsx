@@ -50,6 +50,7 @@ type Content = {};
 export type UserConfig = {
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
+  onTrackingResumee?: (json: unknown) => void;
   voucherShopEnabled: boolean;
 };
 
@@ -60,6 +61,7 @@ export type OnboardingProps = {
   content?: Content;
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
+  onTrackingResumee?: (json: unknown) => void;
   voucherShopEnabled?: boolean;
   xbgeCampaign?: boolean;
   testEnv?: Boolean;
@@ -202,6 +204,7 @@ const OnboardingContent = ({
           return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
         })
       : Nothing.value,
+    onTrackingResumee: Nothing.value
   };
 
   const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);
