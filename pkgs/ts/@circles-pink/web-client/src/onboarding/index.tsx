@@ -40,6 +40,7 @@ import { Unit, unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { fromFpTsEither } from '../utils/fpTs';
 import * as E from 'fp-ts/Either';
 import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
+import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 
 type Language = 'en' | 'de';
 
@@ -59,6 +60,7 @@ export type OnboardingProps = {
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
   voucherShopEnabled?: boolean;
+  xbgeCampaign?: boolean;
   testEnv?: Boolean;
 };
 
@@ -103,9 +105,15 @@ type ViewProps = {
   state: CirclesState;
   act: (m: CirclesAction) => void;
   cfg: UserConfig;
+  xbgeCampaign: boolean;
 };
 
-const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
+const View = ({
+  state,
+  act,
+  cfg,
+  xbgeCampaign,
+}: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -134,6 +142,9 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
     case 'trusts':
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
+      if (xbgeCampaign) {
+        return <XbgeDashboard state={state.value} act={act} cfg={cfg} />;
+      }
       return <Dashboard state={state.value} act={act} cfg={cfg} />;
     default:
       return null;
@@ -167,6 +178,7 @@ const OnboardingContent = ({
   email = () => {},
   onTrackingEvent,
   voucherShopEnabled = false,
+  xbgeCampaign = false,
   testEnv = false,
 }: OnboardingProps): ReactElement => {
   const userConfig: UserConfig = {
@@ -209,7 +221,7 @@ const OnboardingContent = ({
     <AnimProvider state={state}>
       <I18nextProvider i18n={i18n}>
         <DebugProvider>
-          <View state={state} act={act} cfg={cfg} />
+          <View state={state} act={act} cfg={cfg} xbgeCampaign={xbgeCampaign} />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>
