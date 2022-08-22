@@ -10,7 +10,7 @@ import React, {
 } from 'react';
 import { Button, ButtonLinkLike, Input } from '../../../components/forms';
 import { JustText, SubClaim, Text } from '../../../components/text';
-import { UserDashboard } from '../../../components/UserDashboard';
+import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
 import { FadeIn } from 'anima-react';
 import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
@@ -356,7 +356,7 @@ export const XbgeDashboard = ({
   // -----------------------------------------------------------------------------
 
   return (
-    <UserDashboard
+    <XbgeUserDashboard
       mainContent={
         <>
           <FadeIn orientation={'up'} delay={getDelay()}>
