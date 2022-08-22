@@ -1,9 +1,11 @@
 module CirclesPink.Garden.StateMachine.TrackingResumee
-  ( StepName(..)
+  ( Resumee
+  , StepName(..)
   , fromAction
   , fromStateUpdate
   , init
-  ) where
+  )
+  where
 
 import Prelude
 
