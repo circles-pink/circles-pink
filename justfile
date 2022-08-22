@@ -169,6 +169,7 @@ run-garden_:
 	export GARDEN_SAFE_MASTER_ADDRESS={{GARDEN_SAFE_MASTER_ADDRESS}}
 	export GARDEN_ETHEREUM_NODE_WS={{GARDEN_ETHEREUM_NODE_WS}}
 	export VOUCHER_SERVER_HOST={{VOUCHER_SERVER_HOST}}
+	export IS_DEV=true
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
 
 generate-tsd:
