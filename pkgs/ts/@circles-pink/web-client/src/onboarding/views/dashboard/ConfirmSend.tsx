@@ -2,7 +2,7 @@ import { mdiCashFast } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { SetStateAction, useEffect, useState } from 'react';
 import { Button } from '../../../components/forms';
-import { JustifyEnd, MarginY } from '../../../components/helper';
+import { JustifyEnd, Margin } from '../../../components/helper';
 import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapResult } from '../../utils/mapResult';
@@ -136,7 +136,9 @@ const ConfirmDialog = ({ theme, provider, eurAmount }: ConfirmDialogProps) => {
         <br />
         {`${t('dashboard.voucherShop.eurAmountWillBe')} ${eurAmount} €`}
 
-        <MarginY size={2}>{t('mayTakeSomeTime')}</MarginY>
+        <Margin top={2} bottom={2}>
+          {t('mayTakeSomeTime')}
+        </Margin>
       </SubClaim>
     </>
   );

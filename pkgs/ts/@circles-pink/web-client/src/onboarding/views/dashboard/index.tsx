@@ -35,8 +35,7 @@ import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
   JustifyStartCenter,
-  MarginT,
-  MarginY,
+  Margin,
   TwoButtonRow,
 } from '../../../components/helper';
 import { Send, SendProps } from './Send';
@@ -459,14 +458,14 @@ export const Dashboard = ({
                   title={t('dashboard.voucherShop.shopTitle')}
                   icon={mdiGiftOutline}
                 >
-                  <MarginY size={2}>
+                  <Margin top={2} bottom={2}>
                     <BuyVouchers
                       theme={theme}
                       providers={stateRaw.voucherProvidersResult}
                       initializeVoucherOrder={initializeVoucherOrder}
                       availableBalance={userBalance}
                     />
-                  </MarginY>
+                  </Margin>
                   <ListVouchers
                     theme={theme}
                     providersResult={stateRaw.voucherProvidersResult}
@@ -475,7 +474,7 @@ export const Dashboard = ({
                     setJustBoughtVoucher={setJustBoughtVoucher}
                   />
 
-                  <MarginT size={3}>
+                  <Margin top={3}>
                     <JustifyStartCenter>
                       <JustText>
                         {t('dashboard.voucherShop.buyAtMarketPlace')}
@@ -491,7 +490,7 @@ export const Dashboard = ({
                         {t('dashboard.voucherShop.toTheMarketPlace')}
                       </ButtonLinkLike>
                     </JustifyStartCenter>
-                  </MarginT>
+                  </Margin>
                 </LightColorFrame>
               </TopMargin>
             </FadeIn>

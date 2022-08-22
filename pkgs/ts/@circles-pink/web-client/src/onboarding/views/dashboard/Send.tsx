@@ -2,7 +2,7 @@ import { mdiCashFast, mdiQrcodeScan } from '@mdi/js';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Button, Input } from '../../../components/forms';
-import { JustifyEnd, MarginY } from '../../../components/helper';
+import { JustifyEnd } from '../../../components/helper';
 import { Claim, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 import { mapResult } from '../../utils/mapResult';

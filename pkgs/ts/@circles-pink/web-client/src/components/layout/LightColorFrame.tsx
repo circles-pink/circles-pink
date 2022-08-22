@@ -13,7 +13,7 @@ type FameProps = {
   theme: Theme;
   title?: string;
   icon?: string;
-  children: ReactElement | ReactElement[] | string;
+  children: ReactElement | ReactElement[] | string | null;
 };
 
 export const LightColorFrame = ({

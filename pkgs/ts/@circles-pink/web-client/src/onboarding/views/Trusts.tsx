@@ -36,7 +36,7 @@ import {
   DefaultView,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
 import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { MarginY } from '../../components/helper';
+import { Margin } from '../../components/helper';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -124,11 +124,11 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
           />
 
           <FadeIn orientation={orientation} delay={getDelay()}>
-            <MarginY size={2}>
+            <Margin top={2} bottom={2}>
               <ButtonLinkLike onClick={() => setShowSafeInfo(!showSafeInfo)}>
                 {t('trusts.fundMySafeManually')}
               </ButtonLinkLike>
-            </MarginY>
+            </Margin>
           </FadeIn>
 
           {showSafeInfo && (

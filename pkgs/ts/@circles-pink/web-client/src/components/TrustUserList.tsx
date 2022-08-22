@@ -22,7 +22,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import { JustifyAroundCenter, JustifyStartCenter, MarginX } from './helper';
+import { JustifyAroundCenter, JustifyStartCenter } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,

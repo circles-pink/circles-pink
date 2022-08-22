@@ -29,14 +29,15 @@ import {
   mdiHandCoin,
   mdiLan,
   mdiMagnify,
+  mdiWalletOutline,
 } from '@mdi/js';
 import { TrustUserList } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
   JustifyStartCenter,
-  MarginT,
-  MarginY,
+  Margin,
+  TwoButtonCol,
   TwoButtonRow,
 } from '../../../components/helper';
 import { Send, SendProps } from './Send';
@@ -356,56 +357,195 @@ export const XbgeDashboard = ({
 
   return (
     <UserDashboard
-      header={
-        <HeaderContent>
-          {/* <FadeIn orientation={'down'} delay={getDelay()}>
-            <Icon path={mdiCog} size={1} color={theme.darkColor} />
-          </FadeIn> */}
-          <FadeIn orientation={'down'} delay={getDelay()}>
-            <UserHandle>{`@${stateRaw.user.username}`}</UserHandle>
-          </FadeIn>
-          {/* <FadeIn orientation={'down'} delay={getDelay()}>
-            <Icon path={mdiLogout} size={1} color={theme.darkColor} />
-          </FadeIn> */}
-        </HeaderContent>
-      }
-      text={
-        <Text>
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <Balance
-              theme={theme}
-              balance={state.getBalanceResult}
-              checkUBIPayoutResult={state.checkUBIPayoutResult}
-              requestUBIPayoutResult={state.requestUBIPayoutResult}
-            />
-          </FadeIn>
-        </Text>
-      }
-      control={
-        <ControlContent>
-          <FadeIn orientation={'up'} delay={getDelay()}>
-            <TwoButtonRow>
-              <Button
-                prio="high"
-                theme={theme}
-                icon={mdiCashFast}
-                onClick={() => toggleOverlay('SEND')}
-              >
-                {t('dashboard.xbgeSpecial.sendButton')}
-              </Button>
-              <Button
-                theme={theme}
-                icon={mdiHandCoin}
-                onClick={() => toggleOverlay('RECEIVE')}
-              >
-                {t('dashboard.xbgeSpecial.receiveButton')}
-              </Button>
-            </TwoButtonRow>
-          </FadeIn>
-        </ControlContent>
-      }
       mainContent={
         <>
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <Margin bottom={1}>
+              <LightColorFrame
+                theme={theme}
+                title={t('dashboard.xbgeSpecial.myWalletTitle')}
+                icon={mdiWalletOutline}
+              >
+                <TwoCols>
+                  <Text>
+                    <FadeIn orientation={'up'} delay={getDelay()}>
+                      <>
+                        <SubClaim>
+                          {t('dashboard.xbgeSpecial.welcomeGeneral')}
+                        </SubClaim>
+                        <SubClaim>
+                          {t('dashboard.xbgeSpecial.welcomeUser').replace(
+                            '{{user}}',
+                            stateRaw.user.username
+                          )}
+                        </SubClaim>
+                        <JustText fontSize={1.25}>
+                          {t('dashboard.xbgeSpecial.yourBalance')}
+                        </JustText>
+                        <Balance
+                          theme={theme}
+                          balance={state.getBalanceResult}
+                          checkUBIPayoutResult={state.checkUBIPayoutResult}
+                          requestUBIPayoutResult={state.requestUBIPayoutResult}
+                        />
+                      </>
+                    </FadeIn>
+                  </Text>
+                  <TwoButtonCol>
+                    <Button
+                      prio="high"
+                      theme={theme}
+                      icon={mdiCashFast}
+                      onClick={() => toggleOverlay('SEND')}
+                      fullWidth
+                    >
+                      {t('dashboard.xbgeSpecial.sendButton')}
+                    </Button>
+                    <Button
+                      theme={theme}
+                      icon={mdiHandCoin}
+                      onClick={() => toggleOverlay('RECEIVE')}
+                      fullWidth
+                    >
+                      {t('dashboard.xbgeSpecial.receiveButton')}
+                    </Button>
+                  </TwoButtonCol>
+                </TwoCols>
+              </LightColorFrame>
+            </Margin>
+          </FadeIn>
+
+          <FadeIn orientation={'up'} delay={getDelay()}>
+            <Margin bottom={1}>
+              <LightColorFrame
+                theme={theme}
+                title={t('dashboard.voucherShop.shopTitle')}
+                icon={mdiGiftOutline}
+              >
+                <>
+                  {cfg?.voucherShopEnabled ? (
+                    <>
+                      <Margin top={2} bottom={2}>
+                        <BuyVouchers
+                          theme={theme}
+                          providers={stateRaw.voucherProvidersResult}
+                          initializeVoucherOrder={initializeVoucherOrder}
+                          availableBalance={userBalance}
+                        />
+                      </Margin>
+                      <ListVouchers
+                        theme={theme}
+                        providersResult={stateRaw.voucherProvidersResult}
+                        vouchersResult={state.vouchersResult}
+                        justBoughtVoucher={justBoughtVoucher}
+                        setJustBoughtVoucher={setJustBoughtVoucher}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Margin top={1} bottom={1}>
+                        <JustText fontSize={1.25}>
+                          {
+                            t(
+                              'dashboard.xbgeSpecial.whatToBuyForCircles'
+                            ).split('{{providers}}')[0]
+                          }
+                          <ButtonLinkLike
+                            fontSize={1.25}
+                            onClick={() =>
+                              window.open('https://goodbuy.eu/', '_blank')
+                            }
+                          >
+                            goodbuy.eu
+                          </ButtonLinkLike>
+                          ,{' '}
+                          <ButtonLinkLike
+                            fontSize={1.25}
+                            onClick={() =>
+                              window.open('https://sirplus.de/', '_blank')
+                            }
+                          >
+                            sirplus.de
+                          </ButtonLinkLike>{' '}
+                          und{' '}
+                          <ButtonLinkLike
+                            fontSize={1.25}
+                            onClick={() =>
+                              window.open('https://geschmack.org/', '_blank')
+                            }
+                          >
+                            geschmack.org
+                          </ButtonLinkLike>
+                          {
+                            t(
+                              'dashboard.xbgeSpecial.whatToBuyForCircles'
+                            ).split('{{providers}}')[1]
+                          }
+                        </JustText>
+                      </Margin>
+                      <Margin top={1} bottom={1}>
+                        <JustText fontSize={1.25}>
+                          {
+                            t(
+                              'dashboard.xbgeSpecial.howToActivateVoucherShop'
+                            ).split('{{collectionTipps}}')[0]
+                          }
+                          <ButtonLinkLike
+                            fontSize={1.25}
+                            onClick={() =>
+                              window.open(
+                                'https://www.volksentscheid-grundeinkommen.de/mitmachen',
+                                '_blank'
+                              )
+                            }
+                          >
+                            {t('dashboard.xbgeSpecial.collectionTipps')}
+                          </ButtonLinkLike>
+                          {
+                            t(
+                              'dashboard.xbgeSpecial.howToActivateVoucherShop'
+                            ).split('{{collectionTipps}}')[1]
+                          }
+                        </JustText>
+                      </Margin>
+                      <Margin top={1} bottom={1}>
+                        <JustText fontSize={1.25}>
+                          {t('dashboard.xbgeSpecial.bringSignaturesTo')}
+                        </JustText>
+                      </Margin>
+                    </>
+                  )}
+                </>
+
+                <Margin top={2}>
+                  <JustifyStartCenter>
+                    <JustText fontSize={1}>
+                      {
+                        t('dashboard.voucherShop.buyAtMarketPlace').split(
+                          '{{toTheMarketPlace}}'
+                        )[0]
+                      }
+                    </JustText>
+                    <ButtonLinkLike
+                      onClick={() =>
+                        window.open('https://market.joincircles.net/', '_blank')
+                      }
+                    >
+                      {t('dashboard.voucherShop.toTheMarketPlace')}
+                    </ButtonLinkLike>
+                    <JustText fontSize={1}>
+                      {
+                        t('dashboard.voucherShop.buyAtMarketPlace').split(
+                          '{{toTheMarketPlace}}'
+                        )[1]
+                      }
+                    </JustText>
+                  </JustifyStartCenter>
+                </Margin>
+              </LightColorFrame>
+            </Margin>
+          </FadeIn>
+
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
@@ -450,52 +590,6 @@ export const XbgeDashboard = ({
               />
             </FadeIn>
           </MainContent>
-
-          {cfg?.voucherShopEnabled && (
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <TopMargin>
-                <LightColorFrame
-                  theme={theme}
-                  title={t('dashboard.voucherShop.shopTitle')}
-                  icon={mdiGiftOutline}
-                >
-                  <MarginY size={2}>
-                    <BuyVouchers
-                      theme={theme}
-                      providers={stateRaw.voucherProvidersResult}
-                      initializeVoucherOrder={initializeVoucherOrder}
-                      availableBalance={userBalance}
-                    />
-                  </MarginY>
-                  <ListVouchers
-                    theme={theme}
-                    providersResult={stateRaw.voucherProvidersResult}
-                    vouchersResult={state.vouchersResult}
-                    justBoughtVoucher={justBoughtVoucher}
-                    setJustBoughtVoucher={setJustBoughtVoucher}
-                  />
-
-                  <MarginT size={3}>
-                    <JustifyStartCenter>
-                      <JustText>
-                        {t('dashboard.voucherShop.buyAtMarketPlace')}
-                      </JustText>
-                      <ButtonLinkLike
-                        onClick={() =>
-                          window.open(
-                            'https://market.joincircles.net/',
-                            '_blank'
-                          )
-                        }
-                      >
-                        {t('dashboard.voucherShop.toTheMarketPlace')}
-                      </ButtonLinkLike>
-                    </JustifyStartCenter>
-                  </MarginT>
-                </LightColorFrame>
-              </TopMargin>
-            </FadeIn>
-          )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
@@ -626,6 +720,7 @@ const DebugButtonWrapper = tw.span`mb-3`;
 const InputWrapper = tw.div`pr-2 w-4/5`;
 const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
 const TopMargin = tw.div`mt-4`;
+const TwoCols = tw.div`max-w-7xl grid lg:grid-cols-2 md:grid-cols-2 lg:gap-4 md:gap-4`;
 
 const FlexItemGrow = styled.div(() => [
   tw`h-full`,
