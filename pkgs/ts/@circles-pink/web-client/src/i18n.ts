@@ -158,7 +158,7 @@ export const resources = {
       signInButton: 'Bestehende Wallet öffnen',
       signUpInsteadButton: 'Neue Wallet erstellen',
       signInSubmitButton: 'Wiederherstellen',
-      finalizeButton: 'Account erstellen',
+      finalizeButton: 'Wallet aktivieren',
       safeStateButton: 'Safe State abfragen',
       getTrustsButton: 'Vertrauensnetzwerk abfragen',
       addTrustsButton: 'Vertrauen',
@@ -233,10 +233,27 @@ export const resources = {
           'Sammle mindestens drei Trusts von Circles User:innen. Nenne ihnen dazu einfach deinen Nutzernamen. Danach kannst du deinen Account freischalten und erhälst Grundeinkommen!',
         fundYourSafe:
           'Oder funde deine Wallet mit mindestens einem xDai. Das ist deine Safe Adresse, wenn sie mit mindestens einem Euro gefunded ist, kannst du die Registrierung abschließen.',
-        collectTrustsTitle: 'Sammle drei Trusts!',
+        collectTrustsTitle: 'Wallet aktivieren',
         fundSafeTitle: 'Funde deinen Safe!',
         fundMySafeManually:
           'Ich weiß was ich tue und möchte meinen Safe selbst funden.',
+        xbgeSpecial: {
+          myWalletTitle: 'Meine Circles-Wallet',
+
+          welcomeUser:
+            'Willkommen @{{user}}! Deine Wallet wurde erfolgreich angelegt!',
+          welcomeGeneral:
+            'Damit du dein Grundeinkommen bekommen kannst, muss deine Wallet aktiviert werden.',
+          howToActivateWallet:
+            'Um deine Wallet zu aktivieren und mit Circles bezahlen zu können, muss du mindestens 3 Circles-User*innen finden, die dich in ihr Vertrauensnetzwerk aufnehmen.',
+          howToGetTrusts:
+            'Wo findest du 3 Menschen? Am besten kommst du bei einer {{collectionAction}} vorbei - dort sind immer Menschen von der Expedition vor Ort, die dich gerne in ihr Vertrauensnetzwerk aufnehmen. Nenne ihnen einfach deinen Usernamen.',
+          collectSignaturesForVouchers:
+            'Außerdem kannst du dann auch gleich 20 Unterschriften sammeln, um deinen Gutschschein-Shop freizuschalten.',
+          youWillGetCircles:
+            'Sobald deine Wallet aktiviert ist, beginnt dein Grundeinkommen zu fließen, und du erhältst jede Stunde 1 Circles, die du in Gutscheine eintauschen kannst.',
+          collectionAction: 'Sammelaktion',
+        },
       },
       dashboard: {
         xbgeSpecial: {
