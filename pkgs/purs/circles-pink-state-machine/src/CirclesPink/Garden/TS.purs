@@ -15,7 +15,10 @@ import CirclesPink.Garden.StateMachine.Control.Class.ProdM (runProdM)
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (evalTestScriptT)
 import CirclesPink.Garden.StateMachine.TrackingEvent (TrackingEvent)
 import CirclesPink.Garden.StateMachine.TrackingEvent as TE
+import CirclesPink.Garden.StateMachine.TrackingResumee (Resumee)
+import CirclesPink.Garden.StateMachine.TrackingResumee as Tr
 import Data.FpTs.Either as FP
+import Effect.Now (now)
 import Effect.Unsafe (unsafePerformEffect)
 import FpTs.Class (fromFpTs)
 import HTTP.Milkis (milkisRequest)
@@ -25,18 +28,21 @@ import StringStorage (getLocalStorage, getSessionStorage)
 type CirclesConfig =
   { extractEmail :: FP.Either String (String -> Effect Unit)
   , onTrackingEvent :: Maybe (TrackingEvent -> Effect Unit)
+  , onTrackingResumee :: Maybe ((Resumee -> Resumee) -> Effect Unit)
   }
 
 convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
 convertConfig cfg = C.CirclesConfig
   { extractEmail: map (map liftEffect) $ fromFpTs $ cfg.extractEmail
-  , onTrackingEvent: map (map liftEffect) $ cfg.onTrackingEvent 
+  , onTrackingEvent: map (map liftEffect) $ cfg.onTrackingEvent
   }
 
 mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControl envVars cfg setState s a = do
-  fold (cfg.onTrackingEvent <*> TE.fromAction s  a)
- 
+  time <- now
+  fold (cfg.onTrackingEvent <*> TE.fromAction s a)
+  fold (cfg.onTrackingResumee <*> Tr.fromAction time a)
+
   localStorage <- getLocalStorage
   sessionStorage <- getSessionStorage
   let
@@ -56,14 +62,15 @@ mkControl envVars cfg setState s a = do
   where
   cfg' = C.mapCirclesConfig liftEffect $ convertConfig cfg
   request = milkisRequest windowFetch
-  handler f = do 
-    setState \statePrev -> 
-      let 
+  handler f = do
+    time <- now
+    setState \statePrev ->
+      let
         stateNext = f statePrev
-        _ = unsafePerformEffect $ fold (cfg.onTrackingEvent <*> TE.fromStateUpdate {prev: statePrev, next: stateNext})
+        _ = unsafePerformEffect $ fold (cfg.onTrackingEvent <*> TE.fromStateUpdate { prev: statePrev, next: stateNext })
+        _ = unsafePerformEffect $ fold (cfg.onTrackingResumee <*> Tr.fromStateUpdate time { prev: statePrev, next: stateNext })
       in
         stateNext
-    
 
 mkControlTestEnv :: ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControlTestEnv setState st ac =
