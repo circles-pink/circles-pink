@@ -20,6 +20,7 @@ export default {
 
 const control = mkControl(env)({
   extractEmail: left("foo@bar.com"),
+  onTrackingResumee: Nothing.value,
   onTrackingEvent: Nothing.value,
 });
 
