@@ -51,6 +51,6 @@ const Frame = styled.div((props: FrameProps) => [
 // UI / Layout Components
 // -----------------------------------------------------------------------------
 
-const CardBody = tw.div`max-w-7xl mx-auto sm:p-6 lg:p-8`;
+const CardBody = tw.div`max-w-7xl mx-auto p-4 sm:p-6 lg:p-8`;
 const MainContent = tw.div`w-full`;
 const Debug = tw.div`p-8`;
