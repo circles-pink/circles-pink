@@ -30,17 +30,17 @@ trustsReport
   :: forall m
    . MonadApp m
   => { guards :: { basicAuth :: Unit }
-     , body :: { addresses :: Array C.Address }
+     , body :: { safeAddresses :: Array C.Address }
      }
   -> m (Response { trusted :: Array C.Address, notTrusted :: Array C.Address })
-trustsReport { body: { addresses } } = do
+trustsReport { body: { safeAddresses } } = do
   AppEnv
     { circlesCore: CirclesCoreEnv { getTrusts }
     , envVars: AppEnvVars envVars
     } <- ask
   xbgeTrusts <- getTrusts $ coerce envVars.xbgeSafeAddress
 
-  let { yes, no } = A.partition (_ `Set.member` xbgeTrusts) addresses
+  let { yes, no } = A.partition (_ `Set.member` xbgeTrusts) safeAddresses
 
   pure $ Res.ok { trusted: yes, notTrusted: no }
 
@@ -58,7 +58,7 @@ spec = do
     it "returns the trusted and untrusted addresses" do
       trustsReport
         { guards: { basicAuth: unit }
-        , body: { addresses: [ addrA, addrB, addrC ] }
+        , body: { safeAddresses: [ addrA, addrB, addrC ] }
         }
         # runAppTestM env
         # shouldEqual

@@ -11,7 +11,13 @@ import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
 import VoucherServer.MonadApp.Class (CirclesCoreEnv(..))
 
-trustUsers :: forall m. MonadApp m => { body :: { safeAddresses :: Array Address } } -> m {}
+trustUsers
+  :: forall m
+   . MonadApp m
+  => { guards :: { basicAuth :: Unit }
+     , body :: { safeAddresses :: Array Address }
+     }
+  -> m {}
 trustUsers { body: { safeAddresses } } = do
   _ <- for safeAddresses trustUser
   pure {}
