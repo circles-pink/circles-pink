@@ -26,7 +26,6 @@ import Data.Newtype (class Newtype, un, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Time.Duration (Milliseconds(..))
 import Data.Variant (case_, default, onMatch)
-import Debug (spy)
 
 newtype Instant = Instant DT.Instant
 
@@ -118,17 +117,22 @@ fromStateUpdate time { prev, next } = Nothing
   # update
       do
         comingFromLandingOrLogin
-        safeAddress <- goingToDashboard
-        pure (setLogin >>> setSafeAddress safeAddress)
+        goingToDashboard
+        pure setLogin
+
+  # update
+      do
+        safeAddress <- goingToTrusts
+        pure $ setSafeAddress safeAddress
 
   # update
       let
         nextStepName = getStepName next
         prevStepName = getStepName prev
       in
-         if prevStepName < nextStepName then 
-           Just \r -> if r.lastState < nextStepName then setLastState nextStepName r else r
-         else Nothing
+        if prevStepName < nextStepName then
+          Just \r -> if r.lastState < nextStepName then setLastState nextStepName r else r
+        else Nothing
 
   where
   update Nothing Nothing = Nothing
@@ -149,6 +153,12 @@ fromStateUpdate time { prev, next } = Nothing
 
   goingToDashboard = next #
     ( default Nothing # onMatch
-        { dashboard: \{ user } -> Just $ user -# _.safeAddress
+        { dashboard: \_ -> Just $ unit
+        }
+    )
+
+  goingToTrusts = next #
+    ( default Nothing # onMatch
+        { trusts: \{ user } -> Just $ user -# _.safeAddress
         }
     )
