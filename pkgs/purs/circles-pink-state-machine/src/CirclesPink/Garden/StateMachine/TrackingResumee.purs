@@ -77,7 +77,7 @@ decodeJsonResumee = decodeJson
 
 init :: Resumee
 init =
-  { lastState: AskUserName
+  { lastState: Landing
   , safeAddress: Nothing
   , triggeredSends: 0
   , triggeredTrusts: 0
