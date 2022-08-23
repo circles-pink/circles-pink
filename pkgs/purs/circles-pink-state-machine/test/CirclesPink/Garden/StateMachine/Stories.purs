@@ -27,7 +27,11 @@ spec =
     env' :: EnvControl (TestScriptT Identity)
     env' = testEnv
 
-    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit), onTrackingEvent : Nothing }
+    cfg = CirclesConfig
+      { extractEmail: Right (\_ -> pure unit)
+      , onTrackingEvent: Nothing
+      , onTrackingResumee: Nothing
+      }
 
     execTestScriptM_ = execTestScriptT cfg initLanding >>> unwrap >>> fst
   in
