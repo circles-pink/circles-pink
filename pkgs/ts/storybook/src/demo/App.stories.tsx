@@ -18,6 +18,11 @@ export default {
 
 export const GardenAPI = (args): ReactElement => {
   const [content, setContent] = useState<{}>();
+  const [trackingResumee, setTrackingResumee] = useState<unknown>();
+
+  useEffect(() => {
+    console.log("Tracking Resumee", JSON.stringify(trackingResumee, null, 2));
+  }, [trackingResumee]);
 
   return (
     <Onboarding
@@ -25,6 +30,9 @@ export const GardenAPI = (args): ReactElement => {
       initState={initLanding}
       content={content}
       onTrackingEvent={(te) => console.log("Tracking Event", te)}
+      onTrackingResumee={(updateResumee) => {
+        setTrackingResumee(updateResumee);
+      }}
     />
   );
 };

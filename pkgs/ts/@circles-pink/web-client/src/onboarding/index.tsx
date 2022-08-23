@@ -11,6 +11,12 @@ import {
   CirclesState,
   init,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import {
+  decodeJsonResumee,
+  Resumee,
+  init as initResumee,
+  encodeJsonResumee,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee';
 import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
@@ -42,6 +48,7 @@ import * as E from 'fp-ts/Either';
 import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
 import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 import { XbgeTrusts } from './views/XbgeTrusts';
+import { Json } from '@circles-pink/state-machine/output/Data.Argonaut.Core';
 
 type Language = 'en' | 'de';
 
@@ -61,7 +68,7 @@ export type OnboardingProps = {
   content?: Content;
   email?: string | ((email: string) => void);
   onTrackingEvent?: (json: unknown) => void;
-  onTrackingResumee?: (json: unknown) => void;
+  onTrackingResumee?: (f: (json?: unknown) => unknown) => void;
   voucherShopEnabled?: boolean;
   xbgeCampaign?: boolean;
   testEnv?: Boolean;
@@ -183,6 +190,7 @@ const OnboardingContent = ({
   content = {},
   email = () => {},
   onTrackingEvent,
+  onTrackingResumee,
   voucherShopEnabled = false,
   xbgeCampaign = false,
   testEnv = false,
@@ -204,7 +212,21 @@ const OnboardingContent = ({
           return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
         })
       : Nothing.value,
-    onTrackingResumee: Nothing.value
+    onTrackingResumee: onTrackingResumee
+      ? Just.create((f: (r: Resumee) => Resumee) => () => {
+          onTrackingResumee(j => {
+            if (!j) return encodeJsonResumee(f(initResumee));
+            const r = decodeJsonResumee(j as Json);
+            console.log(j, r);
+            switch (r.constructor.name) {
+              case 'Right':
+                return encodeJsonResumee(f(r.value0 as Resumee));
+              case 'Left':
+                throw new Error('Decode error');
+            }
+          });
+        })
+      : Nothing.value,
   };
 
   const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);

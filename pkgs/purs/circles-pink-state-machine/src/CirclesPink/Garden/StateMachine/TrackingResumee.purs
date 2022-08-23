@@ -13,7 +13,8 @@ module CirclesPink.Garden.StateMachine.TrackingResumee
 import Prelude
 
 import CirclesPink.Data.Address (Address)
-import CirclesPink.Garden.StateMachine (CirclesAction, CirclesState)
+import CirclesPink.Garden.StateMachine.Action (CirclesAction)
+import CirclesPink.Garden.StateMachine.State (CirclesState)
 import Data.Argonaut (class DecodeJson, class EncodeJson, Json, JsonDecodeError(..), decodeJson, encodeJson)
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Argonaut.Encode.Generic (genericEncodeJson)
@@ -102,9 +103,9 @@ fromAction :: Instant -> CirclesAction -> Maybe (Resumee -> Resumee)
 fromAction _ = default Nothing # onMatch
   { dashboard:
       default Nothing # onMatch
-        { addTrustConnection: \_ -> Just incSends
-        , removeTrustConnection: \_ -> Just incTrusts
-        , transfer: \_ -> Just incUnTrusts
+        { addTrustConnection: \_ -> Just incTrusts
+        , removeTrustConnection: \_ -> Just incUnTrusts
+        , transfer: \_ -> Just incSends
         }
   }
   where

@@ -35,13 +35,14 @@ convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
 convertConfig cfg = C.CirclesConfig
   { extractEmail: map (map liftEffect) $ fromFpTs $ cfg.extractEmail
   , onTrackingEvent: map (map liftEffect) $ cfg.onTrackingEvent
+  , onTrackingResumee: map (map liftEffect) $ cfg.onTrackingResumee
   }
 
 mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
 mkControl envVars cfg setState s a = do
   time <- now
   fold (cfg.onTrackingEvent <*> TE.fromAction s a)
-  fold (cfg.onTrackingResumee <*> Tr.fromAction time a)
+  fold (cfg.onTrackingResumee <*> Tr.fromAction (wrap time) a)
 
   localStorage <- getLocalStorage
   sessionStorage <- getSessionStorage
@@ -68,7 +69,7 @@ mkControl envVars cfg setState s a = do
       let
         stateNext = f statePrev
         _ = unsafePerformEffect $ fold (cfg.onTrackingEvent <*> TE.fromStateUpdate { prev: statePrev, next: stateNext })
-        _ = unsafePerformEffect $ fold (cfg.onTrackingResumee <*> Tr.fromStateUpdate time { prev: statePrev, next: stateNext })
+        _ = unsafePerformEffect $ fold (cfg.onTrackingResumee <*> Tr.fromStateUpdate (wrap time) { prev: statePrev, next: stateNext })
       in
         stateNext
 
@@ -77,4 +78,8 @@ mkControlTestEnv setState st ac =
   circlesControl testEnv cfg (setState >>> liftEffect) st ac
     # evalTestScriptT cfg initLanding
   where
-  cfg = C.CirclesConfig { extractEmail: Right (\_ -> pure unit), onTrackingEvent: Nothing }
+  cfg = C.CirclesConfig
+    { extractEmail: Right (\_ -> pure unit)
+    , onTrackingEvent: Nothing
+    , onTrackingResumee: Nothing
+    }

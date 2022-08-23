@@ -27,6 +27,7 @@ testConfig :: forall m. Monad m => CirclesConfig m
 testConfig = CirclesConfig
   { extractEmail: Right $ const $ pure unit
   , onTrackingEvent: Nothing
+  , onTrackingResumee: Nothing
   }
 
 act :: CirclesAction -> (TestScriptT Identity) Unit

@@ -196,7 +196,11 @@ main' = do
           , decrypt: \_ s -> Just s
           }
       }
-    cfg = CirclesConfig { extractEmail: Right (\_ -> pure unit), onTrackingEvent : Nothing }
+    cfg = CirclesConfig
+      { extractEmail: Right (\_ -> pure unit)
+      , onTrackingEvent: Nothing
+      , onTrackingResumee: Nothing
+      }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)
     # traverse' { count: 20, maxPar: 5 }
