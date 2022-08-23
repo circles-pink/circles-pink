@@ -42,7 +42,7 @@ mkCirclesCoreEnv = do
       CC.trustGetNetwork circlesCore account
         { safeAddress: convert safeAddress }
         # liftCirclesCore
-        <#> A.filter _.isOutgoing
+        <#> A.filter _.isIncoming
           >>> map (_.safeAddress >>> wrap)
           >>> Set.fromFoldable
 
