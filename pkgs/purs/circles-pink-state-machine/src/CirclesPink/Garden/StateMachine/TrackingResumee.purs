@@ -7,8 +7,7 @@ module CirclesPink.Garden.StateMachine.TrackingResumee
   , fromAction
   , fromStateUpdate
   , init
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -27,6 +26,7 @@ import Data.Newtype (class Newtype, un, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Time.Duration (Milliseconds(..))
 import Data.Variant (case_, default, onMatch)
+import Debug (spy)
 
 newtype Instant = Instant DT.Instant
 
@@ -126,9 +126,9 @@ fromStateUpdate time { prev, next } = Nothing
         nextStepName = getStepName next
         prevStepName = getStepName prev
       in
-        if prevStepName < nextStepName then
-          Just $ setLastState nextStepName
-        else Nothing
+         if prevStepName < nextStepName then 
+           Just \r -> if r.lastState < nextStepName then setLastState nextStepName r else r
+         else Nothing
 
   where
   update Nothing Nothing = Nothing
