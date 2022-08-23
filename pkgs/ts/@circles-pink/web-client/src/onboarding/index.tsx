@@ -217,7 +217,6 @@ const OnboardingContent = ({
           onTrackingResumee(j => {
             if (!j) return encodeJsonResumee(f(initResumee));
             const r = decodeJsonResumee(j as Json);
-            console.log(j, r);
             switch (r.constructor.name) {
               case 'Right':
                 return encodeJsonResumee(f(r.value0 as Resumee));
