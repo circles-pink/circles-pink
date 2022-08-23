@@ -36,15 +36,16 @@ type VoucherServerSpec = Spec
           POST "/trust-users"
             { response :: {}
             , body :: { safeAddresses :: Array Address }
+            , guards :: Guards ("basicAuth" : Nil)
             }
       , trustsReport ::
           POST "/trusts-report"
-            { body :: { addresses :: Array Address }
+            { body :: { safeAddresses :: Array Address }
             , response ::
                 { trusted :: Array Address
                 , notTrusted :: Array Address
                 }
-           , guards :: Guards ("basicAuth" : Nil)
+            , guards :: Guards ("basicAuth" : Nil)
             }
       }
   }
