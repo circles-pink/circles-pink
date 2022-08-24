@@ -31,6 +31,14 @@ class
   log :: AppLog -> m Unit
 
 --------------------------------------------------------------------------------
+-- Constants
+--------------------------------------------------------------------------------
+
+type AppConstants =
+  { trustLimitPercentage :: Number
+  }
+
+--------------------------------------------------------------------------------
 -- Log
 --------------------------------------------------------------------------------
 
@@ -104,6 +112,7 @@ errorToLog = case _ of
 newtype AppEnv m = AppEnv (AppEnv' m)
 type AppEnv' m =
   { envVars :: AppEnvVars
+  , constants :: AppConstants
   , graphNode :: GraphNodeEnv m
   , circlesCore :: CirclesCoreEnv m
   , xbgeClient :: XbgeClientEnv m

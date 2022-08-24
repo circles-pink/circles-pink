@@ -2,32 +2,26 @@ module VoucherServer.MonadApp.Impl.Prod.AppEnv where
 
 import Prelude
 
-import Control.Monad.Except (ExceptT, runExceptT)
-import Control.Monad.Reader (ReaderT, ask, runReaderT)
-import Data.Either (Either)
-import Effect.Aff (Aff)
-import VoucherServer.EnvVars (AppEnvVars)
-import VoucherServer.MonadApp (AppEnv(..), AppError, AppProdM)
+import Control.Monad.Reader (ask)
+import VoucherServer.MonadApp (AppEnv(..), AppProdM)
 import VoucherServer.MonadApp.Impl.Prod.CirclesCoreEnv (mkCirclesCoreEnv)
 import VoucherServer.MonadApp.Impl.Prod.GraphNodeEnv (mkGraphNodeEnv)
+import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.MonadApp.Impl.Prod.XbgeClientEnv (mkXbgeClientEnv)
 
-type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
+type M a = MkAppProdM a
 
 mkAppEnv :: M (AppEnv AppProdM)
 mkAppEnv = do
-  envVars <- ask
+  { envVars, constants } <- ask
   circlesCore <- mkCirclesCoreEnv
   graphNode <- mkGraphNodeEnv
   xbgeClient <- mkXbgeClientEnv
 
   pure $ AppEnv
     { envVars
+    , constants
     , graphNode
     , circlesCore
     , xbgeClient
     }
-
-
-runM :: forall a. AppEnvVars -> M a -> Aff (Either AppError a)
-runM env x = runExceptT $ runReaderT x env

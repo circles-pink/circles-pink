@@ -3,8 +3,7 @@ module VoucherServer.MonadApp.Impl.Prod.XbgeClientEnv where
 import Prelude
 
 import Control.Monad.Error.Class (liftEither)
-import Control.Monad.Except (ExceptT)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Reader (ask)
 import Data.Bifunctor (lmap)
 import Data.Either (Either)
 import Data.Tuple.Nested ((/\))
@@ -15,14 +14,15 @@ import Payload.Client as PC
 import Payload.Headers as H
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM)
-import VoucherServer.MonadApp.Class (AppError, XbgeClientEnv)
+import VoucherServer.MonadApp.Class (XbgeClientEnv)
+import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.Specs.Xbge (xbgeSpec)
 
-type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
+type M a = MkAppProdM a
 
 mkXbgeClientEnv :: M (XbgeClientEnv AppProdM)
 mkXbgeClientEnv = do
-  AppEnvVars env <- ask
+  { envVars : AppEnvVars env} <- ask
   let
     options = PC.defaultOpts
       { baseUrl = env.xbgeEndpoint

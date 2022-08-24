@@ -41,8 +41,9 @@ import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
 import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, runAppProdM)
-import VoucherServer.MonadApp.Class (errorToFailure)
+import VoucherServer.MonadApp.Class (AppConstants, errorToFailure)
 import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
+import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (runMkAppProdM)
 import VoucherServer.Routes.TrustUsers (trustUsers) as Routes
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
@@ -198,7 +199,7 @@ app = do
       error e
       liftEffect $ exit 1
     Right parsedEnv -> do
-      prodEnv_ <- Prod.mkAppEnv # Prod.runM parsedEnv
+      prodEnv_ <- Prod.mkAppEnv # runMkAppProdM { envVars: parsedEnv, constants: appConstants }
       case prodEnv_ of
         Left e -> do
           error $ errorToLog e
@@ -245,6 +246,11 @@ runSync env x = do
 --       log msg
 --       pure $ Left err
 --     Right x -> pure $ Right x
+
+appConstants :: AppConstants
+appConstants =
+  { trustLimitPercentage: 100.0
+  }
 
 main :: Effect Unit
 main = launchAff_ app
