@@ -118,17 +118,19 @@ fromStateUpdate :: Instant -> { prev :: CirclesState, next :: CirclesState } -> 
 fromStateUpdate time { prev, next } = Nothing
   # update
       do
-        comingFromLandingOrLogin
+        comingFromOutside
         _ <- goingToDashboard
         pure setLogin
 
   # update
       do
+        comingFromBeforeTrusts
         user <- goingToTrusts
         pure $ setSafeAddress (user -# _.safeAddress) >>> setUsername (user -# _.username)
 
   # update
       do
+        comingFromOutside
         user <- goingToDashboard
         pure $ setSafeAddress (user -# _.safeAddress) >>> setUsername (user -# _.username)
 
@@ -152,10 +154,19 @@ fromStateUpdate time { prev, next } = Nothing
   setSafeAddress sa r = r { safeAddress = Just sa }
   setUsername un r = r { username = Just un }
 
-  comingFromLandingOrLogin = prev #
+  comingFromOutside = prev #
     ( default Nothing # onMatch
         { login: \_ -> Just unit
         , landing: \_ -> Just unit
+        , trusts: \_ -> Just unit
+        }
+    )
+
+  comingFromBeforeTrusts = prev #
+    ( default Nothing # onMatch
+        { submit: \_ -> Just unit
+        , landing: \_ -> Just unit
+        , login: \_ -> Just unit
         }
     )
 
