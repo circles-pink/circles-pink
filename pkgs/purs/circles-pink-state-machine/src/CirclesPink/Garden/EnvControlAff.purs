@@ -27,8 +27,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
-import Data.Variant (Variant, inj)
-import Debug (spy)
+import Data.Variant (inj)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -81,6 +80,8 @@ type EnvEnvControlAff =
       , decrypt :: CryptoKey -> String -> Aff (Maybe String)
       }
   , envVars :: EnvVars
+  , safeAddress :: Maybe Address
+  , strictMode :: Boolean
   }
 
 env
@@ -501,20 +502,20 @@ storageGetItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ls -> do
-      k <- encryptJson envenv sk k
+      k' <- encryptJson envenv sk k
         # liftAff
-      ls.getItem k
-        <#> note (_errKeyNotFound $ stringify $ encodeJson k)
+      ls.getItem k'
+        <#> note (_errKeyNotFound $ stringify $ encodeJson k')
         # ExceptT
         >>= (\v -> decryptJson envenv sk v)
 
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ls -> do
-      k <- encryptJson envenv sk k
+      k' <- encryptJson envenv sk k
         # liftAff
-      ls.getItem k
-        <#> note (_errKeyNotFound $ stringify $ encodeJson k)
+      ls.getItem k'
+        <#> note (_errKeyNotFound $ stringify $ encodeJson k')
         # ExceptT
         >>= (\v -> decryptJson envenv sk v)
 

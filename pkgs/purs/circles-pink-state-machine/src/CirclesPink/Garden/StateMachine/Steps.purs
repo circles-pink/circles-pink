@@ -28,6 +28,8 @@ testConfig = CirclesConfig
   { extractEmail: Right $ const $ pure unit
   , onTrackingEvent: Nothing
   , onTrackingResumee: Nothing
+  , safeAddress : Nothing
+  , strictMode : false
   }
 
 act :: CirclesAction -> (TestScriptT Identity) Unit

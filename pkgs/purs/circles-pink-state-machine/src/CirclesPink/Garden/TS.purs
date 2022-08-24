@@ -7,6 +7,7 @@ module CirclesPink.Garden.TS
 
 import CirclesPink.Prelude
 
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Garden.EnvControlAff as Garden
 import CirclesPink.Garden.EnvControlTest (liftEnv, testEnv)
 import CirclesPink.Garden.StateMachine (CirclesAction, circlesControl, CirclesState, initLanding)
@@ -29,6 +30,8 @@ type CirclesConfig =
   { extractEmail :: FP.Either String (String -> Effect Unit)
   , onTrackingEvent :: Maybe (TrackingEvent -> Effect Unit)
   , onTrackingResumee :: Maybe ((Resumee -> Resumee) -> Effect Unit)
+  , safeAddress :: Maybe Address
+  , strictMode :: Boolean
   }
 
 convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
@@ -36,6 +39,8 @@ convertConfig cfg = C.CirclesConfig
   { extractEmail: map (map liftEffect) $ fromFpTs $ cfg.extractEmail
   , onTrackingEvent: map (map liftEffect) $ cfg.onTrackingEvent
   , onTrackingResumee: map (map liftEffect) $ cfg.onTrackingResumee
+  , safeAddress: cfg.safeAddress
+  , strictMode: cfg.strictMode
   }
 
 mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
@@ -56,6 +61,8 @@ mkControl envVars cfg setState s a = do
           { encrypt: \_ str -> pure str
           , decrypt: \_ str -> pure $ Just str
           }
+      , safeAddress: cfg.safeAddress
+      , strictMode: cfg.strictMode
       }
   circlesControl env cfg' (liftEffect <<< handler) s a
     # runProdM cfg'
@@ -82,4 +89,6 @@ mkControlTestEnv setState st ac =
     { extractEmail: Right (\_ -> pure unit)
     , onTrackingEvent: Nothing
     , onTrackingResumee: Nothing
+    , safeAddress: Nothing
+    , strictMode: false
     }

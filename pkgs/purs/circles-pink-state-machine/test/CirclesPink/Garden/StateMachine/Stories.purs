@@ -31,6 +31,8 @@ spec =
       { extractEmail: Right (\_ -> pure unit)
       , onTrackingEvent: Nothing
       , onTrackingResumee: Nothing
+      , safeAddress : Nothing
+      , strictMode : false
       }
 
     execTestScriptM_ = execTestScriptT cfg initLanding >>> unwrap >>> fst
