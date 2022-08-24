@@ -137,11 +137,11 @@ const ConfirmDialog = ({ theme, provider, eurAmount }: ConfirmDialogProps) => {
         {`${t('dashboard.voucherShop.tcCostWillBe')} ${crcAmount} CRC`}
         <br />
         {`${t('dashboard.voucherShop.eurAmountWillBe')} ${eurAmount} €`}
-
-        <Margin top={2} bottom={2}>
-          {t('mayTakeSomeTime')}
-        </Margin>
       </SubClaim>
+
+      <Margin top={1} bottom={1}>
+        <SubClaim color={theme.baseColor}>{t('mayTakeSomeTime')}</SubClaim>
+      </Margin>
     </>
   );
 };

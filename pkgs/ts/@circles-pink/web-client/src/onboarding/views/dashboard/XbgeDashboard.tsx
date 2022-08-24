@@ -8,7 +8,12 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { Button, ButtonLinkLike, Input } from '../../../components/forms';
+import {
+  Button,
+  ButtonLinkLike,
+  Input,
+  TagButton,
+} from '../../../components/forms';
 import { JustText, SubClaim, Text } from '../../../components/text';
 import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
 import { FadeIn } from 'anima-react';
@@ -88,6 +93,7 @@ export type XbgeDashboardProps = {
   cfg?: UserConfig;
   sharingFeature: ReactElement | null;
   buyVoucherEurLimit: number;
+  shadowFriends?: Array<string>;
 };
 
 export const XbgeDashboard = ({
@@ -96,6 +102,7 @@ export const XbgeDashboard = ({
   cfg,
   sharingFeature,
   buyVoucherEurLimit,
+  shadowFriends,
 }: XbgeDashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -597,14 +604,34 @@ export const XbgeDashboard = ({
                 }
                 description={t('dashboard.xbgeSpecial.userSearchDescription')}
                 actionRow={
-                  <JustifyBetweenCenter>
+                  <div>
                     <Input
                       type="text"
                       value={search}
                       placeholder={t('dashboard.userSearchPlaceholder')}
                       onChange={e => setSearch(e.target.value)}
                     />
-                  </JustifyBetweenCenter>
+                    <>
+                      {shadowFriends && shadowFriends.length > 0 && (
+                        <>
+                          <Margin bottom={0.5}>
+                            <JustText fontSize={0.75}>
+                              {t('dashboard.xbgeSpecial.yourShadowFriends')}
+                            </JustText>
+                          </Margin>
+                          {shadowFriends.map((friend, index) => (
+                            <TagButton
+                              theme={theme}
+                              onClick={() => setSearch(friend)}
+                              key={`${friend}-${index}`}
+                            >
+                              {friend}
+                            </TagButton>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  </div>
                 }
               />
             </FadeIn>

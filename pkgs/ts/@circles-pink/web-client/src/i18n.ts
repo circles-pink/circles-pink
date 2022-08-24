@@ -132,11 +132,13 @@ export const resources = {
             'Du bist mit dem Benutzernamen @{{user}} bei Circles angemeldet.',
           shareFeatureTitle: 'Teile deinen Trust-Link',
           userSearchDescription:
-            'Hier kannst du andere Circles User:innen finden und ihnen trusten.',
+            'Hier kannst du User suchen, denen du vertrauen willst.',
           trustNetworkDescription:
             'Dies ist die Liste der Personen, denen du vertraust, oder die dir vertrauen.',
           trustGraphDescription:
             'Der Trust Graph zeigt dir dein Vertrauensnetzwerk. Klicke die anderen User:innen an, um die Ansicht zu erweitern!',
+          yourShadowFriends:
+            'Von diesen User:innen hast du den Share-Link geklickt:',
         },
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
