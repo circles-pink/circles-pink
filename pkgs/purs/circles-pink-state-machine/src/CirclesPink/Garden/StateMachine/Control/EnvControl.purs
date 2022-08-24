@@ -5,6 +5,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , CheckUBIPayout
   , CoreToWindow
   , CryptoKey(..)
+  , CustomError
   , DeploySafe
   , DeployToken
   , EnvControl
@@ -75,6 +76,7 @@ module CirclesPink.Garden.StateMachine.Control.EnvControl
   , UserRegister
   , UserResolve
   , UserSearch
+  , _customError
   , _errDecode
   , _errDecrypt
   , _errGetVoucherProviders
@@ -241,7 +243,9 @@ type ErrReadStorage r = (errReadStorage :: RequestPath | r)
 
 type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
-type ErrRestoreSession r = ErrNoStorage + ErrStorageGetItem + r
+type CustomError r = (customError :: String | r)
+
+type ErrRestoreSession r = ErrNoStorage + ErrStorageGetItem + CustomError + r
 
 type RestoreSession m = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
 
@@ -322,6 +326,9 @@ _errParseToData = inj (Proxy :: _ "errParseToData")
 
 _errNoStorage :: forall r. StorageType -> Variant (ErrNoStorage r)
 _errNoStorage = inj (Proxy :: _ "errNoStorage")
+
+_customError :: forall r. String -> Variant (CustomError r)
+_customError = inj (Proxy :: _ "customError")
 
 _errKeyNotFound :: forall r. String -> Variant (ErrKeyNotFound r)
 _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")

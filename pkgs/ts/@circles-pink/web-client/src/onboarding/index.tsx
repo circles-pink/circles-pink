@@ -51,6 +51,7 @@ import { XbgeTrusts } from './views/XbgeTrusts';
 import { Json } from '@circles-pink/state-machine/output/Data.Argonaut.Core';
 import { mkI18n } from '../i18n_custom';
 import { Resource } from 'i18next';
+import { parseAddress } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 
 type Language = 'en' | 'de';
 
@@ -76,6 +77,8 @@ export type OnboardingProps = {
   testEnv?: Boolean;
   translations?: Resource;
   sharingFeature?: ReactElement | null;
+  safeAddress?: string;
+  strictMode?: boolean;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -215,6 +218,8 @@ const OnboardingContent = ({
   testEnv = false,
   translations,
   sharingFeature,
+  safeAddress,
+  strictMode = false,
 }: OnboardingProps): ReactElement => {
   const userConfig: UserConfig = {
     email,
@@ -247,6 +252,8 @@ const OnboardingContent = ({
           });
         })
       : Nothing.value,
+    safeAddress: safeAddress ? parseAddress(safeAddress) : Nothing.value,
+    strictMode,
   };
 
   const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);

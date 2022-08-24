@@ -112,8 +112,8 @@ export const resources = {
       },
       dashboard: {
         xbgeSpecial: {
-          sendButton: 'Circles Senden',
-          receiveButton: 'Circles Empfangen',
+          sendButton: 'Circles senden',
+          receiveButton: 'Circles empfangen',
           whatToBuyForCircles:
             'Mit deinen Circles kannst du Gutscheine für die Shops von {{providers}} erhalten.',
           howToActivateVoucherShop:
@@ -159,6 +159,11 @@ export const resources = {
             pendingTrust: 'Bestätige ...',
             pendingUntrust: 'Bestätige ...',
           },
+        },
+        trustGraphLayoutOptions: {
+          cose: 'Cose',
+          cise: 'Cise',
+          circles: 'Circles',
         },
         voucherShop: {
           shopTitle: 'Circles einlösen',
@@ -287,6 +292,11 @@ export const resources = {
         trustNetworkTitle: 'Trust Network',
         exploreTitle: 'Explore',
         userSearchPlaceholder: 'Search by username',
+        trustGraphLayoutOptions: {
+          cose: 'Cose',
+          cise: 'Cise',
+          circles: 'Circles',
+        },
         trustList: {
           tableHead: {
             user: 'User',

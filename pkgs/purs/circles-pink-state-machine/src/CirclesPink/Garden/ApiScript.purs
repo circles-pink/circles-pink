@@ -195,13 +195,15 @@ main' = do
           { encrypt: \_ s -> pure s
           , decrypt: \_ s -> pure $ Just s
           }
+      , safeAddress: Nothing
+      , strictMode: false
       }
     cfg = CirclesConfig
       { extractEmail: Right (\_ -> pure unit)
       , onTrackingEvent: Nothing
       , onTrackingResumee: Nothing
-      , safeAddress : Nothing
-      , strictMode : false
+      , safeAddress: Nothing
+      , strictMode: false
       }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)

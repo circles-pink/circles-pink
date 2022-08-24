@@ -271,7 +271,7 @@ dashboard env@{ trustGetNetwork } =
         _ <-
           env.addTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
-            # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
+            # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
 
         lift
@@ -324,7 +324,7 @@ dashboard env@{ trustGetNetwork } =
         _ <-
           env.removeTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
             # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
-            # retryUntil env (const { delay: 10000 }) (\r n -> n == 10 || isRight r) 0
+            # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
 
         lift
@@ -495,7 +495,7 @@ getVoucherProviders :: forall m. MonadCircles m => EnvControl m -> HandlerGetVou
 getVoucherProviders env set st _ =
   void do
     runExceptT do
-      msg <- env.getTimestamp # lift <#> unInstant >>> unwrap >>> N.toString 
+      msg <- env.getTimestamp # lift <#> unInstant >>> unwrap >>> N.toString
       signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
       _ <-
         env.getVoucherProviders signatureObj
