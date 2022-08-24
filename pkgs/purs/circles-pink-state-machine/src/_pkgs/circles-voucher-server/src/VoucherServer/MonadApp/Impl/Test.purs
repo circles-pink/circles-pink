@@ -36,7 +36,8 @@ derive newtype instance MonadThrow AppError AppTestM
 derive newtype instance MonadError AppError AppTestM
 derive newtype instance MonadAsk (AppEnv AppTestM) AppTestM
 
-instance MonadApp AppTestM
+instance MonadApp AppTestM where
+  log _ = pure unit 
 
 --------------------------------------------------------------------------------
 -- Type
@@ -47,6 +48,7 @@ testEnv = AppEnv
   { envVars: evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
   , graphNode: GraphNodeEnv
       { getTransferMeta: \_ -> throwError ErrUnknown
+      , getTransactions: \_ -> throwError ErrUnknown
       }
   , circlesCore: CirclesCoreEnv
       { getTrusts: \_ -> throwError ErrUnknown
@@ -56,6 +58,7 @@ testEnv = AppEnv
   , xbgeClient:
       { getVoucherProviders: \_ -> throwError ErrUnknown
       , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
+      , getVouchers: \_ -> throwError ErrUnknown
       }
   }
 

@@ -31,8 +31,12 @@ mkXbgeClientEnv = do
       }
     xbgeClient = mkClient options xbgeSpec
   pure
-    { getVoucherProviders: xbgeClient.getVoucherProviders >>> liftPayload
-    , finalizeVoucherPurchase : xbgeClient.finalizeVoucherPurchase >>> liftPayload
+    { getVoucherProviders: xbgeClient.getVoucherProviders
+        >>> liftPayload
+    , finalizeVoucherPurchase: xbgeClient.finalizeVoucherPurchase
+        >>> liftPayload
+    , getVouchers: xbgeClient.getVouchers
+        >>> liftPayload
     }
 
 liftPayload :: forall a. Aff (Either ClientError a) -> AppProdM a

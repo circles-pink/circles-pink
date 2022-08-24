@@ -7,12 +7,16 @@ import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant, unInstant)
-import Data.Maybe (Maybe)
+import Data.Map as M
+import Data.Maybe (Maybe(..))
 import Data.Newtype (un, unwrap)
+import Data.Traversable (for)
+import Data.Tuple.Nested ((/\))
 import Payload.ResponseTypes (Response(..))
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..), AppError(..))
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), GraphNodeEnv(..))
-import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted, VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
+import VoucherServer.MonadApp.Class (AppLog(..), CirclesCoreEnv(..), GraphNodeEnv(..), log)
+import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
 
@@ -33,15 +37,44 @@ threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 -- Sync
 --------------------------------------------------------------------------------
 
+syncVouchers :: forall m. MonadApp m => m (Array VoucherEncrypted)
+syncVouchers = do
+  AppEnv
+    { graphNode: GraphNodeEnv { getTransactions }
+    , xbgeClient: { getVouchers }
+    , envVars: AppEnvVars { xbgeSafeAddress }
+    } <- ask
+
+  log LogSync
+
+  txs <- getTransactions { toAddress: xbgeSafeAddress }
+
+  vouchers <- getVouchers { query: { safeAddress: Nothing } }
+    <#> getResponseData
+
+  let
+    vouchersLookup = vouchers
+      <#> (\all@(VoucherEncrypted { sold: { transactionId } }) -> transactionId /\ all)
+      # M.fromFoldable
+
+  let
+    unfinalizedTxs = txs # A.filter
+      \(Transfer { id }) -> not $ M.member id vouchersLookup
+
+  for unfinalizedTxs finalizeTx
+
 finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
-finalizeTx (Transfer { from, amount, id }) = do
+finalizeTx transfer@(Transfer { from, amount, id }) = do
   AppEnv
     { graphNode: GraphNodeEnv { getTransferMeta }
     , circlesCore: CirclesCoreEnv { getPaymentNote }
     , xbgeClient: { getVoucherProviders, finalizeVoucherPurchase }
     } <- ask
 
+  log $ LogStartFinalizeTx transfer
+
   TransferMeta { time, transactionHash } <- getTransferMeta id
+
   providers <- getVoucherProviders {}
     <#> getResponseData
 
@@ -57,7 +90,7 @@ finalizeTx (Transfer { from, amount, id }) = do
         redeemAmount from eur
         throwError ErrUnknown
 
-  finalizeVoucherPurchase
+  voucher <- finalizeVoucherPurchase
     { body:
         { safeAddress: from
         , providerId
@@ -67,9 +100,13 @@ finalizeTx (Transfer { from, amount, id }) = do
     }
     <#> getResponseData
 
+  log $ LogFinishFinalizeTx voucher
+
+  pure voucher
+
 redeemAmount :: forall m. MonadApp m => Address -> EurCent -> m Unit
-redeemAmount _ _ =
-  -- log "In the future we'll pay back the amount..."
+redeemAmount _ _ = do
+  log LogRedeem
   pure unit
 
 --------------------------------------------------------------------------------

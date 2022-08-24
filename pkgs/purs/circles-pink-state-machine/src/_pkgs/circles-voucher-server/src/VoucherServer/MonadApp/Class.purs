@@ -8,15 +8,16 @@ import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
 import Data.Lens (Lens', lens')
 import Data.Lens.Record (prop)
+import Data.Maybe (Maybe)
 import Data.Tuple.Nested ((/\))
 import Payload.Client (ClientError)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
 import Type.Proxy (Proxy(..))
-import VoucherServer.EnvVars (AppEnvVars)
+import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVars')
 import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 import VoucherServer.Specs.Xbge (Address)
-import VoucherServer.Types (TransferMeta)
+import VoucherServer.Types (Transfer, TransferMeta)
 
 --------------------------------------------------------------------------------
 -- Class
@@ -26,7 +27,25 @@ class
   ( MonadError AppError m
   , MonadAsk (AppEnv m) m
   ) <=
-  MonadApp m
+  MonadApp m where
+  log :: AppLog -> m Unit
+
+--------------------------------------------------------------------------------
+-- Log
+--------------------------------------------------------------------------------
+
+data AppLog
+  = LogSync
+  | LogStartFinalizeTx Transfer
+  | LogFinishFinalizeTx VoucherEncrypted
+  | LogRedeem
+
+logToString :: AppLog -> String
+logToString = case _ of
+  LogSync -> "Tiggered transaction sync."
+  LogStartFinalizeTx _ -> "Start to finalize Transaction."
+  LogFinishFinalizeTx _ -> "Finish finalizing Transaction."
+  LogRedeem -> "In the future we'll pay back the amount..."
 
 --------------------------------------------------------------------------------
 -- Error
@@ -98,9 +117,12 @@ newtype GraphNodeEnv m = GraphNodeEnv (GraphNodeEnv' m)
 
 type GraphNodeEnv' m =
   { getTransferMeta :: GraphNodeEnv'getTransferMeta m
+  , getTransactions :: GraphNodeEnv'getTransactions m
   }
 
 type GraphNodeEnv'getTransferMeta m = TransferId -> m TransferMeta
+
+type GraphNodeEnv'getTransactions m = { toAddress :: Address } -> m (Array Transfer)
 
 --------------------------------------------------------------------------------
 -- CirclesCoreEnv
@@ -129,9 +151,12 @@ type CirclesCoreEnv'trustAddConnection m = TrustAddConnectionOptions -> m String
 type XbgeClientEnv m =
   { getVoucherProviders :: XbgeClientEnv'getVoucherProviders m
   , finalizeVoucherPurchase :: XbgeClientEnv'finalizeVoucherPurchase m
+  , getVouchers :: XbgeClientEnv'getVouchers m
   }
 
-type XbgeClientEnv'getVoucherProviders m = {} -> m (Response { data :: Array VoucherProvider })
+type XbgeClientEnv'getVoucherProviders m =
+  {}
+  -> m (Response { data :: Array VoucherProvider })
 
 type XbgeClientEnv'finalizeVoucherPurchase m =
   { body ::
@@ -143,6 +168,10 @@ type XbgeClientEnv'finalizeVoucherPurchase m =
   }
   -> m (Response { data :: VoucherEncrypted })
 
+type XbgeClientEnv'getVouchers m =
+  { query :: { safeAddress :: Maybe Address } }
+  -> m (Response { data :: Array VoucherEncrypted })
+
 --------------------------------------------------------------------------------
 -- Lenses
 --------------------------------------------------------------------------------
@@ -152,6 +181,9 @@ _AppEnv = lens' (\(AppEnv x) -> x /\ AppEnv)
 
 _CirclesCoreEnv :: forall m. Lens' (CirclesCoreEnv m) (CirclesCoreEnv' m)
 _CirclesCoreEnv = lens' (\(CirclesCoreEnv x) -> x /\ CirclesCoreEnv)
+
+_AppEnvVars :: Lens' AppEnvVars AppEnvVars'
+_AppEnvVars = lens' (\(AppEnvVars x) -> x /\ AppEnvVars)
 
 _GraphNodeEnv :: forall m. Lens' (GraphNodeEnv m) (GraphNodeEnv' m)
 _GraphNodeEnv = lens' (\(GraphNodeEnv x) -> x /\ GraphNodeEnv)

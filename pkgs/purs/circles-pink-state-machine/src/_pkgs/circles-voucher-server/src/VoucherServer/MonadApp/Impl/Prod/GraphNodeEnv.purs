@@ -2,15 +2,18 @@ module VoucherServer.MonadApp.Impl.Prod.GraphNodeEnv where
 
 import Prelude
 
+import CirclesPink.Data.Address (parseAddress)
 import Control.Monad.Error.Class (liftEither, liftMaybe)
 import Control.Monad.Except (ExceptT)
 import Control.Monad.Reader (ReaderT, ask)
 import Data.Array as A
+import Data.BN (fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime.Instant (instant)
 import Data.Newtype (un)
 import Data.Number (fromString)
 import Data.Time.Duration (Seconds(..), convertDuration)
+import Data.Traversable (for)
 import Effect.Aff (Aff, try)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
@@ -22,9 +25,10 @@ import GraphQL.Client.Types (Client)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
-import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv'getTransferMeta)
-import VoucherServer.Spec.Types (TransferId(..))
-import VoucherServer.Types (TransferMeta(..))
+import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv'getTransferMeta, GraphNodeEnv'getTransactions)
+import VoucherServer.Spec.Types (Freckles(..), TransferId(..))
+import VoucherServer.Specs.Xbge (Address(..))
+import VoucherServer.Types (Transfer(..), TransferMeta(..))
 
 type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
 
@@ -39,42 +43,73 @@ mkClient (AppEnvVars env) =
     }
     # liftEffect
 
-mkGetTransferMeta :: M (GraphNodeEnv'getTransferMeta AppProdM)
-mkGetTransferMeta = do
+mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
+mkGraphNodeEnv = do
   appEnvVars@(AppEnvVars env) <- ask
 
   client :: _ Schema _ _ <- mkClient appEnvVars
 
-  pure \transferId -> do
-    result <-
-      let
-        { id, transactionHash, time } = selectors
-      in
-        query client "get-transfer-meta"
-          { notifications:
-              { where:
-                  { transfer: un TransferId transferId
-                  , safeAddress: show env.xbgeSafeAddress
-                  }
-              } =>>
-                { id, transactionHash, time }
-          }
-          # liftGQL
+  let
+    getTransferMeta :: GraphNodeEnv'getTransferMeta AppProdM
+    getTransferMeta transferId = do
+      result <-
+        let
+          { id, transactionHash, time } = selectors
+        in
+          query client "get-transfer-meta"
+            { notifications:
+                { where:
+                    { transfer: un TransferId transferId
+                    , safeAddress: show env.xbgeSafeAddress
+                    }
+                } =>>
+                  { id, transactionHash, time }
+            }
+            # liftGQL
 
-    { transactionHash, id, time: time' } <- A.head result.notifications
-      # liftMaybe (ErrGraphQLParse "Array is empty")
+      { transactionHash, id, time: time' } <- A.head result.notifications
+        # liftMaybe (ErrGraphQLParse "Array is empty")
 
-    time <- fromString time' <#> Seconds <#> convertDuration >>= instant
-      # liftMaybe (ErrGraphQLParse "Not a number")
+      time <- fromString time' <#> Seconds <#> convertDuration >>= instant
+        # liftMaybe (ErrGraphQLParse "Not a number")
 
-    pure $ TransferMeta { time, transactionHash, id }
+      pure $ TransferMeta { time, transactionHash, id }
 
-mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
-mkGraphNodeEnv = do
-  getTransferMeta <- mkGetTransferMeta
+    getTransactions :: GraphNodeEnv'getTransactions AppProdM
+    getTransactions { toAddress } = do
+      { transfers } <-
+        let
+          { from, to, id, amount } = selectors
+        in
+          query client "get-transactions"
+            { transfers:
+                { where: { to: show toAddress } } =>>
+                  { from, to, id, amount }
+            }
+            # liftGQL
+
+      for transfers \x -> ado
+        from <- Address <$> parseAddress x.from
+          # liftMaybe ErrUnknown
+
+        to <- Address <$> parseAddress x.to
+          # liftMaybe ErrUnknown
+
+        amount <- Freckles <$> fromDecimalStr x.amount
+          # liftMaybe ErrUnknown
+
+        let id = TransferId x.id
+
+        in Transfer { from, to, amount, id }
+
   pure $ GraphNodeEnv
     { getTransferMeta
+    , getTransactions
     }
+
+--------------------------------------------------------------------------------
+-- Utils
+--------------------------------------------------------------------------------
 
 liftGQL :: forall a. Aff a -> AppProdM a
 liftGQL x = try x
