@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { Theme } from '../context/theme';
-import { Claim } from './text';
+import { Claim, JustText } from './text';
 import ReactTooltip from 'react-tooltip';
 import { GridRow } from './GridRow';
 import {
@@ -22,7 +22,7 @@ import {
 } from '@mdi/js';
 import Icon from '@mdi/react';
 import { darken } from '../onboarding/utils/colorUtils';
-import { JustifyAroundCenter, JustifyStartCenter } from './helper';
+import { JustifyAroundCenter, JustifyStartCenter, Margin } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,
@@ -79,6 +79,7 @@ type TrustUserListProps = {
   removeTrust: (to: UserIdent) => void;
   trustAddResult: DefaultView['trustAddResult'];
   trustRemoveResult: DefaultView['trustRemoveResult'];
+  description?: string;
 };
 
 type TsNode = [Address, UserIdent];
@@ -196,6 +197,13 @@ export const TrustUserList = (props: TrustUserListProps) => {
   return (
     <LightColorFrame theme={theme} title={title} icon={icon}>
       <>{actionRow}</>
+      <>
+        {props.description && (
+          <Margin top={0.75} bottom={0.75}>
+            <JustText fontSize={1.25}>{props.description}</JustText>
+          </Margin>
+        )}
+      </>
       <ListContainer>
         {trusts.length > 0 && (
           <GridRow

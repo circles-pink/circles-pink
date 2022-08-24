@@ -257,7 +257,7 @@ type BorderDotProps = {
 
 const BorderDot = styled.div<BorderDotProps>(({ theme, position }) => [
   css`
-    background-color: ${theme.lightColor};
+    background-color: ${theme.cardColor};
     height: 2rem;
     width: 2rem;
     border-radius: 50%;

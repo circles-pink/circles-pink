@@ -1,32 +1,24 @@
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, {
-  ReactElement,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactElement, useContext, useEffect, useMemo } from 'react';
 import { Button, ButtonLinkLike } from '../../components/forms';
-import { Claim, JustText, SubClaim } from '../../components/text';
+import { JustText, SubClaim } from '../../components/text';
 import { XbgeDialogCard } from '../../components/XbgeDialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
-import { Theme, ThemeContext } from '../../context/theme';
+import { ThemeContext } from '../../context/theme';
 import Icon from '@mdi/react';
 import {
   mdiNumeric1CircleOutline,
   mdiNumeric2CircleOutline,
   mdiNumeric3CircleOutline,
   mdiAccountGroup,
-  mdiCashFast,
   mdiShareVariantOutline,
+  mdiWalletOutline,
 } from '@mdi/js';
-import tw, { css, styled } from 'twin.macro';
-import { InfoCard } from '../../components/InfoCard';
-import QrCode from 'react-qrcode-svg';
+import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import {
   TrustState,
@@ -36,9 +28,9 @@ import {
   defaultView,
   DefaultView,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
-import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { Margin } from '../../components/helper';
 import { LightColorFrame } from '../../components/layout';
+import { SubClaimLike } from '../../components/text/SubClaim';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -87,6 +79,7 @@ export const XbgeTrusts = ({
               <LightColorFrame
                 theme={theme}
                 title={t('trusts.xbgeSpecial.myWalletTitle')}
+                icon={mdiWalletOutline}
               >
                 <FadeIn orientation={'up'} delay={getDelay()}>
                   <>
@@ -116,6 +109,17 @@ export const XbgeTrusts = ({
                   {t('trusts.xbgeSpecial.howToActivateWallet')}
                 </JustText>
               </FadeIn>
+
+              <>
+                {sharingFeature && (
+                  <Margin top={1} bottom={1}>
+                    <FadeIn orientation={orientation} delay={getDelay()}>
+                      {sharingFeature}
+                    </FadeIn>
+                  </Margin>
+                )}
+              </>
+
               <FadeIn orientation={orientation} delay={getDelay()}>
                 <SubClaim>
                   {
@@ -123,16 +127,17 @@ export const XbgeTrusts = ({
                       '{{collectionAction}}'
                     )[0]
                   }
-
                   <ButtonLinkLike
                     onClick={() =>
                       window.open(
-                        'https://www.volksentscheid-grundeinkommen.de/',
+                        t('trusts.xbgeSpecial.collectionActionLink'),
                         '_blank'
                       )
                     }
                   >
-                    <b>{t('trusts.xbgeSpecial.collectionAction')}</b>
+                    <SubClaimLike>
+                      {t('trusts.xbgeSpecial.collectionAction')}
+                    </SubClaimLike>
                   </ButtonLinkLike>
                   {
                     t('trusts.xbgeSpecial.howToGetTrusts').split(
@@ -141,13 +146,19 @@ export const XbgeTrusts = ({
                   }
                 </SubClaim>
               </FadeIn>
+
               <FadeIn orientation={orientation} delay={getDelay()}>
                 <JustText>
                   {t('trusts.xbgeSpecial.collectSignaturesForVouchers')}
                 </JustText>
               </FadeIn>
+
               <FadeIn orientation={orientation} delay={getDelay()}>
-                <JustText>{t('trusts.xbgeSpecial.youWillGetCircles')}</JustText>
+                <Margin top={1}>
+                  <JustText>
+                    {t('trusts.xbgeSpecial.youWillGetCircles')}
+                  </JustText>
+                </Margin>
               </FadeIn>
             </Margin>
 
@@ -174,6 +185,7 @@ export const XbgeTrusts = ({
                 />
               </FadeIn>
             </TrustIndicatorRow>
+
             <FadeIn orientation={orientation} delay={getDelay()}>
               <>
                 {state.isReady ? (
@@ -195,18 +207,6 @@ export const XbgeTrusts = ({
               </>
             </FadeIn>
           </LightColorFrame>
-
-          {sharingFeature && (
-            <Margin top={1}>
-              <LightColorFrame
-                title={t('trusts.xbgeSpecial.shareFeatureTitle')}
-                theme={theme}
-                icon={mdiShareVariantOutline}
-              >
-                {sharingFeature}
-              </LightColorFrame>
-            </Margin>
-          )}
         </>
       }
       debug={<StateMachineDebugger state={state} />}

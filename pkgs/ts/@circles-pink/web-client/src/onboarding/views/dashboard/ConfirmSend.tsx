@@ -81,11 +81,13 @@ export const ConfirmSend = ({
 
   // Render
 
-  if (!to || state.transferResult.type === 'failure') {
+  if (state.transferResult.type === 'failure') {
     return (
-      <Claim color={theme.baseColor}>
-        {t('dashboard.voucherShop.confirmSendProblem')}
-      </Claim>
+      <Margin top={2} bottom={2}>
+        <Claim color={theme.baseColor}>
+          {t('dashboard.voucherShop.confirmSendProblem')}
+        </Claim>
+      </Margin>
     );
   }
 
@@ -103,9 +105,9 @@ export const ConfirmSend = ({
         <Button
           prio={'high'}
           theme={theme}
-          state={mapResult(state.transferResult)}
           icon={mdiCashFast}
-          onClick={() => transact(from, to)}
+          state={to ? mapResult(state.transferResult) : 'disabled'}
+          onClick={() => (to ? transact(from, to) : {})}
         >
           {t('dashboard.voucherShop.confirmSendButton')}
         </Button>
