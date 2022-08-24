@@ -184,7 +184,14 @@ const View = ({
           />
         );
       }
-      return <Dashboard state={state.value} act={act} cfg={cfg} />;
+      return (
+        <Dashboard
+          state={state.value}
+          act={act}
+          cfg={cfg}
+          buyVoucherEurLimit={buyVoucherEurLimit}
+        />
+      );
     default:
       return null;
   }

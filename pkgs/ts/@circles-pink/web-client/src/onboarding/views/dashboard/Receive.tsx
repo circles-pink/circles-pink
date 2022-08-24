@@ -11,7 +11,9 @@ import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Gar
 // Receive Circles
 // -----------------------------------------------------------------------------
 
-type ReceiveProps = DashboardProps & { theme: Theme };
+type ReceiveProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
+  theme: Theme;
+};
 
 export const Receive = ({ state, theme }: ReceiveProps) => {
   const safeAddress = addrToString(state.user.safeAddress);

@@ -26,7 +26,7 @@ import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServe
 // ConfirmSend Circles
 // -----------------------------------------------------------------------------
 
-export type ConfirmSendProps = DashboardProps & {
+export type ConfirmSendProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
   theme: Theme;
   selectedOffer: SelectedOffer;
   setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
