@@ -18,7 +18,7 @@ import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv'getPaymentNote, CirclesCoreEnv'getTrusts, CirclesCoreEnv'trustAddConnection)
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv'getPaymentNote, CirclesCoreEnv'getTrusts, CirclesCoreEnv'trustAddConnection, CirclesCoreEnv'trustIsTrusted)
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import Web3 (Web3)
 
@@ -61,10 +61,18 @@ mkCirclesCoreEnv = do
         opts
         # liftCirclesCore
 
+  let
+    trustIsTrusted :: CirclesCoreEnv'trustIsTrusted N
+    trustIsTrusted opts =
+      CC.trustIsTrusted circlesCore account
+        opts
+        # liftCirclesCore
+
   pure $ CirclesCoreEnv
     { getTrusts
     , getPaymentNote
     , trustAddConnection
+    , trustIsTrusted
     }
 
 --------------------------------------------------------------------------------

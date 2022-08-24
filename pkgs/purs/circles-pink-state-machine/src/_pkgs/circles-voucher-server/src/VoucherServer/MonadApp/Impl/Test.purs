@@ -54,6 +54,7 @@ testEnv = AppEnv
       { getTrusts: \_ -> throwError ErrUnknown
       , getPaymentNote: \_ -> throwError ErrUnknown
       , trustAddConnection: \_ -> throwError ErrUnknown
+      , trustIsTrusted: \_ -> throwError ErrUnknown
       }
   , xbgeClient:
       { getVoucherProviders: \_ -> throwError ErrUnknown
@@ -63,7 +64,7 @@ testEnv = AppEnv
   , constants: gen
   }
 
-gen :: forall a. Arbitrary a => a 
+gen :: forall a. Arbitrary a => a
 gen = evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
 
 runAppTestM :: forall a. AppEnv AppTestM -> AppTestM a -> Either AppError a
