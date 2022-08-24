@@ -595,13 +595,15 @@ export const XbgeDashboard = ({
           </MainContent>
 
           {sharingFeature && (
-            <LightColorFrame
-              title={t('dashboard.xbgeSpecial.shareFeatureTitle')}
-              theme={theme}
-              icon={mdiShareVariantOutline}
-            >
-              {sharingFeature}
-            </LightColorFrame>
+            <TopMargin>
+              <LightColorFrame
+                title={t('dashboard.xbgeSpecial.shareFeatureTitle')}
+                theme={theme}
+                icon={mdiShareVariantOutline}
+              >
+                {sharingFeature}
+              </LightColorFrame>
+            </TopMargin>
           )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
