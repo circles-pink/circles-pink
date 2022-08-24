@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Maybe.Trans (MaybeT(..), runMaybeT)
 import Data.Either (hush)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -41,3 +41,11 @@ getSessionStorage = runMaybeT do
     , clear: liftEffect $ clear s
     , deleteItem: \k -> liftEffect $ removeItem k s
     }
+
+testStringStorage :: StringStorage
+testStringStorage =
+  { setItem: \_ _ -> pure unit
+  , getItem: \_ -> pure Nothing
+  , deleteItem: \_ -> pure unit
+  , clear: pure unit
+  }
