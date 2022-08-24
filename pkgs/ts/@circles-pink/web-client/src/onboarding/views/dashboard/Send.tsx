@@ -32,7 +32,7 @@ let QrScanner: React.ReactElement<
   string | React.JSXElementConstructor<any>
 >;
 
-export type SendProps = DashboardProps & {
+export type SendProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
   theme: Theme;
   overwriteTo?: Address;
 };

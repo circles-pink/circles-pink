@@ -83,12 +83,14 @@ export type DashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
   cfg?: UserConfig;
+  buyVoucherEurLimit: number;
 };
 
 export const Dashboard = ({
   state: stateRaw,
   act,
   cfg,
+  buyVoucherEurLimit,
 }: DashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -128,6 +130,11 @@ export const Dashboard = ({
     setSelectedOffer(offer);
     toggleOverlay('CONFIRM_SEND');
   };
+
+  const boughtVouchersAmount =
+    state.vouchersResult.type === 'success'
+      ? state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
+      : 0;
 
   // animation
   const getDelay = getIncrementor(0, 0.05);
@@ -464,6 +471,8 @@ export const Dashboard = ({
                       providers={stateRaw.voucherProvidersResult}
                       initializeVoucherOrder={initializeVoucherOrder}
                       availableBalance={userBalance}
+                      boughtVouchersAmount={boughtVouchersAmount}
+                      buyVoucherEurLimit={buyVoucherEurLimit}
                     />
                   </Margin>
                   <ListVouchers
