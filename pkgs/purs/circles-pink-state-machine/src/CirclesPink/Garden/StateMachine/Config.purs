@@ -5,6 +5,7 @@ module CirclesPink.Garden.StateMachine.Config
 
 import Prelude
 
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Garden.StateMachine.TrackingEvent (TrackingEvent)
 import CirclesPink.Garden.StateMachine.TrackingResumee (Resumee)
 import Data.Either (Either)
@@ -15,6 +16,8 @@ newtype CirclesConfig m = CirclesConfig
   { extractEmail :: Either String (String -> m Unit)
   , onTrackingEvent :: Maybe (TrackingEvent -> m Unit)
   , onTrackingResumee :: Maybe ((Resumee -> Resumee) -> m Unit)
+  , safeAddress :: Maybe Address
+  , strictMode :: Boolean
   }
 
 derive instance newtypeCirclesConfig :: Newtype (CirclesConfig m) _
@@ -24,4 +27,6 @@ mapCirclesConfig f (CirclesConfig x) = CirclesConfig
   { extractEmail: map (map f) x.extractEmail
   , onTrackingEvent: map (map f) x.onTrackingEvent
   , onTrackingResumee: map (map f) x.onTrackingResumee
+  , safeAddress : x.safeAddress
+  , strictMode : x.strictMode
   }

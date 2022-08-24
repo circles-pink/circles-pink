@@ -200,6 +200,8 @@ main' = do
       { extractEmail: Right (\_ -> pure unit)
       , onTrackingEvent: Nothing
       , onTrackingResumee: Nothing
+      , safeAddress : Nothing
+      , strictMode : false
       }
 
   (mkAccount envVars env'' cfg # runExceptT # evalScriptM cfg)
