@@ -17,7 +17,7 @@ import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
-import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, printJsonDecodeError, stringify)
 import Data.Argonaut as J
 import Data.Array (head)
 import Data.Bifunctor (lmap)
@@ -29,6 +29,7 @@ import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
 import Debug (spy)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -36,6 +37,7 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
+import Foreign (Foreign)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Payload.Client (defaultOpts, mkGuardedClient)
@@ -403,13 +405,13 @@ env envenv@{ request, envVars, localStorage } =
       Just ls -> do
         let key = "gun/"
         result :: Maybe String <- ls.getItem key # liftAff
-        let _ = spy "result" result
         case result of
           Nothing ->
             storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
           Just jsonStr ->
             let
-              (eitherResult :: Either _ { session :: { privKey :: PrivateKey } }) = J.fromString jsonStr # decodeJson
+              (eitherResult :: Either _ { session :: { privKey :: PrivateKey } }) =
+                J.jsonParser jsonStr >>= decodeJson >>> lmap printJsonDecodeError
             in
               case eitherResult of
                 Left e -> do
