@@ -34,7 +34,7 @@ import Prelude
 import CirclesCore (ApiError, NativeError)
 import CirclesPink.Data.PrivateKey (PrivateKey)
 import CirclesPink.Garden.StateMachine.Control.Common (ErrLoginTask)
-import CirclesPink.Garden.StateMachine.Control.EnvControl (RequestPath, UserNotFoundError)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (RequestPath, StorageType, UserNotFoundError)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Direction as D
 import CirclesPink.Garden.StateMachine.Error (CirclesError)
@@ -73,7 +73,7 @@ type ErrSubmitResolved = Variant
   , errNative :: NativeError
   , errService :: Unit
   , errUserNotFound :: UserNotFoundError
-  , errSaveSession :: Unit
+  , errNoStorage :: StorageType
   )
 
 type UserDataSubmitResult = RemoteData Unit Unit ErrSubmitResolved Unit
@@ -126,6 +126,7 @@ type ErrLandingStateResolved = Variant
   , errApi :: ApiError
   , errNative :: NativeError
   , errUserNotFound :: UserNotFoundError
+  , errNoStorage :: StorageType
   , errInvalidUrl :: String
   )
 
