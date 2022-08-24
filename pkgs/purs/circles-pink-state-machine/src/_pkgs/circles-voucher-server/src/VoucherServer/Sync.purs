@@ -10,7 +10,7 @@ import Data.DateTime.Instant (Instant, unInstant)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (un, unwrap)
-import Data.Traversable (for)
+import Data.Traversable (for_)
 import Data.Tuple.Nested ((/\))
 import Payload.ResponseTypes (Response(..))
 import VoucherServer.EnvVars (AppEnvVars(..))
@@ -37,7 +37,7 @@ threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 -- Sync
 --------------------------------------------------------------------------------
 
-syncVouchers :: forall m. MonadApp m => m (Array VoucherEncrypted)
+syncVouchers :: forall m. MonadApp m => m Unit
 syncVouchers = do
   AppEnv
     { graphNode: GraphNodeEnv { getTransactions }
@@ -61,7 +61,7 @@ syncVouchers = do
     unfinalizedTxs = txs # A.filter
       \(Transfer { id }) -> not $ M.member id vouchersLookup
 
-  for unfinalizedTxs finalizeTx
+  for_ unfinalizedTxs (\tx -> (void $ finalizeTx tx) `catchError` (\_ -> pure unit))
 
 finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx transfer@(Transfer { from, amount, id }) = do
@@ -90,15 +90,16 @@ finalizeTx transfer@(Transfer { from, amount, id }) = do
         redeemAmount from eur
         throwError ErrUnknown
 
-  voucher <- finalizeVoucherPurchase
-    { body:
-        { safeAddress: from
-        , providerId
-        , amount: voucherAmount
-        , transactionId: id
-        }
-    }
-    <#> getResponseData
+  voucher <-
+    finalizeVoucherPurchase
+      { body:
+          { safeAddress: from
+          , providerId
+          , amount: voucherAmount
+          , transactionId: id
+          }
+      }
+      <#> getResponseData
 
   log $ LogFinishFinalizeTx voucher
 
