@@ -49,6 +49,8 @@ import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
 import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 import { XbgeTrusts } from './views/XbgeTrusts';
 import { Json } from '@circles-pink/state-machine/output/Data.Argonaut.Core';
+import { mkI18n } from '../i18n_custom';
+import { Resource } from 'i18next';
 
 type Language = 'en' | 'de';
 
@@ -72,6 +74,8 @@ export type OnboardingProps = {
   voucherShopEnabled?: boolean;
   xbgeCampaign?: boolean;
   testEnv?: Boolean;
+  translations?: Resource;
+  sharingFeature?: ReactElement | null;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -116,6 +120,7 @@ type ViewProps = {
   act: (m: CirclesAction) => void;
   cfg: UserConfig;
   xbgeCampaign: boolean;
+  sharingFeature: ReactElement | null;
 };
 
 const View = ({
@@ -123,6 +128,7 @@ const View = ({
   act,
   cfg,
   xbgeCampaign,
+  sharingFeature,
 }: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
@@ -151,12 +157,25 @@ const View = ({
       return <Login state={state.value} act={act} />;
     case 'trusts':
       if (xbgeCampaign) {
-        return <XbgeTrusts state={state.value} act={act} />;
+        return (
+          <XbgeTrusts
+            state={state.value}
+            act={act}
+            sharingFeature={sharingFeature}
+          />
+        );
       }
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
       if (xbgeCampaign) {
-        return <XbgeDashboard state={state.value} act={act} cfg={cfg} />;
+        return (
+          <XbgeDashboard
+            state={state.value}
+            act={act}
+            cfg={cfg}
+            sharingFeature={sharingFeature}
+          />
+        );
       }
       return <Dashboard state={state.value} act={act} cfg={cfg} />;
     default:
@@ -194,6 +213,8 @@ const OnboardingContent = ({
   voucherShopEnabled = false,
   xbgeCampaign = false,
   testEnv = false,
+  translations,
+  sharingFeature,
 }: OnboardingProps): ReactElement => {
   const userConfig: UserConfig = {
     email,
@@ -236,8 +257,6 @@ const OnboardingContent = ({
   );
   const [_theme, setTheme] = useContext(ThemeContext);
 
-  i18n.changeLanguage(lang);
-
   useEffect(() => {
     if (theme) {
       const mergedTheme = { ..._theme, ...theme };
@@ -245,11 +264,21 @@ const OnboardingContent = ({
     }
   }, [theme]);
 
+  const customI18n = translations ? mkI18n(translations) : i18n;
+
+  customI18n.changeLanguage(lang);
+
   return (
     <AnimProvider state={state}>
-      <I18nextProvider i18n={i18n}>
+      <I18nextProvider i18n={customI18n}>
         <DebugProvider>
-          <View state={state} act={act} cfg={cfg} xbgeCampaign={xbgeCampaign} />
+          <View
+            state={state}
+            act={act}
+            cfg={cfg}
+            xbgeCampaign={xbgeCampaign}
+            sharingFeature={sharingFeature || null}
+          />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>

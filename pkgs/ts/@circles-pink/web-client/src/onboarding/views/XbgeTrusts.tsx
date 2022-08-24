@@ -22,6 +22,7 @@ import {
   mdiNumeric3CircleOutline,
   mdiAccountGroup,
   mdiCashFast,
+  mdiShareVariantOutline,
 } from '@mdi/js';
 import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
@@ -52,11 +53,13 @@ type FinalizeMethod = 'collectTrusts' | 'fundSafe';
 type XbgeTrustsProps = {
   state: TrustState;
   act: (ac: A.CirclesAction) => void;
+  sharingFeature: ReactElement | null;
 };
 
 export const XbgeTrusts = ({
   state: stateRaw,
   act,
+  sharingFeature,
 }: XbgeTrustsProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -67,10 +70,6 @@ export const XbgeTrusts = ({
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
 
-  const safeAddress = addrToString(state.user.safeAddress);
-
-  const [showSafeInfo, setShowSafeInfo] = useState<boolean>(false);
-
   useEffect(() => {
     const safeStatus = setInterval(
       () => act(_trusts(A._getSafeStatus(unit))),
@@ -78,9 +77,6 @@ export const XbgeTrusts = ({
     );
     return () => clearInterval(safeStatus);
   }, []);
-
-  const [finalizeMethod, setFinalizeMethod] =
-    useState<FinalizeMethod>('collectTrusts');
 
   return (
     <XbgeDialogCard
@@ -198,6 +194,16 @@ export const XbgeTrusts = ({
               </>
             </FadeIn>
           </LightColorFrame>
+
+          {sharingFeature && (
+            <LightColorFrame
+              title={t('trusts.xbgeSpecial.shareFeatureTitle')}
+              theme={theme}
+              icon={mdiShareVariantOutline}
+            >
+              {sharingFeature}
+            </LightColorFrame>
+          )}
         </>
       }
       debug={<StateMachineDebugger state={state} />}
