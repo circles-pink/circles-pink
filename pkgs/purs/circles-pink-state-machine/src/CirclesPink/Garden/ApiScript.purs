@@ -192,8 +192,8 @@ main' = do
       , sessionStorage: Nothing
       , localStorage: Nothing
       , crypto:
-          { encrypt: \_ s -> s
-          , decrypt: \_ s -> Just s
+          { encrypt: \_ s -> pure s
+          , decrypt: \_ s -> pure $ Just s
           }
       }
     cfg = CirclesConfig

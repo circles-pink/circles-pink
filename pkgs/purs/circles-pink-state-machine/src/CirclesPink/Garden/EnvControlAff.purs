@@ -28,6 +28,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -76,8 +77,8 @@ type EnvEnvControlAff =
   , localStorage :: Maybe StringStorage
   , sessionStorage :: Maybe StringStorage
   , crypto ::
-      { encrypt :: CryptoKey -> String -> String
-      , decrypt :: CryptoKey -> String -> Maybe String
+      { encrypt :: CryptoKey -> String -> Aff String
+      , decrypt :: CryptoKey -> String -> Aff (Maybe String)
       }
   , envVars :: EnvVars
   }
@@ -475,40 +476,60 @@ env envenv@{ request, envVars, localStorage } =
   logInfo = log
 
 storageSetItem :: EnvEnvControlAff -> EnvControl.StorageSetItem Aff
-storageSetItem envenv@{ localStorage, sessionStorage } sk st k v = case st of
+storageSetItem envenv@{ localStorage, sessionStorage } sk st k' v' = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ls -> ls.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
-      # liftAff
+    Just ls -> do
+      k <- encryptJson envenv sk k'
+        # liftAff
+      v <- encryptJson envenv sk v'
+        # liftAff
+      ls.setItem k v
+        # liftAff
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ss -> ss.setItem (encryptJson envenv sk k) (encryptJson envenv sk v)
-      # liftAff
+    Just ls -> do
+      k <- encryptJson envenv sk k'
+        # liftAff
+      v <- encryptJson envenv sk v'
+        # liftAff
+      ls.setItem k v
+        # liftAff
 
 storageGetItem :: EnvEnvControlAff -> EnvControl.StorageGetItem Aff
 storageGetItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ls -> ls.getItem (encryptJson envenv sk k)
-      <#> note (_errKeyNotFound $ stringify $ encodeJson k)
-      # ExceptT
-      >>= (\v -> except $ decryptJson envenv sk v)
+    Just ls -> do
+      k <- encryptJson envenv sk k
+        # liftAff
+      ls.getItem k
+        <#> note (_errKeyNotFound $ stringify $ encodeJson k)
+        # ExceptT
+        >>= (\v -> decryptJson envenv sk v)
 
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ss -> ss.getItem (encryptJson envenv sk k)
-      <#> note (_errKeyNotFound $ stringify $ encodeJson k)
-      # ExceptT
-      >>= (\v -> except $ decryptJson envenv sk v)
+    Just ls -> do
+      k <- encryptJson envenv sk k
+        # liftAff
+      ls.getItem k
+        <#> note (_errKeyNotFound $ stringify $ encodeJson k)
+        # ExceptT
+        >>= (\v -> decryptJson envenv sk v)
 
 storageDeleteItem :: EnvEnvControlAff -> EnvControl.StorageDeleteItem Aff
 storageDeleteItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ls -> ls.deleteItem (encryptJson envenv sk k) # liftAff
+    Just ls -> do
+      j <- encryptJson envenv sk k # liftAff
+      ls.deleteItem j # liftAff
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
-    Just ss -> ss.deleteItem (encryptJson envenv sk k) # liftAff
+    Just ss -> do
+      j <- encryptJson envenv sk k # liftAff
+      ss.deleteItem j # liftAff
 
 storageClear :: EnvEnvControlAff -> EnvControl.StorageClear Aff
 storageClear { localStorage, sessionStorage } st = case st of
@@ -519,17 +540,17 @@ storageClear { localStorage, sessionStorage } st = case st of
     Nothing -> throwError $ _errNoStorage st
     Just ss -> ExceptT $ Right <$> ss.clear
 
-encryptJson :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> String
+encryptJson :: forall a. EncodeJson a => EnvEnvControlAff -> CryptoKey -> a -> Aff String
 encryptJson { crypto: { encrypt } } sk k = encrypt sk $ stringify $ encodeJson k
 
 --------------------------------------------------------------------------------
 type ErrDecryptJson r = ErrParseToData + ErrParseToJson + ErrDecrypt + r
 
-decryptJson :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> Either (Variant (ErrDecryptJson r)) a
-decryptJson { crypto: { decrypt } } sk v = v
-  # (decrypt sk >>> note _errDecrypt)
-  >>= (\s -> parseJson s # lmap (\_ -> _errParseToJson s))
-  >>= (\j -> decodeJson j # lmap (\jde -> _errParseToData $ stringify j /\ jde))
+decryptJson :: forall a r. DecodeJson a => EnvEnvControlAff -> CryptoKey -> String -> ExceptV (ErrDecryptJson r) Aff a
+decryptJson { crypto: { decrypt } } sk v = do
+  d <- decrypt sk v <#> note _errDecrypt # ExceptT
+  j <- parseJson d # lmap (\_ -> _errParseToJson d) # except
+  decodeJson j # lmap (\jde -> _errParseToData $ stringify j /\ jde) # except
 
 --------------------------------------------------------------------------------
 

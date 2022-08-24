@@ -53,8 +53,8 @@ mkControl envVars cfg setState s a = do
       , localStorage
       , sessionStorage
       , crypto:
-          { encrypt: \_ str -> str
-          , decrypt: \_ str -> Just str
+          { encrypt: \_ str -> pure str
+          , decrypt: \_ str -> pure $ Just str
           }
       }
   circlesControl env cfg' (liftEffect <<< handler) s a
