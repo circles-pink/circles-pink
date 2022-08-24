@@ -14,10 +14,12 @@ import CirclesPink.Data.User (User(..))
 import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
+import Control.Monad.Error.Class (liftMaybe)
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
 import Control.Monad.Except.Checked (ExceptV)
 import Convertable (convert)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson, parseJson, stringify)
+import Data.Argonaut as J
 import Data.Array (head)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..), note)
@@ -27,6 +29,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
+import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -85,7 +88,7 @@ type EnvEnvControlAff =
 env
   :: EnvEnvControlAff
   -> EnvControl Aff
-env envenv@{ request, envVars } =
+env envenv@{ request, envVars, stringStorage } =
   { apiCheckUserName
   , apiCheckEmail
   , generatePrivateKey
@@ -396,7 +399,23 @@ env envenv@{ request, envVars } =
   saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
 
   restoreSession :: EnvControl.RestoreSession Aff
-  restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+  restoreSession = do
+    let key = "gun/"
+    result :: Maybe String <- stringStorage.getItem key # liftAff
+    case result of
+      Nothing ->
+        storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+      Just jsonStr ->
+        let
+          (eitherResult :: Either _ { session :: { privKey :: PrivateKey } }) = J.fromString jsonStr # decodeJson
+        in
+          case eitherResult of
+            Left _ -> do
+              storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+            Right { session: { privKey } } -> do
+              storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
+              stringStorage.deleteItem key # liftAff
+              pure privKey
 
   -- privateKeyStore :: String
   -- privateKeyStore = "session"
