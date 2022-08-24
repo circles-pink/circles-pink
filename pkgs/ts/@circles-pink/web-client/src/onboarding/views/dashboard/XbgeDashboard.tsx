@@ -29,6 +29,7 @@ import {
   mdiHandCoin,
   mdiLan,
   mdiMagnify,
+  mdiShareVariantOutline,
   mdiWalletOutline,
 } from '@mdi/js';
 import { TrustUserList } from '../../../components/TrustUserList';
@@ -85,12 +86,14 @@ export type XbgeDashboardProps = {
   state: DashboardState;
   act: (ac: A.CirclesAction) => void;
   cfg?: UserConfig;
+  sharingFeature: ReactElement | null;
 };
 
 export const XbgeDashboard = ({
   state: stateRaw,
   act,
   cfg,
+  sharingFeature,
 }: XbgeDashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -590,6 +593,16 @@ export const XbgeDashboard = ({
               />
             </FadeIn>
           </MainContent>
+
+          {sharingFeature && (
+            <LightColorFrame
+              title={t('dashboard.xbgeSpecial.shareFeatureTitle')}
+              theme={theme}
+              icon={mdiShareVariantOutline}
+            >
+              {sharingFeature}
+            </LightColorFrame>
+          )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
