@@ -47,6 +47,13 @@ type VoucherServerSpec = Spec
                 }
             , guards :: Guards ("basicAuth" : Nil)
             }
+      , trustCount ::
+          POST "/trust-count"
+            { body :: { safeAddresses :: Array Address }
+            , response ::
+                Array { safeAddress :: Address, trustConnections :: Int }
+            , guards :: Guards ("basicAuth" : Nil)
+            }
       }
   }
 

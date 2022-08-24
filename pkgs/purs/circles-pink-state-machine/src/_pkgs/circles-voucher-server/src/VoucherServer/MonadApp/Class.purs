@@ -10,6 +10,7 @@ import Data.Lens (Lens', lens')
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
 import Data.Tuple.Nested ((/\))
+import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Payload.Client (ClientError)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
@@ -52,7 +53,7 @@ logToString :: AppLog -> String
 logToString = case _ of
   LogSync -> "Tiggered transaction sync."
   LogStartFinalizeTx _ -> "Start to finalize Transaction."
-  LogFinishFinalizeTx _ -> "Finish finalizing Transaction."
+  LogFinishFinalizeTx ve -> "Finish finalizing Transaction. " <> show ve
   LogRedeem -> "In the future we'll pay back the amount..."
 
 --------------------------------------------------------------------------------
@@ -146,6 +147,8 @@ type CirclesCoreEnv' m =
       CirclesCoreEnv'getPaymentNote m
   , trustAddConnection ::
       CirclesCoreEnv'trustAddConnection m
+  , trustIsTrusted ::
+      CirclesCoreEnv'trustIsTrusted m
   }
 
 type CirclesCoreEnv'getTrusts m = C.Address -> m (Set C.Address)
@@ -153,6 +156,12 @@ type CirclesCoreEnv'getTrusts m = C.Address -> m (Set C.Address)
 type CirclesCoreEnv'getPaymentNote m = String -> m String
 
 type CirclesCoreEnv'trustAddConnection m = TrustAddConnectionOptions -> m String
+
+type CirclesCoreEnv'trustIsTrusted m =
+  { safeAddress :: ChecksumAddress
+  , limit :: Int
+  }
+  -> m CC.TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
 -- XbgeClientEnv

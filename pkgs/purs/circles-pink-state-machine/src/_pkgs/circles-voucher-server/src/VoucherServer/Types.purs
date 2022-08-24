@@ -6,15 +6,12 @@ import Data.Newtype (class Newtype)
 import VoucherServer.Spec.Types (Freckles, TransferId)
 import VoucherServer.Specs.Xbge (Address)
 
-
-
 newtype Transfer = Transfer
   { from :: Address
   , to :: Address
   , id :: TransferId
   , amount :: Freckles
   }
-
 
 newtype TransferMeta = TransferMeta
   { id :: String

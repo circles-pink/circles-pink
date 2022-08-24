@@ -46,6 +46,7 @@ import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (runMkAppProdM)
 import VoucherServer.Routes.TrustUsers (trustUsers) as Routes
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
+import VoucherServer.Routes.TrustCount (trustCount) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Spec.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
 import VoucherServer.Specs.Xbge (xbgeSpec)
@@ -211,6 +212,7 @@ app = do
               , getVoucherProviders: getVoucherProviders parsedEnv
               , trustUsers: Routes.trustUsers >>> runRoute prodEnv
               , trustsReport: Routes.trustsReport >>> runRoute prodEnv
+              , trustCount: Routes.trustCount >>> runRoute prodEnv
               }
             guards =
               { basicAuth: basicAuthGuard >>> runRoute prodEnv

@@ -42,6 +42,7 @@ module CirclesCore
   , TokenRequestUBIPayoutOptions
   , TokenTransferOptions
   , TrustAddConnectionOptions
+  , TrustIsTrustedOptions
   , TrustNode
   , TrustRemoveConnectionOptions
   , User
@@ -80,7 +81,8 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  ) where
+  )
+  where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
