@@ -49,7 +49,6 @@ import Node.Encoding (Encoding(..))
 import Node.FS.Aff (writeTextFile)
 import Node.Process (exit)
 import Record as R
-import StringStorage (testStringStorage)
 import Sunde (spawn)
 import Web3 (newWeb3, newWebSocketProvider, sendTransaction)
 

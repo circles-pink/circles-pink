@@ -28,8 +28,6 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (Variant, inj)
-import Debug (spy)
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, Canceler(..), makeAff)
 import Effect.Aff.Class (liftAff)
@@ -37,7 +35,6 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
-import Foreign (Foreign)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Payload.Client (defaultOpts, mkGuardedClient)
@@ -414,12 +411,10 @@ env envenv@{ request, envVars, localStorage } =
                 J.jsonParser jsonStr >>= decodeJson >>> lmap printJsonDecodeError
             in
               case eitherResult of
-                Left e -> do
-                  let _ = spy "Parse Err" e
+                Left _ -> do
                   storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
                 Right { session: { privKey } } -> do
                   storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
-                  let _ = spy "privKey" privKey
                   ls.deleteItem key # liftAff
                   pure privKey
 
