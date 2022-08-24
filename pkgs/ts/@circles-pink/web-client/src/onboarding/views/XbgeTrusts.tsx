@@ -150,6 +150,7 @@ export const XbgeTrusts = ({
                 <JustText>{t('trusts.xbgeSpecial.youWillGetCircles')}</JustText>
               </FadeIn>
             </Margin>
+
             <TrustIndicatorRow>
               <FadeIn orientation={orientation} delay={getDelay()}>
                 <Icon
@@ -196,13 +197,15 @@ export const XbgeTrusts = ({
           </LightColorFrame>
 
           {sharingFeature && (
-            <LightColorFrame
-              title={t('trusts.xbgeSpecial.shareFeatureTitle')}
-              theme={theme}
-              icon={mdiShareVariantOutline}
-            >
-              {sharingFeature}
-            </LightColorFrame>
+            <Margin top={1}>
+              <LightColorFrame
+                title={t('trusts.xbgeSpecial.shareFeatureTitle')}
+                theme={theme}
+                icon={mdiShareVariantOutline}
+              >
+                {sharingFeature}
+              </LightColorFrame>
+            </Margin>
           )}
         </>
       }
