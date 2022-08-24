@@ -11,7 +11,7 @@ import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
 import CirclesPink.Data.User (User(..))
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _customError, _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
@@ -405,20 +405,28 @@ env envenv@{ request, envVars, localStorage } =
         let key = "gun/"
         result :: Maybe String <- ls.getItem key # liftAff
         case result of
-          Nothing ->
-            storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+          Nothing -> handleSuccess
           Just jsonStr ->
             let
               (eitherResult :: Either _ { session :: { privKey :: PrivateKey } }) =
                 J.jsonParser jsonStr >>= decodeJson >>> lmap printJsonDecodeError
             in
               case eitherResult of
-                Left _ -> do
-                  storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+                Left _ -> handleSuccess
                 Right { session: { privKey } } -> do
                   storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
                   ls.deleteItem key # liftAff
-                  pure privKey
+                  handleSuccess
+    where
+    handleSuccess = do
+      privKey <- storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+      if envenv.strictMode then
+        do
+          safeAddress <- getSafeAddress privKey # (withExceptT $ const $ _customError "Could not restore safe address")
+          case envenv.safeAddress of
+            Nothing -> throwError $ _customError "No guard safe address"
+            Just addr -> if addr == safeAddress then pure privKey else throwError $ _customError "Guard safe address did not match"
+      else pure privKey
 
   -- privateKeyStore :: String
   -- privateKeyStore = "session"

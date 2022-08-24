@@ -62,6 +62,7 @@ instance EncodeJson StepName where
 type Resumee =
   { lastState :: StepName
   , safeAddress :: Maybe Address
+  , username :: Maybe String
   , triggeredSends :: Int
   , triggeredTrusts :: Int
   , triggeredUntrusts :: Int
@@ -78,6 +79,7 @@ init :: Resumee
 init =
   { lastState: Landing
   , safeAddress: Nothing
+  , username: Nothing
   , triggeredSends: 0
   , triggeredTrusts: 0
   , triggeredUntrusts: 0
@@ -117,13 +119,18 @@ fromStateUpdate time { prev, next } = Nothing
   # update
       do
         comingFromLandingOrLogin
-        goingToDashboard
+        _ <- goingToDashboard
         pure setLogin
 
   # update
       do
-        safeAddress <- goingToTrusts
-        pure $ setSafeAddress safeAddress
+        user <- goingToTrusts
+        pure $ setSafeAddress (user -# _.safeAddress) >>> setUsername (user -# _.username)
+
+  # update
+      do
+        user <- goingToDashboard
+        pure $ setSafeAddress (user -# _.safeAddress) >>> setUsername (user -# _.username)
 
   # update
       let
@@ -143,6 +150,7 @@ fromStateUpdate time { prev, next } = Nothing
   setLogin r = r { lastLogin = time }
   setLastState s r = r { lastState = s }
   setSafeAddress sa r = r { safeAddress = Just sa }
+  setUsername un r = r { username = Just un }
 
   comingFromLandingOrLogin = prev #
     ( default Nothing # onMatch
@@ -153,12 +161,12 @@ fromStateUpdate time { prev, next } = Nothing
 
   goingToDashboard = next #
     ( default Nothing # onMatch
-        { dashboard: \_ -> Just $ unit
+        { dashboard: \{ user } -> Just $ user
         }
     )
 
   goingToTrusts = next #
     ( default Nothing # onMatch
-        { trusts: \{ user } -> Just $ user -# _.safeAddress
+        { trusts: \{ user } -> Just $ user
         }
     )
