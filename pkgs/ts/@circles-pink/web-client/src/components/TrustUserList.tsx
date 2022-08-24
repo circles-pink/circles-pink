@@ -295,13 +295,13 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
             content: (
               <FadeIn orientation={'left'} delay={getDelay()}>
                 <JustifyStartCenter>
-                  <ReactTooltip id="username" />
+                  <ReactTooltip id="trustlist-username-in-sync" />
                   <div>
                     <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                   </div>
                   <Username
                     theme={theme}
-                    data-for="username"
+                    data-for="trustlist-username-in-sync"
                     data-tip={userIdent}
                   >
                     {userIdent}
@@ -317,7 +317,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="relation-from" />
+                    <ReactTooltip id="trustlist-relation-from" />
                     <Icon
                       path={
                         isTrusted || pendingUntrust || loadingUntrust
@@ -330,21 +330,21 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                           ? theme.baseColor
                           : 'white'
                       }
-                      data-for="relation-from"
+                      data-for="trustlist-relation-from"
                       data-tip={mapToolTipRelRec(isTrusted, userIdent)}
                     />
                   </>
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="relation-to" />
+                    <ReactTooltip id="trustlist-relation-to" />
                     <Icon
                       path={
                         c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
                       }
                       size={1.6}
                       color={c.isOutgoing ? theme.baseColor : 'white'}
-                      data-for="relation-to"
+                      data-for="trustlist-relation-to"
                       data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
                     />
                   </>
@@ -359,7 +359,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="action-send" />
+                    <ReactTooltip id="trustlist-action-send-in-sync" />
                     <Clickable
                       clickable={c.isOutgoing}
                       onClick={() => {
@@ -375,7 +375,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                         path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
                         size={1.75}
                         color={c.isOutgoing ? theme.baseColor : 'white'}
-                        data-for="action-send"
+                        data-for="trustlist-action-send-in-sync"
                         data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
                       />
                     </Clickable>
@@ -383,7 +383,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="action-trust" />
+                    <ReactTooltip id="trustlist-action-trust-in-sync" />
                     <Clickable
                       clickable={true}
                       onClick={() => {
@@ -394,7 +394,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                         path={isTrusted ? mdiHeart : mdiHeartOutline}
                         size={1.5}
                         color={isTrusted ? theme.baseColor : 'white'}
-                        data-for="action-trust"
+                        data-for="trustlist-action-trust-in-sync"
                         data-tip={mapToolTipTrust(isTrusted, userIdent)}
                       />
                     </Clickable>
@@ -417,14 +417,14 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <JustifyStartCenter>
-                <ReactTooltip id="username" />
+                <ReactTooltip id="trustlist-username-not-in-sync" />
                 <div>
                   <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                 </div>
                 <Username
                   theme={theme}
                   data-tip={userIdent}
-                  data-for="username"
+                  data-for="trustlist-username-not-in-sync"
                 >
                   {userIdent}
                 </Username>
@@ -446,7 +446,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <>
-                <ReactTooltip id="action" />
+                <ReactTooltip id="trustlist-action-not-in-sync" />
                 {loadingTrust || loadingUntrust ? (
                   <LoadingCircles
                     count={1}
@@ -458,7 +458,7 @@ const ContentRow = (props: TrustUserListProps & { c: Trust }): ReactElement => {
                     path={mdiWeatherCloudyClock}
                     size={1.5}
                     color={theme.baseColor}
-                    data-for="action"
+                    data-for="trustlist-action-not-in-sync"
                     data-tip={mapToolTipTrust(isTrusted, userIdent)}
                   />
                 )}

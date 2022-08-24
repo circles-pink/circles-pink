@@ -222,14 +222,14 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
             content: (
               <FadeIn orientation={'left'} delay={getDelay()}>
                 <JustifyStartCenter>
-                  <ReactTooltip id="username" />
+                  <ReactTooltip id="search-username-in-sync" />
                   <div>
                     <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                   </div>
                   <Username
                     theme={theme}
                     data-tip={userIdent}
-                    data-for="username"
+                    data-for="search-username-in-sync"
                   >
                     {userIdent}
                   </Username>
@@ -244,7 +244,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="relation-from" />
+                    <ReactTooltip id="search-relation-from-in-sync" />
                     <Icon
                       path={
                         isTrusted || pendingUntrust || loadingUntrust
@@ -257,21 +257,21 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
                           ? theme.baseColor
                           : 'white'
                       }
-                      data-for="relation-from"
+                      data-for="search-relation-from-in-sync"
                       data-tip={mapToolTipRelRec(isTrusted, userIdent)}
                     />
                   </>
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="relation-to" />
+                    <ReactTooltip id="search-relation-to-in-sync" />
                     <Icon
                       path={
                         c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
                       }
                       size={1.6}
                       color={c.isOutgoing ? theme.baseColor : 'white'}
-                      data-for="relation-to"
+                      data-for="search-relation-to-in-sync"
                       data-tip={mapToolTipRelRec(isTrusted, userIdent)}
                     />
                   </>
@@ -286,7 +286,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="action-send" />
+                    <ReactTooltip id="search-action-send-in-sync" />
                     <Clickable
                       clickable={c.isOutgoing}
                       onClick={() => {
@@ -302,7 +302,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
                         path={c.isOutgoing ? mdiCashFast : mdiCashRemove}
                         size={1.75}
                         color={c.isOutgoing ? theme.baseColor : 'white'}
-                        data-for="action-send"
+                        data-for="search-action-send-in-sync"
                         data-tip={mapToolTipSend(c.isOutgoing, userIdent)}
                       />
                     </Clickable>
@@ -310,7 +310,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={getDelay()}>
                   <>
-                    <ReactTooltip id="action-trust" />
+                    <ReactTooltip id="search-action-trust-in-sync" />
                     <Clickable
                       clickable={true}
                       onClick={() => {
@@ -321,7 +321,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
                         path={isTrusted ? mdiHeart : mdiHeartOutline}
                         size={1.5}
                         color={isTrusted ? theme.baseColor : 'white'}
-                        data-for="action-trust"
+                        data-for="search-action-trust-in-sync"
                         data-tip={mapToolTipTrust(isTrusted, userIdent)}
                       />
                     </Clickable>
@@ -345,14 +345,14 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <JustifyStartCenter>
-                <ReactTooltip id="username" />
+                <ReactTooltip id="search-username-not-in-sync" />
                 <div>
                   <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                 </div>
                 <Username
                   theme={theme}
                   data-tip={userIdent}
-                  data-for="username"
+                  data-for="search-username-not-in-sync"
                 >
                   {userIdent}
                 </Username>
@@ -373,7 +373,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
           content: (
             <FadeIn orientation={'left'} delay={getDelay()}>
               <>
-                <ReactTooltip id="action" />
+                <ReactTooltip id="search-action-not-in-sync" />
                 {loadingTrust || loadingUntrust ? (
                   <LoadingCircles
                     count={1}
@@ -386,7 +386,7 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
                     size={1.5}
                     color={theme.baseColor}
                     data-tip={mapToolTipTrust(isTrusted, userIdent)}
-                    data-for="action"
+                    data-for="search-action-not-in-sync"
                   />
                 )}
               </>
