@@ -23,7 +23,7 @@ import Effect.Unsafe (unsafePerformEffect)
 import FpTs.Class (fromFpTs)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Window (windowFetch)
-import StringStorage (getLocalStorage, getSessionStorage, testStringStorage)
+import StringStorage (getLocalStorage, getSessionStorage)
 
 type CirclesConfig =
   { extractEmail :: FP.Either String (String -> Effect Unit)
