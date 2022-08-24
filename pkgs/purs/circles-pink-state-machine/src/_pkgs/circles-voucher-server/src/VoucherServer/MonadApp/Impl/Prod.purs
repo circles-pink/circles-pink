@@ -10,8 +10,9 @@ import Data.Newtype (class Newtype)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
+import Effect.Class.Console as E
 import Payload.ResponseTypes (Response(..))
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv, AppError)
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv, AppError, logToString)
 
 newtype AppProdM a = AppProdM
   ( ReaderT (AppEnv AppProdM)
@@ -21,18 +22,20 @@ newtype AppProdM a = AppProdM
 
 type M = AppProdM
 
-derive instance newtypeAPM :: Newtype (AppProdM a) _
-derive newtype instance applyAPM :: Apply AppProdM
-derive newtype instance applicativeAPM :: Applicative AppProdM
-derive newtype instance functorAPM :: Functor AppProdM
-derive newtype instance bindAPM :: Bind AppProdM
-derive newtype instance monadAPM :: Monad AppProdM
-derive newtype instance monadThrowAPM :: MonadThrow AppError AppProdM
-derive newtype instance monadErrorAPM :: MonadError AppError AppProdM
-derive newtype instance monadAskAPM :: MonadAsk (AppEnv AppProdM) AppProdM
-derive newtype instance monadEffectAPM :: MonadEffect AppProdM
-derive newtype instance monadAffAPM :: MonadAff AppProdM
-instance monadVoucherServerAffAPM :: MonadApp AppProdM
+derive instance Newtype (AppProdM a) _
+derive newtype instance Apply AppProdM
+derive newtype instance Applicative AppProdM
+derive newtype instance Functor AppProdM
+derive newtype instance Bind AppProdM
+derive newtype instance Monad AppProdM
+derive newtype instance MonadThrow AppError AppProdM
+derive newtype instance MonadError AppError AppProdM
+derive newtype instance MonadAsk (AppEnv AppProdM) AppProdM
+derive newtype instance MonadEffect AppProdM
+derive newtype instance MonadAff AppProdM
+
+instance monadVoucherServerAffAPM :: MonadApp AppProdM where
+  log = logToString >>> E.log
 
 runAppProdM :: forall a. AppEnv M -> M a -> Aff (Either AppError a)
 runAppProdM env (AppProdM x) = runExceptT $ runReaderT x env

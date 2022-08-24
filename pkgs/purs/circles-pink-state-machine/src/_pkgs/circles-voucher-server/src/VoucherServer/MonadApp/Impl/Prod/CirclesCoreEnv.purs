@@ -46,14 +46,16 @@ mkCirclesCoreEnv = do
           >>> map (_.safeAddress >>> wrap)
           >>> Set.fromFoldable
 
+  let
     getPaymentNote :: CirclesCoreEnv'getPaymentNote N
     getPaymentNote transactionHash =
       CC.tokenGetPaymentNote circlesCore account
         { transactionHash }
         # liftCirclesCore
 
+  let
     trustAddConnection :: CirclesCoreEnv'trustAddConnection N
-    trustAddConnection opts = 
+    trustAddConnection opts =
       CC.trustAddConnection circlesCore account
         opts
         # liftCirclesCore

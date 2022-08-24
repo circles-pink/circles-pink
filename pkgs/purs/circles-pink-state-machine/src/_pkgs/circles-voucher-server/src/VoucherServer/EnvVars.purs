@@ -1,9 +1,11 @@
 module VoucherServer.EnvVars
-  ( MkAppEnvVars
-  , PrivateKey(..)
+  ( AppEnvVars'
   , AppEnvVars(..)
   , AppEnvVarsSpec
-  ) where
+  , MkAppEnvVars
+  , PrivateKey(..)
+  )
+  where
 
 import Prelude
 
@@ -43,7 +45,9 @@ type MkAppEnvVars f =
 
 type AppEnvVarsSpec = MkAppEnvVars Variable
 
-newtype AppEnvVars = AppEnvVars { | MkAppEnvVars Resolved }
+newtype AppEnvVars = AppEnvVars AppEnvVars'
+
+type AppEnvVars' = { | MkAppEnvVars Resolved }
 
 derive newtype instance arbitraryAppEnvVars :: Arbitrary AppEnvVars
 derive instance newtypeAppEnvVars :: Newtype AppEnvVars _

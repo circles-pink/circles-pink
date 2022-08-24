@@ -7,37 +7,26 @@ import Prelude
 
 import CirclesCore (SafeAddress(..))
 import CirclesCore as CC
-import CirclesPink.Data.Address (parseAddress)
 import CirclesPink.Data.Nonce (addressToNonce)
-import Control.Monad.Except (ExceptT(..), lift, mapExceptT, runExceptT, withExceptT)
+import Control.Monad.Except (mapExceptT, runExceptT)
 import Convertable (convert)
-import Data.Argonaut.Decode.Class (class DecodeJson, class DecodeJsonField)
-import Data.Array as A
-import Data.BN (fromDecimalStr)
 import Data.Bifunctor (lmap)
 import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
-import Data.Either (Either(..), note)
-import Data.Generic.Rep (class Generic)
-import Data.Map as M
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (un, unwrap, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
-import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Seconds(..))
-import Data.Traversable (for, traverse)
+import Data.Traversable (traverse)
 import Data.Tuple.Nested ((/\))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), launchAff_, try)
+import Effect.Aff (Aff, Milliseconds(..), launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (error, log, logShow)
 import Effect.Now (now)
 import Effect.Timer (setInterval)
-import GraphQL.Client.Args ((=>>))
-import GraphQL.Client.BaseClients.Urql (createClient)
-import GraphQL.Client.Query (query)
-import GraphQL.Client.Types (class GqlQuery)
 import Node.Process (exit, getEnv)
 import Payload.Client (ClientError(..), Options, mkClient)
 import Payload.Client as PC
@@ -50,19 +39,16 @@ import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
-import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
-import VoucherServer.GraphQLSchemas.GraphNode as GraphNode
 import VoucherServer.Guards.Auth (basicAuthGuard)
-import VoucherServer.MonadApp (AppEnv(..), AppProdM, errorToLog, runAppProdM)
+import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, runAppProdM)
 import VoucherServer.MonadApp.Class (errorToFailure)
 import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
-import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Routes.TrustUsers (trustUsers) as Routes
+import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
-import VoucherServer.Spec.Types (Freckles(..), TransferId(..), Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
-import VoucherServer.Specs.Xbge (Address(..), xbgeSpec)
+import VoucherServer.Spec.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..), VoucherProvider)
+import VoucherServer.Specs.Xbge (xbgeSpec)
 import VoucherServer.Sync as Sync
-import VoucherServer.Types (Transfer(..))
 import Web3 (Message(..), SignatureObj(..), Web3, accountsHashMessage, accountsRecover, newWeb3_)
 
 --------------------------------------------------------------------------------
@@ -73,9 +59,6 @@ type ErrGetVoucher = String
 
 allowedDiff :: Seconds
 allowedDiff = Seconds 60.0
-
-mkSubgraphUrl :: String -> String -> String
-mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
 
 --------------------------------------------------------------------------------
 
@@ -91,51 +74,9 @@ isValid web3 (SignatureObj { message, messageHash }) = do
 
   pure (messageValid && timestampValid)
 
-syncVouchers' :: AppEnv AppProdM -> ExceptT String Aff Unit
-syncVouchers' appEnv@(AppEnv { envVars: AppEnvVars envVars }) = do
-  let
-    xbgeClient = mkClient (getOptions (AppEnvVars envVars)) xbgeSpec
-
-  txs <- getTransactions (AppEnvVars envVars) { toAddress: envVars.xbgeSafeAddress }
-    # ExceptT
-
-  vouchers <- xbgeClient.getVouchers { query: { safeAddress: Nothing } }
-    # ExceptT
-    # withExceptT show
-    <#> (unwrap >>> _.body >>> _.data)
-
-  let
-    vouchersLookup = vouchers
-      <#> (\all@(VoucherEncrypted { sold: { transactionId } }) -> transactionId /\ all)
-      # M.fromFoldable
-
-    unfinalizedTxs = txs # A.filter (\(Transfer { id }) -> not $ M.member id vouchersLookup)
-
-  syncedVouchers <- for unfinalizedTxs (finalizeTx' appEnv >>> runExceptT)
-    # lift
-
-  log ("finalized the following vouchers: ")
-  logShow syncedVouchers
-
-  pure unit
-
 newtype Threshold a = Threshold { above :: a, below :: a }
 
 --------------------------------------------------------------------------------
-
-finalizeTx' :: AppEnv AppProdM -> Transfer -> ExceptT String Aff VoucherEncrypted
-finalizeTx' appEnv trans = Sync.finalizeTx trans
-  # runAppProdM appEnv
-  # ExceptT
-  # withExceptT errorToLog
-
-syncVouchers :: AppEnv AppProdM -> Aff Unit
-syncVouchers appEnv = do
-  log "syncing transactions..."
-  result <- runExceptT $ syncVouchers' appEnv
-  case result of
-    Left e -> logShow ("Could not sync transaction: " <> e)
-    Right _ -> log "synced transactions."
 
 getOptions :: AppEnvVars -> Options
 getOptions (AppEnvVars env) = PC.defaultOpts
@@ -233,56 +174,6 @@ decryptVoucherCode key (VoucherCodeEncrypted s) = decrypt key s <#> VoucherCode
 
 --------------------------------------------------------------------------------
 
-getTransactions
-  :: AppEnvVars
-  -> { toAddress :: Address
-     }
-  -> Aff (Either String (Array Transfer))
-getTransactions env { toAddress } = do
-  result <-
-    let
-      { from, to, id, amount } = selectors
-    in
-      queryGql env "get-transactions"
-        { transfers:
-            { where: { to: show toAddress } } =>> { from, to, id, amount }
-        }
-  case result of
-    Left e -> pure $ Left $ show e
-    Right { transfers } -> transfers # traverse mkTransfer # pure
-
-  where
-  mkTransfer :: GraphNode.Transfer -> Either String Transfer
-  mkTransfer x = note "Parse error" ado
-    from <- Address <$> parseAddress x.from
-    to <- Address <$> parseAddress x.to
-    amount <- fromDecimalStr x.amount
-    in Transfer { from, to, amount: Freckles amount, id: TransferId x.id }
-
---------------------------------------------------------------------------------
-
-data GQLError = ConnOrParseError
-
-derive instance genericGQLError :: Generic GQLError _
-instance showGQLError :: Show GQLError where
-  show = genericShow
-
-queryGql
-  :: forall query returns
-   . GqlQuery Schema query returns
-  => DecodeJsonField returns
-  => DecodeJson returns
-  => AppEnvVars
-  -> String
-  -> query
-  -> Aff (Either GQLError returns)
-queryGql (AppEnvVars env) s q =
-  do
-    (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
-    query client s q # try <#> (lmap (\_ -> ConnOrParseError))
-
---------------------------------------------------------------------------------
-
 foreign import decryptImpl :: forall z. z -> (String -> z) -> String -> String -> z
 
 decrypt :: String -> String -> Maybe String
@@ -323,7 +214,7 @@ app = do
             guards =
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
-          _ <- liftEffect $ setInterval 5000 (launchAff_ $ syncVouchers prodEnv)
+          _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
           _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 (unwrap parsedEnv).port })
             spec
             { guards, handlers }
@@ -337,6 +228,14 @@ runRoute env x = do
       log $ errorToLog appError
       pure $ Left $ errorToFailure appError
     Right ok -> pure $ Right ok
+
+runSync :: forall a. AppEnv AppProdM -> AppProdM a -> Aff Unit
+runSync env x = do
+  result <- runAppProdM env x
+  case result of
+    Left appError -> do
+      log $ errorToLog appError
+    Right _ -> pure unit
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
 -- runWithLog m = do
