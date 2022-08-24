@@ -50,7 +50,9 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               type="password"
               value={state.magicWords}
               placeholder={t('login.magicWordsPlaceholder')}
-              onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
+              onChange={e =>
+                act(A._login(A._setMagicWords(e.target.value.trim())))
+              }
               onKeyPress={e =>
                 e.key === 'Enter' && act(A._login(A._login(unit)))
               }

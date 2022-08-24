@@ -46,7 +46,9 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
               type="password"
               value={state.magicWords}
               placeholder={t('debug.magicWordsPlaceholder')}
-              onChange={e => act(A._debug(A._setMagicWords(e.target.value)))}
+              onChange={e =>
+                act(A._debug(A._setMagicWords(e.target.value.trim())))
+              }
               onKeyPress={e =>
                 e.key === 'Enter' && act(A._debug(A._coreToWindow(unit)))
               }
