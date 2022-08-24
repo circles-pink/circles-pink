@@ -91,7 +91,7 @@ export const MagicWords = ({
               theme={theme}
               onClick={() => act(A._magicWords(A._next(unit)))}
             >
-              {t('nextButton')}
+              {t('magicWords.gotMyMagicWordsButton')}
             </Button>
           </TwoButtonRow>
         </FadeIn>

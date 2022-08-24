@@ -87,6 +87,7 @@ export type XbgeDashboardProps = {
   act: (ac: A.CirclesAction) => void;
   cfg?: UserConfig;
   sharingFeature: ReactElement | null;
+  buyVoucherEurLimit: number;
 };
 
 export const XbgeDashboard = ({
@@ -94,6 +95,7 @@ export const XbgeDashboard = ({
   act,
   cfg,
   sharingFeature,
+  buyVoucherEurLimit,
 }: XbgeDashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -302,6 +304,11 @@ export const XbgeDashboard = ({
     }
   }, [state.getBalanceResult]);
 
+  const boughtVouchersAmount =
+    state.vouchersResult.type === 'success'
+      ? state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
+      : 0;
+
   // -----------------------------------------------------------------------------
   // Redeploy, if token is not deployed
   // -----------------------------------------------------------------------------
@@ -426,26 +433,8 @@ export const XbgeDashboard = ({
                 icon={mdiGiftOutline}
               >
                 <>
-                  {cfg?.voucherShopEnabled ? (
-                    <>
-                      <Margin top={2} bottom={2}>
-                        <BuyVouchers
-                          theme={theme}
-                          providers={stateRaw.voucherProvidersResult}
-                          initializeVoucherOrder={initializeVoucherOrder}
-                          availableBalance={userBalance}
-                        />
-                      </Margin>
-                      <ListVouchers
-                        theme={theme}
-                        providersResult={stateRaw.voucherProvidersResult}
-                        vouchersResult={state.vouchersResult}
-                        justBoughtVoucher={justBoughtVoucher}
-                        setJustBoughtVoucher={setJustBoughtVoucher}
-                      />
-                    </>
-                  ) : (
-                    <>
+                  <>
+                    {t('dashboard.xbgeSpecial.whatToBuyForCircles') && (
                       <Margin top={1} bottom={1}>
                         <JustText fontSize={1.25}>
                           {
@@ -486,6 +475,30 @@ export const XbgeDashboard = ({
                           }
                         </JustText>
                       </Margin>
+                    )}
+                  </>
+                  {cfg?.voucherShopEnabled ? (
+                    <>
+                      <Margin top={2} bottom={2}>
+                        <BuyVouchers
+                          theme={theme}
+                          providers={stateRaw.voucherProvidersResult}
+                          initializeVoucherOrder={initializeVoucherOrder}
+                          availableBalance={userBalance}
+                          boughtVouchersAmount={boughtVouchersAmount}
+                          buyVoucherEurLimit={buyVoucherEurLimit}
+                        />
+                      </Margin>
+                      <ListVouchers
+                        theme={theme}
+                        providersResult={stateRaw.voucherProvidersResult}
+                        vouchersResult={state.vouchersResult}
+                        justBoughtVoucher={justBoughtVoucher}
+                        setJustBoughtVoucher={setJustBoughtVoucher}
+                      />
+                    </>
+                  ) : (
+                    <>
                       <Margin top={1} bottom={1}>
                         <JustText fontSize={1.25}>
                           {
@@ -497,7 +510,7 @@ export const XbgeDashboard = ({
                             fontSize={1.25}
                             onClick={() =>
                               window.open(
-                                'https://www.volksentscheid-grundeinkommen.de/mitmachen#sammeltipps',
+                                t('dashboard.xbgeSpecial.collectionTippsLink'),
                                 '_blank'
                               )
                             }
@@ -528,15 +541,16 @@ export const XbgeDashboard = ({
                           '{{toTheMarketPlace}}'
                         )[0]
                       }
-                    </JustText>
-                    <ButtonLinkLike
-                      onClick={() =>
-                        window.open('https://market.joincircles.net/', '_blank')
-                      }
-                    >
-                      {t('dashboard.voucherShop.toTheMarketPlace')}
-                    </ButtonLinkLike>
-                    <JustText fontSize={1}>
+                      <ButtonLinkLike
+                        onClick={() =>
+                          window.open(
+                            'https://market.joincircles.net/',
+                            '_blank'
+                          )
+                        }
+                      >
+                        {t('dashboard.voucherShop.toTheMarketPlace')}
+                      </ButtonLinkLike>
                       {
                         t('dashboard.voucherShop.buyAtMarketPlace').split(
                           '{{toTheMarketPlace}}'
@@ -565,6 +579,7 @@ export const XbgeDashboard = ({
                   act(A._dashboard(A._removeTrustConnection(to)))
                 }
                 trustRemoveResult={state.trustRemoveResult}
+                description={t('dashboard.xbgeSpecial.trustNetworkDescription')}
               />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
@@ -580,6 +595,7 @@ export const XbgeDashboard = ({
                 removeTrust={to =>
                   act(A._dashboard(A._removeTrustConnection(to)))
                 }
+                description={t('dashboard.xbgeSpecial.userSearchDescription')}
                 actionRow={
                   <JustifyBetweenCenter>
                     <Input
@@ -613,6 +629,16 @@ export const XbgeDashboard = ({
                 title="Trust Graph"
                 icon={mdiGraphOutline}
               >
+                <>
+                  {t('dashboard.xbgeSpecial.trustGraphDescription') && (
+                    <Margin top={0.75} bottom={0.75}>
+                      <JustText fontSize={1.25}>
+                        {t('dashboard.xbgeSpecial.trustGraphDescription')}
+                      </JustText>
+                    </Margin>
+                  )}
+                </>
+
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>

@@ -5,7 +5,8 @@ import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
 import { SelectedOffer } from '.';
-import { Claim, SubClaim } from '../../../components/text';
+import { Margin } from '../../../components/helper';
+import { Claim, JustText, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
 type BuyVouchersProps = {
@@ -13,6 +14,8 @@ type BuyVouchersProps = {
   theme: Theme;
   initializeVoucherOrder: (selectedOffer: SelectedOffer) => void;
   availableBalance: number;
+  boughtVouchersAmount: number;
+  buyVoucherEurLimit: number;
 };
 
 export const BuyVouchers = ({
@@ -20,6 +23,8 @@ export const BuyVouchers = ({
   theme,
   initializeVoucherOrder,
   availableBalance,
+  boughtVouchersAmount,
+  buyVoucherEurLimit,
 }: BuyVouchersProps): ReactElement => {
   const [providers_, setProviders_] = useState<VoucherProvider[]>(
     getData([] as VoucherProvider[])(providers as any)
@@ -32,11 +37,32 @@ export const BuyVouchers = ({
     }
   }, [providers]);
 
+  const limitReached = boughtVouchersAmount >= buyVoucherEurLimit;
+
   return (
     <>
       <Claim color={theme.textColorDark}>
-        {t('dashboard.voucherShop.buyDescription')}
+        {t('dashboard.voucherShop.buyTitle')}
       </Claim>
+      <Margin top={1} bottom={1}>
+        {!limitReached ? (
+          <JustText>
+            {t('dashboard.voucherShop.buyDescription')
+              .replace(
+                '{{limit}}',
+                `${buyVoucherEurLimit}€ (${buyVoucherEurLimit * 10} Circles)`
+              )
+              .replace('{{amount}}', boughtVouchersAmount.toString())}
+          </JustText>
+        ) : (
+          <JustText>
+            {t('dashboard.voucherShop.buyLimitReached').replace(
+              '{{limit}}',
+              `${buyVoucherEurLimit}€ (${buyVoucherEurLimit * 10} Circles)`
+            )}
+          </JustText>
+        )}
+      </Margin>
       {providers_.length > 0 ? (
         <>
           {providers_.map(provider => {
@@ -52,7 +78,7 @@ export const BuyVouchers = ({
 
                     return (
                       <Offer
-                        enabled={userCanBuy}
+                        enabled={userCanBuy && !limitReached}
                         theme={theme}
                         key={`${provider.id}-${offer.amount}`}
                         onClick={() =>
@@ -71,16 +97,22 @@ export const BuyVouchers = ({
                         </VoucherText>
                         <br />
 
-                        <VoucherText fontSize={1.5}>
-                          {userCanBuy
-                            ? `${t('dashboard.voucherShop.buyFor')} ${
-                                offer.amount * 10
-                              } Circles`
-                            : `${t('dashboard.voucherShop.youNeed')} ${(
-                                offer.amount * 10 -
-                                availableBalance
-                              ).toFixed(2)} Circles`}
-                        </VoucherText>
+                        {!limitReached ? (
+                          <VoucherText fontSize={1.5}>
+                            {userCanBuy
+                              ? `${t('dashboard.voucherShop.buyFor')} ${
+                                  offer.amount * 10
+                                } Circles`
+                              : `${t('dashboard.voucherShop.youNeed')} ${(
+                                  offer.amount * 10 -
+                                  availableBalance
+                                ).toFixed(2)} Circles`}
+                          </VoucherText>
+                        ) : (
+                          <VoucherText fontSize={1.5}>
+                            {t('dashboard.voucherShop.buyLimitReachedHint')}
+                          </VoucherText>
+                        )}
                       </Offer>
                     );
                   })}

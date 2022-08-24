@@ -79,6 +79,7 @@ export type OnboardingProps = {
   sharingFeature?: ReactElement | null;
   safeAddress?: string;
   strictMode?: boolean;
+  buyVoucherEurLimit?: number;
 };
 
 export const Onboarding = (props: OnboardingProps) => {
@@ -124,6 +125,7 @@ type ViewProps = {
   cfg: UserConfig;
   xbgeCampaign: boolean;
   sharingFeature: ReactElement | null;
+  buyVoucherEurLimit: number;
 };
 
 const View = ({
@@ -132,6 +134,7 @@ const View = ({
   cfg,
   xbgeCampaign,
   sharingFeature,
+  buyVoucherEurLimit,
 }: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
@@ -177,6 +180,7 @@ const View = ({
             act={act}
             cfg={cfg}
             sharingFeature={sharingFeature}
+            buyVoucherEurLimit={buyVoucherEurLimit}
           />
         );
       }
@@ -220,6 +224,7 @@ const OnboardingContent = ({
   sharingFeature,
   safeAddress,
   strictMode = false,
+  buyVoucherEurLimit = 70,
 }: OnboardingProps): ReactElement => {
   const userConfig: UserConfig = {
     email,
@@ -285,6 +290,7 @@ const OnboardingContent = ({
             cfg={cfg}
             xbgeCampaign={xbgeCampaign}
             sharingFeature={sharingFeature || null}
+            buyVoucherEurLimit={buyVoucherEurLimit}
           />
         </DebugProvider>
       </I18nextProvider>

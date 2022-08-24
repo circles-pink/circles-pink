@@ -19,7 +19,7 @@ import {
   mdiWeatherCloudyClock,
 } from '@mdi/js';
 import Icon from '@mdi/react';
-import { JustifyAroundCenter, JustifyStartCenter } from './helper';
+import { JustifyAroundCenter, JustifyStartCenter, Margin } from './helper';
 import { LoadingCircles } from './LoadingCircles';
 import {
   addrToString,
@@ -52,6 +52,7 @@ import {
   USERNAME_WIDTH,
 } from './TrustUserList';
 import { GridRow } from './GridRow';
+import { JustText } from './text';
 
 type Overlay = 'SEND' | 'RECEIVE';
 
@@ -66,6 +67,7 @@ type UserSearchProps = {
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
+  description?: string;
 };
 
 export const UserSearch = (props: UserSearchProps) => {
@@ -122,7 +124,15 @@ export const UserSearch = (props: UserSearchProps) => {
 
   return (
     <LightColorFrame theme={theme} title={title} icon={icon}>
+      <>
+        {props.description && (
+          <Margin top={0.75} bottom={0.75}>
+            <JustText fontSize={1.25}>{props.description}</JustText>
+          </Margin>
+        )}
+      </>
       <>{actionRow}</>
+
       <ListContainer>
         {trusts.length > 0 && (
           <GridRow
@@ -339,7 +349,6 @@ const ContentRow = (props: UserSearchProps & { c: Trust }): ReactElement => {
     <GridRow
       minHeight={ROW_HEIGHT}
       fields={[
-        { width: 0, align: 'LEFT', content: <ReactTooltip /> },
         {
           width: USERNAME_WIDTH,
           content: (

@@ -67,12 +67,13 @@ export const resources = {
       magicWords: {
         claim: 'Der eine Schlüssel...',
         subClaim1:
-          'Schreibe dir diese Worte am besten auf ein Blatt Papier, oder speichere sie an einem sicheren Ort.',
+          'Schreibe dir diese Worte am besten auf ein Blatt Papier, oder speichere sie an einem sicheren Ort. Wenn du sie verlierst, kann dein Account nicht wiederhergestellt werden. All deine Vertrauensbeziehungen und deine Circles sind dann unzugänglich.',
         subClaim2:
-          'Wenn du sie verlierst, dann kann dein Account nicht wiederhergestellt werden. All deine Vertrauensbeziehungen sind damit dann unzugänglich.',
+          'Dein Schlüssel wird in diesem Browser für dich gespeichert. Wenn du dich in einem anderen Browser in deine Geldbörse einloggen willst, musst du den Schlüssel neu eingeben.',
         copyBtn: 'In die Zwischenablage kopieren',
         copiedInfo: 'Kopiert!',
         newPhraseBtn: 'Gib mir schönere Worte!',
+        gotMyMagicWordsButton: 'Schlüssel notiert!',
       },
       submit: {
         claim: 'Nutzer:in {{user}} anlegen',
@@ -99,15 +100,15 @@ export const resources = {
           welcomeGeneral:
             'Damit du dein Grundeinkommen bekommen kannst, muss deine Wallet aktiviert werden.',
           howToActivateWallet:
-            'Um deine Wallet zu aktivieren und mit Circles bezahlen zu können, muss du mindestens 3 Circles-User*innen finden, die dich in ihr Vertrauensnetzwerk aufnehmen.',
+            'Um deine Wallet zu aktivieren und mit Circles bezahlen zu können, musst du mindestens 3 Circles-User:innen finden, die dich in ihr Vertrauensnetzwerk aufnehmen.',
           howToGetTrusts:
-            'Wo findest du 3 Menschen? Am besten kommst du bei einer {{collectionAction}} vorbei - dort sind immer Menschen von der Expedition vor Ort, die dich gerne in ihr Vertrauensnetzwerk aufnehmen. Nenne ihnen einfach deinen Usernamen.',
+            'Du kannst auch bei einer {{collectionAction}} vorbeikommen - dort sind immer Menschen von der Expedition vor Ort, die deinen Account verifizieren. Dazu brauchst du nur deinen Usernamen.',
           collectSignaturesForVouchers:
-            'Außerdem kannst du dann auch gleich 20 Unterschriften sammeln, um deinen Gutschschein-Shop freizuschalten.',
+            'Außerdem kannst du dann auch gleich 20 Unterschriften sammeln, um den Gutschschein-Shop für dich freizuschalten und Gutscheine im Wert von 70 Euro für deine Circles zu bekommen!',
           youWillGetCircles:
-            'Sobald deine Wallet aktiviert ist, beginnt dein Grundeinkommen zu fließen, und du erhältst jede Stunde 1 Circles, die du in Gutscheine eintauschen kannst.',
+            'Sobald deine Wallet aktiviert ist, beginnt dein Grundeinkommen zu fließen, und du erhältst jeden Tag 24 Circles, die du in Gutscheine eintauschen kannst. Hier kannst du sehen, wie viele Menschen dir schon vertrauen.',
           collectionAction: 'Sammelaktion',
-          shareFeatureTitle: 'Teile deinen Trust-Link',
+          collectionActionLink: 'https://www.volksentscheid-grundeinkommen.de/',
         },
       },
       dashboard: {
@@ -119,6 +120,8 @@ export const resources = {
           howToActivateVoucherShop:
             'Um Zugang zum Gutschein-Shop zu erhalten, musst du mindestens 20 Unterschriften für den Volksentscheid sammeln und einreichen. Natürlich haben wir auch einige {{collectionTipps}} für dich.',
           collectionTipps: 'Tipps zum Sammeln',
+          collectionTippsLink:
+            'https://www.volksentscheid-grundeinkommen.de/mitmachen#sammeltipps',
           bringSignaturesTo:
             'Die Unterschriften kannst du einfach bei deinem Kiezteam abgeben, per Post einsenden oder persönlich beim Expeditionsbüro in der Gneisenaustr. 63 vorbeibringen.',
           myWalletTitle: 'Meine Circles-Wallet',
@@ -128,6 +131,12 @@ export const resources = {
           welcomeUser:
             'Du bist mit dem Benutzernamen @{{user}} bei Circles angemeldet.',
           shareFeatureTitle: 'Teile deinen Trust-Link',
+          userSearchDescription:
+            'Hier kannst du andere Circles User:innen finden und ihnen trusten.',
+          trustNetworkDescription:
+            'Dies ist die Liste der Personen, denen du vertraust, oder die dir vertrauen.',
+          trustGraphDescription:
+            'Der Trust Graph zeigt dir dein Vertrauensnetzwerk. Klicke die anderen User:innen an, um die Ansicht zu erweitern!',
         },
         addTrustPlaceholder:
           'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
@@ -160,14 +169,15 @@ export const resources = {
             pendingUntrust: 'Bestätige ...',
           },
         },
-        trustGraphLayoutOptions: {
-          cose: 'Cose',
-          cise: 'Cise',
-          circles: 'Circles',
-        },
+
         voucherShop: {
           shopTitle: 'Circles einlösen',
-          buyDescription: 'Gutscheine kaufen:',
+          buyTitle: 'Gutscheine kaufen:',
+          buyDescription:
+            'Bis zu einem Betrag von {{limit}} kannst du Gutscheine für Circles kaufen. Davon hast du bisher {{amount}}€ ausgegeben.',
+          buyLimitReached:
+            'Du hast das Limit von {{limit}} erreicht und kannst keine Gutscheine mehr kaufen.',
+          buyLimitReachedHint: 'Limit erreicht',
           buyNoVouchers:
             'Im Moment gibt es keine Gutscheine, versuche es später nochmal!',
           listDescription: 'Deine Gutscheine:',
@@ -178,7 +188,7 @@ export const resources = {
           eurAmountWillBe: 'Der Wert des Gutscheines ist:',
           confirmSendButton: 'Kauf abschließen',
           confirmSendProblem:
-            'Leider konnten wir deinen Kauf nicht abschließen. Bitte versuche es später nochmal!',
+            'Leider konnten wir deinen Einkauf nicht abschließen. Bitte versuche es später nochmal!',
           buyFor: 'Kaufen für',
           youNeed: 'Dir fehlen',
           waitingFor: 'Warte auf',
@@ -187,6 +197,15 @@ export const resources = {
           buyAtMarketPlace:
             'In der Zwischenzeit kannst du auch schon Produkte auf dem {{toTheMarketPlace}} erwerben.',
           toTheMarketPlace: 'Circles-Marktplatz',
+        },
+      },
+      trustGraph: {
+        switchLayout:
+          'Du kannst dir verschiedene Layouts des Trust Graphen ansehen:',
+        layoutOptions: {
+          circles: 'Kreise',
+          cose: 'Verteilt',
+          cise: 'Alphabet',
         },
       },
       debug: {
@@ -263,6 +282,7 @@ export const resources = {
         copyBtn: 'Copy to clipboard',
         copiedInfo: 'Copied!',
         newPhraseBtn: 'Give me different words',
+        gotMyMagicWordsButton: 'Words saved!',
       },
       submit: {
         claim: 'Register user {{user}}',
@@ -292,11 +312,7 @@ export const resources = {
         trustNetworkTitle: 'Trust Network',
         exploreTitle: 'Explore',
         userSearchPlaceholder: 'Search by username',
-        trustGraphLayoutOptions: {
-          cose: 'Cose',
-          cise: 'Cise',
-          circles: 'Circles',
-        },
+
         trustList: {
           tableHead: {
             user: 'User',
@@ -339,6 +355,14 @@ export const resources = {
           buyAtMarketPlace:
             'You can also buy many products at the Circles market:',
           toTheMarketPlace: 'To the market',
+        },
+      },
+      trustGraph: {
+        switchLayout: 'Switch layout:',
+        layoutOptions: {
+          cose: 'Cose',
+          cise: 'Cise',
+          circles: 'Circles',
         },
       },
       debug: {

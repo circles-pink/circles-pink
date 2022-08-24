@@ -19,7 +19,7 @@ import {
 import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
 import { Theme } from '../../context/theme';
 
-import { ButtonRow } from '../helper';
+import { ButtonRow, Margin } from '../helper';
 import { Button } from '../forms';
 
 // -----------------------------------------------------------------------------
@@ -35,6 +35,8 @@ Cytoscape.use(COSEBilkent);
 import { cise } from './layout/cise';
 import { coseBilkent } from './layout/coseBilkent';
 import { concentric } from './layout/concentric';
+import { JustText } from '../text';
+import { t } from 'i18next';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -178,28 +180,32 @@ export const TrustGraph = ({
         layout={layout}
         stylesheet={stylesheets}
       />
-      <br />
+
+      <Margin top={0.75} bottom={0.75}>
+        <JustText fontSize={1.25}>{t('trustGraph.switchLayout')}</JustText>
+      </Margin>
+
       <ButtonRow>
         <Button
           theme={theme}
           prio={layout.name === 'concentric' ? 'medium' : 'low'}
           onClick={() => setLayout(concentric)}
         >
-          Circles
+          {t('trustGraph.layoutOptions.circles')}
         </Button>
         <Button
           theme={theme}
           prio={layout.name === 'cise' ? 'medium' : 'low'}
           onClick={() => setLayout(cise)}
         >
-          Cise
+          {t('trustGraph.layoutOptions.cise')}
         </Button>
         <Button
           theme={theme}
           prio={layout.name === 'cose-bilkent' ? 'medium' : 'low'}
           onClick={() => setLayout(coseBilkent)}
         >
-          Cose
+          {t('trustGraph.layoutOptions.cose')}
         </Button>
       </ButtonRow>
     </>
