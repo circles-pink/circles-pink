@@ -4,8 +4,7 @@ import Prelude
 
 import CirclesPink.Data.Address (parseAddress)
 import Control.Monad.Error.Class (liftEither, liftMaybe)
-import Control.Monad.Except (ExceptT)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Reader (ask)
 import Data.Array as A
 import Data.BN (fromDecimalStr)
 import Data.Bifunctor (lmap)
@@ -26,11 +25,12 @@ import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
 import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv'getTransferMeta, GraphNodeEnv'getTransactions)
+import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.Spec.Types (Freckles(..), TransferId(..))
 import VoucherServer.Specs.Xbge (Address(..))
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
 
-type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
+type M a = MkAppProdM a
 
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
@@ -45,7 +45,7 @@ mkClient (AppEnvVars env) =
 
 mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
 mkGraphNodeEnv = do
-  appEnvVars@(AppEnvVars env) <- ask
+  { envVars: appEnvVars@(AppEnvVars env) } <- ask
 
   client :: _ Schema _ _ <- mkClient appEnvVars
 

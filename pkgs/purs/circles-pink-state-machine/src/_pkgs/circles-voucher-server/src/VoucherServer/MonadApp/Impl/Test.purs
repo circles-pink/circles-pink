@@ -12,7 +12,7 @@ import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
 import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
-import Test.QuickCheck (arbitrary, mkSeed)
+import Test.QuickCheck (class Arbitrary, arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), CirclesCoreEnv(..), GraphNodeEnv(..))
 
@@ -37,7 +37,7 @@ derive newtype instance MonadError AppError AppTestM
 derive newtype instance MonadAsk (AppEnv AppTestM) AppTestM
 
 instance MonadApp AppTestM where
-  log _ = pure unit 
+  log _ = pure unit
 
 --------------------------------------------------------------------------------
 -- Type
@@ -45,7 +45,7 @@ instance MonadApp AppTestM where
 
 testEnv :: AppEnv AppTestM
 testEnv = AppEnv
-  { envVars: evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
+  { envVars: gen
   , graphNode: GraphNodeEnv
       { getTransferMeta: \_ -> throwError ErrUnknown
       , getTransactions: \_ -> throwError ErrUnknown
@@ -60,7 +60,11 @@ testEnv = AppEnv
       , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
       , getVouchers: \_ -> throwError ErrUnknown
       }
+  , constants: gen
   }
+
+gen :: forall a. Arbitrary a => a 
+gen = evalGen arbitrary { newSeed: mkSeed 0, size: 100 }
 
 runAppTestM :: forall a. AppEnv AppTestM -> AppTestM a -> Either AppError a
 runAppTestM env (AppTestM x) = un Identity do

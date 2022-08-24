@@ -7,7 +7,7 @@ import CirclesCore as CC
 import CirclesPink.Data.PrivateKey (PrivateKey(..))
 import Control.Monad.Error.Class (class MonadThrow, liftEither)
 import Control.Monad.Except (ExceptT, mapExceptT, runExceptT, withExceptT)
-import Control.Monad.Reader (ReaderT, ask)
+import Control.Monad.Reader (ask)
 import Convertable (convert)
 import Data.Array as A
 import Data.Newtype (wrap)
@@ -19,9 +19,10 @@ import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
 import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv'getPaymentNote, CirclesCoreEnv'getTrusts, CirclesCoreEnv'trustAddConnection)
+import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import Web3 (Web3)
 
-type M a = ReaderT AppEnvVars (ExceptT AppError Aff) a
+type M a = MkAppProdM a
 
 type N = AppProdM
 
@@ -79,7 +80,7 @@ liftCirclesCore x = x
 
 getCirclesValues :: M CirclesValues
 getCirclesValues = do
-  AppEnvVars envVars <- ask
+  { envVars: AppEnvVars envVars } <- ask
 
   provider <- CC.newWebSocketProvider envVars.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect

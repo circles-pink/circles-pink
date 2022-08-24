@@ -27,10 +27,11 @@ trustUser safeAddress = do
   AppEnv
     { circlesCore: CirclesCoreEnv { trustAddConnection }
     , envVars: AppEnvVars { xbgeSafeAddress }
+    , constants: { trustLimitPercentage }
     } <- ask
 
   trustAddConnection
     { user: convert safeAddress
     , canSendTo: convert $ unwrap xbgeSafeAddress
-    , limitPercentage: 100.0
+    , limitPercentage: trustLimitPercentage
     }
