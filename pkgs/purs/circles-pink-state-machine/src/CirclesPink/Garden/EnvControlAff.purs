@@ -11,7 +11,7 @@ import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..), genPrivateKey)
 import CirclesPink.Data.User (User(..))
-import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey, EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecode, _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson, _errReadStorage)
+import CirclesPink.Garden.StateMachine.Control.EnvControl (CryptoKey(..), EnvControl, ErrDecrypt, ErrParseToData, ErrParseToJson, StorageType(..), _errDecrypt, _errGetVoucherProviders, _errGetVouchers, _errKeyNotFound, _errNoStorage, _errParseToData, _errParseToJson)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
 import CirclesPink.Garden.StateMachine.Error (CirclesError, CirclesError')
 import Control.Monad.Except (ExceptT(..), except, lift, mapExceptT, runExceptT, throwError, withExceptT)
@@ -34,7 +34,6 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Now (now)
 import Effect.Timer (clearTimeout, setTimeout)
-import GunDB (get, offline, once, put)
 import HTTP (ReqFn)
 import Network.Ethereum.Core.Signatures (privateToAddress)
 import Payload.Client (defaultOpts, mkGuardedClient)
@@ -75,6 +74,7 @@ type EnvEnvControlAff =
   { request :: ReqFn (CirclesError' ())
   , localStorage :: Maybe StringStorage
   , sessionStorage :: Maybe StringStorage
+  , stringStorage :: StringStorage
   , crypto ::
       { encrypt :: CryptoKey -> String -> String
       , decrypt :: CryptoKey -> String -> Maybe String
@@ -392,27 +392,27 @@ env envenv@{ request, envVars } =
     res <- client.getVoucherProviders { body: { signatureObj } } # ExceptT # withExceptT (show >>> _errGetVoucherProviders)
     pure (res -# _.body)
 
-  -- saveSession :: EnvControl.SaveSession Aff
-  -- saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
-
-  -- restoreSession :: EnvControl.RestoreSession String Aff
-  -- restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
-
-  privateKeyStore :: String
-  privateKeyStore = "session"
-
   saveSession :: EnvControl.SaveSession Aff
-  saveSession privKey = do
-    gundb <- liftEffect $ offline
-    _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
-    pure unit
+  saveSession privKey = storageSetItem envenv (CryptoKey "sk") LocalStorage "privateKey" privKey
 
   restoreSession :: EnvControl.RestoreSession Aff
-  restoreSession = do
-    gundb <- lift $ liftEffect $ offline
-    result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
-    resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
-    pure resultPk.privKey
+  restoreSession = storageGetItem envenv (CryptoKey "sk") LocalStorage "privateKey"
+
+  -- privateKeyStore :: String
+  -- privateKeyStore = "session"
+
+  -- saveSession :: EnvControl.SaveSession Aff
+  -- saveSession privKey = do
+  --   gundb <- liftEffect $ offline
+  --   _ <- liftEffect $ gundb # get privateKeyStore # put (encodeJson { privKey })
+  --   pure unit
+
+  -- restoreSession :: EnvControl.RestoreSession Aff
+  -- restoreSession = do
+  --   gundb <- lift $ liftEffect $ offline
+  --   result <- gundb # get privateKeyStore # once <#> note (_errReadStorage [ privateKeyStore ]) # ExceptT
+  --   resultPk :: { privKey :: _ } <- decodeJson result.data # lmap _errDecode # except
+  --   pure resultPk.privKey
 
   getBalance :: EnvControl.GetBalance Aff
   getBalance privKey safeAddress = do
@@ -470,14 +470,14 @@ storageGetItem envenv@{ localStorage, sessionStorage } sk st k = case st of
   LocalStorage -> case localStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ls -> ls.getItem (encryptJson envenv sk k)
-      <#> note (_errKeyNotFound k)
+      <#> note (_errKeyNotFound $ stringify $ encodeJson k)
       # ExceptT
       >>= (\v -> except $ decryptJson envenv sk v)
 
   SessionStorage -> case sessionStorage of
     Nothing -> throwError $ _errNoStorage st
     Just ss -> ss.getItem (encryptJson envenv sk k)
-      <#> note (_errKeyNotFound k)
+      <#> note (_errKeyNotFound $ stringify $ encodeJson k)
       # ExceptT
       >>= (\v -> except $ decryptJson envenv sk v)
 

@@ -230,9 +230,9 @@ type GetVoucherProviders m = forall r. SignatureObj -> ExceptV (ErrGetVoucherPro
 --------------------------------------------------------------------------------
 
 -- Save Session
--- type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
+type ErrSaveSession r = ErrNoStorage + ErrStorageSetItem + r
 
--- type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
+type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
 
 -- Restore Session
 type RequestPath = Array String
@@ -241,18 +241,7 @@ type ErrReadStorage r = (errReadStorage :: RequestPath | r)
 
 type ErrDecode r = (errDecode :: JsonDecodeError | r)
 
--- type ErrRestoreSession k r = ErrNoStorage + ErrStorageGetItem k + r
-
--- type RestoreSession k m = forall r. ExceptV (ErrRestoreSession k + r) m PrivateKey
-
--- Save Session
-type ErrSaveSession r = (errSaveSession :: Unit | r)
-
-type SaveSession m = forall r. PrivateKey -> ExceptV (ErrSaveSession + r) m Unit
-
--- Restore Session
-
-type ErrRestoreSession r = ErrReadStorage + ErrDecode + r
+type ErrRestoreSession r = ErrNoStorage + ErrStorageGetItem + r
 
 type RestoreSession m = forall r. ExceptV (ErrRestoreSession + r) m PrivateKey
 
@@ -293,7 +282,7 @@ newtype CryptoKey = CryptoKey String
 
 type StorageSetItem m = forall k v r. EncodeJson k => EncodeJson v => CryptoKey -> StorageType -> k -> v -> ExceptV (ErrStorageSetItem + r) m Unit
 
-type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageGetItem k + r) m v
+type StorageGetItem m = forall k v r. EncodeJson k => DecodeJson v => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageGetItem + r) m v
 
 type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType -> k -> ExceptV (ErrStorageDeleteItem + r) m Unit
 
@@ -304,7 +293,7 @@ data StorageType = SessionStorage | LocalStorage
 --------------------------------------------------------------------------------
 type ErrStorageSetItem r = ErrNoStorage + r
 
-type ErrStorageGetItem k r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrDecrypt + ErrKeyNotFound k + r
+type ErrStorageGetItem r = ErrNoStorage + ErrParseToJson + ErrParseToData + ErrDecrypt + ErrKeyNotFound + r
 
 type ErrStorageDeleteItem r = ErrNoStorage + r
 
@@ -319,8 +308,7 @@ type ErrParseToData r = (errParseToData :: String /\ JsonDecodeError | r)
 
 type ErrNoStorage r = (errNoStorage :: StorageType | r)
 
-type ErrKeyNotFound :: forall k1. k1 -> Row k1 -> Row k1
-type ErrKeyNotFound k r = (errKeyNotFound :: k | r)
+type ErrKeyNotFound r = (errKeyNotFound :: String | r)
 
 -- Error Connstructors
 
@@ -335,7 +323,7 @@ _errParseToData = inj (Proxy :: _ "errParseToData")
 _errNoStorage :: forall r. StorageType -> Variant (ErrNoStorage r)
 _errNoStorage = inj (Proxy :: _ "errNoStorage")
 
-_errKeyNotFound :: forall r k. k -> Variant (ErrKeyNotFound k r)
+_errKeyNotFound :: forall r. String -> Variant (ErrKeyNotFound r)
 _errKeyNotFound = inj (Proxy :: _ "errKeyNotFound")
 
 _errDecrypt :: forall r. Variant (ErrDecrypt r)
