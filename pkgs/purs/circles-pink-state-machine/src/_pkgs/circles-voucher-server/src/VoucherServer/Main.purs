@@ -217,7 +217,7 @@ app = do
             guards =
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
-          _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
+          _ <- liftEffect $ setInterval 15000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
           _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 (unwrap parsedEnv).port })
             spec
             { guards, handlers }
