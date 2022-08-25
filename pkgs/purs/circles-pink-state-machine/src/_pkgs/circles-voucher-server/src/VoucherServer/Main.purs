@@ -228,7 +228,7 @@ runRoute env x = do
   result <- runAppProdM env x
   case result of
     Left appError -> do
-      log $ errorToLog appError
+      log ("Route Error: " <> errorToLog appError)
       pure $ Left $ errorToFailure appError
     Right ok -> pure $ Right ok
 
@@ -237,7 +237,7 @@ runSync env x = do
   result <- runAppProdM env x
   case result of
     Left appError -> do
-      log $ errorToLog appError
+      log ("Syncing Error: " <> errorToLog appError)
     Right _ -> pure unit
 
 -- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)

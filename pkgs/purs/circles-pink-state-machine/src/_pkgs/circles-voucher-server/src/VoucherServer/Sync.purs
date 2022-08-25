@@ -14,8 +14,8 @@ import Data.Traversable (for_)
 import Data.Tuple.Nested ((/\))
 import Payload.ResponseTypes (Response(..))
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..), AppError(..))
-import VoucherServer.MonadApp.Class (AppLog(..), CirclesCoreEnv(..), GraphNodeEnv(..), log)
+import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
+import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), CirclesCoreEnv(..), GraphNodeEnv(..), log)
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
@@ -45,9 +45,11 @@ syncVouchers = do
     , envVars: AppEnvVars { xbgeSafeAddress }
     } <- ask
 
-  log LogSync
+  log LogSyncStart
 
   txs <- getTransactions { toAddress: xbgeSafeAddress }
+
+  log $ LogSyncFetchedTxs $ A.length txs
 
   vouchers <- getVouchers { query: { safeAddress: Nothing } }
     <#> getResponseData
@@ -61,7 +63,10 @@ syncVouchers = do
     unfinalizedTxs = txs # A.filter
       \(Transfer { id }) -> not $ M.member id vouchersLookup
 
-  for_ unfinalizedTxs (\tx -> (void $ finalizeTx tx) `catchError` (\_ -> pure unit))
+  for_ unfinalizedTxs
+    (\tx -> (void $ finalizeTx tx) `catchError` (log <<< LogCatchedFinalizeTxError))
+
+  log LogSyncEnd
 
 finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx transfer@(Transfer { from, amount, id }) = do
@@ -84,11 +89,11 @@ finalizeTx transfer@(Transfer { from, amount, id }) = do
 
   voucherAmount <-
     ( getVoucherAmount providers providerId eur
-        # liftMaybe ErrUnknown
+        # liftMaybe ErrGetVoucherAmount
     )
-      `catchError` \_debug -> do
+      `catchError` \err -> do
         redeemAmount from eur
-        throwError ErrUnknown
+        throwError err
 
   voucher <-
     finalizeVoucherPurchase

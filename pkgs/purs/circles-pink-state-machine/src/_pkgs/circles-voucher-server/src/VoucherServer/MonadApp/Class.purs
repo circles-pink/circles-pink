@@ -6,9 +6,12 @@ import CirclesCore (TrustAddConnectionOptions)
 import CirclesCore as CC
 import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
+import Data.Array (replicate)
 import Data.Lens (Lens', lens')
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
+import Data.String (Pattern(..), joinWith, split)
+import Data.String.CodeUnits (fromCharArray)
 import Data.Tuple.Nested ((/\))
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Payload.Client (ClientError)
@@ -44,16 +47,25 @@ type AppConstants =
 --------------------------------------------------------------------------------
 
 data AppLog
-  = LogSync
+  = LogSyncStart
+  | LogSyncEnd
+  | LogSyncFetchedTxs Int
   | LogStartFinalizeTx Transfer
   | LogFinishFinalizeTx VoucherEncrypted
+  | LogCatchedFinalizeTxError AppError
   | LogRedeem
 
 logToString :: AppLog -> String
 logToString = case _ of
-  LogSync -> "Tiggered transaction sync."
+  LogSyncStart -> "Tiggered transaction sync."
+  LogSyncEnd -> "Finished transaction sync."
+  LogSyncFetchedTxs n -> "Fetched " <> show n <> " transactions."
   LogStartFinalizeTx _ -> "Start to finalize Transaction."
   LogFinishFinalizeTx ve -> "Finish finalizing Transaction. " <> show ve
+  LogCatchedFinalizeTxError err -> joinWith "\n"
+    [ "Catched error while finalizing transaction. Skipping!"
+    , indent 2 $ errorToLog err
+    ]
   LogRedeem -> "In the future we'll pay back the amount..."
 
 --------------------------------------------------------------------------------
@@ -67,6 +79,7 @@ data AppError
   | ErrGraphQL
   | ErrGraphQLParse String
   | ErrPayloadClient ClientError
+  | ErrGetVoucherAmount
 
 derive instance genericVSE :: Generic AppError _
 derive instance eqVSE :: Eq AppError
@@ -94,6 +107,7 @@ errorToFailure = case _ of
   ErrGraphQL -> internalServerError
   ErrGraphQLParse _ -> internalServerError
   ErrPayloadClient _ -> internalServerError
+  ErrGetVoucherAmount -> internalServerError
   where
   internalServerError = Error $ Res.internalError $ StringBody "Internal server error"
 
@@ -105,6 +119,7 @@ errorToLog = case _ of
   ErrGraphQL -> "Graph QL Error"
   ErrGraphQLParse msg -> "Graph QL Parse Error: " <> msg
   ErrPayloadClient _ -> "Payload client error"
+  ErrGetVoucherAmount -> "Failed to get Voucher Amount"
 
 --------------------------------------------------------------------------------
 -- AppEnv
@@ -216,3 +231,12 @@ _envVars = Proxy :: Proxy "envVars"
 
 _a :: forall m. Lens' (AppEnv m) (CirclesCoreEnv' m)
 _a = _AppEnv <<< prop _circlesCore <<< _CirclesCoreEnv
+
+--------------------------------------------------------------------------------
+-- Util
+--------------------------------------------------------------------------------
+
+indent :: Int -> String -> String
+indent n = split (Pattern "\n")
+  >>> map (\line -> (fromCharArray $ replicate n ' ') <> line)
+  >>> joinWith "\n"
