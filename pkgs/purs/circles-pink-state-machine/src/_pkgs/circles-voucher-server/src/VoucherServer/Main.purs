@@ -217,7 +217,7 @@ app = do
             guards =
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
-          _ <- liftEffect $ setInterval 15000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
+          _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
           _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 (unwrap parsedEnv).port })
             spec
             { guards, handlers }
@@ -239,15 +239,6 @@ runSync env x = do
     Left appError -> do
       log ("Syncing Error: " <> errorToLog appError)
     Right _ -> pure unit
-
--- runWithLog :: forall a. ExceptT (String /\ Failure) Aff a -> Aff (Either Failure a)
--- runWithLog m = do
---   result <- runExceptT m
---   case result of
---     Left (msg /\ err) -> do
---       log msg
---       pure $ Left err
---     Right x -> pure $ Right x
 
 appConstants :: AppConstants
 appConstants =
