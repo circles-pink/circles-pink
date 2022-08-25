@@ -8,9 +8,7 @@ import Control.Monad.Reader (ask)
 import Convertable (convert)
 import Data.Newtype (unwrap)
 import Data.Traversable (for_)
-import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..))
 
 trustUsers
   :: forall m
@@ -27,8 +25,8 @@ trustUsers { body: { safeAddresses } } = do
 trustUser :: forall m. MonadApp m => Address -> m String
 trustUser safeAddress = do
   AppEnv
-    { circlesCore: CirclesCoreEnv { trustAddConnection }
-    , envVars: AppEnvVars { xbgeSafeAddress }
+    { circlesCore: { trustAddConnection }
+    , envVars: { xbgeSafeAddress }
     , constants: { trustLimitPercentage }
     } <- ask
 

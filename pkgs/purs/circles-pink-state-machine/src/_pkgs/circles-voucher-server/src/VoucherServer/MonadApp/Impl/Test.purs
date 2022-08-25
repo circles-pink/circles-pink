@@ -14,7 +14,7 @@ import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
 import Test.QuickCheck (class Arbitrary, arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), CirclesCoreEnv(..), GraphNodeEnv(..))
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
 
 --------------------------------------------------------------------------------
 -- Type
@@ -46,11 +46,11 @@ instance MonadApp AppTestM where
 testEnv :: AppEnv AppTestM
 testEnv = AppEnv
   { envVars: gen
-  , graphNode: GraphNodeEnv
+  , graphNode: 
       { getTransferMeta: \_ -> throwError ErrUnknown
       , getTransactions: \_ -> throwError ErrUnknown
       }
-  , circlesCore: CirclesCoreEnv
+  , circlesCore: 
       { getTrusts: \_ -> throwError ErrUnknown
       , getPaymentNote: \_ -> throwError ErrUnknown
       , trustAddConnection: \_ -> throwError ErrUnknown

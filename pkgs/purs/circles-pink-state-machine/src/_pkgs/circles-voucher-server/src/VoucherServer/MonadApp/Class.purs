@@ -7,18 +7,14 @@ import CirclesCore as CC
 import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
 import Data.Array (replicate)
-import Data.Lens (Lens', lens')
-import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
 import Data.String (Pattern(..), joinWith, split)
 import Data.String.CodeUnits (fromCharArray)
-import Data.Tuple.Nested ((/\))
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Payload.Client (ClientError)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
-import Type.Proxy (Proxy(..))
-import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVars')
+import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer, TransferMeta)
@@ -125,8 +121,7 @@ errorToLog = case _ of
 -- AppEnv
 --------------------------------------------------------------------------------
 
-newtype AppEnv m = AppEnv (AppEnv' m)
-type AppEnv' m =
+newtype AppEnv m = AppEnv
   { envVars :: AppEnvVars
   , constants :: AppConstants
   , graphNode :: GraphNodeEnv m
@@ -138,9 +133,7 @@ type AppEnv' m =
 -- GraphNodeEnv
 --------------------------------------------------------------------------------
 
-newtype GraphNodeEnv m = GraphNodeEnv (GraphNodeEnv' m)
-
-type GraphNodeEnv' m =
+type GraphNodeEnv m =
   { getTransferMeta :: GraphNodeEnv'getTransferMeta m
   , getTransactions :: GraphNodeEnv'getTransactions m
   }
@@ -152,10 +145,7 @@ type GraphNodeEnv'getTransactions m = { toAddress :: Address } -> m (Array Trans
 --------------------------------------------------------------------------------
 -- CirclesCoreEnv
 --------------------------------------------------------------------------------
-
-newtype CirclesCoreEnv m = CirclesCoreEnv (CirclesCoreEnv' m)
-
-type CirclesCoreEnv' m =
+type CirclesCoreEnv m =
   { getTrusts ::
       CirclesCoreEnv'getTrusts m
   , getPaymentNote ::
@@ -204,33 +194,6 @@ type XbgeClientEnv'finalizeVoucherPurchase m =
 type XbgeClientEnv'getVouchers m =
   { query :: { safeAddress :: Maybe Address } }
   -> m (Response { data :: Array VoucherEncrypted })
-
---------------------------------------------------------------------------------
--- Lenses
---------------------------------------------------------------------------------
-
-_AppEnv :: forall m. Lens' (AppEnv m) (AppEnv' m)
-_AppEnv = lens' (\(AppEnv x) -> x /\ AppEnv)
-
-_CirclesCoreEnv :: forall m. Lens' (CirclesCoreEnv m) (CirclesCoreEnv' m)
-_CirclesCoreEnv = lens' (\(CirclesCoreEnv x) -> x /\ CirclesCoreEnv)
-
-_AppEnvVars :: Lens' AppEnvVars AppEnvVars'
-_AppEnvVars = lens' (\(AppEnvVars x) -> x /\ AppEnvVars)
-
-_GraphNodeEnv :: forall m. Lens' (GraphNodeEnv m) (GraphNodeEnv' m)
-_GraphNodeEnv = lens' (\(GraphNodeEnv x) -> x /\ GraphNodeEnv)
-
-modifyAppEnv :: forall m. (AppEnv' m -> AppEnv' m) -> AppEnv m -> AppEnv m
-modifyAppEnv f (AppEnv r) = AppEnv $ f r
-
-_getTrusts = Proxy :: Proxy "getTrusts"
-_circlesCore = Proxy :: Proxy "circlesCore"
-
-_envVars = Proxy :: Proxy "envVars"
-
-_a :: forall m. Lens' (AppEnv m) (CirclesCoreEnv' m)
-_a = _AppEnv <<< prop _circlesCore <<< _CirclesCoreEnv
 
 --------------------------------------------------------------------------------
 -- Util

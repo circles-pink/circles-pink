@@ -13,9 +13,8 @@ import Data.Newtype (un, unwrap)
 import Data.Traversable (for_)
 import Data.Tuple.Nested ((/\))
 import Payload.ResponseTypes (Response(..))
-import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), CirclesCoreEnv(..), GraphNodeEnv(..), log)
+import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), log)
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
@@ -40,9 +39,9 @@ threshold = Threshold { above: EurCent 5, below: EurCent 5 }
 syncVouchers :: forall m. MonadApp m => m Unit
 syncVouchers = do
   AppEnv
-    { graphNode: GraphNodeEnv { getTransactions }
+    { graphNode: { getTransactions }
     , xbgeClient: { getVouchers }
-    , envVars: AppEnvVars { xbgeSafeAddress }
+    , envVars: { xbgeSafeAddress }
     } <- ask
 
   log LogSyncStart
@@ -71,8 +70,8 @@ syncVouchers = do
 finalizeTx :: forall m. MonadApp m => Transfer -> m VoucherEncrypted
 finalizeTx transfer@(Transfer { from, amount, id }) = do
   AppEnv
-    { graphNode: GraphNodeEnv { getTransferMeta }
-    , circlesCore: CirclesCoreEnv { getPaymentNote }
+    { graphNode: { getTransferMeta }
+    , circlesCore: { getPaymentNote }
     , xbgeClient: { getVoucherProviders, finalizeVoucherPurchase }
     } <- ask
 

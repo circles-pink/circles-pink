@@ -22,10 +22,10 @@ import GraphQL.Client.Args ((=>>))
 import GraphQL.Client.BaseClients.Urql (createClient)
 import GraphQL.Client.Query (query)
 import GraphQL.Client.Types (class GqlQuery)
-import VoucherServer.EnvVars (AppEnvVars(..))
+import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
-import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv(..), GraphNodeEnv'getTransferMeta, GraphNodeEnv'getTransactions)
+import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv, GraphNodeEnv'getTransactions, GraphNodeEnv'getTransferMeta)
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.Spec.Types (Freckles(..), TransferId(..))
 import VoucherServer.Specs.Xbge (Address(..))
@@ -48,14 +48,14 @@ queryGql
   -> String
   -> query
   -> Aff returns
-queryGql (AppEnvVars env) s q =
+queryGql env s q =
   do
     (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
     query client s q
 
 mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
 mkGraphNodeEnv = do
-  { envVars: appEnvVars@(AppEnvVars env) } <- ask
+  { envVars: appEnvVars } <- ask
 
   let
     getTransferMeta :: GraphNodeEnv'getTransferMeta AppProdM
@@ -68,7 +68,7 @@ mkGraphNodeEnv = do
             { notifications:
                 { where:
                     { transfer: un TransferId transferId
-                    , safeAddress: show env.xbgeSafeAddress
+                    , safeAddress: show appEnvVars.xbgeSafeAddress
                     }
                 } =>>
                   { id, transactionHash, time }
@@ -110,7 +110,7 @@ mkGraphNodeEnv = do
 
         in Transfer { from, to, amount, id }
 
-  pure $ GraphNodeEnv
+  pure
     { getTransferMeta
     , getTransactions
     }

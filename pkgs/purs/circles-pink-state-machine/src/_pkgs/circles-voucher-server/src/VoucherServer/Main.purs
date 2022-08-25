@@ -15,7 +15,7 @@ import Data.DateTime (diff)
 import Data.DateTime.Instant (instant, toDateTime)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (un, unwrap, wrap)
+import Data.Newtype (un, wrap)
 import Data.Newtype.Extra ((-#))
 import Data.Number (fromString)
 import Data.Time.Duration (Seconds(..))
@@ -38,7 +38,7 @@ import Payload.Server.Response as Response
 import Safe.Coerce (coerce)
 import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
-import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
+import VoucherServer.EnvVars (AppEnvVars, AppEnvVarsSpec)
 import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, runAppProdM)
 import VoucherServer.MonadApp.Class (AppConstants, errorToFailure)
@@ -81,7 +81,7 @@ newtype Threshold a = Threshold { above :: a, below :: a }
 --------------------------------------------------------------------------------
 
 getOptions :: AppEnvVars -> Options
-getOptions (AppEnvVars env) = PC.defaultOpts
+getOptions env = PC.defaultOpts
   { baseUrl = env.xbgeEndpoint
   , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
   -- , logLevel = Log
@@ -99,7 +99,7 @@ getVoucherProviders env _ = do
     Right response -> pure $ Right (response -# _.body # _.data)
 
 getVouchers :: AppEnvVars -> { body :: { signatureObj :: SignatureObj } } -> Aff (Either Failure (Array Voucher))
-getVouchers (AppEnvVars env) { body: { signatureObj } } = do
+getVouchers env { body: { signatureObj } } = do
   web3 <- newWeb3_
   circlesCore <- runExceptT $ mapExceptT liftEffect $ CC.newCirclesCore web3
     { apiServiceEndpoint: env.gardenApi
@@ -113,7 +113,7 @@ getVouchers (AppEnvVars env) { body: { signatureObj } } = do
     }
 
   let
-    xbgeClient = mkClient (getOptions (AppEnvVars env)) xbgeSpec
+    xbgeClient = mkClient (getOptions env) xbgeSpec
 
   case circlesCore of
     Left _ -> do
@@ -194,7 +194,6 @@ app = do
   let
     config = fromEnv (Proxy :: _ AppEnvVarsSpec) env
       # lmap envErrorMessage
-      <#> AppEnvVars
   case config of
     Left e -> do
       error e
@@ -218,7 +217,7 @@ app = do
               { basicAuth: basicAuthGuard >>> runRoute prodEnv
               }
           _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
-          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 (unwrap parsedEnv).port })
+          _ <- Payload.startGuarded (defaultOpts { port = fromMaybe 4000 parsedEnv.port })
             spec
             { guards, handlers }
           pure $ Right unit

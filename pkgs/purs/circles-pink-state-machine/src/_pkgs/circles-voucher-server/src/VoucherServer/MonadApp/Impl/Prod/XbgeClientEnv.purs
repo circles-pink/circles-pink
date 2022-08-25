@@ -12,7 +12,6 @@ import Effect.Aff.Class (liftAff)
 import Payload.Client (ClientError, mkClient)
 import Payload.Client as PC
 import Payload.Headers as H
-import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM)
 import VoucherServer.MonadApp.Class (XbgeClientEnv)
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
@@ -22,11 +21,11 @@ type M a = MkAppProdM a
 
 mkXbgeClientEnv :: M (XbgeClientEnv AppProdM)
 mkXbgeClientEnv = do
-  { envVars : AppEnvVars env} <- ask
+  { envVars} <- ask
   let
     options = PC.defaultOpts
-      { baseUrl = env.xbgeEndpoint
-      , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> env.xbgeAuthSecret) ]
+      { baseUrl = envVars.xbgeEndpoint
+      , extraHeaders = H.fromFoldable [ "Authorization" /\ ("Basic " <> envVars.xbgeAuthSecret) ]
       -- , logLevel = Log
       }
     xbgeClient = mkClient options xbgeSpec
