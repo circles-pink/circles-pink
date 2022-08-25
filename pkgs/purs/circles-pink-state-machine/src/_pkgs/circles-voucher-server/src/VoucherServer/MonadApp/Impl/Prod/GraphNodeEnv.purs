@@ -5,6 +5,8 @@ import Prelude
 import CirclesPink.Data.Address (parseAddress)
 import Control.Monad.Error.Class (liftEither, liftMaybe)
 import Control.Monad.Reader (ask)
+import Data.Argonaut (class DecodeJson)
+import Data.Argonaut.Decode.Class (class DecodeJsonField)
 import Data.Array as A
 import Data.BN (fromDecimalStr)
 import Data.Bifunctor (lmap)
@@ -17,10 +19,9 @@ import Effect.Aff (Aff, try)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
 import GraphQL.Client.Args ((=>>))
-import GraphQL.Client.BaseClients.Urql (UrqlClient)
-import GraphQL.Client.BaseClients.Urql as GQL
+import GraphQL.Client.BaseClients.Urql (createClient)
 import GraphQL.Client.Query (query)
-import GraphQL.Client.Types (Client)
+import GraphQL.Client.Types (class GqlQuery)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
@@ -35,19 +36,26 @@ type M a = MkAppProdM a
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
 
-mkClient :: AppEnvVars -> M (Client UrqlClient Schema Unit Unit)
-mkClient (AppEnvVars env) =
-  GQL.createClient
-    { headers: []
-    , url: mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName
-    }
-    # liftEffect
+-- For the stangest reasons this definition must stay top level
+-- It should not move inside the socpe of `mkGraphNodeEnv`
+-- Otherwise fetched results seem to be cached.
+queryGql
+  :: forall query returns
+   . GqlQuery Schema query returns
+  => DecodeJsonField returns
+  => DecodeJson returns
+  => AppEnvVars
+  -> String
+  -> query
+  -> Aff returns
+queryGql (AppEnvVars env) s q =
+  do
+    (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
+    query client s q
 
 mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
 mkGraphNodeEnv = do
   { envVars: appEnvVars@(AppEnvVars env) } <- ask
-
-  client :: _ Schema _ _ <- mkClient appEnvVars
 
   let
     getTransferMeta :: GraphNodeEnv'getTransferMeta AppProdM
@@ -56,7 +64,7 @@ mkGraphNodeEnv = do
         let
           { id, transactionHash, time } = selectors
         in
-          query client "get-transfer-meta"
+          queryGql appEnvVars "get-transfer-meta"
             { notifications:
                 { where:
                     { transfer: un TransferId transferId
@@ -81,7 +89,7 @@ mkGraphNodeEnv = do
         let
           { from, to, id, amount } = selectors
         in
-          query client "get-transactions"
+          queryGql appEnvVars "get-transactions"
             { transfers:
                 { where: { to: show toAddress } } =>>
                   { from, to, id, amount }
