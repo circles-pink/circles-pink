@@ -81,8 +81,7 @@ module CirclesCore
   , userResolve
   , userSearch
   , utilsRequestRelayer
-  )
-  where
+  ) where
 
 --------------------------------------------------------------------------------
 -- Re-Exports
@@ -568,19 +567,21 @@ type ErrUtilsRequestRelayer r = ErrNative + ErrParseAddress + r
 
 newtype SafeAddress = SafeAddress Address
 
-derive newtype instance show :: Show SafeAddress
+derive instance Newtype SafeAddress _
 
-derive newtype instance eq :: Eq SafeAddress
+derive newtype instance Show SafeAddress
 
-derive newtype instance ord :: Ord SafeAddress
+derive newtype instance Eq SafeAddress
 
-derive newtype instance decodeJson :: DecodeJson SafeAddress
+derive newtype instance Ord SafeAddress
 
-derive newtype instance encodeJson :: EncodeJson SafeAddress
+derive newtype instance DecodeJson SafeAddress
 
-derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
+derive newtype instance EncodeJson SafeAddress
 
-derive newtype instance readForeignSafeAddress :: ReadForeign SafeAddress
+derive newtype instance WriteForeign SafeAddress
+
+derive newtype instance ReadForeign SafeAddress
 
 utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) SafeAddress
 utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk

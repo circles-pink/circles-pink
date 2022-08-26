@@ -4,21 +4,22 @@ import Prelude
 
 import CirclesCore (Account, CirclesCore, Provider)
 import CirclesCore as CC
+import CirclesPink.Data.Address (Address(..))
+import CirclesPink.Data.Nonce (addressToNonce)
 import CirclesPink.Data.PrivateKey (PrivateKey(..))
 import Control.Monad.Error.Class (class MonadThrow, liftEither)
 import Control.Monad.Except (ExceptT, mapExceptT, runExceptT, withExceptT)
 import Control.Monad.Reader (ask)
 import Convertable (convert)
 import Data.Array as A
-import Data.Newtype (wrap)
+import Data.Newtype (unwrap, wrap)
 import Data.Set as Set
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
-import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (AppEnv(..), AppError(..), AppProdM, CCErrAll)
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), CirclesCoreEnv'getPaymentNote, CirclesCoreEnv'getTrusts, CirclesCoreEnv'trustAddConnection, CirclesCoreEnv'trustIsTrusted)
+import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
+import VoucherServer.MonadApp.Class (CC'getPaymentNote, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv, CC'getSafeAddress)
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import Web3 (Web3)
 
@@ -38,7 +39,7 @@ mkCirclesCoreEnv = do
   { circlesCore, account } <- getCirclesValues
 
   let
-    getTrusts :: CirclesCoreEnv'getTrusts N
+    getTrusts :: CC'getTrusts N
     getTrusts safeAddress =
       CC.trustGetNetwork circlesCore account
         { safeAddress: convert safeAddress }
@@ -48,31 +49,47 @@ mkCirclesCoreEnv = do
           >>> Set.fromFoldable
 
   let
-    getPaymentNote :: CirclesCoreEnv'getPaymentNote N
+    getPaymentNote :: CC'getPaymentNote N
     getPaymentNote transactionHash =
       CC.tokenGetPaymentNote circlesCore account
         { transactionHash }
         # liftCirclesCore
 
   let
-    trustAddConnection :: CirclesCoreEnv'trustAddConnection N
+    trustAddConnection :: CC'trustAddConnection N
     trustAddConnection opts =
       CC.trustAddConnection circlesCore account
         opts
         # liftCirclesCore
 
   let
-    trustIsTrusted :: CirclesCoreEnv'trustIsTrusted N
+    trustIsTrusted :: CC'trustIsTrusted N
     trustIsTrusted opts =
       CC.trustIsTrusted circlesCore account
         opts
         # liftCirclesCore
+
+  let
+    getSafeAddress :: CC'getSafeAddress N
+    getSafeAddress addr = CC.utilsRequestRelayer circlesCore
+      { path: [ "safes", "predict" ]
+      , version: 3
+      , method: "POST"
+      , data:
+          { saltNonce:  coerce $ addressToNonce $ coerce addr
+          , owners: [ convert $ unwrap addr ]   
+          , threshold: 1
+          }
+      }
+      # liftCirclesCore
+      <#> unwrap >>> coerce
 
   pure
     { getTrusts
     , getPaymentNote
     , trustAddConnection
     , trustIsTrusted
+    , getSafeAddress
     }
 
 --------------------------------------------------------------------------------

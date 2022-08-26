@@ -7,12 +7,15 @@ import CirclesCore as CC
 import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
 import Data.Array (replicate)
+import Data.DateTime.Instant (Instant)
 import Data.Maybe (Maybe)
+import Data.Newtype (un)
 import Data.String (Pattern(..), joinWith, split)
 import Data.String.CodeUnits (fromCharArray)
+import Data.Time.Duration (Seconds)
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Payload.Client (ClientError)
-import Payload.ResponseTypes (Response)
+import Payload.ResponseTypes (Response(..))
 import Payload.Server.Response as Res
 import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
@@ -36,6 +39,7 @@ class
 
 type AppConstants =
   { trustLimitPercentage :: Number
+  , authChallengeDuration :: Seconds
   }
 
 --------------------------------------------------------------------------------
@@ -76,6 +80,7 @@ data AppError
   | ErrGraphQLParse String
   | ErrPayloadClient ClientError
   | ErrGetVoucherAmount
+  | ErrAuthChallenge
 
 derive instance genericVSE :: Generic AppError _
 derive instance eqVSE :: Eq AppError
@@ -97,25 +102,39 @@ type CCErrAll = Variant
 
 errorToFailure :: AppError -> Failure
 errorToFailure = case _ of
-  ErrCirclesCore _ -> internalServerError
-  ErrUnknown -> internalServerError
-  ErrBasicAuth -> Error $ Res.internalError $ StringBody "Authorization failed"
-  ErrGraphQL -> internalServerError
-  ErrGraphQLParse _ -> internalServerError
-  ErrPayloadClient _ -> internalServerError
-  ErrGetVoucherAmount -> internalServerError
+  ErrCirclesCore _ -> internalError
+  ErrUnknown -> internalError
+  ErrBasicAuth -> authError
+  ErrGraphQL -> internalError
+  ErrGraphQLParse _ -> internalError
+  ErrPayloadClient _ -> internalError
+  ErrGetVoucherAmount -> internalError
+  ErrAuthChallenge -> authError
   where
-  internalServerError = Error $ Res.internalError $ StringBody "Internal server error"
+  authError = Error $ Res.unauthorized $
+    StringBody "Authorization failed"
+
+  internalError = Error $ Res.internalError $
+    StringBody "Internal server error"
 
 errorToLog :: AppError -> String
 errorToLog = case _ of
-  ErrCirclesCore e -> "Circles Core Error: " <> CC.printErr e
-  ErrUnknown -> "Unknown error"
-  ErrBasicAuth -> "Basic Authentication failed"
-  ErrGraphQL -> "Graph QL Error"
-  ErrGraphQLParse msg -> "Graph QL Parse Error: " <> msg
-  ErrPayloadClient payloadError -> "Payload client error:" <> indent 2 (show payloadError)
-  ErrGetVoucherAmount -> "Failed to get Voucher Amount"
+  ErrCirclesCore e ->
+    "Circles Core Error: " <> CC.printErr e
+  ErrUnknown ->
+    "Unknown error"
+  ErrBasicAuth ->
+    "Basic Authentication failed"
+  ErrGraphQL ->
+    "Graph QL Error"
+  ErrGraphQLParse msg ->
+    "Graph QL Parse Error: " <> msg
+  ErrPayloadClient payloadError ->
+    "Payload client error"  <> indent 2 (show payloadError)
+  ErrGetVoucherAmount ->
+    "Failed to get Voucher Amount"
+  ErrAuthChallenge ->
+    "Challenge Authentication failed"
 
 --------------------------------------------------------------------------------
 -- AppEnv
@@ -127,61 +146,71 @@ newtype AppEnv m = AppEnv
   , graphNode :: GraphNodeEnv m
   , circlesCore :: CirclesCoreEnv m
   , xbgeClient :: XbgeClientEnv m
+  , now :: AE'now m
   }
 
---------------------------------------------------------------------------------
--- GraphNodeEnv
---------------------------------------------------------------------------------
-
-type GraphNodeEnv m =
-  { getTransferMeta :: GraphNodeEnv'getTransferMeta m
-  , getTransactions :: GraphNodeEnv'getTransactions m
-  }
-
-type GraphNodeEnv'getTransferMeta m = TransferId -> m TransferMeta
-
-type GraphNodeEnv'getTransactions m = { toAddress :: Address } -> m (Array Transfer)
-
---------------------------------------------------------------------------------
--- CirclesCoreEnv
---------------------------------------------------------------------------------
 type CirclesCoreEnv m =
   { getTrusts ::
-      CirclesCoreEnv'getTrusts m
+      CC'getTrusts m
   , getPaymentNote ::
-      CirclesCoreEnv'getPaymentNote m
+      CC'getPaymentNote m
   , trustAddConnection ::
-      CirclesCoreEnv'trustAddConnection m
+      CC'trustAddConnection m
   , trustIsTrusted ::
-      CirclesCoreEnv'trustIsTrusted m
+      CC'trustIsTrusted m
+  , getSafeAddress ::
+      CC'getSafeAddress m
   }
 
-type CirclesCoreEnv'getTrusts m = C.Address -> m (Set C.Address)
+type XbgeClientEnv m =
+  { getVoucherProviders ::
+      XBG'getVoucherProviders m
+  , finalizeVoucherPurchase ::
+      XBG'finalizeVoucherPurchase m
+  , getVouchers ::
+      XBG'getVouchers m
+  }
 
-type CirclesCoreEnv'getPaymentNote m = String -> m String
+type GraphNodeEnv m =
+  { getTransferMeta ::
+      GN'getTransferMeta m
+  , getTransactions ::
+      GN'getTransactions m
+  }
 
-type CirclesCoreEnv'trustAddConnection m = TrustAddConnectionOptions -> m String
 
-type CirclesCoreEnv'trustIsTrusted m =
+type AE'now :: forall k. (Type -> k) -> k
+type AE'now m =
+  m Instant
+
+type GN'getTransferMeta m =
+  TransferId -> m TransferMeta
+
+type GN'getTransactions m =
+  { toAddress :: Address } -> m (Array Transfer)
+
+type CC'getTrusts m =
+  C.Address -> m (Set C.Address)
+
+type CC'getPaymentNote m =
+  String -> m String
+
+type CC'trustAddConnection m =
+  TrustAddConnectionOptions -> m String
+
+type CC'trustIsTrusted m =
   { safeAddress :: ChecksumAddress
   , limit :: Int
   }
   -> m CC.TrustIsTrustedResult
 
---------------------------------------------------------------------------------
--- XbgeClientEnv
---------------------------------------------------------------------------------
-type XbgeClientEnv m =
-  { getVoucherProviders :: XbgeClientEnv'getVoucherProviders m
-  , finalizeVoucherPurchase :: XbgeClientEnv'finalizeVoucherPurchase m
-  , getVouchers :: XbgeClientEnv'getVouchers m
-  }
+type CC'getSafeAddress m =
+  Address -> m Address
 
-type XbgeClientEnv'getVoucherProviders m =
-  {}
-  -> m (Response { data :: Array VoucherProvider })
+type XBG'getVoucherProviders m =
+  {} -> m (Response { data :: Array VoucherProvider })
 
-type XbgeClientEnv'finalizeVoucherPurchase m =
+type XBG'finalizeVoucherPurchase m =
   { body ::
       { safeAddress :: Address
       , providerId :: VoucherProviderId
@@ -191,8 +220,10 @@ type XbgeClientEnv'finalizeVoucherPurchase m =
   }
   -> m (Response { data :: VoucherEncrypted })
 
-type XbgeClientEnv'getVouchers m =
-  { query :: { safeAddress :: Maybe Address } }
+type XBG'getVouchers m =
+  { query ::
+      { safeAddress :: Maybe Address }
+  }
   -> m (Response { data :: Array VoucherEncrypted })
 
 --------------------------------------------------------------------------------
@@ -203,3 +234,6 @@ indent :: Int -> String -> String
 indent n = split (Pattern "\n")
   >>> map (\line -> (fromCharArray $ replicate n ' ') <> line)
   >>> joinWith "\n"
+
+getResponseData :: forall r a. Response { data :: a | r } -> a
+getResponseData = un Response >>> _.body >>> _.data

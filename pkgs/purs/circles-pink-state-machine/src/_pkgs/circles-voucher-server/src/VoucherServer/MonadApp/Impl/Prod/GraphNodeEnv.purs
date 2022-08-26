@@ -25,13 +25,15 @@ import GraphQL.Client.Types (class GqlQuery)
 import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
 import VoucherServer.MonadApp (AppProdM)
-import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv, GraphNodeEnv'getTransactions, GraphNodeEnv'getTransferMeta)
+import VoucherServer.MonadApp.Class (AppError(..), GraphNodeEnv, GN'getTransactions, GN'getTransferMeta)
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.Spec.Types (Freckles(..), TransferId(..))
 import VoucherServer.Specs.Xbge (Address(..))
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
 
 type M a = MkAppProdM a
+
+type N a = AppProdM a
 
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
@@ -58,7 +60,7 @@ mkGraphNodeEnv = do
   { envVars: appEnvVars } <- ask
 
   let
-    getTransferMeta :: GraphNodeEnv'getTransferMeta AppProdM
+    getTransferMeta :: GN'getTransferMeta N
     getTransferMeta transferId = do
       result <-
         let
@@ -83,7 +85,7 @@ mkGraphNodeEnv = do
 
       pure $ TransferMeta { time, transactionHash, id }
 
-    getTransactions :: GraphNodeEnv'getTransactions AppProdM
+    getTransactions :: GN'getTransactions N
     getTransactions { toAddress } = do
       { transfers } <-
         let

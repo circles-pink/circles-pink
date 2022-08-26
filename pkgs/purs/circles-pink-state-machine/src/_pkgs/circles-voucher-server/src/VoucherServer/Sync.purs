@@ -9,12 +9,11 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant, unInstant)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (un, unwrap)
+import Data.Newtype (unwrap)
 import Data.Traversable (for_)
 import Data.Tuple.Nested ((/\))
-import Payload.ResponseTypes (Response(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), log)
+import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), getResponseData, log)
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
@@ -141,9 +140,6 @@ frecklesToEurCent timestamp (Freckles freckles) =
     ms = unInstant timestamp
   in
     frecklesToEuroCentImpl (unwrap ms) freckles # EurCent
-
-getResponseData :: forall r a. Response { data :: a | r } -> a
-getResponseData = un Response >>> _.body >>> _.data
 
 --------------------------------------------------------------------------------
 -- FFI

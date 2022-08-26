@@ -45,6 +45,7 @@ xbgeSpec = Spec
 -- Types
 --------------------------------------------------------------------------------
 
+-- This Newtype is temporay
 newtype Address = Address C.Address
 
 derive instance newtypeAddress :: Newtype Address _

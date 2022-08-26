@@ -1,7 +1,4 @@
 const crypto = require("crypto");
-const { crcToTc, tcToCrc } = require("@circles/timecircles");
-var web3 = require("web3");
-const Web3 = new web3();
 
 exports.decryptImpl = (Nothing) => (Just) => (secretKey) => (data) => {
   try {

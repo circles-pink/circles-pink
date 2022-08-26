@@ -12,6 +12,7 @@ import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
 import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
+import Debug.Extra (todo)
 import Test.QuickCheck (class Arbitrary, arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
 import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
@@ -55,13 +56,15 @@ testEnv = AppEnv
       , getPaymentNote: \_ -> throwError ErrUnknown
       , trustAddConnection: \_ -> throwError ErrUnknown
       , trustIsTrusted: \_ -> throwError ErrUnknown
+      , getSafeAddress: \_ -> throwError ErrUnknown
       }
   , xbgeClient:
       { getVoucherProviders: \_ -> throwError ErrUnknown
       , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
       , getVouchers: \_ -> throwError ErrUnknown
       }
-  , constants: gen
+  , constants: todo -- gen
+  , now: pure bottom
   }
 
 gen :: forall a. Arbitrary a => a

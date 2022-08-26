@@ -8,13 +8,16 @@ module Web3
   , accountsHashMessage
   , accountsRecover
   , accountsSign
+  , fromSignatureObj
   , module Exp
   , newWeb3
   , newWeb3_
   , newWebSocketProvider
   , privKeyToAccount
   , sendTransaction
-  ) where
+  , toSignatureObj
+  )
+  where
 
 import Prelude
 
