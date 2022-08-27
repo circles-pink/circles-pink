@@ -225,7 +225,7 @@ const OnboardingContent = ({
   lang = 'en',
   theme,
   content = {},
-  email = () => {},
+  email = () => { },
   onTrackingEvent,
   onTrackingResumee,
   voucherShopEnabled = false,
@@ -251,23 +251,38 @@ const OnboardingContent = ({
     ...cfg_,
     onTrackingEvent: onTrackingEvent
       ? Just.create((x: TrackingEvent) => () => {
-          if (!userConfig?.onTrackingEvent) return;
-          return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
-        })
+        if (!userConfig?.onTrackingEvent) return;
+        return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
+      })
       : Nothing.value,
     onTrackingResumee: onTrackingResumee
       ? Just.create((f: (r: Resumee) => Resumee) => () => {
-          onTrackingResumee(j => {
-            if (!j) return encodeJsonResumee(f(initResumee));
-            const r = decodeJsonResumee(j as Json);
-            switch (r.constructor.name) {
-              case 'Right':
-                return encodeJsonResumee(f(r.value0 as Resumee));
-              case 'Left':
-                throw new Error('Decode error');
-            }
-          });
-        })
+        onTrackingResumee(j => {
+          if (!j) {
+            console.log("no data received. init state will be used.", j)
+            console.log("initResumee", initResumee)
+            const resumee_  = f(initResumee)
+            console.log("resumee_", resumee_)
+            const resumee_encoded = encodeJsonResumee(resumee_)
+            console.log("resumee_encoded", resumee_encoded)
+            return resumee_encoded;
+          }
+          console.log("received some data.", j)
+          const r = decodeJsonResumee(j as Json);
+          console.log("Decoded data:", r)
+          switch (r.constructor.name) {
+            case 'Right':
+              console.log("is Right", r.value0)
+              const result = f(r.value0 as Resumee)
+              console.log("result", result)
+              const encodedResult = encodeJsonResumee(result)
+              console.log("encodedResult", encodedResult)
+              return encodedResult;
+            case 'Left':
+              throw new Error('Decode error');
+          }
+        });
+      })
       : Nothing.value,
     safeAddress: safeAddress ? parseAddress(safeAddress) : Nothing.value,
     strictMode,
