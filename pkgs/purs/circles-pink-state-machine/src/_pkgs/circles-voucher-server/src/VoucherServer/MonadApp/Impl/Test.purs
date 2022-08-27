@@ -12,10 +12,9 @@ import Control.Monad.Reader (class MonadAsk, ReaderT, runReaderT)
 import Data.Either (Either(..))
 import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
-import Debug.Extra (todo)
 import Test.QuickCheck (class Arbitrary, arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), CirclesCoreEnv(..), GraphNodeEnv(..), XbgeClientEnv(..))
 
 --------------------------------------------------------------------------------
 -- Type
@@ -47,23 +46,23 @@ instance MonadApp AppTestM where
 testEnv :: AppEnv AppTestM
 testEnv = AppEnv
   { envVars: gen
-  , graphNode: 
+  , graphNode: GraphNodeEnv
       { getTransferMeta: \_ -> throwError ErrUnknown
       , getTransactions: \_ -> throwError ErrUnknown
       }
-  , circlesCore: 
+  , circlesCore: CirclesCoreEnv
       { getTrusts: \_ -> throwError ErrUnknown
       , getPaymentNote: \_ -> throwError ErrUnknown
       , trustAddConnection: \_ -> throwError ErrUnknown
       , trustIsTrusted: \_ -> throwError ErrUnknown
       , getSafeAddress: \_ -> throwError ErrUnknown
       }
-  , xbgeClient:
+  , xbgeClient: XbgeClientEnv
       { getVoucherProviders: \_ -> throwError ErrUnknown
       , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
       , getVouchers: \_ -> throwError ErrUnknown
       }
-  , constants: todo -- gen
+  , constants: gen
   , now: pure bottom
   }
 

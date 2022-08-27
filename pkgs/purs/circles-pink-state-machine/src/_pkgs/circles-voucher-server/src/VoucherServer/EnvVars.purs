@@ -1,5 +1,5 @@
 module VoucherServer.EnvVars
-  ( AppEnvVars
+  ( AppEnvVars(..)
   , AppEnvVarsSpec
   , MkAppEnvVars
   , PrivateKey(..)
@@ -43,7 +43,9 @@ type MkAppEnvVars f =
 
 type AppEnvVarsSpec = MkAppEnvVars Variable
 
-type AppEnvVars = { | MkAppEnvVars Resolved }
+newtype AppEnvVars = AppEnvVars { | MkAppEnvVars Resolved }
+
+derive newtype instance Arbitrary AppEnvVars
 
 --------------------------------------------------------------------------------
 -- Newtypes

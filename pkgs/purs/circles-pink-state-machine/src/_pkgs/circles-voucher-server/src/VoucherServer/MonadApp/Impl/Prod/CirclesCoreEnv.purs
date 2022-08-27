@@ -18,8 +18,9 @@ import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
-import VoucherServer.MonadApp.Class (CC'getPaymentNote, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv, CC'getSafeAddress)
+import VoucherServer.MonadApp.Class (CC'getPaymentNote, CC'getSafeAddress, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv(..))
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import Web3 (Web3)
 
@@ -71,20 +72,21 @@ mkCirclesCoreEnv = do
 
   let
     getSafeAddress :: CC'getSafeAddress N
-    getSafeAddress addr = CC.utilsRequestRelayer circlesCore
-      { path: [ "safes", "predict" ]
-      , version: 3
-      , method: "POST"
-      , data:
-          { saltNonce:  coerce $ addressToNonce $ coerce addr
-          , owners: [ convert $ unwrap addr ]   
-          , threshold: 1
-          }
-      }
-      # liftCirclesCore
-      <#> unwrap >>> coerce
+    getSafeAddress addr =
+      CC.utilsRequestRelayer circlesCore
+        { path: [ "safes", "predict" ]
+        , version: 3
+        , method: "POST"
+        , data:
+            { saltNonce: coerce $ addressToNonce $ coerce addr
+            , owners: [ convert $ unwrap addr ]
+            , threshold: 1
+            }
+        }
+        # liftCirclesCore
+        <#> unwrap >>> coerce
 
-  pure
+  pure $ CirclesCoreEnv
     { getTrusts
     , getPaymentNote
     , trustAddConnection
@@ -105,7 +107,7 @@ liftCirclesCore x = x
 
 getCirclesValues :: M CirclesValues
 getCirclesValues = do
-  { envVars } <- ask
+  { envVars : AppEnvVars envVars } <- ask
 
   provider <- CC.newWebSocketProvider envVars.gardenEthereumNodeWebSocket
     # mapExceptT liftEffect

@@ -8,15 +8,21 @@ import CirclesPink.Data.Address as C
 import Control.Monad.Error.Class (class MonadError)
 import Data.Array (replicate)
 import Data.DateTime.Instant (Instant)
+import Data.Lens (Lens', lens')
 import Data.Maybe (Maybe)
 import Data.Newtype (un)
 import Data.String (Pattern(..), joinWith, split)
 import Data.String.CodeUnits (fromCharArray)
-import Data.Time.Duration (Seconds)
+import Data.Time.Duration (Seconds(..))
+import Data.Tuple.Nested (type (/\), (/\))
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Payload.Client (ClientError)
 import Payload.ResponseTypes (Response(..))
 import Payload.Server.Response as Res
+import Safe.Coerce (coerce)
+import Test.QuickCheck (class Arbitrary, arbitrary)
+import Test.QuickCheck.Gen (Gen)
+import Type.Proxy (Proxy(..))
 import VoucherServer.EnvVars (AppEnvVars)
 import VoucherServer.Spec.Types (TransferId, VoucherAmount, VoucherEncrypted, VoucherProvider, VoucherProviderId)
 import VoucherServer.Specs.Xbge (Address)
@@ -37,10 +43,20 @@ class
 -- Constants
 --------------------------------------------------------------------------------
 
-type AppConstants =
+newtype AppConstants = AppConstants
   { trustLimitPercentage :: Number
   , authChallengeDuration :: Seconds
   }
+
+instance Arbitrary AppConstants where
+  arbitrary = ado
+    trustLimitPercentage <- arbitrary
+    authChallengeDuration <- coerce <$> (arbitrary :: Gen Number)
+    in
+      AppConstants
+        { trustLimitPercentage
+        , authChallengeDuration
+        }
 
 --------------------------------------------------------------------------------
 -- Log
@@ -149,7 +165,7 @@ newtype AppEnv m = AppEnv
   , now :: AE'now m
   }
 
-type CirclesCoreEnv m =
+newtype CirclesCoreEnv m = CirclesCoreEnv
   { getTrusts ::
       CC'getTrusts m
   , getPaymentNote ::
@@ -162,7 +178,7 @@ type CirclesCoreEnv m =
       CC'getSafeAddress m
   }
 
-type XbgeClientEnv m =
+newtype XbgeClientEnv m = XbgeClientEnv
   { getVoucherProviders ::
       XBG'getVoucherProviders m
   , finalizeVoucherPurchase ::
@@ -171,13 +187,12 @@ type XbgeClientEnv m =
       XBG'getVouchers m
   }
 
-type GraphNodeEnv m =
+newtype GraphNodeEnv m = GraphNodeEnv
   { getTransferMeta ::
       GN'getTransferMeta m
   , getTransactions ::
       GN'getTransactions m
   }
-
 
 type AE'now :: forall k. (Type -> k) -> k
 type AE'now m =
@@ -237,3 +252,24 @@ indent n = split (Pattern "\n")
 
 getResponseData :: forall r a. Response { data :: a | r } -> a
 getResponseData = un Response >>> _.body >>> _.data
+
+--------------------------------------------------------------------------------
+-- Lenses
+--------------------------------------------------------------------------------
+
+_AppEnv :: Lens' _ _
+_AppEnv = lens' (\(AppEnv x) -> x /\ AppEnv)
+
+_CirclesCoreEnv :: Lens' _ _
+_CirclesCoreEnv = lens' (\(CirclesCoreEnv x) -> x /\ CirclesCoreEnv)
+
+-- _AppEnvVars :: Lens' AppEnvVars _
+-- _AppEnvVars = lens' (\(AppEnvVars x) -> x /\ AppEnvVars)
+
+_GraphNodeEnv :: Lens' _ _
+_GraphNodeEnv = lens' (\(GraphNodeEnv x) -> x /\ GraphNodeEnv)
+
+_getTrusts = Proxy :: Proxy "getTrusts"
+_circlesCore = Proxy :: Proxy "circlesCore"
+
+_envVars = Proxy :: Proxy "envVars"

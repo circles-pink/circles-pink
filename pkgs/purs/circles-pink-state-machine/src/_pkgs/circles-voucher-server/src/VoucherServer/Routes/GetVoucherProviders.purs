@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.Reader (ask)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), getResponseData)
+import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), XbgeClientEnv(..), getResponseData)
 import VoucherServer.Spec.Types (VoucherProvider)
 
 routeGetVoucherProviders
@@ -14,7 +14,7 @@ routeGetVoucherProviders
   => {}
   -> m (Response (Array VoucherProvider))
 routeGetVoucherProviders {} = do
-  AppEnv { xbgeClient: { getVoucherProviders } } <- ask
+  AppEnv { xbgeClient: XbgeClientEnv { getVoucherProviders } } <- ask
 
   voucherProviders <- getVoucherProviders {}
     <#> getResponseData

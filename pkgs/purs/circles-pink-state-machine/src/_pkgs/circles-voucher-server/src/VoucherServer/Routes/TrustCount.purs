@@ -12,6 +12,7 @@ import Data.Traversable (for)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
+import VoucherServer.MonadApp.Class (CirclesCoreEnv(..))
 
 --------------------------------------------------------------------------------
 -- Route
@@ -26,7 +27,7 @@ trustCount
   -> m (Response (Array { safeAddress :: Address, trustConnections :: Int }))
 trustCount { body: { safeAddresses } } = do
   AppEnv
-    { circlesCore: { trustIsTrusted }
+    { circlesCore: CirclesCoreEnv { trustIsTrusted }
     } <- ask
 
   results <- for safeAddresses \safeAddress -> do

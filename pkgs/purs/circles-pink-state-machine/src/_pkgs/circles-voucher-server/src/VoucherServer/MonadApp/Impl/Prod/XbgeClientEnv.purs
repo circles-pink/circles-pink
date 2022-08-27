@@ -12,8 +12,9 @@ import Effect.Aff.Class (liftAff)
 import Payload.Client (ClientError, mkClient)
 import Payload.Client as PC
 import Payload.Headers as H
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (AppError(..), AppProdM)
-import VoucherServer.MonadApp.Class (XbgeClientEnv)
+import VoucherServer.MonadApp.Class (XbgeClientEnv(..))
 import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
 import VoucherServer.Specs.Xbge (xbgeSpec)
 
@@ -21,7 +22,7 @@ type M a = MkAppProdM a
 
 mkXbgeClientEnv :: M (XbgeClientEnv AppProdM)
 mkXbgeClientEnv = do
-  { envVars} <- ask
+  { envVars: AppEnvVars envVars } <- ask
   let
     options = PC.defaultOpts
       { baseUrl = envVars.xbgeEndpoint
@@ -29,7 +30,7 @@ mkXbgeClientEnv = do
       -- , logLevel = Log
       }
     xbgeClient = mkClient options xbgeSpec
-  pure
+  pure $ XbgeClientEnv
     { getVoucherProviders: xbgeClient.getVoucherProviders
         >>> liftPayload
     , finalizeVoucherPurchase: xbgeClient.finalizeVoucherPurchase

@@ -13,8 +13,9 @@ import Data.Time.Duration (Milliseconds(..))
 import Data.Traversable (for)
 import Safe.Coerce (coerce)
 import VoucherServer.Crypto (decrypt)
+import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (AppError(..), getResponseData)
+import VoucherServer.MonadApp.Class (AppConstants(..), AppError(..), CirclesCoreEnv(..), XbgeClientEnv(..), getResponseData)
 import VoucherServer.Spec.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..))
 import VoucherServer.Specs.Xbge (Address(..))
 import Web3 (Message(..), SignatureObj(..))
@@ -23,8 +24,8 @@ import Web3.Pure as W3
 routeGetVouchers :: forall m. MonadApp m => { body :: { signatureObj :: SignatureObj } } -> m (Array Voucher)
 routeGetVouchers { body: { signatureObj } } = do
   AppEnv
-    { xbgeClient: { getVouchers }
-    , envVars: { voucherCodeSecret }
+    { xbgeClient: XbgeClientEnv { getVouchers }
+    , envVars: AppEnvVars { voucherCodeSecret }
     } <- ask
 
   safeAddress <- authChallenge signatureObj
@@ -41,8 +42,8 @@ routeGetVouchers { body: { signatureObj } } = do
 authChallenge :: forall m. MonadApp m => SignatureObj -> m Address
 authChallenge sigObj@(SignatureObj { message, messageHash }) = do
   AppEnv
-    { circlesCore: { getSafeAddress }
-    , constants: { authChallengeDuration }
+    { circlesCore: CirclesCoreEnv { getSafeAddress }
+    , constants: AppConstants { authChallengeDuration }
     , now
     } <- ask
 
