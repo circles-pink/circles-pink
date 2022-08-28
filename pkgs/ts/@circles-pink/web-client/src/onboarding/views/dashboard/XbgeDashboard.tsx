@@ -299,6 +299,7 @@ export const XbgeDashboard = ({
 
   // Balance for vouchers
   const [userBalance, setUserBalance] = useState<number>(0);
+  const [boughtVouchersAmount, setBoughtVouchersAmount] = useState(0);
 
   useEffect(() => {
     if (state.getBalanceResult.type === 'success') {
@@ -313,10 +314,13 @@ export const XbgeDashboard = ({
     }
   }, [state.getBalanceResult]);
 
-  const boughtVouchersAmount =
-    state.vouchersResult.type === 'success'
-      ? state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
-      : 0;
+  useEffect(() => {
+    if (state.vouchersResult.type === 'success') {
+      setBoughtVouchersAmount(
+        state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
+      );
+    }
+  }, [state.vouchersResult]);
 
   // -----------------------------------------------------------------------------
   // Redeploy, if token is not deployed
