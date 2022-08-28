@@ -122,7 +122,6 @@ export const ConfirmSend = ({
           onClick={() => (to ? transact(from, to) : {})}
         >
           {t('dashboard.voucherShop.confirmSendButton')}
-          {to}
         </Button>
       </JustifyEnd>
     </>

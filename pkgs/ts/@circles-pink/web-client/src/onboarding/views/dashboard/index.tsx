@@ -125,16 +125,20 @@ export const Dashboard = ({
   // Voucher Shop
   const [selectedOffer, setSelectedOffer] = useState<SelectedOffer>();
   const [justBoughtVoucher, setJustBoughtVoucher] = useState(false);
+  const [boughtVouchersAmount, setBoughtVouchersAmount] = useState(0);
 
   const initializeVoucherOrder = (offer: SelectedOffer) => {
     setSelectedOffer(offer);
     toggleOverlay('CONFIRM_SEND');
   };
 
-  const boughtVouchersAmount =
-    state.vouchersResult.type === 'success'
-      ? state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
-      : 0;
+  useEffect(() => {
+    if (state.vouchersResult.type === 'success') {
+      setBoughtVouchersAmount(
+        state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
+      );
+    }
+  }, [state.vouchersResult]);
 
   // animation
   const getDelay = getIncrementor(0, 0.05);
