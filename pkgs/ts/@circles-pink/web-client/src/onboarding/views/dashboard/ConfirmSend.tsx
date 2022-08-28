@@ -30,6 +30,7 @@ export type ConfirmSendProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
   theme: Theme;
   selectedOffer: SelectedOffer;
   setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
+  xbgeSafeAddress?: string;
 };
 
 export const ConfirmSend = ({
@@ -38,8 +39,13 @@ export const ConfirmSend = ({
   theme,
   selectedOffer: [provider, offer],
   setJustBoughtVoucher,
+  xbgeSafeAddress,
 }: ConfirmSendProps) => {
   const state = (defaultView as any)(stateRaw) as DefaultView;
+
+  const optionAddr: Option<Address> = toFpTsOption(
+    parseAddress(env.xbgeSafeAddress)
+  );
 
   // State
   const [from, _] = useState<Address>(stateRaw.user.safeAddress);
@@ -47,10 +53,16 @@ export const ConfirmSend = ({
   const [value, setValue] = useState<BN>(eurToCrc(offer.amount));
 
   useEffect(() => {
-    const optionAddr: Option<Address> = toFpTsOption(
-      parseAddress(env.xbgeSafeAddress)
-    );
-    if (optionAddr._tag === 'Some') {
+    if (xbgeSafeAddress) {
+      const optionAddrProp: Option<Address> = toFpTsOption(
+        parseAddress(xbgeSafeAddress)
+      );
+      if (optionAddrProp._tag === 'Some') {
+        setTo(optionAddrProp.value);
+      } else if (optionAddr._tag === 'Some') {
+        setTo(optionAddr.value);
+      }
+    } else if (optionAddr._tag === 'Some') {
       setTo(optionAddr.value);
     }
   }, [env]);
@@ -110,6 +122,7 @@ export const ConfirmSend = ({
           onClick={() => (to ? transact(from, to) : {})}
         >
           {t('dashboard.voucherShop.confirmSendButton')}
+          {to}
         </Button>
       </JustifyEnd>
     </>

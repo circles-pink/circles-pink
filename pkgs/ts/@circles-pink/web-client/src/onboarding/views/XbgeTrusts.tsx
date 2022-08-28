@@ -160,6 +160,35 @@ export const XbgeTrusts = ({
                   </JustText>
                 </Margin>
               </FadeIn>
+
+              <FadeIn orientation={orientation} delay={getDelay()}>
+                <Margin top={1}>
+                  <SubClaim>
+                    {
+                      t('trusts.xbgeSpecial.getHelp').split(
+                        '{{telegramOnboardingGroup}}'
+                      )[0]
+                    }
+                    <ButtonLinkLike
+                      onClick={() =>
+                        window.open(
+                          t('trusts.xbgeSpecial.telegramOnboardingGroupLink'),
+                          '_blank'
+                        )
+                      }
+                    >
+                      <SubClaimLike>
+                        {t('trusts.xbgeSpecial.telegramOnboardingGroup')}
+                      </SubClaimLike>
+                    </ButtonLinkLike>
+                    {
+                      t('trusts.xbgeSpecial.getHelp').split(
+                        '{{telegramOnboardingGroup}}'
+                      )[1]
+                    }
+                  </SubClaim>
+                </Margin>
+              </FadeIn>
             </Margin>
 
             <TrustIndicatorRow>

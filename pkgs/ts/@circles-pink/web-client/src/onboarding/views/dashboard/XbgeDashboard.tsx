@@ -94,6 +94,7 @@ export type XbgeDashboardProps = {
   sharingFeature: ReactElement | null;
   buyVoucherEurLimit: number;
   shadowFriends?: Array<string>;
+  xbgeSafeAddress?: string;
 };
 
 export const XbgeDashboard = ({
@@ -103,6 +104,7 @@ export const XbgeDashboard = ({
   sharingFeature,
   buyVoucherEurLimit,
   shadowFriends,
+  xbgeSafeAddress,
 }: XbgeDashboardProps): ReactElement => {
   const state = useMemo<DefaultView>(
     () => (defaultView as any)(stateRaw) as DefaultView,
@@ -693,6 +695,7 @@ export const XbgeDashboard = ({
                 state={stateRaw}
                 act={act}
                 theme={theme}
+                xbgeSafeAddress={xbgeSafeAddress}
               />
             }
           />
@@ -728,6 +731,7 @@ type DashboardOverlayProps = SendProps & {
   closeOverlay: () => void;
   selectedOffer?: SelectedOffer;
   setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
+  xbgeSafeAddress?: string;
 };
 
 const DashboardOverlay = ({
@@ -739,6 +743,7 @@ const DashboardOverlay = ({
   setJustBoughtVoucher,
   overwriteTo,
   selectedOffer,
+  xbgeSafeAddress,
 }: DashboardOverlayProps): ReactElement | null => {
   switch (overlay) {
     case 'SEND':
@@ -755,6 +760,7 @@ const DashboardOverlay = ({
           act={act}
           theme={theme}
           setJustBoughtVoucher={setJustBoughtVoucher}
+          xbgeSafeAddress={xbgeSafeAddress}
         />
       ) : null;
   }
