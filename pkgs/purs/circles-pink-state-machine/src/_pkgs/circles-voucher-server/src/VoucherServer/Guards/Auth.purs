@@ -13,7 +13,9 @@ import Node.HTTP as HTTP
 import Payload.Headers (Headers)
 import Payload.Headers as Headers
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..))
+import VoucherServer.MonadApp.Class (class MonadApp)
+import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.Envs (AppEnv(..))
 
 --------------------------------------------------------------------------------
 -- Guard

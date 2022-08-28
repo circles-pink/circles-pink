@@ -1,4 +1,4 @@
-module VoucherServer.MonadApp.Impl.Test
+module VoucherServer.Monad.AppTestM
   ( AppTestM(..)
   , runAppTestM
   , testEnv
@@ -14,7 +14,9 @@ import Data.Identity (Identity(..))
 import Data.Newtype (class Newtype, un)
 import Test.QuickCheck (class Arbitrary, arbitrary, mkSeed)
 import Test.QuickCheck.Gen (evalGen)
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), AppError(..), CirclesCoreEnv(..), GraphNodeEnv(..), XbgeClientEnv(..))
+import VoucherServer.MonadApp.Class (class MonadApp)
+import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..), GraphNodeEnv(..), XbgeClientEnv(..))
 
 --------------------------------------------------------------------------------
 -- Type
@@ -47,24 +49,28 @@ testEnv :: AppEnv AppTestM
 testEnv = AppEnv
   { envVars: gen
   , graphNode: GraphNodeEnv
-      { getTransferMeta: \_ -> throwError ErrUnknown
-      , getTransactions: \_ -> throwError ErrUnknown
+      { getTransferMeta: fail
+      , getTransactions: fail
       }
   , circlesCore: CirclesCoreEnv
-      { getTrusts: \_ -> throwError ErrUnknown
-      , getPaymentNote: \_ -> throwError ErrUnknown
-      , trustAddConnection: \_ -> throwError ErrUnknown
-      , trustIsTrusted: \_ -> throwError ErrUnknown
-      , getSafeAddress: \_ -> throwError ErrUnknown
+      { getTrusts: fail
+      , getPaymentNote: fail
+      , trustAddConnection: fail
+      , trustIsTrusted: fail
+      , getSafeAddress: fail
       }
   , xbgeClient: XbgeClientEnv
-      { getVoucherProviders: \_ -> throwError ErrUnknown
-      , finalizeVoucherPurchase: \_ -> throwError ErrUnknown
-      , getVouchers: \_ -> throwError ErrUnknown
+      { getVoucherProviders: fail
+      , finalizeVoucherPurchase: fail
+      , getVouchers: fail
       }
   , constants: gen
   , now: pure bottom
   }
+  where
+  fail :: forall b a. b -> AppTestM a
+  fail = \_ ->
+    throwError ErrUnknown
 
 gen :: forall a. Arbitrary a => a
 gen = evalGen arbitrary { newSeed: mkSeed 0, size: 100 }

@@ -1,4 +1,4 @@
-module VoucherServer.MonadApp.Impl.Prod.XbgeClientEnv where
+module VoucherServer.Monad.AppM.XbgeClientEnv where
 
 import Prelude
 
@@ -13,14 +13,15 @@ import Payload.Client (ClientError, mkClient)
 import Payload.Client as PC
 import Payload.Headers as H
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (AppError(..), AppProdM)
-import VoucherServer.MonadApp.Class (XbgeClientEnv(..))
-import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
+import VoucherServer.Monad.AppM (AppM)
+import VoucherServer.Monad.MkAppM (MkAppM)
 import VoucherServer.Specs.Xbge (xbgeSpec)
+import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.Envs (XbgeClientEnv(..))
 
-type M a = MkAppProdM a
+type M a = MkAppM a
 
-mkXbgeClientEnv :: M (XbgeClientEnv AppProdM)
+mkXbgeClientEnv :: M (XbgeClientEnv AppM)
 mkXbgeClientEnv = do
   { envVars: AppEnvVars envVars } <- ask
   let
@@ -39,7 +40,7 @@ mkXbgeClientEnv = do
         >>> liftPayload
     }
 
-liftPayload :: forall a. Aff (Either ClientError a) -> AppProdM a
+liftPayload :: forall a. Aff (Either ClientError a) -> AppM a
 liftPayload x = x
   # liftAff
   <#> lmap ErrPayloadClient

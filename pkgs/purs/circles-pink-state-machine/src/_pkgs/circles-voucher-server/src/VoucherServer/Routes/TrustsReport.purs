@@ -19,8 +19,9 @@ import Test.Spec (Spec, describe, it)
 import Test.Spec.Assertions (shouldEqual)
 import Test.TestUtils (addrA, addrB, addrC)
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..), runAppTestM, testEnv)
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..), _AppEnv, _CirclesCoreEnv, _circlesCore, _getTrusts)
+import VoucherServer.Monad.AppTestM (runAppTestM, testEnv)
+import VoucherServer.MonadApp.Class (class MonadApp)
+import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..), _AppEnv, _CirclesCoreEnv, _circlesCore, _getTrusts)
 
 --------------------------------------------------------------------------------
 -- Route

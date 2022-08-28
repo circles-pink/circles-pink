@@ -1,4 +1,4 @@
-module VoucherServer.MonadApp.Impl.Prod.GraphNodeEnv where
+module VoucherServer.Monad.AppM.GraphNodeEnv where
 
 import Prelude
 
@@ -24,16 +24,17 @@ import GraphQL.Client.Query (query)
 import GraphQL.Client.Types (class GqlQuery)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.GraphQLSchemas.GraphNode (Schema, selectors)
-import VoucherServer.MonadApp (AppProdM)
-import VoucherServer.MonadApp.Class (AppError(..), GN'getTransactions, GN'getTransferMeta, GraphNodeEnv(..))
-import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
+import VoucherServer.Monad.AppM (AppM)
+import VoucherServer.Monad.MkAppM (MkAppM)
 import VoucherServer.Spec.Types (Freckles(..), TransferId(..))
 import VoucherServer.Specs.Xbge (Address(..))
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
+import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.Envs (GN'getTransferMeta, GraphNodeEnv(..), GN'getTransactions)
 
-type M a = MkAppProdM a
+type M a = MkAppM a
 
-type N a = AppProdM a
+type N a = AppM a
 
 mkSubgraphUrl :: String -> String -> String
 mkSubgraphUrl url subgraphName = url <> "/subgraphs/name/" <> subgraphName
@@ -55,7 +56,7 @@ queryGql (AppEnvVars env) s q =
     (client :: _ Schema _ _) <- liftEffect $ createClient { headers: [], url: (mkSubgraphUrl env.gardenGraphApi env.gardenSubgraphName) }
     query client s q
 
-mkGraphNodeEnv :: M (GraphNodeEnv AppProdM)
+mkGraphNodeEnv :: M (GraphNodeEnv AppM)
 mkGraphNodeEnv = do
   { envVars: appEnvVars@(AppEnvVars {xbgeSafeAddress}) } <- ask
 
@@ -121,7 +122,7 @@ mkGraphNodeEnv = do
 -- Utils
 --------------------------------------------------------------------------------
 
-liftGQL :: forall a. Aff a -> AppProdM a
+liftGQL :: forall a. Aff a -> AppM a
 liftGQL x = try x
   <#> lmap (const ErrGraphQL)
   # liftAff

@@ -13,11 +13,13 @@ import Data.Newtype (unwrap)
 import Data.Traversable (for_)
 import Data.Tuple.Nested ((/\))
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (AppError(..), AppLog(..), CirclesCoreEnv(..), GraphNodeEnv(..), XbgeClientEnv(..), getResponseData, log)
+import VoucherServer.MonadApp.Class (class MonadApp, getResponseData, log)
 import VoucherServer.Spec.Types (EurCent(..), Freckles(..), VoucherAmount(..), VoucherEncrypted(..), VoucherOffer(..), VoucherProvider(..), VoucherProviderId(..))
 import VoucherServer.Specs.Xbge (Address)
 import VoucherServer.Types (Transfer(..), TransferMeta(..))
+import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.AppLog (AppLog(..))
+import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..), GraphNodeEnv(..), XbgeClientEnv(..))
 
 --------------------------------------------------------------------------------
 -- Types

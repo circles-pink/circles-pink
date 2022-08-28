@@ -5,8 +5,9 @@ import Prelude
 import Control.Monad.Reader (ask)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
-import VoucherServer.MonadApp.Class (class MonadApp, AppEnv(..), XbgeClientEnv(..), getResponseData)
+import VoucherServer.MonadApp.Class (class MonadApp, getResponseData)
 import VoucherServer.Spec.Types (VoucherProvider)
+import VoucherServer.Types.Envs (AppEnv(..), XbgeClientEnv(..))
 
 routeGetVoucherProviders
   :: forall m

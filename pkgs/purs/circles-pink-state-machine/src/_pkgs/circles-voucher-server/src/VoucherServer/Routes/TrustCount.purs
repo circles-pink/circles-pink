@@ -11,8 +11,8 @@ import Convertable (convert)
 import Data.Traversable (for)
 import Payload.ResponseTypes (Response)
 import Payload.Server.Response as Res
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..))
+import VoucherServer.MonadApp.Class (class MonadApp)
+import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..))
 
 --------------------------------------------------------------------------------
 -- Route

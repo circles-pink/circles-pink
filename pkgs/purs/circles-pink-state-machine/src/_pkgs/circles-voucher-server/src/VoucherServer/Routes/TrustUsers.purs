@@ -9,8 +9,9 @@ import Convertable (convert)
 import Data.Newtype (unwrap)
 import Data.Traversable (for_)
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (AppConstants(..), CirclesCoreEnv(..))
+import VoucherServer.MonadApp.Class (class MonadApp)
+import VoucherServer.Types.AppConstants (AppConstants(..))
+import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..))
 
 trustUsers
   :: forall m

@@ -1,4 +1,4 @@
-module VoucherServer.MonadApp.Impl.Prod.CirclesCoreEnv where
+module VoucherServer.Monad.AppM.CirclesCoreEnv where
 
 import Prelude
 
@@ -19,14 +19,15 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Safe.Coerce (coerce)
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp (AppError(..), AppProdM, CCErrAll)
-import VoucherServer.MonadApp.Class (CC'getPaymentNote, CC'getSafeAddress, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv(..))
-import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (MkAppProdM)
+import VoucherServer.Monad.AppM (AppM)
+import VoucherServer.Monad.MkAppM (MkAppM)
+import VoucherServer.Types.AppError (AppError(..), CCErrAll)
+import VoucherServer.Types.Envs (CC'getPaymentNote, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv(..), CC'getSafeAddress)
 import Web3 (Web3)
 
-type M a = MkAppProdM a
+type M a = MkAppM a
 
-type N = AppProdM
+type N = AppM
 
 type CirclesValues =
   { provider :: Provider

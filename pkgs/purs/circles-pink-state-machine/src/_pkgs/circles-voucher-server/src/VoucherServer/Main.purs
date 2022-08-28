@@ -1,24 +1,22 @@
 module VoucherServer.Main
   ( main
-  , app'
   ) where
 
 import Prelude
 
 import Control.Monad.Error.Class (liftEither)
-import Control.Monad.Except (ExceptT(..), withExceptT)
+import Control.Monad.Except (ExceptT, runExceptT)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
 import Data.Maybe (fromMaybe)
 import Data.Time.Duration (Seconds(..))
-import Debug.Extra (todo)
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
 import Effect.Aff.Class (liftAff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (error, log)
+import Effect.Class.Console (log)
 import Effect.Timer (setInterval)
-import Node.Process (exit, getEnv)
+import Node.Process (getEnv)
 import Payload.ResponseTypes (Failure)
 import Payload.Server (defaultOpts)
 import Payload.Server as Payload
@@ -26,10 +24,9 @@ import Type.Proxy (Proxy(..))
 import TypedEnv (envErrorMessage, fromEnv)
 import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
 import VoucherServer.Guards.Auth (basicAuthGuard)
-import VoucherServer.MonadApp (AppEnv, AppProdM, errorToLog, runAppProdM)
-import VoucherServer.MonadApp.Class (AppConstants(..), errorToFailure)
-import VoucherServer.MonadApp.Impl.Prod.AppEnv as Prod
-import VoucherServer.MonadApp.Impl.Prod.MkAppProdM (runMkAppProdM)
+import VoucherServer.Monad.AppM (AppM, runAppM)
+import VoucherServer.Monad.AppM.AppEnv as Prod
+import VoucherServer.Monad.MkAppM (runMkAppM)
 import VoucherServer.Routes.GetVoucherProviders (routeGetVoucherProviders) as Routes
 import VoucherServer.Routes.GetVouchers (routeGetVouchers) as Routes
 import VoucherServer.Routes.TrustCount (trustCount) as Routes
@@ -37,10 +34,13 @@ import VoucherServer.Routes.TrustUsers (trustUsers) as Routes
 import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Sync as Sync
+import VoucherServer.Types.AppConstants (AppConstants(..))
+import VoucherServer.Types.AppError (errorToFailure, errorToLog)
+import VoucherServer.Types.Envs (AppEnv)
 
 --------------------------------------------------------------------------------
 
-type M a = M (ExceptT String Aff a)
+type M a = ExceptT String Aff a
 
 getEnvVars :: M AppEnvVars
 getEnvVars = do
@@ -52,12 +52,12 @@ getEnvVars = do
 
   pure $ AppEnvVars envVars
 
-app' :: M Unit
-app' = do
-  envVars <- getEnvVars
+app :: M Unit
+app = do
+  envVars@(AppEnvVars env) <- getEnvVars
 
   prodEnv <- Prod.mkAppEnv
-    # runMkAppProdM
+    # runMkAppM
         { envVars
         , constants
         }
@@ -94,7 +94,7 @@ app' = do
   _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
 
   _ <-
-    Payload.startGuarded (defaultOpts { port = fromMaybe 4000 envVars.port })
+    Payload.startGuarded (defaultOpts { port = fromMaybe 4000 env.port })
       spec
       { guards, handlers }
       # liftAff
@@ -102,21 +102,29 @@ app' = do
 
   pure unit
 
-runRoute :: forall a. AppEnv AppProdM -> AppProdM a -> Aff (Either Failure a)
+runRoute :: forall a. AppEnv AppM -> AppM a -> Aff (Either Failure a)
 runRoute env x = do
-  result <- runAppProdM env x
+  result <- runAppM env x
   case result of
     Left appError -> do
       log ("Route Error: " <> errorToLog appError)
       pure $ Left $ errorToFailure appError
     Right ok -> pure $ Right ok
 
-runSync :: forall a. AppEnv AppProdM -> AppProdM a -> Aff Unit
+runSync :: forall a. AppEnv AppM -> AppM a -> Aff Unit
 runSync env x = do
-  result <- runAppProdM env x
+  result <- runAppM env x
   case result of
     Left appError -> do
       log ("Syncing Error: " <> errorToLog appError)
+    Right _ -> pure unit
+
+runM :: forall a. M a -> Aff Unit
+runM x = do
+  result <- runExceptT x
+  case result of
+    Left err ->
+      log ("Server Inititialization error: " <> err)
     Right _ -> pure unit
 
 constants :: AppConstants
@@ -126,4 +134,4 @@ constants = AppConstants
   }
 
 main :: Effect Unit
-main = launchAff_ app
+main = launchAff_ $ runM app
