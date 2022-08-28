@@ -17,6 +17,7 @@ import {
   init as initResumee,
   encodeJsonResumee,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee';
+import { either } from '@circles-pink/state-machine/output/Data.Either';
 import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
@@ -225,7 +226,7 @@ const OnboardingContent = ({
   lang = 'en',
   theme,
   content = {},
-  email = () => { },
+  email = () => {},
   onTrackingEvent,
   onTrackingResumee,
   voucherShopEnabled = false,
@@ -251,38 +252,28 @@ const OnboardingContent = ({
     ...cfg_,
     onTrackingEvent: onTrackingEvent
       ? Just.create((x: TrackingEvent) => () => {
-        if (!userConfig?.onTrackingEvent) return;
-        return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
-      })
+          if (!userConfig?.onTrackingEvent) return;
+          return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
+        })
       : Nothing.value,
     onTrackingResumee: onTrackingResumee
       ? Just.create((f: (r: Resumee) => Resumee) => () => {
-        onTrackingResumee(j => {
-          if (!j) {
-            console.log("no data received. init state will be used.", j)
-            console.log("initResumee", initResumee)
-            const resumee_  = f(initResumee)
-            console.log("resumee_", resumee_)
-            const resumee_encoded = encodeJsonResumee(resumee_)
-            console.log("resumee_encoded", resumee_encoded)
-            return resumee_encoded;
-          }
-          console.log("received some data.", j)
-          const r = decodeJsonResumee(j as Json);
-          console.log("Decoded data:", r)
-          switch (r.constructor.name) {
-            case 'Right':
-              console.log("is Right", r.value0)
-              const result = f(r.value0 as Resumee)
-              console.log("result", result)
-              const encodedResult = encodeJsonResumee(result)
-              console.log("encodedResult", encodedResult)
+          onTrackingResumee(j => {
+            if (!j) {
+              const resumee_ = f(initResumee);
+              const resumee_encoded = encodeJsonResumee(resumee_);
+              return resumee_encoded;
+            }
+            const r = decodeJsonResumee(j as Json);
+            return (either as any)(() => {
+              throw new Error('Decode error') as any;
+            })((ok: Resumee) => {
+              const result = f(ok);
+              const encodedResult = encodeJsonResumee(result);
               return encodedResult;
-            case 'Left':
-              throw new Error('Decode error');
-          }
-        });
-      })
+            })(r);
+          });
+        })
       : Nothing.value,
     safeAddress: safeAddress ? parseAddress(safeAddress) : Nothing.value,
     strictMode,
