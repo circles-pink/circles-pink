@@ -104,11 +104,15 @@ export const resources = {
           howToGetTrusts:
             'Du kannst auch bei einer {{collectionAction}} vorbeikommen - dort sind immer Menschen von der Expedition vor Ort, die deinen Account verifizieren. Dazu brauchst du nur deinen Usernamen.',
           collectSignaturesForVouchers:
-            'Außerdem kannst du dann auch gleich 20 Unterschriften sammeln, um den Gutschschein-Shop für dich freizuschalten und Gutscheine im Wert von 70 Euro für deine Circles zu bekommen!',
+            'Im Endspurt des Volksentscheid Grundeinkommen tauschen wir deine Circles in Einkaufsgutscheine um. Was du dafür tun musst? Unterschriften sammeln! Für 10 gesammelte Unterschriften kannst du einen Gutschein im Wert von 33 € bekommen. Und das bis zu 5 Mal, also bis zu 5 x 33 € bei 50 Unterschriften.',
           youWillGetCircles:
-            'Sobald deine Wallet aktiviert ist, beginnt dein Grundeinkommen zu fließen, und du erhältst jeden Tag 24 Circles, die du in Gutscheine eintauschen kannst. Hier kannst du sehen, wie viele Menschen dir schon vertrauen.',
+            'Sobald deine Wallet aktiviert ist, beginnt dein Grundeinkommen zu fließen. Du erhältst dann jeden Tag 24 Circles, die du ausgeben oder in Gutscheine eintauschen kannst. Hier kannst du sehen, wie viele Menschen dir schon vertrauen.',
           collectionAction: 'Sammelaktion',
           collectionActionLink: 'https://www.volksentscheid-grundeinkommen.de/',
+          getHelp:
+            'Wenn du Hilfe brauchst, komm einfach in unsere {{telegramOnboardingGroup}}.',
+          telegramOnboardingGroup: 'Telegram-Onboarding-Gruppe',
+          telegramOnboardingGroupLink: 'https://bit.ly/3KoOXMI',
         },
       },
       dashboard: {
@@ -118,7 +122,7 @@ export const resources = {
           whatToBuyForCircles:
             'Mit deinen Circles kannst du Gutscheine für die Shops von {{providers}} erhalten.',
           howToActivateVoucherShop:
-            'Um Zugang zum Gutschein-Shop zu erhalten, musst du mindestens 20 Unterschriften für den Volksentscheid sammeln und einreichen. Natürlich haben wir auch einige {{collectionTipps}} für dich.',
+            'Um Zugang zum Gutschein-Shop zu erhalten, musst du mindestens 10 Unterschriften für den Volksentscheid Grundeinkommen sammeln und einreichen. Natürlich haben wir auch einige {{collectionTipps}} für dich.',
           collectionTipps: 'Tipps zum Sammeln',
           collectionTippsLink:
             'https://www.volksentscheid-grundeinkommen.de/mitmachen#sammeltipps',
@@ -141,7 +145,7 @@ export const resources = {
             'Von diesen User:innen hast du den Share-Link geklickt:',
         },
         addTrustPlaceholder:
-          'Adresse einer Person, die du in dein Vertauensnetzwerk hinzufügen willst',
+          'Adresse einer Person, die du in dein Vertrauensnetzwerk hinzufügen willst',
         debugTitle: 'Dashboard actions zum ausprobieren:',
         sendButton: 'Senden',
         receiveButton: 'Empfangen',
@@ -178,7 +182,7 @@ export const resources = {
           buyDescription:
             'Bis zu einem Betrag von {{limit}} kannst du Gutscheine für Circles kaufen. Davon hast du bisher {{amount}}€ ausgegeben.',
           buyLimitReached:
-            'Du hast das Limit von {{limit}} erreicht und kannst keine Gutscheine mehr kaufen.',
+            'Du hast das Limit von {{limit}} erreicht und kannst derzeit keine Gutscheine mehr kaufen.',
           buyLimitReachedHint: 'Limit erreicht',
           buyNoVouchers:
             'Im Moment gibt es keine Gutscheine, versuche es später nochmal!',
