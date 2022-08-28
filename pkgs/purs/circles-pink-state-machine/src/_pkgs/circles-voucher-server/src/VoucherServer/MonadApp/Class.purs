@@ -118,7 +118,7 @@ errorToLog = case _ of
   ErrBasicAuth -> "Basic Authentication failed"
   ErrGraphQL -> "Graph QL Error"
   ErrGraphQLParse msg -> "Graph QL Parse Error: " <> msg
-  ErrPayloadClient _ -> "Payload client error"
+  ErrPayloadClient payloadError -> "Payload client error:" <> indent 2 (show payloadError)
   ErrGetVoucherAmount -> "Failed to get Voucher Amount"
 
 --------------------------------------------------------------------------------
