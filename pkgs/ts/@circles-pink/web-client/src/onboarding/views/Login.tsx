@@ -50,12 +50,13 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               type="password"
               value={state.magicWords}
               placeholder={t('login.magicWordsPlaceholder')}
-              onChange={e =>
-                act(A._login(A._setMagicWords(e.target.value.trim())))
-              }
-              onKeyPress={e =>
-                e.key === 'Enter' && act(A._login(A._login(unit)))
-              }
+              onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  act(A._login(A._setMagicWords(state.magicWords.trim())));
+                  act(A._login(A._login(unit)));
+                }
+              }}
             />
             {mapStatusMessage(state.loginResult) !== '' && (
               <StatusContainer>
@@ -72,7 +73,10 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               prio={'high'}
               theme={theme}
               state={mapResult(state.loginResult)}
-              onClick={() => act(A._login(A._login(unit)))}
+              onClick={() => {
+                act(A._login(A._setMagicWords(state.magicWords.trim())));
+                act(A._login(A._login(unit)));
+              }}
             >
               {t('signInSubmitButton')}
             </Button>
