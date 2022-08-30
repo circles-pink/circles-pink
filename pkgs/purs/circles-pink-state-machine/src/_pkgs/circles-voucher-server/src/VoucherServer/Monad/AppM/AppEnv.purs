@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.Reader (ask)
 import Effect.Class (liftEffect)
 import Effect.Now as DT
-import VoucherServer.Monad.AppM (AppM(..))
+import VoucherServer.Monad.AppM (AppM)
 import VoucherServer.Monad.AppM.CirclesCoreEnv (mkCirclesCoreEnv)
 import VoucherServer.Monad.AppM.GraphNodeEnv (mkGraphNodeEnv)
 import VoucherServer.Monad.AppM.XbgeClientEnv (mkXbgeClientEnv)

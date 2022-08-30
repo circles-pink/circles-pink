@@ -6,7 +6,6 @@ import CirclesCore (Account, CirclesCore, Provider)
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address(..))
 import CirclesPink.Data.Nonce (addressToNonce)
-import CirclesPink.Data.PrivateKey (PrivateKey(..))
 import Control.Monad.Error.Class (class MonadThrow, liftEither)
 import Control.Monad.Except (ExceptT, mapExceptT, runExceptT, withExceptT)
 import Control.Monad.Reader (ask)
@@ -24,6 +23,7 @@ import VoucherServer.Monad.MkAppM (MkAppM)
 import VoucherServer.Types.AppError (AppError(..), CCErrAll)
 import VoucherServer.Types.Envs (CC'getPaymentNote, CC'getTrusts, CC'trustAddConnection, CC'trustIsTrusted, CirclesCoreEnv(..), CC'getSafeAddress)
 import Web3 (Web3)
+
 
 type M a = MkAppM a
 
@@ -132,7 +132,7 @@ getCirclesValues = do
       # mapExceptT liftEffect
       # liftCirclesCore
 
-  account <- CC.privKeyToAccount web3 (coerce envVars.xbgeKey)
+  account <- CC.privKeyToAccount web3 envVars.xbgeKey
     # mapExceptT liftEffect
     # liftCirclesCore
 

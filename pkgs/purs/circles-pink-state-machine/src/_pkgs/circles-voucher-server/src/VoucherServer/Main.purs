@@ -5,10 +5,8 @@ module VoucherServer.Main
 import Prelude
 
 import Control.Monad.Error.Class (liftEither)
-import Control.Monad.Except (ExceptT, runExceptT)
 import Data.Bifunctor (lmap)
 import Data.Either (Either(..))
-import Data.Maybe (fromMaybe)
 import Data.Time.Duration (Seconds(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff_)
@@ -20,12 +18,11 @@ import Node.Process (getEnv)
 import Payload.ResponseTypes (Failure)
 import Payload.Server (defaultOpts)
 import Payload.Server as Payload
-import Type.Proxy (Proxy(..))
-import TypedEnv (envErrorMessage, fromEnv)
-import VoucherServer.EnvVars (AppEnvVars(..), AppEnvVarsSpec)
+import VoucherServer.EnvVars (AppEnvVars(..), parseEnvVars)
 import VoucherServer.Guards.Auth (basicAuthGuard)
 import VoucherServer.Monad.AppM (AppM, runAppM)
 import VoucherServer.Monad.AppM.AppEnv as Prod
+import VoucherServer.Monad.Init (InitM, runInitM)
 import VoucherServer.Monad.MkAppM (runMkAppM)
 import VoucherServer.Routes.GetVoucherProviders (routeGetVoucherProviders) as Routes
 import VoucherServer.Routes.GetVouchers (routeGetVouchers) as Routes
@@ -35,22 +32,26 @@ import VoucherServer.Routes.TrustsReport (trustsReport) as Routes
 import VoucherServer.Spec (spec)
 import VoucherServer.Sync as Sync
 import VoucherServer.Types.AppConstants (AppConstants(..))
-import VoucherServer.Types.AppError (errorToFailure, errorToLog)
+import VoucherServer.Types.AppError (AppError(..), errorToFailure, errorToLog)
 import VoucherServer.Types.Envs (AppEnv)
 
 --------------------------------------------------------------------------------
 
-type M a = ExceptT String Aff a
+type M a = InitM a
+
+constants :: AppConstants
+constants = AppConstants
+  { trustLimitPercentage: 100.0
+  , authChallengeDuration: Seconds 60.0
+  }
 
 getEnvVars :: M AppEnvVars
 getEnvVars = do
   obj <- getEnv # liftEffect
 
-  envVars <- fromEnv (Proxy :: _ AppEnvVarsSpec) obj
-    # lmap envErrorMessage
+  parseEnvVars obj
+    # lmap ErrParseEnv
     # liftEither
-
-  pure $ AppEnvVars envVars
 
 app :: M Unit
 app = do
@@ -61,7 +62,6 @@ app = do
         { envVars
         , constants
         }
-    <#> lmap errorToLog
     # liftAff
     >>= liftEither
 
@@ -94,10 +94,11 @@ app = do
   _ <- liftEffect $ setInterval 5000 (launchAff_ $ runSync prodEnv Sync.syncVouchers)
 
   _ <-
-    Payload.startGuarded (defaultOpts { port = fromMaybe 4000 env.port })
+    Payload.startGuarded (defaultOpts { port = env.port })
       spec
       { guards, handlers }
       # liftAff
+      <#> lmap ErrServer
       >>= liftEither
 
   pure unit
@@ -121,17 +122,11 @@ runSync env x = do
 
 runM :: forall a. M a -> Aff Unit
 runM x = do
-  result <- runExceptT x
+  result <- runInitM constants x
   case result of
     Left err ->
-      log ("Server Inititialization error: " <> err)
+      log ("Server Inititialization error: " <> errorToLog err)
     Right _ -> pure unit
-
-constants :: AppConstants
-constants = AppConstants
-  { trustLimitPercentage: 100.0
-  , authChallengeDuration: Seconds 60.0
-  }
 
 main :: Effect Unit
 main = launchAff_ $ runM app
