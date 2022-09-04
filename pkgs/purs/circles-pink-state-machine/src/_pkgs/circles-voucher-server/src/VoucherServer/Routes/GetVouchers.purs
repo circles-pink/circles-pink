@@ -14,58 +14,63 @@ import Data.Traversable (for)
 import Safe.Coerce (coerce)
 import VoucherServer.Crypto (decrypt)
 import VoucherServer.EnvVars (AppEnvVars(..))
-import VoucherServer.MonadApp.Class (class MonadApp, getResponseData)
+import VoucherServer.MonadApp.Class (class MonadApp, getResponseData, scope)
 import VoucherServer.Spec.Types (Voucher(..), VoucherCode(..), VoucherCodeEncrypted(..), VoucherEncrypted(..))
 import VoucherServer.Specs.Xbge (Address(..))
 import VoucherServer.Types.AppConstants (AppConstants(..))
 import VoucherServer.Types.AppError (AppError(..))
+import VoucherServer.Types.AppScope (AppScope(..))
 import VoucherServer.Types.Envs (AppEnv(..), CirclesCoreEnv(..), XbgeClientEnv(..))
 import Web3 (Message(..), SignatureObj(..))
 import Web3.Pure as W3
 
 routeGetVouchers :: forall m. MonadApp m => { body :: { signatureObj :: SignatureObj } } -> m (Array Voucher)
-routeGetVouchers { body: { signatureObj } } = do
-  AppEnv
-    { xbgeClient: XbgeClientEnv { getVouchers }
-    , envVars: AppEnvVars { voucherCodeSecret }
-    } <- ask
+routeGetVouchers { body: { signatureObj } } =
+  scope AtRouteGetVouchers do
+  
+    AppEnv
+      { xbgeClient: XbgeClientEnv { getVouchers }
+      , envVars: AppEnvVars { voucherCodeSecret }
+      } <- ask
 
-  safeAddress <- authChallenge signatureObj
+    safeAddress <- authChallenge signatureObj
 
-  vouchers <-
-    getVouchers
-      { query: { safeAddress: Just safeAddress }
-      }
-      <#> getResponseData
+    vouchers <-
+      getVouchers
+        { query: { safeAddress: Just safeAddress }
+        }
+        <#> getResponseData
 
-  for vouchers $
-    decryptVoucher voucherCodeSecret >>> liftMaybe ErrUnknown
+    for vouchers $
+      decryptVoucher voucherCodeSecret >>> liftMaybe ErrUnknown
 
 authChallenge :: forall m. MonadApp m => SignatureObj -> m Address
-authChallenge sigObj@(SignatureObj { message, messageHash }) = do
-  AppEnv
-    { circlesCore: CirclesCoreEnv { getSafeAddress }
-    , constants: AppConstants { authChallengeDuration }
-    , now
-    } <- ask
+authChallenge sigObj@(SignatureObj { message, messageHash }) =
+  scope AtAuthChallenge do
 
-  timestamp <- toDateTime <$> now
+    AppEnv
+      { circlesCore: CirclesCoreEnv { getSafeAddress }
+      , constants: AppConstants { authChallengeDuration }
+      , now
+      } <- ask
 
-  let
-    isMessageValid = messageHash == W3.accountsHashMessage message
+    timestamp <- toDateTime <$> now
 
-  unless isMessageValid $ throwError ErrAuthChallenge
+    let
+      isMessageValid = messageHash == W3.accountsHashMessage message
 
-  msgTime <- messageToDateTime message # liftMaybe ErrAuthChallenge
+    unless isMessageValid $ throwError ErrAuthChallenge
 
-  let
-    isInTimeFrame = diff msgTime timestamp <= authChallengeDuration
+    msgTime <- messageToDateTime message # liftMaybe ErrAuthChallenge
 
-  unless isInTimeFrame $ throwError ErrAuthChallenge
+    let
+      isInTimeFrame = diff msgTime timestamp <= authChallengeDuration
 
-  address <- W3.accountsRecover sigObj # liftMaybe ErrAuthChallenge
+    unless isInTimeFrame $ throwError ErrAuthChallenge
 
-  getSafeAddress $ coerce address
+    address <- W3.accountsRecover sigObj # liftMaybe ErrAuthChallenge
+
+    getSafeAddress $ coerce address
 
 --------------------------------------------------------------------------------
 -- Utils

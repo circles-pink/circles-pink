@@ -40,6 +40,7 @@ derive newtype instance MonadAsk (AppEnv AppTestM) AppTestM
 
 instance MonadApp AppTestM where
   log _ = pure unit
+  scope _ = identity
 
 --------------------------------------------------------------------------------
 -- Type
