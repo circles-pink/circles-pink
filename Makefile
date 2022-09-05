@@ -69,8 +69,6 @@ rw-result:
 generate: materialize clean-generate spago-build generate_
 
 generate_:
-	just purs-tsd-gen
-	make patchTsTypes
 	make generate-zeus
 
 generate-watch:

@@ -14,7 +14,6 @@ pkgs.mkShell {
     pkgs.nodejs
     pkgs.purescript
     pkgs.spago
-    pkgs.purescript-tsd-gen
     pkgs.spago2nix
     pkgs.cspell
     pkgs.ts-node
