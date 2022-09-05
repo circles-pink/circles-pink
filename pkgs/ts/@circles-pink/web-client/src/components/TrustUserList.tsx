@@ -9,6 +9,7 @@ import {
   _Either,
   _Nullable,
   _IxGraph,
+  TrustConnection,
 } from '@circles-pink/state-machine/src';
 import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 import * as UI from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
@@ -26,6 +27,7 @@ import { PageSelector } from './PageSelector';
 import { LightColorFrame } from './layout';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { boolean } from 'fp-ts';
+import { TrustConnection_TrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -45,6 +47,11 @@ type Props = {
   actionRow?: ReactElement | ReactElement[] | string;
   description?: string;
 };
+
+type Conn = {
+  incoming?: TrustConnection_TrustConnection;
+  outgoing?: TrustConnection_TrustConnection;
+}
 
 export const TrustUserList = (props: Props) => {
   // animation
@@ -128,11 +135,11 @@ export const TrustUserList = (props: Props) => {
               _Tuple.unTuple(x1 => x2 => [x1, x2])
             );
 
-            const relation = _IxGraph.unNeighborConnectivity({
-              onJustIncoming: () => 'incoming',
-              onJustOutgoing: () => 'outgoing',
-              onMutualOutAndIn: () => () => 'mutual',
-            });
+            const relation: Conn = _IxGraph.unNeighborConnectivity({
+              onJustIncoming: e => ({ incoming: e } as Conn),
+              onJustOutgoing: e => ({ outgoing: e } as Conn),
+              onMutualOutAndIn: e1 => e2 => ({ incoming: e1, outgoing: e2 } as Conn),
+            })(neigborConnectivity);
 
             const { userIdent } = TN.unwrap(trustNode);
 
@@ -183,46 +190,45 @@ export const HeadingRowText = styled.b<HeadingRowTextProps>(
 // UI Relation
 // -----------------------------------------------------------------------------
 
-// type RelationProps = {
-//   isIncoming: boolean;
-//   isOutgoing: boolean;
-// }
+type RelationProps = {
+  conn : Conn
+}
 
-// const Relation = () => {
-//   return (<JustifyAroundCenter>
-//     <FadeIn orientation={'left'} delay={getDelay()}>
-//       <>
-//         <ReactTooltip id="trustlist-relation-from" />
-//         <Icon
-//           path={
-//             isTrusted || pendingUntrust || loadingUntrust
-//               ? mdiAccountArrowLeft
-//               : mdiAccountCancel
-//           }
-//           size={1.6}
-//           color={
-//             isTrusted || pendingUntrust || loadingUntrust
-//               ? theme.baseColor
-//               : 'white'
-//           }
-//           data-for="trustlist-relation-from"
-//           data-tip={mapToolTipRelRec(isTrusted, userIdent)}
-//         />
-//       </>
-//     </FadeIn>
-//     <FadeIn orientation={'left'} delay={getDelay()}>
-//       <>
-//         <ReactTooltip id="trustlist-relation-to" />
-//         <Icon
-//           path={
-//             c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
-//           }
-//           size={1.6}
-//           color={c.isOutgoing ? theme.baseColor : 'white'}
-//           data-for="trustlist-relation-to"
-//           data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
-//         />
-//       </>
-//     </FadeIn>
-//   </JustifyAroundCenter>)
-// }
+const Relation = () => {
+  return (<JustifyAroundCenter>
+    <FadeIn orientation={'left'} delay={getDelay()}>
+      <>
+        <ReactTooltip id="trustlist-relation-from" />
+        <Icon
+          path={
+            isTrusted || pendingUntrust || loadingUntrust
+              ? mdiAccountArrowLeft
+              : mdiAccountCancel
+          }
+          size={1.6}
+          color={
+            isTrusted || pendingUntrust || loadingUntrust
+              ? theme.baseColor
+              : 'white'
+          }
+          data-for="trustlist-relation-from"
+          data-tip={mapToolTipRelRec(isTrusted, userIdent)}
+        />
+      </>
+    </FadeIn>
+    <FadeIn orientation={'left'} delay={getDelay()}>
+      <>
+        <ReactTooltip id="trustlist-relation-to" />
+        <Icon
+          path={
+            c.isOutgoing ? mdiAccountArrowRight : mdiAccountCancel
+          }
+          size={1.6}
+          color={c.isOutgoing ? theme.baseColor : 'white'}
+          data-for="trustlist-relation-to"
+          data-tip={mapToolTipRelSend(c.isOutgoing, userIdent)}
+        />
+      </>
+    </FadeIn>
+  </JustifyAroundCenter>)
+}
