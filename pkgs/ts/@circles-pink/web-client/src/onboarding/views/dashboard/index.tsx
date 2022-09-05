@@ -425,13 +425,13 @@ export const Dashboard = ({
                 graph={stateRaw.trusts}
                 theme={theme}
                 icon={mdiLan}
-                // toggleOverlay={toggleOverlay}
-                // setOverwriteTo={setOverwriteTo}
-                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
                 // trustAddResult={state.trustAddResult}
-                // removeTrust={to =>
-                //   act(A._dashboard(A._removeTrustConnection(to)))
-                // }
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
                 // trustRemoveResult={state.trustRemoveResult}
               />
             </FadeIn>

@@ -92,6 +92,12 @@ modules =
       join
         [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
         , value "unTrustState" [] CirclesPink.Data.TrustState.unTrustState
+        , value "isUntrusted" [] CirclesPink.Data.TrustState.isUntrusted
+        , value "isTrusted" [] CirclesPink.Data.TrustState.isTrusted
+        , value "isLoadingTrust" [] CirclesPink.Data.TrustState.isLoadingTrust
+        , value "isLoadingUntrust" [] CirclesPink.Data.TrustState.isLoadingUntrust
+        , value "isPendingTrust" [] CirclesPink.Data.TrustState.isPendingTrust
+        , value "isPendingUntrust" [] CirclesPink.Data.TrustState.isPendingUntrust
         ]
   , "CirclesPink.Data.UserIdent" /\
       join
