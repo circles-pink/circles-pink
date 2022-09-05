@@ -19,7 +19,9 @@ module Data.Graph
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingNodes
-  ) where
+  , unNeighborConnectivity
+  )
+  where
 
 import Prelude
 
@@ -49,9 +51,22 @@ type IxEdgeWithNode id e n = IxEdge id e /\ IxNode id n
 
 data NeighborConnectivity e = JustOutgoing e | JustIncoming e | MutualOutAndIn e e
 
-derive instance genericNeighborConnectivity :: Generic (NeighborConnectivity e) _
-derive instance eqNeighborConnectivity :: Eq e => Eq (NeighborConnectivity e)
-derive instance ordNeighborConnectivity :: Ord e => Ord (NeighborConnectivity e)
+unNeighborConnectivity
+  :: forall e z
+   . { onJustOutgoing :: e -> z
+     , onJustIncoming :: e -> z
+     , onMutualOutAndIn :: e -> e -> z
+     }
+  -> NeighborConnectivity e
+  -> z
+unNeighborConnectivity { onJustOutgoing, onJustIncoming, onMutualOutAndIn } = case _ of
+  JustOutgoing x1 -> onJustOutgoing x1
+  JustIncoming x1 -> onJustIncoming x1
+  MutualOutAndIn x1 x2 -> onMutualOutAndIn x1 x2
+
+derive instance Generic (NeighborConnectivity e) _
+derive instance Eq e => Eq (NeighborConnectivity e)
+derive instance Ord e => Ord (NeighborConnectivity e)
 
 instance showNeighborConnectivity :: Show e => Show (NeighborConnectivity e) where
   show = genericShow

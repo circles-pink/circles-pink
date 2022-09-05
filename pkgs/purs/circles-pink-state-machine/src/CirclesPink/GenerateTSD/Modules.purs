@@ -72,6 +72,7 @@ modules =
         , R.value "lookupEdge"
             [ _Ord ORD ]
             (Data.IxGraph.lookupEdge :: _ -> _ ORD B C -> _ (_ (ErrLookupEdge ORD ())) _)
+        , R.value "unNeighborConnectivity" [] (Data.IxGraph.unNeighborConnectivity :: _ -> _ A -> C)
         ]
   , "CirclesPink.Data.Address" /\
       join

@@ -37,7 +37,7 @@ import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec, NeighborConnectivity)
-import Data.Graph (NeighborConnectivity) as Exp
+import Data.Graph (NeighborConnectivity, unNeighborConnectivity) as Exp
 import Data.Graph as G
 import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrNeighborhood)
 import Data.Pair (Pair)
