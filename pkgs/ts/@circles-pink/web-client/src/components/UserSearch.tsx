@@ -12,7 +12,6 @@ import {
   unTrustState,
   UserIdent,
   _Address,
-  _Array,
   _ArrayS,
   _IxGraph,
   _Pair,

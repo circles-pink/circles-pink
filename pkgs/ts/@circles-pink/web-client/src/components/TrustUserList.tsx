@@ -8,7 +8,7 @@ import { isLeft } from '@circles-pink/state-machine/output/Data.Either';
 import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 import * as UI from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
-import { fields } from '../purs-util';
+import { fieldsOf } from '../purs-util';
 import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { pipe } from 'fp-ts/lib/function';
 
@@ -22,14 +22,14 @@ export const TrustUserList = ({ address, graph }: Props) => {
 
   if (isLeft(neighborhood)) return <div>Address not found in graph!</div>;
 
-  const [items] = fields(neighborhood);
+  const [items] = fieldsOf('Right')(neighborhood);
 
   return (
     <div>
       {pipe(
         items,
-        A.map(x => {
-          const [_, trustNode] = fields(x);
+        A.mapArray(x => {
+          const [_, trustNode] = fieldsOf('Tuple')(x);
           const { userIdent } = TN.unwrap(trustNode);
 
           const id = UI.getIdentifier(userIdent);
