@@ -3,8 +3,6 @@
 
   inputs.nixpkgs.url = "nixpkgs";
 
-  inputs.purescript-tsd-gen.url = github:thought2/purescript-tsd-gen/flake;
-
   inputs.flake-utils.url = github:numtide/flake-utils;
 
   inputs.nix-filter.url = github:numtide/nix-filter;
@@ -51,7 +49,6 @@
       overlays = [
         overlay
         (prev: final: {
-          purescript-tsd-gen = purescript-tsd-gen.defaultPackage.${system};
           inherit (easy-purescript-nix) purs-tidy spago2nix;
           nix-filter = nix-filter.lib;
           nixopsLatest = inputs.nixops.defaultPackage.${system};
@@ -66,7 +63,6 @@
         inherit overlays;
       };
       nix-filter = inputs.nix-filter;
-      purescript-tsd-gen = inputs.purescript-tsd-gen;
       easy-purescript-nix = import inputs.easy-purescript-nix { inherit pkgs; };
       overlay = import ./nix/overlay.nix;
       checks = import ./nix/checks.nix { inherit pkgs; };

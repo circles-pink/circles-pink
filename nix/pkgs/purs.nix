@@ -9,8 +9,6 @@ let
   withTS = pursOutput: pkgs.runCommand "pursOutputWithTS"
     {
       buildInputs = [
-        pkgs.purescript-tsd-gen
-        pkgs.circles-pink.patchTsTypes
         pkgs.circles-pink.generate-tsd
         pkgs.nodePackages.prettier
       ];
@@ -18,19 +16,6 @@ let
     ''
       cp -r ${pursOutput} $out
       chmod -R +w $out
-      
-      DIR=`mktemp -d`;
-      mv $out/CirclesPink.EnvVars -t $DIR;
-      mv $out/CirclesPink.Garden.ApiScript -t $DIR;
-      mv $out/CirclesPink.Garden.TS -t $DIR;
-      mv $out/Test.CirclesPinkStateMachine.Main -t $DIR;
-      mv $out/Payload.* $out/VoucherServer.* $out/CirclesPink.Garden.EnvControlAff -t $DIR;
-      mv $DIR/VoucherServer.Spec.Types -t $out;
-
-      purs-tsd-gen --directory $out;
-      mv $DIR/* -t $out; 
-
-      patchTsTypes $out
       generate-tsd --output-dir $out
     '';
 
