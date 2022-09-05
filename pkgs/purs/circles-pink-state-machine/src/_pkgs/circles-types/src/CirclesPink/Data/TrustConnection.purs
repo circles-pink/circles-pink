@@ -32,8 +32,7 @@ instance toTsTypeTrustConnection :: ToTsType TrustConnection where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustConnection" "TrustConnection"
 
 instance toPursTypeTrustConnection :: ToPursType TrustConnection where
-  toPursType _ = PS.mkType (PS.qualName "CirclesPink.Data.TrustConnection" "TrustConnection") [  ]
-
+  toPursType _ = PS.mkType (PS.qualName "CirclesPink.Data.TrustConnection" "TrustConnection") []
 
 --------------------------------------------------------------------------------
 
@@ -42,3 +41,8 @@ newtype TsTrustConnection = TsTrustConnection { conn :: FpTs.Pair Address, trust
 instance fpTs :: FpTs TrustConnection TsTrustConnection where
   toFpTs (TrustConnection conn trustState) = TsTrustConnection { conn: toFpTs conn, trustState }
   fromFpTs (TsTrustConnection { conn, trustState }) = TrustConnection (fromFpTs conn) trustState
+
+--------------------------------------------------------------------------------
+
+unTrustConnection :: forall z. ((Pair Address) -> TrustState -> z) -> TrustConnection -> z
+unTrustConnection onTrustConnection (TrustConnection x y) = onTrustConnection x y
