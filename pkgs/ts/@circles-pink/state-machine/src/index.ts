@@ -1,4 +1,4 @@
-import * as Data_Array from "@circles-pink/state-machine/output/Data.Array";
+// import * as Data_Array from "@circles-pink/state-machine/output/Data.Array";
 import * as Simple_Data_Array from "@circles-pink/state-machine/output/Simple.Data.Array";
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
@@ -22,7 +22,7 @@ export type {
   CirclesGraph,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 
-export const _Array = Data_Array;
+// export const _Array = Data_Array;
 export const _ArrayS = Simple_Data_Array;
 export const _UserIdent = CirclesPink_Data_UserIdent;
 export const _Pair = Data_Pair;

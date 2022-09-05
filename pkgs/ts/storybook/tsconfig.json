@@ -1,7 +1,7 @@
 {
   "compilerOptions": {},
   "extends": "../../../tsconfig.json",
-  "include": ["src"],
+  "include": [],
   "exclude": ["node_modules"],
   "references": [
     { "path": "../@circles-pink/web-client" }
