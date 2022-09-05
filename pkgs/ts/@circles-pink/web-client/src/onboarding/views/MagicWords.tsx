@@ -20,7 +20,7 @@ import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { Theme, ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
-import { OnboardingStepIndicator } from '../../components/layout';
+import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { TwoButtonRow } from '../../components/helper';
 import { maybe } from '@circles-pink/state-machine/output/Data.Maybe';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';

@@ -21,8 +21,21 @@
   "files": [
     "src/components/UserSearch.tsx",
     "src/components/TrustUserList.tsx",
+    "src/components/Frame.tsx",
+    "src/components/LoadingCircles.tsx",
+    "src/components/PageSelector.tsx",
+    "src/components/GridRow.tsx",
+    "src/onboarding/utils/colorUtils.ts",
+    "src/onboarding/utils/paginate.ts",
+    "src/context/theme.tsx",
     "src/purs-util.ts"
   ],
-  "include": ["types"],
+  "include": [
+    "types",
+    "src/components/forms",
+    "src/components/helper",
+    "src/components/layout",
+    "src/components/text"
+  ],
   "exclude": ["node_modules"]
 }

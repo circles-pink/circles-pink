@@ -9,7 +9,7 @@ export type FrameProps = {
   theme: Theme;
   title?: string;
   icon?: string;
-  children?: ReactNode
+  children?: ReactNode;
 };
 
 export const Frame = ({
