@@ -103,6 +103,7 @@ modules =
   , "CirclesPink.Data.TrustConnection" /\
       join
         [ typeDef "--" (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection))
+        , R.value "unTrustConnection" [] (CirclesPink.Data.TrustConnection.unTrustConnection :: _ -> _ -> C)
         ]
   , "Data.Either" /\
       join

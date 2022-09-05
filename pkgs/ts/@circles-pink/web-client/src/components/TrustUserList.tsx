@@ -4,12 +4,10 @@ import {
 } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import * as G from '@circles-pink/state-machine/output/Data.IxGraph';
 import React from 'react';
-import { isLeft } from '@circles-pink/state-machine/output/Data.Either';
-import { _Tuple } from '@circles-pink/state-machine/src';
+import { _Tuple, _Either, _Nullable } from '@circles-pink/state-machine/src';
 import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 import * as UI from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
-import { fieldsOf } from '../purs-util';
 import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { pipe } from 'fp-ts/lib/function';
 
@@ -20,10 +18,9 @@ type Props = {
 
 export const TrustUserList = ({ address, graph }: Props) => {
   const neighborhood = G.neighborhood(ordAddress)(address)(graph);
+  const items = pipe(neighborhood, _Either.hush, _Nullable.toNullable);
 
-  if (isLeft(neighborhood)) return <div>Address not found in graph!</div>;
-
-  const [items] = fieldsOf('Right')(neighborhood);
+  if (!items) return <div>Address not found in graph!</div>;
 
   return (
     <div>

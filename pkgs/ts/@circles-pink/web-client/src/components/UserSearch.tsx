@@ -14,8 +14,10 @@ import {
   _Address,
   _ArrayS,
   _IxGraph,
+  _Nullable,
   _Pair,
   _RemoteData,
+  _TrustConnection,
   _TrustState,
   _UserIdent,
 } from '@circles-pink/state-machine/src';
@@ -153,10 +155,13 @@ const getUsers = (
 };
 
 const isTrusting = (tc: Maybe<TrustConnection>): boolean => {
-  if (isCase('Nothing')(tc)) return false;
+  const _tc = pipe(tc, _Nullable.toNullable);
+  if (!_tc) return false;
 
-  const [trustConnection] = fieldsOf('Just')(tc);
-  const [_, trustState] = fieldsOf('TrustConnection')(trustConnection);
+  const trustState = pipe(
+    _tc,
+    _TrustConnection.unTrustConnection(() => r => r)
+  );
   const trustState_ = unTrustState(trustState);
 
   if (isCaseV('trusted')(trustState_)) return false;
