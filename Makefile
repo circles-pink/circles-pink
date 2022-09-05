@@ -69,6 +69,7 @@ rw-result:
 generate: materialize clean-generate spago-build generate_
 
 generate_:
+	just generate-tsd
 	make generate-zeus
 
 generate-watch:
