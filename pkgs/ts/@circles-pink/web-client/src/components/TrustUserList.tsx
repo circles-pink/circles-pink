@@ -5,6 +5,7 @@ import {
 import * as G from '@circles-pink/state-machine/output/Data.IxGraph';
 import React from 'react';
 import { isLeft } from '@circles-pink/state-machine/output/Data.Either';
+import { _Tuple } from '@circles-pink/state-machine/src';
 import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 import * as UI from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
@@ -29,8 +30,9 @@ export const TrustUserList = ({ address, graph }: Props) => {
       {pipe(
         items,
         A.mapArray(x => {
-          const [_, trustNode] = fieldsOf('Tuple')(x);
-          const { userIdent } = TN.unwrap(trustNode);
+          const { userIdent } = _Tuple.unTuple(
+            () => (trustNode: TN.TrustNode) => TN.unwrap(trustNode)
+          )(x);
 
           const id = UI.getIdentifier(userIdent);
 

@@ -32,6 +32,7 @@ import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
+import Simple.Data.Tuple as Simple.Data.Tuple
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
@@ -51,8 +52,8 @@ instance toTsTypeAny :: ToTsType Any where
 modules :: Array (String /\ Array TS.Declaration)
 modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
-      [  R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
-       , R.typeAlias "DashboardState" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
+      [ R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
+      , R.typeAlias "DashboardState" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
       ]
   , "RemoteData" /\ join
       [ R.typeDef "--" (Proxy :: _ (RemoteData A B C D))
@@ -116,6 +117,10 @@ modules =
   , "Data.Tuple" /\
       join
         [ typeDef "--" (Proxy :: _ (Data.Tuple.Tuple A B))
+        ]
+  , "Simple.Data.Tuple" /\
+      join
+        [ value "unTuple" [] (Simple.Data.Tuple.unTuple :: _ -> _ A B -> C)
         ]
   , "Data.Pair" /\
       join
