@@ -27,9 +27,16 @@ export const TrustUserList = ({ address, graph }: Props) => {
       {pipe(
         items,
         A.mapArray(x => {
-          const { userIdent } = _Tuple.unTuple(
-            () => (trustNode: TN.TrustNode) => TN.unwrap(trustNode)
-          )(x);
+          console.log(x);
+
+          const [neigborConnectivity, trustNode] = pipe(
+            x,
+            _Tuple.unTuple(x1 => x2 => [x1, x2])
+          );
+
+          console.log(neigborConnectivity);
+
+          const { userIdent } = TN.unwrap(trustNode);
 
           const id = UI.getIdentifier(userIdent);
 
