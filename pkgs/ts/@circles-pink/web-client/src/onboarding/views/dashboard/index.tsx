@@ -522,7 +522,6 @@ export const Dashboard = ({
                       </ButtonLinkLike>
                     </JustifyStartCenter>
                   </Margin>
-                </LightColorFrame>
                 </Frame>
               </TopMargin>
             </FadeIn>

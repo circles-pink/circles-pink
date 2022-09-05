@@ -29,14 +29,14 @@ import TypedEnv (class ParseValue)
 
 newtype Address = Address W3.Address
 
-derive instance newtype_ :: Newtype Address _
-derive newtype instance show :: Show Address
-derive newtype instance eq :: Eq Address
-derive newtype instance ord :: Ord Address
-derive newtype instance decodeJson :: DecodeJson Address
-derive newtype instance encodeJson :: EncodeJson Address
-derive newtype instance readForeignAddress :: ReadForeign Address
-derive newtype instance writeForeignAddress :: WriteForeign Address
+derive instance Newtype Address _
+derive newtype instance Show Address
+derive newtype instance Eq Address
+derive newtype instance Ord Address
+derive newtype instance DecodeJson Address
+derive newtype instance EncodeJson Address
+derive newtype instance ReadForeign Address
+derive newtype instance WriteForeign Address
 
 instance Arbitrary Address where
   arbitrary = unsafePartial do
