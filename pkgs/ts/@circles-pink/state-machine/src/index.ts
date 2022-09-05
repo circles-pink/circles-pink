@@ -1,5 +1,6 @@
 // import * as Data_Array from "@circles-pink/state-machine/output/Data.Array";
 import * as Simple_Data_Array from "@circles-pink/state-machine/output/Simple.Data.Array";
+import * as Simple_Data_Tuple from "@circles-pink/state-machine/output/Simple.Data.Tuple";
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
 import * as CirclesPink_Data_Address from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
@@ -24,6 +25,7 @@ export type {
 
 // export const _Array = Data_Array;
 export const _ArrayS = Simple_Data_Array;
+export const _Tuple = {...Simple_Data_Tuple};
 export const _UserIdent = CirclesPink_Data_UserIdent;
 export const _Pair = Data_Pair;
 export const _Address = CirclesPink_Data_Address;
