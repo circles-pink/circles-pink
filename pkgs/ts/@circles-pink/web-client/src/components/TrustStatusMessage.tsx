@@ -1,4 +1,4 @@
-import * as TrustState from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+import { TrustState, _TrustState } from '@circles-pink/state-machine/src';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { t } from 'i18next';
 import React from 'react';
@@ -8,7 +8,7 @@ import { LoadingText } from './text';
 
 type TrustStatusMessageProps = {
   theme: Theme;
-  trustState: TrustState.TrustState;
+  trustState: TrustState;
 };
 
 export const TrustStatusMessage = ({
@@ -37,14 +37,14 @@ export const TrustStatusMessage = ({
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (trustState: TrustState.TrustState) => {
-  if (TrustState.isLoadingTrust(trustState)) {
+const mapStatusMessage = (trustState: TrustState) => {
+  if (_TrustState.isLoadingTrust(trustState)) {
     return t('dashboard.trustList.message.loadingTrust');
-  } else if (TrustState.isLoadingUntrust(trustState)) {
+  } else if (_TrustState.isLoadingUntrust(trustState)) {
     return t('dashboard.trustList.message.loadingUntrust');
-  } else if (TrustState.isPendingTrust(trustState)) {
+  } else if (_TrustState.isPendingTrust(trustState)) {
     return t('dashboard.trustList.message.pendingTrust');
-  } else if (TrustState.isPendingUntrust(trustState)) {
+  } else if (_TrustState.isPendingUntrust(trustState)) {
     return t('dashboard.trustList.message.pendingUntrust');
   }
 };

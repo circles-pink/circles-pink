@@ -22,6 +22,7 @@
     "src/components/UserSearch.tsx",
     "src/components/TrustUserList.tsx",
     "src/components/Frame.tsx",
+    "src/components/TrustStatusMessage.tsx",
     "src/components/LoadingCircles.tsx",
     "src/components/PageSelector.tsx",
     "src/components/GridRow.tsx",
