@@ -30,9 +30,7 @@ import {
   mdiLan,
   mdiMagnify,
 } from '@mdi/js';
-import {
-  TrustUserList,
-} from '../../../components/TrustUserList';
+import { TrustUserList } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
   JustifyBetweenCenter,
@@ -421,24 +419,21 @@ export const Dashboard = ({
         <>
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <Frame theme={theme}>
-                <TrustUserList
-                  address={stateRaw.user.safeAddress}
-                  // title={t('dashboard.trustNetworkTitle')}
-                  graph={stateRaw.trusts}
-                  // ownAddress={stateRaw.user.safeAddress}
-                  // theme={theme}
-                  // icon={mdiLan}
-                  // toggleOverlay={toggleOverlay}
-                  // setOverwriteTo={setOverwriteTo}
-                  // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                  // trustAddResult={state.trustAddResult}
-                  // removeTrust={to =>
-                  //   act(A._dashboard(A._removeTrustConnection(to)))
-                  // }
-                  // trustRemoveResult={state.trustRemoveResult}
-                />
-              </Frame>
+              <TrustUserList
+                address={stateRaw.user.safeAddress}
+                title={t('dashboard.trustNetworkTitle')}
+                graph={stateRaw.trusts}
+                theme={theme}
+                icon={mdiLan}
+                // toggleOverlay={toggleOverlay}
+                // setOverwriteTo={setOverwriteTo}
+                // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // trustAddResult={state.trustAddResult}
+                // removeTrust={to =>
+                //   act(A._dashboard(A._removeTrustConnection(to)))
+                // }
+                // trustRemoveResult={state.trustRemoveResult}
+              />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <Frame theme={theme}>

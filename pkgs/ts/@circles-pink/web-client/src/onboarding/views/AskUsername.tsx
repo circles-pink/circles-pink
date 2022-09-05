@@ -17,7 +17,7 @@ import { t } from 'i18next';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { ThemeContext } from '../../context/theme';
-import { OnboardingStepIndicator } from '../../components/layout';
+import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 

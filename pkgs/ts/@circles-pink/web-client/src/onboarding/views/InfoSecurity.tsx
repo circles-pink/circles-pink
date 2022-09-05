@@ -14,7 +14,7 @@ import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
-import { OnboardingStepIndicator } from '../../components/layout';
+import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 
