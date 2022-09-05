@@ -7,6 +7,7 @@ module CirclesPink.Data.Address
   ) where
 
 import CirclesPink.Prelude
+
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Array.NonEmpty as NEA
 import Data.Maybe (Maybe, fromJust)
@@ -25,8 +26,6 @@ import TypedEnv (class ParseValue)
 
 --import Payload.Server.Params (class DecodeParam, decodeParam)
 --import Simple.JSON (class ReadForeign, class WriteForeign)
-import PursTsGen (class ToTsDef, class ToTsType)
-import PursTsGen.Class.ToPursType (class ToPursType)
 
 newtype Address = Address W3.Address
 
@@ -50,6 +49,7 @@ instance Arbitrary Address where
 
 instance ParseValue Address where
   parseValue = parseAddress
+
 ptAddress :: PursType
 ptAddress = PursType "CirclesPink_Data_Address" "Address"
 
@@ -59,8 +59,6 @@ instance toTsTypeDefAddress :: ToTsDef Address where
 instance toTsTypeAddress :: ToTsType Address where
   toTsType _ = defaultToTsType ptAddress []
 
-instance toPursType_Address :: ToPursType Address where
-  toPursType _ = PS.mkType (PS.qualName "CirclesPink_Data_Address" "Address") [ ]
 instance toPursTypeAddress :: ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
 

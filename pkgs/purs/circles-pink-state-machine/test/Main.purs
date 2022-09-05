@@ -11,7 +11,6 @@ import Test.Spec.Reporter (consoleReporter)
 import Test.Spec.Runner (runSpec)
 import Test.Unit.Main (runTest)
 import Test.Wallet.PrivateKey as Test.Wallet.PrivateKey
-import CirclesPink.Garden.StateMachine.Control.States.Dashboard as CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import Test.VoucherServer.Main as Test.VoucherServer.Main
 
 foreign import globalRequires :: {}
