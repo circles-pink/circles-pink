@@ -8,13 +8,15 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
+import CirclesPink.Garden.StateMachine.Action (CirclesAction, LandingAction)
+import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
-import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Argonaut as Data.Argonaut
+import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
@@ -75,6 +77,8 @@ modules =
   , "CirclesPink.Garden.StateMachine.Action" /\ join
       [ R.typeAlias "CirclesAction"
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
+      , R.value "_landing" []
+          (CirclesPink.Garden.StateMachine.Action._landing :: LandingAction -> CirclesAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join
@@ -265,6 +269,13 @@ modules =
       join
         [ typeDef "--"
             (Proxy :: _ Data.Unit.Unit)
+        , value "unit" [] Data.Unit.unit
+        ]
+
+  , "Data.BN" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ Data.BN.BN)
         ]
 
   , "PursTsGen.Prim" /\
