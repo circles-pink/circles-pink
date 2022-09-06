@@ -25,6 +25,7 @@ import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
+import Data.Argonaut as Data.Argonaut
 
 --------------------------------------------------------------------------------
 
@@ -34,41 +35,43 @@ unsafeReplace = unsafeCoerce
 class UnsafeReplace :: forall k1 k2. k1 -> k2 -> Constraint
 class UnsafeReplace a b | a -> b
 
-instance replaceIxGraph ::
+instance
   ( UnsafeReplace a a'
   , UnsafeReplace b b'
   , UnsafeReplace c c'
   ) =>
   UnsafeReplace (Data.IxGraph.IxGraph a b c) (W.IxGraph a' b' c')
 
-else instance replaceNeighborConnectivity ::
+else instance
   ( UnsafeReplace a a'
   ) =>
   UnsafeReplace (Data.IxGraph.NeighborConnectivity a) (W.NeighborConnectivity a')
 
-else instance replacePair ::
+else instance
   ( UnsafeReplace a a'
   ) =>
   UnsafeReplace (Data.Pair.Pair a) (Pair a')
 
-else instance replaceAddress :: UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
+else instance UnsafeReplace Data.Argonaut.JsonDecodeError JsonDecodeError
 
-else instance replaceInstant ::
+else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
+
+else instance
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant
 
-else instance replaceFn :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Function a b) (Function a' b')
+else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Function a b) (Function a' b')
 
-else instance replaceTuple :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Tuple a b) (Tuple a' b')
+else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Tuple a b) (Tuple a' b')
 
-else instance replaceEither :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Either a b) (Either a' b')
+else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Either a b) (Either a' b')
 
-else instance replaceMaybe :: (UnsafeReplace a a') => UnsafeReplace (Maybe a) (Maybe a')
+else instance (UnsafeReplace a a') => UnsafeReplace (Maybe a) (Maybe a')
 
-else instance replaceArray :: (UnsafeReplace a a') => UnsafeReplace (Array a) (Array a')
+else instance (UnsafeReplace a a') => UnsafeReplace (Array a) (Array a')
 
-else instance replaceProxy :: (UnsafeReplace a a') => UnsafeReplace (Proxy a) (Proxy a')
+else instance (UnsafeReplace a a') => UnsafeReplace (Proxy a) (Proxy a')
 
-else instance replaceRemoteData ::
+else instance
   ( UnsafeReplace a a'
   , UnsafeReplace b b'
   , UnsafeReplace c c'
@@ -76,19 +79,19 @@ else instance replaceRemoteData ::
   ) =>
   UnsafeReplace (RemoteData.RemoteData a b c d) (RemoteData a' b' c' d')
 
-else instance replaceRecord :: (RowToList a rl, GenRecord rl a') => UnsafeReplace (Record a) (Record a')
+else instance (RowToList a rl, GenRecord rl a') => UnsafeReplace (Record a) (Record a')
 
-else instance replaceSum :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Sum a b) (Sum a' b')
+else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Sum a b) (Sum a' b')
 
-else instance replaceConstructor :: (UnsafeReplace a a') => UnsafeReplace (Constructor s a) (Constructor s a')
+else instance (UnsafeReplace a a') => UnsafeReplace (Constructor s a) (Constructor s a')
 
-else instance replaceProduct :: (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Product a b) (Product a' b')
+else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Product a b) (Product a' b')
 
-else instance replaceArgument :: (UnsafeReplace a a') => UnsafeReplace (Argument a) (Argument a')
+else instance (UnsafeReplace a a') => UnsafeReplace (Argument a) (Argument a')
 
-else instance replaceVariant :: (RowToList a rl, GenRecord rl a') => UnsafeReplace (Variant a) (Variant a')
+else instance (RowToList a rl, GenRecord rl a') => UnsafeReplace (Variant a) (Variant a')
 
-else instance replace :: UnsafeReplace a a
+else instance UnsafeReplace a a
 
 --------------------------------------------------------------------------------
 
@@ -138,12 +141,30 @@ infixl 7 type Product as :*:
 
 --------------------------------------------------------------------------------
 
+newtype JsonDecodeError = JsonDecodeError Data.Argonaut.JsonDecodeError
+
+ptJsonDecodeError :: PursType
+ptJsonDecodeError = PursType "Data_Argonaut" "JsonDecodeError"
+
+derive instance Newtype JsonDecodeError _
+
+instance P.ToTsType JsonDecodeError where
+  toTsType _ = defaultToTsType ptJsonDecodeError []
+
+instance ToTsDef JsonDecodeError where
+  toTsDef _ = defaultToTsDef ptJsonDecodeError []
+
+instance ToPursType JsonDecodeError where
+  toPursType _ = defaultToPursType ptJsonDecodeError []
+
+--------------------------------------------------------------------------------
+
 newtype Pair a = Pair (Data.Pair.Pair a)
 
 ptPair :: PursType
 ptPair = PursType "Data_Pair" "Pair"
 
-derive instance newtypePair :: Newtype (Pair a) _
+derive instance Newtype (Pair a) _
 
 instance g ::
   UnsafeReplace a a' =>
@@ -153,13 +174,13 @@ instance g ::
   from = undefined
   to = undefined
 
-instance toTsType_Pair :: (P.ToTsType a) => P.ToTsType (Pair a) where
+instance (P.ToTsType a) => P.ToTsType (Pair a) where
   toTsType _ = defaultToTsType ptPair [ P.toTsType (Proxy :: _ a) ]
 
-instance toTsDef_Pair :: (ToPursType a, P.ToTsType a) => ToTsDef (Pair a) where
+instance (ToPursType a, P.ToTsType a) => ToTsDef (Pair a) where
   toTsDef = genericToTsDef "Pair"
 
-instance toPursType_Pair :: (ToPursType a) => ToPursType (Pair a) where
+instance (ToPursType a) => ToPursType (Pair a) where
   toPursType _ = defaultToPursType ptPair []
 
 --------------------------------------------------------------------------------
@@ -171,13 +192,13 @@ ptAddress = PursType "Network_Ethereum_Core_Signatures" "Address"
 
 derive instance newtypeAddress :: Newtype Address _
 
-instance toTsType_Address :: P.ToTsType Address where
+instance P.ToTsType Address where
   toTsType _ = defaultToTsType ptAddress []
 
-instance toTsDef_Address :: ToTsDef Address where
+instance ToTsDef Address where
   toTsDef _ = defaultToTsDef ptAddress []
 
-instance toPursType_Address :: ToPursType Address where
+instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
 
 --------------------------------------------------------------------------------
