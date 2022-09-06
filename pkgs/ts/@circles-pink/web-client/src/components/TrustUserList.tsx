@@ -153,8 +153,8 @@ export const TrustUserList = (props: Props) => {
             const relation = pipe(
               neighborConnectivity,
               _IxGraph.unNeighborConnectivity<TrustConnection, Conn>({
-                onJustIncoming: e => ({ incoming: e }),
-                onJustOutgoing: e => ({ outgoing: e }),
+                onJustIncoming: e => ({ outgoing: e }),
+                onJustOutgoing: e => ({ incoming: e }),
                 onMutualOutAndIn: e1 => e2 => ({ incoming: e1, outgoing: e2 }),
               })
             );
