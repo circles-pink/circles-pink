@@ -15,6 +15,7 @@ import {
   TwoButtonRow,
 } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { LandingState } from '@circles-pink/state-machine/src';
 
 type LandingProps = {
   state: LandingState;
