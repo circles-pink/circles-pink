@@ -29,8 +29,6 @@ import { fetchPageNumbers, paginate } from '../onboarding/utils/paginate';
 import { PageSelector } from './PageSelector';
 import { LightColorFrame } from './layout';
 import { FadeIn, getIncrementor } from 'anima-react';
-import { boolean } from 'fp-ts';
-import { TrustConnection_TrustConnection } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection';
 import ReactTooltip from 'react-tooltip';
 import Icon from '@mdi/react';
 import {
@@ -77,8 +75,8 @@ type Props = {
 };
 
 type Conn = {
-  incoming?: TrustConnection_TrustConnection;
-  outgoing?: TrustConnection_TrustConnection;
+  incoming?: TrustConnection;
+  outgoing?: TrustConnection;
 };
 
 export const TrustUserList = (props: Props) => {
@@ -169,21 +167,22 @@ export const TrustUserList = (props: Props) => {
           A.mapArray(x => {
             console.log(x);
 
-            const [neigborConnectivity, trustNode] = pipe(
+            const [neighborConnectivity, trustNode] = pipe(
               x,
               _Tuple.unTuple(x1 => x2 => [x1, x2])
             );
 
-            const relation: Conn = _IxGraph.unNeighborConnectivity({
-              onJustIncoming: e => ({ incoming: e } as Conn),
-              onJustOutgoing: e => ({ outgoing: e } as Conn),
-              onMutualOutAndIn: e1 => e2 =>
-                ({ incoming: e1, outgoing: e2 } as Conn),
-            })(neigborConnectivity);
+            const relation = pipe(
+              neighborConnectivity,
+              _IxGraph.unNeighborConnectivity<TrustConnection, Conn>({
+                onJustIncoming: e => ({ incoming: e }),
+                onJustOutgoing: e => ({ outgoing: e }),
+                onMutualOutAndIn: e1 => e2 => ({ incoming: e1, outgoing: e2 }),
+              })
+            );
 
             const trustState = pipe(
-              relation.incoming ||
-                (relation.outgoing as TrustConnection_TrustConnection),
+              relation.incoming || (relation.outgoing as TrustConnection),
               _TrustConnection.unTrustConnection(() => r => r)
             );
             // const trustState_ = _TrustState.unTrustState(trustState);

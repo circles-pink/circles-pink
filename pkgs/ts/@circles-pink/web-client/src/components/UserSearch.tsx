@@ -1,6 +1,6 @@
 import { pipe } from 'fp-ts/lib/function';
 import React from 'react';
-import { fieldsOf, isCaseV, matchADT, matchV, isCase } from '../purs-util';
+import { isCaseV, matchV } from '../purs-util';
 import {
   Address,
   CirclesGraph,
@@ -12,8 +12,8 @@ import {
   unTrustState,
   UserIdent,
   _Address,
-  _ArrayS,
   _IxGraph,
+  _Maybe,
   _Nullable,
   _Pair,
   _RemoteData,
@@ -21,7 +21,7 @@ import {
   _TrustState,
   _UserIdent,
 } from '@circles-pink/state-machine/src';
-import { hush, isLeft } from '@circles-pink/state-machine/output/Data.Either';
+import { hush } from '@circles-pink/state-machine/output/Data.Either';
 
 // -----------------------------------------------------------------------------
 // UI / Row
@@ -145,10 +145,13 @@ const getUsers = (
     failure: () => [],
     success: ({ data }) => data,
     loading: ({ previousData }) =>
-      matchADT(previousData)({
-        Just: ([users]) => users,
-        Nothing: () => [],
-      }),
+      pipe(
+        previousData,
+        _Maybe.unMaybe({
+          onJust: users => users,
+          onNothing: () => [],
+        })
+      ),
   });
 
   return mapArray(_UserIdent.fromUser)(users);
