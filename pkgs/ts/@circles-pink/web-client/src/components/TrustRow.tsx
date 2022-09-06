@@ -103,7 +103,7 @@ export const TrustRow = (props: TrustRowProps) => {
     pendingUntrust: _TrustState.isPendingUntrust(trustState),
     loadingTrust: _TrustState.isLoadingTrust(trustState),
     loadingUntrust: _TrustState.isLoadingUntrust(trustState),
-    isOutgoing: !!relation.incoming,
+    isOutgoing: !!relation.outgoing,
   };
 
   const inSync =

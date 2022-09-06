@@ -74,8 +74,8 @@ const Row = (props: RowProps) => {
   );
 
   const relation: Conn = {
-    incoming: incomingEdge || undefined,
-    outgoing: outgoingEdge || undefined,
+    incoming: outgoingEdge || undefined,
+    outgoing: incomingEdge || undefined,
   };
 
   const trustNode: TrustNode = pipe(
