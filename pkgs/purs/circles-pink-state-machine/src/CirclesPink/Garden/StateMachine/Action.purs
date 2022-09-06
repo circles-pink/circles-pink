@@ -14,6 +14,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _askEmail
   , _askUsername
   , _checkForSession
+  , _circlesAction
   , _coreToWindow
   , _dashboard
   , _debug
@@ -28,6 +29,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _getVouchers
   , _infoSecurity
   , _landing
+  , _landingAction
   , _login
   , _magicWords
   , _newPrivKey
@@ -149,6 +151,30 @@ type LandingAction = Variant
   )
 
 ----
+
+_circlesAction
+  :: { _askUsername :: AskUsernameAction -> CirclesAction
+     , _askEmail :: AskEmailAction -> CirclesAction
+     , _infoSecurity :: InfoSecurityAction -> CirclesAction
+     , _landing :: LandingAction -> CirclesAction
+     }
+_circlesAction =
+  { _askUsername
+  , _askEmail
+  , _infoSecurity
+  , _landing
+  }
+
+_landingAction
+  :: { _checkForSession :: Unit -> LandingAction
+     , _signIn :: Unit -> LandingAction
+     , _signUp :: Unit -> LandingAction
+     }
+_landingAction =
+  { _checkForSession: inj (Proxy :: _ "checkForSession")
+  , _signIn: inj (Proxy :: _ "signIn")
+  , _signUp: inj (Proxy :: _ "signUp")
+  }
 
 _askUsername :: AskUsernameAction -> CirclesAction
 _askUsername = inj (Proxy :: _ "askUsername")

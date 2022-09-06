@@ -78,7 +78,11 @@ modules =
       [ R.typeAlias "CirclesAction"
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
       , R.value "_landing" []
-          (CirclesPink.Garden.StateMachine.Action._landing :: LandingAction -> CirclesAction)
+          (CirclesPink.Garden.StateMachine.Action._landing)
+      , R.value "_circlesAction" []
+          (CirclesPink.Garden.StateMachine.Action._circlesAction)
+      , R.value "_landingAction" []
+          (CirclesPink.Garden.StateMachine.Action._landingAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join

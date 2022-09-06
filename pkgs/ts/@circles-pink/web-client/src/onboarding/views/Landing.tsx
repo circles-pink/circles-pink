@@ -18,6 +18,7 @@ import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import {
   CirclesAction,
   LandingState,
+  unit,
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 
@@ -32,7 +33,11 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
-    act(_StateMachine._landing(_StateMachine._checkForSession(unit)));
+    act(
+      _StateMachine._circlesAction._landing(
+        _StateMachine._landingAction._checkForSession(unit)
+      )
+    );
   }, []);
 
   if (
