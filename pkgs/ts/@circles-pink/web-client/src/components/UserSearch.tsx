@@ -284,25 +284,3 @@ const isTrusting = (tc: Maybe<TrustConnection>): boolean => {
 };
 
 const lookupEdge = _IxGraph.lookupEdge(_Address.ordAddress);
-
-// <td>
-// <pre>
-//   {/* {matchADT(outgoingEdge)({
-//     Left: () => '  X',
-//     Right: ([trustConnection]) => {
-//       const [_, trustState] =
-//         fields('TrustConnection')(trustConnection);
-//       const trustState_ = _TrustState.unwrap(trustState);
-
-//       return matchV(trustState_)({
-//         loadingTrust: () => '..O',
-//         loadingUntrust: () => '..X',
-//         pendingTrust: () => ' .O',
-//         pendingUntrust: () => ' .X',
-//         trusted: () => '  O',
-//         untrusted: () => '  X',
-//       });
-//     },
-//   })} */}
-// </pre>
-// </td>

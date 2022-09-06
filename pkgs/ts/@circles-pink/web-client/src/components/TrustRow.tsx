@@ -1,5 +1,5 @@
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import React, { SetStateAction } from 'react';
+import React, { SetStateAction, useEffect, useState } from 'react';
 import {
   _Tuple,
   _Either,
@@ -45,6 +45,16 @@ export const RELATION_WIDTH = 1.25;
 export const ACTION_WIDTH = 1.25;
 export const ROW_HEIGHT = 3;
 
+const tooltipIds = (prefix: string) => ({
+  usernameInSync: `${prefix}-usernameInSync`,
+  actionSendInSync: `${prefix}-actionSendInSync`,
+  actionTrustInSync: `${prefix}-actionTrustInSync`,
+  usernameNotInSync: `${prefix}-usernameNotInSync`,
+  actionNotInSync: `${prefix}-actionNotInSync`,
+  relationFrom: `${prefix}-relationFrom`,
+  relationTo: `${prefix}-relationTo`,
+});
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -81,6 +91,8 @@ export const TrustRow = (props: TrustRowProps) => {
 
   const getDelay = getIncrementor(0, 0.05);
 
+  const [tooltipId] = useState(Math.random().toString());
+
   const trustConnection = relation.incoming;
 
   const trustState = (() => {
@@ -110,7 +122,6 @@ export const TrustRow = (props: TrustRowProps) => {
     trustRelationConfig.isTrusted || trustRelationConfig.isUntrusted;
 
   const { userIdent } = _TrustNode.unwrap(trustNode);
-  const id = _UserIdent.getIdentifier(userIdent);
 
   if (inSync) {
     return (
@@ -122,13 +133,13 @@ export const TrustRow = (props: TrustRowProps) => {
             content: (
               <FadeIn orientation={'left'} delay={delay}>
                 <JustifyStartCenter>
-                  <ReactTooltip id="trustlist-username-in-sync" />
+                  <ReactTooltip id={tooltipIds(tooltipId).usernameInSync} />
                   <div>
                     <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                   </div>
                   <Username
                     theme={theme}
-                    data-for="trustlist-username-in-sync"
+                    data-for={tooltipIds(tooltipId).usernameInSync}
                     data-tip={_UserIdent.getIdentifier(userIdent)}
                   >
                     {_UserIdent.getIdentifier(userIdent)}
@@ -156,7 +167,7 @@ export const TrustRow = (props: TrustRowProps) => {
               <JustifyAroundCenter>
                 <FadeIn orientation={'left'} delay={delay}>
                   <>
-                    <ReactTooltip id="trustlist-action-send-in-sync" />
+                    <ReactTooltip id={tooltipIds(tooltipId).actionSendInSync} />
                     <Clickable
                       clickable={trustRelationConfig.isOutgoing}
                       onClick={() => {
@@ -182,7 +193,7 @@ export const TrustRow = (props: TrustRowProps) => {
                             ? theme.baseColor
                             : 'white'
                         }
-                        data-for="trustlist-action-send-in-sync"
+                        data-for={tooltipIds(tooltipId).actionSendInSync}
                         data-tip={mapToolTipSend(
                           trustRelationConfig.isOutgoing,
                           _UserIdent.getIdentifier(userIdent)
@@ -193,7 +204,9 @@ export const TrustRow = (props: TrustRowProps) => {
                 </FadeIn>
                 <FadeIn orientation={'left'} delay={delay}>
                   <>
-                    <ReactTooltip id="trustlist-action-trust-in-sync" />
+                    <ReactTooltip
+                      id={tooltipIds(tooltipId).actionTrustInSync}
+                    />
                     <Clickable
                       clickable={true}
                       onClick={() => {
@@ -214,7 +227,7 @@ export const TrustRow = (props: TrustRowProps) => {
                             ? theme.baseColor
                             : 'white'
                         }
-                        data-for="trustlist-action-trust-in-sync"
+                        data-for={tooltipIds(tooltipId).actionTrustInSync}
                         data-tip={mapToolTipTrust(
                           trustRelationConfig.isTrusted,
                           _UserIdent.getIdentifier(userIdent)
@@ -241,14 +254,14 @@ export const TrustRow = (props: TrustRowProps) => {
           content: (
             <FadeIn orientation={'left'} delay={delay}>
               <JustifyStartCenter>
-                <ReactTooltip id="trustlist-username-not-in-sync" />
+                <ReactTooltip id={tooltipIds(tooltipId).usernameNotInSync} />
                 <div>
                   <Icon path={mdiAt} size={1.25} color={theme.baseColor} />
                 </div>
                 <Username
                   theme={theme}
                   data-tip={_UserIdent.getIdentifier(userIdent)}
-                  data-for="trustlist-username-not-in-sync"
+                  data-for={tooltipIds(tooltipId).usernameNotInSync}
                 >
                   {_UserIdent.getIdentifier(userIdent)}
                 </Username>
@@ -268,7 +281,7 @@ export const TrustRow = (props: TrustRowProps) => {
           content: (
             <FadeIn orientation={'left'} delay={delay}>
               <>
-                <ReactTooltip id="trustlist-action-not-in-sync" />
+                <ReactTooltip id={tooltipIds(tooltipId).actionNotInSync} />
                 {trustRelationConfig.loadingTrust ||
                 trustRelationConfig.loadingUntrust ? (
                   <LoadingCircles
@@ -281,7 +294,7 @@ export const TrustRow = (props: TrustRowProps) => {
                     path={mdiWeatherCloudyClock}
                     size={1.5}
                     color={theme.baseColor}
-                    data-for="trustlist-action-not-in-sync"
+                    data-for={tooltipIds(tooltipId).actionNotInSync}
                     data-tip={mapToolTipTrust(
                       trustRelationConfig.isTrusted,
                       _UserIdent.getIdentifier(userIdent)
@@ -356,11 +369,13 @@ const Relation = ({
     isOutgoing,
   } = trustRelationConfig;
 
+  const [tooltipId] = useState(Math.random().toString());
+
   return (
     <JustifyAroundCenter>
       <FadeIn orientation={'left'} delay={getDelay()}>
         <>
-          <ReactTooltip id="trustlist-relation-from" />
+          <ReactTooltip id={tooltipIds(tooltipId).relationFrom} />
           <Icon
             path={
               isTrusted || pendingUntrust || loadingUntrust
@@ -373,7 +388,7 @@ const Relation = ({
                 ? theme.baseColor
                 : 'white'
             }
-            data-for="trustlist-relation-from"
+            data-for={tooltipIds(tooltipId).relationFrom}
             data-tip={mapToolTipRelRec(
               isTrusted,
               _UserIdent.getIdentifier(userIdent)
@@ -383,12 +398,12 @@ const Relation = ({
       </FadeIn>
       <FadeIn orientation={'left'} delay={getDelay()}>
         <>
-          <ReactTooltip id="trustlist-relation-to" />
+          <ReactTooltip id={tooltipIds(tooltipId).relationTo} />
           <Icon
             path={isOutgoing ? mdiAccountArrowRight : mdiAccountCancel}
             size={1.6}
             color={isOutgoing ? theme.baseColor : 'white'}
-            data-for="trustlist-relation-to"
+            data-for={tooltipIds(tooltipId).relationTo}
             data-tip={mapToolTipRelSend(
               isOutgoing,
               _UserIdent.getIdentifier(userIdent)
