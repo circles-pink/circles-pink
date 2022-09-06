@@ -81,7 +81,7 @@ export const TrustRow = (props: TrustRowProps) => {
 
   const getDelay = getIncrementor(0, 0.05);
 
-  const trustConnection = relation.incoming || relation.outgoing;
+  const trustConnection = relation.incoming;
 
   const trustState = (() => {
     if (trustConnection) {
