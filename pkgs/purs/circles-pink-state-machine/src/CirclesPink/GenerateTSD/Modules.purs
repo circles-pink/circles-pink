@@ -12,7 +12,7 @@ import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
 import Data.Either as Data.Either
-import Data.Graph.Errors (ErrNeighborNodes, ErrNeighborhood, ErrLookupEdge)
+import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
@@ -32,8 +32,8 @@ import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
-import Simple.Data.Tuple as Simple.Data.Tuple
 import Simple.Data.Maybe as Simple.Data.Maybe
+import Simple.Data.Tuple as Simple.Data.Tuple
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
@@ -81,6 +81,9 @@ modules =
         , R.value "lookupEdge"
             [ _Ord ORD ]
             (Data.IxGraph.lookupEdge :: _ -> _ ORD B C -> _ (_ (ErrLookupEdge ORD ())) _)
+        , R.value "lookupNode"
+            [ _Ord ORD ]
+            (Data.IxGraph.lookupNode :: _ -> _ ORD B C -> _ (_ (ErrLookupNode ORD ())) _)
         , R.value "unNeighborConnectivity" [] (Data.IxGraph.unNeighborConnectivity :: _ -> _ A -> C)
         ]
 
@@ -104,6 +107,8 @@ modules =
             (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
         , value "unwrap" []
             CirclesPink.Data.TrustNode.unwrap
+        , value "initTrustNode" []
+            CirclesPink.Data.TrustNode.initTrustNode
         , instanceDef "ordTrustNode"
             (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
         ]
@@ -126,6 +131,8 @@ modules =
             CirclesPink.Data.TrustState.isPendingTrust
         , value "isPendingUntrust" []
             CirclesPink.Data.TrustState.isPendingUntrust
+        , value "initUntrusted" []
+            CirclesPink.Data.TrustState.initUntrusted
         ]
 
   , "CirclesPink.Data.UserIdent" /\

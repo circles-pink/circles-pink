@@ -436,41 +436,34 @@ export const Dashboard = ({
               />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
-              <Frame theme={theme}>
-                <UserSearch
-                  //userSearchResult={stateRaw.userSearchResult}
-                  trusts={stateRaw.trusts}
-                  userSearchResult={stateRaw.userSearchResult}
-                  onSearch={query =>
-                    act(A._dashboard(A._userSearch({ query })))
-                  }
-                  onAddTrust={userIdent =>
-                    act(A._dashboard(A._addTrustConnection(userIdent)))
-                  }
-                  centerAddress={stateRaw.user.safeAddress}
-
-                  // title={t('dashboard.exploreTitle')}
-                  // trusts={searchResult}
-                  // theme={theme}
-                  // icon={mdiMagnify}
-                  // toggleOverlay={toggleOverlay}
-                  // setOverwriteTo={setOverwriteTo}
-                  // addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                  // removeTrust={to =>
-                  //   act(A._dashboard(A._removeTrustConnection(to)))
-                  // }
-                  // actionRow={
-                  //   <JustifyBetweenCenter>
-                  //     <Input
-                  //       type="text"
-                  //       value={search}
-                  //       placeholder={t('dashboard.userSearchPlaceholder')}
-                  //       onChange={e => setSearch(e.target.value)}
-                  //     />
-                  //   </JustifyBetweenCenter>
-                  // }
-                />
-              </Frame>
+              <UserSearch
+                userSearchResult={stateRaw.userSearchResult}
+                trusts={stateRaw.trusts}
+                onSearch={query => act(A._dashboard(A._userSearch({ query })))}
+                onAddTrust={userIdent =>
+                  act(A._dashboard(A._addTrustConnection(userIdent)))
+                }
+                centerAddress={stateRaw.user.safeAddress}
+                title={t('dashboard.exploreTitle')}
+                theme={theme}
+                icon={mdiMagnify}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                actionRow={
+                  <JustifyBetweenCenter>
+                    <Input
+                      type="text"
+                      value={search}
+                      placeholder={t('dashboard.userSearchPlaceholder')}
+                      onChange={e => setSearch(e.target.value)}
+                    />
+                  </JustifyBetweenCenter>
+                }
+              />
             </FadeIn>
           </MainContent>
 
