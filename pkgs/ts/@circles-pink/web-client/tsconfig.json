@@ -26,6 +26,7 @@
     "src/components/LoadingCircles.tsx",
     "src/components/PageSelector.tsx",
     "src/components/GridRow.tsx",
+    "src/components/TrustRow.tsx",
     "src/onboarding/utils/colorUtils.ts",
     "src/onboarding/utils/paginate.ts",
     "src/context/theme.tsx",

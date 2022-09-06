@@ -15,7 +15,6 @@ import {
   UserIdent,
   _UserIdent,
 } from '@circles-pink/state-machine/src';
-import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
 import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { pipe } from 'fp-ts/lib/function';
@@ -35,15 +34,8 @@ import {
   mdiAccountArrowLeft,
   mdiAccountArrowRight,
   mdiAccountCancel,
-  mdiAt,
-  mdiCashFast,
-  mdiCashRemove,
-  mdiHeart,
-  mdiHeartOutline,
-  mdiWeatherCloudyClock,
 } from '@mdi/js';
-import { LoadingCircles } from './LoadingCircles';
-import { TrustStatusMessage } from './TrustStatusMessage';
+import { TrustRow } from './TrustRow';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -89,11 +81,7 @@ export const TrustUserList = (props: Props) => {
     address,
     theme,
     icon,
-    actionRow,
-    toggleOverlay,
-    setOverwriteTo,
-    addTrust,
-    removeTrust,
+    actionRow
   } = props;
 
   const neighborhood = G.neighborhood(ordAddress)(address)(graph);
@@ -181,226 +169,8 @@ export const TrustUserList = (props: Props) => {
               })
             );
 
-            const trustState = pipe(
-              relation.incoming || (relation.outgoing as TrustConnection),
-              _TrustConnection.unTrustConnection(() => r => r)
-            );
-            // const trustState_ = _TrustState.unTrustState(trustState);
-
-            const trustRelationConfig: TrustRelationConfig = {
-              isTrusted: _TrustState.isTrusted(trustState),
-              isUntrusted: _TrustState.isUntrusted(trustState),
-              pendingTrust: _TrustState.isPendingTrust(trustState),
-              pendingUntrust: _TrustState.isPendingUntrust(trustState),
-              loadingTrust: _TrustState.isLoadingTrust(trustState),
-              loadingUntrust: _TrustState.isLoadingUntrust(trustState),
-              isOutgoing: !!relation.incoming,
-            };
-
-            const inSync =
-              trustRelationConfig.isTrusted || trustRelationConfig.isUntrusted;
-
-            const { userIdent } = TN.unwrap(trustNode);
-            const id = _UserIdent.getIdentifier(userIdent);
-
-            if (inSync) {
-              return (
-                <GridRow
-                  minHeight={ROW_HEIGHT}
-                  fields={[
-                    {
-                      width: USERNAME_WIDTH,
-                      content: (
-                        <FadeIn orientation={'left'} delay={getDelay()}>
-                          <JustifyStartCenter>
-                            <ReactTooltip id="trustlist-username-in-sync" />
-                            <div>
-                              <Icon
-                                path={mdiAt}
-                                size={1.25}
-                                color={theme.baseColor}
-                              />
-                            </div>
-                            <Username
-                              theme={theme}
-                              data-for="trustlist-username-in-sync"
-                              data-tip={_UserIdent.getIdentifier(userIdent)}
-                            >
-                              {_UserIdent.getIdentifier(userIdent)}
-                            </Username>
-                          </JustifyStartCenter>
-                        </FadeIn>
-                      ),
-                      align: 'LEFT',
-                    },
-                    {
-                      width: RELATION_WIDTH,
-                      content: (
-                        <Relation
-                          trustRelationConfig={trustRelationConfig}
-                          getDelay={getDelay}
-                          theme={theme}
-                          userIdent={userIdent}
-                        />
-                      ),
-                      align: 'CENTER',
-                    },
-                    {
-                      width: ACTION_WIDTH,
-                      content: (
-                        <JustifyAroundCenter>
-                          <FadeIn orientation={'left'} delay={getDelay()}>
-                            <>
-                              <ReactTooltip id="trustlist-action-send-in-sync" />
-                              <Clickable
-                                clickable={trustRelationConfig.isOutgoing}
-                                onClick={() => {
-                                  if (
-                                    trustRelationConfig.isOutgoing &&
-                                    toggleOverlay &&
-                                    setOverwriteTo
-                                  ) {
-                                    setOverwriteTo(
-                                      _UserIdent.getAddress(userIdent)
-                                    );
-                                    toggleOverlay('SEND');
-                                  }
-                                }}
-                              >
-                                <Icon
-                                  path={
-                                    trustRelationConfig.isOutgoing
-                                      ? mdiCashFast
-                                      : mdiCashRemove
-                                  }
-                                  size={1.75}
-                                  color={
-                                    trustRelationConfig.isOutgoing
-                                      ? theme.baseColor
-                                      : 'white'
-                                  }
-                                  data-for="trustlist-action-send-in-sync"
-                                  data-tip={mapToolTipSend(
-                                    trustRelationConfig.isOutgoing,
-                                    _UserIdent.getIdentifier(userIdent)
-                                  )}
-                                />
-                              </Clickable>
-                            </>
-                          </FadeIn>
-                          <FadeIn orientation={'left'} delay={getDelay()}>
-                            <>
-                              <ReactTooltip id="trustlist-action-trust-in-sync" />
-                              <Clickable
-                                clickable={true}
-                                onClick={() => {
-                                  trustRelationConfig.isUntrusted
-                                    ? addTrust(userIdent)
-                                    : removeTrust(userIdent);
-                                }}
-                              >
-                                <Icon
-                                  path={
-                                    trustRelationConfig.isTrusted
-                                      ? mdiHeart
-                                      : mdiHeartOutline
-                                  }
-                                  size={1.5}
-                                  color={
-                                    trustRelationConfig.isTrusted
-                                      ? theme.baseColor
-                                      : 'white'
-                                  }
-                                  data-for="trustlist-action-trust-in-sync"
-                                  data-tip={mapToolTipTrust(
-                                    trustRelationConfig.isTrusted,
-                                    _UserIdent.getIdentifier(userIdent)
-                                  )}
-                                />
-                              </Clickable>
-                            </>
-                          </FadeIn>
-                        </JustifyAroundCenter>
-                      ),
-                      align: 'CENTER',
-                    },
-                  ]}
-                />
-              );
-            }
-
             return (
-              <GridRow
-                minHeight={ROW_HEIGHT}
-                fields={[
-                  {
-                    width: USERNAME_WIDTH,
-                    content: (
-                      <FadeIn orientation={'left'} delay={getDelay()}>
-                        <JustifyStartCenter>
-                          <ReactTooltip id="trustlist-username-not-in-sync" />
-                          <div>
-                            <Icon
-                              path={mdiAt}
-                              size={1.25}
-                              color={theme.baseColor}
-                            />
-                          </div>
-                          <Username
-                            theme={theme}
-                            data-tip={_UserIdent.getIdentifier(userIdent)}
-                            data-for="trustlist-username-not-in-sync"
-                          >
-                            {_UserIdent.getIdentifier(userIdent)}
-                          </Username>
-                        </JustifyStartCenter>
-                      </FadeIn>
-                    ),
-                    align: 'LEFT',
-                  },
-                  {
-                    width: RELATION_WIDTH * 2,
-                    content: (
-                      <TrustStatusMessage
-                        theme={theme}
-                        trustState={trustState}
-                      />
-                    ),
-
-                    align: 'RIGHT',
-                  },
-                  {
-                    width: ACTION_WIDTH / 2,
-                    content: (
-                      <FadeIn orientation={'left'} delay={getDelay()}>
-                        <>
-                          <ReactTooltip id="trustlist-action-not-in-sync" />
-                          {trustRelationConfig.loadingTrust ||
-                          trustRelationConfig.loadingUntrust ? (
-                            <LoadingCircles
-                              count={1}
-                              width={35}
-                              color={theme.baseColor}
-                            />
-                          ) : (
-                            <Icon
-                              path={mdiWeatherCloudyClock}
-                              size={1.5}
-                              color={theme.baseColor}
-                              data-for="trustlist-action-not-in-sync"
-                              data-tip={mapToolTipTrust(
-                                trustRelationConfig.isTrusted,
-                                _UserIdent.getIdentifier(userIdent)
-                              )}
-                            />
-                          )}
-                        </>
-                      </FadeIn>
-                    ),
-                    align: 'LEFT',
-                  },
-                ]}
-              />
+              <TrustRow {...{ relation, trustNode, getDelay }} {...props} />
             );
           })
         )}
