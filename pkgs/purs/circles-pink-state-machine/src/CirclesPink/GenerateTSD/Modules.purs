@@ -52,17 +52,25 @@ instance toTsTypeAny :: ToTsType Any where
 modules :: Array (String /\ Array TS.Declaration)
 modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
-      [ R.typeAlias "CirclesGraph" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
-      , R.typeAlias "DashboardState" (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
+      [ R.typeAlias "CirclesGraph"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
+      , R.typeAlias "DashboardState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
       ]
+
   , "RemoteData" /\ join
-      [ R.typeDef "--" (Proxy :: _ (RemoteData A B C D))
-      , R.value "unwrap" [] (RemoteData.unwrap :: _ A B C D -> _)
+      [ R.typeDef "--"
+          (Proxy :: _ (RemoteData A B C D))
+      , R.value "unwrap" []
+          (RemoteData.unwrap :: _ A B C D -> _)
       ]
+
   , "Data.IxGraph" /\
       join
-        [ R.typeDef "--" (Proxy :: _ (Data.IxGraph.IxGraph A B C))
-        , R.typeDef "--" (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
+        [ R.typeDef "--"
+            (Proxy :: _ (Data.IxGraph.IxGraph A B C))
+        , R.typeDef "--"
+            (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
         , R.value "neighborNodes"
             [ _Ord ORD ]
             (Data.IxGraph.neighborNodes :: ORD -> _ ORD B C -> _ (_ (ErrNeighborNodes ORD ())) _)
@@ -74,78 +82,125 @@ modules =
             (Data.IxGraph.lookupEdge :: _ -> _ ORD B C -> _ (_ (ErrLookupEdge ORD ())) _)
         , R.value "unNeighborConnectivity" [] (Data.IxGraph.unNeighborConnectivity :: _ -> _ A -> C)
         ]
+
   , "CirclesPink.Data.Address" /\
       join
-        [ typeDef "--" (Proxy :: _ CirclesPink.Data.Address.Address)
-        , instanceDef "ordAddress" (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
+        [ typeDef "--"
+            (Proxy :: _ CirclesPink.Data.Address.Address)
+        , instanceDef "ordAddress"
+            (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
         ]
+
   , "Simple.Data.Array" /\
       join
-        [ value "mapArray" [] (Simple.Data.Array.mapArray :: (A -> B) -> _) ]
+        [ value "mapArray" []
+            (Simple.Data.Array.mapArray :: (A -> B) -> _)
+        ]
+
   , "CirclesPink.Data.TrustNode" /\
       join
-        [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
-        , value "unwrap" [] CirclesPink.Data.TrustNode.unwrap
-        , instanceDef "ordTrustNode" (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
+        [ typeDef "--"
+            (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
+        , value "unwrap" []
+            CirclesPink.Data.TrustNode.unwrap
+        , instanceDef "ordTrustNode"
+            (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
         ]
+
   , "CirclesPink.Data.TrustState" /\
       join
-        [ typeDef "--" (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
-        , value "unTrustState" [] CirclesPink.Data.TrustState.unTrustState
-        , value "isUntrusted" [] CirclesPink.Data.TrustState.isUntrusted
-        , value "isTrusted" [] CirclesPink.Data.TrustState.isTrusted
-        , value "isLoadingTrust" [] CirclesPink.Data.TrustState.isLoadingTrust
-        , value "isLoadingUntrust" [] CirclesPink.Data.TrustState.isLoadingUntrust
-        , value "isPendingTrust" [] CirclesPink.Data.TrustState.isPendingTrust
-        , value "isPendingUntrust" [] CirclesPink.Data.TrustState.isPendingUntrust
+        [ typeDef "--"
+            (Proxy :: _ CirclesPink.Data.TrustState.TrustState)
+        , value "unTrustState" []
+            CirclesPink.Data.TrustState.unTrustState
+        , value "isUntrusted" []
+            CirclesPink.Data.TrustState.isUntrusted
+        , value "isTrusted" []
+            CirclesPink.Data.TrustState.isTrusted
+        , value "isLoadingTrust" []
+            CirclesPink.Data.TrustState.isLoadingTrust
+        , value "isLoadingUntrust" []
+            CirclesPink.Data.TrustState.isLoadingUntrust
+        , value "isPendingTrust" []
+            CirclesPink.Data.TrustState.isPendingTrust
+        , value "isPendingUntrust" []
+            CirclesPink.Data.TrustState.isPendingUntrust
         ]
+
   , "CirclesPink.Data.UserIdent" /\
       join
-        [ typeDef "--" (Proxy :: _ CirclesPink.Data.UserIdent.UserIdent)
+        [ typeDef "--"
+            (Proxy :: _ CirclesPink.Data.UserIdent.UserIdent)
         -- , value "unwrap" [] CirclesPink.Data.UserIdent.unwrap
-        , value "getIdentifier" [] CirclesPink.Data.UserIdent.getIdentifier
-        , value "fromUser" [] CirclesPink.Data.UserIdent.fromUser
-        , value "getAddress" [] CirclesPink.Data.UserIdent.getAddress
+        , value "getIdentifier" []
+            CirclesPink.Data.UserIdent.getIdentifier
+        , value "fromUser" []
+            CirclesPink.Data.UserIdent.fromUser
+        , value "getAddress" []
+            CirclesPink.Data.UserIdent.getAddress
         ]
+
   , "CirclesPink.Data.TrustConnection" /\
       join
-        [ typeDef "--" (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection))
-        , R.value "unTrustConnection" [] (CirclesPink.Data.TrustConnection.unTrustConnection :: _ -> _ -> C)
+        [ typeDef "--"
+            (Proxy :: _ (CirclesPink.Data.TrustConnection.TrustConnection))
+        , R.value "unTrustConnection" []
+            (CirclesPink.Data.TrustConnection.unTrustConnection :: _ -> _ -> C)
         ]
+
   , "Data.Either" /\
       join
-        [ typeDef "--" (Proxy :: _ (Data.Either.Either A B))
-        , value "either" [] (Data.Either.either :: _ -> _ -> _ A B -> C)
-        , value "hush" [] (Data.Either.hush :: _ A B -> _)
-        , defPredicateFn "isLeft" [] (Data.Either.isLeft :: Either A B -> Boolean)
+        [ typeDef "--"
+            (Proxy :: _ (Data.Either.Either A B))
+        , value "either" []
+            (Data.Either.either :: _ -> _ -> _ A B -> C)
+        , value "hush" []
+            (Data.Either.hush :: _ A B -> _)
+        , defPredicateFn "isLeft" []
+            (Data.Either.isLeft :: Either A B -> Boolean)
             (TS.mkType (TS.qualName_ "Either_Left") [ toTsType A ])
-        , defPredicateFn "isRight" [] (Data.Either.isRight :: _ A B -> _)
+        , defPredicateFn "isRight" []
+            (Data.Either.isRight :: _ A B -> _)
             (TS.mkType (TS.qualName_ "Either_Right") [ toTsType B ])
         ]
+
   , "Data.Tuple" /\
       join
-        [ typeDef "--" (Proxy :: _ (Data.Tuple.Tuple A B))
+        [ typeDef "--"
+            (Proxy :: _ (Data.Tuple.Tuple A B))
         ]
+
   , "Simple.Data.Tuple" /\
       join
-        [ value "unTuple" [] (Simple.Data.Tuple.unTuple :: _ -> _ A B -> C)
+        [ value "unTuple" []
+            (Simple.Data.Tuple.unTuple :: _ -> _ A B -> C)
         ]
+
   , "Data.Pair" /\
       join
-        [ R.typeDef "--" (Proxy :: _ (Data.Pair.Pair A))
+        [ R.typeDef "--"
+            (Proxy :: _ (Data.Pair.Pair A))
         ]
+
   , "Data.Maybe" /\
       join
-        [ typeDef "--" (Proxy :: _ (Data.Maybe.Maybe A))
-        , value "maybe" [] (Data.Maybe.maybe :: _ -> (A -> B) -> _)
+        [ typeDef "--"
+            (Proxy :: _ (Data.Maybe.Maybe A))
+        , value "maybe" []
+            (Data.Maybe.maybe :: _ -> (A -> B) -> _)
         ]
+
   , "Data.Ord" /\
       join
-        [ classDef "Ord" (Proxy :: _ (Data.Ord.Ord ORD => Unit)) (Proxy :: _ (ClassOrd A))
+        [ classDef "Ord"
+            (Proxy :: _ (Data.Ord.Ord ORD => Unit))
+            (Proxy :: _ (ClassOrd A))
         ]
+
   , "Data.Nullable" /\
       join
-        [ value "toNullable" [] (Data.Nullable.toNullable :: _ A -> _)
+        [ value "toNullable" []
+            (Data.Nullable.toNullable :: _ A -> _)
         ]
 
   ]
