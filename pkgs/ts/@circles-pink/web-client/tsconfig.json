@@ -96,7 +96,7 @@
     // "src/onboarding/views/dashboard/index.tsx",
     // "src/onboarding/views/index.tsx",
     "src/purs-util.ts",
-    // "src/ui-utils.ts",
+    "src/ui-utils.ts",
     // "src/utils/fpTs.ts",
   ],
   "include": [
