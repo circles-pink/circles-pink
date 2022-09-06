@@ -11,7 +11,7 @@ import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
-import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
+import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Argonaut as Data.Argonaut
@@ -31,6 +31,7 @@ import Data.Pair as Data.Pair
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
+import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
@@ -69,6 +70,11 @@ modules =
   , "Data.DateTime.Instant" /\ join
       [ R.typeDef "--"
           (Proxy :: _ Data.DateTime.Instant.Instant)
+      ]
+
+  , "CirclesPink.Garden.StateMachine.Action" /\ join
+      [ R.typeAlias "CirclesAction"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join
