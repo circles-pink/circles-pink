@@ -63,7 +63,7 @@ type Props = {
   removeTrust: (to: UserIdent) => void;
 };
 
-type Conn = {
+export type Conn = {
   incoming?: TrustConnection;
   outgoing?: TrustConnection;
 };
@@ -72,23 +72,18 @@ export const TrustUserList = (props: Props) => {
   // animation
   const getDelay = getIncrementor(0, 0.05);
 
-  const {
-    title,
-    graph,
-    address,
-    theme,
-    icon,
-    actionRow
-  } = props;
+  const { title, graph, address, theme, icon, actionRow } = props;
 
-  const neighborhood = _IxGraph.neighborhood(_Address.ordAddress)(address)(graph);
-  const items = pipe(neighborhood, _Either.hush, _Nullable.toNullable);
+  const neighborhood = _IxGraph.neighborhood(_Address.ordAddress)(address)(
+    graph
+  );
+  const items_ = pipe(neighborhood, _Either.hush, _Nullable.toNullable);
 
-  if (!items) return <div>Address not found in graph!</div>;
+  if (!items_) return <div>Address not found in graph!</div>;
 
   // Paginate trusts
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const paginationInfo = paginate(items.length, currentPage);
+  const paginationInfo = paginate(items_.length, currentPage);
 
   const pageControls = fetchPageNumbers({
     currentPage,
@@ -97,7 +92,7 @@ export const TrustUserList = (props: Props) => {
   });
 
   // Get slice on current page
-  const trusts = items.slice(
+  const items = items_.slice(
     paginationInfo.startIndex,
     paginationInfo.endIndex + 1
   );
@@ -150,8 +145,6 @@ export const TrustUserList = (props: Props) => {
         {pipe(
           items,
           _Array.mapArray(x => {
-            console.log(x);
-
             const [neighborConnectivity, trustNode] = pipe(
               x,
               _Tuple.unTuple(x1 => x2 => [x1, x2])
@@ -167,7 +160,10 @@ export const TrustUserList = (props: Props) => {
             );
 
             return (
-              <TrustRow {...{ relation, trustNode, getDelay }} {...props} />
+              <TrustRow
+                {...{ relation, trustNode, delay: getDelay() }}
+                {...props}
+              />
             );
           })
         )}

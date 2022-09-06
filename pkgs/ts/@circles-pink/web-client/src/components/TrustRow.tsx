@@ -1,6 +1,4 @@
-import {
-  Address,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import React, { SetStateAction } from 'react';
 import {
   _Tuple,
@@ -12,7 +10,8 @@ import {
   _TrustConnection,
   UserIdent,
   _UserIdent,
-  _TrustNode, TrustNode
+  _TrustNode,
+  TrustNode,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
 import { Theme } from '../context/theme';
@@ -20,7 +19,7 @@ import { JustifyAroundCenter, JustifyStartCenter, Margin } from './helper';
 import tw, { css, styled } from 'twin.macro';
 import { t } from 'i18next';
 import { GridRow } from './GridRow';
-import { FadeIn } from 'anima-react';
+import { FadeIn, getIncrementor } from 'anima-react';
 import ReactTooltip from 'react-tooltip';
 import Icon from '@mdi/react';
 import {
@@ -60,7 +59,7 @@ type Conn = {
 type TrustRowProps = {
   relation: Conn;
   trustNode: TrustNode;
-  getDelay: () => number;
+  delay: number;
   theme: Theme;
   toggleOverlay?: (type: Overlay) => void;
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
@@ -72,7 +71,7 @@ export const TrustRow = (props: TrustRowProps) => {
   const {
     relation,
     trustNode,
-    getDelay,
+    delay,
     theme,
     toggleOverlay,
     setOverwriteTo,
@@ -80,10 +79,21 @@ export const TrustRow = (props: TrustRowProps) => {
     removeTrust,
   } = props;
 
-  const trustState = pipe(
-    relation.incoming || (relation.outgoing as TrustConnection),
-    _TrustConnection.unTrustConnection(() => r => r)
-  );
+  const getDelay = getIncrementor(0, 0.05);
+
+  const trustConnection = relation.incoming || relation.outgoing;
+
+  const trustState = (() => {
+    if (trustConnection) {
+      return pipe(
+        trustConnection,
+        _TrustConnection.unTrustConnection(() => r => r)
+      );
+    } else {
+      return _TrustState.initUntrusted;
+    }
+  })();
+
   // const trustState_ = _TrustState.unTrustState(trustState);
 
   const trustRelationConfig: TrustRelationConfig = {
@@ -110,7 +120,7 @@ export const TrustRow = (props: TrustRowProps) => {
           {
             width: USERNAME_WIDTH,
             content: (
-              <FadeIn orientation={'left'} delay={getDelay()}>
+              <FadeIn orientation={'left'} delay={delay}>
                 <JustifyStartCenter>
                   <ReactTooltip id="trustlist-username-in-sync" />
                   <div>
@@ -144,7 +154,7 @@ export const TrustRow = (props: TrustRowProps) => {
             width: ACTION_WIDTH,
             content: (
               <JustifyAroundCenter>
-                <FadeIn orientation={'left'} delay={getDelay()}>
+                <FadeIn orientation={'left'} delay={delay}>
                   <>
                     <ReactTooltip id="trustlist-action-send-in-sync" />
                     <Clickable
@@ -181,7 +191,7 @@ export const TrustRow = (props: TrustRowProps) => {
                     </Clickable>
                   </>
                 </FadeIn>
-                <FadeIn orientation={'left'} delay={getDelay()}>
+                <FadeIn orientation={'left'} delay={delay}>
                   <>
                     <ReactTooltip id="trustlist-action-trust-in-sync" />
                     <Clickable
@@ -229,7 +239,7 @@ export const TrustRow = (props: TrustRowProps) => {
         {
           width: USERNAME_WIDTH,
           content: (
-            <FadeIn orientation={'left'} delay={getDelay()}>
+            <FadeIn orientation={'left'} delay={delay}>
               <JustifyStartCenter>
                 <ReactTooltip id="trustlist-username-not-in-sync" />
                 <div>
@@ -256,7 +266,7 @@ export const TrustRow = (props: TrustRowProps) => {
         {
           width: ACTION_WIDTH / 2,
           content: (
-            <FadeIn orientation={'left'} delay={getDelay()}>
+            <FadeIn orientation={'left'} delay={delay}>
               <>
                 <ReactTooltip id="trustlist-action-not-in-sync" />
                 {trustRelationConfig.loadingTrust ||
