@@ -517,7 +517,11 @@ export const Dashboard = ({
 
           <FadeIn orientation={'up'} delay={getDelay()}>
             <TopMargin>
-              <Frame theme={theme} title="Trust Graph" icon={mdiGraphOutline}>
+              <LightColorFrame
+                theme={theme}
+                title="Trust Graph"
+                icon={mdiGraphOutline}
+              >
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>
@@ -525,7 +529,7 @@ export const Dashboard = ({
                   }
                   theme={theme}
                 />
-              </Frame>
+              </LightColorFrame>
             </TopMargin>
           </FadeIn>
         </>
