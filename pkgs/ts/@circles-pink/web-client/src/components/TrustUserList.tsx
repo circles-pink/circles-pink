@@ -225,7 +225,7 @@ export const TrustUserList = (props: Props) => {
                             <Username
                               theme={theme}
                               data-for="trustlist-username-in-sync"
-                              data-tip={userIdent}
+                              data-tip={_UserIdent.getIdentifier(userIdent)}
                             >
                               {_UserIdent.getIdentifier(userIdent)}
                             </Username>
@@ -349,7 +349,7 @@ export const TrustUserList = (props: Props) => {
                           </div>
                           <Username
                             theme={theme}
-                            data-tip={userIdent}
+                            data-tip={_UserIdent.getIdentifier(userIdent)}
                             data-for="trustlist-username-not-in-sync"
                           >
                             {_UserIdent.getIdentifier(userIdent)}
