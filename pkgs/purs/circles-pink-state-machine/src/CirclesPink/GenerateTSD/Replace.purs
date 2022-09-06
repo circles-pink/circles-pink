@@ -26,6 +26,7 @@ import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
 import Data.Argonaut as Data.Argonaut
+import Data.BN as Data.BN
 
 --------------------------------------------------------------------------------
 
@@ -53,6 +54,8 @@ else instance
   UnsafeReplace (Data.Pair.Pair a) (Pair a')
 
 else instance UnsafeReplace Data.Argonaut.JsonDecodeError JsonDecodeError
+
+else instance UnsafeReplace Data.BN.BN BN
 
 else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 
@@ -138,6 +141,25 @@ genericToTsDef s p = genericToTsDef' s p (Proxy :: _ rep')
 
 infixr 6 type Sum as :+:
 infixl 7 type Product as :*:
+
+--------------------------------------------------------------------------------
+
+newtype BN = BN Data.BN.BN
+
+ptBN :: PursType
+ptBN = PursType "Data_BN" "BN"
+
+derive instance Newtype BN _
+
+instance P.ToTsType BN where
+  toTsType _ = defaultToTsType ptBN []
+
+instance ToTsDef BN where
+  toTsDef _ = defaultToTsDef ptBN []
+
+instance ToPursType BN where
+  toPursType _ = defaultToPursType ptBN []
+
 
 --------------------------------------------------------------------------------
 
