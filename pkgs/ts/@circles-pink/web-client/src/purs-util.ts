@@ -32,7 +32,7 @@
 // matchV
 // -----------------------------------------------------------------------------
 
-type Variant<T = string, V = unknown> = { type: string; value: unknown };
+type Variant<T = string, V = unknown> = { type: T; value: V };
 
 type VariantCasesOf<V extends Variant, Z> = {
   [key in V['type']]: (x: Extract<V, { type: key }>['value']) => Z;
