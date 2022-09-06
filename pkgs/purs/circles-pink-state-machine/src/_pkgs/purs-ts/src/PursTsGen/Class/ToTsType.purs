@@ -24,7 +24,7 @@ instance toTsTypeNumber :: ToTsType Number where
   toTsType _ = TS.number
 
 instance toTsTypeInt :: ToTsType Int where
-  toTsType _ = TS.mkType_ $ TS.qualName "Data_Int" "Int"
+  toTsType _ = TS.mkType_ $ TS.qualName "PursTsGen_Prim" "Int"
 
 instance toTsTypeString :: ToTsType String where
   toTsType _ = TS.string
