@@ -49,8 +49,8 @@
     "src/context/debug.tsx",
     "src/context/theme.tsx",
     // "src/env.ts",
-    // "src/i18n.ts",
-    // "src/i18n_custom.ts",
+    "src/i18n.ts",
+    "src/i18n_custom.ts",
     // "src/index.tsx",
     // "src/onboarding/index.tsx",
     // "src/onboarding/useStateMachine.ts",
@@ -81,7 +81,7 @@
     // "src/onboarding/views/dashboard/index.tsx",
     // "src/onboarding/views/index.tsx",
     "src/purs-util.ts",
-    "src/ui-utils.ts",
+    "src/ui-utils.ts"
     // "src/utils/fpTs.ts"
   ],
   "include": [
@@ -89,8 +89,7 @@
     "src/components/forms",
     "src/components/helper",
     "src/components/layout",
-    "src/components/text",
-    "../state-machine/src",
+    "src/components/text"
   ],
   "exclude": ["node_modules"]
 }

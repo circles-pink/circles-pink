@@ -2,6 +2,7 @@ module CirclesPink.GenerateTSD.Modules where
 
 import Prelude
 
+import CirclesCore as CirclesPink.Data.User
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
@@ -29,6 +30,7 @@ import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
 import Prelude as Data.Unit
+import Prim as Data.Int
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Data.ABC (A(..), B(..), C, D)
@@ -70,12 +72,12 @@ modules =
 
   , "Data.Argonaut" /\ join
       [ R.typeDef "--"
-            (Proxy :: _ (Data.Argonaut.JsonDecodeError))
+          (Proxy :: _ (Data.Argonaut.JsonDecodeError))
       ]
 
   , "CirclesPink.Garden.StateMachine.Control.EnvControl" /\ join
       [ R.typeDef "--"
-            (Proxy :: _ (CirclesPink.Garden.StateMachine.Control.EnvControl.StorageType))
+          (Proxy :: _ (CirclesPink.Garden.StateMachine.Control.EnvControl.StorageType))
       ]
 
   , "RemoteData" /\ join
@@ -112,6 +114,12 @@ modules =
             (Proxy :: _ CirclesPink.Data.Address.Address)
         , instanceDef "ordAddress"
             (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
+        ]
+
+  , "CirclesPink.Data.User" /\
+      join
+        [ R.typeAlias "User"
+            (Proxy :: _ CirclesPink.Data.User.User)
         ]
 
   , "Simple.Data.Array" /\
@@ -240,6 +248,12 @@ modules =
       join
         [ typeDef "--"
             (Proxy :: _ Data.Unit.Unit)
+        ]
+
+  , "Data.Int" /\
+      join
+        [ typeDef "--"
+            (Proxy :: _ Data.Int.Int)
         ]
 
   ]
