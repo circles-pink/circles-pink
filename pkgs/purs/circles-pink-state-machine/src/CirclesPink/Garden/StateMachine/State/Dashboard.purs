@@ -31,8 +31,7 @@ module CirclesPink.Garden.StateMachine.State.Dashboard
   , VouchersResult
   , _dashboard
   , initDashboard
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -82,8 +81,6 @@ type DashboardState =
   , vouchersResult :: VouchersResult
   , voucherProvidersResult :: VoucherProvidersResult
   }
-
-
 
 type DashboardState_ =
   { user :: User

@@ -102,6 +102,7 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
+import PursTsGen (class ToPursType, class ToTsType, PursType(..), defaultToPursType, defaultToTsType)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import VoucherServer.Spec.Types (Voucher, VoucherProvider)
@@ -293,6 +294,15 @@ type StorageDeleteItem m = forall k r. EncodeJson k => CryptoKey -> StorageType 
 type StorageClear m = forall r. StorageType -> ExceptV (ErrStorageClear + r) m Unit
 
 data StorageType = SessionStorage | LocalStorage
+
+instance ToTsType StorageType where
+  toTsType _ = defaultToTsType storageType []
+
+instance ToPursType StorageType where
+  toPursType _ = defaultToPursType storageType []
+
+storageType :: PursType
+storageType = PursType "CirclesPink_Data_StorageType" "StorageType"
 
 --------------------------------------------------------------------------------
 type ErrStorageSetItem r = ErrNoStorage + r

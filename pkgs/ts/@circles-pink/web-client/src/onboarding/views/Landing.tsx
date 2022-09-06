@@ -1,5 +1,3 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { Button, ButtonLinkLike } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
@@ -17,7 +15,6 @@ import {
   TwoButtonRow,
 } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import { LandingState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 
 type LandingProps = {
   state: LandingState;
