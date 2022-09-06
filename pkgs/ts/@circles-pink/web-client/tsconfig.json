@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
-    "skipLibCheck": true,
+    // "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -81,15 +81,16 @@
     // "src/onboarding/views/dashboard/index.tsx",
     // "src/onboarding/views/index.tsx",
     "src/purs-util.ts",
-    "src/ui-utils.ts"
-    // "src/utils/fpTs.ts",
+    "src/ui-utils.ts",
+    // "src/utils/fpTs.ts"
   ],
   "include": [
     "types",
     "src/components/forms",
     "src/components/helper",
     "src/components/layout",
-    "src/components/text"
+    "src/components/text",
+    "../state-machine/src",
   ],
   "exclude": ["node_modules"]
 }

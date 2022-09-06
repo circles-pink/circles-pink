@@ -7,10 +7,12 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
-import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
+import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
+import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
+import Data.Argonaut as Data.Argonaut
 import Data.Either (Either)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
@@ -26,6 +28,7 @@ import Data.Pair as Data.Pair
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
+import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
 import PursTsGen.Data.ABC (A(..), B(..), C, D)
@@ -63,6 +66,16 @@ modules =
   , "CirclesPink.Garden.StateMachine.State" /\ join
       [ R.typeAlias "LandingState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LandingState)
+      ]
+
+  , "Data.Argonaut" /\ join
+      [ R.typeDef "--"
+            (Proxy :: _ (Data.Argonaut.JsonDecodeError))
+      ]
+
+  , "CirclesPink.Garden.StateMachine.Control.EnvControl" /\ join
+      [ R.typeDef "--"
+            (Proxy :: _ (CirclesPink.Garden.StateMachine.Control.EnvControl.StorageType))
       ]
 
   , "RemoteData" /\ join
@@ -221,6 +234,12 @@ modules =
       join
         [ value "toNullable" []
             (Data.Nullable.toNullable :: _ A -> _)
+        ]
+
+  , "Data.Unit" /\
+      join
+        [ typeDef "--"
+            (Proxy :: _ Data.Unit.Unit)
         ]
 
   ]
