@@ -15,11 +15,15 @@ import {
   TwoButtonRow,
 } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import { LandingState } from '@circles-pink/state-machine/src';
+import {
+  CirclesAction,
+  LandingState,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
 
 type LandingProps = {
   state: LandingState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
 };
 
 export const Landing = ({ state, act }: LandingProps): ReactElement => {
@@ -28,7 +32,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
-    act(A._landing(A._checkForSession(unit)));
+    act(_StateMachine._landing(_StateMachine._checkForSession(unit)));
   }, []);
 
   if (
@@ -65,14 +69,14 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             <Button
               prio={'medium'}
               theme={theme}
-              onClick={() => act(A._landing(A._signIn(unit)))}
+              onClick={() => act(_StateMachine._landing(_StateMachine._signIn(unit)))}
             >
               {t('signInButton')}
             </Button>
             <Button
               prio={'high'}
               theme={theme}
-              onClick={() => act(A._landing(A._signUp(unit)))}
+              onClick={() => act(_StateMachine._landing(_StateMachine._signUp(unit)))}
             >
               {t('signUpButton')}
             </Button>
@@ -80,7 +84,9 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
           <Button
             prio={'high'}
             theme={theme}
-            onClick={() => act(A._landing(A._signUp(unit)))}
+            onClick={() =>
+              act(_StateMachine._landing(_StateMachine._signUp(unit)))
+            }
           >
             {t('signUpButton')}
           </Button>
@@ -90,7 +96,11 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
         <FadeIn orientation={orientation} delay={getDelay()}>
           <JustifyStartCenter>
             <SubClaim>{t('landing.loginWithKey')}</SubClaim>
-            <ButtonLinkLike onClick={() => act(A._landing(A._signIn(unit)))}>
+            <ButtonLinkLike
+              onClick={() =>
+                act(_StateMachine._landing(_StateMachine._signIn(unit)))
+              }
+            >
               {t('signInButton')}
             </ButtonLinkLike>
           </JustifyStartCenter>

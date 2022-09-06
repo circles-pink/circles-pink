@@ -1,5 +1,15 @@
 module CirclesPink.Garden.StateMachine.Action
-  ( CirclesAction
+  ( AskEmailAction
+  , AskUsernameAction
+  , CirclesAction
+  , DashboardAction
+  , DebugAction
+  , InfoSecurityAction
+  , LandingAction
+  , LoginAction
+  , MagicWordsAction
+  , SubmitAction
+  , TrustsAction
   , _addTrustConnection
   , _askEmail
   , _askUsername
@@ -47,115 +57,127 @@ import Data.Variant (Variant, inj)
 import Type.Proxy (Proxy(..))
 
 type CirclesAction = Variant
-  ( askUsername ::
-      Variant
-        ( setUsername :: String
-        , next :: Unit
-        )
-  , askEmail ::
-      Variant
-        ( prev :: Unit
-        , setEmail :: String
-        , setTerms :: Unit
-        , setPrivacy :: Unit
-        , next :: Unit
-        )
-  , infoSecurity ::
-      Variant
-        ( prev :: Unit
-        , next :: Unit
-        )
-  , magicWords ::
-      Variant
-        ( prev :: Unit
-        , newPrivKey :: Unit
-        , next :: Unit
-        )
-  , submit ::
-      Variant
-        ( prev :: Unit
-        , submit :: Unit
-        )
-  , dashboard ::
-      Variant
-        ( logout :: Unit
-        , getTrusts :: Unit
-        , addTrustConnection :: UserIdent
-        , removeTrustConnection :: UserIdent
-        , getBalance :: Unit
-        , getUBIPayout :: Unit
-        , transfer ::
-            { from :: Address
-            , to :: Address
-            , value :: BN
-            , paymentNote :: String
-            }
-        , getUsers ::
-            { userNames :: Array String
-            , addresses :: Array Address
-            }
-        , userSearch ::
-            { query :: String
-            }
-        , redeploySafeAndToken :: Unit
-        , expandTrustNetwork :: String
-        , getVouchers :: String
-        , getVoucherProviders :: Unit
-        )
-  , login ::
-      Variant
-        ( login :: Unit
-        , signUp :: Unit
-        , setMagicWords :: String
-        )
-  , trusts ::
-      Variant
-        ( getSafeStatus :: Unit
-        , finalizeRegisterUser :: Unit
-        )
-  , debug ::
-      Variant
-        ( coreToWindow :: Unit
-        , setMagicWords :: String
-        )
-  , landing ::
-      Variant
-        ( signUp :: Unit
-        , signIn :: Unit
-        , checkForSession :: Unit
-        )
+  ( askUsername :: AskUsernameAction
+  , askEmail :: AskEmailAction
+  , infoSecurity :: InfoSecurityAction
+  , magicWords :: MagicWordsAction
+  , submit :: SubmitAction
+  , dashboard :: DashboardAction
+  , login :: LoginAction
+  , trusts :: TrustsAction
+  , debug :: DebugAction
+  , landing :: LandingAction
   )
 
 ----
 
-_askUsername :: forall a v. a -> Variant (askUsername :: a | v)
+type AskUsernameAction = Variant
+  ( setUsername :: String
+  , next :: Unit
+  )
+
+type AskEmailAction = Variant
+  ( prev :: Unit
+  , setEmail :: String
+  , setTerms :: Unit
+  , setPrivacy :: Unit
+  , next :: Unit
+  )
+
+type InfoSecurityAction = Variant
+  ( prev :: Unit
+  , next :: Unit
+  )
+
+type MagicWordsAction = Variant
+  ( prev :: Unit
+  , newPrivKey :: Unit
+  , next :: Unit
+  )
+
+type SubmitAction = Variant
+  ( prev :: Unit
+  , submit :: Unit
+  )
+
+type DashboardAction = Variant
+  ( logout :: Unit
+  , getTrusts :: Unit
+  , addTrustConnection :: UserIdent
+  , removeTrustConnection :: UserIdent
+  , getBalance :: Unit
+  , getUBIPayout :: Unit
+  , transfer ::
+      { from :: Address
+      , to :: Address
+      , value :: BN
+      , paymentNote :: String
+      }
+  , getUsers ::
+      { userNames :: Array String
+      , addresses :: Array Address
+      }
+  , userSearch ::
+      { query :: String
+      }
+  , redeploySafeAndToken :: Unit
+  , expandTrustNetwork :: String
+  , getVouchers :: String
+  , getVoucherProviders :: Unit
+  )
+
+type LoginAction = Variant
+  ( login :: Unit
+  , signUp :: Unit
+  , setMagicWords :: String
+  )
+
+type TrustsAction = Variant
+  ( getSafeStatus :: Unit
+  , finalizeRegisterUser :: Unit
+  )
+
+type DebugAction = Variant
+  ( coreToWindow :: Unit
+  , setMagicWords :: String
+  )
+
+type LandingAction = Variant
+  ( signUp :: Unit
+  , signIn :: Unit
+  , checkForSession :: Unit
+  )
+
+----
+
+_askUsername :: AskUsernameAction -> CirclesAction
 _askUsername = inj (Proxy :: _ "askUsername")
 
-_askEmail :: forall a v. a -> Variant (askEmail :: a | v)
+_askEmail :: AskEmailAction -> CirclesAction
 _askEmail = inj (Proxy :: _ "askEmail")
 
-_infoSecurity :: forall a v. a -> Variant (infoSecurity :: a | v)
+_infoSecurity :: InfoSecurityAction -> CirclesAction
 _infoSecurity = inj (Proxy :: _ "infoSecurity")
 
-_magicWords :: forall a v. a -> Variant (magicWords :: a | v)
+_magicWords :: MagicWordsAction -> CirclesAction
 _magicWords = inj (Proxy :: _ "magicWords")
 
-_submit :: forall a v. a -> Variant (submit :: a | v)
+_submit :: SubmitAction -> CirclesAction
 _submit = inj (Proxy :: _ "submit")
 
-_dashboard :: forall a v. a -> Variant (dashboard :: a | v)
+_dashboard :: DashboardAction -> CirclesAction
 _dashboard = inj (Proxy :: _ "dashboard")
 
-_landing :: forall a v. a -> Variant (landing :: a | v)
-_landing = inj (Proxy :: _ "landing")
-
-_trusts :: forall a v. a -> Variant (trusts :: a | v)
-_trusts = inj (Proxy :: _ "trusts")
-
-_login :: forall a v. a -> Variant (login :: a | v)
+_login :: LoginAction -> CirclesAction
 _login = inj (Proxy :: _ "login")
 
-_debug :: forall a v. a -> Variant (debug :: a | v)
+_trusts :: TrustsAction -> CirclesAction
+_trusts = inj (Proxy :: _ "trusts")
+
+_landing :: LandingAction -> CirclesAction
+_landing = inj (Proxy :: _ "landing")
+
+_debug :: DebugAction -> CirclesAction
 _debug = inj (Proxy :: _ "debug")
 
 ----
