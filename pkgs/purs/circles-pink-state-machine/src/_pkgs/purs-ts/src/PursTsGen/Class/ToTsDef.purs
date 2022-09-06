@@ -23,24 +23,24 @@ class ToTsDef :: forall k. k -> Constraint
 class ToTsDef a where
   toTsDef :: Proxy a -> Array TS.Declaration
 
-instance toTsDefMaybe :: ToTsDef (Maybe A) where
+instance ToTsDef (Maybe A) where
   toTsDef = genericToTsDef "Maybe"
 
-instance toTsefEither :: ToTsDef (Either A B) where
+instance  ToTsDef (Either A B) where
   toTsDef = genericToTsDef "Either"
 
-instance toTsDefTuple :: ToTsDef (Tuple A B) where
+instance  ToTsDef (Tuple A B) where
   toTsDef = genericToTsDef "Tuple"
 
-instance toTsDefUnit :: ToTsDef Unit where
+instance  ToTsDef Unit where
   toTsDef _ = pure $ TS.typeDef (TS.name "Unit") [] TS.undefined
 
-instance toTsDefNullable :: ToTsDef (Nullable A) where
+instance  ToTsDef (Nullable A) where
   toTsDef _ = pure $ TS.typeDef (TS.name "Nullable") [] (TS.null ||| toTsType A)
 
-instance toTsTypeDefUserIdent :: ToTsDef Int where
+instance  ToTsDef Int where
   toTsDef _ = pure $ TS.typeDef (TS.name "Int") []
-    $ TS.opaque (TS.qualName "Data_Int" "Int")
+    $ TS.opaque (TS.qualName "PursTsGen_Prim" "Int")
     $ TS.name
     <$> []
 
