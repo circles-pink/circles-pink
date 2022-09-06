@@ -13,6 +13,7 @@ import * as RemoteData from "@circles-pink/state-machine/output/RemoteData";
 import * as Data_IxGraph from "@circles-pink/state-machine/output/Data.IxGraph";
 import * as CirclesPink_Data_TrustState from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 import * as CirclesPink_Data_TrustConnection from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
+import * as CirclesPink_Data_TrustNode from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode"
 
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
@@ -20,6 +21,8 @@ export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.D
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
+export type {TrustNode} from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode"
+
 export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export { Pair } from "@circles-pink/state-machine/output/Data.Pair";
 export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
@@ -42,3 +45,4 @@ export const _TrustState = CirclesPink_Data_TrustState;
 export const _Either = Data_Either;
 export const _Nullable = Data_Nullable;
 export const _TrustConnection = CirclesPink_Data_TrustConnection;
+export const _TrustNode = CirclesPink_Data_TrustNode;
