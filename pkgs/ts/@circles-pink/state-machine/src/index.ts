@@ -2,7 +2,10 @@
 import * as Simple_Data_Array from "@circles-pink/state-machine/output/Simple.Data.Array";
 import * as Data_Either from "@circles-pink/state-machine/output/Data.Either";
 import * as Data_Nullable from "@circles-pink/state-machine/output/Data.Nullable";
+import * as Data_Maybe from "@circles-pink/state-machine/output/Data.Maybe";
+import * as Data_Tuple from "@circles-pink/state-machine/output/Data.Tuple";
 import * as Simple_Data_Tuple from "@circles-pink/state-machine/output/Simple.Data.Tuple";
+import * as Simple_Data_Maybe from "@circles-pink/state-machine/output/Simple.Data.Maybe";
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
 import * as CirclesPink_Data_Address from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
@@ -27,8 +30,9 @@ export type {
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 
 // export const _Array = Data_Array;
-export const _ArrayS = Simple_Data_Array;
-export const _Tuple = { ...Simple_Data_Tuple };
+export const _Array = { ...Simple_Data_Array };
+export const _Tuple = { ...Data_Tuple, ...Simple_Data_Tuple };
+export const _Maybe = { ...Data_Maybe, ...Simple_Data_Maybe };
 export const _UserIdent = CirclesPink_Data_UserIdent;
 export const _Pair = Data_Pair;
 export const _Address = CirclesPink_Data_Address;

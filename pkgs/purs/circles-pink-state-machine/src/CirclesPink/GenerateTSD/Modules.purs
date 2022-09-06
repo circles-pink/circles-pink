@@ -33,6 +33,7 @@ import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Tuple as Simple.Data.Tuple
+import Simple.Data.Maybe as Simple.Data.Maybe
 import Type.Proxy (Proxy(..))
 
 moduleMap :: Map String (String /\ String)
@@ -188,6 +189,12 @@ modules =
             (Proxy :: _ (Data.Maybe.Maybe A))
         , value "maybe" []
             (Data.Maybe.maybe :: _ -> (A -> B) -> _)
+        ]
+
+  , "Simple.Data.Maybe" /\
+      join
+        [ value "unMaybe" []
+            (Simple.Data.Maybe.unMaybe :: _ -> _ A -> C)
         ]
 
   , "Data.Ord" /\

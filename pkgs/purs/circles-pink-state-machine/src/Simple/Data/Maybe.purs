@@ -5,7 +5,10 @@ module Simple.Data.Maybe
   , map
   , module Exp
   , pure
+  , unMaybe
   ) where
+
+import Prelude
 
 import Control.Bind as B
 import Data.Maybe (Maybe(..))
@@ -30,3 +33,7 @@ eq _EQ x y = case x, y of
   Just x', Just y' -> _EQ.eq x' y'
   _, _ -> false
 
+unMaybe :: forall a z. { onJust :: a -> z, onNothing :: Unit -> z } -> Maybe a -> z
+unMaybe { onJust, onNothing } = case _ of
+  Just x -> onJust x
+  Nothing -> onNothing unit
