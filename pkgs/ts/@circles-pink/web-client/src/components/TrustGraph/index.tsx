@@ -2,9 +2,25 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, { LayoutOptions } from 'cytoscape';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import {
+  addrToString,
+  Graph,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import {
+  getIdentifier,
+  UserIdent,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
+import {
+  isLoadingTrust,
+  isLoadingUntrust,
+  isTrusted,
+} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
 import { Theme } from '../../context/theme';
+
 import { ButtonRow, Margin } from '../helper';
 import { Button } from '../forms';
+import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
 
 // -----------------------------------------------------------------------------
 // Layouts
@@ -22,6 +38,7 @@ import { concentric } from './layout/concentric';
 import { JustText } from '../text';
 import { t } from 'i18next';
 import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
+import { TrustState, _TrustState } from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -100,7 +117,7 @@ export const TrustGraph = ({
     //   const duration = 250 + Math.random() *  50
     //   return ele
     //     .animation({
-    //       style:  { opacity: 1, 'background-color': theme.baseColor, width: ele.data('label').length * 12, height: 15}, 
+    //       style:  { opacity: 1, 'background-color': theme.baseColor, width: ele.data('label').length * 12, height: 15},
     //       duration,
     //       easing: 'ease-in-out-sine',
     //     })
@@ -142,7 +159,7 @@ export const TrustGraph = ({
     {
       selector: 'node',
       style: {
-        width: (node:any) => node.data('label').length * 12 ,
+        width: (node: any) => node.data('label').length * 12,
         height: 15,
         padding: '4px',
         shape: 'round-rectangle',
@@ -167,13 +184,13 @@ export const TrustGraph = ({
         'target-arrow-shape': 'triangle',
         width: 1,
         'line-style': (s: any) => {
-          const trustState = s._private.data.value as TrustState;
+          const trustState = s._private.data.value;
 
-          if (isTrusted(trustState)) {
+          if (_TrustState.isTrusted(trustState)) {
             return 'solid';
           } else if (
-            isLoadingTrust(trustState) ||
-            isLoadingUntrust(trustState)
+            _TrustState.isLoadingTrust(trustState) ||
+            _TrustState.isLoadingUntrust(trustState)
           ) {
             return 'dotted';
           } else {
