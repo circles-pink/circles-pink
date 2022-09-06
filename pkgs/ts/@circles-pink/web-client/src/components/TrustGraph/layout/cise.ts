@@ -1,5 +1,3 @@
-import { getIdentifier } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-
 export const cise = {
   // -------- Mandatory parameters --------
   name: 'cise',

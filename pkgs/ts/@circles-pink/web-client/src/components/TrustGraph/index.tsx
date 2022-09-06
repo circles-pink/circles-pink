@@ -2,26 +2,9 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, { LayoutOptions } from 'cytoscape';
 import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import {
-  addrToString,
-  Graph,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import {
-  getIdentifier,
-  UserIdent,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import {
-  isLoadingTrust,
-  isLoadingUntrust,
-  isTrusted,
-  TrustState,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
-import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
 import { Theme } from '../../context/theme';
-
 import { ButtonRow, Margin } from '../helper';
 import { Button } from '../forms';
-import * as TN from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode"
 
 // -----------------------------------------------------------------------------
 // Layouts
