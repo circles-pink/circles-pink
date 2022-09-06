@@ -1,10 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 
 export const DebugContext: React.Context<[boolean, (x: boolean) => void]> =
-  React.createContext(
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    [false as boolean, (x: boolean) => {}]
-  );
+  React.createContext([false as boolean, (x: boolean) => {}]);
 
 type DebugProviderProps = {
   children: ReactElement;

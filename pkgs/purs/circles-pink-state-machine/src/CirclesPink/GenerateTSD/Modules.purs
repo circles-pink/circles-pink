@@ -8,6 +8,7 @@ import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
+import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Either (Either)
@@ -57,6 +58,11 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
       , R.typeAlias "DashboardState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
+      ]
+
+  , "CirclesPink.Garden.StateMachine.State" /\ join
+      [ R.typeAlias "LandingState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.LandingState)
       ]
 
   , "RemoteData" /\ join
