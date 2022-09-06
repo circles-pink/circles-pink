@@ -1,8 +1,3 @@
-import {
-  Address,
-  ordAddress,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import * as G from '@circles-pink/state-machine/output/Data.IxGraph';
 import React, { ReactElement, SetStateAction, useState } from 'react';
 import {
   _Tuple,
@@ -14,9 +9,11 @@ import {
   _TrustConnection,
   UserIdent,
   _UserIdent,
+  CirclesGraph,
+  Address,
+  _Address,
+  _Array,
 } from '@circles-pink/state-machine/src';
-import * as A from '@circles-pink/state-machine/output/Simple.Data.Array';
-import { CirclesGraph } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import { pipe } from 'fp-ts/lib/function';
 import { Theme } from '../context/theme';
 import { JustifyAroundCenter, JustifyStartCenter, Margin } from './helper';
@@ -84,7 +81,7 @@ export const TrustUserList = (props: Props) => {
     actionRow
   } = props;
 
-  const neighborhood = G.neighborhood(ordAddress)(address)(graph);
+  const neighborhood = _IxGraph.neighborhood(_Address.ordAddress)(address)(graph);
   const items = pipe(neighborhood, _Either.hush, _Nullable.toNullable);
 
   if (!items) return <div>Address not found in graph!</div>;
@@ -152,7 +149,7 @@ export const TrustUserList = (props: Props) => {
         )}
         {pipe(
           items,
-          A.mapArray(x => {
+          _Array.mapArray(x => {
             console.log(x);
 
             const [neighborConnectivity, trustNode] = pipe(
