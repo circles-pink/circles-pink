@@ -32,7 +32,7 @@
     "src/components/PageSelector.tsx",
     // "src/components/StateMachineDebugger.tsx",
     // "src/components/StepIndicator.tsx",
-    "src/components/TrustGraph/index.tsx",
+    // "src/components/TrustGraph/index.tsx",
     "src/components/TrustGraph/layout/cise.ts",
     "src/components/TrustGraph/layout/concentric.ts",
     "src/components/TrustGraph/layout/coseBilkent.ts",

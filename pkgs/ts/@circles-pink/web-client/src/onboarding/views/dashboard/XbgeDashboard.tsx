@@ -579,6 +579,77 @@ export const XbgeDashboard = ({
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
+                address={stateRaw.user.safeAddress}
+                title={t('dashboard.trustNetworkTitle')}
+                graph={stateRaw.trusts}
+                theme={theme}
+                icon={mdiLan}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                // trustAddResult={state.trustAddResult}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                // trustRemoveResult={state.trustRemoveResult}
+              />
+            </FadeIn>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <UserSearch
+                userSearchResult={stateRaw.userSearchResult}
+                trusts={stateRaw.trusts}
+                onSearch={query => act(A._dashboard(A._userSearch({ query })))}
+                onAddTrust={userIdent =>
+                  act(A._dashboard(A._addTrustConnection(userIdent)))
+                }
+                centerAddress={stateRaw.user.safeAddress}
+                title={t('dashboard.exploreTitle')}
+                theme={theme}
+                icon={mdiMagnify}
+                toggleOverlay={toggleOverlay}
+                setOverwriteTo={setOverwriteTo}
+                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                removeTrust={to =>
+                  act(A._dashboard(A._removeTrustConnection(to)))
+                }
+                description={t('dashboard.xbgeSpecial.userSearchDescription')}
+                actionRow={
+                  <div>
+                    <Input
+                      type="text"
+                      value={search}
+                      placeholder={t('dashboard.userSearchPlaceholder')}
+                      onChange={e => setSearch(e.target.value)}
+                    />
+                    <>
+                      {shadowFriends && shadowFriends.length > 0 && (
+                        <>
+                          <Margin bottom={0.5}>
+                            <JustText fontSize={0.75}>
+                              {t('dashboard.xbgeSpecial.yourShadowFriends')}
+                            </JustText>
+                          </Margin>
+                          {shadowFriends.map((friend, index) => (
+                            <TagButton
+                              theme={theme}
+                              onClick={() => setSearch(friend)}
+                              key={`${friend}-${index}`}
+                            >
+                              {friend}
+                            </TagButton>
+                          ))}
+                        </>
+                      )}
+                    </>
+                  </div>
+                }
+              />
+            </FadeIn>
+          </MainContent>
+
+          {/* <MainContent>
+            <FadeIn orientation={'up'} delay={getDelay()}>
+              <TrustUserList
                 title={t('dashboard.trustNetworkTitle')}
                 graph={state.graph}
                 ownAddress={stateRaw.user.safeAddress}
@@ -641,7 +712,7 @@ export const XbgeDashboard = ({
                 }
               />
             </FadeIn>
-          </MainContent>
+          </MainContent> */}
 
           {sharingFeature && (
             <TopMargin>
