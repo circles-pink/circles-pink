@@ -12,6 +12,7 @@ module CirclesPink.Garden.StateMachine.Action
   , TrustsAction
   , _addTrustConnection
   , _askEmail
+  , _askEmailAction
   , _askUsername
   , _askUsernameAction
   , _checkForSession
@@ -52,7 +53,8 @@ module CirclesPink.Garden.StateMachine.Action
   , _transfer
   , _trusts
   , _userSearch
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -199,6 +201,21 @@ _askUsernameAction
      }
 _askUsernameAction =
   { _setUsername: inj (Proxy :: _ "setUsername")
+  , _next: inj (Proxy :: _ "next")
+  }
+
+_askEmailAction
+  :: { _prev :: Unit -> AskEmailAction
+     , _setEmail :: String -> AskEmailAction
+     , _setTerms :: Unit -> AskEmailAction
+     , _setPrivacy :: Unit -> AskEmailAction
+     , _next :: Unit -> AskEmailAction
+     }
+_askEmailAction =
+  { _prev: inj (Proxy :: _ "prev")
+  , _setEmail: inj (Proxy :: _ "setEmail")
+  , _setTerms: inj (Proxy :: _ "setTerms")
+  , _setPrivacy: inj (Proxy :: _ "setPrivacy")
   , _next: inj (Proxy :: _ "next")
   }
 
