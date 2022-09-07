@@ -1,13 +1,7 @@
-import {
-  CirclesState,
-  UserData,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
@@ -18,10 +12,19 @@ import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicato
 import { mapResult } from '../utils/mapResult';
 import { TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import {
+  CirclesAction,
+  CirclesState,
+  unit,
+  UserData,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+
+const { _circlesAction, _submitAction } = _StateMachine;
 
 type SubmitProps = {
   state: UserData;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   skip: CirclesState['type'][];
 };
 
@@ -63,7 +66,9 @@ export const Submit = ({ state, act, skip }: SubmitProps): ReactElement => {
             <Button
               prio={'medium'}
               theme={theme}
-              onClick={() => act(A._submit(A._prev(unit)))}
+              onClick={() =>
+                act(_circlesAction._submit(_submitAction._prev(unit)))
+              }
             >
               {t('prevButton')}
             </Button>
@@ -72,7 +77,9 @@ export const Submit = ({ state, act, skip }: SubmitProps): ReactElement => {
               prio={'high'}
               theme={theme}
               state={mapResult(state.submitResult)}
-              onClick={() => act(A._submit(A._submit(unit)))}
+              onClick={() =>
+                act(_circlesAction._submit(_submitAction._submit(unit)))
+              }
             >
               {t('submitButton')}
             </Button>

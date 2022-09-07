@@ -9,6 +9,7 @@ import * as Simple_Data_Maybe from "@circles-pink/state-machine/output/Simple.Da
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
 import * as CirclesPink_Data_Address from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
+import * as CirclesPink_Data_Mnemonic from "@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic";
 import * as RemoteData from "@circles-pink/state-machine/output/RemoteData";
 import * as Data_IxGraph from "@circles-pink/state-machine/output/Data.IxGraph";
 import * as CirclesPink_Data_TrustState from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
@@ -21,6 +22,8 @@ import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
+export type { PrivateKey } from "@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey";
+export type { Mnemonic } from "@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic";
 export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
@@ -54,6 +57,7 @@ export const _Maybe = { ...Data_Maybe, ...Simple_Data_Maybe };
 export const _UserIdent = CirclesPink_Data_UserIdent;
 export const _Pair = Data_Pair;
 export const _Address = CirclesPink_Data_Address;
+export const _Mnemonic = CirclesPink_Data_Mnemonic;
 export const _RemoteData = RemoteData;
 export const _IxGraph = Data_IxGraph;
 export const _TrustState = CirclesPink_Data_TrustState;

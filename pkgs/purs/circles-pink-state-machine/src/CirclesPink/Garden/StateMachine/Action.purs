@@ -13,13 +13,13 @@ module CirclesPink.Garden.StateMachine.Action
   , _addTrustConnection
   , _askEmail
   , _askEmailAction
-  , _infoSecurityAction
   , _askUsername
   , _askUsernameAction
   , _checkForSession
   , _circlesAction
   , _coreToWindow
   , _dashboard
+  , _dashboardAction
   , _debug
   , _expandTrustNetwork
   , _finalizeRegisterUser
@@ -31,12 +31,14 @@ module CirclesPink.Garden.StateMachine.Action
   , _getVoucherProviders
   , _getVouchers
   , _infoSecurity
+  , _infoSecurityAction
   , _landing
   , _landingAction
   , _login
   , _login'
   , _loginAction
   , _magicWords
+  , _magicWordsAction
   , _newPrivKey
   , _next
   , _prev
@@ -51,11 +53,11 @@ module CirclesPink.Garden.StateMachine.Action
   , _signUp
   , _submit
   , _submit'
+  , _submitAction
   , _transfer
   , _trusts
   , _userSearch
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -165,6 +167,9 @@ _circlesAction
      , _infoSecurity :: InfoSecurityAction -> CirclesAction
      , _landing :: LandingAction -> CirclesAction
      , _login :: LoginAction -> CirclesAction
+     , _magicWords :: MagicWordsAction -> CirclesAction
+     , _submit :: SubmitAction -> CirclesAction
+     , _dashboard :: DashboardAction -> CirclesAction
      }
 _circlesAction =
   { _askUsername
@@ -172,6 +177,9 @@ _circlesAction =
   , _infoSecurity
   , _landing
   , _login
+  , _magicWords
+  , _submit
+  , _dashboard
   }
 
 _landingAction
@@ -229,6 +237,69 @@ _infoSecurityAction =
   , _next: inj (Proxy :: _ "next")
   }
 
+_magicWordsAction
+  :: { _prev :: Unit -> MagicWordsAction
+     , _newPrivKey :: Unit -> MagicWordsAction
+     , _next :: Unit -> MagicWordsAction
+     }
+_magicWordsAction =
+  { _prev: inj (Proxy :: _ "prev")
+  , _newPrivKey: inj (Proxy :: _ "newPrivKey")
+  , _next: inj (Proxy :: _ "next")
+  }
+
+_submitAction
+  :: { _prev :: Unit -> SubmitAction
+     , _submit :: Unit -> SubmitAction
+     }
+_submitAction =
+  { _prev: inj (Proxy :: _ "prev")
+  , _submit: inj (Proxy :: _ "submit")
+  }
+
+_dashboardAction
+  :: { _logout :: Unit -> DashboardAction
+     , _getTrusts :: Unit -> DashboardAction
+     , _addTrustConnection :: UserIdent -> DashboardAction
+     , _removeTrustConnection :: UserIdent -> DashboardAction
+     , _getBalance :: Unit -> DashboardAction
+     , _getUBIPayout :: Unit -> DashboardAction
+     , _transfer ::
+         { from :: Address
+         , to :: Address
+         , value :: BN
+         , paymentNote :: String
+         }
+         -> DashboardAction
+     , _getUsers ::
+         { userNames :: Array String
+         , addresses :: Array Address
+         }
+         -> DashboardAction
+     , _userSearch ::
+         { query :: String
+         }
+         -> DashboardAction
+     , _redeploySafeAndToken :: Unit -> DashboardAction
+     , _expandTrustNetwork :: String -> DashboardAction
+     , _getVouchers :: String -> DashboardAction
+     , _getVoucherProviders :: Unit -> DashboardAction
+     }
+_dashboardAction =
+  { _logout: inj (Proxy :: _ "logout")
+  , _getTrusts: inj (Proxy :: _ "getTrusts")
+  , _addTrustConnection: inj (Proxy :: _ "addTrustConnection")
+  , _removeTrustConnection: inj (Proxy :: _ "removeTrustConnection")
+  , _getBalance: inj (Proxy :: _ "getBalance")
+  , _getUBIPayout: inj (Proxy :: _ "getUBIPayout")
+  , _transfer: inj (Proxy :: _ "transfer")
+  , _getUsers: inj (Proxy :: _ "getUsers")
+  , _userSearch: inj (Proxy :: _ "userSearch")
+  , _redeploySafeAndToken: inj (Proxy :: _ "redeploySafeAndToken")
+  , _expandTrustNetwork: inj (Proxy :: _ "expandTrustNetwork")
+  , _getVouchers: inj (Proxy :: _ "getVouchers")
+  , _getVoucherProviders: inj (Proxy :: _ "getVoucherProviders")
+  }
 
 _askUsername :: AskUsernameAction -> CirclesAction
 _askUsername = inj (Proxy :: _ "askUsername")
