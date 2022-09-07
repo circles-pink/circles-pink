@@ -61,7 +61,7 @@
     "src/onboarding/utils/mapResult.ts",
     "src/onboarding/utils/paginate.ts",
     // "src/onboarding/utils/timeCircles.ts",
-    // "src/onboarding/views/AskEmail.tsx",
+    "src/onboarding/views/AskEmail.tsx",
     "src/onboarding/views/AskUsername.tsx",
     // "src/onboarding/views/Debug.tsx",
     // "src/onboarding/views/InfoSecurity.tsx",

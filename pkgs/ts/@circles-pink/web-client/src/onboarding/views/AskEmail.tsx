@@ -1,16 +1,8 @@
-import {
-  CirclesState,
-  EmailApiResult,
-  UserData,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';
-
 import { Claim, SubClaim, Text } from '../../components/text';
 import { Button, Input, Checkbox } from '../../components/forms';
 import { mapIndicatorColors } from '../utils/mapIndicatorColors';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import { getIncrementor } from '../utils/getCounter';
 import { directionToOrientation } from '../utils/directionToOrientation';
 import { t } from 'i18next';
@@ -21,10 +13,22 @@ import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicato
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import tw, { styled } from 'twin.macro';
+import {
+  CirclesAction,
+  CirclesState,
+  RemoteData,
+  unit,
+  UserData,
+  _RemoteData,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+
+const { _circlesAction, _askEmailAction } = _StateMachine;
 
 type AskEmailProps = {
   state: UserData;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   skip: CirclesState['type'][];
 };
 
@@ -57,9 +61,16 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
                 type="text"
                 value={state.email}
                 placeholder={t('askEmail.emailPlaceholder')}
-                onChange={e => act(A._askEmail(A._setEmail(e.target.value)))}
+                onChange={e =>
+                  act(
+                    _circlesAction._askEmail(
+                      _askEmailAction._setEmail(e.target.value)
+                    )
+                  )
+                }
                 onKeyPress={e =>
-                  e.key === 'Enter' && act(A._askEmail(A._next(unit)))
+                  e.key === 'Enter' &&
+                  act(_circlesAction._askEmail(_askEmailAction._next(unit)))
                 }
               />
               {mapStatusMessage(state.emailApiResult) !== '' && (
@@ -78,7 +89,11 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
                   borderColor={theme.baseColor}
                   label={t('askEmail.termsLabel')}
                   checked={state.terms}
-                  setChecked={() => act(A._askEmail(A._setTerms(unit)))}
+                  setChecked={() =>
+                    act(
+                      _circlesAction._askEmail(_askEmailAction._setTerms(unit))
+                    )
+                  }
                 />
               </div>
               {!state.terms && (
@@ -97,7 +112,13 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
                   borderColor={theme.baseColor}
                   label={t('askEmail.privacyLabel')}
                   checked={state.privacy}
-                  setChecked={() => act(A._askEmail(A._setPrivacy(unit)))}
+                  setChecked={() =>
+                    act(
+                      _circlesAction._askEmail(
+                        _askEmailAction._setPrivacy(unit)
+                      )
+                    )
+                  }
                 />
               </div>
               {!state.privacy && (
@@ -116,7 +137,9 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
             <Button
               theme={theme}
               prio={'medium'}
-              onClick={() => act(A._askEmail(A._prev(unit)))}
+              onClick={() =>
+                act(_circlesAction._askEmail(_askEmailAction._prev(unit)))
+              }
             >
               {t('prevButton')}
             </Button>
@@ -124,7 +147,9 @@ export const AskEmail = ({ state, act, skip }: AskEmailProps): ReactElement => {
             <Button
               prio={'high'}
               theme={theme}
-              onClick={() => act(A._askEmail(A._next(unit)))}
+              onClick={() =>
+                act(_circlesAction._askEmail(_askEmailAction._next(unit)))
+              }
             >
               {t('nextButton')}
             </Button>
@@ -146,15 +171,15 @@ const InputContainer = styled.div(() => [tw`mb-2`]);
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (email: EmailApiResult) => {
-  switch (email.type) {
-    case 'loading':
-      return '';
-    case 'success':
-      return '';
-    case 'failure':
-      return t('askEmail.validation.email');
-    case 'notAsked':
-      return '';
-  }
-};
+export const mapStatusMessage = (
+  rd: RemoteData<unknown, unknown, unknown, { isValid: boolean }>
+) =>
+  pipe(
+    rd,
+    _RemoteData.unRemoteData({
+      onFailure: () => t('askEmail.validation.email'),
+      onLoading: () => '',
+      onSuccess: ({ isValid }) => '',
+      onNotAsked: () => 'black',
+    })
+  );
