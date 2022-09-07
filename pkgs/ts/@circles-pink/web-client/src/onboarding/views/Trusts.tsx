@@ -26,6 +26,7 @@ import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Margin } from '../../components/helper';
+import { CirclesAction, TrustState } from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -39,7 +40,7 @@ type FinalizeMethod = 'collectTrusts' | 'fundSafe';
 
 type TrustsProps = {
   state: TrustState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
 };
 
 export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {

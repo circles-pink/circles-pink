@@ -5,7 +5,6 @@ import Prelude
 import CirclesCore as CirclesPink.Data.User
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.Mnemonic as CirclesPink.Data.Mnemonic
-import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
@@ -117,6 +116,8 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.UserData)
       , R.typeAlias "CirclesState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
+      , R.typeAlias "TrustState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.TrustState)
       ]
 
   , "Data.Argonaut" /\ join
