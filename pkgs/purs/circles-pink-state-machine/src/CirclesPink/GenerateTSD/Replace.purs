@@ -4,9 +4,9 @@ import Prelude
 
 import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.GenerateTSD.Wrappers as W
-import Data.Argonaut (Json)
+import Data.Argonaut (Json, JsonDecodeError)
 import Data.Argonaut as Data.Argonaut
-import Data.BN as Data.BN
+import Data.BN (BN)
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
@@ -25,7 +25,6 @@ import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Class.ToTsType (class ToTsType, toTsType) as P
 import PursTsGen.Data.ABC (A)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
@@ -61,9 +60,9 @@ else instance
   ) =>
   UnsafeReplace (Data.Pair.Pair a) (Pair a')
 
-else instance UnsafeReplace Data.Argonaut.JsonDecodeError JsonDecodeError
+else instance UnsafeReplace JsonDecodeError (Wrap JsonDecodeError)
 
-else instance UnsafeReplace Data.BN.BN BN
+else instance UnsafeReplace BN (Wrap BN)
 
 else instance UnsafeReplace CirclesPink.Data.PrivateKey.PrivateKey PrivateKey
 
@@ -133,16 +132,16 @@ instance genRecordCons ::
 typeDef :: forall t154 t155. ToTsDef t154 => UnsafeReplace t155 (Proxy t154) => String -> t155 -> Array TS.Declaration
 typeDef s x = PT.typeDef s (unsafeReplace x)
 
-value :: forall t88 t89. P.ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
+value :: forall t88 t89. ToTsType t88 => UnsafeReplace t89 t88 => String -> Array TS.Type -> t89 -> Array TS.Declaration
 value s xs x = PT.value s xs (unsafeReplace x)
 
-typeAlias :: forall t119 t120. P.ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
+typeAlias :: forall t119 t120. ToTsType t119 => UnsafeReplace t120 t119 => String -> t120 -> Array TS.Declaration
 typeAlias n x = PT.typeAlias n (unsafeReplace x)
 
 -- toTsType :: forall a a'. UnsafeReplace a a' => ToTsType a => a -> TS.Type
--- toTsType x = P.toTsType $ unsafeReplace x
+-- toTsType x = ToTsType $ unsafeReplace x
 
--- class (UnsafeReplace a a', P.ToTsType a') <= ToTsType a
+-- class (UnsafeReplace a a', ToTsType a') <= ToTsType a
 
 genericToTsDef
   :: forall a rep rep'
@@ -162,35 +161,31 @@ infixl 7 type Product as :*:
 
 --------------------------------------------------------------------------------
 
-newtype BN = BN Data.BN.BN
+instance ToPursNominal (Wrap BN) where
+  toPursNominal _ = PursNominal "Data.BN" "BN"
 
-ptBN :: PursType
-ptBN = PursType "Data_BN" "BN"
+instance ToTsType (Wrap BN) where
+  toTsType = defaultToTsType' []
 
-derive instance Newtype BN _
+instance ToTsDef (Wrap BN) where
+  toTsDef = defaultToTsDef' []
 
-instance P.ToTsType BN where
-  toTsType _ = defaultToTsType ptBN []
-
-instance ToTsDef BN where
-  toTsDef _ = defaultToTsDef ptBN []
-
-instance ToPursType BN where
-  toPursType _ = defaultToPursType ptBN []
+instance ToPursType (Wrap BN) where
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
-ptJson :: PursType
-ptJson = PursType "Data.Argonaut.Json" "Json"
+instance ToPursNominal (Wrap Json) where
+  toPursNominal _ = PursNominal "Data.Argonaut.Json" "Json"
 
-instance P.ToTsType (Wrap Json) where
-  toTsType _ = defaultToTsType ptJson []
+instance ToTsType (Wrap Json) where
+  toTsType = defaultToTsType' []
 
 instance ToTsDef (Wrap Json) where
-  toTsDef _ = defaultToTsDef ptJson []
+  toTsDef = defaultToTsDef' []
 
 instance ToPursType (Wrap Json) where
-  toPursType _ = defaultToPursType ptJson []
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
@@ -198,7 +193,7 @@ instance ToPursNominal (Wrap (Object a)) where
   toPursNominal _ = PursNominal "Foreign.Object" "Object"
 
 instance (ToTsType a) => ToTsType (Wrap (Object a)) where
-  toTsType = defaultToTsType' [toTsType (Proxy :: _ a)]
+  toTsType = defaultToTsType' [ toTsType (Proxy :: _ a) ]
 
 instance ToTsDef (Wrap (Object A)) where
   toTsDef = defaultToTsDef' []
@@ -208,49 +203,45 @@ instance (ToPursType a) => ToPursType (Wrap (Object a)) where
 
 --------------------------------------------------------------------------------
 
-ptVoucher :: PursType
-ptVoucher = PursType "VoucherServer.Spec.Types" "Voucher"
+instance ToPursNominal (Wrap Voucher) where
+  toPursNominal _ = PursNominal "VoucherServer.Spec.Types" "Voucher"
 
-instance P.ToTsType (Wrap Voucher) where
-  toTsType _ = defaultToTsType ptVoucher []
+instance ToTsType (Wrap Voucher) where
+  toTsType = defaultToTsType' []
 
 instance ToTsDef (Wrap Voucher) where
-  toTsDef _ = defaultToTsDef ptVoucher []
+  toTsDef = defaultToTsDef' []
 
 instance ToPursType (Wrap Voucher) where
-  toPursType _ = defaultToPursType ptVoucher []
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
-ptMethod :: PursType
-ptMethod = PursType "Data.HTTP.Method" "Method"
+instance ToPursNominal (Wrap Method) where
+  toPursNominal _ = PursNominal "Data.HTTP.Method" "Method"
 
-instance P.ToTsType (Wrap Method) where
-  toTsType _ = defaultToTsType ptMethod []
+instance ToTsType (Wrap Method) where
+  toTsType = defaultToTsType' []
 
 instance ToTsDef (Wrap Method) where
-  toTsDef _ = defaultToTsDef ptMethod []
+  toTsDef = defaultToTsDef' []
 
 instance ToPursType (Wrap Method) where
-  toPursType _ = defaultToPursType ptMethod []
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
-newtype JsonDecodeError = JsonDecodeError Data.Argonaut.JsonDecodeError
+instance ToPursNominal (Wrap JsonDecodeError) where
+  toPursNominal _ = PursNominal "Data_Argonaut" "JsonDecodeError"
 
-ptJsonDecodeError :: PursType
-ptJsonDecodeError = PursType "Data_Argonaut" "JsonDecodeError"
+instance ToTsType (Wrap JsonDecodeError) where
+  toTsType = defaultToTsType' []
 
-derive instance Newtype JsonDecodeError _
+instance ToTsDef (Wrap JsonDecodeError) where
+  toTsDef = defaultToTsDef' []
 
-instance P.ToTsType JsonDecodeError where
-  toTsType _ = defaultToTsType ptJsonDecodeError []
-
-instance ToTsDef JsonDecodeError where
-  toTsDef _ = defaultToTsDef ptJsonDecodeError []
-
-instance ToPursType JsonDecodeError where
-  toPursType _ = defaultToPursType ptJsonDecodeError []
+instance ToPursType (Wrap JsonDecodeError) where
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
@@ -269,10 +260,10 @@ instance g ::
   from = undefined
   to = undefined
 
-instance (P.ToTsType a) => P.ToTsType (Pair a) where
-  toTsType _ = defaultToTsType ptPair [ P.toTsType (Proxy :: _ a) ]
+instance (ToTsType a) => ToTsType (Pair a) where
+  toTsType _ = defaultToTsType ptPair [ toTsType (Proxy :: _ a) ]
 
-instance (ToPursType a, P.ToTsType a) => ToTsDef (Pair a) where
+instance (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
   toTsDef = genericToTsDef "Pair"
 
 instance (ToPursType a) => ToPursType (Pair a) where
@@ -287,7 +278,7 @@ ptAddress = PursType "Network_Ethereum_Core_Signatures" "Address"
 
 derive instance newtypeAddress :: Newtype Address _
 
-instance P.ToTsType Address where
+instance ToTsType Address where
   toTsType _ = defaultToTsType ptAddress []
 
 instance ToTsDef Address where
@@ -305,7 +296,7 @@ ptPrivateKey = PursType "CirclesPink_Data_PrivateKey" "PrivateKey"
 
 derive instance newtypePrivateKey :: Newtype PrivateKey _
 
-instance P.ToTsType PrivateKey where
+instance ToTsType PrivateKey where
   toTsType _ = defaultToTsType ptPrivateKey []
 
 instance ToTsDef PrivateKey where
