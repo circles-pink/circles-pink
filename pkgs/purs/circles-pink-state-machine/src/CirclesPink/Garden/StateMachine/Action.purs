@@ -56,6 +56,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _submitAction
   , _transfer
   , _trusts
+  , _trustsAction
   , _userSearch
   ) where
 
@@ -169,6 +170,7 @@ _circlesAction
      , _login :: LoginAction -> CirclesAction
      , _magicWords :: MagicWordsAction -> CirclesAction
      , _submit :: SubmitAction -> CirclesAction
+     , _trusts :: TrustsAction -> CirclesAction
      , _dashboard :: DashboardAction -> CirclesAction
      }
 _circlesAction =
@@ -179,6 +181,7 @@ _circlesAction =
   , _login
   , _magicWords
   , _submit
+  , _trusts
   , _dashboard
   }
 
@@ -255,6 +258,15 @@ _submitAction
 _submitAction =
   { _prev: inj (Proxy :: _ "prev")
   , _submit: inj (Proxy :: _ "submit")
+  }
+
+_trustsAction
+  :: { _getSafeStatus :: Unit -> TrustsAction
+     , _finalizeRegisterUser :: Unit -> TrustsAction
+     }
+_trustsAction =
+  { _getSafeStatus: inj (Proxy :: _ "getSafeStatus")
+  , _finalizeRegisterUser: inj (Proxy :: _ "finalizeRegisterUser")
   }
 
 _dashboardAction

@@ -26,7 +26,18 @@ import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { Margin } from '../../components/helper';
-import { CirclesAction, TrustState } from '@circles-pink/state-machine/src';
+import {
+  CirclesAction,
+  RemoteData,
+  TrustState,
+  unit,
+  _Address,
+  _EthAddress,
+  _RemoteData,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+import { ButtonState } from '../../components/forms/Button';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -43,23 +54,20 @@ type TrustsProps = {
   act: (ac: CirclesAction) => void;
 };
 
-export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
-  const state = useMemo<DefaultView>(
-    () => (defaultView as any)(stateRaw) as DefaultView,
-    [stateRaw]
-  );
+const { _circlesAction, _trustsAction } = _StateMachine;
 
+export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
 
-  const safeAddress = addrToString(state.user.safeAddress);
+  const safeAddress = _EthAddress.showAddress(state.user.safeAddress);
 
   const [showSafeInfo, setShowSafeInfo] = useState<boolean>(false);
 
   useEffect(() => {
     const safeStatus = setInterval(
-      () => act(_trusts(A._getSafeStatus(unit))),
+      () => act(_circlesAction._trusts(_trustsAction._getSafeStatus(unit))),
       5000
     );
     return () => clearInterval(safeStatus);
@@ -86,7 +94,13 @@ export const Trusts = ({ state: stateRaw, act }: TrustsProps): ReactElement => {
             {state.isReady ? (
               <Button
                 theme={theme}
-                onClick={() => act(A._trusts(A._finalizeRegisterUser(unit)))}
+                onClick={() =>
+                  act(
+                    _circlesAction._trusts(
+                      _trustsAction._finalizeRegisterUser(unit)
+                    )
+                  )
+                }
                 state={mapResults(
                   state.deploySafeResult,
                   state.deployTokenResult
@@ -274,16 +288,35 @@ const Text = tw.p`mt-4 text-lg font-medium text-gray-500`;
 // Util
 // -----------------------------------------------------------------------------
 
-type Result = {
-  type: 'notAsked' | 'loading' | 'failure' | 'success';
-};
+type ResultStates = 'notAsked' | 'loading' | 'failure' | 'success';
 
-const mapResults = (res1: Result, res2: Result) => {
-  if (res1.type === 'notAsked' && res2.type === 'notAsked') {
+export const mapResults = (
+  res1: RemoteData<unknown, unknown, unknown, unknown>,
+  res2: RemoteData<unknown, unknown, unknown, unknown>
+): ButtonState => {
+  const result1 = pipe(
+    res1,
+    _RemoteData.unRemoteData<unknown, unknown, unknown, unknown, ResultStates>({
+      onNotAsked: () => 'notAsked',
+      onFailure: () => 'failure',
+      onLoading: () => 'loading',
+      onSuccess: () => 'success',
+    })
+  );
+  const result2 = pipe(
+    res2,
+    _RemoteData.unRemoteData<unknown, unknown, unknown, unknown, ResultStates>({
+      onNotAsked: () => 'notAsked',
+      onFailure: () => 'failure',
+      onLoading: () => 'loading',
+      onSuccess: () => 'success',
+    })
+  );
+  if (result1 === 'notAsked' && result2 === 'notAsked') {
     return 'enabled';
-  } else if (res1.type === 'success' && res2.type === 'success') {
+  } else if (result1 === 'success' && result2 === 'success') {
     return 'enabled';
-  } else if (res1.type === 'failure' || res2.type === 'failure') {
+  } else if (result1 === 'failure' || result2 === 'failure') {
     return 'enabled';
   }
   return 'loading';

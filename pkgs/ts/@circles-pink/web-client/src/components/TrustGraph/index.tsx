@@ -6,15 +6,7 @@ import {
   addrToString,
   Graph,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import {
-  getIdentifier,
-  UserIdent,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import {
-  isLoadingTrust,
-  isLoadingUntrust,
-  isTrusted,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.TrustState';
+import { getIdentifier } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
 import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
 import { Theme } from '../../context/theme';
 
@@ -38,7 +30,7 @@ import { concentric } from './layout/concentric';
 import { JustText } from '../text';
 import { t } from 'i18next';
 import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
-import { TrustState, _TrustState } from '@circles-pink/state-machine/src';
+import { TrustStateType, _TrustState } from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -57,7 +49,7 @@ const getNode = (
 const getEdge = (
   source: Address,
   target: Address,
-  value: TrustState
+  value: TrustStateType
 ): Cytoscape.ElementDefinition => ({
   data: {
     source: addrToString(source),
