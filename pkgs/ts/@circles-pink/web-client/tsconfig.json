@@ -55,7 +55,7 @@
     // "src/onboarding/index.tsx",
     // "src/onboarding/useStateMachine.ts",
     "src/onboarding/utils/colorUtils.ts",
-    // "src/onboarding/utils/directionToOrientation.ts",
+    "src/onboarding/utils/directionToOrientation.ts",
     "src/onboarding/utils/getCounter.ts",
     "src/onboarding/utils/mapIndicatorColors.ts",
     "src/onboarding/utils/mapResult.ts",

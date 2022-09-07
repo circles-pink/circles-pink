@@ -11,6 +11,7 @@ import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
 import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
+import CirclesPink.Garden.StateMachine.Direction as CirclesPink.Garden.StateMachine.Direction
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
 import CirclesPink.GenerateTSD.Replace as R
@@ -97,8 +98,8 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LoginState)
       , R.typeAlias "UserData"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.UserData)
-    --   , R.typeAlias "CirclesState"
-    --       (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
+      --   , R.typeAlias "CirclesState"
+      --       (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
       ]
 
   , "Data.Argonaut" /\ join
@@ -153,6 +154,13 @@ modules =
       join
         [ R.typeAlias "User"
             (Proxy :: _ CirclesPink.Data.User.User)
+        ]
+
+  , "CirclesPink.Garden.StateMachine.Direction" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ CirclesPink.Garden.StateMachine.Direction.Direction)
+        , R.value "unDirection" [] (CirclesPink.Garden.StateMachine.Direction.unDirection :: _ -> _ -> Z)
         ]
 
   , "CirclesPink.Data.PrivateKey" /\

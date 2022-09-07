@@ -57,10 +57,10 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   const loadingIndicator = pipe(
     state.checkSessionResult,
     _RemoteData.unRemoteData({
-      onNotAsked: () => 1,
+      onNotAsked: () => loadingIndicator_,
       onFailure: () => null,
-      onSuccess: () => true,
-      onLoading: () => true,
+      onLoading: () => loadingIndicator_,
+      onSuccess: () => null,
     })
   );
 
