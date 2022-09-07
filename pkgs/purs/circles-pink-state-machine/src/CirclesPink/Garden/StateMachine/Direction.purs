@@ -2,21 +2,21 @@ module CirclesPink.Garden.StateMachine.Direction
   ( Direction(..)
   ) where
 
-
-import PursTsGen (class ToPursType, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType)
+import PursTsGen (class ToPursType, class ToTsDef, class ToTsType, defaultToPursType', defaultToTsDef', defaultToTsType')
+import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..))
 
 data Direction = Forwards | Backwards
 
 --------------------------------------------------------------------------------
 
-ptDirection :: PursType
-ptDirection = PursType "CirclesPink.Garden.StateMachine.Direction" "Direction"
+instance ToPursNominal Direction where
+  toPursNominal _ = PursNominal "CirclesPink.Garden.StateMachine.Direction" "Direction"
 
 instance ToTsType Direction where
-  toTsType _ = defaultToTsType ptDirection []
+  toTsType = defaultToTsType' []
 
 instance ToTsDef Direction where
-  toTsDef _ = defaultToTsDef ptDirection []
+  toTsDef = defaultToTsDef' []
 
 instance ToPursType Direction where
-  toPursType _ = defaultToPursType ptDirection []
+  toPursType = defaultToPursType' []
