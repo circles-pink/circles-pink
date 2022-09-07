@@ -31,6 +31,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _landing
   , _landingAction
   , _login
+  , _login'
   , _magicWords
   , _newPrivKey
   , _next
@@ -45,6 +46,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _signIn
   , _signUp
   , _submit
+  , _submit'
   , _transfer
   , _trusts
   , _userSearch
@@ -191,11 +193,17 @@ _magicWords = inj (Proxy :: _ "magicWords")
 _submit :: SubmitAction -> CirclesAction
 _submit = inj (Proxy :: _ "submit")
 
+_submit' :: forall a v. a -> Variant (submit :: a | v)
+_submit' = inj (Proxy :: _ "submit")
+
 _dashboard :: DashboardAction -> CirclesAction
 _dashboard = inj (Proxy :: _ "dashboard")
 
 _login :: LoginAction -> CirclesAction
 _login = inj (Proxy :: _ "login")
+
+_login' :: forall a v. a -> Variant (login :: a | v)
+_login' = inj (Proxy :: _ "login")
 
 _trusts :: TrustsAction -> CirclesAction
 _trusts = inj (Proxy :: _ "trusts")

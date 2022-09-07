@@ -62,7 +62,7 @@ signUpUser env cfg opts = do
   act env cfg $ A._askEmail $ A._next unit
   act env cfg $ A._infoSecurity $ A._next unit
   act env cfg $ A._magicWords $ A._next unit
-  act env cfg $ A._submit $ A._submit unit
+  act env cfg $ A._submit $ A._submit' unit
 
 --------------------------------------------------------------------------------
 finalizeAccount :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> m Unit
@@ -78,7 +78,7 @@ loginUser :: forall m. MonadScript m => EnvControl m -> CirclesConfig m -> Login
 loginUser env cfg { magicWords } = do
   act env cfg $ A._landing $ A._signIn unit
   act env cfg $ A._login $ A._setMagicWords magicWords
-  act env cfg $ A._login $ A._login unit
+  act env cfg $ A._login $ A._login' unit
 
 --------------------------------------------------------------------------------
 type TrustUserOpts = UserIdent

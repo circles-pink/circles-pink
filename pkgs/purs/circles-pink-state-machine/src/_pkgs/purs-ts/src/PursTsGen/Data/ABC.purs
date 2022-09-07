@@ -1,7 +1,5 @@
 module PursTsGen.Data.ABC where
 
-
-
 data A = A
 
 data B = B
@@ -10,46 +8,46 @@ data C = C
 
 data D = D
 
-data E
+data E = E
 
-data F
+data F = F
 
-data G
+data G = G
 
-data H
+data H = H
 
-data I
+data I = I
 
-data J
+data J = J
 
-data K
+data K = K
 
-data L
+data L = L
 
-data M
+data M = M
 
-data N
+data N = N
 
-data O
+data O = O
 
-data P
+data P = P
 
-data Q
+data Q = Q
 
-data R
+data R = R
 
-data S
+data S = S
 
-data T
+data T = T
 
-data U
+data U = U
 
-data V
+data V = V
 
-data W
+data W = W
 
-data X
+data X = X
 
-data Y
+data Y = Y
 
-data Z
+data Z = Z
