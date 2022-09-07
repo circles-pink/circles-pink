@@ -17,14 +17,16 @@ import Data.Newtype (class Newtype)
 import Data.Pair as Data.Pair
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
+import Foreign.Object (Object)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType, toPursType, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType) as P
+import PursTsGen.Data.ABC (A)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
@@ -72,6 +74,8 @@ else instance UnsafeReplace Method (Wrap Method)
 else instance UnsafeReplace Json (Wrap Json)
 
 else instance UnsafeReplace Voucher (Wrap Voucher)
+
+else instance UnsafeReplace a a' => UnsafeReplace (Object a) (Wrap (Object a'))
 
 else instance
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant
@@ -187,6 +191,20 @@ instance ToTsDef (Wrap Json) where
 
 instance ToPursType (Wrap Json) where
   toPursType _ = defaultToPursType ptJson []
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap (Object a)) where
+  toPursNominal _ = PursNominal "Foreign.Object" "Object"
+
+instance (ToTsType a) => ToTsType (Wrap (Object a)) where
+  toTsType = defaultToTsType' [toTsType (Proxy :: _ a)]
+
+instance ToTsDef (Wrap (Object A)) where
+  toTsDef = defaultToTsDef' []
+
+instance (ToPursType a) => ToPursType (Wrap (Object a)) where
+  toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
 
 --------------------------------------------------------------------------------
 

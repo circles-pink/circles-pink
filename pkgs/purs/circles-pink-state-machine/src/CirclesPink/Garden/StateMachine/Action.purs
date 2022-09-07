@@ -13,6 +13,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _addTrustConnection
   , _askEmail
   , _askUsername
+  , _askUsernameAction
   , _checkForSession
   , _circlesAction
   , _coreToWindow
@@ -190,6 +191,15 @@ _loginAction =
   { _setMagicWords: inj (Proxy :: _ "setMagicWords")
   , _login: inj (Proxy :: _ "login")
   , _signUp: inj (Proxy :: _ "signUp")
+  }
+
+_askUsernameAction
+  :: { _setUsername :: String -> AskUsernameAction
+     , _next :: Unit -> AskUsernameAction
+     }
+_askUsernameAction =
+  { _setUsername: inj (Proxy :: _ "setUsername")
+  , _next: inj (Proxy :: _ "next")
   }
 
 _askUsername :: AskUsernameAction -> CirclesAction

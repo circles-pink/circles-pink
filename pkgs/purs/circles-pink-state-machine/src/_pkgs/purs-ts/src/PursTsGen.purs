@@ -42,7 +42,8 @@ import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, mkType, name, opaque, qualName, typeDef) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
-import Type.Proxy (Proxy(..))
+import Type.Proxy (Proxy)
+import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..)) as Exp
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }

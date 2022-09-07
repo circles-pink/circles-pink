@@ -29,6 +29,7 @@ export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.D
 export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
 export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 export type {
+  CirclesState,
   LandingState,
   LoginState,
   UserData,

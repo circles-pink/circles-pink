@@ -1,6 +1,6 @@
 module VoucherServer.Spec.Types where
 
-import Prelude
+import CirclesPink.Prelude
 
 import Data.BN (BN)
 import Data.DateTime.Instant as DT
@@ -8,7 +8,11 @@ import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype, un)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Milliseconds(..))
+import PursTsGen.Class.ToPursNominal (PursNominal(..))
 import Simple.JSON (class ReadForeign, class WriteForeign, writeImpl)
+
+moduleName :: String
+moduleName = "VoucherServer.Spec.Types"
 
 --------------------------------------------------------------------------------
 newtype Instant = Instant DT.Instant
@@ -28,8 +32,21 @@ newtype VoucherProvider = VoucherProvider
   , availableOffers :: Array VoucherOffer
   }
 
-derive newtype instance writeForeignVoucherProvider :: WriteForeign VoucherProvider
-derive newtype instance readForeignVoucherProvider :: ReadForeign VoucherProvider
+derive newtype instance WriteForeign VoucherProvider
+derive newtype instance ReadForeign VoucherProvider
+
+instance ToPursNominal VoucherProvider where
+  toPursNominal _ = PursNominal moduleName "VoucherProvider"
+
+instance ToTsType VoucherProvider where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef VoucherProvider where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType VoucherProvider where
+  toPursType = defaultToPursType' []
+
 
 --------------------------------------------------------------------------------
 

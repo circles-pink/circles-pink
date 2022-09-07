@@ -4,10 +4,10 @@ import { Step, StepIndicator } from './StepIndicator';
 import { useAnimContext } from '../context/anim';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/theme';
-import { CirclesState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import * as NEA from 'fp-ts/lib/NonEmptyArray';
 import { identity, pipe } from 'fp-ts/lib/function';
 import * as O from 'fp-ts/lib/Option';
+import { CirclesState } from '@circles-pink/state-machine/src';
 
 const StepIndicatorContainer = tw.div`p-4`;
 
