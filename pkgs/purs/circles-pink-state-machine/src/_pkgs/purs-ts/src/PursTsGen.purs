@@ -17,8 +17,7 @@ module PursTsGen
   , typeAlias
   , typeDef
   , value
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -28,7 +27,7 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Set as S
-import Data.String (Pattern(..), Replacement(..))
+import Data.String (Pattern(..), Replacement(..), replaceAll)
 import Data.String as St
 import Data.Traversable (foldr, sequence)
 import Data.Tuple (fst, snd)
@@ -169,22 +168,25 @@ defaultToTsDef (PursType m n) xs = pure $ TS.typeDef (TS.name n) []
 
 defaultToTsDef' :: forall a. ToPursNominal a => Array TS.Name -> Proxy a -> Array TS.Declaration
 defaultToTsDef' xs x = pure $ TS.typeDef (TS.name n) []
-  $ TS.opaque (TS.qualName m n) xs
+  $ TS.opaque (TS.qualName (dotsToLodashes m) n) xs
   where
-    PursNominal m n = toPursNominal x
+  PursNominal m n = toPursNominal x
 
 defaultToTsType :: PursType -> Array TS.Type -> TS.Type
 defaultToTsType (PursType m n) xs = TS.mkType (TS.qualName m n) xs
 
 defaultToTsType' :: forall a. ToPursNominal a => Array TS.Type -> a -> TS.Type
-defaultToTsType' xs x = TS.mkType (TS.qualName m n) xs
+defaultToTsType' xs x = TS.mkType (TS.qualName (dotsToLodashes m) n) xs
   where
-    PursNominal m n = toPursNominal x
+  PursNominal m n = toPursNominal x
 
 defaultToPursType :: PursType -> Array PS.Type -> PS.Type
 defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs
 
 defaultToPursType' :: forall a. ToPursNominal a => Array PS.Type -> a -> PS.Type
-defaultToPursType' xs x = PS.mkType (PS.qualName m n) xs
+defaultToPursType' xs x = PS.mkType (PS.qualName (dotsToLodashes m) n) xs
   where
-    PursNominal m n = toPursNominal x
+  PursNominal m n = toPursNominal x
+
+dotsToLodashes :: String -> String
+dotsToLodashes = replaceAll (Pattern ".") (Replacement "_")
