@@ -5,6 +5,8 @@ import * as Data_Nullable from "@circles-pink/state-machine/output/Data.Nullable
 import * as Data_Maybe from "@circles-pink/state-machine/output/Data.Maybe";
 import * as Data_Tuple from "@circles-pink/state-machine/output/Data.Tuple";
 import * as Simple_Data_Tuple from "@circles-pink/state-machine/output/Simple.Data.Tuple";
+import * as Simple_Network_Ethereum_Core_Signatures from "@circles-pink/state-machine/output/Simple.Network.Ethereum.Core.Signatures";
+import * as Network_Ethereum_Core_Signatures from "@circles-pink/state-machine/output/Network.Ethereum.Core.Signatures";
 import * as Simple_Data_Maybe from "@circles-pink/state-machine/output/Simple.Data.Maybe";
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
@@ -22,11 +24,12 @@ import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
+export type { Address as EthAddress } from "@circles-pink/state-machine/output/Network.Ethereum.Core.Signatures";
 export type { PrivateKey } from "@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey";
 export type { Mnemonic } from "@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic";
 export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
-export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
+export type { TrustState as TrustStateType } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode";
 export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
@@ -36,6 +39,7 @@ export type {
   LandingState,
   LoginState,
   UserData,
+  TrustState,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 export type { CirclesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 
@@ -57,6 +61,10 @@ export const _Maybe = { ...Data_Maybe, ...Simple_Data_Maybe };
 export const _UserIdent = CirclesPink_Data_UserIdent;
 export const _Pair = Data_Pair;
 export const _Address = CirclesPink_Data_Address;
+export const _EthAddress = {
+  ...Simple_Network_Ethereum_Core_Signatures,
+  ...Network_Ethereum_Core_Signatures,
+};
 export const _Mnemonic = CirclesPink_Data_Mnemonic;
 export const _RemoteData = RemoteData;
 export const _IxGraph = Data_IxGraph;

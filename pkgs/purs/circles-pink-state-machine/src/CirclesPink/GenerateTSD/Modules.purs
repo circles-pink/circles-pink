@@ -48,6 +48,7 @@ import RemoteData as RemoteData
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Tuple as Simple.Data.Tuple
+import Simple.Network.Ethereum.Core.Signatures as Simple.Network.Ethereum.Core.Signatures
 import Type.Proxy (Proxy(..))
 import VoucherServer.Spec.Types as VoucherServer.Spec.Types
 
@@ -98,6 +99,8 @@ modules =
           (CirclesPink.Garden.StateMachine.Action._magicWordsAction)
       , R.value "_submitAction" []
           (CirclesPink.Garden.StateMachine.Action._submitAction)
+      , R.value "_trustsAction" []
+          (CirclesPink.Garden.StateMachine.Action._trustsAction)
       , R.value "_dashboardAction" []
           (CirclesPink.Garden.StateMachine.Action._dashboardAction)
       ]
@@ -171,6 +174,14 @@ modules =
             (Proxy :: _ CirclesPink.Data.Address.Address)
         , instanceDef "ordAddress"
             (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
+        , value "addrToString" []
+            CirclesPink.Data.Address.addrToString
+        ]
+
+  , "Simple.Network.Ethereum.Core.Signatures" /\
+      join
+        [ R.value "showAddress" []
+            Simple.Network.Ethereum.Core.Signatures.showAddress
         ]
 
   , "CirclesPink.Data.User" /\

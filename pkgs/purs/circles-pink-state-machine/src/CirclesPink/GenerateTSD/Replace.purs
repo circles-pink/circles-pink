@@ -5,7 +5,6 @@ import Prelude
 import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.Argonaut (Json, JsonDecodeError)
-import Data.Argonaut as Data.Argonaut
 import Data.BN (BN)
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
@@ -21,11 +20,11 @@ import Foreign.Object (Object)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsDef, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Data.ABC (A(..))
+import PursTsGen.Data.ABC (A)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))

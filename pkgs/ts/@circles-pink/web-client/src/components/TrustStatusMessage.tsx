@@ -1,4 +1,4 @@
-import { TrustState, _TrustState } from '@circles-pink/state-machine/src';
+import { _TrustState, TrustStateType } from '@circles-pink/state-machine/src';
 import { FadeIn, getIncrementor } from 'anima-react';
 import { t } from 'i18next';
 import React from 'react';
@@ -8,7 +8,7 @@ import { LoadingText } from './text';
 
 type TrustStatusMessageProps = {
   theme: Theme;
-  trustState: TrustState;
+  trustState: TrustStateType;
 };
 
 export const TrustStatusMessage = ({
@@ -37,7 +37,7 @@ export const TrustStatusMessage = ({
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (trustState: TrustState) => {
+const mapStatusMessage = (trustState: TrustStateType) => {
   if (_TrustState.isLoadingTrust(trustState)) {
     return t('dashboard.trustList.message.loadingTrust');
   } else if (_TrustState.isLoadingUntrust(trustState)) {

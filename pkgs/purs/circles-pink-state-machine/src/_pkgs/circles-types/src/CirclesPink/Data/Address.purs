@@ -1,5 +1,6 @@
 module CirclesPink.Data.Address
   ( Address(..)
+  , addrToString
   , module Exp
   , parseAddress
   , sampleAddress
@@ -83,6 +84,9 @@ parseAddress x = x
   # mkHexString
   >>= W3.mkAddress
   <#> wrap
+
+addrToString :: Address -> String
+addrToString = show
 
 unsafeMkAddress :: String -> Address
 unsafeMkAddress s = unsafePartial
