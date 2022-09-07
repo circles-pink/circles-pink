@@ -64,7 +64,7 @@
     "src/onboarding/views/AskEmail.tsx",
     "src/onboarding/views/AskUsername.tsx",
     // "src/onboarding/views/Debug.tsx",
-    // "src/onboarding/views/InfoSecurity.tsx",
+    "src/onboarding/views/InfoSecurity.tsx",
     "src/onboarding/views/Landing.tsx",
     "src/onboarding/views/Login.tsx",
     // "src/onboarding/views/MagicWords.tsx",

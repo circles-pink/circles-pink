@@ -88,6 +88,8 @@ modules =
           (CirclesPink.Garden.StateMachine.Action._askUsernameAction)
       , R.value "_askEmailAction" []
           (CirclesPink.Garden.StateMachine.Action._askEmailAction)
+      , R.value "_infoSecurityAction" []
+          (CirclesPink.Garden.StateMachine.Action._infoSecurityAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join

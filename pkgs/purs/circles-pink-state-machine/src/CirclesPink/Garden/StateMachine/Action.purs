@@ -13,6 +13,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _addTrustConnection
   , _askEmail
   , _askEmailAction
+  , _infoSecurityAction
   , _askUsername
   , _askUsernameAction
   , _checkForSession
@@ -218,6 +219,16 @@ _askEmailAction =
   , _setPrivacy: inj (Proxy :: _ "setPrivacy")
   , _next: inj (Proxy :: _ "next")
   }
+
+_infoSecurityAction
+  :: { _prev :: Unit -> InfoSecurityAction
+     , _next :: Unit -> InfoSecurityAction
+     }
+_infoSecurityAction =
+  { _prev: inj (Proxy :: _ "prev")
+  , _next: inj (Proxy :: _ "next")
+  }
+
 
 _askUsername :: AskUsernameAction -> CirclesAction
 _askUsername = inj (Proxy :: _ "askUsername")
