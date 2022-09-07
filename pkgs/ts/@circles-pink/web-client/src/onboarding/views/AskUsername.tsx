@@ -1,7 +1,9 @@
 import {
+  CirclesState,
   RemoteData,
   UserData,
   _RemoteData,
+  _StateMachine,
 } from '@circles-pink/state-machine/src';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
@@ -21,6 +23,8 @@ import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicato
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import { pipe } from 'fp-ts/lib/function';
+
+const { _circlesAction, _askUsernameAction } = _StateMachine;
 
 type AskUsernameProps = {
   state: UserData;
@@ -61,10 +65,15 @@ export const AskUsername = ({
               value={state.username}
               placeholder={t('askUsername.usernamePlaceholder')}
               onChange={e =>
-                act(A._askUsername(A._setUsername(e.target.value)))
+                act(
+                  _circlesAction._askUsername(
+                    _askUsernameAction._setUsername(e.target.value)
+                  )
+                )
               }
               onKeyPress={e =>
-                e.key === 'Enter' && act(A._askUsername(A._next(unit)))
+                e.key === 'Enter' &&
+                act(_circlesAction._askUsername(_askUsernameAction._next(unit)))
               }
             />
             <StatusContainer>
@@ -81,7 +90,7 @@ export const AskUsername = ({
           <Button
             prio={'high'}
             theme={theme}
-            onClick={() => act(A._askUsername(A._next(unit)))}
+            onClick={() => act(_circlesAction._askUsername(_askUsernameAction._next(unit)))}
           >
             {t('nextButton')}
           </Button>

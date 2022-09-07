@@ -84,6 +84,8 @@ modules =
           (CirclesPink.Garden.StateMachine.Action._landingAction)
       , R.value "_loginAction" []
           (CirclesPink.Garden.StateMachine.Action._loginAction)
+      , R.value "_askUsernameAction" []
+          (CirclesPink.Garden.StateMachine.Action._askUsernameAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join
@@ -98,8 +100,8 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LoginState)
       , R.typeAlias "UserData"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.UserData)
-      --   , R.typeAlias "CirclesState"
-      --       (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
+      , R.typeAlias "CirclesState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
       ]
 
   , "Data.Argonaut" /\ join

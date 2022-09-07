@@ -1,9 +1,6 @@
 module CirclesPink.Garden.StateMachine.Direction where
 
-import Prelude
-
-import PursTsGen (class ToPursType, class ToTsDef, class ToTsType, defaultToPursType', defaultToTsDef', defaultToTsType')
-import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..))
+import CirclesPink.Prelude
 
 data Direction = Forwards | Backwards
 

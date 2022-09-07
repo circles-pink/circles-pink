@@ -1,11 +1,6 @@
-import React, { ReactElement, ReactNode, useEffect, useState } from 'react';
-import tw from 'twin.macro';
-import useDimensions, { ElementDimensions } from 'use-element-dimensions';
+import React, { ReactElement, useEffect, useState } from 'react';
+import useDimensions from 'use-element-dimensions';
 import * as A from 'fp-ts/Array';
-import * as R from 'fp-ts/Random';
-import * as IO from 'fp-ts/IO';
-import { pipe } from 'fp-ts/lib/function';
-import { number } from 'fp-ts';
 import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray';
 import * as G from '@no-day/fp-ts-generators';
 
