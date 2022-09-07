@@ -1,8 +1,6 @@
 import {
-  CirclesState,
   UserData,
-  UsernameApiResult,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+} from '@circles-pink/state-machine/src';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { DialogCard } from '../../components/DialogCard';

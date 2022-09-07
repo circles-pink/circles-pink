@@ -4,11 +4,13 @@ import Prelude
 
 import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.GenerateTSD.Wrappers as W
+import Data.Argonaut (Json)
 import Data.Argonaut as Data.Argonaut
 import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
+import Data.HTTP.Method (Method)
 import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
@@ -28,6 +30,9 @@ import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
+import VoucherServer.Spec.Types (Voucher)
+
+newtype Wrap a = Wrap a
 
 --------------------------------------------------------------------------------
 
@@ -61,6 +66,12 @@ else instance UnsafeReplace Data.BN.BN BN
 else instance UnsafeReplace CirclesPink.Data.PrivateKey.PrivateKey PrivateKey
 
 else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
+
+else instance UnsafeReplace Method (Wrap Method)
+
+else instance UnsafeReplace Json (Wrap Json)
+
+else instance UnsafeReplace Voucher (Wrap Voucher)
 
 else instance
   UnsafeReplace Data.DateTime.Instant.Instant W.Instant
@@ -162,6 +173,48 @@ instance ToTsDef BN where
 
 instance ToPursType BN where
   toPursType _ = defaultToPursType ptBN []
+
+--------------------------------------------------------------------------------
+
+ptJson :: PursType
+ptJson = PursType "Data.Argonaut.Json" "Json"
+
+instance P.ToTsType (Wrap Json) where
+  toTsType _ = defaultToTsType ptJson []
+
+instance ToTsDef (Wrap Json) where
+  toTsDef _ = defaultToTsDef ptJson []
+
+instance ToPursType (Wrap Json) where
+  toPursType _ = defaultToPursType ptJson []
+
+--------------------------------------------------------------------------------
+
+ptVoucher :: PursType
+ptVoucher = PursType "VoucherServer.Spec.Types" "Voucher"
+
+instance P.ToTsType (Wrap Voucher) where
+  toTsType _ = defaultToTsType ptVoucher []
+
+instance ToTsDef (Wrap Voucher) where
+  toTsDef _ = defaultToTsDef ptVoucher []
+
+instance ToPursType (Wrap Voucher) where
+  toPursType _ = defaultToPursType ptVoucher []
+
+--------------------------------------------------------------------------------
+
+ptMethod :: PursType
+ptMethod = PursType "Data.HTTP.Method" "Method"
+
+instance P.ToTsType (Wrap Method) where
+  toTsType _ = defaultToTsType ptMethod []
+
+instance ToTsDef (Wrap Method) where
+  toTsDef _ = defaultToTsDef ptMethod []
+
+instance ToPursType (Wrap Method) where
+  toPursType _ = defaultToPursType ptMethod []
 
 --------------------------------------------------------------------------------
 

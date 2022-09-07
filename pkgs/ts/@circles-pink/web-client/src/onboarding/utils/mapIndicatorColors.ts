@@ -1,20 +1,17 @@
-import {
-  EmailApiResult,
-  UsernameApiResult,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { RemoteData } from '@circles-pink/state-machine/output/RemoteData';
+import { _RemoteData } from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
 
 export const mapIndicatorColors = (
-  apiResult: UsernameApiResult | EmailApiResult
-) => {
-  switch (apiResult.type) {
-    case 'notAsked':
-    case 'loading':
-      return 'black';
-    case 'failure':
-      return 'red';
-    case 'success':
-      return apiResult.value.isValid ? 'green' : 'red';
-    default:
-      return 'black';
-  }
-};
+  apiResult: RemoteData<unknown, unknown, unknown, { isValid: boolean }>
+) =>
+  pipe(
+    apiResult,
+    _RemoteData.unRemoteData({
+      onFailure: () => 'red',
+      onLoading: () => 'black',
+      onSuccess: ({ isValid }) => isValid ? 'green' : 'red',
+      onNotAsked: () => 'black',
+    })
+  );
+
