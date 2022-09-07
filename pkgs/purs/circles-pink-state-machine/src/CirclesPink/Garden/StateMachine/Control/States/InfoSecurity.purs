@@ -28,12 +28,12 @@ infoSecurity env =
     pk <- env.generatePrivateKey
     set \st ->
       if isNothing st.privateKey then
-        S._magicWords st { privateKey = Just pk, direction = D._forwards }
+        S._magicWords st { privateKey = Just pk, direction = D.Forwards }
       else
-        S._magicWords st { direction = D._forwards }
+        S._magicWords st { direction = D.Forwards }
 
   prev set _ _ = do
     cfg <- ask
     set \st -> case cfg -# _.extractEmail of
-      Left _ -> S._askUsername st { direction = D._backwards }
-      Right _ -> S._askEmail st { direction = D._backwards }
+      Left _ -> S._askUsername st { direction = D.Backwards }
+      Right _ -> S._askEmail st { direction = D.Backwards }

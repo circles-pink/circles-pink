@@ -48,7 +48,7 @@ askUsername env cfg =
         case cfg -# _.extractEmail of
           Left e -> do
             set \st' -> S._askUsername st' { email = e }
-            set \st' -> S._infoSecurity st' { direction = D._forwards }
-          Right _ -> set \st' -> S._askEmail st' { direction = D._forwards }
+            set \st' -> S._infoSecurity st' { direction = D.Forwards }
+          Right _ -> set \st' -> S._askEmail st' { direction = D.Forwards }
       else
-        set \st' -> S._askUsername st' { direction = D._forwards }
+        set \st' -> S._askUsername st' { direction = D.Forwards }

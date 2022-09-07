@@ -17,9 +17,9 @@ magicWords
      , next :: ActionHandler' m Unit S.UserData ("submit" :: S.UserData)
      }
 magicWords env =
-  { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D._backwards }
+  { prev: \set _ _ -> set \st -> S._infoSecurity st { direction = D.Backwards }
   , newPrivKey
-  , next: \set _ _ -> set \st -> S._submit st { direction = D._forwards }
+  , next: \set _ _ -> set \st -> S._submit st { direction = D.Forwards }
   }
   where
   newPrivKey set _ _ = do

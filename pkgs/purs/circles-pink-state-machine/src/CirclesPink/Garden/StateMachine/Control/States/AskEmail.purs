@@ -15,7 +15,7 @@ import Data.Variant (default, onMatch)
 import RemoteData (_failure, _loading, _success)
 
 prev :: forall m. MonadCircles m => EnvControl m -> ActionHandler' m Unit S.UserData ("askUsername" :: S.UserData)
-prev _ set _ _ = set \st -> S._askUsername st { direction = D._backwards }
+prev _ set _ _ = set \st -> S._askUsername st { direction = D.Backwards }
 
 setTerms :: forall m. MonadCircles m => EnvControl m -> ActionHandler' m Unit S.UserData ("askEmail" :: S.UserData)
 setTerms _ set _ _ = set \st -> S._askEmail st { terms = not st.terms }
@@ -36,9 +36,9 @@ next _ set st _ = do
     case cfg -# _.extractEmail of
       Left _ -> pure unit
       Right cb -> cb st.email
-    set \st' -> S._infoSecurity st' { direction = D._forwards }
+    set \st' -> S._infoSecurity st' { direction = D.Forwards }
   else
-    set \st' -> S._askEmail st' { direction = D._forwards }
+    set \st' -> S._askEmail st' { direction = D.Forwards }
 
 setEmail :: forall m. MonadCircles m => EnvControl m -> ActionHandler' m String S.UserData ("askEmail" :: S.UserData)
 setEmail env set _ email = do
