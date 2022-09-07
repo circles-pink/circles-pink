@@ -25,7 +25,7 @@ submit
      , submit :: ActionHandler' m Unit S.UserData ("submit" :: S.UserData, "trusts" :: S.TrustState)
      }
 submit env =
-  { prev: \set _ _ -> set \st -> S._magicWords st { direction = D._backwards }
+  { prev: \set _ _ -> set \st -> S._magicWords st { direction = D.Backwards }
   , submit: submit'
   }
   where

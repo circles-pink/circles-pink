@@ -147,7 +147,7 @@ type DebugState =
 init :: forall v. Variant (askUsername :: UserData | v)
 init =
   _askUsername
-    { direction: D._forwards
+    { direction: D.Forwards
     , username: ""
     , usernameApiResult: _notAsked unit
     , email: ""
