@@ -24,7 +24,6 @@ import {
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
-import { matchV } from '../../purs-util';
 
 type LandingProps = {
   state: LandingState;
@@ -44,36 +43,27 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
     );
   }, []);
 
-  const sessionResult_ = pipe(state.checkSessionResult, _RemoteData.unwrap);
+  const loadingIndicator_ = (
+    <DialogCard
+      mainContent={
+        <CenterElement>
+          <LoadingCircles width={250} color={theme.baseColor} />
+        </CenterElement>
+      }
+    />
+  );
 
-  const sessionResult = matchV(sessionResult_)({
-    notAsked: () => [],
-    failure: () => [],
-    success: ({ data }) => data,
-    loading: ({ previousData }) =>
-      pipe(
-        previousData,
-        _Maybe.unMaybe({
-          onJust: users => users,
-          onNothing: () => [],
-        })
-      ),
-  });
+  const loadingIndicator = pipe(
+    state.checkSessionResult,
+    _RemoteData.unRemoteData({
+      onNotAsked: () => loadingIndicator_,
+      onFailure: () => null,
+      onSuccess: () => null,
+      onLoading: () => loadingIndicator_,
+    })
+  );
 
-  if (
-    state.checkSessionResult.type === 'notAsked' ||
-    state.checkSessionResult.type === 'loading'
-  ) {
-    return (
-      <DialogCard
-        mainContent={
-          <CenterElement>
-            <LoadingCircles width={250} color={theme.baseColor} />
-          </CenterElement>
-        }
-      />
-    );
-  }
+  if (loadingIndicator) return loadingIndicator;
 
   return (
     <DialogCard
@@ -111,7 +101,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             theme={theme}
             onClick={() =>
               act(
-                _StateMachine._landing(
+                _StateMachine._circlesAction._landing(
                   _StateMachine._landingAction._signUp(unit)
                 )
               )
@@ -128,7 +118,7 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             <ButtonLinkLike
               onClick={() =>
                 act(
-                  _StateMachine._landing(
+                  _StateMachine._circlesAction._landing(
                     _StateMachine._landingAction._signIn(unit)
                   )
                 )
