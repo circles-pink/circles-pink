@@ -1,8 +1,3 @@
-import {
-  CirclesState,
-  UserData,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
 import { Button } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
@@ -17,10 +12,18 @@ import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import {
+  CirclesAction,
+  CirclesState,
+  UserData,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+
+const { _circlesAction, _infoSecurityAction } = _StateMachine;
 
 type InfoSecurityProps = {
   state: UserData;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   skip: CirclesState['type'][];
 };
 
@@ -53,7 +56,11 @@ export const InfoSecurity = ({
             <Button
               theme={theme}
               prio={'medium'}
-              onClick={() => act(A._infoSecurity(A._prev(unit)))}
+              onClick={() =>
+                act(
+                  _circlesAction._infoSecurity(_infoSecurityAction._prev(unit))
+                )
+              }
             >
               {t('prevButton')}
             </Button>
@@ -61,7 +68,11 @@ export const InfoSecurity = ({
             <Button
               prio={'high'}
               theme={theme}
-              onClick={() => act(A._infoSecurity(A._next(unit)))}
+              onClick={() =>
+                act(
+                  _circlesAction._infoSecurity(_infoSecurityAction._next(unit))
+                )
+              }
             >
               {t('nextButton')}
             </Button>
