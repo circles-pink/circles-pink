@@ -24,6 +24,7 @@ import {
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
+import { boolean } from 'fp-ts';
 
 type LandingProps = {
   state: LandingState;
@@ -56,10 +57,10 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
   const loadingIndicator = pipe(
     state.checkSessionResult,
     _RemoteData.unRemoteData({
-      onNotAsked: () => loadingIndicator_,
+      onNotAsked: () => 1,
       onFailure: () => null,
-      onSuccess: () => null,
-      onLoading: () => loadingIndicator_,
+      onSuccess: () => true,
+      onLoading: () => true,
     })
   );
 

@@ -13,9 +13,14 @@ import {
   CirclesAction,
   LoginState,
   unit,
+  _Maybe,
+  _RemoteData,
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { mapResult } from '../utils/mapResult';
+import { unRemoteData } from '@circles-pink/state-machine/output/RemoteData';
+import { pipe } from 'fp-ts/lib/function';
+import { matchV } from '../../purs-util';
 
 type LoginProps = {
   state: LoginState;
@@ -130,21 +135,20 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (loginResult: LoginStateLoginResult) => {
-  switch (loginResult.type) {
-    case 'loading':
-      return '';
-    case 'success':
-      return '';
-    case 'failure': {
-      switch ((loginResult.value.error as ErrLoginStateResolved).type) {
-        case 'errInvalidMnemonic':
-          return t('login.validation.invalidMnemonic');
-        case 'errUserNotFound':
-          return t('login.validation.userNotFound');
-      }
-    }
-    case 'notAsked':
-      return '';
-  }
-};
+const mapStatusMessage = (loginResult: LoginState['loginResult']) =>
+  pipe(
+    loginResult,
+    _RemoteData.unRemoteData({
+      onLoading: () => '',
+      onSuccess: () => '',
+      onFailure: ({ error }) =>
+        matchV(error)(
+          {
+            errInvalidMnemonic: () => t('login.validation.invalidMnemonic'),
+            errUserNotFound: () => t('login.validation.userNotFound'),
+          },
+          () => ''
+        ),
+      onNotAsked: () => '',
+    })
+  );
