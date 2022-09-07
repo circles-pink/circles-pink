@@ -5,8 +5,11 @@ module PursTsGen
   , constructor
   , defPredicateFn
   , defaultToPursType
+  , defaultToPursType'
   , defaultToTsDef
+  , defaultToTsDef'
   , defaultToTsType
+  , defaultToTsType'
   , defineModules
   , instanceDef
   , module Exp
@@ -14,7 +17,8 @@ module PursTsGen
   , typeAlias
   , typeDef
   , value
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -29,6 +33,7 @@ import Data.String as St
 import Data.Traversable (foldr, sequence)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
+import PursTsGen.Class.ToPursNominal (PursNominal(..), class ToPursNominal, toPursNominal)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType) as Exp
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, toTsDef) as Exp
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
@@ -38,7 +43,7 @@ import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, mkType, name, opaque, qualName, typeDef) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
-import Type.Proxy (Proxy)
+import Type.Proxy (Proxy(..))
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -162,8 +167,24 @@ defaultToTsDef :: PursType -> Array TS.Name -> Array TS.Declaration
 defaultToTsDef (PursType m n) xs = pure $ TS.typeDef (TS.name n) []
   $ TS.opaque (TS.qualName m n) xs
 
+defaultToTsDef' :: forall a. ToPursNominal a => Array TS.Name -> Proxy a -> Array TS.Declaration
+defaultToTsDef' xs x = pure $ TS.typeDef (TS.name n) []
+  $ TS.opaque (TS.qualName m n) xs
+  where
+    PursNominal m n = toPursNominal x
+
 defaultToTsType :: PursType -> Array TS.Type -> TS.Type
 defaultToTsType (PursType m n) xs = TS.mkType (TS.qualName m n) xs
 
+defaultToTsType' :: forall a. ToPursNominal a => Array TS.Type -> a -> TS.Type
+defaultToTsType' xs x = TS.mkType (TS.qualName m n) xs
+  where
+    PursNominal m n = toPursNominal x
+
 defaultToPursType :: PursType -> Array PS.Type -> PS.Type
 defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs
+
+defaultToPursType' :: forall a. ToPursNominal a => Array PS.Type -> a -> PS.Type
+defaultToPursType' xs x = PS.mkType (PS.qualName m n) xs
+  where
+    PursNominal m n = toPursNominal x
