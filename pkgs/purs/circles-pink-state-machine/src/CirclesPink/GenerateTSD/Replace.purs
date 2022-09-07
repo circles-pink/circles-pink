@@ -2,7 +2,10 @@ module CirclesPink.GenerateTSD.Replace where
 
 import Prelude
 
+import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.GenerateTSD.Wrappers as W
+import Data.Argonaut as Data.Argonaut
+import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
@@ -25,8 +28,6 @@ import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
-import Data.Argonaut as Data.Argonaut
-import Data.BN as Data.BN
 
 --------------------------------------------------------------------------------
 
@@ -56,6 +57,8 @@ else instance
 else instance UnsafeReplace Data.Argonaut.JsonDecodeError JsonDecodeError
 
 else instance UnsafeReplace Data.BN.BN BN
+
+else instance UnsafeReplace CirclesPink.Data.PrivateKey.PrivateKey PrivateKey
 
 else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 
@@ -160,7 +163,6 @@ instance ToTsDef BN where
 instance ToPursType BN where
   toPursType _ = defaultToPursType ptBN []
 
-
 --------------------------------------------------------------------------------
 
 newtype JsonDecodeError = JsonDecodeError Data.Argonaut.JsonDecodeError
@@ -222,6 +224,24 @@ instance ToTsDef Address where
 
 instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
+
+--------------------------------------------------------------------------------
+
+newtype PrivateKey = PrivateKey CirclesPink.Data.PrivateKey.PrivateKey
+
+ptPrivateKey :: PursType
+ptPrivateKey = PursType "CirclesPink_Data_PrivateKey" "PrivateKey"
+
+derive instance newtypePrivateKey :: Newtype PrivateKey _
+
+instance P.ToTsType PrivateKey where
+  toTsType _ = defaultToTsType ptPrivateKey []
+
+instance ToTsDef PrivateKey where
+  toTsDef _ = defaultToTsDef ptPrivateKey []
+
+instance ToPursType PrivateKey where
+  toPursType _ = defaultToPursType ptPrivateKey []
 
 --------------------------------------------------------------------------------
 

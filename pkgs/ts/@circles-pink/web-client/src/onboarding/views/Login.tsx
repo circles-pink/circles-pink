@@ -1,26 +1,25 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, { ReactElement, useContext } from 'react';
 import { Button, Input } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import {
-  LoginState,
-  LoginStateLoginResult,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login';
-import { ErrLoginStateResolved } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Login.Views';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
-import { mapResult } from '../utils/mapResult';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import {
+  CirclesAction,
+  LoginState,
+  unit,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+import { mapResult } from '../utils/mapResult';
 
 type LoginProps = {
   state: LoginState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
 };
 
 export const Login = ({ state, act }: LoginProps): ReactElement => {
@@ -50,11 +49,27 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               type="password"
               value={state.magicWords}
               placeholder={t('login.magicWordsPlaceholder')}
-              onChange={e => act(A._login(A._setMagicWords(e.target.value)))}
+              onChange={e =>
+                act(
+                  _StateMachine._circlesAction._login(
+                    _StateMachine._loginAction._setMagicWords(e.target.value)
+                  )
+                )
+              }
               onKeyPress={e => {
                 if (e.key === 'Enter') {
-                  act(A._login(A._setMagicWords(state.magicWords.trim())));
-                  act(A._login(A._login(unit)));
+                  act(
+                    _StateMachine._circlesAction._login(
+                      _StateMachine._loginAction._setMagicWords(
+                        state.magicWords.trim()
+                      )
+                    )
+                  );
+                  act(
+                    _StateMachine._circlesAction._login(
+                      _StateMachine._loginAction._login(unit)
+                    )
+                  );
                 }
               }}
             />
@@ -74,8 +89,18 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
               theme={theme}
               state={mapResult(state.loginResult)}
               onClick={() => {
-                act(A._login(A._setMagicWords(state.magicWords.trim())));
-                act(A._login(A._login(unit)));
+                act(
+                  _StateMachine._circlesAction._login(
+                    _StateMachine._loginAction._setMagicWords(
+                      state.magicWords.trim()
+                    )
+                  )
+                );
+                act(
+                  _StateMachine._circlesAction._login(
+                    _StateMachine._loginAction._login(unit)
+                  )
+                );
               }}
             >
               {t('signInSubmitButton')}
@@ -83,7 +108,13 @@ export const Login = ({ state, act }: LoginProps): ReactElement => {
             <Button
               prio={'medium'}
               theme={theme}
-              onClick={() => act(A._login(A._signUp(unit)))}
+              onClick={() =>
+                act(
+                  _StateMachine._circlesAction._login(
+                    _StateMachine._loginAction._signUp(unit)
+                  )
+                )
+              }
             >
               {t('signUpInsteadButton')}
             </Button>

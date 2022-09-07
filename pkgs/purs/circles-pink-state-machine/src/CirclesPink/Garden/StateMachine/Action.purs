@@ -32,6 +32,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _landingAction
   , _login
   , _login'
+  , _loginAction
   , _magicWords
   , _newPrivKey
   , _next
@@ -159,12 +160,14 @@ _circlesAction
      , _askEmail :: AskEmailAction -> CirclesAction
      , _infoSecurity :: InfoSecurityAction -> CirclesAction
      , _landing :: LandingAction -> CirclesAction
+     , _login :: LoginAction -> CirclesAction
      }
 _circlesAction =
   { _askUsername
   , _askEmail
   , _infoSecurity
   , _landing
+  , _login
   }
 
 _landingAction
@@ -175,6 +178,17 @@ _landingAction
 _landingAction =
   { _checkForSession: inj (Proxy :: _ "checkForSession")
   , _signIn: inj (Proxy :: _ "signIn")
+  , _signUp: inj (Proxy :: _ "signUp")
+  }
+
+_loginAction
+  :: { _setMagicWords :: String -> LoginAction
+     , _login :: Unit -> LoginAction
+     , _signUp :: Unit -> LoginAction
+     }
+_loginAction =
+  { _setMagicWords: inj (Proxy :: _ "setMagicWords")
+  , _login: inj (Proxy :: _ "login")
   , _signUp: inj (Proxy :: _ "signUp")
   }
 
