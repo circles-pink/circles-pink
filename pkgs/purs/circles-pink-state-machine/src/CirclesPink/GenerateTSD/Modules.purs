@@ -5,6 +5,7 @@ import Prelude
 import CirclesCore as CirclesPink.Data.User
 import CirclesPink.Data.Address as CirclesPink.Data.Address
 import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
+import CirclesPink.Data.Mnemonic as CirclesPink.Data.Mnemonic
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
@@ -90,6 +91,12 @@ modules =
           (CirclesPink.Garden.StateMachine.Action._askEmailAction)
       , R.value "_infoSecurityAction" []
           (CirclesPink.Garden.StateMachine.Action._infoSecurityAction)
+      , R.value "_magicWordsAction" []
+          (CirclesPink.Garden.StateMachine.Action._magicWordsAction)
+      , R.value "_submitAction" []
+          (CirclesPink.Garden.StateMachine.Action._submitAction)
+      , R.value "_dashboardAction" []
+          (CirclesPink.Garden.StateMachine.Action._dashboardAction)
       ]
 
   , "Network.Ethereum.Core.Signatures" /\ join
@@ -173,6 +180,16 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ CirclesPink.Data.PrivateKey.PrivateKey)
+        ]
+
+  , "CirclesPink.Data.Mnemonic" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ CirclesPink.Data.Mnemonic.Mnemonic)
+        , value "getWords" []
+            CirclesPink.Data.Mnemonic.getWords
+        , value "keyToMnemonic" []
+            CirclesPink.Data.Mnemonic.keyToMnemonic
         ]
 
   , "Simple.Data.Array" /\

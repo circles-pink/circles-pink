@@ -6,7 +6,7 @@ module CirclesPink.Data.Mnemonic
   , sampleMnemonic
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 
 import CirclesPink.Data.PrivateKey.Type (PrivateKey)
 import Data.Argonaut (class EncodeJson)
@@ -17,6 +17,9 @@ import Data.String.Regex as R
 import Data.String.Regex.Flags (noFlags)
 import Data.String.Regex.Unsafe (unsafeRegex)
 
+moduleName :: String
+moduleName = "CirclesPink.Data.Mnemonic"
+
 newtype Mnemonic = Mnemonic (Array String)
 
 derive instance mnemonicEq :: Eq Mnemonic
@@ -25,6 +28,18 @@ derive newtype instance mnemonicEncodeJson :: EncodeJson Mnemonic
 
 instance mnemonicShow :: Show Mnemonic where
   show (Mnemonic xs) = joinWith " " xs -- TODO: Remove!
+
+instance ToPursNominal Mnemonic where
+  toPursNominal _ = PursNominal moduleName "Mnemonic"
+
+instance ToTsType Mnemonic where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef Mnemonic where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType Mnemonic where
+  toPursType = defaultToPursType' []
 
 getWords :: Mnemonic -> Array String
 getWords (Mnemonic ws) = ws

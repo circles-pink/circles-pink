@@ -1,13 +1,3 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import {
-  CirclesState,
-  UserData,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import {
-  getWords,
-  keyToMnemonic,
-} from '@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic';
 import React, { ReactElement, useContext, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { FadeIn, ZoomIn } from 'anima-react';
@@ -22,13 +12,23 @@ import { Theme, ThemeContext } from '../../context/theme';
 import { lighten } from '../utils/colorUtils';
 import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { TwoButtonRow } from '../../components/helper';
-import { maybe } from '@circles-pink/state-machine/output/Data.Maybe';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import { PrivateKey } from '@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey.Type';
+import {
+  CirclesAction,
+  CirclesState,
+  unit,
+  UserData,
+  _Maybe,
+  _Mnemonic,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+
+const { _circlesAction, _magicWordsAction } = _StateMachine;
 
 type MagicWordsProps = {
   state: UserData;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   skip: CirclesState['type'][];
 };
 
@@ -42,10 +42,13 @@ export const MagicWords = ({
   const getDelay = getIncrementor(0, 0.05);
   const getWordDelay = getIncrementor(0, 0.02);
 
-  const words = (() =>
-    maybe([] as string[])(pk => getWords(keyToMnemonic(pk as PrivateKey)))(
-      state.privateKey
-    ))();
+  const words = pipe(
+    state.privateKey,
+    _Maybe.unMaybe({
+      onJust: pk => _Mnemonic.getWords(_Mnemonic.keyToMnemonic(pk)),
+      onNothing: () => [],
+    })
+  );
 
   const [copyNotify, setCopyNotify] = useState('');
 
@@ -81,7 +84,9 @@ export const MagicWords = ({
             <Button
               prio={'medium'}
               theme={theme}
-              onClick={() => act(A._magicWords(A._prev(unit)))}
+              onClick={() =>
+                act(_circlesAction._magicWords(_magicWordsAction._prev(unit)))
+              }
             >
               {t('prevButton')}
             </Button>
@@ -89,7 +94,9 @@ export const MagicWords = ({
             <Button
               prio={'high'}
               theme={theme}
-              onClick={() => act(A._magicWords(A._next(unit)))}
+              onClick={() =>
+                act(_circlesAction._magicWords(_magicWordsAction._next(unit)))
+              }
             >
               {t('magicWords.gotMyMagicWordsButton')}
             </Button>
@@ -118,7 +125,13 @@ export const MagicWords = ({
                 prio={'low'}
                 theme={theme}
                 fullWidth={true}
-                onClick={() => act(A._magicWords(A._newPrivKey(unit)))}
+                onClick={() =>
+                  act(
+                    _circlesAction._magicWords(
+                      _magicWordsAction._newPrivKey(unit)
+                    )
+                  )
+                }
               >
                 {t('magicWords.newPhraseBtn')}
               </Button>
