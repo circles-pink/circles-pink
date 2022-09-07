@@ -12,7 +12,7 @@ import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
-import PursTsGen.Data.ABC (A, B, C, D, E, Z)
+import PursTsGen.Data.ABC (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)
 import PursTsGen.Lang.TypeScript.DSL ((|||))
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
@@ -67,22 +67,82 @@ instance toTsTypeUnit :: ToTsType Unit where
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
   toTsType _ = TS.null ||| toTsType (Proxy :: _ a)
 
-instance toTsTypeA :: ToTsType A where
+instance ToTsType A where
   toTsType _ = TS.var $ TS.name "A"
 
-instance toTsTypeB :: ToTsType B where
+instance ToTsType B where
   toTsType _ = TS.var $ TS.name "B"
 
-instance toTsTypeC :: ToTsType C where
+instance ToTsType C where
   toTsType _ = TS.var $ TS.name "C"
 
-instance toTsTypeD :: ToTsType D where
+instance ToTsType D where
   toTsType _ = TS.var $ TS.name "D"
 
-instance toTsTypeE :: ToTsType E where
+instance ToTsType E where
   toTsType _ = TS.var $ TS.name "E"
 
-instance toTsTypeZ :: ToTsType Z where
+instance ToTsType F where
+  toTsType _ = TS.var $ TS.name "F"
+
+instance ToTsType G where
+  toTsType _ = TS.var $ TS.name "G"
+
+instance ToTsType H where
+  toTsType _ = TS.var $ TS.name "H"
+
+instance ToTsType I where
+  toTsType _ = TS.var $ TS.name "I"
+
+instance ToTsType J where
+  toTsType _ = TS.var $ TS.name "J"
+
+instance ToTsType K where
+  toTsType _ = TS.var $ TS.name "K"
+
+instance ToTsType L where
+  toTsType _ = TS.var $ TS.name "L"
+
+instance ToTsType M where
+  toTsType _ = TS.var $ TS.name "M"
+
+instance ToTsType N where
+  toTsType _ = TS.var $ TS.name "N"
+
+instance ToTsType O where
+  toTsType _ = TS.var $ TS.name "O"
+
+instance ToTsType P where
+  toTsType _ = TS.var $ TS.name "P"
+
+instance ToTsType Q where
+  toTsType _ = TS.var $ TS.name "Q"
+
+instance ToTsType R where
+  toTsType _ = TS.var $ TS.name "R"
+
+instance ToTsType S where
+  toTsType _ = TS.var $ TS.name "S"
+
+instance ToTsType T where
+  toTsType _ = TS.var $ TS.name "T"
+
+instance ToTsType U where
+  toTsType _ = TS.var $ TS.name "U"
+
+instance ToTsType V where
+  toTsType _ = TS.var $ TS.name "V"
+
+instance ToTsType W where
+  toTsType _ = TS.var $ TS.name "W"
+
+instance ToTsType X where
+  toTsType _ = TS.var $ TS.name "X"
+
+instance ToTsType Y where
+  toTsType _ = TS.var $ TS.name "Y"
+
+instance ToTsType Z where
   toTsType _ = TS.var $ TS.name "Z"
 
 --------------------------------------------------------------------------------

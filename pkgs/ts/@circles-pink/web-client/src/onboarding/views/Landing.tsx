@@ -19,8 +19,12 @@ import {
   CirclesAction,
   LandingState,
   unit,
+  _Maybe,
+  _RemoteData,
   _StateMachine,
 } from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+import { matchV } from '../../purs-util';
 
 type LandingProps = {
   state: LandingState;
@@ -39,6 +43,22 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
       )
     );
   }, []);
+
+  const sessionResult_ = pipe(state.checkSessionResult, _RemoteData.unwrap);
+
+  const sessionResult = matchV(sessionResult_)({
+    notAsked: () => [],
+    failure: () => [],
+    success: ({ data }) => data,
+    loading: ({ previousData }) =>
+      pipe(
+        previousData,
+        _Maybe.unMaybe({
+          onJust: users => users,
+          onNothing: () => [],
+        })
+      ),
+  });
 
   if (
     state.checkSessionResult.type === 'notAsked' ||
@@ -90,7 +110,11 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             prio={'high'}
             theme={theme}
             onClick={() =>
-              act(_StateMachine._landing(_StateMachine._signUp(unit)))
+              act(
+                _StateMachine._landing(
+                  _StateMachine._landingAction._signUp(unit)
+                )
+              )
             }
           >
             {t('signUpButton')}
@@ -103,7 +127,11 @@ export const Landing = ({ state, act }: LandingProps): ReactElement => {
             <SubClaim>{t('landing.loginWithKey')}</SubClaim>
             <ButtonLinkLike
               onClick={() =>
-                act(_StateMachine._landing(_StateMachine._signIn(unit)))
+                act(
+                  _StateMachine._landing(
+                    _StateMachine._landingAction._signIn(unit)
+                  )
+                )
               }
             >
               {t('signInButton')}

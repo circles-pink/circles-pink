@@ -8,7 +8,6 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
-import CirclesPink.Garden.StateMachine.Action (CirclesAction, LandingAction)
 import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
@@ -37,7 +36,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, D)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -77,8 +76,6 @@ modules =
   , "CirclesPink.Garden.StateMachine.Action" /\ join
       [ R.typeAlias "CirclesAction"
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
-      , R.value "_landing" []
-          (CirclesPink.Garden.StateMachine.Action._landing)
       , R.value "_circlesAction" []
           (CirclesPink.Garden.StateMachine.Action._circlesAction)
       , R.value "_landingAction" []
@@ -107,9 +104,11 @@ modules =
 
   , "RemoteData" /\ join
       [ R.typeDef "--"
-          (Proxy :: _ (RemoteData A B C D))
+          (Proxy :: _ (RemoteData N L E A))
       , R.value "unwrap" []
-          (RemoteData.unwrap :: _ A B C D -> _)
+          (RemoteData.unwrap :: _ N L E A -> _)
+      , R.value "unRemoteData" []
+          (RemoteData.unRemoteData :: _ -> _ N L E A -> Z)
       ]
 
   , "Data.IxGraph" /\

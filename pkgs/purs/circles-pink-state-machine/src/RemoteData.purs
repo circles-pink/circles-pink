@@ -10,6 +10,7 @@ module RemoteData
   , isNotAsked
   , isSuccess
   , onSuccess
+  , unRemoteData
   , unwrap
   ) where
 
@@ -17,7 +18,7 @@ import Prelude
 
 import Data.Newtype (class Newtype)
 import Data.Newtype as NT
-import Data.Variant (Variant, default, inj, onMatch)
+import Data.Variant (Variant, case_, default, inj, onMatch)
 import Type.Proxy (Proxy(..))
 
 type RemoteData' n l e a = Variant
@@ -29,13 +30,30 @@ type RemoteData' n l e a = Variant
 
 newtype RemoteData n l e a = RemoteData (RemoteData' n l e a)
 
+unRemoteData
+  :: forall n l e a z
+   . { onNotAsked :: n -> z
+     , onLoading :: l -> z
+     , onFailure :: e -> z
+     , onSuccess :: a -> z
+     }
+  -> RemoteData n l e a
+  -> z
+unRemoteData c (RemoteData rd) =
+  rd #
+    ( case_ # onMatch
+        { notAsked: c.onNotAsked
+        , loading: c.onLoading
+        , failure: c.onFailure
+        , success: c.onSuccess
+        }
+    )
+
 unwrap :: forall n l e a. RemoteData n l e a -> RemoteData' n l e a
 unwrap = NT.unwrap
 
 derive instance newtypeRemoteData :: Newtype (RemoteData n l e a) _
 derive newtype instance showRemoteData :: (Show n, Show l, Show e, Show a) => Show (RemoteData n l e a)
-
-
 
 --------------------------------------------------------------------------------
 -- Constructors
