@@ -4,6 +4,7 @@ import Prelude
 
 import CirclesCore as CirclesPink.Data.User
 import CirclesPink.Data.Address as CirclesPink.Data.Address
+import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
@@ -148,6 +149,12 @@ modules =
       join
         [ R.typeAlias "User"
             (Proxy :: _ CirclesPink.Data.User.User)
+        ]
+
+  , "CirclesPink.Data.PrivateKey" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ CirclesPink.Data.PrivateKey.PrivateKey)
         ]
 
   , "Simple.Data.Array" /\
