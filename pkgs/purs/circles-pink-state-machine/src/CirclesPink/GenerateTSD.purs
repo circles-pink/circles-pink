@@ -44,8 +44,8 @@ app = do
             let filePath = opts.outputDir <> "/" <> modName <> "/index.d.ts"
             log filePath
             writeTextFile UTF8 filePath (printModule mod)
-            void $ spawn "prettier" [ "--write", filePath ]
         )
+  void $ spawn "prettier" [ "--write", opts.outputDir <> "/*/index.d.ts" ]
 
 spawn :: String -> Array String -> Aff { stderr :: String, stdout :: String }
 spawn cmd args = do
