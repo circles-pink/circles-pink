@@ -25,7 +25,10 @@ export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode";
-export type { LandingState } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
+export type {
+  LandingState,
+  LoginState,
+} from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 export type { CirclesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 
 export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
@@ -37,7 +40,7 @@ export type {
   CirclesGraph,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 
-export { unit } from "@circles-pink/state-machine/output/Data.Unit"
+export { unit } from "@circles-pink/state-machine/output/Data.Unit";
 
 // export const _Array = Data_Array;
 export const _Array = { ...Simple_Data_Array };
