@@ -14,6 +14,7 @@ import * as Data_IxGraph from "@circles-pink/state-machine/output/Data.IxGraph";
 import * as CirclesPink_Data_TrustState from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 import * as CirclesPink_Data_TrustConnection from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 import * as CirclesPink_Data_TrustNode from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode";
+import * as CirclesPink_Garden_StateMachine_Direction from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 import * as CirclesPink_Garden_StateMachine_State from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 import * as CirclesPink_Garden_StateMachine_Action from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
@@ -25,10 +26,12 @@ export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode";
+export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
+export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 export type {
   LandingState,
   LoginState,
-  UserData
+  UserData,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 export type { CirclesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 
@@ -58,6 +61,7 @@ export const _Nullable = Data_Nullable;
 export const _TrustConnection = CirclesPink_Data_TrustConnection;
 export const _TrustNode = CirclesPink_Data_TrustNode;
 export const _Unit = Data_Unit;
+export const _Direction = CirclesPink_Garden_StateMachine_Direction;
 export const _StateMachine = {
   ...CirclesPink_Garden_StateMachine_State,
   ...CirclesPink_Garden_StateMachine_Action,

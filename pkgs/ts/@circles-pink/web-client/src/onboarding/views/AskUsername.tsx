@@ -1,5 +1,7 @@
 import {
+  RemoteData,
   UserData,
+  _RemoteData,
 } from '@circles-pink/state-machine/src';
 import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { ReactElement, useContext } from 'react';
@@ -18,6 +20,7 @@ import { ThemeContext } from '../../context/theme';
 import { OnboardingStepIndicator } from '../../components/OnboardingStepIndicator';
 import { Status, StatusContainer, TwoButtonRow } from '../../components/helper';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import { pipe } from 'fp-ts/lib/function';
 
 type AskUsernameProps = {
   state: UserData;
@@ -93,24 +96,24 @@ export const AskUsername = ({
 // Util
 // -----------------------------------------------------------------------------
 
-const mapStatusMessage = (trustState: UsernameApiResult, username: string) => {
-  switch (trustState.type) {
-    case 'loading':
-      return '';
-    case 'success':
-      if (trustState.value.isValid) {
-        return '';
-      }
-      return t('askUsername.validation.availFail');
-    case 'failure':
-      const regex = new RegExp(/[^A-Za-z0-9]+/);
-      if (regex.test(username)) {
-        return t('askUsername.validation.charFail');
-      }
-      if (username.length < 3 || username.length > 24) {
-        return t('askUsername.validation.lengthFail');
-      }
-    case 'notAsked':
-      return '';
-  }
-};
+const invalidUsername = new RegExp(/[^A-Za-z0-9]+/);
+
+export const mapStatusMessage = (
+  trustState: RemoteData<unknown, unknown, unknown, { isValid: boolean }>,
+  username: string
+) =>
+  pipe(
+    trustState,
+    _RemoteData.unRemoteData({
+      onFailure: () =>
+        invalidUsername.test(username)
+          ? t('askUsername.validation.charFail')
+          : username.length < 3 || username.length > 24
+          ? t('askUsername.validation.lengthFail')
+          : '',
+      onLoading: () => '',
+      onSuccess: ({ isValid }) =>
+        isValid ? '' : t('askUsername.validation.availFail'),
+      onNotAsked: () => 'black',
+    })
+  );
