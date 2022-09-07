@@ -2,7 +2,7 @@ module CirclesPink.GenerateTSD.Replace where
 
 import Prelude
 
-import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
+import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.Argonaut (Json, JsonDecodeError)
 import Data.Argonaut as Data.Argonaut
@@ -21,11 +21,11 @@ import Foreign.Object (Object)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsDef, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Data.ABC (A)
+import PursTsGen.Data.ABC (A(..))
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
@@ -64,7 +64,7 @@ else instance UnsafeReplace JsonDecodeError (Wrap JsonDecodeError)
 
 else instance UnsafeReplace BN (Wrap BN)
 
-else instance UnsafeReplace CirclesPink.Data.PrivateKey.PrivateKey PrivateKey
+else instance UnsafeReplace CirclesPink.Data.PrivateKey.Type.PrivateKey PrivateKey
 
 else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 
@@ -176,7 +176,7 @@ instance ToPursType (Wrap BN) where
 --------------------------------------------------------------------------------
 
 instance ToPursNominal (Wrap Json) where
-  toPursNominal _ = PursNominal "Data.Argonaut.Json" "Json"
+  toPursNominal _ = PursNominal "Data.Argonaut" "Json"
 
 instance ToTsType (Wrap Json) where
   toTsType = defaultToTsType' []
@@ -196,7 +196,7 @@ instance (ToTsType a) => ToTsType (Wrap (Object a)) where
   toTsType = defaultToTsType' [ toTsType (Proxy :: _ a) ]
 
 instance ToTsDef (Wrap (Object A)) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = defaultToTsDef' [ TS.name "A" ]
 
 instance (ToPursType a) => ToPursType (Wrap (Object a)) where
   toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
@@ -289,10 +289,10 @@ instance ToPursType Address where
 
 --------------------------------------------------------------------------------
 
-newtype PrivateKey = PrivateKey CirclesPink.Data.PrivateKey.PrivateKey
+newtype PrivateKey = PrivateKey CirclesPink.Data.PrivateKey.Type.PrivateKey
 
 ptPrivateKey :: PursType
-ptPrivateKey = PursType "CirclesPink_Data_PrivateKey" "PrivateKey"
+ptPrivateKey = PursType "CirclesPink_Data_PrivateKey_Type" "PrivateKey"
 
 derive instance newtypePrivateKey :: Newtype PrivateKey _
 

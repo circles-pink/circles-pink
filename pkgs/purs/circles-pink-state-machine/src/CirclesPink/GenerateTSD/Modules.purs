@@ -4,8 +4,9 @@ import Prelude
 
 import CirclesCore as CirclesPink.Data.User
 import CirclesPink.Data.Address as CirclesPink.Data.Address
-import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
 import CirclesPink.Data.Mnemonic as CirclesPink.Data.Mnemonic
+import CirclesPink.Data.PrivateKey as CirclesPink.Data.PrivateKey
+import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
 import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
@@ -23,6 +24,7 @@ import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
+import Data.HTTP.Method as Data.HTTP.Method
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
@@ -35,6 +37,7 @@ import Data.Pair as Data.Pair
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
+import Foreign.Object as Foreign.Object
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
@@ -47,6 +50,7 @@ import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Tuple as Simple.Data.Tuple
 import Type.Proxy (Proxy(..))
+import VoucherServer.Spec.Types as VoucherServer.Spec.Types
 
 moduleMap :: Map String (String /\ String)
 moduleMap = modules <#> (fst >>> pursModule) # M.fromFoldable
@@ -120,6 +124,11 @@ modules =
           (Proxy :: _ (Data.Argonaut.JsonDecodeError))
       ]
 
+  , "Data.HTTP.Method" /\ join
+      [ R.typeDef "--"
+          (Proxy :: _ (Data.HTTP.Method.Method))
+      ]
+
   , "CirclesPink.Garden.StateMachine.Control.EnvControl" /\ join
       [ R.typeDef "--"
           (Proxy :: _ (CirclesPink.Garden.StateMachine.Control.EnvControl.StorageType))
@@ -176,10 +185,18 @@ modules =
         , R.value "unDirection" [] (CirclesPink.Garden.StateMachine.Direction.unDirection :: _ -> _ -> Z)
         ]
 
-  , "CirclesPink.Data.PrivateKey" /\
+  , "CirclesPink.Data.PrivateKey.Type" /\
       join
         [ R.typeDef "--"
-            (Proxy :: _ CirclesPink.Data.PrivateKey.PrivateKey)
+            (Proxy :: _ CirclesPink.Data.PrivateKey.Type.PrivateKey)
+        ]
+
+  , "Data.Argonaut" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ Data.Argonaut.Json)
+        , R.typeDef "--"
+            (Proxy :: _ Data.Argonaut.JsonDecodeError)
         ]
 
   , "CirclesPink.Data.Mnemonic" /\
@@ -190,6 +207,20 @@ modules =
             CirclesPink.Data.Mnemonic.getWords
         , value "keyToMnemonic" []
             CirclesPink.Data.Mnemonic.keyToMnemonic
+        ]
+
+  , "VoucherServer.Spec.Types" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ VoucherServer.Spec.Types.VoucherProvider)
+        , R.typeDef "--"
+            (Proxy :: _ VoucherServer.Spec.Types.Voucher)
+        ]
+
+  , "Foreign.Object" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ (Foreign.Object.Object A))
         ]
 
   , "Simple.Data.Array" /\

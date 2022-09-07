@@ -1,5 +1,3 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, {
   ReactElement,
   useContext,
@@ -27,15 +25,6 @@ import tw, { css, styled } from 'twin.macro';
 import { InfoCard } from '../../components/InfoCard';
 import QrCode from 'react-qrcode-svg';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import {
-  TrustState,
-  _trusts,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts';
-import {
-  defaultView,
-  DefaultView,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
-import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import { Margin } from '../../components/helper';
 
 // -----------------------------------------------------------------------------
