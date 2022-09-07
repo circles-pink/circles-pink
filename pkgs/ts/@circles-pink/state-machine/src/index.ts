@@ -28,6 +28,7 @@ export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.D
 export type {
   LandingState,
   LoginState,
+  UserData
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 export type { CirclesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 

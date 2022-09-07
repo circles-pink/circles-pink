@@ -95,6 +95,10 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LandingState)
       , R.typeAlias "LoginState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LoginState)
+      , R.typeAlias "UserData"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.UserData)
+      , R.typeAlias "CirclesState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
       ]
 
   , "Data.Argonaut" /\ join
