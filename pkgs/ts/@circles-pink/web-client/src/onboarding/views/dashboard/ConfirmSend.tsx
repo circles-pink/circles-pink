@@ -21,6 +21,7 @@ import {
   _VoucherServer,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
+import { fromNativeBN, toNativeBN } from '../../../safe-as';
 
 const { _dashboardAction } = _StateMachine;
 
@@ -101,7 +102,7 @@ export const ConfirmSend = ({
       _dashboardAction._transfer({
         from: fromAddr,
         to: toAddr,
-        value: value,
+        value: fromNativeBN(value),
         paymentNote: _VoucherServer.unVoucherProviderId(provider.id),
       })
     );

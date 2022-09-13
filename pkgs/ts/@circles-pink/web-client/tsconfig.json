@@ -19,6 +19,7 @@
     "composite": true
   },
   "files": [
+    "src/safe-as.ts",
     // "src/assets/CirclesCurrency.tsx",
     "src/components/CurrencySymbol.tsx",
     "src/components/DialogCard.tsx",
