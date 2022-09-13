@@ -8,53 +8,49 @@ import { Theme } from '../../../context/theme';
 import { mapResult } from '../../utils/mapResult';
 import { convertTcToCrc } from '../../utils/timeCircles';
 const Web3 = require('web3');
-import { DashboardProps } from '../dashboard';
 import { t } from 'i18next';
-import {
-  DefaultView,
-  defaultView,
-  addrToString,
-  parseAddress,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
 import Icon from '@mdi/react';
 import styled from '@emotion/styled';
 import tw from 'twin.macro';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { Option } from 'fp-ts/lib/Option';
-import { toFpTsOption } from '../../../utils/fpTs';
+import {
+  Address,
+  DashboardState,
+  CirclesAction,
+  DashboardAction,
+  _Address,
+  Maybe,
+  _Nullable,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
 
 // -----------------------------------------------------------------------------
 // Send Circles
 // -----------------------------------------------------------------------------
 
 let QrScanner: React.ReactElement<
-  any,
-  string | React.JSXElementConstructor<any>
+  unknown,
+  string | React.JSXElementConstructor<unknown>
 >;
 
-export type SendProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
+export type SendProps = {
   theme: Theme;
   overwriteTo?: Address;
+  state: DashboardState;
+  act: (ac: DashboardAction) => void;
 };
 
-export const Send = ({
-  state: stateRaw,
-  act,
-  theme,
-  overwriteTo,
-}: SendProps) => {
-  const state = (defaultView as any)(stateRaw) as DefaultView;
 
+export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   // State
-  const [from, _] = useState<Address>(stateRaw.user.safeAddress);
+  const [from, _] = useState<Address>(_Address.Address(state.user.safeAddress));
   const [to, setTo] = useState<string>(
-    overwriteTo ? addrToString(overwriteTo) : ''
+    overwriteTo ? _Address.addrToString(overwriteTo) : ''
   );
   const [value, setValue] = useState<number>(0);
   const [paymentNote, setPaymentNote] = useState<string>('');
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
 
-  const optionAddr: Option<Address> = toFpTsOption(parseAddress(to));
+  const optionAddr: Address | null = pipe(to, _Address.parseAddress, _Nullable.toNullable);
 
   // QR Scanner
 

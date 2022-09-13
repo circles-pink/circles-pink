@@ -1,11 +1,13 @@
 module CirclesPink.Data.Address
   ( Address(..)
   , addrToString
+  , mkAddress
   , module Exp
   , parseAddress
   , sampleAddress
   , sampleSafeAddress
-  ) where
+  )
+  where
 
 import CirclesPink.Prelude
 
@@ -54,16 +56,16 @@ instance ParseValue Address where
 ptAddress :: PursType
 ptAddress = PursType "CirclesPink_Data_Address" "Address"
 
-instance toTsTypeDefAddress :: ToTsDef Address where
+instance ToTsDef Address where
   toTsDef _ = defaultToTsDef ptAddress []
 
-instance toTsTypeAddress :: ToTsType Address where
+instance ToTsType Address where
   toTsType _ = defaultToTsType ptAddress []
 
-instance toPursTypeAddress :: ToPursType Address where
+instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
 
-instance fpTs :: FpTs Address Address where
+instance FpTs Address Address where
   toFpTs = identity
   fromFpTs = identity
 

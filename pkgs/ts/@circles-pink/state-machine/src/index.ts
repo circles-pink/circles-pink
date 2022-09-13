@@ -40,15 +40,15 @@ export type {
   LoginState,
   UserData,
   TrustState,
+  DashboardState
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
-export type { CirclesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
+export type { CirclesAction, DashboardAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 
 export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export { Pair } from "@circles-pink/state-machine/output/Data.Pair";
 export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
 
 export type {
-  DashboardState,
   CirclesGraph,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 

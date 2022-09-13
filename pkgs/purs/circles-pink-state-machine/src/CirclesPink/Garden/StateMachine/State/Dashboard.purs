@@ -1,7 +1,6 @@
 module CirclesPink.Garden.StateMachine.State.Dashboard
   ( CirclesGraph
   , DashboardState
-  , DashboardState_
   , ErrDashboardState
   , ErrGetUsers
   , ErrTokenCheckUBIPayout
@@ -80,24 +79,6 @@ type DashboardState =
   , redeployTokenResult :: RedeployTokenResult
   , vouchersResult :: VouchersResult
   , voucherProvidersResult :: VoucherProvidersResult
-  }
-
-type DashboardState_ =
-  { user :: User
-  --, privKey :: PrivateKey
-  , error :: Maybe (Variant (ErrDashboardState + ()))
-  , trusts :: CirclesGraph
-  , trustsResult :: TrustGetTrusts
-  --, trustAddResult :: TrustAddResult
-  --, trustRemoveResult :: TrustRemoveResult
-  --, getBalanceResult :: TokenGetBalanceResult
-  , getUsersResult :: GetUsersResult
-  -- , checkUBIPayoutResult :: TokenCheckUBIPayoutResult
-  , requestUBIPayoutResult :: TokenRequestUBIPayoutResult
-  , transferResult :: TokenTransferResult
-  , userSearchResult :: UserSearchResult
-  , redeploySafeResult :: RedeploySafeResult
-  , redeployTokenResult :: RedeployTokenResult
   }
 
 type Trusts = Map Address Trust
