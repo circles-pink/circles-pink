@@ -286,6 +286,8 @@ modules =
             CirclesPink.Data.TrustNode.initTrustNode
         , instanceDef "ordTrustNode"
             (_Ord (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode))
+        , value "getAddress" []
+            CirclesPink.Data.TrustNode.getAddress
         ]
 
   , "CirclesPink.Data.TrustState" /\
