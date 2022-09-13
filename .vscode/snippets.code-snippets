@@ -54,5 +54,18 @@
     ],
     "description": "80 column wide section header to organize source files",
     "scope": "typescript,typescriptreact"
+  },
+  "UnRemoteData": {
+    "prefix": ["unRemoteData"],
+    "body": [
+      "_RemoteData.unRemoteData({",
+      "  onNotAsked: () => ${1:element},",
+      "  onLoading: () => ${1:element},",
+      "  onFailure: () => ${1:element},",
+      "  onSuccess: () => ${1:element},",
+      "})"
+    ],
+    "description": "unRemoteData function template",
+    "scope": "typescript,typescriptreact"
   }
 }
