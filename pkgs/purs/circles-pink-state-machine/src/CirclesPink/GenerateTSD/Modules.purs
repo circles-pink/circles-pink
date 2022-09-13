@@ -45,6 +45,7 @@ import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
+import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Tuple as Simple.Data.Tuple
@@ -71,6 +72,8 @@ modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
       [ R.typeAlias "CirclesGraph"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
+      , R.typeAlias "VoucherProvidersResult"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.VoucherProvidersResult)
       ]
 
   , "Data.DateTime.Instant" /\ join
@@ -147,8 +150,11 @@ modules =
           (RemoteData.unwrap :: _ N L E A -> _)
       , R.value "unRemoteData" []
           (RemoteData.unRemoteData :: _ -> _ N L E A -> Z)
-      , R.value "getData" []
-          (RemoteData.getData :: _ N L E A -> _)
+      ]
+
+  , "RemoteReport" /\ join
+      [ R.value "getData" []
+          (RemoteReport.getData :: _ -> RemoteReport.RemoteReport E A -> _)
       ]
 
   , "Data.IxGraph" /\

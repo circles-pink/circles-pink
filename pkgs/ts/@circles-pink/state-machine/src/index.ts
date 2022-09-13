@@ -21,6 +21,7 @@ import * as CirclesPink_Garden_StateMachine_Direction from "@circles-pink/state-
 import * as CirclesPink_Garden_StateMachine_State from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 import * as CirclesPink_Garden_StateMachine_Action from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
+import * as RemoteReport from "@circles-pink/state-machine/output/RemoteReport";
 
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { User } from "@circles-pink/state-machine/output/CirclesPink.Data.User";
@@ -52,7 +53,7 @@ export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Dat
 export { Pair } from "@circles-pink/state-machine/output/Data.Pair";
 export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
 
-export type { CirclesGraph } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
+export type { CirclesGraph , VoucherProvidersResult } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 
 export { unit } from "@circles-pink/state-machine/output/Data.Unit";
 
@@ -77,6 +78,8 @@ export const _TrustConnection = CirclesPink_Data_TrustConnection;
 export const _TrustNode = CirclesPink_Data_TrustNode;
 export const _Unit = Data_Unit;
 export const _Direction = CirclesPink_Garden_StateMachine_Direction;
+export const _RemoteReport = RemoteReport;
+
 export const _StateMachine = {
   ...CirclesPink_Garden_StateMachine_State,
   ...CirclesPink_Garden_StateMachine_Action,
