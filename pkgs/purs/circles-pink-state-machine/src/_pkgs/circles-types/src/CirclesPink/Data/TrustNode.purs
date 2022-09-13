@@ -6,6 +6,7 @@ import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..))
 import Data.IxGraph (class Indexed)
+import Data.IxGraph as IxGraph 
 import Data.Lens (Lens')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
@@ -41,6 +42,9 @@ instance fpTsTrustNode :: FpTs TrustNode TrustNode where
 instance indexedUserIdent :: Indexed Address TrustNode where
   getIndex (TrustNode { userIdent: UserIdent (Left x) }) = x
   getIndex (TrustNode { userIdent: UserIdent (Right (User { safeAddress })) }) = safeAddress
+
+getAddress :: TrustNode -> Address
+getAddress = IxGraph.getIndex
 
 initTrustNode :: UserIdent -> TrustNode
 initTrustNode userIdent' = TrustNode { userIdent: userIdent' }
