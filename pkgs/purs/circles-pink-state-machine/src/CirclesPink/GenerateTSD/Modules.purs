@@ -73,7 +73,9 @@ modules =
       [ R.typeAlias "CirclesGraph"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
       , R.typeAlias "VoucherProvidersResult"
-          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.VoucherProvidersResult)
+      , R.typeAlias "VouchersResult"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.VouchersResult)
       ]
 
   , "Data.DateTime.Instant" /\ join
@@ -238,8 +240,6 @@ modules =
   , "VoucherServer.Spec.Types" /\
       join
         [ R.typeDef "--"
-            (Proxy :: _ VoucherServer.Spec.Types.Voucher)
-        , R.typeDef "--"
             (Proxy :: _ VoucherServer.Spec.Types.VoucherAmount)
         , R.typeDef "--"
             (Proxy :: _ VoucherServer.Spec.Types.VoucherProviderId)
@@ -247,10 +247,14 @@ modules =
             (Proxy :: _ VoucherServer.Spec.Types.VoucherProvider)
         , R.typeAlias "VoucherOffer"
             (Proxy :: _ VoucherServer.Spec.Types.VoucherOffer)
+        , R.typeAlias "Voucher"
+            (Proxy :: _ VoucherServer.Spec.Types.Voucher)
         , value "unVoucherProviderId" []
             VoucherServer.Spec.Types.unVoucherProviderId
         , value "unVoucherAmount" []
             VoucherServer.Spec.Types.unVoucherAmount
+        , value "unVoucherCode" []
+            VoucherServer.Spec.Types.unVoucherCode
         ]
 
   , "Foreign.Object" /\

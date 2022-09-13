@@ -1,12 +1,15 @@
-import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { isLoading } from '@circles-pink/state-machine/output/RemoteData';
-import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import {
   Voucher,
   VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
+  VoucherProviderId,
+  VoucherProvidersResult,
+  VouchersResult,
+  _RemoteData,
+  _RemoteReport,
+  _VoucherServer,
+} from '@circles-pink/state-machine/src';
 import { FadeIn, getIncrementor } from 'anima-react';
+import { pipe } from 'fp-ts/lib/function';
 import { t } from 'i18next';
 import React, {
   ReactElement,
@@ -20,7 +23,7 @@ import { Claim, LoadingText, SubClaim } from '../../../components/text';
 import { Theme } from '../../../context/theme';
 
 type ListVouchersProps = {
-  vouchersResult: DefaultView['vouchersResult'];
+  vouchersResult: VouchersResult;
   providersResult: VoucherProvidersResult;
   theme: Theme;
   justBoughtVoucher: boolean;
@@ -35,24 +38,37 @@ export const ListVouchers = ({
   setJustBoughtVoucher,
 }: ListVouchersProps): ReactElement | null => {
   // Vouchers
-  const [vouchers, setVouchers] = useState<Array<Voucher>>(
+  const [vouchers, setVouchers] = useState<ReadonlyArray<Voucher>>(
     mapResult(vouchersResult)
   );
 
   useEffect(() => {
-    if (vouchersResult.type === 'success') {
-      setVouchers(mapResult(vouchersResult));
-    }
+    pipe(
+      vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: () => setVouchers(mapResult(vouchersResult)),
+      })
+    );
   }, [vouchersResult]);
 
   // VoucherProviders
-  const [providers, setProviders] = useState<VoucherProvider[]>(
-    getData([] as VoucherProvider[])(providersResult as any)
+  const [providers, setProviders] = useState(
+    pipe(
+      providersResult,
+      _RemoteReport.getData<ReadonlyArray<VoucherProvider>>([])
+    )
   );
 
   useEffect(() => {
-    if (!isLoading(providersResult as any)) {
-      setProviders(getData([] as VoucherProvider[])(providersResult as any));
+    const providerResult = pipe(
+      providersResult,
+      _RemoteReport.getData<ReadonlyArray<VoucherProvider>>([])
+    );
+    if (providerResult.length > 0) {
+      setProviders(providerResult);
     }
   }, [providersResult]);
 
@@ -107,7 +123,10 @@ export const ListVouchers = ({
                     />
                   }
                   right={
-                    <VoucherAmount amount={voucher.amount} theme={theme} />
+                    <VoucherAmount
+                      amount={_VoucherServer.unVoucherAmount(voucher.amount)}
+                      theme={theme}
+                    />
                   }
                 />
               </FadeIn>
@@ -155,25 +174,26 @@ export const ListVouchers = ({
   );
 };
 
-const mapResult = (
-  vouchersResult: DefaultView['vouchersResult']
-): Array<Voucher> => {
-  switch (vouchersResult.type) {
-    case 'success':
-      return vouchersResult.value.data;
-    case 'loading':
-    case 'failure':
-    case 'notAsked':
-    default:
-      return [];
-  }
-};
+const mapResult = (vouchersResult: VouchersResult): ReadonlyArray<Voucher> =>
+  pipe(
+    vouchersResult,
+    _RemoteData.unRemoteData({
+      onNotAsked: () => [],
+      onLoading: () => [],
+      onFailure: () => [],
+      onSuccess: x => x.data,
+    })
+  );
 
 const mapInfo = (
-  providers: Array<VoucherProvider>,
-  providerId: string
+  providers: ReadonlyArray<VoucherProvider>,
+  providerId: VoucherProviderId
 ): VoucherProvider | undefined => {
-  const provider = providers.find(provider => provider.id === providerId);
+  const provider = providers.find(
+    provider =>
+      _VoucherServer.unVoucherProviderId(provider.id) ===
+      _VoucherServer.unVoucherProviderId(providerId)
+  );
   return provider;
 };
 
@@ -295,10 +315,12 @@ const VoucherContent = ({
   return (
     <VoucherContentContainer theme={theme}>
       <VoucherText fontSize={1.25} theme={theme}>
-        {provider ? provider.name : voucher.providerId}
+        {provider
+          ? provider.name
+          : _VoucherServer.unVoucherProviderId(voucher.providerId)}
       </VoucherText>
       <VoucherText fontSize={0.75} theme={theme}>
-        {voucher.code}
+        {_VoucherServer.unVoucherCode(voucher.code)}
       </VoucherText>
     </VoucherContentContainer>
   );

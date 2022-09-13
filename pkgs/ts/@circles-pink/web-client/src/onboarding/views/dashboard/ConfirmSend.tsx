@@ -1,5 +1,4 @@
 import { mdiCashFast } from '@mdi/js';
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 import React, { SetStateAction, useEffect, useState } from 'react';
 import { Button } from '../../../components/forms';
 import { JustifyEnd, Margin } from '../../../components/helper';
@@ -10,17 +9,20 @@ import { convertTcToCrc } from '../../utils/timeCircles';
 const Web3 = require('web3');
 import { DashboardProps, SelectedOffer } from '../dashboard';
 import { t } from 'i18next';
-import {
-  DefaultView,
-  defaultView,
-  parseAddress,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import { Option } from 'fp-ts/lib/Option';
-import { toFpTsOption } from '../../../utils/fpTs';
 import { env } from '../../../env';
 import BN from 'bn.js';
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
+import {
+  Address,
+  VoucherProvider,
+  _Address,
+  _Nullable,
+  _RemoteData,
+  _StateMachine,
+  _VoucherServer,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+
+const { _dashboardAction } = _StateMachine;
 
 // -----------------------------------------------------------------------------
 // ConfirmSend Circles
@@ -34,45 +36,60 @@ export type ConfirmSendProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
 };
 
 export const ConfirmSend = ({
-  state: stateRaw,
+  state,
   act,
   theme,
   selectedOffer: [provider, offer],
   setJustBoughtVoucher,
   xbgeSafeAddress,
 }: ConfirmSendProps) => {
-  const state = (defaultView as any)(stateRaw) as DefaultView;
-
-  const optionAddr: Option<Address> = toFpTsOption(
-    parseAddress(env.xbgeSafeAddress)
+  const optionAddr: Address | null = pipe(
+    env.xbgeSafeAddress,
+    _Address.parseAddress,
+    _Nullable.toNullable
   );
 
   // State
-  const [from, _] = useState<Address>(stateRaw.user.safeAddress);
+  const [from, _] = useState<Address>(_Address.Address(state.user.safeAddress));
   const [to, setTo] = useState<Address>();
-  const [value, setValue] = useState<BN>(eurToCrc(offer.amount));
+  const [value, setValue] = useState<BN>(
+    eurToCrc(_VoucherServer.unVoucherAmount(offer.amount))
+  );
 
   useEffect(() => {
     if (xbgeSafeAddress) {
-      const optionAddrProp: Option<Address> = toFpTsOption(
-        parseAddress(xbgeSafeAddress)
+      const optionAddrProp: Address | null = pipe(
+        xbgeSafeAddress,
+        _Address.parseAddress,
+        _Nullable.toNullable
       );
-      if (optionAddrProp._tag === 'Some') {
-        setTo(optionAddrProp.value);
-      } else if (optionAddr._tag === 'Some') {
-        setTo(optionAddr.value);
+
+      if (optionAddrProp) {
+        setTo(optionAddrProp);
+      } else if (optionAddr) {
+        setTo(optionAddr);
       }
-    } else if (optionAddr._tag === 'Some') {
-      setTo(optionAddr.value);
+    } else if (optionAddr) {
+      setTo(optionAddr);
     }
   }, [env]);
 
   useEffect(() => {
-    setValue(eurToCrc(offer.amount));
+    setValue(eurToCrc(_VoucherServer.unVoucherAmount(offer.amount)));
   }, [provider, offer]);
 
   useEffect(() => {
-    if (state.transferResult.type === 'success') {
+    const result = pipe(
+      state.transferResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => null,
+        onLoading: () => null,
+        onFailure: () => null,
+        onSuccess: x => x,
+      })
+    );
+
+    if (result) {
       // console.log('Show waiting voucher');
       setJustBoughtVoucher(true);
     }
@@ -81,50 +98,52 @@ export const ConfirmSend = ({
   // Util
   const transact = (fromAddr: Address, toAddr: Address) =>
     act(
-      A._dashboard(
-        A._transfer({
-          from: fromAddr,
-          to: toAddr,
-          value: value as any,
-          paymentNote: provider.id,
-        })
-      )
+      _dashboardAction._transfer({
+        from: fromAddr,
+        to: toAddr,
+        value: value,
+        paymentNote: _VoucherServer.unVoucherProviderId(provider.id),
+      })
     );
 
   // Render
 
-  if (state.transferResult.type === 'failure') {
-    return (
-      <Margin top={2} bottom={2}>
-        <Claim color={theme.baseColor}>
-          {t('dashboard.voucherShop.confirmSendProblem')}
-        </Claim>
-      </Margin>
-    );
-  }
-
-  return (
-    <>
-      <Claim color={theme.baseColor}>
-        {t('dashboard.voucherShop.confirmSendClaim')}
-      </Claim>
-      <ConfirmDialog
-        theme={theme}
-        provider={provider}
-        eurAmount={offer.amount}
-      />
-      <JustifyEnd>
-        <Button
-          prio={'high'}
-          theme={theme}
-          icon={mdiCashFast}
-          state={to ? mapResult(state.transferResult) : 'disabled'}
-          onClick={() => (to ? transact(from, to) : {})}
-        >
-          {t('dashboard.voucherShop.confirmSendButton')}
-        </Button>
-      </JustifyEnd>
-    </>
+  pipe(
+    state.transferResult,
+    _RemoteData.unRemoteData({
+      onNotAsked: () => null,
+      onLoading: () => null,
+      onFailure: () => (
+        <Margin top={2} bottom={2}>
+          <Claim color={theme.baseColor}>
+            {t('dashboard.voucherShop.confirmSendProblem')}
+          </Claim>
+        </Margin>
+      ),
+      onSuccess: () => (
+        <>
+          <Claim color={theme.baseColor}>
+            {t('dashboard.voucherShop.confirmSendClaim')}
+          </Claim>
+          <ConfirmDialog
+            theme={theme}
+            provider={provider}
+            eurAmount={_VoucherServer.unVoucherAmount(offer.amount)}
+          />
+          <JustifyEnd>
+            <Button
+              prio={'high'}
+              theme={theme}
+              icon={mdiCashFast}
+              state={to ? mapResult(state.transferResult) : 'disabled'}
+              onClick={() => (to ? transact(from, to) : {})}
+            >
+              {t('dashboard.voucherShop.confirmSendButton')}
+            </Button>
+          </JustifyEnd>
+        </>
+      ),
+    })
   );
 };
 

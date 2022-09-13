@@ -30,7 +30,6 @@ import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
 import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
-import VoucherServer.Spec.Types (Voucher)
 
 newtype Wrap a = Wrap a
 
@@ -70,8 +69,6 @@ else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 else instance UnsafeReplace Method (Wrap Method)
 
 else instance UnsafeReplace Json (Wrap Json)
-
-else instance UnsafeReplace Voucher (Wrap Voucher)
 
 else instance UnsafeReplace a a' => UnsafeReplace (Object a) (Wrap (Object a'))
 
@@ -199,20 +196,6 @@ instance ToTsDef (Wrap (Object A)) where
 
 instance (ToPursType a) => ToPursType (Wrap (Object a)) where
   toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
-
---------------------------------------------------------------------------------
-
-instance ToPursNominal (Wrap Voucher) where
-  toPursNominal _ = PursNominal "VoucherServer.Spec.Types" "Voucher"
-
-instance ToTsType (Wrap Voucher) where
-  toTsType = defaultToTsType' []
-
-instance ToTsDef (Wrap Voucher) where
-  toTsDef = defaultToTsDef' []
-
-instance ToPursType (Wrap Voucher) where
-  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
