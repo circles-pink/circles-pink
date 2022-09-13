@@ -41,7 +41,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, I(..), L, N, Z)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -89,8 +89,12 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
       , R.typeAlias "DashboardAction"
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.DashboardAction)
+      , R.typeAlias "DebugAction"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.Action.DebugAction)
       , R.value "_circlesAction" []
           (CirclesPink.Garden.StateMachine.Action._circlesAction)
+      , R.value "_debugAction" []
+          (CirclesPink.Garden.StateMachine.Action._debugAction)
       , R.value "_landingAction" []
           (CirclesPink.Garden.StateMachine.Action._landingAction)
       , R.value "_loginAction" []
@@ -117,7 +121,9 @@ modules =
       ]
 
   , "CirclesPink.Garden.StateMachine.State" /\ join
-      [ R.typeAlias "LandingState"
+      [ R.typeAlias "DebugState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.DebugState)
+      , R.typeAlias "LandingState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LandingState)
       , R.typeAlias "LoginState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.LoginState)

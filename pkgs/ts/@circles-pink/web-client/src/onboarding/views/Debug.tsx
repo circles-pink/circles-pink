@@ -1,22 +1,27 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useState } from 'react';
+import React, { ReactElement, useContext } from 'react';
 import { Button, Input } from '../../components/forms';
 import { Claim, SubClaim, Text } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
-import { DebugState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
 import { getIncrementor } from '../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../context/theme';
 import { TwoButtonRow } from '../../components/helper';
 import tw, { css, styled } from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
+import {
+  DebugAction,
+  DebugState,
+  unit,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+
+const { _debugAction } = _StateMachine;
 
 type DebugProps = {
   state: DebugState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: DebugAction) => void;
 };
 
 export const Debug = ({ state, act }: DebugProps): ReactElement => {
@@ -47,10 +52,10 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
               value={state.magicWords}
               placeholder={t('debug.magicWordsPlaceholder')}
               onChange={e =>
-                act(A._debug(A._setMagicWords(e.target.value.trim())))
+                act(_debugAction._setMagicWords(e.target.value.trim()))
               }
               onKeyPress={e =>
-                e.key === 'Enter' && act(A._debug(A._coreToWindow(unit)))
+                e.key === 'Enter' && act(_debugAction._coreToWindow(unit))
               }
             />
           </FadeIn>
@@ -60,7 +65,7 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
             <TwoButtonRow>
               <Button
                 theme={theme}
-                onClick={() => act(A._debug(A._coreToWindow(unit)))}
+                onClick={() => act(_debugAction._coreToWindow(unit))}
               >
                 {t('debugButton')}
               </Button>

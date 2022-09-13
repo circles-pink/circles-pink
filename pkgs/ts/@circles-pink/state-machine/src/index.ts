@@ -40,6 +40,7 @@ export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
 export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 export type {
   CirclesState,
+  DebugState,
   LandingState,
   LoginState,
   UserData,
@@ -49,6 +50,7 @@ export type {
 export type {
   CirclesAction,
   DashboardAction,
+  DebugAction,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 export type {
   Voucher,
