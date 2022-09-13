@@ -71,8 +71,6 @@ modules =
   [ "CirclesPink.Garden.StateMachine.State.Dashboard" /\ join
       [ R.typeAlias "CirclesGraph"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.CirclesGraph)
-      , R.typeAlias "DashboardState"
-          (Proxy :: _ CirclesPink.Garden.StateMachine.State.Dashboard.DashboardState_)
       ]
 
   , "Data.DateTime.Instant" /\ join
@@ -83,6 +81,8 @@ modules =
   , "CirclesPink.Garden.StateMachine.Action" /\ join
       [ R.typeAlias "CirclesAction"
           (Proxy :: _ CirclesPink.Garden.StateMachine.Action.CirclesAction)
+      , R.typeAlias "DashboardAction"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.Action.DashboardAction)
       , R.value "_circlesAction" []
           (CirclesPink.Garden.StateMachine.Action._circlesAction)
       , R.value "_landingAction" []
@@ -121,6 +121,8 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.CirclesState)
       , R.typeAlias "TrustState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.TrustState)
+      , R.typeAlias "DashboardState"
+          (Proxy :: _ CirclesPink.Garden.StateMachine.State.DashboardState)
       ]
 
   , "Data.Argonaut" /\ join
@@ -176,6 +178,10 @@ modules =
             (_Ord (Proxy :: _ CirclesPink.Data.Address.Address))
         , value "addrToString" []
             CirclesPink.Data.Address.addrToString
+        , value "parseAddress" []
+            CirclesPink.Data.Address.parseAddress
+        , R.value "Address" []
+            CirclesPink.Data.Address.Address
         ]
 
   , "Simple.Network.Ethereum.Core.Signatures" /\

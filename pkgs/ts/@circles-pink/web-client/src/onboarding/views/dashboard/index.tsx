@@ -1,5 +1,3 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, {
   ReactElement,
   SetStateAction,
@@ -12,12 +10,7 @@ import { Button, ButtonLinkLike, Input } from '../../../components/forms';
 import { JustText, SubClaim, Text } from '../../../components/text';
 import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import {
-  DefaultView,
-  defaultView,
-  Trust,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { DashboardState } from '@circles-pink/state-machine/src';
 import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../../context/theme';
@@ -41,12 +34,7 @@ import {
 import { Send, SendProps } from './Send';
 import { Receive } from './Receive';
 import { Balance } from './Balance';
-import {
-  TrustNode,
-  User,
-} from '@circles-pink/state-machine/output/CirclesCore';
 import { StateMachineDebugger } from '../../../components/StateMachineDebugger';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
