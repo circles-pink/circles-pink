@@ -2,6 +2,9 @@
 // fields
 // -----------------------------------------------------------------------------
 
+import { unRemoteData } from "@circles-pink/state-machine/output/RemoteData";
+import { ReadonlyRecord } from "fp-ts/lib/ReadonlyRecord";
+
 // export const fieldsOf =
 //   <L extends string>(l: L) =>
 //   <V extends { constructor: { name: L } }>(d: V): ValuesToFields<V> => {
@@ -90,3 +93,27 @@ export const isCaseV =
 //     s === a.constructor.name;
 
 // export const run = <Z>(f: () => Z): Z => f();
+
+// -----------------------------------------------------------------------------
+// withDefault
+// -----------------------------------------------------------------------------
+
+
+// type CaseFn<Z> = 
+//  // | ((x1: any) => (x2: any) => (x3: any) => Z)
+//  // | ((x1: any) => (x2: any) => Z)
+//   | ((x1: any) => Z)
+
+// type CaseFns<K extends (string), Z> = ReadonlyRecord<K, CaseFn<Z>>
+
+// //type UnFn <A, Z> = (_: CaseFns<Z>) => any // <A>(x: A) => Z
+
+// const withDefault = <U extends ReadonlyRecord<keyof U,  CaseFn<any>>>(unFn : U) : any => 1 as any
+
+// const x = withDefault(unRemoteData)
+
+
+// ({
+//   onSuccess: () => 3,
+//   default: (): 0
+// }, 0)

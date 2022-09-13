@@ -6,6 +6,7 @@ module Data.IxGraph
   , class Indexed
   , deleteEdge
   , deleteNode
+  , edges
   , empty
   , getIndex
   , incomingEdges
@@ -17,9 +18,11 @@ module Data.IxGraph
   , lookupEdge
   , lookupNode
   , modifyNode
+  , module Exp
   , neighborEdgesWithNodes
   , neighborNodes
   , neighborhood
+  , nodes
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingIds
@@ -27,9 +30,7 @@ module Data.IxGraph
   , toUnfoldables
   , updateEdge
   , updateNode
-  , module Exp
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -42,14 +43,14 @@ import Data.Graph as G
 import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrNeighborhood)
 import Data.Pair (Pair)
 import Data.Set (Set)
-import Data.Tuple (snd)
+import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
 
 class Indexed k v | v -> k where
   getIndex :: v -> k
 
-instance indexedEither :: (Indexed k a, Indexed k b) => Indexed k (Either a b) where
+instance (Indexed k a, Indexed k b) => Indexed k (Either a b) where
   getIndex (Left x) = getIndex x
   getIndex (Right x) = getIndex x
 
@@ -61,6 +62,12 @@ newtype IxGraph id e n = IxGraph (Graph id e n)
 
 empty :: forall id e n. IxGraph id e n
 empty = IxGraph G.empty
+
+nodes :: forall id e n. Ord id => IxGraph id e n -> Array n
+nodes (IxGraph g) = G.nodes g <#> snd
+
+edges :: forall id e n. Ord id => IxGraph id e n -> Array e
+edges (IxGraph g) = G.edges g <#> snd
 
 --------------------------------------------------------------------------------
 -- Node API
@@ -76,7 +83,7 @@ updateNode :: forall r id e n. Ord id => Indexed id n => n -> IxGraph id e n -> 
 updateNode n (IxGraph g) = IxGraph <$> G.updateNode (getIndex n) n g
 
 modifyNode :: forall r id e n. Ord id => Indexed id n => id -> (n -> n) -> IxGraph id e n -> EitherV (ErrModifyNode id r) (IxGraph id e n)
-modifyNode id f (IxGraph g) = IxGraph <$> G.modifyNode id f g 
+modifyNode id f (IxGraph g) = IxGraph <$> G.modifyNode id f g
 
 deleteNode :: forall r id e n. Ord id => id -> IxGraph id e n -> EitherV (ErrDeleteNode id r) (IxGraph id e n)
 deleteNode id (IxGraph g) = IxGraph <$> G.deleteNode id g

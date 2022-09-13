@@ -10,6 +10,7 @@ import * as Network_Ethereum_Core_Signatures from "@circles-pink/state-machine/o
 import * as Simple_Data_Maybe from "@circles-pink/state-machine/output/Simple.Data.Maybe";
 import * as CirclesPink_Data_UserIdent from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 import * as Data_Pair from "@circles-pink/state-machine/output/Data.Pair";
+import * as Simple_Data_Pair from "@circles-pink/state-machine/output/Simple.Data.Pair";
 import * as CirclesPink_Data_Address from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
 import * as CirclesPink_Data_Mnemonic from "@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic";
 import * as RemoteData from "@circles-pink/state-machine/output/RemoteData";
@@ -56,9 +57,9 @@ export type {
   VoucherProvider,
   VoucherOffer,
 } from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
+export type { Pair } from "@circles-pink/state-machine/output/Data.Pair";
 
 export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
-export { Pair } from "@circles-pink/state-machine/output/Data.Pair";
 export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
 
 export type {
@@ -74,7 +75,7 @@ export const _Array = { ...Simple_Data_Array };
 export const _Tuple = { ...Data_Tuple, ...Simple_Data_Tuple };
 export const _Maybe = { ...Data_Maybe, ...Simple_Data_Maybe };
 export const _UserIdent = CirclesPink_Data_UserIdent;
-export const _Pair = Data_Pair;
+export const _Pair = { ...Data_Pair, ...Simple_Data_Pair };
 export const _Address = CirclesPink_Data_Address;
 export const _EthAddress = {
   ...Simple_Network_Ethereum_Core_Signatures,

@@ -8,9 +8,14 @@ import { JustText } from '../text';
 import { t } from 'i18next';
 import {
   Address,
+  CirclesGraph,
   TrustNode,
   TrustStateType,
   _Address,
+  _Array,
+  _IxGraph,
+  _Pair,
+  _TrustConnection,
   _TrustNode,
   _TrustState,
   _UserIdent,
@@ -29,6 +34,8 @@ Cytoscape.use(COSEBilkent);
 import { cise } from './layout/cise';
 import { coseBilkent } from './layout/coseBilkent';
 import { concentric } from './layout/concentric';
+import { ordAddress } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { pipe } from 'fp-ts/lib/function';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -56,30 +63,53 @@ const getEdge = (
   },
 });
 
-const getNodes = (data_: Graph): Cytoscape.ElementDefinition[] =>
+const getNodes = (data_: CirclesGraph): Cytoscape.ElementDefinition[] =>
   data_.nodes.map(n => {
     const [key, value] = toFpTsTuple(n);
     return getNode(key, value);
   });
 
-const getEdges = (data_: Graph): Cytoscape.ElementDefinition[] =>
-  data_.edges.map(n => {
-    const [conn, value] = toFpTsTuple(n);
-    const [from, to] = toFpTsPair(conn);
-    return getEdge(from, to, value.trustState);
-  });
+const getEdges = (
+  graph: CirclesGraph
+): readonly Cytoscape.ElementDefinition[] =>
+  pipe(
+    graph,
+    _IxGraph.edges(ordAddress),
+    _Array.mapArray(tc => {
+      const [pair, ts] = _TrustConnection.unTrustConnection(
+        pair => ts => [pair, ts] as const
+      )(tc);
 
-const getElementsFromData = (data_: Graph): Cytoscape.ElementDefinition[] => [
-  ...getNodes(data_),
-  ...getEdges(data_),
-];
+      const [source, target] = pipe(
+        pair,
+        _Pair.unPair(x1 => x2 => [x1, x2])
+      );
+
+      return {
+        data: {
+          source: _Address.addrToString(source),
+          target: _Address.addrToString(target),
+          value,
+        },
+      };
+    })
+  );
+// data_.edges.map(n => {
+//   const [conn, value] = toFpTsTuple(n);
+//   const [from, to] = toFpTsPair(conn);
+//   return getEdge(from, to, value.trustState);
+// });
+
+const getElementsFromData = (
+  data_: CirclesGraph
+): Cytoscape.ElementDefinition[] => [...getNodes(data_), ...getEdges(data_)];
 
 // -----------------------------------------------------------------------------
 // UI
 // -----------------------------------------------------------------------------
 
 type TrustGraphProps = {
-  graph: Graph;
+  graph: CirclesGraph;
   expandTrustNetwork: (addr: string) => void;
   theme: Theme;
 };
