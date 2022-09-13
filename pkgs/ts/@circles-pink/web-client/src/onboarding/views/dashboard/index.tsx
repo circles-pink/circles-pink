@@ -7,10 +7,16 @@ import React, {
   useState,
 } from 'react';
 import { Button, ButtonLinkLike, Input } from '../../../components/forms';
-import { JustText, SubClaim, Text } from '../../../components/text';
+import { JustText, Text } from '../../../components/text';
 import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { DashboardState } from '@circles-pink/state-machine/src';
+import {
+  DashboardAction,
+  DashboardState,
+  TrustNode,
+  User,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
 import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../../context/theme';
@@ -39,15 +45,11 @@ import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
-import {
-  VoucherOffer,
-  VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
-import { UserConfig } from '../..';
 import { LightColorFrame } from '../../../components/layout';
 import { Frame } from '../../../components/Frame';
+import { UserConfig } from '../../../types/user-config';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -68,24 +70,21 @@ export type SelectedOffer = [VoucherProvider, VoucherOffer];
 // Dashboard
 // -----------------------------------------------------------------------------
 
+const { _circlesAction, _dashboardAction } = _StateMachine;
+
 export type DashboardProps = {
   state: DashboardState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: DashboardAction) => void;
   cfg?: UserConfig;
   buyVoucherEurLimit: number;
 };
 
 export const Dashboard = ({
-  state: stateRaw,
+  state,
   act,
   cfg,
   buyVoucherEurLimit,
 }: DashboardProps): ReactElement => {
-  const state = useMemo<DefaultView>(
-    () => (defaultView as any)(stateRaw) as DefaultView,
-    [stateRaw]
-  );
-
   // Theme
   const [theme] = useContext(ThemeContext);
 

@@ -5,7 +5,7 @@ import { Theme } from '../../../context/theme';
 import { DashboardProps } from '../dashboard';
 import QrCode from 'react-qrcode-svg';
 import tw, { styled } from 'twin.macro';
-import { addrToString } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { _Address } from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Receive Circles
@@ -16,7 +16,9 @@ type ReceiveProps = Omit<DashboardProps, 'buyVoucherEurLimit'> & {
 };
 
 export const Receive = ({ state, theme }: ReceiveProps) => {
-  const safeAddress = addrToString(state.user.safeAddress);
+  const safeAddress = _Address.addrToString(
+    _Address.Address(state.user.safeAddress)
+  );
   return (
     <>
       <Claim color={theme.baseColor}>Receive Circles</Claim>

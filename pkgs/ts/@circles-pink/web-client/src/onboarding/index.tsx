@@ -53,17 +53,11 @@ import { Json } from '@circles-pink/state-machine/output/Data.Argonaut.Core';
 import { mkI18n } from '../i18n_custom';
 import { Resource } from 'i18next';
 import { parseAddress } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
+import { UserConfig } from '../types/user-config';
 
 type Language = 'en' | 'de';
 
 type Content = {};
-
-export type UserConfig = {
-  email?: string | ((email: string) => void);
-  onTrackingEvent?: (json: unknown) => void;
-  onTrackingResumee?: (json: unknown) => void;
-  voucherShopEnabled: boolean;
-};
 
 export type OnboardingProps = {
   initState?: CirclesState;

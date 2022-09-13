@@ -65,8 +65,8 @@ import {
 } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
-import { UserConfig } from '../..';
 import { LightColorFrame } from '../../../components/layout';
+import { UserConfig } from '../../../types/user-config';
 
 // -----------------------------------------------------------------------------
 // Types

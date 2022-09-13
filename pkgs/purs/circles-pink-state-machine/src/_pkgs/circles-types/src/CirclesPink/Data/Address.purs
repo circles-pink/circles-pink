@@ -1,13 +1,11 @@
 module CirclesPink.Data.Address
   ( Address(..)
   , addrToString
-  , mkAddress
   , module Exp
   , parseAddress
   , sampleAddress
   , sampleSafeAddress
-  )
-  where
+  ) where
 
 import CirclesPink.Prelude
 
