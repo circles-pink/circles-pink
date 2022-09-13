@@ -19,8 +19,10 @@ import {
   User,
   VoucherOffer,
   VoucherProvider,
+  _Address,
   _RemoteData,
   _StateMachine,
+  _VoucherServer,
 } from '@circles-pink/state-machine/src';
 import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
@@ -127,11 +129,22 @@ export const Dashboard = ({
   };
 
   useEffect(() => {
-    if (state.vouchersResult.type === 'success') {
-      setBoughtVouchersAmount(
-        state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
-      );
-    }
+    pipe(
+      state.vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: x => {
+          setBoughtVouchersAmount(
+            x.data.reduce(
+              (p, c) => p + _VoucherServer.unVoucherAmount(c.amount),
+              0
+            )
+          );
+        },
+      })
+    );
   }, [state.vouchersResult]);
 
   // animation
@@ -224,12 +237,15 @@ export const Dashboard = ({
 
   useEffect(() => {
     const balance = pipe(
-      state.getBalanceResult,
+      state.vouchersResult,
       _RemoteData.unRemoteData({
         onNotAsked: () => null,
         onLoading: () => null,
         onFailure: () => null,
-        onSuccess: x => x.data.toString(),
+        onSuccess: x =>
+          x.data
+            .reduce((p, c) => p + _VoucherServer.unVoucherAmount(c.amount), 0)
+            .toString(),
       })
     );
 
@@ -263,47 +279,54 @@ export const Dashboard = ({
   const [countRefreshPayout, setCountRefreshPayout] = useState<number>(0);
 
   useEffect(() => {
-    switch (state.requestUBIPayoutResult.type) {
-      case 'loading':
-        setCountRefreshPayout(0);
-        setInitBalPayout(
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null
-        );
-        break;
-      case 'success':
-        const newBalance =
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null;
+    const balance = pipe(
+      state.vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => null,
+        onLoading: () => null,
+        onFailure: () => null,
+        onSuccess: x => x.data.toString(),
+      })
+    );
 
-        if (newBalance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
-          setTimeout(() => {
-            act(_dashboardAction._getBalance(unit));
-            setCountRefreshPayout(countRefreshPayout + 1);
-          }, RETRY_INTERVAL);
-        }
-        break;
-      default:
-        break;
-    }
+    pipe(
+      state.requestUBIPayoutResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {
+          setCountRefreshPayout(0);
+          setInitBalPayout(balance);
+        },
+        onFailure: () => {},
+        onSuccess: () => {
+          if (balance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
+            setTimeout(() => {
+              act(_dashboardAction._getBalance(unit));
+              setCountRefreshPayout(countRefreshPayout + 1);
+            }, RETRY_INTERVAL);
+          }
+        },
+      })
+    );
   }, [state.requestUBIPayoutResult, countRefreshPayout]);
 
   // Balance for vouchers
   const [userBalance, setUserBalance] = useState<number>(0);
 
   useEffect(() => {
-    if (state.getBalanceResult.type === 'success') {
-      setUserBalance(
-        parseFloat(
-          displayBalance(
-            state.getBalanceResult.value.data.toString(),
-            'TIME-CIRCLES'
-          )
-        )
-      );
-    }
+    pipe(
+      state.getBalanceResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: x => {
+          setUserBalance(
+            parseFloat(displayBalance(x.toString(), 'TIME-CIRCLES'))
+          );
+        },
+      })
+    );
   }, [state.getBalanceResult]);
 
   // -----------------------------------------------------------------------------
@@ -311,15 +334,24 @@ export const Dashboard = ({
   // -----------------------------------------------------------------------------
 
   useEffect(() => {
-    if (
-      state.checkUBIPayoutResult.type === 'failure' &&
-      state.checkUBIPayoutResult.value.error.type === 'errNative' &&
-      state.checkUBIPayoutResult.value.error.value.name === 'CoreError' &&
-      state.checkUBIPayoutResult.value.error.value.message ===
-        'Invalid Token address. Did you forget to deploy the Token?'
-    ) {
-      act(_dashboardAction._redeploySafeAndToken(unit));
-    }
+    pipe(
+      state.checkUBIPayoutResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: x => {
+          if (
+            x.error.type === 'errNative' &&
+            x.error.value.name === 'CoreError' &&
+            x.error.value.message ===
+              'Invalid Token address. Did you forget to deploy the Token?'
+          ) {
+            act(_dashboardAction._redeploySafeAndToken(unit));
+          }
+        },
+        onSuccess: () => {},
+      })
+    );
   }, [state.checkUBIPayoutResult]);
 
   // -----------------------------------------------------------------------------
@@ -327,35 +359,25 @@ export const Dashboard = ({
   // -----------------------------------------------------------------------------
 
   const [search, setSearch] = useState<string>(''); // Search Input
-  const [searchResult, setSearchResult] = useState<Trust[]>(state.usersSearch);
-
-  useEffect(() => {
-    // Query on user input
-    if (search !== '') {
-      act(_dashboardAction._userSearch({ query: search }));
-    } else {
-      setSearchResult([]);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    // Update on api result
-    if (search !== '') {
-      setSearchResult(state.usersSearch);
-    } else {
-      setSearchResult([]);
-    }
-  }, [state.usersSearch]);
 
   // -----------------------------------------------------------------------------
   // Transfer
   // -----------------------------------------------------------------------------
 
   useEffect(() => {
-    if (state.transferResult.type === 'success') {
-      // Close overlay
-      setOverlay(['SEND', false]);
-    }
+    pipe(
+      state.transferResult,
+
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: () => {
+          // Close overlay
+          setOverlay(['SEND', false]);
+        },
+      })
+    );
   }, [state.transferResult]);
 
   // -----------------------------------------------------------------------------
@@ -382,8 +404,7 @@ export const Dashboard = ({
           <FadeIn orientation={'up'} delay={getDelay()}>
             <Balance
               theme={theme}
-              balance={state.getBalanceResult}
-              checkUBIPayoutResult={state.checkUBIPayoutResult}
+              balanceResult={state.getBalanceResult}
               requestUBIPayoutResult={state.requestUBIPayoutResult}
             />
           </FadeIn>
@@ -417,17 +438,17 @@ export const Dashboard = ({
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
-                address={state.user.safeAddress}
+                address={_Address.Address(state.user.safeAddress)}
                 title={t('dashboard.trustNetworkTitle')}
                 graph={state.trusts}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                addTrust={to => act(_dashboardAction._addTrustConnection(to))}
                 // trustAddResult={state.trustAddResult}
                 removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
+                  act(_dashboardAction._removeTrustConnection(to))
                 }
                 // trustRemoveResult={state.trustRemoveResult}
               />
@@ -440,7 +461,7 @@ export const Dashboard = ({
                 onAddTrust={userIdent =>
                   act(_dashboardAction._addTrustConnection(userIdent))
                 }
-                centerAddress={state.user.safeAddress}
+                centerAddress={_Address.Address(state.user.safeAddress)}
                 title={t('dashboard.exploreTitle')}
                 theme={theme}
                 icon={mdiMagnify}
@@ -520,9 +541,9 @@ export const Dashboard = ({
                 icon={mdiGraphOutline}
               >
                 <TrustGraph
-                  graph={state.graph}
+                  graph={state.trusts}
                   expandTrustNetwork={(addr: string) =>
-                    act(_dashboardActionA._expandTrustNetwork(addr))
+                    act(_dashboardAction._expandTrustNetwork(addr))
                   }
                   theme={theme}
                 />

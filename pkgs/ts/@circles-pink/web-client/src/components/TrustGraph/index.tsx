@@ -1,18 +1,20 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, { LayoutOptions } from 'cytoscape';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
-import {
-  addrToString,
-  Graph,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
-import { getIdentifier } from '@circles-pink/state-machine/output/CirclesPink.Data.UserIdent';
-import { toFpTsPair, toFpTsTuple } from '../../utils/fpTs';
 import { Theme } from '../../context/theme';
-
 import { ButtonRow, Margin } from '../helper';
 import { Button } from '../forms';
-import * as TN from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
+import { JustText } from '../text';
+import { t } from 'i18next';
+import {
+  Address,
+  TrustNode,
+  TrustStateType,
+  _Address,
+  _TrustNode,
+  _TrustState,
+  _UserIdent,
+} from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Layouts
@@ -27,10 +29,6 @@ Cytoscape.use(COSEBilkent);
 import { cise } from './layout/cise';
 import { coseBilkent } from './layout/coseBilkent';
 import { concentric } from './layout/concentric';
-import { JustText } from '../text';
-import { t } from 'i18next';
-import { TrustNode } from '@circles-pink/state-machine/output/CirclesPink.Data.TrustNode';
-import { TrustStateType, _TrustState } from '@circles-pink/state-machine/src';
 
 // -----------------------------------------------------------------------------
 // Utils
@@ -41,8 +39,8 @@ const getNode = (
   value: TrustNode
 ): Cytoscape.ElementDefinition => ({
   data: {
-    id: addrToString(key),
-    label: getIdentifier(TN.unwrap(value).userIdent),
+    id: _Address.addrToString(key),
+    label: _UserIdent.getIdentifier(_TrustNode.unwrap(value).userIdent),
   },
 });
 
@@ -52,8 +50,8 @@ const getEdge = (
   value: TrustStateType
 ): Cytoscape.ElementDefinition => ({
   data: {
-    source: addrToString(source),
-    target: addrToString(target),
+    source: _Address.addrToString(source),
+    target: _Address.addrToString(target),
     value,
   },
 });

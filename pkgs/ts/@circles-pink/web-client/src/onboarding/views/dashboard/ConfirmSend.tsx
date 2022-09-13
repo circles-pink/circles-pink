@@ -1,5 +1,10 @@
 import { mdiCashFast } from '@mdi/js';
-import React, { SetStateAction, useEffect, useState } from 'react';
+import React, {
+  ReactElement,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
 import { Button } from '../../../components/forms';
 import { JustifyEnd, Margin } from '../../../components/helper';
 import { Claim, SubClaim } from '../../../components/text';
@@ -43,7 +48,7 @@ export const ConfirmSend = ({
   selectedOffer: [provider, offer],
   setJustBoughtVoucher,
   xbgeSafeAddress,
-}: ConfirmSendProps) => {
+}: ConfirmSendProps): ReactElement | null => {
   const optionAddr: Address | null = pipe(
     env.xbgeSafeAddress,
     _Address.parseAddress,
@@ -109,7 +114,7 @@ export const ConfirmSend = ({
 
   // Render
 
-  pipe(
+  return pipe(
     state.transferResult,
     _RemoteData.unRemoteData({
       onNotAsked: () => null,
