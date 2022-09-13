@@ -8,7 +8,9 @@ import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype, un)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Milliseconds(..))
+import PursTsGen (toPursType)
 import PursTsGen.Class.ToPursNominal (PursNominal(..))
+import PursTsGen.Lang.PureScript.Type as PS
 import Simple.JSON (class ReadForeign, class WriteForeign, writeImpl)
 
 moduleName :: String
@@ -35,18 +37,14 @@ newtype VoucherProvider = VoucherProvider
 derive newtype instance WriteForeign VoucherProvider
 derive newtype instance ReadForeign VoucherProvider
 
-instance ToPursNominal VoucherProvider where
-  toPursNominal _ = PursNominal moduleName "VoucherProvider"
+-- instance ToPursNominal VoucherProvider where
+--   toPursNominal _ = PursNominal moduleName "VoucherProvider"
 
 instance ToTsType VoucherProvider where
-  toTsType = defaultToTsType' []
-
-instance ToTsDef VoucherProvider where
-  toTsDef = defaultToTsDef' []
+  toTsType (VoucherProvider r) = toTsType r
 
 instance ToPursType VoucherProvider where
-  toPursType = defaultToPursType' []
-
+  toPursType _ = PS.var $ PS.Name "TODO"
 
 --------------------------------------------------------------------------------
 
@@ -55,45 +53,96 @@ newtype VoucherOffer = VoucherOffer
   , countAvailable :: Int
   }
 
-derive newtype instance writeForeignVoucherOffer :: WriteForeign VoucherOffer
-derive newtype instance readForeignVoucherOffer :: ReadForeign VoucherOffer
+derive newtype instance WriteForeign VoucherOffer
+derive newtype instance ReadForeign VoucherOffer
+
+instance ToTsType VoucherOffer where
+  toTsType (VoucherOffer r) = toTsType r
+
+instance ToPursType VoucherOffer where
+  toPursType _ = PS.var $ PS.Name "TODO"
 
 --------------------------------------------------------------------------------
 
 newtype VoucherProviderId = VoucherProviderId String
 
-derive instance genericVoucherProviderId :: Generic VoucherProviderId _
-derive newtype instance writeForeignVoucherProviderId :: WriteForeign VoucherProviderId
-derive newtype instance readForeignVoucherProviderId :: ReadForeign VoucherProviderId
-derive newtype instance eqVoucherProviderId :: Eq VoucherProviderId
-derive newtype instance ordVoucherProviderId :: Ord VoucherProviderId
+derive instance Generic VoucherProviderId _
+derive newtype instance WriteForeign VoucherProviderId
+derive newtype instance ReadForeign VoucherProviderId
+derive newtype instance Eq VoucherProviderId
+derive newtype instance Ord VoucherProviderId
 
-instance showVoucherProviderId :: Show VoucherProviderId where
+unVoucherProviderId :: VoucherProviderId -> String
+unVoucherProviderId (VoucherProviderId x) = x
+
+instance Show VoucherProviderId where
   show = genericShow
+
+instance ToPursNominal VoucherProviderId where
+  toPursNominal _ = PursNominal moduleName "VoucherProviderId"
+
+instance ToTsType VoucherProviderId where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef VoucherProviderId where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType VoucherProviderId where
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 
 newtype EurCent = EurCent Int
 
-derive instance genericEurCent :: Generic EurCent _
-derive newtype instance writeForeignEurCent :: WriteForeign EurCent
-derive newtype instance readForeignEurCent :: ReadForeign EurCent
+derive instance Generic EurCent _
+derive newtype instance WriteForeign EurCent
+derive newtype instance ReadForeign EurCent
 -- derive newtype instance semiringEurCent :: Semiring EurCent
 -- derive newtype instance eqEurCent :: Eq EurCent
 -- derive newtype instance ordEurCent :: Ord EurCent
 
-instance showEurCent :: Show EurCent where
+instance Show EurCent where
   show = genericShow
+
+instance ToPursNominal EurCent where
+  toPursNominal _ = PursNominal moduleName "EurCent"
+
+instance ToTsType EurCent where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef EurCent where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType EurCent where
+  toPursType = defaultToPursType' []
+
+unEurCent :: EurCent -> Int
+unEurCent (EurCent x) = x
 
 --------------------------------------------------------------------------------
 newtype VoucherAmount = VoucherAmount EurCent
 
-derive instance genericVoucherAmount :: Generic VoucherAmount _
-derive newtype instance writeForeignVoucherAmount :: WriteForeign VoucherAmount
-derive newtype instance readForeignVoucherAmount :: ReadForeign VoucherAmount
+derive instance Generic VoucherAmount _
+derive newtype instance WriteForeign VoucherAmount
+derive newtype instance ReadForeign VoucherAmount
 
-instance showVoucherAmount :: Show VoucherAmount where
+instance Show VoucherAmount where
   show = genericShow
+
+instance ToPursNominal VoucherAmount where
+  toPursNominal _ = PursNominal moduleName "VoucherAmount"
+
+instance ToTsType VoucherAmount where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef VoucherAmount where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType VoucherAmount where
+  toPursType = defaultToPursType' []
+
+unVoucherAmount :: VoucherAmount -> EurCent
+unVoucherAmount (VoucherAmount x) = x
 
 --------------------------------------------------------------------------------
 
