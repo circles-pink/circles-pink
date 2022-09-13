@@ -147,6 +147,8 @@ modules =
           (RemoteData.unwrap :: _ N L E A -> _)
       , R.value "unRemoteData" []
           (RemoteData.unRemoteData :: _ -> _ N L E A -> Z)
+      , R.value "getData" []
+          (RemoteData.getData :: _ N L E A -> _)
       ]
 
   , "Data.IxGraph" /\

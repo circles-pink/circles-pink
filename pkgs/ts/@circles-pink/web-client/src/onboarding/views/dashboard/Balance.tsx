@@ -1,4 +1,5 @@
-import { DefaultView } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+import { DashboardState, _RemoteData } from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
 import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CurrencySymbol } from '../../../components/CurrencySymbol';
@@ -7,14 +8,13 @@ import { displayBalance } from '../../utils/timeCircles';
 
 type BalanceProps = {
   theme: Theme;
-  balance: DefaultView['getBalanceResult'];
-  checkUBIPayoutResult: DefaultView['checkUBIPayoutResult'];
-  requestUBIPayoutResult: DefaultView['requestUBIPayoutResult'];
+  balanceResult: DashboardState['getBalanceResult'];
+  requestUBIPayoutResult: DashboardState['requestUBIPayoutResult'];
 };
 
 export const Balance = ({
   theme,
-  balance,
+  balanceResult,
   requestUBIPayoutResult,
 }: BalanceProps) => {
   // a state is needed here, to avoid flickering balance display
@@ -23,24 +23,45 @@ export const Balance = ({
   const [isRequesting, setIsRequesting] = useState<boolean>(false);
 
   useEffect(() => {
-    if (balance.type === 'success') {
-      setResBalance(balance.value.data.toString());
-      setIsLoading(false);
-    } else if (balance.type === 'loading') {
-      setIsLoading(true);
-    } else {
-      setIsLoading(false);
-    }
-  }, [balance]);
+    pipe(
+      balanceResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {
+          setIsLoading(false);
+        },
+        onLoading: () => {
+          setIsLoading(true);
+        },
+        onFailure: () => {
+          setIsLoading(false);
+        },
+        onSuccess: balance => {
+          setResBalance(balance.toString());
+        },
+      })
+    );
+  }, [balanceResult]);
 
   useEffect(() => {
     // When requesting a UBI payout, we want to indicate
     // that to the user with a rotation animation
-    if (requestUBIPayoutResult.type === 'loading') {
-      setIsRequesting(true);
-    } else {
-      setIsRequesting(false);
-    }
+    pipe(
+      requestUBIPayoutResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {
+          setIsRequesting(false);
+        },
+        onLoading: () => {
+          setIsRequesting(true);
+        },
+        onFailure: () => {
+          setIsRequesting(false);
+        },
+        onSuccess: () => {
+          setIsRequesting(false);
+        },
+      })
+    );
   }, [requestUBIPayoutResult]);
 
   return (

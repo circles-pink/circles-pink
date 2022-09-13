@@ -1,6 +1,5 @@
-import { VoucherProvidersResult } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
-import { getData } from '@circles-pink/state-machine/output/RemoteReport';
 import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
+import { _RemoteData } from '@circles-pink/state-machine/src';
 import { t } from 'i18next';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { css, styled } from 'twin.macro';
@@ -27,11 +26,13 @@ export const BuyVouchers = ({
   buyVoucherEurLimit,
 }: BuyVouchersProps): ReactElement => {
   const [providers_, setProviders_] = useState<VoucherProvider[]>(
-    getData([] as VoucherProvider[])(providers as any)
+    _RemoteData.getData([] as VoucherProvider[])(providers as any)
   );
 
   useEffect(() => {
-    const providerResult = getData([] as VoucherProvider[])(providers as any);
+    const providerResult = _RemoteData.getData([] as VoucherProvider[])(
+      providers as any
+    );
     if (providerResult.length > 0) {
       setProviders_(providerResult);
     }

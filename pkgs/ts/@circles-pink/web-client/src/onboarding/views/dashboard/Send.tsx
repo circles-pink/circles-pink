@@ -20,12 +20,15 @@ import {
   _Address,
   Maybe,
   _Nullable,
+  _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
 
 // -----------------------------------------------------------------------------
 // Send Circles
 // -----------------------------------------------------------------------------
+
+const { _circlesAction, _dashboardAction } = _StateMachine;
 
 let QrScanner: React.ReactElement<
   unknown,
@@ -39,7 +42,6 @@ export type SendProps = {
   act: (ac: DashboardAction) => void;
 };
 
-
 export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   // State
   const [from, _] = useState<Address>(_Address.Address(state.user.safeAddress));
@@ -50,7 +52,11 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   const [paymentNote, setPaymentNote] = useState<string>('');
   const [scannerOpen, setScannerOpen] = useState<boolean>(false);
 
-  const optionAddr: Address | null = pipe(to, _Address.parseAddress, _Nullable.toNullable);
+  const optionAddr: Address | null = pipe(
+    to,
+    _Address.parseAddress,
+    _Nullable.toNullable
+  );
 
   // QR Scanner
 
@@ -62,16 +68,14 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
   // Util
   const transact = (fromAddr: Address, toAddr: Address) =>
     act(
-      A._dashboard(
-        A._transfer({
-          from: fromAddr,
-          to: toAddr,
-          value: new Web3.utils.BN(
-            Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether')
-          ),
-          paymentNote,
-        })
-      )
+      _dashboardAction._transfer({
+        from: fromAddr,
+        to: toAddr,
+        value: new Web3.utils.BN(
+          Web3.utils.toWei(convertTcToCrc(value).toString(), 'ether')
+        ),
+        paymentNote,
+      })
     );
 
   const handleScan = (data: string) => {
@@ -107,9 +111,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
           placeholder={'To'}
           onChange={e => setTo(e.target.value)}
           onKeyPress={e =>
-            e.key === 'Enter' &&
-            optionAddr._tag === 'Some' &&
-            transact(from, optionAddr.value)
+            e.key === 'Enter' && optionAddr && transact(from, optionAddr)
           }
         />
         <IconContainer onClick={() => setScannerOpen(!scannerOpen)}>
@@ -126,9 +128,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
           setValue(parseFloat(twoDecimals));
         }}
         onKeyPress={e =>
-          e.key === 'Enter' &&
-          optionAddr._tag === 'Some' &&
-          transact(from, optionAddr.value)
+          e.key === 'Enter' && optionAddr && transact(from, optionAddr)
         }
       />
       <Input
@@ -137,9 +137,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
         placeholder={'Payment Note'}
         onChange={e => setPaymentNote(e.target.value)}
         onKeyPress={e =>
-          e.key === 'Enter' &&
-          optionAddr._tag === 'Some' &&
-          transact(from, optionAddr.value)
+          e.key === 'Enter' && optionAddr && transact(from, optionAddr)
         }
       />
       <JustifyEnd>
@@ -148,9 +146,7 @@ export const Send = ({ state, act, theme, overwriteTo }: SendProps) => {
           theme={theme}
           state={mapResult(state.transferResult)}
           icon={mdiCashFast}
-          onClick={() =>
-            optionAddr._tag === 'Some' && transact(from, optionAddr.value)
-          }
+          onClick={() => optionAddr && transact(from, optionAddr)}
         >
           {t('dashboard.sendButton')}
         </Button>
