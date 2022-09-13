@@ -9,6 +9,7 @@ import { t } from 'i18next';
 import {
   Address,
   CirclesGraph,
+  TrustConnection,
   TrustNode,
   TrustStateType,
   _Address,
@@ -41,64 +42,41 @@ import { pipe } from 'fp-ts/lib/function';
 // Utils
 // -----------------------------------------------------------------------------
 
-const getNode = (
-  key: Address,
-  value: TrustNode
-): Cytoscape.ElementDefinition => ({
+const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
-    id: _Address.addrToString(key),
-    label: _UserIdent.getIdentifier(_TrustNode.unwrap(value).userIdent),
+    address: _TrustNode.getAddress(tn),
+    label: _TrustNode.unwrap(tn).userIdent,
   },
 });
 
-const getEdge = (
-  source: Address,
-  target: Address,
-  value: TrustStateType
-): Cytoscape.ElementDefinition => ({
-  data: {
-    source: _Address.addrToString(source),
-    target: _Address.addrToString(target),
-    value,
-  },
-});
+const getEdge = (tc: TrustConnection): Cytoscape.ElementDefinition => {
+  const [pair, value] = _TrustConnection.unTrustConnection(
+    pair => ts => [pair, ts] as const
+  )(tc);
 
-const getNodes = (data_: CirclesGraph): Cytoscape.ElementDefinition[] =>
-  data_.nodes.map(n => {
-    const [key, value] = toFpTsTuple(n);
-    return getNode(key, value);
-  });
+  const [source, target] = pipe(
+    pair,
+    _Pair.unPair(x1 => x2 => [x1, x2])
+  );
+
+  return {
+    data: {
+      source: _Address.addrToString(source),
+      target: _Address.addrToString(target),
+      value,
+    },
+  };
+};
+
+const getNodes = (
+  data_: CirclesGraph
+): readonly Cytoscape.ElementDefinition[] =>
+  pipe(data_, _IxGraph.nodes(ordAddress), _Array.mapArray(getNode));
 
 const getEdges = (
   graph: CirclesGraph
 ): readonly Cytoscape.ElementDefinition[] =>
-  pipe(
-    graph,
-    _IxGraph.edges(ordAddress),
-    _Array.mapArray(tc => {
-      const [pair, ts] = _TrustConnection.unTrustConnection(
-        pair => ts => [pair, ts] as const
-      )(tc);
-
-      const [source, target] = pipe(
-        pair,
-        _Pair.unPair(x1 => x2 => [x1, x2])
-      );
-
-      return {
-        data: {
-          source: _Address.addrToString(source),
-          target: _Address.addrToString(target),
-          value,
-        },
-      };
-    })
-  );
-// data_.edges.map(n => {
-//   const [conn, value] = toFpTsTuple(n);
-//   const [from, to] = toFpTsPair(conn);
-//   return getEdge(from, to, value.trustState);
-// });
+  pipe(graph, _IxGraph.edges(ordAddress), _Array.mapArray(getEdge));
 
 const getElementsFromData = (
   data_: CirclesGraph
@@ -222,7 +200,7 @@ export const TrustGraph = ({
   ];
 
   // Preventing errors in some layouts for an empty graph
-  if (graph.nodes.length === 0) return <></>;
+  if (_IxGraph.nodes(ordAddress)(graph).length === 0) return <></>;
 
   return (
     <>

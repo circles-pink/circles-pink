@@ -21,6 +21,7 @@ module CirclesPink.Garden.StateMachine.Action
   , _dashboard
   , _dashboardAction
   , _debug
+  , _debugAction
   , _expandTrustNetwork
   , _finalizeRegisterUser
   , _getBalance
@@ -183,6 +184,15 @@ _circlesAction =
   , _submit
   , _trusts
   , _dashboard
+  }
+
+_debugAction
+  :: { _coreToWindow :: Unit -> DebugAction
+     , _setMagicWords :: String -> DebugAction
+     }
+_debugAction =
+  { _coreToWindow: inj (Proxy :: _ "coreToWindow")
+  , _setMagicWords: inj (Proxy :: _ "setMagicWords")
   }
 
 _landingAction
