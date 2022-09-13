@@ -13,7 +13,7 @@ import Data.HTTP.Method (Method)
 import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
-import Data.Pair as Data.Pair
+import Data.Pair (Pair)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Foreign.Object (Object)
@@ -28,7 +28,6 @@ import PursTsGen.Data.ABC (A)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
-import Undefined (undefined)
 import Unsafe.Coerce (unsafeCoerce)
 
 newtype Wrap a = Wrap a
@@ -56,7 +55,7 @@ else instance
 else instance
   ( UnsafeReplace a a'
   ) =>
-  UnsafeReplace (Data.Pair.Pair a) (Pair a')
+  UnsafeReplace (Pair a) (Wrap (Pair a'))
 
 else instance UnsafeReplace JsonDecodeError (Wrap JsonDecodeError)
 
@@ -227,29 +226,19 @@ instance ToPursType (Wrap JsonDecodeError) where
 
 --------------------------------------------------------------------------------
 
-newtype Pair a = Pair (Data.Pair.Pair a)
+instance ToPursNominal (Wrap (Pair a)) where
+  toPursNominal _ = PursNominal "Data.Pair" "Pair"
 
-ptPair :: PursType
-ptPair = PursType "Data_Pair" "Pair"
+instance (ToTsType a) => ToTsType (Wrap (Pair a)) where
+  toTsType = defaultToTsType'
+    [ toTsType (Proxy :: _ a)
+    ]
 
-derive instance Newtype (Pair a) _
+instance ToTsDef (Wrap (Pair A)) where
+  toTsDef = defaultToTsDef' [ TS.name "A" ]
 
-instance g ::
-  UnsafeReplace a a' =>
-  Generic (Pair a)
-    (Constructor "Pair" (Argument a' :*: Argument a'))
-  where
-  from = undefined
-  to = undefined
-
-instance (ToTsType a) => ToTsType (Pair a) where
-  toTsType _ = defaultToTsType ptPair [ toTsType (Proxy :: _ a) ]
-
-instance (ToPursType a, ToTsType a) => ToTsDef (Pair a) where
-  toTsDef = genericToTsDef "Pair"
-
-instance (ToPursType a) => ToPursType (Pair a) where
-  toPursType _ = defaultToPursType ptPair []
+instance (ToPursType a) => ToPursType (Wrap (Pair a)) where
+  toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
 
 --------------------------------------------------------------------------------
 

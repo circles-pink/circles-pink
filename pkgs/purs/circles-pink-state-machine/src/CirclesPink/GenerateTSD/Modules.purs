@@ -41,13 +41,14 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, I(..), L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Maybe as Simple.Data.Maybe
+import Simple.Data.Pair as Simple.Data.Pair
 import Simple.Data.Tuple as Simple.Data.Tuple
 import Simple.Network.Ethereum.Core.Signatures as Simple.Network.Ethereum.Core.Signatures
 import Type.Proxy (Proxy(..))
@@ -178,6 +179,12 @@ modules =
             [ _Ord ORD ]
             (Data.IxGraph.lookupNode :: _ -> _ ORD B C -> _ (_ (ErrLookupNode ORD ())) _)
         , R.value "unNeighborConnectivity" [] (Data.IxGraph.unNeighborConnectivity :: _ -> _ A -> C)
+        , R.value "edges"
+            [ _Ord ORD ]
+            (Data.IxGraph.edges :: _ ORD E N -> _)
+        , R.value "nodes"
+            [ _Ord ORD ]
+            (Data.IxGraph.nodes :: _ ORD E N -> _)
         ]
 
   , "CirclesPink.Data.Address" /\
@@ -356,6 +363,12 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ (Data.Pair.Pair A))
+        ]
+
+  , "Simple.Data.Pair" /\
+      join
+        [ R.value "unPair" []
+            (Simple.Data.Pair.unPair :: _ -> _ A -> Z)
         ]
 
   , "Data.Maybe" /\
