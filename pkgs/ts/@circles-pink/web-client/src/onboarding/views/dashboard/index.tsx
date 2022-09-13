@@ -11,10 +11,15 @@ import { JustText, Text } from '../../../components/text';
 import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import {
+  Address,
   DashboardAction,
   DashboardState,
   TrustNode,
+  unit,
   User,
+  VoucherOffer,
+  VoucherProvider,
+  _RemoteData,
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { getIncrementor } from '../../utils/getCounter';
@@ -50,6 +55,7 @@ import { displayBalance } from '../../utils/timeCircles';
 import { LightColorFrame } from '../../../components/layout';
 import { Frame } from '../../../components/Frame';
 import { UserConfig } from '../../../types/user-config';
+import { pipe } from 'fp-ts/lib/function';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -70,7 +76,7 @@ export type SelectedOffer = [VoucherProvider, VoucherOffer];
 // Dashboard
 // -----------------------------------------------------------------------------
 
-const { _circlesAction, _dashboardAction } = _StateMachine;
+const { _dashboardAction } = _StateMachine;
 
 export type DashboardProps = {
   state: DashboardState;
@@ -142,31 +148,31 @@ export const Dashboard = ({
 
   useEffect(() => {
     // Gather initial client information
-    act(A._dashboard(A._getBalance(unit)));
-    act(A._dashboard(A._getTrusts(unit)));
-    act(A._dashboard(A._getUBIPayout(unit)));
-    act(A._dashboard(A._getVouchers(getTimestamp())));
-    act(A._dashboard(A._getVoucherProviders(unit)));
+    act(_dashboardAction._getBalance(unit));
+    act(_dashboardAction._getTrusts(unit));
+    act(_dashboardAction._getUBIPayout(unit));
+    act(_dashboardAction._getVouchers(getTimestamp()));
+    act(_dashboardAction._getVoucherProviders(unit));
 
     // Start polling tasks
     const balancePolling = setInterval(() => {
-      act(A._dashboard(A._getBalance(unit)));
+      act(_dashboardAction._getBalance(unit));
     }, BALANCE_INTERVAL);
 
     const trustNetworkPolling = setInterval(() => {
-      act(A._dashboard(A._getTrusts(unit)));
+      act(_dashboardAction._getTrusts(unit));
     }, TRUST_NETWORK_INTERVAL);
 
     const ubiPayoutPolling = setInterval(() => {
-      act(A._dashboard(A._getTrusts(unit)));
+      act(_dashboardAction._getTrusts(unit));
     }, UBI_PAYOUT_INTERVAL);
 
     const voucherPolling = setInterval(() => {
-      act(A._dashboard(A._getVouchers(getTimestamp())));
+      act(_dashboardAction._getVouchers(getTimestamp()));
     }, VOUCHER_INTERVAL);
 
     const voucherProviderPolling = setInterval(() => {
-      act(A._dashboard(A._getVoucherProviders(unit)));
+      act(_dashboardAction._getVoucherProviders(unit));
     }, VOUCHER_INTERVAL);
 
     // Clear interval on unmount
@@ -186,11 +192,11 @@ export const Dashboard = ({
     if (justBoughtVoucher) {
       // console.log('Initialize faster polling..');
       balancePolling = setInterval(() => {
-        act(A._dashboard(A._getBalance(unit)));
+        act(_dashboardAction._getBalance(unit));
       }, 1500);
 
       voucherPolling = setInterval(() => {
-        act(A._dashboard(A._getVouchers(getTimestamp())));
+        act(_dashboardAction._getVouchers(getTimestamp()));
       }, 3000);
     } else if (!justBoughtVoucher) {
       // console.log('Finish faster polling');
@@ -217,34 +223,38 @@ export const Dashboard = ({
   const [countRefreshTransfer, setCountRefreshTransfer] = useState<number>(0);
 
   useEffect(() => {
-    switch (state.transferResult.type) {
-      case 'loading':
-        setCountRefreshTransfer(0);
-        setInitBalTransfer(
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null
-        );
-        break;
-      case 'success':
-        const newBalance =
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null;
+    const balance = pipe(
+      state.getBalanceResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => null,
+        onLoading: () => null,
+        onFailure: () => null,
+        onSuccess: x => x.data.toString(),
+      })
+    );
 
-        if (
-          newBalance === initBalTransfer &&
-          countRefreshTransfer < MAX_RETRYS
-        ) {
-          setTimeout(() => {
-            act(A._dashboard(A._getBalance(unit)));
-            setCountRefreshTransfer(countRefreshTransfer + 1);
-          }, RETRY_INTERVAL);
-        }
-        break;
-      default:
-        break;
-    }
+    pipe(
+      state.transferResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {
+          setCountRefreshTransfer(0);
+          setInitBalTransfer(balance);
+        },
+        onFailure: () => {},
+        onSuccess: () => {
+          if (
+            balance === initBalTransfer &&
+            countRefreshTransfer < MAX_RETRYS
+          ) {
+            setTimeout(() => {
+              act(_dashboardAction._getBalance(unit));
+              setCountRefreshTransfer(countRefreshTransfer + 1);
+            }, RETRY_INTERVAL);
+          }
+        },
+      })
+    );
   }, [state.transferResult, countRefreshTransfer]);
 
   // Balance refresh after UBI payout
@@ -270,7 +280,7 @@ export const Dashboard = ({
 
         if (newBalance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
           setTimeout(() => {
-            act(A._dashboard(A._getBalance(unit)));
+            act(_dashboardAction._getBalance(unit));
             setCountRefreshPayout(countRefreshPayout + 1);
           }, RETRY_INTERVAL);
         }
@@ -308,7 +318,7 @@ export const Dashboard = ({
       state.checkUBIPayoutResult.value.error.value.message ===
         'Invalid Token address. Did you forget to deploy the Token?'
     ) {
-      act(A._dashboard(A._redeploySafeAndToken(unit)));
+      act(_dashboardAction._redeploySafeAndToken(unit));
     }
   }, [state.checkUBIPayoutResult]);
 
@@ -322,7 +332,7 @@ export const Dashboard = ({
   useEffect(() => {
     // Query on user input
     if (search !== '') {
-      act(A._dashboard(A._userSearch({ query: search })));
+      act(_dashboardAction._userSearch({ query: search }));
     } else {
       setSearchResult([]);
     }
@@ -360,7 +370,7 @@ export const Dashboard = ({
             <Icon path={mdiCog} size={1} color={theme.darkColor} />
           </FadeIn> */}
           <FadeIn orientation={'down'} delay={getDelay()}>
-            <UserHandle>{`@${stateRaw.user.username}`}</UserHandle>
+            <UserHandle>{`@${state.user.username}`}</UserHandle>
           </FadeIn>
           {/* <FadeIn orientation={'down'} delay={getDelay()}>
             <Icon path={mdiLogout} size={1} color={theme.darkColor} />
@@ -407,9 +417,9 @@ export const Dashboard = ({
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
-                address={stateRaw.user.safeAddress}
+                address={state.user.safeAddress}
                 title={t('dashboard.trustNetworkTitle')}
-                graph={stateRaw.trusts}
+                graph={state.trusts}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
@@ -424,21 +434,21 @@ export const Dashboard = ({
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <UserSearch
-                userSearchResult={stateRaw.userSearchResult}
-                trusts={stateRaw.trusts}
-                onSearch={query => act(A._dashboard(A._userSearch({ query })))}
+                userSearchResult={state.userSearchResult}
+                trusts={state.trusts}
+                onSearch={query => act(_dashboardAction._userSearch({ query }))}
                 onAddTrust={userIdent =>
-                  act(A._dashboard(A._addTrustConnection(userIdent)))
+                  act(_dashboardAction._addTrustConnection(userIdent))
                 }
-                centerAddress={stateRaw.user.safeAddress}
+                centerAddress={state.user.safeAddress}
                 title={t('dashboard.exploreTitle')}
                 theme={theme}
                 icon={mdiMagnify}
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                addTrust={to => act(_dashboardAction._addTrustConnection(to))}
                 removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
+                  act(_dashboardAction._removeTrustConnection(to))
                 }
                 actionRow={
                   <JustifyBetweenCenter>
@@ -465,7 +475,7 @@ export const Dashboard = ({
                   <Margin top={2} bottom={2}>
                     <BuyVouchers
                       theme={theme}
-                      providers={stateRaw.voucherProvidersResult}
+                      providers={state.voucherProvidersResult}
                       initializeVoucherOrder={initializeVoucherOrder}
                       availableBalance={userBalance}
                       boughtVouchersAmount={boughtVouchersAmount}
@@ -474,7 +484,7 @@ export const Dashboard = ({
                   </Margin>
                   <ListVouchers
                     theme={theme}
-                    providersResult={stateRaw.voucherProvidersResult}
+                    providersResult={state.voucherProvidersResult}
                     vouchersResult={state.vouchersResult}
                     justBoughtVoucher={justBoughtVoucher}
                     setJustBoughtVoucher={setJustBoughtVoucher}
@@ -512,7 +522,7 @@ export const Dashboard = ({
                 <TrustGraph
                   graph={state.graph}
                   expandTrustNetwork={(addr: string) =>
-                    act(A._dashboard(A._expandTrustNetwork(addr)))
+                    act(_dashboardActionA._expandTrustNetwork(addr))
                   }
                   theme={theme}
                 />
@@ -533,7 +543,7 @@ export const Dashboard = ({
                 overwriteTo={overwriteTo}
                 selectedOffer={selectedOffer}
                 setJustBoughtVoucher={setJustBoughtVoucher}
-                state={stateRaw}
+                state={state}
                 act={act}
                 theme={theme}
               />
@@ -546,7 +556,7 @@ export const Dashboard = ({
           <StateMachineDebugger state={state} />
           <Button
             theme={theme}
-            onClick={() => act(A._dashboard(A._redeploySafeAndToken(unit)))}
+            onClick={() => act(_dashboardAction._redeploySafeAndToken(unit))}
           >
             Redeploy!
           </Button>

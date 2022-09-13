@@ -8,7 +8,6 @@ import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype, un)
 import Data.Show.Generic (genericShow)
 import Data.Time.Duration (Milliseconds(..))
-import PursTsGen (toPursType)
 import PursTsGen.Class.ToPursNominal (PursNominal(..))
 import PursTsGen.Lang.PureScript.Type as PS
 import Simple.JSON (class ReadForeign, class WriteForeign, writeImpl)
@@ -164,6 +163,21 @@ newtype VoucherCode = VoucherCode String
 derive newtype instance readForeignVoucherCode :: ReadForeign VoucherCode
 derive newtype instance writeForeignVoucherCode :: WriteForeign VoucherCode
 
+instance ToPursNominal VoucherCode where
+  toPursNominal _ = PursNominal moduleName "VoucherCode"
+
+instance ToTsType VoucherCode where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef VoucherCode where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType VoucherCode where
+  toPursType = defaultToPursType' []
+
+unVoucherCode :: VoucherCode -> String
+unVoucherCode (VoucherCode x) = x
+
 --------------------------------------------------------------------------------
 
 newtype VoucherEncrypted =
@@ -201,6 +215,12 @@ newtype Voucher =
 derive newtype instance readForeignVoucher :: ReadForeign Voucher
 derive newtype instance writeForeignVoucher :: WriteForeign Voucher
 
+instance ToTsType Voucher where
+  toTsType (Voucher r) = toTsType r
+
+instance ToPursType Voucher where
+  toPursType _ = PS.var $ PS.Name "TODO"
+
 --------------------------------------------------------------------------------
 
 newtype TransferId = TransferId String
@@ -215,3 +235,14 @@ derive newtype instance ordTransferId :: Ord TransferId
 instance showTransferId :: Show TransferId where
   show = genericShow
 
+instance ToPursNominal TransferId where
+  toPursNominal _ = PursNominal moduleName "TransferId"
+
+instance ToTsType TransferId where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef TransferId where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType TransferId where
+  toPursType = defaultToPursType' []

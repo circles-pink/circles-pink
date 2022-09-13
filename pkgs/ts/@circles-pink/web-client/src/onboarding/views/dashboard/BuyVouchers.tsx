@@ -1,8 +1,9 @@
-import { VoucherProvider } from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import {
+  VoucherProvider,
   VoucherProvidersResult,
   _RemoteData,
   _RemoteReport,
+  _VoucherServer,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
 import { t } from 'i18next';
@@ -35,7 +36,10 @@ export const BuyVouchers = ({
   );
 
   useEffect(() => {
-    const providerResult = pipe(providers, _RemoteReport.getData<ReadonlyArray<VoucherProvider>>([]));
+    const providerResult = pipe(
+      providers,
+      _RemoteReport.getData<ReadonlyArray<VoucherProvider>>([])
+    );
     if (providerResult.length > 0) {
       setProviders_(providerResult);
     }
@@ -71,14 +75,19 @@ export const BuyVouchers = ({
         <>
           {providers_.map(provider => {
             const sortedOffers = [...provider.availableOffers].sort(
-              (a, b) => a.amount - b.amount
+              (a, b) =>
+                _VoucherServer.unVoucherAmount(a.amount) -
+                _VoucherServer.unVoucherAmount(b.amount)
             );
 
             return (
-              <div key={provider.id}>
+              <div key={_VoucherServer.unVoucherProviderId(provider.id)}>
                 <OfferContainer elementCount={provider.availableOffers.length}>
                   {sortedOffers.map(offer => {
-                    const userCanBuy = availableBalance - offer.amount * 10 > 0;
+                    const userCanBuy =
+                      availableBalance -
+                        _VoucherServer.unVoucherAmount(offer.amount) * 10 >
+                      0;
 
                     return (
                       <Offer
@@ -105,10 +114,12 @@ export const BuyVouchers = ({
                           <VoucherText fontSize={1.5}>
                             {userCanBuy
                               ? `${t('dashboard.voucherShop.buyFor')} ${
-                                  offer.amount * 10
+                                  _VoucherServer.unVoucherAmount(offer.amount) *
+                                  10
                                 } Circles`
                               : `${t('dashboard.voucherShop.youNeed')} ${(
-                                  offer.amount * 10 -
+                                  _VoucherServer.unVoucherAmount(offer.amount) *
+                                    10 -
                                   availableBalance
                                 ).toFixed(2)} Circles`}
                           </VoucherText>

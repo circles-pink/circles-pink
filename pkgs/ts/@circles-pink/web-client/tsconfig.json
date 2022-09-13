@@ -49,7 +49,7 @@
     "src/context/debug.tsx",
     "src/context/theme.tsx",
     "src/types/user-config.ts",
-    // "src/env.ts",
+    "src/env.ts",
     "src/i18n.ts",
     "src/i18n_custom.ts",
     // "src/index.tsx",
