@@ -180,6 +180,6 @@ export const mapStatusMessage = (
       onFailure: () => t('askEmail.validation.email'),
       onLoading: () => '',
       onSuccess: ({ isValid }) => '',
-      onNotAsked: () => 'black',
+      onNotAsked: () => '',
     })
   );
