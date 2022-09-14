@@ -247,6 +247,9 @@ modules =
       join
         [ R.typeAlias "Resumee"
             (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingResumee.Resumee)
+        , R.value "init" [] (CirclesPink.Garden.StateMachine.TrackingResumee.init)
+        , R.value "encodeJsonResumee" [] (CirclesPink.Garden.StateMachine.TrackingResumee.encodeJsonResumee)
+        , R.value "decodeJsonResumee" [] (CirclesPink.Garden.StateMachine.TrackingResumee.decodeJsonResumee)
         ]
 
   , "CirclesPink.Garden.StateMachine.Direction" /\
@@ -421,16 +424,14 @@ modules =
             (Proxy :: _ (Data.Maybe.Maybe A))
         , value "maybe" []
             (Data.Maybe.maybe :: _ -> (A -> B) -> _)
-        , value "Just" []
-            (Data.Maybe.Just :: _ -> _ A)
-        , value "Nothing" []
-            (Data.Maybe.Nothing :: _ A)
         ]
 
   , "Simple.Data.Maybe" /\
       join
         [ value "unMaybe" []
             (Simple.Data.Maybe.unMaybe :: _ -> _ A -> C)
+        , value "mkMaybe" []
+            (Simple.Data.Maybe.mkMaybe :: { mkJust :: A -> _, mkNothing :: _ })
         ]
 
   , "Data.Ord" /\

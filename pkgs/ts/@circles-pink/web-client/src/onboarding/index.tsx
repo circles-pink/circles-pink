@@ -41,11 +41,16 @@ import {
   TrackingEvent,
   _TrackingEvent,
   Maybe,
+  _TrackingResumee,
+  Json,
 } from '@circles-pink/state-machine/src';
 import {
   _circlesAction,
   _dashboardAction,
 } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
+import { Resumee } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee';
+import { unsafeUnkownToJson } from '../unsafe-as';
+import { pipe } from 'fp-ts/lib/function';
 
 type Language = 'en' | 'de';
 
@@ -188,18 +193,49 @@ const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
 
   const onTrackingEvent: Maybe<(_: TrackingEvent) => Effect<Unit>> =
     uCfg.onTrackingEvent
-      ? _Maybe.Just((x: TrackingEvent) => () => {
+      ? _Maybe.mkMaybe.mkJust(x => () => {
           if (!uCfg?.onTrackingEvent) return;
           return uCfg?.onTrackingEvent(
             _TrackingEvent.encodeJsonTrackingEvent(x)
           );
         })
-      : _Maybe.Nothing;
+      : _Maybe.mkMaybe.mkNothing(unit);
+
+  const onTrackingResumee: Maybe<(_: (_: Resumee) => Resumee) => Effect<Unit>> =
+    uCfg.onTrackingResumee
+      ? _Maybe.mkMaybe.mkJust(f => () => {
+          if (!uCfg?.onTrackingResumee) return;
+          uCfg.onTrackingResumee((j : unknown) => {
+        
+             
+            if (!j) {
+
+              const resumee_ = f(_TrackingResumee.init);
+              const resumee_encoded = _TrackingResumee.encodeJsonResumee(resumee_);
+              return resumee_encoded;
+            }
+
+            const r = _TrackingResumee.decodeJsonResumee(unsafeUnkownToJson(j));
+
+            pipe(r, _Either.unEither())
+
+            return ()
+
+            return (either as any)(() => {
+              throw new Error('Decode error') as any;
+            })((ok: Resumee) => {
+              const result = f(ok);
+              const encodedResult = encodeJsonResumee(result);
+              return encodedResult;
+            })(r);
+          });
+        })
+      : _Maybe.mkMaybe.mkNothing(unit);
 
   return {
     extractEmail,
     onTrackingEvent,
-    // onTrackingResumee,
+    onTrackingResumee,
     // safeAddress,
     // strictMode,
   };
@@ -262,10 +298,10 @@ const OnboardingContent = ({
       : Nothing.value,
     onTrackingResumee: onTrackingResumee
       ? Just((f: (r: Resumee) => Resumee) => () => {
-          onTrackingResumee(j => {
+          onTrackingResumee((j : unknown) => {
             if (!j) {
-              const resumee_ = f(initResumee);
-              const resumee_encoded = encodeJsonResumee(resumee_);
+              const resumee_ = f(_TrackingResumee.init);
+              const resumee_encoded = _TrackingResumee.encodeJsonResumee(resumee_);
               return resumee_encoded;
             }
             const r = decodeJsonResumee(j as Json);

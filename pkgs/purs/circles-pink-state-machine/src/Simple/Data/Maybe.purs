@@ -3,10 +3,12 @@ module Simple.Data.Maybe
   , bindFlipped
   , eq
   , map
+  , mkMaybe
   , module Exp
   , pure
   , unMaybe
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -37,3 +39,13 @@ unMaybe :: forall a z. { onJust :: a -> z, onNothing :: Unit -> z } -> Maybe a -
 unMaybe { onJust, onNothing } = case _ of
   Just x -> onJust x
   Nothing -> onNothing unit
+
+mkMaybe
+  :: forall a
+   . { mkJust :: a -> Maybe a
+     , mkNothing :: Unit -> Maybe a
+     }
+mkMaybe =
+  { mkNothing: \_ -> Nothing
+  , mkJust: Just
+  }

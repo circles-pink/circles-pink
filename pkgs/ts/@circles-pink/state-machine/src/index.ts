@@ -22,6 +22,8 @@ import * as CirclesPink_Garden_StateMachine_Direction from "@circles-pink/state-
 import * as CirclesPink_Garden_StateMachine_State from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 import * as CirclesPink_Garden_StateMachine_Action from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 import * as CirclesPink_Garden_StateMachine_TrackingEvent from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent";
+import * as CirclesPink_Garden_StateMachine_TrackingResumee from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee";
+
 import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 import * as RemoteReport from "@circles-pink/state-machine/output/RemoteReport";
 import * as VoucherServer from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
@@ -75,6 +77,8 @@ export type {
   VoucherProvidersResult,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 export type { CirclesConfigEffect } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
+export type { Resumee } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee";
+export type { Json } from "@circles-pink/state-machine/output/Data.Argonaut";
 
 // -----------------------------------------------------------------------------
 // Value exports
@@ -112,3 +116,4 @@ export const _StateMachine = {
   ...CirclesPink_Garden_StateMachine_State,
   ...CirclesPink_Garden_StateMachine_Action,
 };
+export const _TrackingResumee = CirclesPink_Garden_StateMachine_TrackingResumee;
