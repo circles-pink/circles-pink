@@ -99,6 +99,7 @@ data Type
   | TypeTLString String
   | TypeUniqueSymbol
   | TypeIsPred Name Type
+  | TypeUnsafeInline String
 
 derive instance genericType :: Generic Type _
 derive instance eqType :: Eq Type

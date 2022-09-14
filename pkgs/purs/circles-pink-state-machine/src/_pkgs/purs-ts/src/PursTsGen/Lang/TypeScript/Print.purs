@@ -29,6 +29,7 @@ printType = case _ of
   TypeTLString s -> "\"" <> s <> "\""
   TypeUniqueSymbol -> "unique symbol"
   TypeIsPred n t -> printName n <> " is " <> printType t
+  TypeUnsafeInline x -> x
 
   where
   printOpaque id = "readonly \"" <> "Opaque__" <> printQualName id <> "\": unique symbol;"

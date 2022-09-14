@@ -3,6 +3,8 @@ module CirclesPink.GenerateTSD.Replace where
 import Prelude
 
 import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
+import CirclesPink.Garden.StateMachine (CirclesConfig(..))
+import CirclesPink.Garden.TS (CirclesConfigEffect(..))
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.Argonaut (Json, JsonDecodeError)
 import Data.BN (BN)
@@ -25,6 +27,7 @@ import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
 import PursTsGen.Data.ABC (A)
+import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
 import Type.Proxy (Proxy(..))
@@ -180,6 +183,16 @@ instance ToTsDef (Wrap Json) where
 
 instance ToPursType (Wrap Json) where
   toPursType = defaultToPursType' []
+
+
+--------------------------------------------------------------------------------
+
+
+instance ToTsType (Wrap CirclesConfigEffect) where
+  toTsType (Wrap (CirclesConfigEffect (CirclesConfig r))) = toTsType $ unsafeReplace r
+
+instance ToPursType (Wrap CirclesConfigEffect) where
+  toPursType _ = PS.var $ PS.Name "TODO"
 
 --------------------------------------------------------------------------------
 
