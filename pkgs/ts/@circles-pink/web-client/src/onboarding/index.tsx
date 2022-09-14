@@ -172,7 +172,7 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
 
 const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
   const defaultRightExtractEmail: Either<string, (_: string) => Effect<Unit>> =
-    _Either.Right((email: string) => () => {
+    _Either.mkEither.mkRight((email: string) => () => {
       // Save the email somewhere...
       console.log(email);
       return unit;
@@ -180,9 +180,9 @@ const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
 
   const extractEmail: Either<string, (_: string) => Effect<Unit>> =
     typeof uCfg.email === 'string'
-      ? _Either.Left(uCfg.email)
+      ? _Either.mkEither.mkLeft(uCfg.email)
       : typeof uCfg.email === 'function'
-      ? _Either.Right((email: string) => () => {
+      ? _Either.mkEither.mkRight((email: string) => () => {
           if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
             uCfg.email(email);
           }

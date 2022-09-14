@@ -391,10 +391,6 @@ modules =
             (Proxy :: _ (Data.Either.Either A B))
         , value "either" []
             (Data.Either.either :: _ -> _ -> _ A B -> C)
-        , value "Right" []
-            (Data.Either.Right :: B -> _ A B)
-        , value "Left" []
-            (Data.Either.Left :: A -> _ A B)
         , value "hush" []
             (Data.Either.hush :: _ A B -> _)
         , defPredicateFn "isLeft" []
@@ -409,7 +405,12 @@ modules =
       join
         [ value "unEither" []
             (Simple.Data.Either.unEither :: _ -> _ A B -> Z)
-
+        , value "mkEither" []
+            ( Simple.Data.Either.mkEither
+                :: { mkLeft :: A -> _
+                   , mkRight :: B -> _
+                   }
+            )
         ]
 
   , "Data.Tuple" /\
