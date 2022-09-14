@@ -24,7 +24,7 @@ module CirclesPink.Garden.StateMachine.TrackingEvent
   , genEncodeJsonVariant
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
 import CirclesPink.Garden.StateMachine.State (CirclesState)
@@ -41,6 +41,9 @@ import RemoteData (RemoteData(..))
 import Type.Proxy (Proxy(..))
 import Type.Row (class Cons)
 
+moduleName :: String
+moduleName = "CirclesPink.Garden.StateMachine.TrackingEvent"
+
 --------------------------------------------------------------------------------
 data TrackingEvent
   = NewState TrackedCirclesState
@@ -50,6 +53,18 @@ derive instance genericTrackingEvent :: Generic TrackingEvent _
 
 instance encodeJsonTrackingEventInst :: EncodeJson TrackingEvent where
   encodeJson = genericEncodeJson
+
+instance ToPursNominal TrackingEvent where
+  toPursNominal _ = PursNominal moduleName "TrackingEvent"
+
+instance ToTsType TrackingEvent where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef TrackingEvent where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType TrackingEvent where
+  toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------
 

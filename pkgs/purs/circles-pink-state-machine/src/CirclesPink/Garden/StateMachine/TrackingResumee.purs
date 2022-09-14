@@ -27,6 +27,9 @@ import Data.Newtype.Extra ((-#))
 import Data.Time.Duration (Milliseconds(..))
 import Data.Variant (case_, default, onMatch)
 
+moduleName :: String
+moduleName = "CirclesPink.Garden.StateMachine.TrackingResumee"
+
 newtype Instant = Instant DT.Instant
 
 derive instance Newtype Instant _
@@ -36,6 +39,18 @@ instance EncodeJson Instant where
 
 instance DecodeJson Instant where
   decodeJson x = decodeJson x <#> Milliseconds >>= instant >>> note (TypeMismatch "Not an instant") <#> Instant
+
+instance ToPursNominal Instant where
+  toPursNominal _ = PursNominal moduleName "Instant"
+
+instance ToTsType Instant where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef Instant where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType Instant where
+  toPursType = defaultToPursType' []
 
 data StepName
   = Debug
@@ -49,10 +64,8 @@ data StepName
   | Trusts
   | Dashboard
 
-
 instance ToPursNominal StepName where
   toPursNominal _ = PursNominal "CirclesPink.Garden.StateMachine.TrackingResumee" "StepName"
-
 
 instance ToTsType StepName where
   toTsType = defaultToTsType' []
@@ -62,7 +75,6 @@ instance ToTsDef StepName where
 
 instance ToPursType StepName where
   toPursType = defaultToPursType' []
-
 
 derive instance Eq StepName
 derive instance Ord StepName

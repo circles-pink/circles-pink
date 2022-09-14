@@ -28,6 +28,7 @@ import * as VoucherServer from "@circles-pink/state-machine/output/VoucherServer
 export type { Effect } from "@circles-pink/state-machine/output/Effect";
 export type { Unit } from "@circles-pink/state-machine/output/Data.Unit";
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
+export type { Either } from "@circles-pink/state-machine/output/Data.Either";
 export type { User } from "@circles-pink/state-machine/output/CirclesPink.Data.User";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
 export type { Address as EthAddress } from "@circles-pink/state-machine/output/Network.Ethereum.Core.Signatures";
@@ -72,9 +73,7 @@ export type {
   VoucherProvidersResult,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
 
-export type {
-  CirclesConfigEffect
-} from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
+export type { CirclesConfigEffect } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 
 export { unit } from "@circles-pink/state-machine/output/Data.Unit";
 
