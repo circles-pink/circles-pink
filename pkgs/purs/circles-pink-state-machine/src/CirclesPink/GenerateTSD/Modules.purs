@@ -371,6 +371,8 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ (Data.Pair.Pair A))
+        , R.value "Pair" []
+            (Data.Pair.Pair :: A -> _ -> _)
         ]
 
   , "Simple.Data.Pair" /\

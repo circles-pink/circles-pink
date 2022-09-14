@@ -1,5 +1,3 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
 import React, {
   ReactElement,
   SetStateAction,
@@ -15,14 +13,22 @@ import {
   TagButton,
 } from '../../../components/forms';
 import { JustText, SubClaim, Text } from '../../../components/text';
-import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
+import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
-import { DashboardState } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard';
 import {
-  DefaultView,
-  defaultView,
-  Trust,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard.Views';
+  Address,
+  DashboardAction,
+  DashboardState,
+  TrustNode,
+  unit,
+  User,
+  VoucherOffer,
+  VoucherProvider,
+  _Address,
+  _RemoteData,
+  _StateMachine,
+  _VoucherServer,
+} from '@circles-pink/state-machine/src';
 import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../../context/theme';
@@ -49,24 +55,18 @@ import {
 import { Send, SendProps } from './Send';
 import { Receive } from './Receive';
 import { Balance } from './Balance';
-import {
-  TrustNode,
-  User,
-} from '@circles-pink/state-machine/output/CirclesCore';
 import { StateMachineDebugger } from '../../../components/StateMachineDebugger';
-import { Address } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
-import {
-  VoucherOffer,
-  VoucherProvider,
-} from '@circles-pink/state-machine/output/VoucherServer.Spec.Types';
 import { ConfirmSend } from './ConfirmSend';
 import { displayBalance } from '../../utils/timeCircles';
 import { LightColorFrame } from '../../../components/layout';
+import { Frame } from '../../../components/Frame';
 import { UserConfig } from '../../../types/user-config';
+import { pipe } from 'fp-ts/lib/function';
+import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -87,9 +87,11 @@ export type SelectedOffer = [VoucherProvider, VoucherOffer];
 // Dashboard
 // -----------------------------------------------------------------------------
 
+const { _dashboardAction } = _StateMachine;
+
 export type XbgeDashboardProps = {
   state: DashboardState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: DashboardAction) => void;
   cfg?: UserConfig;
   sharingFeature: ReactElement | null;
   buyVoucherEurLimit: number;
@@ -98,7 +100,7 @@ export type XbgeDashboardProps = {
 };
 
 export const XbgeDashboard = ({
-  state: stateRaw,
+  state,
   act,
   cfg,
   sharingFeature,
@@ -106,11 +108,6 @@ export const XbgeDashboard = ({
   shadowFriends,
   xbgeSafeAddress,
 }: XbgeDashboardProps): ReactElement => {
-  const state = useMemo<DefaultView>(
-    () => (defaultView as any)(stateRaw) as DefaultView,
-    [stateRaw]
-  );
-
   // Theme
   const [theme] = useContext(ThemeContext);
 
@@ -159,31 +156,31 @@ export const XbgeDashboard = ({
 
   useEffect(() => {
     // Gather initial client information
-    act(A._dashboard(A._getBalance(unit)));
-    act(A._dashboard(A._getTrusts(unit)));
-    act(A._dashboard(A._getUBIPayout(unit)));
-    act(A._dashboard(A._getVouchers(getTimestamp())));
-    act(A._dashboard(A._getVoucherProviders(unit)));
+    act(_dashboardAction._getBalance(unit));
+    act(_dashboardAction._getTrusts(unit));
+    act(_dashboardAction._getUBIPayout(unit));
+    act(_dashboardAction._getVouchers(getTimestamp()));
+    act(_dashboardAction._getVoucherProviders(unit));
 
     // Start polling tasks
     const balancePolling = setInterval(() => {
-      act(A._dashboard(A._getBalance(unit)));
+      act(_dashboardAction._getBalance(unit));
     }, BALANCE_INTERVAL);
 
     const trustNetworkPolling = setInterval(() => {
-      act(A._dashboard(A._getTrusts(unit)));
+      act(_dashboardAction._getTrusts(unit));
     }, TRUST_NETWORK_INTERVAL);
 
     const ubiPayoutPolling = setInterval(() => {
-      act(A._dashboard(A._getTrusts(unit)));
+      act(_dashboardAction._getTrusts(unit));
     }, UBI_PAYOUT_INTERVAL);
 
     const voucherPolling = setInterval(() => {
-      act(A._dashboard(A._getVouchers(getTimestamp())));
+      act(_dashboardAction._getVouchers(getTimestamp()));
     }, VOUCHER_INTERVAL);
 
     const voucherProviderPolling = setInterval(() => {
-      act(A._dashboard(A._getVoucherProviders(unit)));
+      act(_dashboardAction._getVoucherProviders(unit));
     }, VOUCHER_INTERVAL);
 
     // Clear interval on unmount
@@ -203,11 +200,11 @@ export const XbgeDashboard = ({
     if (justBoughtVoucher) {
       // console.log('Initialize faster polling..');
       balancePolling = setInterval(() => {
-        act(A._dashboard(A._getBalance(unit)));
+        act(_dashboardAction._getBalance(unit));
       }, 1500);
 
       voucherPolling = setInterval(() => {
-        act(A._dashboard(A._getVouchers(getTimestamp())));
+        act(_dashboardAction._getVouchers(getTimestamp()));
       }, 3000);
     } else if (!justBoughtVoucher) {
       // console.log('Finish faster polling');
@@ -234,34 +231,41 @@ export const XbgeDashboard = ({
   const [countRefreshTransfer, setCountRefreshTransfer] = useState<number>(0);
 
   useEffect(() => {
-    switch (state.transferResult.type) {
-      case 'loading':
-        setCountRefreshTransfer(0);
-        setInitBalTransfer(
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null
-        );
-        break;
-      case 'success':
-        const newBalance =
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null;
+    const balance = pipe(
+      state.vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => null,
+        onLoading: () => null,
+        onFailure: () => null,
+        onSuccess: x =>
+          x.data
+            .reduce((p, c) => p + _VoucherServer.unVoucherAmount(c.amount), 0)
+            .toString(),
+      })
+    );
 
-        if (
-          newBalance === initBalTransfer &&
-          countRefreshTransfer < MAX_RETRYS
-        ) {
-          setTimeout(() => {
-            act(A._dashboard(A._getBalance(unit)));
-            setCountRefreshTransfer(countRefreshTransfer + 1);
-          }, RETRY_INTERVAL);
-        }
-        break;
-      default:
-        break;
-    }
+    pipe(
+      state.transferResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {
+          setCountRefreshTransfer(0);
+          setInitBalTransfer(balance);
+        },
+        onFailure: () => {},
+        onSuccess: () => {
+          if (
+            balance === initBalTransfer &&
+            countRefreshTransfer < MAX_RETRYS
+          ) {
+            setTimeout(() => {
+              act(_dashboardAction._getBalance(unit));
+              setCountRefreshTransfer(countRefreshTransfer + 1);
+            }, RETRY_INTERVAL);
+          }
+        },
+      })
+    );
   }, [state.transferResult, countRefreshTransfer]);
 
   // Balance refresh after UBI payout
@@ -270,31 +274,35 @@ export const XbgeDashboard = ({
   const [countRefreshPayout, setCountRefreshPayout] = useState<number>(0);
 
   useEffect(() => {
-    switch (state.requestUBIPayoutResult.type) {
-      case 'loading':
-        setCountRefreshPayout(0);
-        setInitBalPayout(
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null
-        );
-        break;
-      case 'success':
-        const newBalance =
-          state.getBalanceResult.type === 'success'
-            ? state.getBalanceResult.value.data.toString()
-            : null;
+    const balance = pipe(
+      state.vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => null,
+        onLoading: () => null,
+        onFailure: () => null,
+        onSuccess: x => x.data.toString(),
+      })
+    );
 
-        if (newBalance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
-          setTimeout(() => {
-            act(A._dashboard(A._getBalance(unit)));
-            setCountRefreshPayout(countRefreshPayout + 1);
-          }, RETRY_INTERVAL);
-        }
-        break;
-      default:
-        break;
-    }
+    pipe(
+      state.requestUBIPayoutResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {
+          setCountRefreshPayout(0);
+          setInitBalPayout(balance);
+        },
+        onFailure: () => {},
+        onSuccess: () => {
+          if (balance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
+            setTimeout(() => {
+              act(_dashboardAction._getBalance(unit));
+              setCountRefreshPayout(countRefreshPayout + 1);
+            }, RETRY_INTERVAL);
+          }
+        },
+      })
+    );
   }, [state.requestUBIPayoutResult, countRefreshPayout]);
 
   // Balance for vouchers
@@ -302,24 +310,38 @@ export const XbgeDashboard = ({
   const [boughtVouchersAmount, setBoughtVouchersAmount] = useState(0);
 
   useEffect(() => {
-    if (state.getBalanceResult.type === 'success') {
-      setUserBalance(
-        parseFloat(
-          displayBalance(
-            state.getBalanceResult.value.data.toString(),
-            'TIME-CIRCLES'
-          )
-        )
-      );
-    }
+    pipe(
+      state.getBalanceResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: x => {
+          setUserBalance(
+            parseFloat(displayBalance(x.toString(), 'TIME-CIRCLES'))
+          );
+        },
+      })
+    );
   }, [state.getBalanceResult]);
 
   useEffect(() => {
-    if (state.vouchersResult.type === 'success') {
-      setBoughtVouchersAmount(
-        state.vouchersResult.value.data.reduce((p, c) => p + c.amount, 0)
-      );
-    }
+    pipe(
+      state.vouchersResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: x => {
+          setBoughtVouchersAmount(
+            x.data.reduce(
+              (p, c) => p + _VoucherServer.unVoucherAmount(c.amount),
+              0
+            )
+          );
+        },
+      })
+    );
   }, [state.vouchersResult]);
 
   // -----------------------------------------------------------------------------
@@ -327,15 +349,24 @@ export const XbgeDashboard = ({
   // -----------------------------------------------------------------------------
 
   useEffect(() => {
-    if (
-      state.checkUBIPayoutResult.type === 'failure' &&
-      state.checkUBIPayoutResult.value.error.type === 'errNative' &&
-      state.checkUBIPayoutResult.value.error.value.name === 'CoreError' &&
-      state.checkUBIPayoutResult.value.error.value.message ===
-        'Invalid Token address. Did you forget to deploy the Token?'
-    ) {
-      act(A._dashboard(A._redeploySafeAndToken(unit)));
-    }
+    pipe(
+      state.checkUBIPayoutResult,
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: x => {
+          if (
+            x.error.type === 'errNative' &&
+            x.error.value.name === 'CoreError' &&
+            x.error.value.message ===
+              'Invalid Token address. Did you forget to deploy the Token?'
+          ) {
+            act(_dashboardAction._redeploySafeAndToken(unit));
+          }
+        },
+        onSuccess: () => {},
+      })
+    );
   }, [state.checkUBIPayoutResult]);
 
   // -----------------------------------------------------------------------------
@@ -343,35 +374,25 @@ export const XbgeDashboard = ({
   // -----------------------------------------------------------------------------
 
   const [search, setSearch] = useState<string>(''); // Search Input
-  const [searchResult, setSearchResult] = useState<Trust[]>(state.usersSearch);
-
-  useEffect(() => {
-    // Query on user input
-    if (search !== '') {
-      act(A._dashboard(A._userSearch({ query: search })));
-    } else {
-      setSearchResult([]);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    // Update on api result
-    if (search !== '') {
-      setSearchResult(state.usersSearch);
-    } else {
-      setSearchResult([]);
-    }
-  }, [state.usersSearch]);
 
   // -----------------------------------------------------------------------------
   // Transfer
   // -----------------------------------------------------------------------------
 
   useEffect(() => {
-    if (state.transferResult.type === 'success') {
-      // Close overlay
-      setOverlay(['SEND', false]);
-    }
+    pipe(
+      state.transferResult,
+
+      _RemoteData.unRemoteData({
+        onNotAsked: () => {},
+        onLoading: () => {},
+        onFailure: () => {},
+        onSuccess: () => {
+          // Close overlay
+          setOverlay(['SEND', false]);
+        },
+      })
+    );
   }, [state.transferResult]);
 
   // -----------------------------------------------------------------------------
@@ -399,7 +420,7 @@ export const XbgeDashboard = ({
                         <SubClaim>
                           {t('dashboard.xbgeSpecial.welcomeUser').replace(
                             '{{user}}',
-                            stateRaw.user.username
+                            state.user.username
                           )}
                         </SubClaim>
                         <JustText fontSize={1.25}>
@@ -407,8 +428,7 @@ export const XbgeDashboard = ({
                         </JustText>
                         <Balance
                           theme={theme}
-                          balance={state.getBalanceResult}
-                          checkUBIPayoutResult={state.checkUBIPayoutResult}
+                          balanceResult={state.getBalanceResult}
                           requestUBIPayoutResult={state.requestUBIPayoutResult}
                         />
                       </>
@@ -495,7 +515,7 @@ export const XbgeDashboard = ({
                       <Margin top={2} bottom={2}>
                         <BuyVouchers
                           theme={theme}
-                          providers={stateRaw.voucherProvidersResult}
+                          providers={state.voucherProvidersResult}
                           initializeVoucherOrder={initializeVoucherOrder}
                           availableBalance={userBalance}
                           boughtVouchersAmount={boughtVouchersAmount}
@@ -504,7 +524,7 @@ export const XbgeDashboard = ({
                       </Margin>
                       <ListVouchers
                         theme={theme}
-                        providersResult={stateRaw.voucherProvidersResult}
+                        providersResult={state.voucherProvidersResult}
                         vouchersResult={state.vouchersResult}
                         justBoughtVoucher={justBoughtVoucher}
                         setJustBoughtVoucher={setJustBoughtVoucher}
@@ -579,38 +599,38 @@ export const XbgeDashboard = ({
           <MainContent>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <TrustUserList
-                address={stateRaw.user.safeAddress}
+                address={_Address.Address(state.user.safeAddress)}
                 title={t('dashboard.trustNetworkTitle')}
-                graph={stateRaw.trusts}
+                graph={state.trusts}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                addTrust={to => act(_dashboardAction._addTrustConnection(to))}
                 // trustAddResult={state.trustAddResult}
                 removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
+                  act(_dashboardAction._removeTrustConnection(to))
                 }
                 // trustRemoveResult={state.trustRemoveResult}
               />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
               <UserSearch
-                userSearchResult={stateRaw.userSearchResult}
-                trusts={stateRaw.trusts}
-                onSearch={query => act(A._dashboard(A._userSearch({ query })))}
+                userSearchResult={state.userSearchResult}
+                trusts={state.trusts}
+                onSearch={query => act(_dashboardAction._userSearch({ query }))}
                 onAddTrust={userIdent =>
-                  act(A._dashboard(A._addTrustConnection(userIdent)))
+                  act(_dashboardAction._addTrustConnection(userIdent))
                 }
-                centerAddress={stateRaw.user.safeAddress}
+                centerAddress={_Address.Address(state.user.safeAddress)}
                 title={t('dashboard.exploreTitle')}
                 theme={theme}
                 icon={mdiMagnify}
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
+                addTrust={to => act(_dashboardAction._addTrustConnection(to))}
                 removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
+                  act(_dashboardAction._removeTrustConnection(to))
                 }
                 description={t('dashboard.xbgeSpecial.userSearchDescription')}
                 actionRow={
@@ -652,7 +672,7 @@ export const XbgeDashboard = ({
               <TrustUserList
                 title={t('dashboard.trustNetworkTitle')}
                 graph={state.graph}
-                ownAddress={stateRaw.user.safeAddress}
+                ownAddress={state.user.safeAddress}
                 theme={theme}
                 icon={mdiLan}
                 toggleOverlay={toggleOverlay}
@@ -670,7 +690,7 @@ export const XbgeDashboard = ({
               <UserSearch
                 title={t('dashboard.exploreTitle')}
                 trusts={searchResult}
-                ownSafeAddress={stateRaw.user.safeAddress}
+                ownSafeAddress={state.user.safeAddress}
                 theme={theme}
                 icon={mdiMagnify}
                 toggleOverlay={toggleOverlay}
@@ -744,9 +764,9 @@ export const XbgeDashboard = ({
                 </>
 
                 <TrustGraph
-                  graph={state.graph}
+                  graph={state.trusts}
                   expandTrustNetwork={(addr: string) =>
-                    act(A._dashboard(A._expandTrustNetwork(addr)))
+                    act(_dashboardAction._expandTrustNetwork(addr))
                   }
                   theme={theme}
                 />
@@ -767,7 +787,7 @@ export const XbgeDashboard = ({
                 overwriteTo={overwriteTo}
                 selectedOffer={selectedOffer}
                 setJustBoughtVoucher={setJustBoughtVoucher}
-                state={stateRaw}
+                state={state}
                 act={act}
                 theme={theme}
                 xbgeSafeAddress={xbgeSafeAddress}
@@ -781,7 +801,7 @@ export const XbgeDashboard = ({
           <StateMachineDebugger state={state} />
           <Button
             theme={theme}
-            onClick={() => act(A._dashboard(A._redeploySafeAndToken(unit)))}
+            onClick={() => act(_dashboardAction._redeploySafeAndToken(unit))}
           >
             Redeploy!
           </Button>

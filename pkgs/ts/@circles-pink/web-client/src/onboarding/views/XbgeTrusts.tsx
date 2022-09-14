@@ -1,9 +1,6 @@
-import * as A from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import React, { ReactElement, useContext, useEffect, useMemo } from 'react';
+import React, { ReactElement, useContext, useEffect } from 'react';
 import { Button, ButtonLinkLike } from '../../components/forms';
 import { JustText, SubClaim } from '../../components/text';
-import { XbgeDialogCard } from '../../components/XbgeDialogCard';
 import { FadeIn } from 'anima-react';
 import { Orientation } from 'anima-react/dist/components/FadeIn';
 import { getIncrementor } from '../utils/getCounter';
@@ -15,23 +12,26 @@ import {
   mdiNumeric2CircleOutline,
   mdiNumeric3CircleOutline,
   mdiAccountGroup,
-  mdiShareVariantOutline,
   mdiWalletOutline,
 } from '@mdi/js';
 import tw from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
-import {
-  TrustState,
-  _trusts,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts';
-import {
-  defaultView,
-  DefaultView,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Trusts.Views';
 import { Margin } from '../../components/helper';
+import {
+  CirclesAction,
+  RemoteData,
+  TrustState,
+  unit,
+  _Address,
+  _EthAddress,
+  _RemoteData,
+  _StateMachine,
+} from '@circles-pink/state-machine/src';
+import { pipe } from 'fp-ts/lib/function';
+import { ButtonState } from '../../components/forms/Button';
+import { XbgeDialogCard } from '../../components/XbgeDialogCard';
 import { LightColorFrame } from '../../components/layout';
 import { SubClaimLike } from '../../components/text/SubClaim';
-
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
@@ -42,29 +42,26 @@ type FinalizeMethod = 'collectTrusts' | 'fundSafe';
 // Trusts
 // -----------------------------------------------------------------------------
 
+const { _circlesAction, _trustsAction } = _StateMachine;
+
 type XbgeTrustsProps = {
   state: TrustState;
-  act: (ac: A.CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   sharingFeature: ReactElement | null;
 };
 
 export const XbgeTrusts = ({
-  state: stateRaw,
+  state,
   act,
   sharingFeature,
 }: XbgeTrustsProps): ReactElement => {
-  const state = useMemo<DefaultView>(
-    () => (defaultView as any)(stateRaw) as DefaultView,
-    [stateRaw]
-  );
-
   const [theme] = useContext(ThemeContext);
   const orientation: Orientation = 'left';
   const getDelay = getIncrementor(0, 0.05);
 
   useEffect(() => {
     const safeStatus = setInterval(
-      () => act(_trusts(A._getSafeStatus(unit))),
+      () => act(_circlesAction._trusts(_trustsAction._getSafeStatus(unit))),
       5000
     );
     return () => clearInterval(safeStatus);
@@ -86,7 +83,7 @@ export const XbgeTrusts = ({
                     <SubClaim>
                       {t('trusts.xbgeSpecial.welcomeUser').replace(
                         '{{user}}',
-                        stateRaw.user.username
+                        state.user.username
                       )}
                     </SubClaim>
                     <JustText>
@@ -223,7 +220,11 @@ export const XbgeTrusts = ({
                     fullWidth
                     prio="high"
                     onClick={() =>
-                      act(A._trusts(A._finalizeRegisterUser(unit)))
+                      act(
+                        _circlesAction._trusts(
+                          _trustsAction._finalizeRegisterUser(unit)
+                        )
+                      )
                     }
                     state={mapResults(
                       state.deploySafeResult,
@@ -253,16 +254,35 @@ const TrustIndicatorRow = tw.div`flex flex-row justify-between mx-16 my-4 gap-4`
 // Util
 // -----------------------------------------------------------------------------
 
-type Result = {
-  type: 'notAsked' | 'loading' | 'failure' | 'success';
-};
+type ResultStates = 'notAsked' | 'loading' | 'failure' | 'success';
 
-const mapResults = (res1: Result, res2: Result) => {
-  if (res1.type === 'notAsked' && res2.type === 'notAsked') {
+export const mapResults = (
+  res1: RemoteData<unknown, unknown, unknown, unknown>,
+  res2: RemoteData<unknown, unknown, unknown, unknown>
+): ButtonState => {
+  const result1 = pipe(
+    res1,
+    _RemoteData.unRemoteData<unknown, unknown, unknown, unknown, ResultStates>({
+      onNotAsked: () => 'notAsked',
+      onFailure: () => 'failure',
+      onLoading: () => 'loading',
+      onSuccess: () => 'success',
+    })
+  );
+  const result2 = pipe(
+    res2,
+    _RemoteData.unRemoteData<unknown, unknown, unknown, unknown, ResultStates>({
+      onNotAsked: () => 'notAsked',
+      onFailure: () => 'failure',
+      onLoading: () => 'loading',
+      onSuccess: () => 'success',
+    })
+  );
+  if (result1 === 'notAsked' && result2 === 'notAsked') {
     return 'enabled';
-  } else if (res1.type === 'success' && res2.type === 'success') {
+  } else if (result1 === 'success' && result2 === 'success') {
     return 'enabled';
-  } else if (res1.type === 'failure' || res2.type === 'failure') {
+  } else if (result1 === 'failure' || result2 === 'failure') {
     return 'enabled';
   }
   return 'loading';
