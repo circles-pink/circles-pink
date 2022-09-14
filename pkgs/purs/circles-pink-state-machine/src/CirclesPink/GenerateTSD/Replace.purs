@@ -3,9 +3,11 @@ module CirclesPink.GenerateTSD.Replace where
 import Prelude
 
 import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
+import CirclesPink.Garden.EnvControlAff (EnvVars(..))
 import CirclesPink.Garden.StateMachine (CirclesConfig(..))
 import CirclesPink.Garden.TS (CirclesConfigEffect(..))
 import CirclesPink.GenerateTSD.Wrappers as W
+import CirclesPink.URI (URI)
 import Data.Argonaut (Json, JsonDecodeError)
 import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
@@ -19,7 +21,9 @@ import Data.Pair (Pair)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Foreign.Object (Object)
+import Milkis.Impl (FetchImpl)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
+import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
 import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsType)
@@ -69,6 +73,14 @@ else instance UnsafeReplace CirclesPink.Data.PrivateKey.Type.PrivateKey PrivateK
 else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 
 else instance UnsafeReplace Method (Wrap Method)
+
+else instance UnsafeReplace EnvVars (Wrap EnvVars)
+
+else instance UnsafeReplace URI (Wrap URI)
+
+else instance UnsafeReplace ChecksumAddress (Wrap ChecksumAddress)
+
+else instance UnsafeReplace FetchImpl (Wrap FetchImpl)
 
 else instance UnsafeReplace CirclesConfigEffect (Wrap CirclesConfigEffect)
 
@@ -188,10 +200,46 @@ instance ToPursType (Wrap Json) where
 
 --------------------------------------------------------------------------------
 
+instance ToPursNominal (Wrap URI) where
+  toPursNominal _ = PursNominal "CirclesPink.URI" "URI"
+
+instance ToTsType (Wrap URI) where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef (Wrap URI) where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType (Wrap URI) where
+  toPursType = defaultToPursType' []
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap ChecksumAddress) where
+  toPursNominal _ = PursNominal "Network.Ethereum.Core.Signatures.Extra" "ChecksumAddress"
+
+instance ToTsType (Wrap ChecksumAddress) where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef (Wrap ChecksumAddress) where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType (Wrap ChecksumAddress) where
+  toPursType = defaultToPursType' []
+
+--------------------------------------------------------------------------------
+
 instance ToTsType (Wrap CirclesConfigEffect) where
   toTsType (Wrap (CirclesConfigEffect (CirclesConfig r))) = toTsType $ unsafeReplace r
 
 instance ToPursType (Wrap CirclesConfigEffect) where
+  toPursType _ = PS.var $ PS.Name "TODO"
+
+--------------------------------------------------------------------------------
+
+instance ToTsType (Wrap EnvVars) where
+  toTsType (Wrap (EnvVars r)) = toTsType $ unsafeReplace r
+
+instance ToPursType (Wrap EnvVars) where
   toPursType _ = PS.var $ PS.Name "TODO"
 
 --------------------------------------------------------------------------------
@@ -220,6 +268,20 @@ instance ToTsDef (Wrap Method) where
   toTsDef = defaultToTsDef' []
 
 instance ToPursType (Wrap Method) where
+  toPursType = defaultToPursType' []
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap FetchImpl) where
+  toPursNominal _ = PursNominal "Milkis.Impl" "FetchImpl"
+
+instance ToTsType (Wrap FetchImpl) where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef (Wrap FetchImpl) where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType (Wrap FetchImpl) where
   toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------

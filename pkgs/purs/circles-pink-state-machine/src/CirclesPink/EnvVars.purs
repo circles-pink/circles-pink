@@ -4,7 +4,7 @@ module CirclesPink.EnvVars
   , getParsedEnv
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 import CirclesPink.Garden.EnvControlAff as E
 import CirclesPink.URI (URI)
 import CirclesPink.URI as U
@@ -52,7 +52,7 @@ instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
       , gardenSafeMasterAddress: show :: ChecksumAddress -> _
       , gardenEthereumNodeWebSocket: U.print
       , voucherServerHost: U.print
-      , isDev : identity :: Boolean -> _
+      , isDev: identity :: Boolean -> _
       }
       env
       # E.EnvVars

@@ -18,9 +18,7 @@ import {
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 import { mapResult } from '../utils/mapResult';
-import { unRemoteData } from '@circles-pink/state-machine/output/RemoteData';
 import { pipe } from 'fp-ts/lib/function';
-import { matchV } from '../../purs-util';
 
 type LoginProps = {
   state: LoginState;
@@ -141,14 +139,14 @@ const mapStatusMessage = (loginResult: LoginState['loginResult']) =>
     _RemoteData.unRemoteData({
       onLoading: () => '',
       onSuccess: () => '',
-      onFailure: ({ error }) =>
-        matchV(error)(
-          {
-            errInvalidMnemonic: () => t('login.validation.invalidMnemonic'),
-            errUserNotFound: () => t('login.validation.userNotFound'),
-          },
-          () => ''
-        ),
+      onFailure: ({ error }) => '',
+      // matchV(error)(
+      //   {
+      //     errInvalidMnemonic: () => t('login.validation.invalidMnemonic'),
+      //     errUserNotFound: () => t('login.validation.userNotFound'),
+      //   },
+      //   () => ''
+      // ),
       onNotAsked: () => '',
     })
   );

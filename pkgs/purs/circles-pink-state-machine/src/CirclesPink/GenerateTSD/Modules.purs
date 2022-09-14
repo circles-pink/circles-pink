@@ -41,6 +41,7 @@ import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
 import Effect as Effect
 import Foreign.Object as Foreign.Object
+import Milkis.Impl as Milkis.Impl
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
@@ -51,6 +52,7 @@ import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
+import Simple.Data.Either as Simple.Data.Either
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Pair as Simple.Data.Pair
 import Simple.Data.Tuple as Simple.Data.Tuple
@@ -141,11 +143,18 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.DashboardState)
       , R.value "initLanding" []
           (CirclesPink.Garden.StateMachine.State.initLanding)
+      , R.value "initUserData" []
+          (CirclesPink.Garden.StateMachine.State.initUserData)
       ]
 
   , "Data.Argonaut" /\ join
       [ R.typeDef "--"
           (Proxy :: _ (Data.Argonaut.JsonDecodeError))
+      ]
+
+  , "Milkis.Impl" /\ join
+      [ R.typeDef "--"
+          (Proxy :: _ (Milkis.Impl.FetchImpl))
       ]
 
   , "Data.HTTP.Method" /\ join
@@ -170,6 +179,10 @@ modules =
   , "CirclesPink.Garden.TS" /\ join
       [ R.typeAlias "CirclesConfigEffect"
           (Proxy :: _ (CirclesPink.Garden.TS.CirclesConfigEffect))
+      , R.value "mkControl" []
+          (CirclesPink.Garden.TS.mkControl)
+      , R.value "mkControlTestEnv" []
+          (CirclesPink.Garden.TS.mkControlTestEnv)
       ]
 
   , "RemoteReport" /\ join
@@ -390,6 +403,13 @@ modules =
         , defPredicateFn "isRight" []
             (Data.Either.isRight :: _ A B -> _)
             (TS.mkType (TS.qualName_ "Either_Right") [ toTsType B ])
+        ]
+
+  , "Simple.Data.Either" /\
+      join
+        [ value "unEither" []
+            (Simple.Data.Either.unEither :: _ -> _ A B -> Z)
+
         ]
 
   , "Data.Tuple" /\
