@@ -25,11 +25,13 @@ import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 import * as RemoteReport from "@circles-pink/state-machine/output/RemoteReport";
 import * as VoucherServer from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
 
+export type { Effect } from "@circles-pink/state-machine/output/Effect";
+export type { Unit } from "@circles-pink/state-machine/output/Data.Unit";
 export type { Maybe } from "@circles-pink/state-machine/output/Data.Maybe";
 export type { User } from "@circles-pink/state-machine/output/CirclesPink.Data.User";
 export type { Address } from "@circles-pink/state-machine/output/CirclesPink.Data.Address";
 export type { Address as EthAddress } from "@circles-pink/state-machine/output/Network.Ethereum.Core.Signatures";
-export type { PrivateKey } from "@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey";
+export type { PrivateKey } from "@circles-pink/state-machine/output/CirclesPink.Data.PrivateKey.Type";
 export type { Mnemonic } from "@circles-pink/state-machine/output/CirclesPink.Data.Mnemonic";
 export type { UserIdent } from "@circles-pink/state-machine/output/CirclesPink.Data.UserIdent";
 export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
@@ -69,6 +71,10 @@ export type {
   VouchersResult,
   VoucherProvidersResult,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
+
+export type {
+  CirclesConfigEffect
+} from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 
 export { unit } from "@circles-pink/state-machine/output/Data.Unit";
 

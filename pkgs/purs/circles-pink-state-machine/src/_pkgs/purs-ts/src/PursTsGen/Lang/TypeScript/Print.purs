@@ -2,7 +2,6 @@ module PursTsGen.Lang.TypeScript.Print
   ( printModule
   ) where
 
-
 import Prim hiding (Row, Type)
 import PursTsGen.Prelude
 
@@ -75,6 +74,7 @@ printDeclaration = case _ of
   DeclValueDef n t -> "export const " <> printName n <> " : " <> printType t
   DeclLineComment s -> "// " <> s
   DeclEmptyLine -> ""
+  DeclUnsafeInline s -> s
 
 printImport :: Import -> String
 printImport (Import n p) = "import * as " <> printName n <> " from '" <> printPath p <> "'"

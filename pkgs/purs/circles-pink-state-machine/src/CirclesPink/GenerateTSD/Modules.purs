@@ -10,11 +10,13 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
+import CirclesPink.Garden.StateMachine as CirclesPink.Garden.StateMachine.Config
 import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.Direction as CirclesPink.Garden.StateMachine.Direction
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
+import CirclesPink.Garden.TS as CirclesPink.Garden.TS
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
 import Data.Argonaut as Data.Argonaut
@@ -36,12 +38,13 @@ import Data.Pair as Data.Pair
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
+import Effect as Effect
 import Foreign.Object as Foreign.Object
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z, M)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -135,6 +138,8 @@ modules =
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.TrustState)
       , R.typeAlias "DashboardState"
           (Proxy :: _ CirclesPink.Garden.StateMachine.State.DashboardState)
+      , R.value "initLanding" []
+          (CirclesPink.Garden.StateMachine.State.initLanding)
       ]
 
   , "Data.Argonaut" /\ join
@@ -159,6 +164,11 @@ modules =
           (RemoteData.unwrap :: _ N L E A -> _)
       , R.value "unRemoteData" []
           (RemoteData.unRemoteData :: _ -> _ N L E A -> Z)
+      ]
+
+  , "CirclesPink.Garden.TS" /\ join
+      [ R.typeAlias "CirclesConfigEffect"
+          (Proxy :: _ (CirclesPink.Garden.TS.CirclesConfigEffect))
       ]
 
   , "RemoteReport" /\ join
@@ -191,6 +201,12 @@ modules =
         , R.value "nodes"
             [ _Ord ORD ]
             (Data.IxGraph.nodes :: _ ORD E N -> _)
+        ]
+
+  , "Effect" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ (Effect.Effect A))
         ]
 
   , "CirclesPink.Data.Address" /\

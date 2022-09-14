@@ -11,6 +11,7 @@ import CirclesPink.Garden.StateMachine.TrackingResumee (Resumee)
 import Data.Either (Either)
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
+import Debug.Extra (todo)
 
 newtype CirclesConfig m = CirclesConfig
   { extractEmail :: Either String (String -> m Unit)
@@ -20,13 +21,14 @@ newtype CirclesConfig m = CirclesConfig
   , strictMode :: Boolean
   }
 
-derive instance newtypeCirclesConfig :: Newtype (CirclesConfig m) _
+derive instance Newtype (CirclesConfig m) _
 
 mapCirclesConfig :: forall (m :: Type -> Type) n. (m Unit -> n Unit) -> CirclesConfig m -> CirclesConfig n
-mapCirclesConfig f (CirclesConfig x) = CirclesConfig
-  { extractEmail: map (map f) x.extractEmail
-  , onTrackingEvent: map (map f) x.onTrackingEvent
-  , onTrackingResumee: map (map f) x.onTrackingResumee
-  , safeAddress : x.safeAddress
-  , strictMode : x.strictMode
-  }
+mapCirclesConfig f (CirclesConfig x) = todo
+--  CirclesConfig
+--   { extractEmail: map (map f) x.extractEmail
+--   , onTrackingEvent: map (map f) x.onTrackingEvent
+--   --, onTrackingResumee: map (map f) x.onTrackingResumee
+--   , safeAddress: x.safeAddress
+--   , strictMode: x.strictMode
+--   }

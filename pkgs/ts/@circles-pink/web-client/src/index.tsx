@@ -1,9 +1,9 @@
-import { initLanding } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
+import { _StateMachine } from '@circles-pink/state-machine/src';
 import React from 'react';
 import { Onboarding, OnboardingProps } from './onboarding';
 
 const Landing = (props: OnboardingProps) => {
-  return <Onboarding {...props} content={{}} initState={initLanding} />;
+  return <Onboarding {...props} content={{}} initState={_StateMachine.initLanding} />;
 };
 
 export default Landing;

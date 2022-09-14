@@ -1,6 +1,5 @@
 module CirclesPink.GenerateTSD.Wrappers
-  ( Instant(..)
-  , IxGraph(..)
+  ( IxGraph(..)
   , NeighborConnectivity(..)
   , type (:*:)
   , type (:+:)
@@ -42,24 +41,6 @@ instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (
     , toTsType (Proxy :: _ e)
     , toTsType (Proxy :: _ n)
     ]
-
---------------------------------------------------------------------------------
-
-newtype Instant = Instant DT.Instant
-
-instance toTsTypeDef_Instant :: ToTsDef Instant where
-  toTsDef _ = pure $ TS.typeDef (TS.name "Instant") []
-    $ TS.opaque (TS.qualName "Data_DateTime_Instant" "Instant")
-    $ TS.Name <$> []
-
-instance toTsType_Instant :: ToTsType Instant where
-  toTsType _ = TS.mkType (TS.qualName "Data_DateTime_Instant" "Instant") $
-    [
-    ]
-
-instance toPursType_Instant :: ToPursType Instant where
-  toPursType _ = PS.mkType (PS.qualName "Data_DateTime_Instant" "Instant")
-    []
 
 --------------------------------------------------------------------------------
 

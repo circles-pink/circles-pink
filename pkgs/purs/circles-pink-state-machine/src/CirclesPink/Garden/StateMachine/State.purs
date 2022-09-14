@@ -134,7 +134,7 @@ type ErrLandingState = EnvControl.ErrRestoreSession
   + ErrLoginTask
   + ()
 
-initLanding :: forall v. Variant (landing :: LandingState | v)
+initLanding :: CirclesState
 initLanding =
   _landing
     { checkSessionResult: _notAsked unit }

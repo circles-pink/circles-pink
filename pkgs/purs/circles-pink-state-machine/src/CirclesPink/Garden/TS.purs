@@ -1,53 +1,33 @@
 module CirclesPink.Garden.TS
-  ( CirclesConfig
-  , convertConfig
+  ( CirclesConfigEffect(..)
   , mkControl
   , mkControlTestEnv
-  ) where
+  )
+  where
 
 import CirclesPink.Prelude
 
-import CirclesPink.Data.Address (Address)
 import CirclesPink.Garden.EnvControlAff as Garden
 import CirclesPink.Garden.EnvControlTest (liftEnv, testEnv)
-import CirclesPink.Garden.StateMachine (CirclesAction, circlesControl, CirclesState, initLanding)
+import CirclesPink.Garden.StateMachine (CirclesAction, CirclesConfig, CirclesState, circlesControl, initLanding)
 import CirclesPink.Garden.StateMachine.Config as C
 import CirclesPink.Garden.StateMachine.Control.Class.ProdM (runProdM)
 import CirclesPink.Garden.StateMachine.Control.Class.TestScriptT (evalTestScriptT)
-import CirclesPink.Garden.StateMachine.TrackingEvent (TrackingEvent)
 import CirclesPink.Garden.StateMachine.TrackingEvent as TE
-import CirclesPink.Garden.StateMachine.TrackingResumee (Resumee)
 import CirclesPink.Garden.StateMachine.TrackingResumee as Tr
-import Data.FpTs.Either as FP
 import Effect.Now (now)
 import Effect.Unsafe (unsafePerformEffect)
-import FpTs.Class (fromFpTs)
 import HTTP.Milkis (milkisRequest)
-import Milkis.Impl.Window (windowFetch)
+import Milkis.Impl (FetchImpl)
 import StringStorage (getLocalStorage, getSessionStorage)
 
-type CirclesConfig =
-  { extractEmail :: FP.Either String (String -> Effect Unit)
-  , onTrackingEvent :: Maybe (TrackingEvent -> Effect Unit)
-  , onTrackingResumee :: Maybe ((Resumee -> Resumee) -> Effect Unit)
-  , safeAddress :: Maybe Address
-  , strictMode :: Boolean
-  }
+newtype CirclesConfigEffect = CirclesConfigEffect (CirclesConfig Effect)
 
-convertConfig :: forall m. MonadEffect m => CirclesConfig -> C.CirclesConfig m
-convertConfig cfg = C.CirclesConfig
-  { extractEmail: map (map liftEffect) $ fromFpTs $ cfg.extractEmail
-  , onTrackingEvent: map (map liftEffect) $ cfg.onTrackingEvent
-  , onTrackingResumee: map (map liftEffect) $ cfg.onTrackingResumee
-  , safeAddress: cfg.safeAddress
-  , strictMode: cfg.strictMode
-  }
-
-mkControl :: Garden.EnvVars -> CirclesConfig -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
-mkControl envVars cfg setState s a = do
+mkControl :: FetchImpl -> Garden.EnvVars -> CirclesConfigEffect -> ((CirclesState -> CirclesState) -> Effect Unit) -> CirclesState -> CirclesAction -> Effect Unit
+mkControl fetch envVars (CirclesConfigEffect cfg) setState s a = do
   time <- now
-  fold (cfg.onTrackingEvent <*> TE.fromAction s a)
-  fold (cfg.onTrackingResumee <*> Tr.fromAction (wrap time) a)
+  fold ((cfg -# _.onTrackingEvent) <*> TE.fromAction s a)
+  fold ((cfg -# _.onTrackingResumee) <*> Tr.fromAction (wrap time) a)
 
   localStorage <- getLocalStorage
   sessionStorage <- getSessionStorage
@@ -61,22 +41,22 @@ mkControl envVars cfg setState s a = do
           { encrypt: \_ str -> pure str
           , decrypt: \_ str -> pure $ Just str
           }
-      , safeAddress: cfg.safeAddress
-      , strictMode: cfg.strictMode
+      , safeAddress: cfg -# _.safeAddress
+      , strictMode: cfg -# _.strictMode
       }
   circlesControl env cfg' (liftEffect <<< handler) s a
     # runProdM cfg'
     # launchAff_
   where
-  cfg' = C.mapCirclesConfig liftEffect $ convertConfig cfg
-  request = milkisRequest windowFetch
+  cfg' = C.mapCirclesConfig liftEffect cfg
+  request = milkisRequest fetch
   handler f = do
     time <- now
     setState \statePrev ->
       let
         stateNext = f statePrev
-        _ = unsafePerformEffect $ fold (cfg.onTrackingEvent <*> TE.fromStateUpdate { prev: statePrev, next: stateNext })
-        _ = unsafePerformEffect $ fold (cfg.onTrackingResumee <*> Tr.fromStateUpdate (wrap time) { prev: statePrev, next: stateNext })
+        _ = unsafePerformEffect $ fold ((cfg -# _.onTrackingEvent) <*> TE.fromStateUpdate { prev: statePrev, next: stateNext })
+        _ = unsafePerformEffect $ fold ((cfg -# _.onTrackingResumee) <*> Tr.fromStateUpdate (wrap time) { prev: statePrev, next: stateNext })
       in
         stateNext
 
@@ -92,3 +72,18 @@ mkControlTestEnv setState st ac =
     , safeAddress: Nothing
     , strictMode: false
     }
+
+
+
+instance ToPursNominal CirclesConfigEffect where
+  toPursNominal _ = PursNominal "CirclesPink.Garden.TS" "CirclesConfigEffect"
+
+instance ToTsType CirclesConfigEffect where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef CirclesConfigEffect where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType CirclesConfigEffect where
+  toPursType = defaultToPursType' []
+

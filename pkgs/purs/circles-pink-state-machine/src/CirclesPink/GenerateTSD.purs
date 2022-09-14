@@ -4,12 +4,12 @@ import CirclesPink.Prelude
 
 import CirclesPink.GenerateTSD.Modules (moduleMap, modules)
 import Effect.Class.Console (log)
-import PursTsGen.Lang.TypeScript (printModule)
 import Node.ChildProcess (Exit(..), defaultSpawnOptions)
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (writeTextFile)
 import Options.Applicative (Parser, ParserInfo, execParser, fullDesc, header, help, helper, info, long, metavar, strOption, (<**>))
 import PursTsGen (defineModules)
+import PursTsGen.Lang.TypeScript (printModule)
 import Sunde as Sun
 
 type GenerateTSOpts =
