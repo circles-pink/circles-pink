@@ -10,12 +10,13 @@ import CirclesPink.Data.TrustConnection as CirclesPink.Data.TrustConnection
 import CirclesPink.Data.TrustNode as CirclesPink.Data.TrustNode
 import CirclesPink.Data.TrustState as CirclesPink.Data.TrustState
 import CirclesPink.Data.UserIdent as CirclesPink.Data.UserIdent
-import CirclesPink.Garden.StateMachine as CirclesPink.Garden.StateMachine.Config
 import CirclesPink.Garden.StateMachine.Action as CirclesPink.Garden.StateMachine.Action
 import CirclesPink.Garden.StateMachine.Control.EnvControl as CirclesPink.Garden.StateMachine.Control.EnvControl
 import CirclesPink.Garden.StateMachine.Direction as CirclesPink.Garden.StateMachine.Direction
 import CirclesPink.Garden.StateMachine.State as CirclesPink.Garden.StateMachine.State
 import CirclesPink.Garden.StateMachine.State.Dashboard as CirclesPink.Garden.StateMachine.State.Dashboard
+import CirclesPink.Garden.StateMachine.TrackingEvent as CirclesPink.Garden.StateMachine.TrackingEvent
+import CirclesPink.Garden.StateMachine.TrackingResumee as CirclesPink.Garden.StateMachine.TrackingResumee
 import CirclesPink.Garden.TS as CirclesPink.Garden.TS
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
@@ -44,7 +45,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z, M)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -233,6 +234,18 @@ modules =
       join
         [ R.typeAlias "User"
             (Proxy :: _ CirclesPink.Data.User.User)
+        ]
+
+  , "CirclesPink.Garden.StateMachine.TrackingEvent" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingEvent.TrackingEvent)
+        ]
+
+  , "CirclesPink.Garden.StateMachine.TrackingResumee" /\
+      join
+        [ R.typeAlias "Resumee"
+            (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingResumee.Resumee)
         ]
 
   , "CirclesPink.Garden.StateMachine.Direction" /\

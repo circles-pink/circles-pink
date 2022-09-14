@@ -1,7 +1,6 @@
 module PursTsGen.Class.ToTsDef where
 
-import Prelude
-import PursTsGen.Prelude
+import PursTsGen.Prelude (class Generic, type (/\), Argument, Constructor, Maybe(..), NoArguments, Product, Sum, Unit, fold, foldr, pure, show, ($), (+), (/\), (<$>), (<<<), (<>), (=<<))
 
 import Data.Array (nub, (:))
 import Data.Array.NonEmpty (NonEmptyArray, foldl1, toArray)
@@ -44,14 +43,14 @@ instance ToTsDef Int where
   toTsDef _ = pure $ TS.typeDef (TS.name "Int") []
     $ TS.opaque (TS.qualName "PursTsGen_Prim" "Int")
     $ TS.name
-        <$> []
+    <$> []
 
 --------------------------------------------------------------------------------
 
 instance ToTsDef (Effect A) where
   toTsDef _ =
     [ TS.DeclUnsafeInline
-        "type Effect<A> = () => A"
+        "export type Effect<A> = () => A"
     ]
 
 --------------------------------------------------------------------------------
