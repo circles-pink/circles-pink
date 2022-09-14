@@ -90,7 +90,9 @@ export const AskUsername = ({
           <Button
             prio={'high'}
             theme={theme}
-            onClick={() => act(_circlesAction._askUsername(_askUsernameAction._next(unit)))}
+            onClick={() =>
+              act(_circlesAction._askUsername(_askUsernameAction._next(unit)))
+            }
           >
             {t('nextButton')}
           </Button>
@@ -123,6 +125,6 @@ export const mapStatusMessage = (
       onLoading: () => '',
       onSuccess: ({ isValid }) =>
         isValid ? '' : t('askUsername.validation.availFail'),
-      onNotAsked: () => 'black',
+      onNotAsked: () => '',
     })
   );
