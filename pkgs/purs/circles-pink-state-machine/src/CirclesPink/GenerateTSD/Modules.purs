@@ -240,6 +240,7 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingEvent.TrackingEvent)
+        , R.value "encodeJsonTrackingEvent" [] (CirclesPink.Garden.StateMachine.TrackingEvent.encodeJsonTrackingEvent)
         ]
 
   , "CirclesPink.Garden.StateMachine.TrackingResumee" /\
@@ -374,6 +375,10 @@ modules =
             (Proxy :: _ (Data.Either.Either A B))
         , value "either" []
             (Data.Either.either :: _ -> _ -> _ A B -> C)
+        , value "Right" []
+            (Data.Either.Right :: B -> _ A B)
+        , value "Left" []
+            (Data.Either.Left :: A -> _ A B)
         , value "hush" []
             (Data.Either.hush :: _ A B -> _)
         , defPredicateFn "isLeft" []
@@ -416,6 +421,10 @@ modules =
             (Proxy :: _ (Data.Maybe.Maybe A))
         , value "maybe" []
             (Data.Maybe.maybe :: _ -> (A -> B) -> _)
+        , value "Just" []
+            (Data.Maybe.Just :: _ -> _ A)
+        , value "Nothing" []
+            (Data.Maybe.Nothing :: _ A)
         ]
 
   , "Simple.Data.Maybe" /\
