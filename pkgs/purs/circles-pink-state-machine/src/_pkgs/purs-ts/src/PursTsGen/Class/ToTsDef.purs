@@ -1,5 +1,6 @@
 module PursTsGen.Class.ToTsDef where
 
+import Prelude
 import PursTsGen.Prelude
 
 import Data.Array (nub, (:))
@@ -10,6 +11,7 @@ import Data.Nullable (Nullable)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple, fst, snd)
 import Data.Typelevel.Undefined (undefined)
+import Effect (Effect)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
 import PursTsGen.Data.ABC (A(..), B)
@@ -26,23 +28,31 @@ class ToTsDef a where
 instance ToTsDef (Maybe A) where
   toTsDef = genericToTsDef "Maybe"
 
-instance  ToTsDef (Either A B) where
+instance ToTsDef (Either A B) where
   toTsDef = genericToTsDef "Either"
 
-instance  ToTsDef (Tuple A B) where
+instance ToTsDef (Tuple A B) where
   toTsDef = genericToTsDef "Tuple"
 
-instance  ToTsDef Unit where
+instance ToTsDef Unit where
   toTsDef _ = pure $ TS.typeDef (TS.name "Unit") [] TS.undefined
 
-instance  ToTsDef (Nullable A) where
+instance ToTsDef (Nullable A) where
   toTsDef _ = pure $ TS.typeDef (TS.name "Nullable") [] (TS.null ||| toTsType A)
 
-instance  ToTsDef Int where
+instance ToTsDef Int where
   toTsDef _ = pure $ TS.typeDef (TS.name "Int") []
     $ TS.opaque (TS.qualName "PursTsGen_Prim" "Int")
     $ TS.name
-    <$> []
+        <$> []
+
+--------------------------------------------------------------------------------
+
+instance ToTsDef (Effect A) where
+  toTsDef _ =
+    [ TS.DeclUnsafeInline
+        "type Effect<A> = () => A"
+    ]
 
 --------------------------------------------------------------------------------
 -- class GenToTsDefSum
@@ -117,8 +127,8 @@ instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Prod
 -- Utils
 --------------------------------------------------------------------------------
 
-genericToTsDef' :: forall a rep. ToPursType a =>  GenToTsDefSum rep => String -> Proxy a -> Proxy rep -> Array TS.Declaration
-genericToTsDef' name _ _ = 
+genericToTsDef' :: forall a rep. ToPursType a => GenToTsDefSum rep => String -> Proxy a -> Proxy rep -> Array TS.Declaration
+genericToTsDef' name _ _ =
   union : ctorTypes <> ((\f -> f $ toPursType (Proxy :: _ a)) =<< ctors)
   where
   xs = genToTsDefSum name (Proxy :: _ rep)

@@ -9,7 +9,7 @@ module CirclesPink.Garden.StateMachine.TrackingResumee
   , init
   ) where
 
-import Prelude
+import CirclesPink.Prelude
 
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Garden.StateMachine.Action (CirclesAction)
@@ -48,6 +48,21 @@ data StepName
   | Submit
   | Trusts
   | Dashboard
+
+
+instance ToPursNominal StepName where
+  toPursNominal _ = PursNominal "CirclesPink.Garden.StateMachine.TrackingResumee" "StepName"
+
+
+instance ToTsType StepName where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef StepName where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType StepName where
+  toPursType = defaultToPursType' []
+
 
 derive instance Eq StepName
 derive instance Ord StepName

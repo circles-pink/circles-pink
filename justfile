@@ -173,6 +173,7 @@ run-garden_:
 	just spago-build && node -e 'require("./{{PURS_OUTPUT}}/CirclesPink.Garden.ApiScript").main()'
 
 generate-tsd:
+	rm -rf {{PURS_OUTPUT}}}/*/index.d.ts
 	node pkgs/ts/@circles-pink/state-machine/bin/generate-tsd.js --output-dir "{{PURS_OUTPUT}}"
 
 purs-docs:

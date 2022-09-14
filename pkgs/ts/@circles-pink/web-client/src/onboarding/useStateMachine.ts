@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Unit } from '@circles-pink/state-machine/output/Data.Unit';
-import { unit } from '@circles-pink/state-machine/output/Data.Unit';
-import { Effect } from '@circles-pink/state-machine/output/Effect';
+import { Effect, Unit, unit } from '@circles-pink/state-machine/src';
 
 export type StateMachine<S, M> = (
   setState: (st: (orig: S) => S) => Effect<Unit>

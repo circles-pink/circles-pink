@@ -116,3 +116,4 @@ data Declaration
   | DeclValueDef Name Type
   | DeclLineComment String
   | DeclEmptyLine
+  | DeclUnsafeInline String

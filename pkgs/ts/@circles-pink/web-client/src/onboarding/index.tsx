@@ -1,22 +1,6 @@
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
-import {
-  CirclesConfig,
-  mkControl,
-  mkControlTestEnv,
-  // @ts-ignore
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.TS';
-import {
-  CirclesState,
-  init,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State';
-import {
-  decodeJsonResumee,
-  Resumee,
-  init as initResumee,
-  encodeJsonResumee,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee';
 import { either } from '@circles-pink/state-machine/output/Data.Either';
 import { useStateMachine } from './useStateMachine';
 import {
@@ -34,26 +18,17 @@ import {
 // Style
 import { ThemeProvider, ThemeContext, Theme } from '../context/theme';
 import { AnimProvider } from '../context/anim';
-import { CirclesAction } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
-import {
-  TrackingEvent,
-  encodeJsonTrackingEvent,
-} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent';
 
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
-import { Unit, unit } from '@circles-pink/state-machine/output/Data.Unit';
-import { fromFpTsEither } from '../utils/fpTs';
 import * as E from 'fp-ts/Either';
-import { Just, Nothing } from '@circles-pink/state-machine/output/Data.Maybe';
 import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 import { XbgeTrusts } from './views/XbgeTrusts';
-import { Json } from '@circles-pink/state-machine/output/Data.Argonaut.Core';
 import { mkI18n } from '../i18n_custom';
 import { Resource } from 'i18next';
-import { parseAddress } from '@circles-pink/state-machine/output/CirclesPink.Data.Address';
 import { UserConfig } from '../types/user-config';
+import { CirclesState } from '@circles-pink/state-machine/src';
 
 type Language = 'en' | 'de';
 

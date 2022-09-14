@@ -6,7 +6,7 @@ import CirclesPink.Data.PrivateKey.Type as CirclesPink.Data.PrivateKey.Type
 import CirclesPink.GenerateTSD.Wrappers as W
 import Data.Argonaut (Json, JsonDecodeError)
 import Data.BN (BN)
-import Data.DateTime.Instant as Data.DateTime.Instant
+import Data.DateTime.Instant (Instant)
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.HTTP.Method (Method)
@@ -71,8 +71,7 @@ else instance UnsafeReplace Json (Wrap Json)
 
 else instance UnsafeReplace a a' => UnsafeReplace (Object a) (Wrap (Object a'))
 
-else instance
-  UnsafeReplace Data.DateTime.Instant.Instant W.Instant
+else instance UnsafeReplace Instant (Wrap Instant)
 
 else instance (UnsafeReplace a a', UnsafeReplace b b') => UnsafeReplace (Function a b) (Function a' b')
 
@@ -223,6 +222,24 @@ instance ToTsDef (Wrap JsonDecodeError) where
 
 instance ToPursType (Wrap JsonDecodeError) where
   toPursType = defaultToPursType' []
+
+
+--------------------------------------------------------------------------------
+
+
+instance ToPursNominal (Wrap Instant) where
+  toPursNominal _ = PursNominal "Data.DateTime.Instant" "Instant"
+
+instance ToTsType (Wrap Instant) where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef (Wrap Instant) where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType (Wrap Instant) where
+  toPursType = defaultToPursType' []
+
+
 
 --------------------------------------------------------------------------------
 
