@@ -7,7 +7,6 @@ import {
   DashboardState,
   mapArray,
   Maybe,
-  Pair,
   TrustConnection,
   TrustNode,
   unTrustState,
@@ -55,20 +54,20 @@ type RowProps = {
 } & UserSearchProps;
 
 const Row = (props: RowProps) => {
-  const { centerAddress, userIdent, trusts, onAddTrust } = props;
+  const { centerAddress, userIdent, trusts } = props;
 
   const targetAddress = _UserIdent.getAddress(userIdent);
 
   const outgoingEdge = pipe(
     trusts,
-    lookupEdge(Pair.create(centerAddress)(targetAddress)),
+    lookupEdge(_Pair.Pair(centerAddress)(targetAddress)),
     hush,
     _Nullable.toNullable
   );
 
   const incomingEdge = pipe(
     trusts,
-    lookupEdge(Pair.create(targetAddress)(centerAddress)),
+    lookupEdge(_Pair.Pair(targetAddress)(centerAddress)),
     hush,
     _Nullable.toNullable
   );

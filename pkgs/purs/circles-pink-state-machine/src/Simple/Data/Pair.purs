@@ -1,6 +1,5 @@
 module Simple.Data.Pair where
 
-
 import Data.Pair (Pair(..))
 
 unPair :: forall a z. (a -> a -> z) -> Pair a -> z

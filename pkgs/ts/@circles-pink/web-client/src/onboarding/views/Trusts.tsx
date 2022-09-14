@@ -49,12 +49,12 @@ type FinalizeMethod = 'collectTrusts' | 'fundSafe';
 // Trusts
 // -----------------------------------------------------------------------------
 
+const { _circlesAction, _trustsAction } = _StateMachine;
+
 type TrustsProps = {
   state: TrustState;
   act: (ac: CirclesAction) => void;
 };
-
-const { _circlesAction, _trustsAction } = _StateMachine;
 
 export const Trusts = ({ state, act }: TrustsProps): ReactElement => {
   const [theme] = useContext(ThemeContext);
