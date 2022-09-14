@@ -3,12 +3,10 @@ module CirclesPink.GenerateTSD.Wrappers
   , NeighborConnectivity(..)
   , type (:*:)
   , type (:+:)
-  )
-  where
+  ) where
 
 import Prelude
 
-import Data.DateTime.Instant as DT
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.IxGraph as Data.IxGraph
 import Data.Newtype (class Newtype)

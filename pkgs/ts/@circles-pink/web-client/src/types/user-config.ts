@@ -9,5 +9,7 @@ export type UserConfig = {
   sharingFeature: ReactElement | null;
   buyVoucherEurLimit: number;
   shadowFriends?: Array<string>;
+  safeAddress?: string;
   xbgeSafeAddress?: string;
+  strictMode?: boolean;
 };

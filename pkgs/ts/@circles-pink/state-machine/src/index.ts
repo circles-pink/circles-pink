@@ -1,6 +1,7 @@
 // import * as Data_Array from "@circles-pink/state-machine/output/Data.Array";
 import * as Simple_Data_Array from "@circles-pink/state-machine/output/Simple.Data.Array";
 import * as Data_Either from "@circles-pink/state-machine/output/Data.Either";
+import * as Simple_Data_Either from "@circles-pink/state-machine/output/Simple.Data.Either";
 import * as Data_Nullable from "@circles-pink/state-machine/output/Data.Nullable";
 import * as Data_Maybe from "@circles-pink/state-machine/output/Data.Maybe";
 import * as Data_Tuple from "@circles-pink/state-machine/output/Data.Tuple";
@@ -23,7 +24,7 @@ import * as CirclesPink_Garden_StateMachine_State from "@circles-pink/state-mach
 import * as CirclesPink_Garden_StateMachine_Action from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 import * as CirclesPink_Garden_StateMachine_TrackingEvent from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent";
 import * as CirclesPink_Garden_StateMachine_TrackingResumee from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee";
-
+import * as CirclesPink_TS from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 import * as RemoteReport from "@circles-pink/state-machine/output/RemoteReport";
 import * as VoucherServer from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
@@ -49,6 +50,7 @@ export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.D
 export type { TrackingEvent } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent";
 export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
 export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
+export type { FetchImpl } from "@circles-pink/state-machine/output/Milkis.Impl";
 export type {
   CirclesState,
   DebugState,
@@ -103,7 +105,7 @@ export const _Mnemonic = CirclesPink_Data_Mnemonic;
 export const _RemoteData = RemoteData;
 export const _IxGraph = Data_IxGraph;
 export const _TrustState = CirclesPink_Data_TrustState;
-export const _Either = Data_Either;
+export const _Either = { ...Data_Either, ...Simple_Data_Either };
 export const _Nullable = Data_Nullable;
 export const _TrustConnection = CirclesPink_Data_TrustConnection;
 export const _TrustNode = CirclesPink_Data_TrustNode;
@@ -117,3 +119,4 @@ export const _StateMachine = {
   ...CirclesPink_Garden_StateMachine_Action,
 };
 export const _TrackingResumee = CirclesPink_Garden_StateMachine_TrackingResumee;
+export const _TS = CirclesPink_TS;

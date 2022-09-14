@@ -1,7 +1,6 @@
 import React, { ReactElement, useContext, useEffect } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import i18n from '../i18n';
-import { either } from '@circles-pink/state-machine/output/Data.Either';
 import { useStateMachine } from './useStateMachine';
 import {
   AskUsername,
@@ -22,7 +21,6 @@ import { AnimProvider } from '../context/anim';
 import { env } from '../env';
 import { DebugContext, DebugProvider } from '../context/debug';
 import tw, { css, styled } from 'twin.macro';
-import * as E from 'fp-ts/Either';
 import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 import { XbgeTrusts } from './views/XbgeTrusts';
 import { mkI18n } from '../i18n_custom';
@@ -42,7 +40,10 @@ import {
   _TrackingEvent,
   Maybe,
   _TrackingResumee,
-  Json,
+  Address,
+  _Address,
+  _StateMachine,
+  _TS,
 } from '@circles-pink/state-machine/src';
 import {
   _circlesAction,
@@ -51,6 +52,7 @@ import {
 import { Resumee } from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee';
 import { unsafeUnkownToJson } from '../unsafe-as';
 import { pipe } from 'fp-ts/lib/function';
+import { fromFetchImplNative } from '../safe-as';
 
 type Language = 'en' | 'de';
 
@@ -87,17 +89,14 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
-const defaultLeftExtractEmail = _Either.Left('hello@world.de');
-
-type CirclesConfigResolved =
-  | { extractEmail: { _tag: 'Left'; left: string } }
-  | { extractEmail: { _tag: 'Right'; right: (_: string) => () => Unit } };
-
 const getSkipStates = (cfg: UserConfig): CirclesState['type'][] => {
   const toSkip: CirclesState['type'][] = [];
-  if ((cfg as unknown as CirclesConfigResolved).extractEmail._tag === 'Left') {
-    toSkip.push('askEmail');
-  }
+  _Either.unEither({
+    onLeft: () => {
+      toSkip.push('askEmail');
+    },
+    onRight: () => {},
+  });
   return toSkip;
 };
 
@@ -205,60 +204,42 @@ const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
     uCfg.onTrackingResumee
       ? _Maybe.mkMaybe.mkJust(f => () => {
           if (!uCfg?.onTrackingResumee) return;
-          uCfg.onTrackingResumee((j : unknown) => {
-        
-             
+          uCfg.onTrackingResumee((j: unknown) => {
             if (!j) {
-
               const resumee_ = f(_TrackingResumee.init);
-              const resumee_encoded = _TrackingResumee.encodeJsonResumee(resumee_);
+              const resumee_encoded =
+                _TrackingResumee.encodeJsonResumee(resumee_);
               return resumee_encoded;
             }
 
             const r = _TrackingResumee.decodeJsonResumee(unsafeUnkownToJson(j));
 
-            pipe(r, _Either.unEither())
-
-            return ()
-
-            return (either as any)(() => {
-              throw new Error('Decode error') as any;
-            })((ok: Resumee) => {
-              const result = f(ok);
-              const encodedResult = encodeJsonResumee(result);
-              return encodedResult;
-            })(r);
+            return pipe(
+              r,
+              _Either.unEither({
+                onLeft: () => {
+                  throw new Error('Decode error');
+                },
+                onRight: ok => pipe(ok, f, _TrackingResumee.encodeJsonResumee),
+              })
+            );
           });
         })
+      : _Maybe.mkMaybe.mkNothing(unit);
+
+  const safeAddress: Maybe<Address> =
+    typeof uCfg.safeAddress === 'string'
+      ? _Address.parseAddress(uCfg.safeAddress)
       : _Maybe.mkMaybe.mkNothing(unit);
 
   return {
     extractEmail,
     onTrackingEvent,
     onTrackingResumee,
-    // safeAddress,
-    // strictMode,
+    safeAddress,
+    strictMode: !!uCfg.strictMode,
   };
 };
-
-// const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
-//   if (typeof uCfg.email === 'string') {
-//     return {
-//       extractEmail: _Either.Left(uCfg.email),
-//     };
-//   }
-
-//   return {
-//     extractEmail: fromFpTsEither(
-//       E.right((email: string) => () => {
-//         if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
-//           uCfg.email(email);
-//         }
-//         return unit;
-//       })
-//     ),
-//   };
-// };
 
 const OnboardingContent = ({
   initState,
@@ -272,57 +253,33 @@ const OnboardingContent = ({
   xbgeCampaign = false,
   testEnv = false,
   translations,
-  sharingFeature,
+  sharingFeature = null,
   safeAddress,
   strictMode = false,
   buyVoucherEurLimit = 70,
   shadowFriends,
   xbgeSafeAddress,
 }: OnboardingProps): ReactElement => {
-  const userConfig: UserConfig = {
+  const userProps = {
     email,
     onTrackingEvent,
     voucherShopEnabled,
-  };
-
-  const cfg_ = mkCfg(userConfig);
-
-  const cfg = {
-    ...userConfig,
-    ...cfg_,
-    onTrackingEvent: onTrackingEvent
-      ? Just((x: TrackingEvent) => () => {
-          if (!userConfig?.onTrackingEvent) return;
-          return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
-        })
-      : Nothing.value,
-    onTrackingResumee: onTrackingResumee
-      ? Just((f: (r: Resumee) => Resumee) => () => {
-          onTrackingResumee((j : unknown) => {
-            if (!j) {
-              const resumee_ = f(_TrackingResumee.init);
-              const resumee_encoded = _TrackingResumee.encodeJsonResumee(resumee_);
-              return resumee_encoded;
-            }
-            const r = decodeJsonResumee(j as Json);
-            return (either as any)(() => {
-              throw new Error('Decode error') as any;
-            })((ok: Resumee) => {
-              const result = f(ok);
-              const encodedResult = encodeJsonResumee(result);
-              return encodedResult;
-            })(r);
-          });
-        })
-      : Nothing.value,
-    safeAddress: safeAddress ? parseAddress(safeAddress) : Nothing.value,
+    safeAddress,
     strictMode,
+    xbgeCampaign,
+    sharingFeature,
+    buyVoucherEurLimit,
+    shadowFriends,
+    xbgeSafeAddress,
   };
+  const cfg = mkCfg(userProps);
 
-  const control = testEnv ? mkControlTestEnv : mkControl(env)(cfg);
+  const control = testEnv
+    ? _TS.mkControlTestEnv
+    : _TS.mkControl(fromFetchImplNative(window.fetch))(env)(cfg);
 
   const [state, act] = (useStateMachine as any)(
-    (initState as unknown as CirclesState) || (init as unknown as CirclesState),
+    (initState as unknown as CirclesState) || _StateMachine.initUserData,
     control
   );
   const [_theme, setTheme] = useContext(ThemeContext);
@@ -342,16 +299,7 @@ const OnboardingContent = ({
     <AnimProvider state={state}>
       <I18nextProvider i18n={customI18n}>
         <DebugProvider>
-          <View
-            state={state}
-            act={act}
-            cfg={cfg}
-            xbgeCampaign={xbgeCampaign}
-            sharingFeature={sharingFeature || null}
-            buyVoucherEurLimit={buyVoucherEurLimit}
-            shadowFriends={shadowFriends}
-            xbgeSafeAddress={xbgeSafeAddress}
-          />
+          <View state={state} act={act} cfg={userProps} />
         </DebugProvider>
       </I18nextProvider>
     </AnimProvider>

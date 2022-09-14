@@ -26,6 +26,7 @@ module CirclesPink.Garden.StateMachine.State
   , init
   , initDebug
   , initLanding
+  , initUserData
   , module Exp
   ) where
 
@@ -157,6 +158,9 @@ init =
     , privateKey: Nothing
     , submitResult: _notAsked unit
     }
+
+initUserData :: CirclesState
+initUserData = init
 
 initDebug :: forall v. Variant (debug :: DebugState | v)
 initDebug =

@@ -10,7 +10,15 @@ const envDefault = {
   gardenEthereumNodeWebSocket: 'wss://dark-frosty-field.xdai.quiknode.pro',
   voucherServerHost: 'https://voucher-server.circles.pink',
   xbgeSafeAddress: '0',
-  isDev : false,
+  isDev: false,
+};
+
+const foo = (x: string | undefined): boolean => {
+  if (typeof x === 'string') {
+    if (x === 'true') return true;
+    if (x === 'false') return false;
+  }
+  return false;
 };
 
 const envRaw = {
@@ -25,7 +33,7 @@ const envRaw = {
   gardenEthereumNodeWebSocket: process.env.STORYBOOK_GARDEN_ETHEREUM_NODE_WS,
   voucherServerHost: process.env.STORYBOOK_VOUCHER_SERVER_HOST,
   xbgeSafeAddress: process.env.STORYBOOK_XBGE_SAFE_ADDRESS,
-  isDev : process.env.STORYBOOK_IS_DEV
+  isDev: foo(process.env.STORYBOOK_IS_DEV),
 };
 
 type RemoveUndefined<T> = { [key in keyof T]: Exclude<T[key], undefined> };

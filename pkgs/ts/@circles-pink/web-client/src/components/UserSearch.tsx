@@ -1,6 +1,5 @@
 import { pipe } from 'fp-ts/lib/function';
 import React, { ReactElement, SetStateAction, useState } from 'react';
-import { isCaseV, matchV } from '../purs-util';
 import {
   Address,
   CirclesGraph,
@@ -248,38 +247,24 @@ export const UserSearch = (props: UserSearchProps) => {
 const getUsers = (
   userSearchResult: DashboardState['userSearchResult']
 ): readonly UserIdent[] => {
-  const userSearchResult_ = _RemoteData.unwrap(userSearchResult);
-
-  const users = matchV(userSearchResult_)({
-    notAsked: () => [],
-    failure: () => [],
-    success: ({ data }) => data,
-    loading: ({ previousData }) =>
-      pipe(
-        previousData,
-        _Maybe.unMaybe({
-          onJust: users => users,
-          onNothing: () => [],
-        })
-      ),
-  });
+  const users = pipe(
+    userSearchResult,
+    _RemoteData.unRemoteData({
+      onNotAsked: () => [],
+      onFailure: () => [],
+      onSuccess: ({ data }) => data,
+      onLoading: ({ previousData }) =>
+        pipe(
+          previousData,
+          _Maybe.unMaybe({
+            onJust: users => users,
+            onNothing: () => [],
+          })
+        ),
+    })
+  );
 
   return mapArray(_UserIdent.fromUser)(users);
-};
-
-const isTrusting = (tc: Maybe<TrustConnection>): boolean => {
-  const _tc = pipe(tc, _Nullable.toNullable);
-  if (!_tc) return false;
-
-  const trustState = pipe(
-    _tc,
-    _TrustConnection.unTrustConnection(() => r => r)
-  );
-  const trustState_ = unTrustState(trustState);
-
-  if (isCaseV('trusted')(trustState_)) return false;
-
-  return true;
 };
 
 const lookupEdge = _IxGraph.lookupEdge(_Address.ordAddress);
