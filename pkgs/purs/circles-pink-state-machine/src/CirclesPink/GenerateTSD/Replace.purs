@@ -70,6 +70,8 @@ else instance UnsafeReplace Network.Ethereum.Core.Signatures.Address Address
 
 else instance UnsafeReplace Method (Wrap Method)
 
+else instance UnsafeReplace CirclesConfigEffect (Wrap CirclesConfigEffect)
+
 else instance UnsafeReplace Json (Wrap Json)
 
 else instance UnsafeReplace a a' => UnsafeReplace (Object a) (Wrap (Object a'))
@@ -184,9 +186,7 @@ instance ToTsDef (Wrap Json) where
 instance ToPursType (Wrap Json) where
   toPursType = defaultToPursType' []
 
-
 --------------------------------------------------------------------------------
-
 
 instance ToTsType (Wrap CirclesConfigEffect) where
   toTsType (Wrap (CirclesConfigEffect (CirclesConfig r))) = toTsType $ unsafeReplace r
@@ -236,9 +236,7 @@ instance ToTsDef (Wrap JsonDecodeError) where
 instance ToPursType (Wrap JsonDecodeError) where
   toPursType = defaultToPursType' []
 
-
 --------------------------------------------------------------------------------
-
 
 instance ToPursNominal (Wrap Instant) where
   toPursNominal _ = PursNominal "Data.DateTime.Instant" "Instant"
@@ -251,8 +249,6 @@ instance ToTsDef (Wrap Instant) where
 
 instance ToPursType (Wrap Instant) where
   toPursType = defaultToPursType' []
-
-
 
 --------------------------------------------------------------------------------
 

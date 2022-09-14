@@ -28,7 +28,24 @@ import { XbgeTrusts } from './views/XbgeTrusts';
 import { mkI18n } from '../i18n_custom';
 import { Resource } from 'i18next';
 import { UserConfig } from '../types/user-config';
-import { CirclesState } from '@circles-pink/state-machine/src';
+import {
+  CirclesAction,
+  CirclesConfigEffect,
+  CirclesState,
+  Unit,
+  unit,
+  _Either,
+  Either,
+  Effect,
+  _Maybe,
+  TrackingEvent,
+  _TrackingEvent,
+  Maybe,
+} from '@circles-pink/state-machine/src';
+import {
+  _circlesAction,
+  _dashboardAction,
+} from '@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action';
 
 type Language = 'en' | 'de';
 
@@ -65,25 +82,13 @@ export const Onboarding = (props: OnboardingProps) => {
   );
 };
 
-const cfgDefaultRight: CirclesConfig = {
-  extractEmail: fromFpTsEither(
-    E.right((email: string) => () => {
-      // Save the email somewhere...
-      console.log(email);
-      return unit;
-    })
-  ),
-};
-
-const cfgDefaultLeft: CirclesConfig = {
-  extractEmail: fromFpTsEither(E.left('hello@world.de')),
-};
+const defaultLeftExtractEmail = _Either.Left('hello@world.de');
 
 type CirclesConfigResolved =
   | { extractEmail: { _tag: 'Left'; left: string } }
   | { extractEmail: { _tag: 'Right'; right: (_: string) => () => Unit } };
 
-const getSkipStates = (cfg: CirclesConfig): CirclesState['type'][] => {
+const getSkipStates = (cfg: UserConfig): CirclesState['type'][] => {
   const toSkip: CirclesState['type'][] = [];
   if ((cfg as unknown as CirclesConfigResolved).extractEmail._tag === 'Left') {
     toSkip.push('askEmail');
@@ -93,25 +98,11 @@ const getSkipStates = (cfg: CirclesConfig): CirclesState['type'][] => {
 
 type ViewProps = {
   state: CirclesState;
-  act: (m: CirclesAction) => void;
+  act: (ac: CirclesAction) => void;
   cfg: UserConfig;
-  xbgeCampaign: boolean;
-  sharingFeature: ReactElement | null;
-  buyVoucherEurLimit: number;
-  shadowFriends?: Array<string>;
-  xbgeSafeAddress?: string;
 };
 
-const View = ({
-  state,
-  act,
-  cfg,
-  xbgeCampaign,
-  sharingFeature,
-  buyVoucherEurLimit,
-  shadowFriends,
-  xbgeSafeAddress,
-}: ViewProps): ReactElement | null => {
+const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -138,36 +129,36 @@ const View = ({
     case 'login':
       return <Login state={state.value} act={act} />;
     case 'trusts':
-      if (xbgeCampaign) {
+      if (cfg.xbgeCampaign) {
         return (
           <XbgeTrusts
             state={state.value}
             act={act}
-            sharingFeature={sharingFeature}
+            sharingFeature={cfg.sharingFeature}
           />
         );
       }
       return <Trusts state={state.value} act={act} />;
     case 'dashboard':
-      if (xbgeCampaign) {
+      if (cfg.xbgeCampaign) {
         return (
           <XbgeDashboard
             state={state.value}
-            act={act}
+            act={da => act(_circlesAction._dashboard(da))}
             cfg={cfg}
-            sharingFeature={sharingFeature}
-            buyVoucherEurLimit={buyVoucherEurLimit}
-            shadowFriends={shadowFriends}
-            xbgeSafeAddress={xbgeSafeAddress}
+            sharingFeature={cfg.sharingFeature}
+            buyVoucherEurLimit={cfg.buyVoucherEurLimit}
+            shadowFriends={cfg.shadowFriends}
+            xbgeSafeAddress={cfg.xbgeSafeAddress}
           />
         );
       }
       return (
         <Dashboard
           state={state.value}
-          act={act}
+          act={da => act(_circlesAction._dashboard(da))}
           cfg={cfg}
-          buyVoucherEurLimit={buyVoucherEurLimit}
+          buyVoucherEurLimit={cfg.buyVoucherEurLimit}
         />
       );
     default:
@@ -175,24 +166,63 @@ const View = ({
   }
 };
 
-const mkCfg = (uCfg: UserConfig): CirclesConfig => {
-  if (typeof uCfg.email === 'string') {
-    return {
-      extractEmail: fromFpTsEither(E.left(uCfg.email)),
-    };
-  }
+const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
+  const defaultRightExtractEmail: Either<string, (_: string) => Effect<Unit>> =
+    _Either.Right((email: string) => () => {
+      // Save the email somewhere...
+      console.log(email);
+      return unit;
+    });
+
+  const extractEmail: Either<string, (_: string) => Effect<Unit>> =
+    typeof uCfg.email === 'string'
+      ? _Either.Left(uCfg.email)
+      : typeof uCfg.email === 'function'
+      ? _Either.Right((email: string) => () => {
+          if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
+            uCfg.email(email);
+          }
+          return unit;
+        })
+      : defaultRightExtractEmail;
+
+  const onTrackingEvent: Maybe<(_: TrackingEvent) => Effect<Unit>> =
+    uCfg.onTrackingEvent
+      ? _Maybe.Just((x: TrackingEvent) => () => {
+          if (!uCfg?.onTrackingEvent) return;
+          return uCfg?.onTrackingEvent(
+            _TrackingEvent.encodeJsonTrackingEvent(x)
+          );
+        })
+      : _Maybe.Nothing;
 
   return {
-    extractEmail: fromFpTsEither(
-      E.right((email: string) => () => {
-        if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
-          uCfg.email(email);
-        }
-        return unit;
-      })
-    ),
+    extractEmail,
+    onTrackingEvent,
+    // onTrackingResumee,
+    // safeAddress,
+    // strictMode,
   };
 };
+
+// const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
+//   if (typeof uCfg.email === 'string') {
+//     return {
+//       extractEmail: _Either.Left(uCfg.email),
+//     };
+//   }
+
+//   return {
+//     extractEmail: fromFpTsEither(
+//       E.right((email: string) => () => {
+//         if (uCfg && uCfg.email && typeof uCfg.email !== 'string') {
+//           uCfg.email(email);
+//         }
+//         return unit;
+//       })
+//     ),
+//   };
+// };
 
 const OnboardingContent = ({
   initState,
@@ -219,19 +249,19 @@ const OnboardingContent = ({
     voucherShopEnabled,
   };
 
-  const cfg_ = email ? mkCfg(userConfig) : cfgDefaultRight;
+  const cfg_ = mkCfg(userConfig);
 
   const cfg = {
     ...userConfig,
     ...cfg_,
     onTrackingEvent: onTrackingEvent
-      ? Just.create((x: TrackingEvent) => () => {
+      ? Just((x: TrackingEvent) => () => {
           if (!userConfig?.onTrackingEvent) return;
           return userConfig?.onTrackingEvent(encodeJsonTrackingEvent(x));
         })
       : Nothing.value,
     onTrackingResumee: onTrackingResumee
-      ? Just.create((f: (r: Resumee) => Resumee) => () => {
+      ? Just((f: (r: Resumee) => Resumee) => () => {
           onTrackingResumee(j => {
             if (!j) {
               const resumee_ = f(initResumee);

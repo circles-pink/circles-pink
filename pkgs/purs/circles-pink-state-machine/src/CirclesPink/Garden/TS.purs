@@ -2,8 +2,7 @@ module CirclesPink.Garden.TS
   ( CirclesConfigEffect(..)
   , mkControl
   , mkControlTestEnv
-  )
-  where
+  ) where
 
 import CirclesPink.Prelude
 
@@ -72,18 +71,4 @@ mkControlTestEnv setState st ac =
     , safeAddress: Nothing
     , strictMode: false
     }
-
-
-
-instance ToPursNominal CirclesConfigEffect where
-  toPursNominal _ = PursNominal "CirclesPink.Garden.TS" "CirclesConfigEffect"
-
-instance ToTsType CirclesConfigEffect where
-  toTsType = defaultToTsType' []
-
-instance ToTsDef CirclesConfigEffect where
-  toTsDef = defaultToTsDef' []
-
-instance ToPursType CirclesConfigEffect where
-  toPursType = defaultToPursType' []
 

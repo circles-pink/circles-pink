@@ -1,16 +1,16 @@
 module PursTsGen.Class.ToTsDef where
 
-import PursTsGen.Prelude (class Generic, type (/\), Argument, Constructor, Maybe(..), NoArguments, Product, Sum, Unit, fold, foldr, pure, show, ($), (+), (/\), (<$>), (<<<), (<>), (=<<))
-
 import Data.Array (nub, (:))
 import Data.Array.NonEmpty (NonEmptyArray, foldl1, toArray)
 import Data.Array.NonEmpty as NEA
 import Data.Either (Either)
 import Data.Nullable (Nullable)
+import Data.String (Pattern(..), Replacement(..), replaceAll)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple, fst, snd)
 import Data.Typelevel.Undefined (undefined)
 import Effect (Effect)
+import PursTsGen.Class.ToPursNominal (PursNominal(..), toPursNominal)
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
 import PursTsGen.Data.ABC (A(..), B)
@@ -18,6 +18,7 @@ import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL ((|||))
 import PursTsGen.Lang.TypeScript.DSL as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveType)
+import PursTsGen.Prelude (class Generic, type (/\), Argument, Constructor, Maybe(..), NoArguments, Product, Sum, Unit, fold, foldr, pure, show, ($), (+), (/\), (<$>), (<<<), (<>), (=<<))
 import Type.Proxy (Proxy(..))
 
 class ToTsDef :: forall k. k -> Constraint
@@ -25,13 +26,22 @@ class ToTsDef a where
   toTsDef :: Proxy a -> Array TS.Declaration
 
 instance ToTsDef (Maybe A) where
-  toTsDef = genericToTsDef "Maybe"
+  toTsDef x = pure $ TS.typeDef (TS.name n) []
+    $ TS.opaque (TS.qualName (dotsToLodashes m) n) [ TS.name "A" ]
+    where
+    PursNominal m n = toPursNominal x
 
 instance ToTsDef (Either A B) where
-  toTsDef = genericToTsDef "Either"
+  toTsDef x = pure $ TS.typeDef (TS.name n) []
+    $ TS.opaque (TS.qualName (dotsToLodashes m) n) [ TS.name "A", TS.name "B" ]
+    where
+    PursNominal m n = toPursNominal x
 
 instance ToTsDef (Tuple A B) where
-  toTsDef = genericToTsDef "Tuple"
+  toTsDef x = pure $ TS.typeDef (TS.name n) []
+    $ TS.opaque (TS.qualName (dotsToLodashes m) n) [ TS.name "A", TS.name "B" ]
+    where
+    PursNominal m n = toPursNominal x
 
 instance ToTsDef Unit where
   toTsDef _ = pure $ TS.typeDef (TS.name "Unit") [] TS.undefined
@@ -137,6 +147,9 @@ genericToTsDef' name _ _ =
 
 genericToTsDef :: forall a rep. ToPursType a => Generic a rep => GenToTsDefSum rep => String -> Proxy a -> Array TS.Declaration
 genericToTsDef name _ = genericToTsDef' name (Proxy :: _ a) (Proxy :: _ rep)
+
+dotsToLodashes :: String -> String
+dotsToLodashes = replaceAll (Pattern ".") (Replacement "_")
 
 --------------------------------------------------------------------------------
 -- Spec

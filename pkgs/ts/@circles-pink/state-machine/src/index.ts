@@ -21,9 +21,14 @@ import * as CirclesPink_Data_TrustNode from "@circles-pink/state-machine/output/
 import * as CirclesPink_Garden_StateMachine_Direction from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 import * as CirclesPink_Garden_StateMachine_State from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
 import * as CirclesPink_Garden_StateMachine_Action from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
+import * as CirclesPink_Garden_StateMachine_TrackingEvent from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent";
 import * as Data_Unit from "@circles-pink/state-machine/output/Data.Unit";
 import * as RemoteReport from "@circles-pink/state-machine/output/RemoteReport";
 import * as VoucherServer from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
+
+// -----------------------------------------------------------------------------
+// Type exports
+// -----------------------------------------------------------------------------
 
 export type { Effect } from "@circles-pink/state-machine/output/Effect";
 export type { Unit } from "@circles-pink/state-machine/output/Data.Unit";
@@ -39,6 +44,7 @@ export type { IxGraph } from "@circles-pink/state-machine/output/Data.IxGraph";
 export type { TrustState as TrustStateType } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
 export type { TrustConnection } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustConnection";
 export type { TrustNode } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustNode";
+export type { TrackingEvent } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingEvent";
 export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
 export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 export type {
@@ -63,18 +69,19 @@ export type {
   VoucherOffer,
 } from "@circles-pink/state-machine/output/VoucherServer.Spec.Types";
 export type { Pair } from "@circles-pink/state-machine/output/Data.Pair";
-
-export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
-export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
-
 export type {
   CirclesGraph,
   VouchersResult,
   VoucherProvidersResult,
 } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State.Dashboard";
-
 export type { CirclesConfigEffect } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 
+// -----------------------------------------------------------------------------
+// Value exports
+// -----------------------------------------------------------------------------
+
+export { unTrustState } from "@circles-pink/state-machine/output/CirclesPink.Data.TrustState";
+export { mapArray } from "@circles-pink/state-machine/output/Simple.Data.Array";
 export { unit } from "@circles-pink/state-machine/output/Data.Unit";
 
 // export const _Array = Data_Array;
@@ -100,6 +107,7 @@ export const _Unit = Data_Unit;
 export const _Direction = CirclesPink_Garden_StateMachine_Direction;
 export const _RemoteReport = RemoteReport;
 export const _VoucherServer = VoucherServer;
+export const _TrackingEvent = CirclesPink_Garden_StateMachine_TrackingEvent;
 export const _StateMachine = {
   ...CirclesPink_Garden_StateMachine_State,
   ...CirclesPink_Garden_StateMachine_Action,
