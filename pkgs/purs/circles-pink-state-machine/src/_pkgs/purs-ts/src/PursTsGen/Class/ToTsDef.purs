@@ -15,7 +15,7 @@ import PursTsGen.Class.ToPursType (class ToPursType, toPursType)
 import PursTsGen.Class.ToTsType (class ToTsType, toTsType)
 import PursTsGen.Data.ABC (A(..), B)
 import PursTsGen.Lang.PureScript.Type as PS
-import PursTsGen.Lang.TypeScript.DSL ((|||))
+import PursTsGen.Lang.TypeScript.DSL (Type(..), (|||))
 import PursTsGen.Lang.TypeScript.DSL as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveType)
 import PursTsGen.Prelude (class Generic, type (/\), Argument, Constructor, Maybe(..), NoArguments, Product, Sum, Unit, fold, foldr, pure, show, ($), (+), (/\), (<$>), (<<<), (<>), (=<<))
@@ -44,7 +44,7 @@ instance ToTsDef (Tuple A B) where
     PursNominal m n = toPursNominal x
 
 instance ToTsDef Unit where
-  toTsDef _ = pure $ TS.typeDef (TS.name "Unit") [] TS.undefined
+  toTsDef _ = pure $ TS.typeDef (TS.name "Unit") [] $ TypeUnsafeInline "void"
 
 instance ToTsDef (Nullable A) where
   toTsDef _ = pure $ TS.typeDef (TS.name "Nullable") [] (TS.null ||| toTsType A)
