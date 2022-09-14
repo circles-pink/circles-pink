@@ -11,6 +11,7 @@ import Data.Tuple (Tuple)
 import Data.Tuple.Nested (type (/\))
 import Data.Typelevel.Undefined (undefined)
 import Data.Variant (Variant)
+import Effect (Effect)
 import Prim.RowList (class RowToList, Cons, Nil, RowList)
 import PursTsGen.Data.ABC (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)
 import PursTsGen.Lang.TypeScript.DSL ((|||))
@@ -66,6 +67,10 @@ instance toTsTypeUnit :: ToTsType Unit where
 
 instance toTsTypeNullable :: ToTsType a => ToTsType (Nullable a) where
   toTsType _ = TS.null ||| toTsType (Proxy :: _ a)
+
+instance ToTsType a => ToTsType (Effect a) where
+  toTsType _ =
+    TS.TypeFunction mempty [] (toTsType (Proxy :: _ a))
 
 instance ToTsType A where
   toTsType _ = TS.var $ TS.name "A"
@@ -209,3 +214,4 @@ else instance toTsPredicateFnRec :: (ToTsType a, ToTsPredFn b) => ToTsPredFn (a 
   toTsPredFn t _ = TS.function_
     [ TS.keyVal "_" $ toTsType (undefined :: a) ]
     (toTsPredFn t (undefined :: b))
+
