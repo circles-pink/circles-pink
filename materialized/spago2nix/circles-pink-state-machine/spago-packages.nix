@@ -525,8 +525,6 @@ let
         installPhase = "ln -s $src $out";
       };
 
-  # fp-ts is a Local package in (Local "./../../../pkgs/purs/fp-ts")
-
     "free" = pkgs.stdenv.mkDerivation {
         name = "free";
         version = "v6.2.0";

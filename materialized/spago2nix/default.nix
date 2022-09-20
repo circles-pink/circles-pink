@@ -19,11 +19,6 @@
     meta = builtins.fromJSON (builtins.readFile ./debug-extra/meta.json);
     location = ../../pkgs/purs/debug-extra;
   };
-  fp-ts = {
-    spagoPkgs = import ./fp-ts/spago-packages.nix;
-    meta = builtins.fromJSON (builtins.readFile ./fp-ts/meta.json);
-    location = ../../pkgs/purs/fp-ts;
-  };
   graph = {
     spagoPkgs = import ./graph/spago-packages.nix;
     meta = builtins.fromJSON (builtins.readFile ./graph/meta.json);
