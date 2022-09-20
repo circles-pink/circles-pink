@@ -67,6 +67,7 @@ import { Frame } from '../../../components/Frame';
 import { UserConfig } from '../../../types/user-config';
 import { pipe } from 'fp-ts/lib/function';
 import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
+import { fromNativeBN, toNativeBN } from '../../../safe-as';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -317,7 +318,9 @@ export const XbgeDashboard = ({
         onLoading: () => {},
         onFailure: () => {},
         onSuccess: x => {
-          setUserBalance(parseFloat(displayBalance(x.data, 'TIME-CIRCLES')));
+          setUserBalance(
+            parseFloat(displayBalance(toNativeBN(x.data), 'TIME-CIRCLES'))
+          );
         },
       })
     );
