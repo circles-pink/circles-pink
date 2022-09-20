@@ -2,8 +2,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
 import { Onboarding } from "@circles-pink/web-client/src/onboarding";
 import { onboardingArgs } from "./onboardingArgs";
-import { getContent } from "@circles-pink/content/src";
-import { initLanding } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
+import { _StateMachine } from "@circles-pink/state-machine/src";
 
 export default {
   title: "Components/App",
@@ -27,7 +26,7 @@ export const GardenAPI = (args): ReactElement => {
   return (
     <Onboarding
       {...args}
-      initState={initLanding}
+      initState={_StateMachine.initLanding}
       content={content}
       onTrackingEvent={(te) => console.log("Tracking Event", te)}
       onTrackingResumee={(updateResumee) => {
@@ -42,7 +41,12 @@ export const TestEnv = (args): ReactElement => {
 
   return (
     <>
-      <Onboarding content={content} {...args} initState={initLanding} testEnv />
+      <Onboarding
+        content={content}
+        {...args}
+        initState={_StateMachine.initLanding}
+        testEnv
+      />
     </>
   );
 };

@@ -225,7 +225,7 @@ spago-repl:
 
 ts-build:
 	cd pkgs/ts/@circles-pink/web-client; tsc;
-	cd pkgs/ts/@circles-pink/storybook; tsc --build tsconfig.json
+	cd pkgs/ts/storybook; tsc --build tsconfig.json
 
 ################################################################################
 
