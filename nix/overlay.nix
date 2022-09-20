@@ -260,7 +260,9 @@
           '';
         in
         final.writeShellScriptBin "generate-tsd" ''
-          export NODE_PATH=${ts.emptyWorkspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/node_modules
+          NODE_MODULES_LOCAL=${ts.emptyWorkspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/node_modules
+          NODE_MODULES_GLOBAL=${ts.emptyWorkspaces."@circles-pink/state-machine"}/libexec/@circles-pink/state-machine/deps/@circles-pink/state-machine/node_modules
+          export NODE_PATH=$NODE_MODULES_GLOBAL:$NODE_MODULES_LOCAL
           ${final.nodejs}/bin/node ${script} $@
         '';
 
