@@ -317,9 +317,7 @@ export const XbgeDashboard = ({
         onLoading: () => {},
         onFailure: () => {},
         onSuccess: x => {
-          setUserBalance(
-            parseFloat(displayBalance(x.toString(), 'TIME-CIRCLES'))
-          );
+          setUserBalance(parseFloat(displayBalance(x.data, 'TIME-CIRCLES')));
         },
       })
     );
