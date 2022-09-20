@@ -429,14 +429,14 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ (Data.Pair.Pair A))
-        , R.value "Pair" []
-            (Data.Pair.Pair :: A -> _ -> _)
         ]
 
   , "Simple.Data.Pair" /\
       join
         [ R.value "unPair" []
             (Simple.Data.Pair.unPair :: _ -> _ A -> Z)
+        , R.value "mkPair" []
+            (Simple.Data.Pair.mkPair :: A -> _)
         ]
 
   , "Data.Maybe" /\
