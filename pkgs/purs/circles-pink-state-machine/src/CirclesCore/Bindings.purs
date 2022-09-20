@@ -51,7 +51,7 @@ foreign import data CirclesCore :: Type
 
 foreign import data Account :: Type
 
-instance structuralAccount :: Structural Account
+instance Structural Account
 
 --------------------------------------------------------------------------------
 newtype User = User
@@ -61,9 +61,9 @@ newtype User = User
   , avatarUrl :: String
   }
 
-derive instance newtypeUser :: Newtype User _
+derive instance Newtype User _
 
-derive newtype instance structuralUser :: Structural User
+derive newtype instance Structural User
 
 --------------------------------------------------------------------------------
 newtype TrustIsTrustedResult = TrustIsTrustedResult
@@ -71,9 +71,9 @@ newtype TrustIsTrustedResult = TrustIsTrustedResult
   , isTrusted :: Boolean
   }
 
-derive instance newtypeTrustIsTrustedResult :: Newtype TrustIsTrustedResult _
+derive instance Newtype TrustIsTrustedResult _
 
-derive newtype instance structuralTrustIsTrustedResult :: Structural TrustIsTrustedResult
+derive newtype instance Structural TrustIsTrustedResult
 
 --------------------------------------------------------------------------------
 -- FFI
@@ -111,7 +111,7 @@ newtype CirclesCore_ = CirclesCore_
   , organization :: CoreOrganization
   }
 
-derive instance newtypeCirclesCore_ :: Newtype CirclesCore_ _
+derive instance Newtype CirclesCore_ _
 
 --------------------------------------------------------------------------------
 newtype CoreUser = CoreUser
@@ -134,9 +134,9 @@ newtype CoreUser = CoreUser
         (ApiResult (Array User))
   }
 
-derive instance newtypeCoreUser :: Newtype CoreUser _
+derive instance Newtype CoreUser _
 
-derive newtype instance structuralCoreUser :: Structural CoreUser
+derive newtype instance Structural CoreUser
 
 --------------------------------------------------------------------------------
 newtype CoreSafe = CoreSafe
@@ -151,9 +151,9 @@ newtype CoreSafe = CoreSafe
         }
   }
 
-derive instance newtypeCoreSafe :: Newtype CoreSafe _
+derive instance Newtype CoreSafe _
 
-derive newtype instance structuralCoreSafe :: Structural CoreSafe
+derive newtype instance Structural CoreSafe
 
 --------------------------------------------------------------------------------
 newtype CoreToken = CoreToken
@@ -172,7 +172,7 @@ newtype CoreToken = CoreToken
   , getPaymentNote :: Fn2Promise Account { transactionHash :: String } (Nullable String)
   }
 
-derive instance newtypeCoreToken :: Newtype CoreToken _
+derive instance Newtype CoreToken _
 
 --------------------------------------------------------------------------------
 newtype CoreTrust = CoreTrust
@@ -201,16 +201,16 @@ newtype CoreTrust = CoreTrust
         (String |+| { data :: Foreign })
   }
 
-derive instance newtypeCoreTrust :: Newtype CoreTrust _
+derive instance Newtype CoreTrust _
 
-derive newtype instance structuralCoreTrust :: Structural CoreTrust
+derive newtype instance Structural CoreTrust
 
 --------------------------------------------------------------------------------
 newtype CoreOrganization = CoreOrganization
   { isOrganization :: Fn2Promise Account { safeAddress :: String } Boolean
   }
 
-derive instance newtypeCoreOrganization :: Newtype CoreOrganization _
+derive instance Newtype CoreOrganization _
 --------------------------------------------------------------------------------
 newtype CoreUtils = CoreUtils
   { toFreckles ::
@@ -236,9 +236,9 @@ newtype CoreUtils = CoreUtils
         }
   }
 
-derive instance newtypeCoreUtils :: Newtype CoreUtils _
+derive instance Newtype CoreUtils _
 
-derive newtype instance structuralCoreUtils :: Structural CoreUtils
+derive newtype instance Structural CoreUtils
 
 --------------------------------------------------------------------------------
 foreign import mkCirclesCore :: Web3 -> Options -> Effect CirclesCore_

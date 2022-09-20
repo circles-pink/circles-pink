@@ -11,12 +11,12 @@ class MonadLog :: (Type -> Type) -> Constraint
 class Monad m <= MonadLog m where
   log :: String -> m Unit
 
-instance _MonadLogIdentity :: MonadLog Identity where
+instance MonadLog Identity where
   log _ = pure unit
 
-instance _MonadLogAff :: MonadLog Aff where
+instance MonadLog Aff where
   log = A.log
 
-instance _MonadLogStateT :: MonadLog m => MonadLog (StateT s m) where
+instance MonadLog m => MonadLog (StateT s m) where
   log = lift <<< log
 

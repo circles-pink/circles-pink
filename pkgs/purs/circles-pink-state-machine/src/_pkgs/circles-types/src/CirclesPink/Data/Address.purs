@@ -62,7 +62,7 @@ instance ToTsType Address where
 instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
 
--- instance decodeParamAddress :: DecodeParam Address where
+-- instance DecodeParam Address where
 --   decodeParam x = decodeParam x
 --     >>= (parseAddress >>> note "Could not parse Address")
 

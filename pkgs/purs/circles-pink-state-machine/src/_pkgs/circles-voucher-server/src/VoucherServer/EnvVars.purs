@@ -49,8 +49,8 @@ newtype AppEnvVars = AppEnvVars AppEnvVars'
 
 type AppEnvVars' = { | MkAppEnvVars Resolved }
 
-derive newtype instance arbitraryAppEnvVars :: Arbitrary AppEnvVars
-derive instance newtypeAppEnvVars :: Newtype AppEnvVars _
+derive newtype instance Arbitrary AppEnvVars
+derive instance Newtype AppEnvVars _
 
 --------------------------------------------------------------------------------
 -- Newtypes
@@ -58,12 +58,12 @@ derive instance newtypeAppEnvVars :: Newtype AppEnvVars _
 
 newtype PrivateKey = PrivateKey C.PrivateKey
 
-instance arbitraryPrivateKey :: Arbitrary PrivateKey where
+instance Arbitrary PrivateKey where
   arbitrary = pure sampleKey
 
--- derive instance newtypePrivateKey :: Newtype PrivateKey
+-- derive instance Newtype PrivateKey
 
-instance parseValuePrivateKey :: ParseValue PrivateKey where
+instance ParseValue PrivateKey where
   parseValue = parsePrivKey
 
 parsePrivKey :: String -> Maybe PrivateKey

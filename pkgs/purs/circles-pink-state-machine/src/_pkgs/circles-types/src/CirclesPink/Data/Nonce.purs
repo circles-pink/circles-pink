@@ -15,7 +15,7 @@ import Data.Newtype (class Newtype, unwrap, wrap)
 
 newtype Nonce = Nonce CC.Nonce
 
-derive instance newtypeNonce :: Newtype Nonce _
+derive instance Newtype Nonce _
 
 nonceToString :: Nonce -> String
 nonceToString (Nonce n) = B.toString $ unwrap n

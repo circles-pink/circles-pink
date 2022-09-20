@@ -57,11 +57,11 @@ data Token
 
 newtype Name = Name String
 
-derive instance genericName :: Generic Name _
-derive newtype instance eqName :: Eq Name
-derive newtype instance ordName :: Ord Name
+derive instance Generic Name _
+derive newtype instance Eq Name
+derive newtype instance Ord Name
 
-instance showName :: Show Name where
+instance Show Name where
   show = genericShow
 
 --------------------------------------------------------------------------------
@@ -70,11 +70,11 @@ instance showName :: Show Name where
 
 data QualName = QualName (Maybe String) String
 
-derive instance genericQualName :: Generic QualName _
-derive instance eqQualName :: Eq QualName
-derive instance ordQualName :: Ord QualName
+derive instance Generic QualName _
+derive instance Eq QualName
+derive instance Ord QualName
 
-instance showQualName :: Show QualName where
+instance Show QualName where
   show = genericShow
 
 --------------------------------------------------------------------------------
@@ -101,11 +101,11 @@ data Type
   | TypeIsPred Name Type
   | TypeUnsafeInline String
 
-derive instance genericType :: Generic Type _
-derive instance eqType :: Eq Type
-derive instance ordType :: Ord Type
+derive instance Generic Type _
+derive instance Eq Type
+derive instance Ord Type
 
-instance showType :: Show Type where
+instance Show Type where
   show x = genericShow x
 
 --------------------------------------------------------------------------------

@@ -35,18 +35,18 @@ type TrustState' = Variant
   , pendingUntrust :: Unit -- 5
   )
 
-derive instance newtypeTrustState :: Newtype TrustState _
-derive instance trustStateEq :: Eq TrustState
-derive instance ordTrustState :: Ord TrustState
-derive newtype instance showTrustState :: Show TrustState
+derive instance Newtype TrustState _
+derive instance Eq TrustState
+derive instance Ord TrustState
+derive newtype instance Show TrustState
 
-instance toTsDef :: ToTsDef TrustState where
+instance ToTsDef TrustState where
   toTsDef _ = defaultToTsDef trustState []
 
-instance toTsTypeTrustState :: ToTsType TrustState where
+instance ToTsType TrustState where
   toTsType _ = defaultToTsType trustState []
 
-instance toPursTypeTrustState :: ToPursType TrustState where
+instance ToPursType TrustState where
   toPursType _ = defaultToPursType trustState []
 
 --------------------------------------------------------------------------------

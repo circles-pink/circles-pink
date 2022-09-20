@@ -275,7 +275,7 @@ trustRemoveConnection cc = mapFn2 fn pure (mapArg2 >>> pure) mkErrorNative mapOk
 --------------------------------------------------------------------------------
 newtype Nonce = Nonce BigInt
 
-derive instance newtypeNone :: Newtype Nonce _
+derive instance Newtype Nonce _
 
 type UserOptions =
   { nonce :: Nonce
@@ -568,19 +568,19 @@ type ErrUtilsRequestRelayer r = ErrNative + ErrParseAddress + r
 
 newtype SafeAddress = SafeAddress Address
 
-derive newtype instance show :: Show SafeAddress
+derive newtype instance Show SafeAddress
 
-derive newtype instance eq :: Eq SafeAddress
+derive newtype instance Eq SafeAddress
 
-derive newtype instance ord :: Ord SafeAddress
+derive newtype instance Ord SafeAddress
 
-derive newtype instance decodeJson :: DecodeJson SafeAddress
+derive newtype instance DecodeJson SafeAddress
 
-derive newtype instance encodeJson :: EncodeJson SafeAddress
+derive newtype instance EncodeJson SafeAddress
 
-derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
+derive newtype instance WriteForeign SafeAddress
 
-derive newtype instance readForeignSafeAddress :: ReadForeign SafeAddress
+derive newtype instance ReadForeign SafeAddress
 
 utilsRequestRelayer :: forall r. B.CirclesCore -> UtilsRequestRelayerOptions -> Result (ErrUtilsRequestRelayer r) SafeAddress
 utilsRequestRelayer cc = mapFn1 fn (mapArg1 >>> pure) mkErrorNative mapOk

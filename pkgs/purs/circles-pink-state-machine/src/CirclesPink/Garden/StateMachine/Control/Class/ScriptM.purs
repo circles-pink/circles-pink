@@ -30,26 +30,26 @@ type ScriptM' a =
 
 newtype ScriptM a = ScriptM (ScriptM' a)
 
-instance monadCirclesScriptM :: MonadCircles ScriptM where
+instance MonadCircles ScriptM where
   sleep _ = pure unit
 
 -- getSafeAddress x1 = getSafeAddress x1 # mapExceptT (ScriptM <<< liftAff)
 
-instance monadAsk :: MonadAsk (CirclesConfig ScriptM) ScriptM where
+instance MonadAsk (CirclesConfig ScriptM) ScriptM where
   ask = ScriptM $ ask
 
-instance monadScriptScriptM :: MonadScript ScriptM
+instance MonadScript ScriptM
 
-instance monadLogScriptM :: MonadLog ScriptM where
+instance MonadLog ScriptM where
   log = E.log >>> ScriptM
 
-instance monadStateScriptM :: MonadState CirclesState ScriptM where
+instance MonadState CirclesState ScriptM where
   state = ScriptM <<< state
 
-instance monadEffectScriptM :: MonadEffect ScriptM where
+instance MonadEffect ScriptM where
   liftEffect = liftEffect >>> ScriptM
 
-instance monadAffScriptM :: MonadAff ScriptM where
+instance MonadAff ScriptM where
   liftAff = liftAff >>> ScriptM
 
 -- Cannot derive because of '[1/1 PartiallyAppliedSynonym] (unknown module)' error
@@ -57,18 +57,18 @@ instance monadAffScriptM :: MonadAff ScriptM where
 unwrapScriptM :: forall a. ScriptM a -> ScriptM' a
 unwrapScriptM (ScriptM x) = x
 
-instance applyScriptM :: Apply ScriptM where
+instance Apply ScriptM where
   apply (ScriptM f) (ScriptM x) = ScriptM $ apply f x
 
-instance bindScriptM :: Bind ScriptM where
+instance Bind ScriptM where
   bind (ScriptM x) f = ScriptM $ bind x (f >>> unwrapScriptM)
 
-instance applicativeScriptM :: Applicative ScriptM where
+instance Applicative ScriptM where
   pure x = ScriptM $ pure x
 
-instance monadScriptM :: Monad ScriptM
+instance Monad ScriptM
 
-instance functorScriptM :: Functor ScriptM where
+instance Functor ScriptM where
   map f (ScriptM x) = ScriptM $ map f x
 
 runScriptM :: forall a. CirclesConfig ScriptM -> ScriptM a -> Aff (a /\ CirclesState /\ {})

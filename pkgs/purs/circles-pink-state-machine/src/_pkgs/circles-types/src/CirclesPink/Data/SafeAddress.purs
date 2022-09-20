@@ -18,24 +18,24 @@ import Simple.JSON (class WriteForeign)
 
 newtype SafeAddress = SafeAddress CC.SafeAddress
 
-derive instance newtypeSafeAddress :: Newtype SafeAddress _
+derive instance Newtype SafeAddress _
 
-derive newtype instance ordSafeAddress :: Ord SafeAddress
-derive newtype instance eqSafeAddress :: Eq SafeAddress
-derive newtype instance showSafeAddress :: Show SafeAddress
-derive newtype instance writeForeignSafeAddress :: WriteForeign SafeAddress
-derive newtype instance decodeJson :: DecodeJson SafeAddress
-derive newtype instance encodeJson :: EncodeJson SafeAddress
+derive newtype instance Ord SafeAddress
+derive newtype instance Eq SafeAddress
+derive newtype instance Show SafeAddress
+derive newtype instance WriteForeign SafeAddress
+derive newtype instance DecodeJson SafeAddress
+derive newtype instance EncodeJson SafeAddress
 
--- instance decodeParamSafeAddress :: DecodeParam SafeAddress where
+-- instance DecodeParam SafeAddress where
 --   decodeParam x = decodeParam x
 --     >>= (parseAddress >>> note "Could not parse SafeAddress")
 --     <#> SafeAddress
 
--- instance encodeParamSafeAddress :: EncodeParam SafeAddress where
+-- instance EncodeParam SafeAddress where
 --   encodeParam (SafeAddress x) = todo -- encodeParam x
 
-instance argGqlSafeAddress :: ArgGql SafeAddress String
+instance ArgGql SafeAddress String
 
 sampleSafeAddress :: SafeAddress
 sampleSafeAddress = SafeAddress $ CC.SafeAddress $ unsafeMkAddress "fd0819dc0ad02411258939c00303ead2789795ac"

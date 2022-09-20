@@ -18,9 +18,9 @@ moduleName = "VoucherServer.Spec.Types"
 --------------------------------------------------------------------------------
 newtype Instant = Instant DT.Instant
 
-derive instance newtypeInstant :: Newtype Instant _
+derive instance Newtype Instant _
 
-instance writeForeignInstant :: WriteForeign Instant where
+instance WriteForeign Instant where
   writeImpl = un Instant >>> DT.unInstant >>> un Milliseconds >>> writeImpl
 
 --------------------------------------------------------------------------------
@@ -96,9 +96,9 @@ newtype EurCent = EurCent Int
 derive instance Generic EurCent _
 derive newtype instance WriteForeign EurCent
 derive newtype instance ReadForeign EurCent
--- derive newtype instance semiringEurCent :: Semiring EurCent
--- derive newtype instance eqEurCent :: Eq EurCent
--- derive newtype instance ordEurCent :: Ord EurCent
+-- derive newtype instance Semiring EurCent
+-- derive newtype instance Eq EurCent
+-- derive newtype instance Ord EurCent
 
 instance Show EurCent where
   show = genericShow
@@ -150,18 +150,18 @@ newtype Freckles = Freckles BN
 --------------------------------------------------------------------------------
 newtype VoucherCodeEncrypted = VoucherCodeEncrypted String
 
-derive instance genericVoucherCodeEncrypted :: Generic VoucherCodeEncrypted _
-derive newtype instance readForeignVoucherCodeEncrypted :: ReadForeign VoucherCodeEncrypted
+derive instance Generic VoucherCodeEncrypted _
+derive newtype instance ReadForeign VoucherCodeEncrypted
 
-instance showVoucherCodeEncrypted :: Show VoucherCodeEncrypted where
+instance Show VoucherCodeEncrypted where
   show = genericShow
 
 --------------------------------------------------------------------------------
 
 newtype VoucherCode = VoucherCode String
 
-derive newtype instance readForeignVoucherCode :: ReadForeign VoucherCode
-derive newtype instance writeForeignVoucherCode :: WriteForeign VoucherCode
+derive newtype instance ReadForeign VoucherCode
+derive newtype instance WriteForeign VoucherCode
 
 instance ToPursNominal VoucherCode where
   toPursNominal _ = PursNominal moduleName "VoucherCode"
@@ -192,10 +192,10 @@ newtype VoucherEncrypted =
         }
     }
 
-derive newtype instance readForeignVoucherEncrypted :: ReadForeign VoucherEncrypted
-derive instance genericVoucherEncrypted :: Generic VoucherEncrypted _
+derive newtype instance ReadForeign VoucherEncrypted
+derive instance Generic VoucherEncrypted _
 
-instance showVoucherEncrypted :: Show VoucherEncrypted where
+instance Show VoucherEncrypted where
   show = genericShow
 
 --------------------------------------------------------------------------------
@@ -212,8 +212,8 @@ newtype Voucher =
         }
     }
 
-derive newtype instance readForeignVoucher :: ReadForeign Voucher
-derive newtype instance writeForeignVoucher :: WriteForeign Voucher
+derive newtype instance ReadForeign Voucher
+derive newtype instance WriteForeign Voucher
 
 instance ToTsType Voucher where
   toTsType (Voucher r) = toTsType r
@@ -225,14 +225,14 @@ instance ToPursType Voucher where
 
 newtype TransferId = TransferId String
 
-derive instance genericTransferId :: Generic TransferId _
-derive instance newtypeTransferId :: Newtype TransferId _
-derive newtype instance readForeignTransferId :: ReadForeign TransferId
-derive newtype instance writeForeignTransferId :: WriteForeign TransferId
-derive newtype instance eqTransferId :: Eq TransferId
-derive newtype instance ordTransferId :: Ord TransferId
+derive instance Generic TransferId _
+derive instance Newtype TransferId _
+derive newtype instance ReadForeign TransferId
+derive newtype instance WriteForeign TransferId
+derive newtype instance Eq TransferId
+derive newtype instance Ord TransferId
 
-instance showTransferId :: Show TransferId where
+instance Show TransferId where
   show = genericShow
 
 instance ToPursNominal TransferId where

@@ -20,12 +20,12 @@ import URI.HostPortPair as HostPortPair
 --------------------------------------------------------------------------------
 newtype URI = URI (AbsoluteURI UserInfo (HostPortPair Host Port) Path HierPath Query)
 
-instance parseValueURI :: ParseValue URI where
+instance ParseValue URI where
   parseValue = parse >>> hush
 
-derive instance newtypeURI :: Newtype URI _
+derive instance Newtype URI _
 
-derive newtype instance showURI :: Show URI
+derive newtype instance Show URI
 
 --------------------------------------------------------------------------------
 options :: Record (AbsoluteURIOptions UserInfo (HostPortPair Host Port) Path HierPath Query)

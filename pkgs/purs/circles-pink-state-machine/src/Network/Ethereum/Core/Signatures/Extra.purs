@@ -18,19 +18,19 @@ import Web3.Bindings (web3static)
 
 newtype ChecksumAddress = ChecksumAddress W3.Address
 
-instance showChecksumAddress :: Show ChecksumAddress where
+instance Show ChecksumAddress where
   show (ChecksumAddress a) = show a # web3static.utils.toChecksumAddress
 
 unsafeFromString :: Partial => String -> ChecksumAddress
 unsafeFromString x = mkHexString x >>= W3.mkAddress # fromJust # ChecksumAddress
 
-instance parseValueAddress :: ParseValue ChecksumAddress where
+instance ParseValue ChecksumAddress where
   parseValue x = mkHexString x >>= mkAddress <#> ChecksumAddress
 
 --------------------------------------------------------------------------------
 
-instance convertible_ChecksumAddress_W3Address :: Convertible ChecksumAddress Address where
+instance Convertible ChecksumAddress Address where
   convert (ChecksumAddress a) = wrap a
 
-instance convertible_W3Address_ChecksumAddress :: Convertible Address ChecksumAddress where
+instance Convertible Address ChecksumAddress where
   convert = unwrap >>> ChecksumAddress

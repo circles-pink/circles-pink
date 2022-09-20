@@ -50,16 +50,16 @@ import Web3.Bindings as B
 
 newtype Hash = Hash String
 
-derive instance newtypeHash :: Newtype Hash _
-derive newtype instance readForeignHash :: ReadForeign Hash
-derive newtype instance writeForeignHash :: WriteForeign Hash
-derive instance eqHash :: Eq Hash
+derive instance Newtype Hash _
+derive newtype instance ReadForeign Hash
+derive newtype instance WriteForeign Hash
+derive instance Eq Hash
 
 newtype Message = Message String
 
-derive instance newtypeMessage :: Newtype Message _
-derive newtype instance readForeignMessage :: ReadForeign Message
-derive newtype instance writeForeignMessage :: WriteForeign Message
+derive instance Newtype Message _
+derive newtype instance ReadForeign Message
+derive newtype instance WriteForeign Message
 
 newtype SignatureObj = SignatureObj
   { message :: Message
@@ -70,9 +70,9 @@ newtype SignatureObj = SignatureObj
   , signature :: String
   }
 
-derive instance newtypeSignatureObj :: Newtype SignatureObj _
-derive newtype instance readForeignSignatureObj :: ReadForeign SignatureObj
-derive newtype instance writeForeignSignatureObj :: WriteForeign SignatureObj
+derive instance Newtype SignatureObj _
+derive newtype instance ReadForeign SignatureObj
+derive newtype instance WriteForeign SignatureObj
 
 --------------------------------------------------------------------------------
 -- Error types

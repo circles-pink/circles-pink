@@ -62,7 +62,7 @@ newtype EnvVars = EnvVars
   , isDev :: Boolean
   }
 
-derive instance newtypeEnvVars :: Newtype EnvVars _
+derive instance Newtype EnvVars _
 
 --------------------------------------------------------------------------------
 _errService :: CirclesError

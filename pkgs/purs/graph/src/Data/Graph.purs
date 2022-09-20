@@ -68,7 +68,7 @@ derive instance Generic (NeighborConnectivity e) _
 derive instance Eq e => Eq (NeighborConnectivity e)
 derive instance Ord e => Ord (NeighborConnectivity e)
 
-instance showNeighborConnectivity :: Show e => Show (NeighborConnectivity e) where
+instance Show e => Show (NeighborConnectivity e) where
   show = genericShow
 
 --------------------------------------------------------------------------------

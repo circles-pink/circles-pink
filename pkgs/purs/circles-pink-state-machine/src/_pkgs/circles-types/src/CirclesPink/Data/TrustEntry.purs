@@ -17,16 +17,16 @@ import CirclesPink.Data.Address (Address)
 
 data TrustEntry = TrustCandidate Trust | TrustConfirmed Trust
 
-derive instance ordTrustEntry :: Ord TrustEntry
+derive instance Ord TrustEntry
 
-derive instance eqTrustEntry :: Eq TrustEntry
+derive instance Eq TrustEntry
 
-derive instance genericTrustEntry :: Generic TrustEntry _
+derive instance Generic TrustEntry _
 
-instance showTrustEntry :: Show TrustEntry where
+instance Show TrustEntry where
   show = genericShow
 
-instance indexedTrustEntry :: Indexed Address TrustEntry where
+instance Indexed Address TrustEntry where
   getIndex (TrustCandidate { user }) = getAddress user
   getIndex (TrustConfirmed { user }) = getAddress user
 

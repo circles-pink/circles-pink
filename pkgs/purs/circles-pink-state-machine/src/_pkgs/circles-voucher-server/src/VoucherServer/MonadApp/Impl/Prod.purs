@@ -34,7 +34,7 @@ derive newtype instance MonadAsk (AppEnv AppProdM) AppProdM
 derive newtype instance MonadEffect AppProdM
 derive newtype instance MonadAff AppProdM
 
-instance monadVoucherServerAffAPM :: MonadApp AppProdM where
+instance MonadApp AppProdM where
   log = logToString >>> E.log
 
 runAppProdM :: forall a. AppEnv M -> M a -> Aff (Either AppError a)

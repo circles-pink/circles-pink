@@ -19,4 +19,4 @@ newtype TransferMeta = TransferMeta
   , time :: Instant
   }
 
-derive instance newtypeTransferMeta :: Newtype TransferMeta _
+derive instance Newtype TransferMeta _

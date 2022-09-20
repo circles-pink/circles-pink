@@ -12,25 +12,25 @@ import Undefined (undefined)
 class TS a where
   toTs :: a -> String
 
-instance numberTS :: TS Number where
+instance TS Number where
   toTs _ = "number"
 
-instance intTS :: TS Int where
+instance TS Int where
   toTs _ = "number"
 
-instance stringTS :: TS String where
+instance TS String where
   toTs _ = "string"
 
-instance charTS :: TS Char where
+instance TS Char where
   toTs _ = "string"
 
-instance booleanTS :: TS Boolean where
+instance TS Boolean where
   toTs _ = "boolean"
 
-instance arrayTS :: TS b => TS (Array b) where
+instance TS b => TS (Array b) where
   toTs _ = "Array<" <> toTs (undefined :: b) <> ">"
 
-instance tupleTS :: (TS a, TS b) => TS (Tuple a b) where
+instance (TS a, TS b) => TS (Tuple a b) where
   toTs _ = "[" <> toTs (undefined :: a) <> ", " <> toTs (undefined :: b) <> "]"
 
 buildFn :: Array String -> String -> String
@@ -46,7 +46,7 @@ buildFn args t =
       <> x
       <> ") => "
 
-instance fn3TS :: (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (Function a3 b))) where
+instance (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (Function a3 b))) where
   toTs _ =
     buildFn
       [ toTs (undefined :: a1)
@@ -54,9 +54,9 @@ instance fn3TS :: (TS a1, TS a2, TS a3, TS b) => TS (Function a1 (Function a2 (F
       , toTs (undefined :: a3)
       ]
       (toTs (undefined :: b))
-else instance fn2TS :: (TS a1, TS a2, TS b) => TS (Function a1 (Function a2 b)) where
+else instance (TS a1, TS a2, TS b) => TS (Function a1 (Function a2 b)) where
   toTs _ = buildFn [ toTs (undefined :: a1), toTs (undefined :: a2) ] (toTs (undefined :: b))
-else instance fn1TS :: (TS a1, TS b) => TS (Function a1 b) where
+else instance (TS a1, TS b) => TS (Function a1 b) where
   toTs _ = buildFn [ toTs (undefined :: a1) ] (toTs (undefined :: b))
 
 tsDeclare :: forall a. TS a => String -> a -> String

@@ -17,26 +17,26 @@ import Log.Class (class MonadLog)
 
 newtype ProdM a = ProdM (ReaderT (CirclesConfig ProdM) Aff a)
 
-derive newtype instance functor :: Functor ProdM
+derive newtype instance Functor ProdM
 
-derive newtype instance apply :: Apply ProdM
+derive newtype instance Apply ProdM
 
-derive newtype instance applicative :: Applicative ProdM
+derive newtype instance Applicative ProdM
 
-derive newtype instance monad :: Monad ProdM
+derive newtype instance Monad ProdM
 
-derive newtype instance bind :: Bind ProdM
+derive newtype instance Bind ProdM
 
-derive newtype instance monadEffect :: MonadEffect ProdM
+derive newtype instance MonadEffect ProdM
 
-derive newtype instance monadAff :: MonadAff ProdM
+derive newtype instance MonadAff ProdM
 
-derive newtype instance monadAsk :: MonadAsk (CirclesConfig ProdM) ProdM
+derive newtype instance MonadAsk (CirclesConfig ProdM) ProdM
 
-instance monadCircles :: MonadCircles ProdM where
+instance MonadCircles ProdM where
   sleep i = liftAff $ delay $ Milliseconds $ I.toNumber i
 
-instance monadLog :: MonadLog ProdM where
+instance MonadLog ProdM where
   log x = liftAff $ A.log x
 
 runProdM :: forall a. CirclesConfig ProdM -> ProdM a -> Aff a

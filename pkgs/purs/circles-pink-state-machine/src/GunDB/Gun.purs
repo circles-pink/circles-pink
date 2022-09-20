@@ -53,16 +53,16 @@ foreign import offline :: Effect GunDb
 class Getable a b where
   get :: a -> b -> GunChainCtx
 
-instance getStringFromGunDb :: Getable String GunDb where
+instance Getable String GunDb where
   get path db = _getOnGunDb [ path ] db
 
-instance getStringArrayFromGunDb :: Getable (Array String) GunDb where
+instance Getable (Array String) GunDb where
   get = _getOnGunDb
 
-instance getStringFromUser :: Getable String User where
+instance Getable String User where
   get path db = _getOnUser [ path ] db
 
-instance getStringArrayFromUser :: Getable (Array String) User where
+instance Getable (Array String) User where
   get = _getOnUser
 
 foreign import _getOnGunDb :: Array String -> GunDb -> GunChainCtx

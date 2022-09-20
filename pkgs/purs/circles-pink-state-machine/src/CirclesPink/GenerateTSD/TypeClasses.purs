@@ -11,7 +11,7 @@ import PursTsGen.Lang.TypeScript.DSL as TS
 data ClassOrd :: forall k. k -> Type
 data ClassOrd a
 
-instance toTsDefClassOrd :: ToTsDef (ClassOrd A) where
+instance ToTsDef (ClassOrd A) where
   toTsDef _ =
     pure $ TS.typeDef (TS.name "Ord") []
       $ TS.TypeOpaque (TS.QualName (Just "Data_Ord") "Ord")
@@ -19,13 +19,13 @@ instance toTsDefClassOrd :: ToTsDef (ClassOrd A) where
 
 data ORD = ORD
 
-instance eqORD :: Eq ORD where
+instance Eq ORD where
   eq = undefined
 
-instance ordORD :: Ord ORD where
+instance Ord ORD where
   compare = undefined
 
-instance toTsTypeORD :: ToTsType ORD where
+instance ToTsType ORD where
   toTsType _ = TS.TypeVar $ TS.Name "ORD"
 --  toPursType _ = PT.var $ PT.name "ord"
 

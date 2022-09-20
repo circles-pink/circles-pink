@@ -22,11 +22,11 @@ moduleName = "CirclesPink.Data.Mnemonic"
 
 newtype Mnemonic = Mnemonic (Array String)
 
-derive instance mnemonicEq :: Eq Mnemonic
+derive instance Eq Mnemonic
 
-derive newtype instance mnemonicEncodeJson :: EncodeJson Mnemonic
+derive newtype instance EncodeJson Mnemonic
 
-instance mnemonicShow :: Show Mnemonic where
+instance Show Mnemonic where
   show (Mnemonic xs) = joinWith " " xs -- TODO: Remove!
 
 instance ToPursNominal Mnemonic where
