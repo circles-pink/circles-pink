@@ -19,22 +19,22 @@ type TrustNode' = { userIdent :: UserIdent }
 
 newtype TrustNode = TrustNode TrustNode'
 
-derive instance newtypeTrusNode :: Newtype TrustNode _
-derive newtype instance showTrustNode :: Show TrustNode
-derive newtype instance eqTrustNode :: Eq TrustNode
-derive newtype instance ordTrustNode :: Ord TrustNode
+derive instance Newtype TrustNode _
+derive newtype instance Show TrustNode
+derive newtype instance Eq TrustNode
+derive newtype instance Ord TrustNode
 
-instance toTsTypeDefTrustNode :: ToTsDef TrustNode where
+instance ToTsDef TrustNode where
   toTsDef _ = pure $ TS.typeDef (TS.name "TrustNode") []
     $ TS.opaque (TS.qualName "CirclesPink_Data_TrustNode" "TrustNode") $ TS.name <$> []
 
-instance toTsTypeTrustNode :: ToTsType TrustNode where
+instance ToTsType TrustNode where
   toTsType _ = TS.mkType_ $ TS.qualName "CirclesPink_Data_TrustNode" "TrustNode"
 
 unwrap :: TrustNode -> TrustNode'
 unwrap = NT.unwrap
 
-instance indexedUserIdent :: Indexed Address TrustNode where
+instance Indexed Address TrustNode where
   getIndex (TrustNode { userIdent: UserIdent (Left x) }) = x
   getIndex (TrustNode { userIdent: UserIdent (Right (User { safeAddress })) }) = safeAddress
 

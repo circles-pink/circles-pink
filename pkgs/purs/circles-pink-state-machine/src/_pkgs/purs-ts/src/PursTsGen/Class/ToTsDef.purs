@@ -123,13 +123,13 @@ mkCtor t xs = TS.record' { create: foldr (\x y -> TS.function_ (pure (TS.name "_
 class GenToTsDefProd rep where
   genToTsDefProd :: rep -> Int -> Array (PS.Type /\ (TS.Name /\ TS.Type))
 
-instance nilProd :: GenToTsDefProd NoArguments where
+instance GenToTsDefProd NoArguments where
   genToTsDefProd _ _ = []
 
-instance nilOne :: (ToTsType t, ToPursType t) => GenToTsDefProd (Argument t) where
+instance (ToTsType t, ToPursType t) => GenToTsDefProd (Argument t) where
   genToTsDefProd _ i = [ toPursType (Proxy :: _ t) /\ (TS.keyVal ("value" <> show i) $ toTsType (undefined :: t)) ]
 
-instance recProd :: (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Product a b) where
+instance (GenToTsDefProd a, GenToTsDefProd b) => GenToTsDefProd (Product a b) where
   genToTsDefProd _ i = genToTsDefProd (undefined :: a) i <> genToTsDefProd (undefined :: b) (i + 1)
 
 --------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ dotsToLodashes = replaceAll (Pattern ".") (Replacement "_")
 
 -- data MyThese a b = This a | That b | Both a b
 
--- derive instance genericMyThese :: Generic (MyThese a b) _
+-- derive instance Generic (MyThese a b) _
 
 -- spec :: Spec Unit
 -- spec = describe "CirclesPink.GenerateTSD.Generic" do

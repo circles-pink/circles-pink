@@ -95,7 +95,7 @@ type ModuleName = Array String
 --------------------------------------------------------------------------------
 newtype ModuleForest = ModuleForest (Map String ModuleTree)
 
-derive instance eqModuleForest :: Eq ModuleForest
+derive instance Eq ModuleForest
 
 type ModuleTree =
   { exists :: Boolean

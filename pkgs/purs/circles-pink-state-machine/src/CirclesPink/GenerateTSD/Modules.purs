@@ -71,7 +71,7 @@ _Newtype a b = TS.TypeConstructor (TS.QualName (Just "Data_Newtype") "Newtype") 
 
 data Any
 
-instance toTsTypeAny :: ToTsType Any where
+instance ToTsType Any where
   toTsType _ = TS.any
 
 modules :: Array (String /\ Array TS.Declaration)

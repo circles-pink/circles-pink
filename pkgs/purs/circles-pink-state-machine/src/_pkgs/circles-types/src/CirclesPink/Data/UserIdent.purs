@@ -18,24 +18,24 @@ import Data.String as S
 type UserIdent' = Either Address User
 newtype UserIdent = UserIdent UserIdent'
 
-derive instance newtypeUserIdent :: Newtype UserIdent _
-derive newtype instance showUserIdent :: Show UserIdent
-derive newtype instance eqUserIdent :: Eq UserIdent
-derive newtype instance ordUserIdent :: Ord UserIdent
+derive instance Newtype UserIdent _
+derive newtype instance Show UserIdent
+derive newtype instance Eq UserIdent
+derive newtype instance Ord UserIdent
 
 ptUserIdent :: PursType
 ptUserIdent = PursType "CirclesPink_Data_UserIdent" "UserIdent"
 
-instance toTsTypeDefUserIdent :: ToTsDef UserIdent where
+instance ToTsDef UserIdent where
   toTsDef _ = defaultToTsDef ptUserIdent []
 
-instance toTsTypeUserIdent :: ToTsType UserIdent where
+instance ToTsType UserIdent where
   toTsType _ = defaultToTsType ptUserIdent []
 
-instance toPursTypeUserIdent :: ToPursType UserIdent where
+instance ToPursType UserIdent where
   toPursType _ = defaultToPursType ptUserIdent []
 
-instance indexedUserIdent :: Indexed Address UserIdent where
+instance Indexed Address UserIdent where
   getIndex (UserIdent (Left x)) = x
   getIndex (UserIdent (Right (User { safeAddress }))) = safeAddress
 

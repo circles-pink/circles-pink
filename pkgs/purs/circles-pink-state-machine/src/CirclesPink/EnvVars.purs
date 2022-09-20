@@ -37,9 +37,9 @@ type Config f =
 --------------------------------------------------------------------------------
 newtype EnvVars = EnvVars (Record (Config Resolved))
 
-derive instance newtypeEnvVars :: Newtype EnvVars _
+derive instance Newtype EnvVars _
 
-instance convertibleEnvVars :: Convertible EnvVars E.EnvVars where
+instance Convertible EnvVars E.EnvVars where
   convert (EnvVars env) =
     zipRecord
       { gardenApi: U.print

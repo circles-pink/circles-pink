@@ -49,9 +49,9 @@ data TrackingEvent
   = NewState TrackedCirclesState
   | Action TrackedCirclesAction
 
-derive instance genericTrackingEvent :: Generic TrackingEvent _
+derive instance Generic TrackingEvent _
 
-instance encodeJsonTrackingEventInst :: EncodeJson TrackingEvent where
+instance EncodeJson TrackingEvent where
   encodeJson = genericEncodeJson
 
 instance ToPursNominal TrackingEvent where
@@ -86,21 +86,21 @@ newtype TrackedCirclesState = TrackedCirclesState
       )
   )
 
-derive instance newtypeTrackedCirclesState :: Newtype TrackedCirclesState _
+derive instance Newtype TrackedCirclesState _
 
-derive instance eqTrackedCirclesState :: Eq TrackedCirclesState
+derive instance Eq TrackedCirclesState
 
-instance encodeJsonTrackedCirclesState :: EncodeJson TrackedCirclesState where
+instance EncodeJson TrackedCirclesState where
   encodeJson (TrackedCirclesState x) = encodeJsonVariant x
 
 --------------------------------------------------------------------------------
 
 data TrackedRemoteData = NotAsked | Loading | Failure | Success
 
-derive instance genericTrackedRemoteData :: Generic TrackedRemoteData _
-derive instance eqTrackedRemoteData :: Eq TrackedRemoteData
+derive instance Generic TrackedRemoteData _
+derive instance Eq TrackedRemoteData
 
-instance encodeJsonTrackedRemoteData :: EncodeJson TrackedRemoteData where
+instance EncodeJson TrackedRemoteData where
   encodeJson = genericEncodeJson
 
 convertRemoteData :: forall n l e a. RemoteData n l e a -> TrackedRemoteData
@@ -163,11 +163,11 @@ newtype TrackedCirclesAction = TrackedCirclesAction
       )
   )
 
-derive instance newtypeTrackedCirclesAction :: Newtype TrackedCirclesAction _
+derive instance Newtype TrackedCirclesAction _
 
-derive instance eqTrackedCirclesAction :: Eq TrackedCirclesAction
+derive instance Eq TrackedCirclesAction
 
-instance encodeJsonTrackedCirclesAction :: EncodeJson TrackedCirclesAction where
+instance EncodeJson TrackedCirclesAction where
   encodeJson (TrackedCirclesAction x) = encodeJsonVariant x
 
 --------------------------------------------------------------------------------
@@ -296,7 +296,7 @@ class GenEncodeJsonVariant :: forall k. Row Type -> k -> Constraint
 class GenEncodeJsonVariant r rl where
   genEncodeJsonVariant :: Variant r -> Proxy rl -> Json
 
-instance genEncodeJsonVariantNil :: GenEncodeJsonVariant v Nil where
+instance GenEncodeJsonVariant v Nil where
   genEncodeJsonVariant _ _ = unsafeCrashWith "should not be possible"
 
 instance genEncodeJsonVariantRec' ::

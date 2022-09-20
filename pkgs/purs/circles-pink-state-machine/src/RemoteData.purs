@@ -52,8 +52,8 @@ unRemoteData c (RemoteData rd) =
 unwrap :: forall n l e a. RemoteData n l e a -> RemoteData' n l e a
 unwrap = NT.unwrap
 
-derive instance newtypeRemoteData :: Newtype (RemoteData n l e a) _
-derive newtype instance showRemoteData :: (Show n, Show l, Show e, Show a) => Show (RemoteData n l e a)
+derive instance Newtype (RemoteData n l e a) _
+derive newtype instance (Show n, Show l, Show e, Show a) => Show (RemoteData n l e a)
 
 --------------------------------------------------------------------------------
 -- Constructors

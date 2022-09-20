@@ -15,9 +15,9 @@ import Structural (class Structural)
 type ApiError = { message :: String, code :: Int }
 
 --------------------------------------------------------------------------------
-derive instance newtypeApiResult :: Newtype (ApiResult a) _
+derive instance Newtype (ApiResult a) _
 
-derive newtype instance structuralApiResult :: Structural a => Structural (ApiResult a)
+derive newtype instance Structural a => Structural (ApiResult a)
 
 newtype ApiResult :: forall k. k -> Type
 newtype ApiResult a = ApiResult (Object Foreign)

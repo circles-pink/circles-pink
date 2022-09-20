@@ -28,12 +28,12 @@ infixl 7 type Product as :*:
 
 newtype IxGraph id e n = IxGraph (Data.IxGraph.IxGraph id e n)
 
-instance toTsTypeDef_IxGraph :: ToTsDef (IxGraph A B C) where
+instance ToTsDef (IxGraph A B C) where
   toTsDef _ = pure $ TS.typeDef (TS.name "IxGraph") []
     $ TS.opaque (TS.qualName "Data_IxGraph" "IxGraph")
     $ TS.Name <$> [ "Id", "E", "N" ]
 
-instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (IxGraph id e n) where
+instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (IxGraph id e n) where
   toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "IxGraph") $
     [ toTsType (Proxy :: _ id)
     , toTsType (Proxy :: _ e)
@@ -44,7 +44,7 @@ instance toTsType_IxGraph :: (ToTsType id, ToTsType e, ToTsType n) => ToTsType (
 
 newtype NeighborConnectivity a = NeighborConnectivity (Data.IxGraph.NeighborConnectivity a)
 
-derive instance newtypeNeighborConnectivity :: Newtype (NeighborConnectivity a) _
+derive instance Newtype (NeighborConnectivity a) _
 
 instance g ::
   Generic (NeighborConnectivity a)
@@ -55,14 +55,14 @@ instance g ::
   from = undefined
   to = undefined
 
-instance toTsType_NeighborConnectivity :: (ToTsType a) => ToTsType (NeighborConnectivity a) where
+instance (ToTsType a) => ToTsType (NeighborConnectivity a) where
   toTsType _ = TS.mkType (TS.qualName "Data_IxGraph" "NeighborConnectivity")
     [ toTsType (Proxy :: _ a) ]
 
-instance toTsDef_NeighborConnectivity :: (ToPursType a, ToTsType a) => ToTsDef (NeighborConnectivity a) where
+instance (ToPursType a, ToTsType a) => ToTsDef (NeighborConnectivity a) where
   toTsDef = genericToTsDef "NeighborConnectivity"
 
-instance toPursType_NeighborConnectivity :: (ToPursType a) => ToPursType (NeighborConnectivity a) where
+instance (ToPursType a) => ToPursType (NeighborConnectivity a) where
   toPursType _ = PS.mkType (PS.qualName "Data_IxGraph" "NeighborConnectivity")
     [ toPursType (Proxy :: _ a)
     ]

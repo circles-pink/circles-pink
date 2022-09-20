@@ -129,7 +129,7 @@ else instance UnsafeReplace a a
 class GenRecord :: forall k1 k2. k1 -> k2 -> Constraint
 class GenRecord rl r | rl -> r
 
-instance genRecordNil :: GenRecord Nil ()
+instance GenRecord Nil ()
 
 instance genRecordCons ::
   ( GenRecord rl r'
@@ -335,7 +335,7 @@ newtype Address = Address Network.Ethereum.Core.Signatures.Address
 ptAddress :: PursType
 ptAddress = PursType "Network_Ethereum_Core_Signatures" "Address"
 
-derive instance newtypeAddress :: Newtype Address _
+derive instance Newtype Address _
 
 instance ToTsType Address where
   toTsType _ = defaultToTsType ptAddress []
@@ -353,7 +353,7 @@ newtype PrivateKey = PrivateKey CirclesPink.Data.PrivateKey.Type.PrivateKey
 ptPrivateKey :: PursType
 ptPrivateKey = PursType "CirclesPink_Data_PrivateKey_Type" "PrivateKey"
 
-derive instance newtypePrivateKey :: Newtype PrivateKey _
+derive instance Newtype PrivateKey _
 
 instance ToTsType PrivateKey where
   toTsType _ = defaultToTsType ptPrivateKey []
@@ -371,7 +371,7 @@ newtype RemoteData a b c d = RemoteData (RemoteData.RemoteData a b c d)
 ptRemoteData :: PursType
 ptRemoteData = PursType "RemoteData" "RemoteData"
 
-derive instance newtypeRemoteData :: Newtype (RemoteData a b c d) _
+derive instance Newtype (RemoteData a b c d) _
 
 instance toTsType_RemoteData ::
   ( ToTsType a
@@ -387,7 +387,7 @@ instance toTsType_RemoteData ::
     , toTsType (Proxy :: _ d)
     ]
 
-instance toTsDef_RemoteData :: ToTsDef (RemoteData a b c d) where
+instance ToTsDef (RemoteData a b c d) where
   toTsDef _ = defaultToTsDef ptRemoteData $ TS.name <$> [ "A", "B", "C", "D" ]
 
 instance toPursType_RemoteData ::

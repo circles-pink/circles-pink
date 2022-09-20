@@ -34,17 +34,17 @@ regex = unsafeRegex "^[0-9]+$" noFlags
 toDecimalStr :: BN -> String
 toDecimalStr bn = toStrImpl bn 10
 
-instance show :: Show BN where
+instance Show BN where
   show = toDecimalStr
 
-instance eq :: Eq BN where
+instance Eq BN where
   eq = eqImpl
 
-instance semiring :: Semiring BN where
+instance Semiring BN where
   add = addImpl
   mul = mulImpl
   zero = unsafePartial $ fromJust $ fromDecimalStr ("0")
   one = unsafePartial $ fromJust $ fromDecimalStr ("1")
 
-instance decodeJsonBN :: DecodeJson BN where
+instance DecodeJson BN where
   decodeJson x = decodeJson x >>= fromDecimalStr >>> note (TypeMismatch "Cannot parse BN")

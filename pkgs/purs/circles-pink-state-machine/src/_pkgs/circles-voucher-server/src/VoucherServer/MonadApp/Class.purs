@@ -81,9 +81,9 @@ data AppError
   | ErrPayloadClient ClientError
   | ErrGetVoucherAmount
 
-derive instance genericVSE :: Generic AppError _
-derive instance eqVSE :: Eq AppError
-instance showVSE :: Show AppError where
+derive instance Generic AppError _
+derive instance Eq AppError
+instance Show AppError where
   show = genericShow
 
 -- Due to a compiler bug (unknown module: Partially applied type synonyms)

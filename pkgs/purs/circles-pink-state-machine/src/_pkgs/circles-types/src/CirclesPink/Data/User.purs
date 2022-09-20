@@ -14,22 +14,22 @@ newtype User = User
   , avatarUrl :: String
   }
 
-derive instance newtypeUser :: Newtype User _
+derive instance Newtype User _
 
-derive newtype instance showUser :: Show User
+derive newtype instance Show User
 
-derive newtype instance eqUser :: Eq User
+derive newtype instance Eq User
 
-derive newtype instance ordUser :: Ord User
+derive newtype instance Ord User
 
 ptUser :: PursType
 ptUser = PursType "CirclesPink_Data_User" "User"
 
-instance toTsTypeDefUser :: ToTsDef User where
+instance ToTsDef User where
   toTsDef _ = defaultToTsDef ptUser []
 
-instance toTsTypeUser :: ToTsType User where
+instance ToTsType User where
   toTsType _ = defaultToTsType ptUser []
 
-instance toPursTypeUser :: ToPursType User where
+instance ToPursType User where
   toPursType _ = defaultToPursType ptUser []

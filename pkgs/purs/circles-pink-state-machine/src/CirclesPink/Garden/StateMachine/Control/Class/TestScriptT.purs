@@ -31,23 +31,23 @@ type TestScriptT' m a =
 -- liftMonadTestEnv :: forall m a. MonadTestEnv m => (State {} a) -> TestScriptT a
 -- liftMonadTestEnv = TestScriptT <<< lift
 
-instance monadEffectScriptM :: MonadEffect m => MonadEffect (TestScriptT m) where
+instance MonadEffect m => MonadEffect (TestScriptT m) where
   liftEffect = liftEffect >>> TestScriptT
 
-instance monadCirclesTestScriptT :: Monad m => MonadCircles (TestScriptT m) where
+instance Monad m => MonadCircles (TestScriptT m) where
   sleep _ = pure unit
 
-instance monadAsk :: Monad m => MonadAsk (CirclesConfig (TestScriptT m)) (TestScriptT m) where
+instance Monad m => MonadAsk (CirclesConfig (TestScriptT m)) (TestScriptT m) where
   ask = TestScriptT $ ask
 
 -- getSafeAddress = todo
 
-instance monadScriptTestScriptT :: Monad m => MonadScript (TestScriptT m)
+instance Monad m => MonadScript (TestScriptT m)
 
-instance monadLogTestScriptT :: Monad m => MonadLog (TestScriptT m) where
+instance Monad m => MonadLog (TestScriptT m) where
   log _ = pure unit
 
-instance monadStateTestScriptT :: Monad m => MonadState CirclesState (TestScriptT m) where
+instance Monad m => MonadState CirclesState (TestScriptT m) where
   state = TestScriptT <<< state
 
 -- Cannot derive because of '[1/1 PartiallyAppliedSynonym] (unknown module)' error
@@ -55,18 +55,18 @@ instance monadStateTestScriptT :: Monad m => MonadState CirclesState (TestScript
 unwrapTestScriptT :: forall m a. TestScriptT m a -> TestScriptT' m a
 unwrapTestScriptT (TestScriptT x) = x
 
-instance applyTestScriptT :: Monad m => Apply (TestScriptT m) where
+instance Monad m => Apply (TestScriptT m) where
   apply (TestScriptT f) (TestScriptT x) = TestScriptT $ apply f x
 
-instance bindTestScriptT :: Monad m => Bind (TestScriptT m) where
+instance Monad m => Bind (TestScriptT m) where
   bind (TestScriptT x) f = TestScriptT $ bind x (f >>> unwrapTestScriptT)
 
-instance applicativeTestScriptT :: Monad m => Applicative (TestScriptT m) where
+instance Monad m => Applicative (TestScriptT m) where
   pure x = TestScriptT $ pure x
 
-instance monadTestScriptT :: Monad m => Monad (TestScriptT m)
+instance Monad m => Monad (TestScriptT m)
 
-instance functorTestScriptT :: Functor m => Functor (TestScriptT m) where
+instance Functor m => Functor (TestScriptT m) where
   map f (TestScriptT x) = TestScriptT $ map f x
 
 runTestScriptT :: forall m a. Monad m => CirclesConfig (TestScriptT m) ->  CirclesState -> TestScriptT m a -> m (a /\ CirclesState /\ {})

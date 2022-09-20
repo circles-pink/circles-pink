@@ -47,26 +47,26 @@ xbgeSpec = Spec
 
 newtype Address = Address C.Address
 
-derive instance newtypeAddress :: Newtype Address _
+derive instance Newtype Address _
 
-derive newtype instance ordAddress :: Ord Address
-derive newtype instance eqAddress :: Eq Address
-derive newtype instance showAddress :: Show Address
-derive newtype instance writeForeignAddress :: WriteForeign Address
-derive newtype instance parseValueAddress :: ParseValue Address
+derive newtype instance Ord Address
+derive newtype instance Eq Address
+derive newtype instance Show Address
+derive newtype instance WriteForeign Address
+derive newtype instance ParseValue Address
 
--- instance decodeParamAddress :: DecodeParam Address where
+-- instance DecodeParam Address where
 --   decodeParam x = decodeParam x
 --     >>= (parseAddress >>> note "Could not parse Address")
 --     <#> Address
 
-instance encodeParamAddress :: EncodeParam Address where
+instance EncodeParam Address where
   encodeParam (Address x) = encodeParam $ show x
 
-instance encodeQueryParamAddress :: EncodeQueryParam Address where
+instance EncodeQueryParam Address where
   encodeQueryParam (Address x) = encodeQueryParam $ show x
 
-instance arbitraryAddress :: Arbitrary Address where
+instance Arbitrary Address where
   arbitrary = pure sampleAddress
 
 sampleAddress :: Address

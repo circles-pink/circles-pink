@@ -56,17 +56,17 @@ newtype Graph id e n = Graph
       }
   )
 
-instance functor :: Functor (Graph id e) where
+instance Functor (Graph id e) where
   map f (Graph nodes) = Graph $ map (\x -> x { data = f x.data }) nodes
 
-instance foldable :: Foldable (Graph id e) where
+instance Foldable (Graph id e) where
   foldr f x (Graph nodes) = foldr (\n z -> f n.data z) x nodes
   foldl f x (Graph nodes) = foldl (\z n -> f z n.data) x nodes
   foldMap f (Graph nodes) = foldMap (\n -> f n.data) nodes
 
-derive instance eq :: (Eq id, Eq e, Eq n) => Eq (Graph id e n)
+derive instance (Eq id, Eq e, Eq n) => Eq (Graph id e n)
 
-instance show :: (Show id, Show e, Show n) => Show (Graph id e n) where
+instance (Show id, Show e, Show n) => Show (Graph id e n) where
   show g = "(fromFoldables " <> show (toUnfoldables' g) <> ")"
     where
       toUnfoldables' = toUnfoldables :: _ -> { nodes :: Array _ | _ }
