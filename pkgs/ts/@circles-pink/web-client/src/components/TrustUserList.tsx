@@ -13,6 +13,7 @@ import {
   Address,
   _Address,
   _Array,
+  _TrustNode,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
 import { Theme } from '../context/theme';
@@ -161,6 +162,7 @@ export const TrustUserList = (props: Props) => {
 
             return (
               <TrustRow
+                key={_Address.addrToString(_TrustNode.getAddress(trustNode))}
                 {...{ relation, trustNode, delay: getDelay() }}
                 {...props}
               />

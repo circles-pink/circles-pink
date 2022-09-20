@@ -44,8 +44,8 @@ import { pipe } from 'fp-ts/lib/function';
 
 const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
-    address: _TrustNode.getAddress(tn),
-    label: _TrustNode.unwrap(tn).userIdent,
+    id: _Address.addrToString(_TrustNode.getAddress(tn)),
+    label: _UserIdent.getIdentifier(_TrustNode.unwrap(tn).userIdent),
   },
 });
 
@@ -101,6 +101,8 @@ export const TrustGraph = ({
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
 
   const elements = getElementsFromData(graph);
+
+  console.log(elements);
 
   useEffect(() => {
     if (!cy) return;
