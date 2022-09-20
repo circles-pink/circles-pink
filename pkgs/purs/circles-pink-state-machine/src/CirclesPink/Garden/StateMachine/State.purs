@@ -162,7 +162,7 @@ init =
 initUserData :: CirclesState
 initUserData = init
 
-initDebug :: forall v. Variant (debug :: DebugState | v)
+initDebug :: CirclesState
 initDebug =
   _debug
     { magicWords: "hockey middle idea enable forget case mountain sugar chronic income crouch critic venue giant tell marble rose scene prefer shoe cheap run print pigeon"

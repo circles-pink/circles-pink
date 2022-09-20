@@ -2,11 +2,10 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
 import { Debug } from "@circles-pink/web-client/src/onboarding/views/Debug";
 import { useStateMachine } from "@circles-pink/web-client/src/onboarding/useStateMachine";
-import { mkControl } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
+import { mkCfg } from "@circles-pink/web-client/src/onboarding";
+import { _StateMachine, _TS } from "@circles-pink/state-machine/src";
 import { env } from "@circles-pink/web-client/src/env";
-import { initDebug } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.State";
-import { left } from "@circles-pink/state-machine/output/Data.FpTs.Either";
-import { Just, Nothing } from "@circles-pink/state-machine/output/Data.Maybe";
+import { fromFetchImplNative } from '@circles-pink/web-client/src/safe-as';
 
 export default {
   title: "Components/Internal",
@@ -18,11 +17,9 @@ export default {
   },
 } as ComponentMeta<typeof Debug>;
 
-const control = mkControl(env)({
-  extractEmail: left("foo@bar.com"),
-  onTrackingResumee: Nothing.value,
-  onTrackingEvent: Nothing.value,
-});
+const cfg = mkCfg({})
+
+const control = _TS.mkControl(fromFetchImplNative(window.fetch))(env)(cfg);
 
 export const DebugCirclesCore = (args): ReactElement => {
   const [state, act] = useStateMachine(initDebug, control);

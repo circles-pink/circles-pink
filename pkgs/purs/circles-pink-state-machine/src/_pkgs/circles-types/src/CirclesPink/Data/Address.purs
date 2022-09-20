@@ -14,7 +14,6 @@ import Data.Array.NonEmpty as NEA
 import Data.Maybe (Maybe, fromJust)
 import Data.Newtype (class Newtype, wrap)
 import Data.String.Utils as Str
-import FpTs.Class (class FpTs)
 import GraphQL.Client.Args (class ArgGql)
 import Network.Ethereum.Core.HexString (HexString, mkHexString)
 import Network.Ethereum.Core.Signatures (mkAddress) as Exp
@@ -62,10 +61,6 @@ instance ToTsType Address where
 
 instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
-
-instance FpTs Address Address where
-  toFpTs = identity
-  fromFpTs = identity
 
 -- instance decodeParamAddress :: DecodeParam Address where
 --   decodeParam x = decodeParam x

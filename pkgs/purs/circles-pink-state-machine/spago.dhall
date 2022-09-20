@@ -22,7 +22,6 @@
   , "foldable-traversable"
   , "foreign"
   , "foreign-object"
-  , "fp-ts"
   , "functions"
   , "graphql-client"
   , "heterogeneous"
