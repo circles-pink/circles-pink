@@ -361,6 +361,10 @@ export const Dashboard = ({
 
   const [search, setSearch] = useState<string>(''); // Search Input
 
+  useEffect(() => {
+    act(_dashboardAction._userSearch({ query: search }));
+  }, [search]);
+
   // -----------------------------------------------------------------------------
   // Transfer
   // -----------------------------------------------------------------------------
@@ -368,7 +372,6 @@ export const Dashboard = ({
   useEffect(() => {
     pipe(
       state.transferResult,
-
       _RemoteData.unRemoteData({
         onNotAsked: () => {},
         onLoading: () => {},

@@ -59,14 +59,14 @@ const Row = (props: RowProps) => {
 
   const outgoingEdge = pipe(
     trusts,
-    lookupEdge(_Pair.Pair(centerAddress)(targetAddress)),
+    lookupEdge(_Pair.mkPair(centerAddress)(targetAddress)),
     hush,
     _Nullable.toNullable
   );
 
   const incomingEdge = pipe(
     trusts,
-    lookupEdge(_Pair.Pair(targetAddress)(centerAddress)),
+    lookupEdge(_Pair.mkPair(targetAddress)(centerAddress)),
     hush,
     _Nullable.toNullable
   );
@@ -220,7 +220,12 @@ export const UserSearch = (props: UserSearchProps) => {
         {pipe(
           users,
           mapArray(userIdent => (
-            <Row {...props} userIdent={userIdent} getDelay={getDelay} />
+            <Row
+              key={_UserIdent.getIdentifier(userIdent)}
+              {...props}
+              userIdent={userIdent}
+              getDelay={getDelay}
+            />
           ))
         )}
       </ListContainer>
