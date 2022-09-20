@@ -1,4 +1,5 @@
 import { DashboardState, _RemoteData } from '@circles-pink/state-machine/src';
+import BN from 'bn.js';
 import { pipe } from 'fp-ts/lib/function';
 import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
@@ -18,7 +19,7 @@ export const Balance = ({
   requestUBIPayoutResult,
 }: BalanceProps) => {
   // a state is needed here, to avoid flickering balance display
-  const [resBalance, setResBalance] = useState<string>('0');
+  const [resBalance, setResBalance] = useState<BN>(new BN('0'));
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRequesting, setIsRequesting] = useState<boolean>(false);
 
@@ -36,7 +37,7 @@ export const Balance = ({
           setIsLoading(false);
         },
         onSuccess: balance => {
-          setResBalance(balance.toString());
+          setResBalance(balance.data);
         },
       })
     );

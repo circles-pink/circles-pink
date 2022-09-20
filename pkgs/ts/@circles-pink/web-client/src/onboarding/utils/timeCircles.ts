@@ -1,5 +1,6 @@
 const Web3 = require('web3');
 import { crcToTc, tcToCrc } from '@circles/timecircles';
+import BN from 'bn.js';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -37,15 +38,17 @@ const mapCircles = (amount: number, date: TcDate, type: Conversion) => {
 // -----------------------------------------------------------------------------
 
 export function displayBalance(
-  amount: string,
+  amount: BN,
   currency: Currency = 'TIME-CIRCLES',
   date: TcDate = new Date()
 ) {
   return mapCurrency(amount, date, currency).toFixed(2);
 }
 
-const mapCurrency = (amount: string, date: TcDate, type: Currency) => {
-  const freckles = Number.parseFloat(Web3.utils.fromWei(amount, 'ether'));
+const mapCurrency = (amount: BN, date: TcDate, type: Currency) => {
+  const freckles = Number.parseFloat(
+    Web3.utils.fromWei(amount.toString(), 'ether')
+  );
 
   switch (type) {
     case 'CIRCLES':
