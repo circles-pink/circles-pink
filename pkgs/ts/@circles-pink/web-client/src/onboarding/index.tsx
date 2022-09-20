@@ -320,6 +320,7 @@ const mkCfgWithDefaults = (cfg: UserConfig): Required<UserConfig> => {
     shadowFriends: [],
     safeAddress: null,
     xbgeSafeAddress: null,
+    ...cfg,
   };
 };
 
