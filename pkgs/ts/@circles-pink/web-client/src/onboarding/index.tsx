@@ -25,7 +25,7 @@ import { XbgeDashboard } from './views/dashboard/XbgeDashboard';
 import { XbgeTrusts } from './views/XbgeTrusts';
 import { mkI18n } from '../i18n_custom';
 import { Resource } from 'i18next';
-import { UserConfig } from '../types/user-config';
+import { Content, Language, UserConfig } from '../types/user-config';
 import {
   CirclesAction,
   CirclesConfigEffect,
@@ -53,10 +53,6 @@ import { Resumee } from '@circles-pink/state-machine/output/CirclesPink.Garden.S
 import { unsafeUnkownToJson } from '../unsafe-as';
 import { pipe } from 'fp-ts/lib/function';
 import { fromFetchImplNative } from '../safe-as';
-
-type Language = 'en' | 'de';
-
-type Content = {};
 
 export type OnboardingProps = {
   initState?: CirclesState;
@@ -106,19 +102,9 @@ type ViewProps = {
   cfg: UserConfig;
 };
 
-const View = ({ state, act, cfg: cfg_ }: ViewProps): ReactElement | null => {
-  const cfg = {
-    lang: 'en',
-    content: {},
-    email: () => {},
-    voucherShopEnabled: false,
-    xbgeCampaign: false,
-    testEnv: false,
-    sharingFeature: null,
-    strictMode: false,
-    buyVoucherEurLimit: 70,
-    ...cfg_,
-  };
+const View = ({ state, act, cfg: _cfg }: ViewProps): ReactElement | null => {
+  const cfg = mkCfgWithDefaults(_cfg);
+
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -165,7 +151,7 @@ const View = ({ state, act, cfg: cfg_ }: ViewProps): ReactElement | null => {
             sharingFeature={cfg.sharingFeature}
             buyVoucherEurLimit={cfg.buyVoucherEurLimit}
             shadowFriends={cfg.shadowFriends}
-            xbgeSafeAddress={cfg.xbgeSafeAddress}
+            xbgeSafeAddress={cfg.xbgeSafeAddress || undefined}
           />
         );
       }
@@ -316,6 +302,25 @@ const OnboardingContent = ({
       </I18nextProvider>
     </AnimProvider>
   );
+};
+
+const mkCfgWithDefaults = (cfg: UserConfig): Required<UserConfig> => {
+  return {
+    lang: 'en',
+    content: {},
+    email: () => {},
+    onTrackingEvent: () => {},
+    onTrackingResumee: () => {},
+    voucherShopEnabled: false,
+    xbgeCampaign: false,
+    testEnv: false,
+    sharingFeature: null,
+    strictMode: false,
+    buyVoucherEurLimit: 70,
+    shadowFriends: [],
+    safeAddress: null,
+    xbgeSafeAddress: null,
+  };
 };
 
 // -----------------------------------------------------------------------------

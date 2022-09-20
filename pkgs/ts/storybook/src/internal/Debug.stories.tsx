@@ -5,7 +5,7 @@ import { useStateMachine } from "@circles-pink/web-client/src/onboarding/useStat
 import { mkCfg } from "@circles-pink/web-client/src/onboarding";
 import { _StateMachine, _TS } from "@circles-pink/state-machine/src";
 import { env } from "@circles-pink/web-client/src/env";
-import { fromFetchImplNative } from '@circles-pink/web-client/src/safe-as';
+import { fromFetchImplNative } from "@circles-pink/web-client/src/safe-as";
 
 export default {
   title: "Components/Internal",
@@ -17,12 +17,12 @@ export default {
   },
 } as ComponentMeta<typeof Debug>;
 
-const cfg = mkCfg({})
+const cfg = mkCfg({});
 
 const control = _TS.mkControl(fromFetchImplNative(window.fetch))(env)(cfg);
 
 export const DebugCirclesCore = (args): ReactElement => {
-  const [state, act] = useStateMachine(initDebug, control);
+  const [state, act] = useStateMachine(_StateMachine.initDebug, control);
 
   return (
     <>
