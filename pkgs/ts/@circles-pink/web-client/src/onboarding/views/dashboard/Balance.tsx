@@ -39,6 +39,7 @@ export const Balance = ({
         },
         onSuccess: balance => {
           setResBalance(toNativeBN(balance.data));
+          setIsLoading(false);
         },
       })
     );

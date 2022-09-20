@@ -1,11 +1,4 @@
-import React, {
-  ReactElement,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import {
   Button,
   ButtonLinkLike,
@@ -13,7 +6,6 @@ import {
   TagButton,
 } from '../../../components/forms';
 import { JustText, SubClaim, Text } from '../../../components/text';
-import { UserDashboard } from '../../../components/UserDashboard';
 import { FadeIn } from 'anima-react';
 import {
   Address,
@@ -32,7 +24,6 @@ import {
 import { getIncrementor } from '../../utils/getCounter';
 import { t } from 'i18next';
 import { ThemeContext } from '../../../context/theme';
-import tw, { css, styled } from 'twin.macro';
 import {
   mdiCashFast,
   mdiGiftOutline,
@@ -46,28 +37,30 @@ import {
 import { TrustUserList } from '../../../components/TrustUserList';
 import { Overlay } from '../../../components/Overlay';
 import {
-  JustifyBetweenCenter,
   JustifyStartCenter,
   Margin,
   TwoButtonCol,
-  TwoButtonRow,
 } from '../../../components/helper';
-import { Send, SendProps } from './Send';
-import { Receive } from './Receive';
 import { Balance } from './Balance';
 import { StateMachineDebugger } from '../../../components/StateMachineDebugger';
 import { TrustGraph } from '../../../components/TrustGraph/index';
 import { UserSearch } from '../../../components/UserSearch';
 import { ListVouchers } from './ListVouchers';
 import { BuyVouchers } from './BuyVouchers';
-import { ConfirmSend } from './ConfirmSend';
-import { displayBalance } from '../../utils/timeCircles';
 import { LightColorFrame } from '../../../components/layout';
-import { Frame } from '../../../components/Frame';
 import { UserConfig } from '../../../types/user-config';
 import { pipe } from 'fp-ts/lib/function';
 import { XbgeUserDashboard } from '../../../components/XbgeUserDashboard';
-import { fromNativeBN, toNativeBN } from '../../../safe-as';
+import { DashboardOverlay, OverlayTag } from './DashboardOverlay';
+import { MainContent, TwoCols } from './ui';
+import { useHealthCheck } from './hooks/useHealthCheck';
+import { useBalance } from './hooks/useBalance';
+import { useBoughtVouchersAmount } from './hooks/useBoughtVouchersAmount';
+import {
+  useUBIPayoutBalancePolling,
+  useVoucherBalancePolling,
+} from './hooks/useExtraBalancePolling';
+import { useClientPolling } from './hooks/useClientPolling';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -109,16 +102,44 @@ export const XbgeDashboard = ({
   shadowFriends,
   xbgeSafeAddress,
 }: XbgeDashboardProps): ReactElement => {
+  // -----------------------------------------------------------------------------
+  // Data polling - Initial fetching and idle polling
+  // -----------------------------------------------------------------------------
+
+  // Perform an initial fetch and continuous polling of relevant dashboard data
+  useClientPolling(act);
+
+  // -----------------------------------------------------------------------------
+  // Data polling - Balance polling on user action
+  // -----------------------------------------------------------------------------
+
+  // Poll Balance faster until voucher arrives
+  useVoucherBalancePolling(act, state.vouchersResult, state.transferResult);
+
+  // Poll Balance faster until UBI payout arrives
+  useUBIPayoutBalancePolling(
+    act,
+    state.getBalanceResult,
+    state.requestUBIPayoutResult
+  );
+
+  // -----------------------------------------------------------------------------
+  // Utilities
+  // -----------------------------------------------------------------------------
+
   // Theme
   const [theme] = useContext(ThemeContext);
 
+  // Animation
+  const getDelay = getIncrementor(0, 0.05);
+
   // Overlay
-  const [[overlayType, isOpen], setOverlay] = useState<[Overlay, boolean]>([
+  const [[overlayType, isOpen], setOverlay] = useState<[OverlayTag, boolean]>([
     'SEND',
     false,
   ]);
 
-  const toggleOverlay = (type: Overlay) => {
+  const toggleOverlay = (type: OverlayTag) => {
     if (isOpen && overlayType !== type) {
       setOverlay([type, true]);
     } else if (isOpen && overlayType === type) {
@@ -130,260 +151,10 @@ export const XbgeDashboard = ({
     }
   };
 
-  // User Interaction
-  // Set transfer target, when clicking on contact action
-  const [overwriteTo, setOverwriteTo] = useState<Address | undefined>();
-
-  // Voucher Shop
-  const [selectedOffer, setSelectedOffer] = useState<SelectedOffer>();
-  const [justBoughtVoucher, setJustBoughtVoucher] = useState(false);
-
-  const initializeVoucherOrder = (offer: SelectedOffer) => {
-    setSelectedOffer(offer);
-    toggleOverlay('CONFIRM_SEND');
-  };
-
-  // animation
-  const getDelay = getIncrementor(0, 0.05);
-
-  // -----------------------------------------------------------------------------
-  // Data polling - Initial fetching and idle polling
-  // -----------------------------------------------------------------------------
-
-  const BALANCE_INTERVAL = 10000;
-  const TRUST_NETWORK_INTERVAL = 15000;
-  const UBI_PAYOUT_INTERVAL = 60000;
-  const VOUCHER_INTERVAL = 30000;
-
-  useEffect(() => {
-    // Gather initial client information
-    act(_dashboardAction._getBalance(unit));
-    act(_dashboardAction._getTrusts(unit));
-    act(_dashboardAction._getUBIPayout(unit));
-    act(_dashboardAction._getVouchers(getTimestamp()));
-    act(_dashboardAction._getVoucherProviders(unit));
-
-    // Start polling tasks
-    const balancePolling = setInterval(() => {
-      act(_dashboardAction._getBalance(unit));
-    }, BALANCE_INTERVAL);
-
-    const trustNetworkPolling = setInterval(() => {
-      act(_dashboardAction._getTrusts(unit));
-    }, TRUST_NETWORK_INTERVAL);
-
-    const ubiPayoutPolling = setInterval(() => {
-      act(_dashboardAction._getTrusts(unit));
-    }, UBI_PAYOUT_INTERVAL);
-
-    const voucherPolling = setInterval(() => {
-      act(_dashboardAction._getVouchers(getTimestamp()));
-    }, VOUCHER_INTERVAL);
-
-    const voucherProviderPolling = setInterval(() => {
-      act(_dashboardAction._getVoucherProviders(unit));
-    }, VOUCHER_INTERVAL);
-
-    // Clear interval on unmount
-    return () => {
-      clearInterval(balancePolling);
-      clearInterval(trustNetworkPolling);
-      clearInterval(ubiPayoutPolling);
-      clearInterval(voucherPolling);
-      clearInterval(voucherProviderPolling);
-    };
-  }, []);
-
-  // Increased polling after voucher buy
-  useEffect(() => {
-    let balancePolling: any, voucherPolling: any;
-
-    if (justBoughtVoucher) {
-      // console.log('Initialize faster polling..');
-      balancePolling = setInterval(() => {
-        act(_dashboardAction._getBalance(unit));
-      }, 1500);
-
-      voucherPolling = setInterval(() => {
-        act(_dashboardAction._getVouchers(getTimestamp()));
-      }, 3000);
-    } else if (!justBoughtVoucher) {
-      // console.log('Finish faster polling');
-      clearInterval(balancePolling);
-      clearInterval(voucherPolling);
-    }
-
-    return () => {
-      clearInterval(balancePolling);
-      clearInterval(voucherPolling);
-    };
-  }, [justBoughtVoucher]);
-
-  // -----------------------------------------------------------------------------
-  // Data polling - Balance
-  // -----------------------------------------------------------------------------
-
-  const MAX_RETRYS = 10;
-  const RETRY_INTERVAL = 1000;
-
-  // Balance refresh after transfer
-
-  const [initBalTransfer, setInitBalTransfer] = useState<string | null>(null);
-  const [countRefreshTransfer, setCountRefreshTransfer] = useState<number>(0);
-
-  useEffect(() => {
-    const balance = pipe(
-      state.vouchersResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => null,
-        onLoading: () => null,
-        onFailure: () => null,
-        onSuccess: x =>
-          x.data
-            .reduce((p, c) => p + _VoucherServer.unVoucherAmount(c.amount), 0)
-            .toString(),
-      })
-    );
-
-    pipe(
-      state.transferResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => {},
-        onLoading: () => {
-          setCountRefreshTransfer(0);
-          setInitBalTransfer(balance);
-        },
-        onFailure: () => {},
-        onSuccess: () => {
-          if (
-            balance === initBalTransfer &&
-            countRefreshTransfer < MAX_RETRYS
-          ) {
-            setTimeout(() => {
-              act(_dashboardAction._getBalance(unit));
-              setCountRefreshTransfer(countRefreshTransfer + 1);
-            }, RETRY_INTERVAL);
-          }
-        },
-      })
-    );
-  }, [state.transferResult, countRefreshTransfer]);
-
-  // Balance refresh after UBI payout
-
-  const [initBalPayout, setInitBalPayout] = useState<string | null>(null);
-  const [countRefreshPayout, setCountRefreshPayout] = useState<number>(0);
-
-  useEffect(() => {
-    const balance = pipe(
-      state.vouchersResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => null,
-        onLoading: () => null,
-        onFailure: () => null,
-        onSuccess: x => x.data.toString(),
-      })
-    );
-
-    pipe(
-      state.requestUBIPayoutResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => {},
-        onLoading: () => {
-          setCountRefreshPayout(0);
-          setInitBalPayout(balance);
-        },
-        onFailure: () => {},
-        onSuccess: () => {
-          if (balance === initBalPayout && countRefreshPayout < MAX_RETRYS) {
-            setTimeout(() => {
-              act(_dashboardAction._getBalance(unit));
-              setCountRefreshPayout(countRefreshPayout + 1);
-            }, RETRY_INTERVAL);
-          }
-        },
-      })
-    );
-  }, [state.requestUBIPayoutResult, countRefreshPayout]);
-
-  // Balance for vouchers
-  const [userBalance, setUserBalance] = useState<number>(0);
-  const [boughtVouchersAmount, setBoughtVouchersAmount] = useState(0);
-
-  useEffect(() => {
-    pipe(
-      state.getBalanceResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => {},
-        onLoading: () => {},
-        onFailure: () => {},
-        onSuccess: x => {
-          setUserBalance(
-            parseFloat(displayBalance(toNativeBN(x.data), 'TIME-CIRCLES'))
-          );
-        },
-      })
-    );
-  }, [state.getBalanceResult]);
-
-  useEffect(() => {
-    pipe(
-      state.vouchersResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => {},
-        onLoading: () => {},
-        onFailure: () => {},
-        onSuccess: x => {
-          setBoughtVouchersAmount(
-            x.data.reduce(
-              (p, c) => p + _VoucherServer.unVoucherAmount(c.amount),
-              0
-            )
-          );
-        },
-      })
-    );
-  }, [state.vouchersResult]);
-
-  // -----------------------------------------------------------------------------
-  // Redeploy, if token is not deployed
-  // -----------------------------------------------------------------------------
-
-  useEffect(() => {
-    pipe(
-      state.checkUBIPayoutResult,
-      _RemoteData.unRemoteData({
-        onNotAsked: () => {},
-        onLoading: () => {},
-        onFailure: x => {
-          if (
-            x.error.type === 'errNative' &&
-            x.error.value.name === 'CoreError' &&
-            x.error.value.message ===
-              'Invalid Token address. Did you forget to deploy the Token?'
-          ) {
-            act(_dashboardAction._redeploySafeAndToken(unit));
-          }
-        },
-        onSuccess: () => {},
-      })
-    );
-  }, [state.checkUBIPayoutResult]);
-
-  // -----------------------------------------------------------------------------
-  // User Search
-  // -----------------------------------------------------------------------------
-
-  const [search, setSearch] = useState<string>(''); // Search Input
-
-  // -----------------------------------------------------------------------------
-  // Transfer
-  // -----------------------------------------------------------------------------
-
+  // Close after successful transfer
   useEffect(() => {
     pipe(
       state.transferResult,
-
       _RemoteData.unRemoteData({
         onNotAsked: () => {},
         onLoading: () => {},
@@ -397,8 +168,42 @@ export const XbgeDashboard = ({
   }, [state.transferResult]);
 
   // -----------------------------------------------------------------------------
-  // Trust
+  // User Interaction
   // -----------------------------------------------------------------------------
+
+  // Set transfer target, when clicking on contact action
+  const [overwriteTo, setOverwriteTo] = useState<Address | undefined>();
+
+  // Voucher Shop
+  const [selectedOffer, setSelectedOffer] = useState<SelectedOffer>();
+  const [justBoughtVoucher, setJustBoughtVoucher] = useState(false);
+  const boughtVouchersAmount = useBoughtVouchersAmount(state.vouchersResult);
+
+  const initializeVoucherOrder = (offer: SelectedOffer) => {
+    setSelectedOffer(offer);
+    toggleOverlay('CONFIRM_SEND');
+  };
+
+  // Balance for vouchers
+  const userBalance = useBalance(state.getBalanceResult);
+
+  // -----------------------------------------------------------------------------
+  // User Search
+  // -----------------------------------------------------------------------------
+
+  const [search, setSearch] = useState<string>(''); // Search Input
+
+  useEffect(() => {
+    act(_dashboardAction._userSearch({ query: search }));
+  }, [search]);
+
+  // -----------------------------------------------------------------------------
+  // Redeploy, if token is not deployed
+  // -----------------------------------------------------------------------------
+
+  // Rarely the token is not deployed after account finalization
+  // Perform a check and redeploy if necessary
+  useHealthCheck(act, state.checkUBIPayoutResult);
 
   return (
     <XbgeUserDashboard
@@ -668,75 +473,8 @@ export const XbgeDashboard = ({
             </FadeIn>
           </MainContent>
 
-          {/* <MainContent>
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <TrustUserList
-                title={t('dashboard.trustNetworkTitle')}
-                graph={state.graph}
-                ownAddress={state.user.safeAddress}
-                theme={theme}
-                icon={mdiLan}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                trustAddResult={state.trustAddResult}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                trustRemoveResult={state.trustRemoveResult}
-                description={t('dashboard.xbgeSpecial.trustNetworkDescription')}
-              />
-            </FadeIn>
-            <FadeIn orientation={'up'} delay={getDelay()}>
-              <UserSearch
-                title={t('dashboard.exploreTitle')}
-                trusts={searchResult}
-                ownSafeAddress={state.user.safeAddress}
-                theme={theme}
-                icon={mdiMagnify}
-                toggleOverlay={toggleOverlay}
-                setOverwriteTo={setOverwriteTo}
-                addTrust={to => act(A._dashboard(A._addTrustConnection(to)))}
-                removeTrust={to =>
-                  act(A._dashboard(A._removeTrustConnection(to)))
-                }
-                description={t('dashboard.xbgeSpecial.userSearchDescription')}
-                actionRow={
-                  <div>
-                    <Input
-                      type="text"
-                      value={search}
-                      placeholder={t('dashboard.userSearchPlaceholder')}
-                      onChange={e => setSearch(e.target.value)}
-                    />
-                    <>
-                      {shadowFriends && shadowFriends.length > 0 && (
-                        <>
-                          <Margin bottom={0.5}>
-                            <JustText fontSize={0.75}>
-                              {t('dashboard.xbgeSpecial.yourShadowFriends')}
-                            </JustText>
-                          </Margin>
-                          {shadowFriends.map((friend, index) => (
-                            <TagButton
-                              theme={theme}
-                              onClick={() => setSearch(friend)}
-                              key={`${friend}-${index}`}
-                            >
-                              {friend}
-                            </TagButton>
-                          ))}
-                        </>
-                      )}
-                    </>
-                  </div>
-                }
-              />
-            </FadeIn>
-          </MainContent> */}
-
           {sharingFeature && (
-            <TopMargin>
+            <Margin top={1}>
               <LightColorFrame
                 title={t('dashboard.xbgeSpecial.shareFeatureTitle')}
                 theme={theme}
@@ -744,11 +482,11 @@ export const XbgeDashboard = ({
               >
                 {sharingFeature}
               </LightColorFrame>
-            </TopMargin>
+            </Margin>
           )}
 
           <FadeIn orientation={'up'} delay={getDelay()}>
-            <TopMargin>
+            <Margin top={1}>
               <LightColorFrame
                 theme={theme}
                 title="Trust Graph"
@@ -772,7 +510,7 @@ export const XbgeDashboard = ({
                   theme={theme}
                 />
               </LightColorFrame>
-            </TopMargin>
+            </Margin>
           </FadeIn>
         </>
       }
@@ -784,7 +522,6 @@ export const XbgeDashboard = ({
             content={
               <DashboardOverlay
                 overlay={overlayType}
-                closeOverlay={() => setOverlay(['SEND', false])}
                 overwriteTo={overwriteTo}
                 selectedOffer={selectedOffer}
                 setJustBoughtVoucher={setJustBoughtVoucher}
@@ -811,91 +548,3 @@ export const XbgeDashboard = ({
     />
   );
 };
-
-// -----------------------------------------------------------------------------
-// Util
-// -----------------------------------------------------------------------------
-
-const getTimestamp = () => Math.round(new Date().getTime() / 1000).toString();
-
-// -----------------------------------------------------------------------------
-// UI / DashboardOverlay
-// -----------------------------------------------------------------------------
-
-type DashboardOverlayProps = SendProps & {
-  overlay: Overlay;
-  closeOverlay: () => void;
-  selectedOffer?: SelectedOffer;
-  setJustBoughtVoucher: React.Dispatch<SetStateAction<boolean>>;
-  xbgeSafeAddress?: string;
-};
-
-const DashboardOverlay = ({
-  overlay,
-  state,
-  act,
-  theme,
-  closeOverlay,
-  setJustBoughtVoucher,
-  overwriteTo,
-  selectedOffer,
-  xbgeSafeAddress,
-}: DashboardOverlayProps): ReactElement | null => {
-  switch (overlay) {
-    case 'SEND':
-      return (
-        <Send overwriteTo={overwriteTo} state={state} act={act} theme={theme} />
-      );
-    case 'RECEIVE':
-      return <Receive state={state} act={act} theme={theme} />;
-    case 'CONFIRM_SEND':
-      return selectedOffer ? (
-        <ConfirmSend
-          selectedOffer={selectedOffer}
-          state={state}
-          act={act}
-          theme={theme}
-          setJustBoughtVoucher={setJustBoughtVoucher}
-          xbgeSafeAddress={xbgeSafeAddress}
-        />
-      ) : null;
-  }
-};
-
-// -----------------------------------------------------------------------------
-// UI / UserHandle
-// -----------------------------------------------------------------------------
-
-type UserHandleProps = { color?: string };
-
-const UserHandle = styled.span<UserHandleProps>(({ color }) => [
-  tw`flex justify-around text-lg`,
-  css`
-    margin: 0;
-    padding: 0;
-    font-weight: 600;
-    color: ${color || 'black'};
-  `,
-]);
-
-// -----------------------------------------------------------------------------
-// UI
-// -----------------------------------------------------------------------------
-
-const HeaderContent = tw.div`flex justify-around items-center mx-4`;
-const ControlContent = tw.div`lg:my-2 md:my-4`;
-const MainContent = tw.div`grid lg:grid-cols-2 gap-4`;
-const ButtonText = tw.span`mr-3`;
-const DebugButtonWrapper = tw.span`mb-3`;
-const InputWrapper = tw.div`pr-2 w-4/5`;
-const FlexBox = tw.div`flex flex-wrap lg:flex-row flex-col justify-between mb-4 gap-4 mx-2`;
-const TopMargin = tw.div`mt-4`;
-const TwoCols = tw.div`max-w-7xl grid lg:grid-cols-2 md:grid-cols-2 lg:gap-4 md:gap-4`;
-
-const FlexItemGrow = styled.div(() => [
-  tw`h-full`,
-  css`
-    flex-grow: 1;
-    flex-basis: 0;
-  `,
-]);
