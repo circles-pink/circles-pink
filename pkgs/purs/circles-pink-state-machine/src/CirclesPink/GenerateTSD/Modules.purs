@@ -145,6 +145,8 @@ modules =
           (CirclesPink.Garden.StateMachine.State.initLanding)
       , R.value "initUserData" []
           (CirclesPink.Garden.StateMachine.State.initUserData)
+      , R.value "initDebug" []
+          (CirclesPink.Garden.StateMachine.State.initDebug)
       ]
 
   , "Data.Argonaut" /\ join

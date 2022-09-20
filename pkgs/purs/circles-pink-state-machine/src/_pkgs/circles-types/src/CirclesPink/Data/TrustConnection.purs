@@ -4,11 +4,9 @@ import CirclesPink.Prelude
 
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.TrustState (TrustState)
-import Data.FpTs.Pair as FpTs
 import Data.Generic.Rep (class Generic)
 import Data.IxGraph (class Indexed)
 import Data.Pair (Pair)
-import FpTs.Class (class FpTs, fromFpTs, toFpTs)
 import PursTsGen (class ToTsDef, class ToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
 
@@ -33,14 +31,6 @@ instance ToTsDef TrustConnection where
 
 instance ToPursType TrustConnection where
   toPursType = defaultToPursType' []
-
---------------------------------------------------------------------------------
-
-newtype TsTrustConnection = TsTrustConnection { conn :: FpTs.Pair Address, trustState :: TrustState }
-
-instance fpTs :: FpTs TrustConnection TsTrustConnection where
-  toFpTs (TrustConnection conn trustState) = TsTrustConnection { conn: toFpTs conn, trustState }
-  fromFpTs (TsTrustConnection { conn, trustState }) = TrustConnection (fromFpTs conn) trustState
 
 --------------------------------------------------------------------------------
 

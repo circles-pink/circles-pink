@@ -106,7 +106,19 @@ type ViewProps = {
   cfg: UserConfig;
 };
 
-const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
+const View = ({ state, act, cfg: cfg_ }: ViewProps): ReactElement | null => {
+  const cfg = {
+    lang: 'en',
+    content: {},
+    email: () => {},
+    voucherShopEnabled: false,
+    xbgeCampaign: false,
+    testEnv: false,
+    sharingFeature: null,
+    strictMode: false,
+    buyVoucherEurLimit: 70,
+    ...cfg_,
+  };
   const skip = getSkipStates(cfg);
 
   const [debugContext, setDebugContext] = useContext(DebugContext);
@@ -170,7 +182,7 @@ const View = ({ state, act, cfg }: ViewProps): ReactElement | null => {
   }
 };
 
-const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
+export const mkCfg = (uCfg: UserConfig): CirclesConfigEffect => {
   const defaultRightExtractEmail: Either<string, (_: string) => Effect<Unit>> =
     _Either.mkEither.mkRight((email: string) => () => {
       // Save the email somewhere...

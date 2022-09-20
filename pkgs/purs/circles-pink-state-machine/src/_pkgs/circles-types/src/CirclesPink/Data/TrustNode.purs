@@ -11,7 +11,6 @@ import Data.Lens (Lens')
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
 import Data.Newtype as NT
-import FpTs.Class (class FpTs)
 import PursTsGen (class ToTsDef, class ToTsType)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import Type.Proxy (Proxy(..))
@@ -34,10 +33,6 @@ instance toTsTypeTrustNode :: ToTsType TrustNode where
 
 unwrap :: TrustNode -> TrustNode'
 unwrap = NT.unwrap
-
-instance fpTsTrustNode :: FpTs TrustNode TrustNode where
-  fromFpTs = identity
-  toFpTs = identity
 
 instance indexedUserIdent :: Indexed Address TrustNode where
   getIndex (TrustNode { userIdent: UserIdent (Left x) }) = x

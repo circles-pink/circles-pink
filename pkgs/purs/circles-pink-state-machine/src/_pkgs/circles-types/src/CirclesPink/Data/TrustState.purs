@@ -19,7 +19,6 @@ import Prelude
 import Data.Newtype (class Newtype)
 import Data.Newtype as NT
 import Data.Variant (Variant, inj, match)
-import FpTs.Class (class FpTs)
 import PursTsGen (class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
 import Type.Proxy (Proxy(..))
@@ -40,10 +39,6 @@ derive instance newtypeTrustState :: Newtype TrustState _
 derive instance trustStateEq :: Eq TrustState
 derive instance ordTrustState :: Ord TrustState
 derive newtype instance showTrustState :: Show TrustState
-
-instance fpTs :: FpTs TrustState TrustState where
-  toFpTs = identity
-  fromFpTs = identity
 
 instance toTsDef :: ToTsDef TrustState where
   toTsDef _ = defaultToTsDef trustState []

@@ -105,7 +105,6 @@ in  upstream
     , version = "v5.0.0"
     }
   with chance = ./pkgs/purs/chance/spago.dhall as Location
-  with fp-ts = ./pkgs/purs/fp-ts/spago.dhall as Location
   with graph = ./pkgs/purs/graph/spago.dhall as Location
   with indexed-graph = ./pkgs/purs/indexed-graph/spago.dhall as Location
   with debug-extra = ./pkgs/purs/debug-extra/spago.dhall as Location

@@ -14,7 +14,6 @@ import CirclesPink.Data.User (User(..))
 import Data.IxGraph (class Indexed)
 import Data.Newtype as NT
 import Data.String as S
-import FpTs.Class (class FpTs)
 
 type UserIdent' = Either Address User
 newtype UserIdent = UserIdent UserIdent'
@@ -39,10 +38,6 @@ instance toPursTypeUserIdent :: ToPursType UserIdent where
 instance indexedUserIdent :: Indexed Address UserIdent where
   getIndex (UserIdent (Left x)) = x
   getIndex (UserIdent (Right (User { safeAddress }))) = safeAddress
-
-instance ftTsUserIdent :: FpTs UserIdent UserIdent where
-  fromFpTs = identity
-  toFpTs = identity
 
 unwrap :: UserIdent -> UserIdent'
 unwrap = NT.unwrap
