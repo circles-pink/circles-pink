@@ -102,8 +102,6 @@ export const TrustGraph = ({
 
   const elements = getElementsFromData(graph);
 
-  console.log(elements);
-
   useEffect(() => {
     if (!cy) return;
     const layout_ = cy.layout(layout);
