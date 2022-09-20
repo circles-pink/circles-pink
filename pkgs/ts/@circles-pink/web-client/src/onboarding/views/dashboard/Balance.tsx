@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import tw, { css, styled } from 'twin.macro';
 import { CurrencySymbol } from '../../../components/CurrencySymbol';
 import { Theme } from '../../../context/theme';
+import { toNativeBN } from '../../../safe-as';
 import { displayBalance } from '../../utils/timeCircles';
 
 type BalanceProps = {
@@ -37,7 +38,7 @@ export const Balance = ({
           setIsLoading(false);
         },
         onSuccess: balance => {
-          setResBalance(balance.data);
+          setResBalance(toNativeBN(balance.data));
         },
       })
     );
