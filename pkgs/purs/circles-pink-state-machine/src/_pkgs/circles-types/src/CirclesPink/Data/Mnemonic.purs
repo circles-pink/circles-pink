@@ -33,10 +33,10 @@ instance ToPursNominal Mnemonic where
   toPursNominal _ = PursNominal moduleName "Mnemonic"
 
 instance ToTsType Mnemonic where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef Mnemonic where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType Mnemonic where
   toPursType = defaultToPursType' []

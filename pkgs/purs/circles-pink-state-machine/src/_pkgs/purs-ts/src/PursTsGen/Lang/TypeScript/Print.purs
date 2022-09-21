@@ -8,7 +8,7 @@ import PursTsGen.Prelude
 import Data.Array as A
 import Data.Set as S
 import Data.String (joinWith)
-import PursTsGen.Lang.TypeScript.Types (Type(..), Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..))
+import PursTsGen.Lang.TypeScript.Types (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..))
 
 printType :: Type -> String
 printType = case _ of
@@ -26,6 +26,7 @@ printType = case _ of
   TypeConstructor qn xs -> printQualName qn <> printTargs' xs
   TypeOpaque id targs -> "{ " <> printOpaque id <> printTargsValues targs <> " }"
   TypeUnion x y -> printType x <> " | " <> printType y
+  TypeIntersection x y -> printType x <> " & " <> printType y
   TypeTLString s -> "\"" <> s <> "\""
   TypeUniqueSymbol -> "unique symbol"
   TypeIsPred n t -> printName n <> " is " <> printType t

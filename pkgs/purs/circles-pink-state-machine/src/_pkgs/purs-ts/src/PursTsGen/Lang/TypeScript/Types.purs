@@ -50,7 +50,6 @@ data Token
   | TokSingleComment String
   | TokMultiComment String
 
-
 --------------------------------------------------------------------------------
 -- Name
 --------------------------------------------------------------------------------
@@ -96,6 +95,7 @@ data Type
   | TypeConstructor QualName (Array Type)
   | TypeOpaque QualName (Array Name)
   | TypeUnion Type Type
+  | TypeIntersection Type Type
   | TypeTLString String
   | TypeUniqueSymbol
   | TypeIsPred Name Type
@@ -118,3 +118,6 @@ data Declaration
   | DeclLineComment String
   | DeclEmptyLine
   | DeclUnsafeInline String
+
+derive instance Eq Declaration
+derive instance Ord Declaration

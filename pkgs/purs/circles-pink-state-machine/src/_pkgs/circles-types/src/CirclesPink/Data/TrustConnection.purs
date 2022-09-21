@@ -24,10 +24,10 @@ instance ToPursNominal TrustConnection where
   toPursNominal _ = PursNominal "CirclesPink.Data.TrustConnection" "TrustConnection"
 
 instance ToTsType TrustConnection where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef TrustConnection where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType TrustConnection where
   toPursType = defaultToPursType' []

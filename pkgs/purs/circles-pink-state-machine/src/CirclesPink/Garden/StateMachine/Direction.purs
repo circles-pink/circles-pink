@@ -15,10 +15,10 @@ instance ToPursNominal Direction where
   toPursNominal _ = PursNominal "CirclesPink.Garden.StateMachine.Direction" "Direction"
 
 instance ToTsType Direction where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef Direction where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType Direction where
   toPursType = defaultToPursType' []

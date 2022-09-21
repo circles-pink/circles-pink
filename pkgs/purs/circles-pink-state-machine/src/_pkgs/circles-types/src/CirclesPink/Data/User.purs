@@ -4,7 +4,7 @@ import Prelude
 
 import CirclesPink.Data.Address (Address)
 import Data.Newtype (class Newtype)
-import PursTsGen (class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType)
+import PursTsGen (class ToTsDef, class ToTsType, PursType(..), defaultToPursType, opaqueToTsDef, typeRefToTsType)
 import PursTsGen.Class.ToPursType (class ToPursType)
 
 newtype User = User
@@ -26,10 +26,10 @@ ptUser :: PursType
 ptUser = PursType "CirclesPink_Data_User" "User"
 
 instance ToTsDef User where
-  toTsDef _ = defaultToTsDef ptUser []
+  toTsDef _ = opaqueToTsDef ptUser []
 
 instance ToTsType User where
-  toTsType _ = defaultToTsType ptUser []
+  toTsType _ = typeRefToTsType ptUser []
 
 instance ToPursType User where
   toPursType _ = defaultToPursType ptUser []

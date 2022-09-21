@@ -26,7 +26,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
 import Prim.Row (class Cons)
 import Prim.RowList (class RowToList, Nil, Cons)
-import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', defaultToTsDef, defaultToTsDef', defaultToTsType, defaultToTsType', toPursType, toTsType)
+import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class ToTsType, PursNominal(..), PursType(..), defaultToPursType, defaultToPursType', opaqueToTsDef, opaqueToTsDef', typeRefToTsType, typeRefToTsType', toPursType, toTsType)
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
@@ -176,10 +176,10 @@ instance ToPursNominal (Wrap BN) where
   toPursNominal _ = PursNominal "Data.BN" "BN"
 
 instance ToTsType (Wrap BN) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap BN) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap BN) where
   toPursType = defaultToPursType' []
@@ -190,10 +190,10 @@ instance ToPursNominal (Wrap Json) where
   toPursNominal _ = PursNominal "Data.Argonaut" "Json"
 
 instance ToTsType (Wrap Json) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap Json) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap Json) where
   toPursType = defaultToPursType' []
@@ -204,10 +204,10 @@ instance ToPursNominal (Wrap URI) where
   toPursNominal _ = PursNominal "CirclesPink.URI" "URI"
 
 instance ToTsType (Wrap URI) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap URI) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap URI) where
   toPursType = defaultToPursType' []
@@ -218,10 +218,10 @@ instance ToPursNominal (Wrap ChecksumAddress) where
   toPursNominal _ = PursNominal "Network.Ethereum.Core.Signatures.Extra" "ChecksumAddress"
 
 instance ToTsType (Wrap ChecksumAddress) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap ChecksumAddress) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap ChecksumAddress) where
   toPursType = defaultToPursType' []
@@ -248,10 +248,10 @@ instance ToPursNominal (Wrap (Object a)) where
   toPursNominal _ = PursNominal "Foreign.Object" "Object"
 
 instance (ToTsType a) => ToTsType (Wrap (Object a)) where
-  toTsType = defaultToTsType' [ toTsType (Proxy :: _ a) ]
+  toTsType = typeRefToTsType' [ toTsType (Proxy :: _ a) ]
 
 instance ToTsDef (Wrap (Object A)) where
-  toTsDef = defaultToTsDef' [ TS.name "A" ]
+  toTsDef = opaqueToTsDef' [ TS.name "A" ]
 
 instance (ToPursType a) => ToPursType (Wrap (Object a)) where
   toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
@@ -262,10 +262,10 @@ instance ToPursNominal (Wrap Method) where
   toPursNominal _ = PursNominal "Data.HTTP.Method" "Method"
 
 instance ToTsType (Wrap Method) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap Method) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap Method) where
   toPursType = defaultToPursType' []
@@ -276,10 +276,10 @@ instance ToPursNominal (Wrap FetchImpl) where
   toPursNominal _ = PursNominal "Milkis.Impl" "FetchImpl"
 
 instance ToTsType (Wrap FetchImpl) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap FetchImpl) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap FetchImpl) where
   toPursType = defaultToPursType' []
@@ -290,10 +290,10 @@ instance ToPursNominal (Wrap JsonDecodeError) where
   toPursNominal _ = PursNominal "Data_Argonaut" "JsonDecodeError"
 
 instance ToTsType (Wrap JsonDecodeError) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap JsonDecodeError) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap JsonDecodeError) where
   toPursType = defaultToPursType' []
@@ -304,10 +304,10 @@ instance ToPursNominal (Wrap Instant) where
   toPursNominal _ = PursNominal "Data.DateTime.Instant" "Instant"
 
 instance ToTsType (Wrap Instant) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap Instant) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap Instant) where
   toPursType = defaultToPursType' []
@@ -318,12 +318,12 @@ instance ToPursNominal (Wrap (Pair a)) where
   toPursNominal _ = PursNominal "Data.Pair" "Pair"
 
 instance (ToTsType a) => ToTsType (Wrap (Pair a)) where
-  toTsType = defaultToTsType'
+  toTsType = typeRefToTsType'
     [ toTsType (Proxy :: _ a)
     ]
 
 instance ToTsDef (Wrap (Pair A)) where
-  toTsDef = defaultToTsDef' [ TS.name "A" ]
+  toTsDef = opaqueToTsDef' [ TS.name "A" ]
 
 instance (ToPursType a) => ToPursType (Wrap (Pair a)) where
   toPursType = defaultToPursType' [ toPursType (Proxy :: _ a) ]
@@ -338,10 +338,10 @@ ptAddress = PursType "Network_Ethereum_Core_Signatures" "Address"
 derive instance Newtype Address _
 
 instance ToTsType Address where
-  toTsType _ = defaultToTsType ptAddress []
+  toTsType _ = typeRefToTsType ptAddress []
 
 instance ToTsDef Address where
-  toTsDef _ = defaultToTsDef ptAddress []
+  toTsDef _ = opaqueToTsDef ptAddress []
 
 instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []
@@ -356,10 +356,10 @@ ptPrivateKey = PursType "CirclesPink_Data_PrivateKey_Type" "PrivateKey"
 derive instance Newtype PrivateKey _
 
 instance ToTsType PrivateKey where
-  toTsType _ = defaultToTsType ptPrivateKey []
+  toTsType _ = typeRefToTsType ptPrivateKey []
 
 instance ToTsDef PrivateKey where
-  toTsDef _ = defaultToTsDef ptPrivateKey []
+  toTsDef _ = opaqueToTsDef ptPrivateKey []
 
 instance ToPursType PrivateKey where
   toPursType _ = defaultToPursType ptPrivateKey []
@@ -380,7 +380,7 @@ instance toTsType_RemoteData ::
   , ToTsType d
   ) =>
   ToTsType (RemoteData a b c d) where
-  toTsType _ = defaultToTsType ptRemoteData
+  toTsType _ = typeRefToTsType ptRemoteData
     [ toTsType (Proxy :: _ a)
     , toTsType (Proxy :: _ b)
     , toTsType (Proxy :: _ c)
@@ -388,7 +388,7 @@ instance toTsType_RemoteData ::
     ]
 
 instance ToTsDef (RemoteData a b c d) where
-  toTsDef _ = defaultToTsDef ptRemoteData $ TS.name <$> [ "A", "B", "C", "D" ]
+  toTsDef _ = opaqueToTsDef ptRemoteData $ TS.name <$> [ "A", "B", "C", "D" ]
 
 instance toPursType_RemoteData ::
   ( ToPursType a

@@ -102,7 +102,7 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Tuple.Nested (type (/\))
 import Data.Variant (Variant, inj)
-import PursTsGen (class ToPursType, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, defaultToTsDef, defaultToTsType)
+import PursTsGen (class ToPursType, class ToTsDef, class ToTsType, PursType(..), defaultToPursType, opaqueToTsDef, typeRefToTsType)
 import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import VoucherServer.Spec.Types (Voucher, VoucherProvider)
@@ -296,13 +296,13 @@ type StorageClear m = forall r. StorageType -> ExceptV (ErrStorageClear + r) m U
 data StorageType = SessionStorage | LocalStorage
 
 instance ToTsType StorageType where
-  toTsType _ = defaultToTsType ptStorageType []
+  toTsType _ = typeRefToTsType ptStorageType []
 
 instance ToPursType StorageType where
   toPursType _ = defaultToPursType ptStorageType []
 
 instance ToTsDef StorageType where
-  toTsDef _ = defaultToTsDef ptStorageType []
+  toTsDef _ = opaqueToTsDef ptStorageType []
 
 ptStorageType :: PursType
 ptStorageType = PursType "CirclesPink_Garden_StateMachine_Control_EnvControl" "StorageType"

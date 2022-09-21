@@ -54,10 +54,10 @@ ptAddress :: PursType
 ptAddress = PursType "CirclesPink_Data_Address" "Address"
 
 instance ToTsDef Address where
-  toTsDef _ = defaultToTsDef ptAddress []
+  toTsDef _ = opaqueToTsDef ptAddress []
 
 instance ToTsType Address where
-  toTsType _ = defaultToTsType ptAddress []
+  toTsType _ = typeRefToTsType ptAddress []
 
 instance ToPursType Address where
   toPursType _ = defaultToPursType ptAddress []

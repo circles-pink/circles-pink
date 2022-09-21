@@ -33,10 +33,10 @@ instance ToPursNominal PrivateKey where
   toPursNominal _ = PursNominal moduleName "PrivateKey"
 
 instance ToTsType PrivateKey where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef PrivateKey where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType PrivateKey where
   toPursType = defaultToPursType' []
