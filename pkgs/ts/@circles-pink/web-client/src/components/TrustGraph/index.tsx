@@ -45,7 +45,7 @@ import { pipe } from 'fp-ts/lib/function';
 const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
     id: _Address.addrToString(_TrustNode.getAddress(tn)),
-    label: _UserIdent.getIdentifier(_TrustNode.unTrustNode(tn).userIdent),
+    label: _UserIdent.getIdentifier(tn.userIdent),
   },
 });
 
