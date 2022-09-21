@@ -14,6 +14,7 @@ module PursTsGen
   , instanceDef
   , module Exp
   , pursModule
+  , transprentRecordNewtype
   , typeAlias
   , typeDef
   , value
@@ -26,6 +27,7 @@ import Data.Array as A
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, unwrap)
 import Data.Set as S
 import Data.String (Pattern(..), Replacement(..), replaceAll)
 import Data.String as St
@@ -33,6 +35,7 @@ import Data.Traversable (foldr, sequence)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
 import PursTsGen.Class.ToPursNominal (PursNominal(..), class ToPursNominal, toPursNominal)
+import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..)) as Exp
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType) as Exp
 import PursTsGen.Class.ToTsDef (class GenToTsDefProd, class GenToTsDefSum, class ToTsDef, genToTsDefProd, genToTsDefSum, genToTsDefSum', genericToTsDef, toTsDef) as Exp
 import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
@@ -43,7 +46,6 @@ import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, mkType, name, opaque, qualName, typeDef) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
 import Type.Proxy (Proxy)
-import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..)) as Exp
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -180,6 +182,9 @@ defaultToTsType' :: forall a. ToPursNominal a => Array TS.Type -> a -> TS.Type
 defaultToTsType' xs x = TS.mkType (TS.qualName (dotsToLodashes m) n) xs
   where
   PursNominal m n = toPursNominal x
+
+transprentRecordNewtype :: forall a b. ToTsType (Record b) => Newtype a (Record b) => a -> TS.Type
+transprentRecordNewtype = unwrap >>> toTsType
 
 defaultToPursType :: PursType -> Array PS.Type -> PS.Type
 defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs
