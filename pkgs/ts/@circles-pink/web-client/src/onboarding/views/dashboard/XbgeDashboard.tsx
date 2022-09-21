@@ -504,7 +504,7 @@ export const XbgeDashboard = ({
 
                 <TrustGraph
                   graph={state.trusts}
-                  expandTrustNetwork={(addr: string) =>
+                  expandTrustNetwork={(addr) =>
                     act(_dashboardAction._expandTrustNetwork(addr))
                   }
                   theme={theme}

@@ -7,18 +7,19 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
 import CirclesPink.Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address, parseAddress)
+import CirclesPink.Data.Address (Address(..), parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (TrustNode, initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode(..), initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User)
-import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
+import CirclesPink.Data.UserIdent (UserIdent(..), UserIdent', getAddress)
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
+import CirclesPink.Garden.StateMachine.State (DashboardState)
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
@@ -35,7 +36,10 @@ import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
-import Data.Lens (set)
+import Data.Lens (Lens', Traversal', set, traversed)
+import Data.Lens as L
+import Data.Lens.Iso.Newtype (_Newtype)
+import Data.Lens.Record (prop)
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -163,7 +167,7 @@ dashboard
   => EnvControl m
   -> { logout :: ActionHandler' m Unit S.DashboardState ("landing" :: S.LandingState)
      , getTrusts :: ActionHandler' m Unit S.DashboardState ("dashboard" :: S.DashboardState)
-     , expandTrustNetwork :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
+     , expandTrustNetwork :: ActionHandler' m _ S.DashboardState ("dashboard" :: S.DashboardState)
      , addTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , removeTrustConnection :: ActionHandler' m UserIdent S.DashboardState ("dashboard" :: S.DashboardState)
      , getVouchers :: ActionHandler' m String S.DashboardState ("dashboard" :: S.DashboardState)
@@ -224,13 +228,24 @@ dashboard env@{ trustGetNetwork } =
         pure unit
 
   expandTrustNetwork set st safeAddress =
-    void do
-      runExceptT do
-        let maybeAddress = parseAddress safeAddress
-        case maybeAddress of
-          Nothing -> pure unit
-          Just addr -> syncTrusts set st addr 0
-        pure unit
+    void $ runExceptT do
+      let
+        _nodeIsLoading = prop _trusts
+          <<< G._atNode safeAddress
+          <<< traversed
+          <<< _Newtype
+          <<< prop _isLoading
+
+      lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
+
+      syncTrusts set st safeAddress 0 `catchError`
+        ( const $ do
+            lift $ env.sleep 2000
+            lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
+        )
+      lift $ env.sleep 2000
+      lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
+      pure unit
 
   getUsers set st { userNames, addresses } = do
     set \st' -> S._dashboard st' { getUsersResult = _loading unit :: RemoteData _ _ _ _ }
@@ -417,7 +432,6 @@ dashboard env@{ trustGetNetwork } =
           # dropError
         pure unit
 
-
   syncTrusts set st centerAddress i = do
 
     trustNodes :: Map Address CC.TrustNode <-
@@ -472,7 +486,7 @@ dashboard env@{ trustGetNetwork } =
     case _ of
       This uiApi -> g # G.insertNode (TN.initTrustNode uiApi) -- use addNode
       That _ -> Right g
-      Both uiApi _ -> G.modifyNode (getIndex uiApi) (set TN.userIdent uiApi) g
+      Both uiApi _ -> G.modifyNode (getIndex uiApi) (set TN._userIdent uiApi) g
 
   getOutgoingEdge :: Address -> CirclesGraph -> These CC.TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge centerAddress g = case _ of
@@ -561,3 +575,7 @@ spec =
     specSplitArray
     specFetchUsersBinarySearch
     specMapsToThese
+
+_trusts = Proxy :: _ "trusts"
+
+_isLoading = Proxy :: _ "isLoading"
