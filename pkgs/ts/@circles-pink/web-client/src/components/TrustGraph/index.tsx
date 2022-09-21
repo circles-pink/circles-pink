@@ -14,7 +14,10 @@ import {
   TrustStateType,
   _Address,
   _Array,
+  _Either,
   _IxGraph,
+  _Maybe,
+  _Nullable,
   _Pair,
   _TrustConnection,
   _TrustNode,
@@ -46,6 +49,7 @@ const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
     id: _Address.addrToString(_TrustNode.getAddress(tn)),
     label: _UserIdent.getIdentifier(tn.userIdent),
+    isLoading: tn.isLoading,
   },
 });
 
@@ -88,7 +92,7 @@ const getElementsFromData = (
 
 type TrustGraphProps = {
   graph: CirclesGraph;
-  expandTrustNetwork: (addr: string) => void;
+  expandTrustNetwork: (addr: Address) => void;
   theme: Theme;
 };
 
@@ -111,45 +115,68 @@ export const TrustGraph = ({
   useEffect(() => {
     if (!cy) return;
 
-    // let loopAnimation1 = (ele: any): any => {
-    //   const duration = 250 + Math.random() *  50
-    //   return ele
-    //     .animation({
-    //       style:  { opacity: 1, 'background-color': theme.baseColor, width: ele.data('label').length * 12, height: 15},
-    //       duration,
-    //       easing: 'ease-in-out-sine',
-    //     })
-    //     .play()
-    //     .promise('done')
-    //     .then(() => {
-    //       loopAnimation2(ele);
-    //       console.log('done');
-    //     });
-    // };
+    let loopAnimation1 =
+      (address: Address) =>
+      (ele: any): any => {
+        const duration = 250 + Math.random() * 50;
+        return ele
+          .animation({
+            style: {
+              opacity: 1,
+              'background-color': theme.baseColor,
+              width: ele.data('label').length * 12,
+              height: 15,
+            },
+            duration,
+            easing: 'ease-in-out-sine',
+          })
+          .play()
+          .promise('done')
+          .then(() => {
+            const trustNode = pipe(
+              graph,
+              _IxGraph.lookupNode(ordAddress)(address),
+              _Either.hush,
+              _Nullable.toNullable
+            );
+            if (!trustNode) return;
+            if (trustNode.isLoading) {
+              return loopAnimation2(address)(ele);
+            }
+          });
+      };
 
-    // let loopAnimation2 = (ele: any): any => {
-    //   const duration = 250 + Math.random() * 50
-    //   return ele
-    //     .animation({
-    //       style: { opacity: 1, 'background-color': theme.lightColor, width: ele.data('label').length * 13, height: 20},
-    //       duration,
-    //       easing: 'ease-in-out-sine',
-    //     })
-    //     .play()
-    //     .promise('done')
-    //     .then(() => {
-    //       loopAnimation1(ele);
-    //       console.log('done');
-    //     });
-    // };
+    let loopAnimation2 =
+      (address: Address) =>
+      (ele: any): any => {
+        const duration = 250 + Math.random() * 50;
+        return ele
+          .animation({
+            style: {
+              opacity: 1,
+              'background-color': theme.lightColor,
+              width: ele.data('label').length * 13,
+              height: 20,
+            },
+            duration,
+            easing: 'ease-in-out-sine',
+          })
+          .play()
+          .promise('done')
+          .then(() => {
+            loopAnimation1(address)(ele);
+          });
+      };
 
     cy.on('tap', 'node', evt => {
-      expandTrustNetwork(evt.target.id());
-      //loopAnimation1(evt.target);
-
-      // evt.cy.nodes().animate({
-      //   style: {}
-      // })
+      const addrStr: string = evt.target.id();
+      const address = pipe(
+        _Address.parseAddress(addrStr),
+        _Nullable.toNullable
+      );
+      if (!address) return;
+      expandTrustNetwork(address);
+      loopAnimation1(address)(evt.target);
     });
   }, [cy]);
 

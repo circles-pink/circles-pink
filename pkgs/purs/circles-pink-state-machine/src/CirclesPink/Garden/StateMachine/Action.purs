@@ -134,7 +134,7 @@ type DashboardAction = Variant
       { query :: String
       }
   , redeploySafeAndToken :: Unit
-  , expandTrustNetwork :: String
+  , expandTrustNetwork :: Address
   , getVouchers :: String
   , getVoucherProviders :: Unit
   )
@@ -279,48 +279,21 @@ _trustsAction =
   , _finalizeRegisterUser: inj (Proxy :: _ "finalizeRegisterUser")
   }
 
-_dashboardAction
-  :: { _logout :: Unit -> DashboardAction
-     , _getTrusts :: Unit -> DashboardAction
-     , _addTrustConnection :: UserIdent -> DashboardAction
-     , _removeTrustConnection :: UserIdent -> DashboardAction
-     , _getBalance :: Unit -> DashboardAction
-     , _getUBIPayout :: Unit -> DashboardAction
-     , _transfer ::
-         { from :: Address
-         , to :: Address
-         , value :: BN
-         , paymentNote :: String
-         }
-         -> DashboardAction
-     , _getUsers ::
-         { userNames :: Array String
-         , addresses :: Array Address
-         }
-         -> DashboardAction
-     , _userSearch ::
-         { query :: String
-         }
-         -> DashboardAction
-     , _redeploySafeAndToken :: Unit -> DashboardAction
-     , _expandTrustNetwork :: String -> DashboardAction
-     , _getVouchers :: String -> DashboardAction
-     , _getVoucherProviders :: Unit -> DashboardAction
-     }
+_dashboardAction :: _
 _dashboardAction =
-  { _logout: inj (Proxy :: _ "logout")
-  , _getTrusts: inj (Proxy :: _ "getTrusts")
-  , _addTrustConnection: inj (Proxy :: _ "addTrustConnection")
-  , _removeTrustConnection: inj (Proxy :: _ "removeTrustConnection")
-  , _getBalance: inj (Proxy :: _ "getBalance")
-  , _getUBIPayout: inj (Proxy :: _ "getUBIPayout")
-  , _transfer: inj (Proxy :: _ "transfer")
-  , _getUsers: inj (Proxy :: _ "getUsers")
-  , _userSearch: inj (Proxy :: _ "userSearch")
-  , _redeploySafeAndToken: inj (Proxy :: _ "redeploySafeAndToken")
-  , _expandTrustNetwork: inj (Proxy :: _ "expandTrustNetwork")
-  , _getVouchers: inj (Proxy :: _ "getVouchers")
-  , _getVoucherProviders: inj (Proxy :: _ "getVoucherProviders")
+  { _logout: inj (Proxy :: _ "logout") :: _ -> DashboardAction
+  , _getTrusts: inj (Proxy :: _ "getTrusts") :: _ -> DashboardAction
+  , _addTrustConnection: inj (Proxy :: _ "addTrustConnection") :: _ -> DashboardAction
+  , _removeTrustConnection: inj (Proxy :: _ "removeTrustConnection") :: _ -> DashboardAction
+  , _getBalance: inj (Proxy :: _ "getBalance") :: _ -> DashboardAction
+  , _getUBIPayout: inj (Proxy :: _ "getUBIPayout") :: _ -> DashboardAction
+  , _transfer: inj (Proxy :: _ "transfer") :: _ -> DashboardAction
+  , _getUsers: inj (Proxy :: _ "getUsers") :: _ -> DashboardAction
+  , _userSearch: inj (Proxy :: _ "userSearch") :: _ -> DashboardAction
+  , _redeploySafeAndToken: inj (Proxy :: _ "redeploySafeAndToken") :: _ -> DashboardAction
+  , _expandTrustNetwork: inj (Proxy :: _ "expandTrustNetwork") :: _ -> DashboardAction
+  , _getVouchers: inj (Proxy :: _ "getVouchers") :: _ -> DashboardAction
+  , _getVoucherProviders: inj (Proxy :: _ "getVoucherProviders") :: _ -> DashboardAction
   }
 
 _askUsername :: AskUsernameAction -> CirclesAction

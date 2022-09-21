@@ -2,7 +2,7 @@ module CirclesPink.Data.TrustNode
   ( TrustNode(..)
   , getAddress
   , initTrustNode
-  , userIdent
+  , _userIdent
   ) where
 
 import CirclesPink.Prelude
@@ -35,8 +35,9 @@ initTrustNode userIdent' = TrustNode
   , isLoading: false
   }
 
-userIdent :: Lens' TrustNode UserIdent
-userIdent = _Newtype <<< prop (Proxy :: _ "userIdent")
+_userIdent :: Lens' TrustNode UserIdent
+_userIdent = _Newtype <<< prop (Proxy :: _ "userIdent")
+
 
 derive newtype instance Show TrustNode
 derive newtype instance Eq TrustNode

@@ -1,5 +1,6 @@
 module Data.Graph
   ( NeighborConnectivity(..)
+  , _atNode
   , addNodes
   , edgeIds
   , edges
@@ -20,19 +21,21 @@ module Data.Graph
   , outgoingEdgesWithNodes
   , outgoingNodes
   , unNeighborConnectivity
-  )
-  where
+  ) where
 
 import Prelude
 
+import Control.Error.Util (hush)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..), fromRight')
+import Data.Either (Either(..), either, fromRight')
 import Data.Foldable (class Foldable, fold, foldM)
 import Data.Generic.Rep (class Generic)
 import Data.Graph.Core (EitherV, Graph)
 import Data.Graph.Core (GraphSpec, toUnfoldables, fromFoldables, EitherV, Graph, addEdge, addNode, deleteEdge, deleteNode, edgesToUnfoldable, empty, foldMapWithIndex, foldlWithIndex, foldrWithIndex, incomingIds, lookupEdge, lookupNode, memberEdge, memberNode, nodeIds, nodesToUnfoldable, outgoingIds, updateEdge, updateNode) as Exp
 import Data.Graph.Core as C
 import Data.Graph.Errors (ErrAddNodes, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborIds, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingNodes, ErrNeighborhood)
+import Data.Lens (Lens', lens)
+import Data.Maybe (Maybe(..))
 import Data.Pair (Pair, (~))
 import Data.Set (Set)
 import Data.Set as S
@@ -114,6 +117,13 @@ modifyNode :: forall r id e n. Ord id => id -> (n -> n) -> Graph id e n -> Eithe
 modifyNode id f g = do
   n <- C.lookupNode id g
   C.updateNode id (f n) g
+
+_atNode :: forall id e n. Ord id => id -> Lens' (Graph id e n) (Maybe n)
+_atNode id = lens getter setter
+  where
+  getter = C.lookupNode id >>> hush
+  setter g (Just n) = insertNode id n g # either (const g) identity
+  setter g Nothing = C.deleteNode id g # either (const g) identity
 
 --------------------------------------------------------------------------------
 -- Edge API

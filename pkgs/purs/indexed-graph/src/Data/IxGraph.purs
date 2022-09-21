@@ -1,5 +1,6 @@
 module Data.IxGraph
   ( IxGraph
+  , _atNode
   , addEdge
   , addNode
   , addNodes
@@ -35,12 +36,14 @@ module Data.IxGraph
 import Prelude
 
 import Data.Bifunctor (bimap)
-import Data.Either (Either(..))
+import Data.Either (Either(..), either, hush)
 import Data.Foldable (class Foldable)
 import Data.Graph (EitherV, Graph, GraphSpec, NeighborConnectivity)
 import Data.Graph (NeighborConnectivity, unNeighborConnectivity) as Exp
 import Data.Graph as G
 import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrAddNodes, ErrDeleteEdge, ErrDeleteNode, ErrIncomingEdges, ErrIncomingEdgesWithNodes, ErrIncomingNodes, ErrInsertEdge, ErrInsertNode, ErrInsertNodes, ErrLookupEdge, ErrLookupNode, ErrModifyNode, ErrNeighborEdgesWithNodes, ErrNeighborNodes, ErrOutgoingEdges, ErrOutgoingEdgesWithNodes, ErrOutgoingIds, ErrOutgoingNodes, ErrUpdateEdge, ErrUpdateNode, ErrNeighborhood)
+import Data.Lens (Lens', lens)
+import Data.Maybe (Maybe(..))
 import Data.Pair (Pair)
 import Data.Set (Set)
 import Data.Tuple (snd)
@@ -96,6 +99,13 @@ insertNode node (IxGraph g) = IxGraph <$> G.insertNode (getIndex node) node g
 
 insertNodes :: forall r f id e n. Foldable f => Ord id => Functor f => Indexed id n => f n -> IxGraph id e n -> EitherV (ErrInsertNodes r) (IxGraph id e n)
 insertNodes nodes' (IxGraph g) = IxGraph <$> G.insertNodes (withIndex <$> nodes') g
+
+_atNode :: forall id e n. Indexed id n => Ord id => id -> Lens' (IxGraph id e n) (Maybe n)
+_atNode id = lens getter setter
+  where
+  getter = lookupNode id >>> hush
+  setter g (Just n) = insertNode n g # either (const g) identity
+  setter g Nothing = deleteNode id g # either (const g) identity
 
 --------------------------------------------------------------------------------
 -- Edge API
