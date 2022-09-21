@@ -149,11 +149,6 @@ modules =
           (CirclesPink.Garden.StateMachine.State.initDebug)
       ]
 
-  , "Data.Argonaut" /\ join
-      [ R.typeDef "--"
-          (Proxy :: _ (Data.Argonaut.JsonDecodeError))
-      ]
-
   , "Milkis.Impl" /\ join
       [ R.typeDef "--"
           (Proxy :: _ (Milkis.Impl.FetchImpl))
@@ -488,35 +483,3 @@ modules =
         ]
 
   ]
-
---        "CirclesPink.GenerateTSD.SampleModule" /\
---       [ typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Baz)) "Baz"
---       , typ (Proxy :: _ (CirclesPink.GenerateTSD.SampleModule.Vielleicht A)) "Vielleicht"
---       , val (CirclesPink.GenerateTSD.SampleModule.Foo) "Foo"
---       , val (CirclesPink.GenerateTSD.SampleModule.Bar) "Bar"
---       , val (CirclesPink.GenerateTSD.SampleModule.gravity) "gravity"
---       , val (CirclesPink.GenerateTSD.SampleModule.myName) "myName"
---       , val (CirclesPink.GenerateTSD.SampleModule.isOff) "isOff"
---       , val (CirclesPink.GenerateTSD.SampleModule.someItems) "someItems"
---       , val (CirclesPink.GenerateTSD.SampleModule.user) "user"
---       , val (CirclesPink.GenerateTSD.SampleModule.add) "add"
---       , val (CirclesPink.GenerateTSD.SampleModule.fromBaz) "fromBaz"
---       , val (CirclesPink.GenerateTSD.SampleModule.myNum) "myNum"
---       , val (CirclesPink.GenerateTSD.SampleModule.myNumVar) "myNumVar"
---       , val (CirclesPink.GenerateTSD.SampleModule.someMaybe) "someMaybe"
---       ]
---   , "Simple.Data.Maybe" /\
---       [ val (Simple.Data.Maybe.Just :: A -> _) "Just"
---       , val (Simple.Data.Maybe.Nothing :: _ A) "Nothing"
---       , val (Simple.Data.Maybe.maybe :: _ -> (A -> B) -> _) "maybe"
---       , val (Simple.Data.Maybe.maybe' :: _ -> (A -> B) -> _) "maybe'"
---       , val (Simple.Data.Maybe.bind :: _ A -> (_ -> _ B) -> _) "bind"
---       , val (Simple.Data.Maybe.bindFlipped :: (_ -> _ B) -> _ A -> _) "bindFlipped"
---       , val (Simple.Data.Maybe.map :: (A -> B) -> _) "map"
---       , val (Simple.Data.Maybe.pure :: A -> _) "pure"
---       , val (Simple.Data.Maybe.eq :: _ -> _ A -> _) "eq"
---       ]
-
---   , "Simple.Data.Number" /\
---       [ val (Simple.Data.Number.eq) "eq"
---       ]
