@@ -5,16 +5,18 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import CirclesPink.Prelude
+import Prelude
 
 import CirclesCore as CC
 import CirclesPink.Data.Address (Address(..), parseAddress)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (TrustNode(..), initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode(..), _userIdent, initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
-import CirclesPink.Data.User (User)
+import CirclesPink.Data.User (User(..))
 import CirclesPink.Data.UserIdent (UserIdent(..), UserIdent', getAddress)
+import CirclesPink.Data.UserIdent as UserIdent
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
@@ -237,13 +239,14 @@ dashboard env@{ trustGetNetwork } =
           <<< prop _isLoading
 
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
-
+      let _ = spy "AA" unit
       syncTrusts set st safeAddress 0 `catchError`
         ( const $ do
             lift $ env.sleep 2000
             lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
         )
       lift $ env.sleep 2000
+      let _ = spy "BB" unit
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
       pure unit
 
@@ -439,13 +442,13 @@ dashboard env@{ trustGetNetwork } =
         # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
         # dropError
         <#> map (\v -> wrap v.safeAddress /\ v)
-        >>> M.fromFoldable
+          >>> M.fromFoldable
 
     userIdents :: Map Address UserIdent <-
       fetchUsersBinarySearch env st.privKey (Set.toUnfoldable $ M.keys trustNodes)
         # dropError
         <#> map (\v -> getIndex v /\ v)
-        >>> M.fromFoldable
+          >>> M.fromFoldable
 
     lift
       $ set \st' ->
@@ -455,22 +458,22 @@ dashboard env@{ trustGetNetwork } =
               let
                 neighborNodes = G.neighborNodes centerAddress st'.trusts
                   <#> map (\v -> getIndex v /\ v)
-                  >>> M.fromFoldable
+                    >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 incomingEdges = G.incomingEdges centerAddress st'.trusts
                   <#> map (\v -> P.fst (getIndex v) /\ v)
-                  >>> M.fromFoldable
+                    >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 outgoingEdges = G.outgoingEdges centerAddress st'.trusts
                   <#> map (\v -> P.snd (getIndex v) /\ v)
-                  >>> M.fromFoldable
+                    >>> M.fromFoldable
                   # either (const M.empty) identity
 
               st'.trusts
-                # (G.insertNode (initTrustNode $ UserIdent $ Right $ st'.user))
-                >>= (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
+                # getOwnNode st'.user
+                # (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
                 >>= (\g -> foldM (getIncomingEdge centerAddress) g $ mapsToThese trustNodes incomingEdges)
                 >>= (\g -> foldM (getOutgoingEdge centerAddress) g $ mapsToThese trustNodes outgoingEdges)
 
@@ -480,6 +483,11 @@ dashboard env@{ trustGetNetwork } =
                 { trusts = newTrusts
                 }
               Left e -> unsafePartial $ crashWith $ GE.printError e
+
+  getOwnNode :: User -> CirclesGraph -> CirclesGraph
+  getOwnNode usr@(User { safeAddress }) g = g
+    # L.over (G._atNode safeAddress)
+        (_ `catchError` (const $ Just $ initTrustNode $ UserIdent.fromUser usr))
 
   getNode :: CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode g =
