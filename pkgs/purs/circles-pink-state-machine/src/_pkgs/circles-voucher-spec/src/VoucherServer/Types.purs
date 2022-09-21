@@ -81,10 +81,10 @@ instance ToPursNominal VoucherProviderId where
   toPursNominal _ = PursNominal moduleName "VoucherProviderId"
 
 instance ToTsType VoucherProviderId where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef VoucherProviderId where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType VoucherProviderId where
   toPursType = defaultToPursType' []
@@ -107,10 +107,10 @@ instance ToPursNominal EurCent where
   toPursNominal _ = PursNominal moduleName "EurCent"
 
 instance ToTsType EurCent where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef EurCent where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType EurCent where
   toPursType = defaultToPursType' []
@@ -132,10 +132,10 @@ instance ToPursNominal VoucherAmount where
   toPursNominal _ = PursNominal moduleName "VoucherAmount"
 
 instance ToTsType VoucherAmount where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef VoucherAmount where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType VoucherAmount where
   toPursType = defaultToPursType' []
@@ -167,10 +167,10 @@ instance ToPursNominal VoucherCode where
   toPursNominal _ = PursNominal moduleName "VoucherCode"
 
 instance ToTsType VoucherCode where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef VoucherCode where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType VoucherCode where
   toPursType = defaultToPursType' []
@@ -239,10 +239,10 @@ instance ToPursNominal TransferId where
   toPursNominal _ = PursNominal moduleName "TransferId"
 
 instance ToTsType TransferId where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef TransferId where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType TransferId where
   toPursType = defaultToPursType' []

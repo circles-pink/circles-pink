@@ -121,7 +121,7 @@ export const TrustRow = (props: TrustRowProps) => {
   const inSync =
     trustRelationConfig.isTrusted || trustRelationConfig.isUntrusted;
 
-  const { userIdent } = _TrustNode.unwrap(trustNode);
+  const { userIdent } = trustNode;
 
   if (inSync) {
     return (

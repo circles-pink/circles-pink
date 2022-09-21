@@ -6,15 +6,15 @@ module PursTsGen
   , defPredicateFn
   , defaultToPursType
   , defaultToPursType'
-  , defaultToTsDef
-  , defaultToTsDef'
-  , defaultToTsType
-  , defaultToTsType'
+  , opaqueToTsDef
+  , opaqueToTsDef'
+  , typeRefToTsType
+  , typeRefToTsType'
   , defineModules
   , instanceDef
   , module Exp
   , pursModule
-  , transprentRecordNewtype
+  , newtypeToTsDef
   , typeAlias
   , typeDef
   , value
@@ -27,13 +27,14 @@ import Data.Array as A
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, unwrap)
+import Data.Newtype (class Newtype)
 import Data.Set as S
 import Data.String (Pattern(..), Replacement(..), replaceAll)
 import Data.String as St
 import Data.Traversable (foldr, sequence)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
+import Debug.Extra (todo)
 import PursTsGen.Class.ToPursNominal (PursNominal(..), class ToPursNominal, toPursNominal)
 import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..)) as Exp
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType) as Exp
@@ -42,10 +43,10 @@ import PursTsGen.Class.ToTsDef (class ToTsDef, toTsDef)
 import PursTsGen.Class.ToTsType (class GenRecord, class GenVariant, class ToTsType, genRecord, genVariant, toTsType) as Exp
 import PursTsGen.Class.ToTsType (class ToTsPredFn, class ToTsType, Constructor(..), toTsPredFn, toTsType)
 import PursTsGen.Lang.PureScript.Type as PS
-import PursTsGen.Lang.TypeScript (defaultVisitor, rewriteModuleTopDown)
+import PursTsGen.Lang.TypeScript (Declaration(..), defaultVisitor, rewriteModuleTopDown)
 import PursTsGen.Lang.TypeScript.DSL (Declaration(..), Import(..), Module(..), ModuleBody(..), ModuleHead(..), Name(..), Path(..), QualName(..), Type(..), emptyLine, lineComment, mkType, name, opaque, qualName, typeDef) as TS
 import PursTsGen.Lang.TypeScript.Ops (resolveModuleBody)
-import Type.Proxy (Proxy)
+import Type.Proxy (Proxy(..))
 
 cleanModule :: String -> TS.Module -> TS.Module
 cleanModule m = rewriteModuleTopDown defaultVisitor { onType = onType }
@@ -165,26 +166,44 @@ instanceDef n x =
 
 data PursType = PursType String String
 
-defaultToTsDef :: PursType -> Array TS.Name -> Array TS.Declaration
-defaultToTsDef (PursType m n) xs = pure $ TS.typeDef (TS.name n) []
+opaqueToTsDef :: PursType -> Array TS.Name -> Array TS.Declaration
+opaqueToTsDef (PursType m n) xs = pure $ TS.typeDef (TS.name n) []
   $ TS.opaque (TS.qualName m n) xs
 
-defaultToTsDef' :: forall a. ToPursNominal a => Array TS.Name -> Proxy a -> Array TS.Declaration
-defaultToTsDef' xs x = pure $ TS.typeDef (TS.name n) []
+opaqueToTsDef' :: forall a. ToPursNominal a => Array TS.Name -> Proxy a -> Array TS.Declaration
+opaqueToTsDef' xs x = pure $ TS.typeDef (TS.name n) []
   $ TS.opaque (TS.qualName (dotsToLodashes m) n) xs
   where
   PursNominal m n = toPursNominal x
 
-defaultToTsType :: PursType -> Array TS.Type -> TS.Type
-defaultToTsType (PursType m n) xs = TS.mkType (TS.qualName m n) xs
+typeRefToTsType :: PursType -> Array TS.Type -> TS.Type
+typeRefToTsType (PursType m n) xs = TS.mkType (TS.qualName m n) xs
 
-defaultToTsType' :: forall a. ToPursNominal a => Array TS.Type -> a -> TS.Type
-defaultToTsType' xs x = TS.mkType (TS.qualName (dotsToLodashes m) n) xs
+typeRefToTsType' :: forall a. ToPursNominal a => Array TS.Type -> a -> TS.Type
+typeRefToTsType' xs x = TS.mkType (TS.qualName (dotsToLodashes m) n) xs
   where
   PursNominal m n = toPursNominal x
 
-transprentRecordNewtype :: forall a b. ToTsType (Record b) => Newtype a (Record b) => a -> TS.Type
-transprentRecordNewtype = unwrap >>> toTsType
+newtypeToTsDef
+  :: forall a b
+   . ToTsType (Proxy b)
+  => ToTsType b
+  => Newtype a b
+  => ToPursNominal a
+  => Array TS.Name
+  -> Proxy a
+  -> Array TS.Declaration
+newtypeToTsDef xs x =
+  [ DeclTypeDef (TS.Name n) []
+      ( TS.TypeIntersection
+          (TS.opaque (TS.qualName (dotsToLodashes m) n) xs)
+          (toTsType (Proxy :: _ b))
+      )
+  ]
+  where
+  PursNominal m n = toPursNominal x
+
+--todo -- unwrap >>> toTsType
 
 defaultToPursType :: PursType -> Array PS.Type -> PS.Type
 defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs

@@ -3,8 +3,7 @@ module CirclesPink.Data.TrustNode
   , getAddress
   , initTrustNode
   , userIdent
-  )
-  where
+  ) where
 
 import CirclesPink.Prelude
 
@@ -23,6 +22,9 @@ newtype TrustNode = TrustNode
   { userIdent :: UserIdent
   , isLoading :: Boolean
   }
+
+moduleName :: String
+moduleName = "CirclesPink.Data.TrustNode"
 
 getAddress :: TrustNode -> Address
 getAddress = IxGraph.getIndex
@@ -46,8 +48,14 @@ instance Indexed Address TrustNode where
   getIndex (TrustNode { userIdent: UserIdent (Left x) }) = x
   getIndex (TrustNode { userIdent: UserIdent (Right (User { safeAddress })) }) = safeAddress
 
+instance ToPursNominal TrustNode where
+  toPursNominal _ = PursNominal moduleName "TrustNode"
+
+instance ToTsDef TrustNode where
+  toTsDef = newtypeToTsDef []
+
 instance ToTsType TrustNode where
-  toTsType = transprentRecordNewtype
+  toTsType = typeRefToTsType' []
 
 instance ToPursType TrustNode where
   toPursType _ = PS.var $ PS.Name "TODO"

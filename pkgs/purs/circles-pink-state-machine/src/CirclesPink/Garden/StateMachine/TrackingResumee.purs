@@ -44,10 +44,10 @@ instance ToPursNominal Instant where
   toPursNominal _ = PursNominal moduleName "Instant"
 
 instance ToTsType Instant where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef Instant where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType Instant where
   toPursType = defaultToPursType' []
@@ -68,10 +68,10 @@ instance ToPursNominal StepName where
   toPursNominal _ = PursNominal "CirclesPink.Garden.StateMachine.TrackingResumee" "StepName"
 
 instance ToTsType StepName where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef StepName where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType StepName where
   toPursType = defaultToPursType' []

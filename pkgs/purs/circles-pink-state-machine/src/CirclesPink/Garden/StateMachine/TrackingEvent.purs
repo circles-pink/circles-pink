@@ -58,10 +58,10 @@ instance ToPursNominal TrackingEvent where
   toPursNominal _ = PursNominal moduleName "TrackingEvent"
 
 instance ToTsType TrackingEvent where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef TrackingEvent where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType TrackingEvent where
   toPursType = defaultToPursType' []

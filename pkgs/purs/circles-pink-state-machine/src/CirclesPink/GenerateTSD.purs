@@ -3,6 +3,7 @@ module CirclesPink.GenerateTSD where
 import CirclesPink.Prelude
 
 import CirclesPink.GenerateTSD.Modules (moduleMap, modules)
+import Data.Array as A
 import Effect.Class.Console (log)
 import Node.ChildProcess (Exit(..), defaultSpawnOptions)
 import Node.Encoding (Encoding(..))
@@ -38,6 +39,7 @@ app :: Aff Unit
 app = do
   opts <- liftEffect $ execParser parserInfo
   modules
+    # A.sort
     # defineModules moduleMap
     # traverse_
         ( \(modName /\ mod) -> do

@@ -334,8 +334,6 @@ modules =
       join
         [ typeDef "--"
             (Proxy :: _ CirclesPink.Data.TrustNode.TrustNode)
-        , value "unwrap" []
-            CirclesPink.Data.TrustNode.unwrap
         , value "initTrustNode" []
             CirclesPink.Data.TrustNode.initTrustNode
         , instanceDef "ordTrustNode"

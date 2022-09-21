@@ -27,10 +27,10 @@ ptUserIdent :: PursType
 ptUserIdent = PursType "CirclesPink_Data_UserIdent" "UserIdent"
 
 instance ToTsDef UserIdent where
-  toTsDef _ = defaultToTsDef ptUserIdent []
+  toTsDef _ = opaqueToTsDef ptUserIdent []
 
 instance ToTsType UserIdent where
-  toTsType _ = defaultToTsType ptUserIdent []
+  toTsType _ = typeRefToTsType ptUserIdent []
 
 instance ToPursType UserIdent where
   toPursType _ = defaultToPursType ptUserIdent []
