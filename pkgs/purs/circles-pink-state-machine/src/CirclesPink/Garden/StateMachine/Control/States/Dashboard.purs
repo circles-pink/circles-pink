@@ -243,13 +243,10 @@ dashboard env@{ trustGetNetwork } =
           <<< prop _isLoading
 
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
-      lift $ env.sleep 1000
       syncTrusts set st safeAddress 0 `catchError`
         ( const $ do
-            lift $ env.sleep 1000
             lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
         )
-      lift $ env.sleep 1000
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
       pure unit
 
