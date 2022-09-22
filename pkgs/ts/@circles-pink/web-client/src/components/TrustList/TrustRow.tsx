@@ -12,13 +12,15 @@ import {
   _UserIdent,
   _TrustNode,
   TrustNode,
+  DashboardState,
+  _Address,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
-import { Theme } from '../context/theme';
-import { JustifyAroundCenter, JustifyStartCenter, Margin } from './helper';
+import { Theme } from '../../context/theme';
+import { JustifyAroundCenter, JustifyStartCenter, Margin } from '../helper';
 import tw, { css, styled } from 'twin.macro';
 import { t } from 'i18next';
-import { GridRow } from './GridRow';
+import { GridRow } from '../GridRow';
 import { FadeIn, getIncrementor } from 'anima-react';
 import ReactTooltip from 'react-tooltip';
 import Icon from '@mdi/react';
@@ -33,8 +35,9 @@ import {
   mdiHeartOutline,
   mdiWeatherCloudyClock,
 } from '@mdi/js';
-import { LoadingCircles } from './LoadingCircles';
+import { LoadingCircles } from '../LoadingCircles';
 import { TrustStatusMessage } from './TrustStatusMessage';
+import { useTrustResult } from './hooks/useTrustResult';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -75,6 +78,8 @@ type TrustRowProps = {
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
+  trustAddResult: DashboardState['trustAddResult'];
+  trustRemoveResult: DashboardState['trustRemoveResult'];
 };
 
 export const TrustRow = (props: TrustRowProps) => {
@@ -87,6 +92,8 @@ export const TrustRow = (props: TrustRowProps) => {
     setOverwriteTo,
     addTrust,
     removeTrust,
+    trustAddResult,
+    trustRemoveResult,
   } = props;
 
   const getDelay = getIncrementor(0, 0.05);
@@ -122,6 +129,14 @@ export const TrustRow = (props: TrustRowProps) => {
     trustRelationConfig.isTrusted || trustRelationConfig.isUntrusted;
 
   const { userIdent } = trustNode;
+
+  const address = _Address.addrToString(_UserIdent.getAddress(userIdent));
+
+  const trustResult = useTrustResult(
+    address,
+    trustAddResult,
+    trustRemoveResult
+  );
 
   if (inSync) {
     return (
@@ -272,7 +287,21 @@ export const TrustRow = (props: TrustRowProps) => {
         },
         {
           width: RELATION_WIDTH * 2,
-          content: <TrustStatusMessage theme={theme} trustState={trustState} />,
+          content: (
+            <>
+              {trustResult?.lastState !== 'failed' ? (
+                <TrustStatusMessage
+                  theme={theme}
+                  trustState={trustState}
+                  trustAddResult={trustAddResult}
+                  trustRemoveResult={trustRemoveResult}
+                  userIdent={userIdent}
+                />
+              ) : (
+                <></>
+              )}
+            </>
+          ),
 
           align: 'RIGHT',
         },

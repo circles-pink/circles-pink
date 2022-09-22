@@ -27,6 +27,7 @@ import Data.Either (Either)
 import Data.Either as Data.Either
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.HTTP.Method as Data.HTTP.Method
+import Data.Int as Data.Int
 import Data.IxGraph as Data.IxGraph
 import Data.Map (Map)
 import Data.Map as M
@@ -36,6 +37,7 @@ import Data.Newtype (class Newtype)
 import Data.Nullable as Data.Nullable
 import Data.Ord as Data.Ord
 import Data.Pair as Data.Pair
+import Data.Time.Duration as Data.Time.Duration
 import Data.Tuple (fst)
 import Data.Tuple as Data.Tuple
 import Data.Tuple.Nested (type (/\), (/\))
@@ -52,6 +54,7 @@ import RemoteData (RemoteData)
 import RemoteData as RemoteData
 import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
+import Simple.Data.Duration as Simple.Data.Duration
 import Simple.Data.Either as Simple.Data.Either
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Pair as Simple.Data.Pair
@@ -88,6 +91,18 @@ modules =
   , "Data.DateTime.Instant" /\ join
       [ R.typeDef "--"
           (Proxy :: _ Data.DateTime.Instant.Instant)
+      , R.value "unInstant" []
+          (Data.DateTime.Instant.unInstant)
+      ]
+
+  , "Data.Time.Duration" /\ join
+      [ R.typeDef "--"
+          (Proxy :: _ Data.Time.Duration.Milliseconds)
+      ]
+
+  , "Simple.Data.Duration" /\ join
+      [ R.value "unMilliseconds" []
+          (Simple.Data.Duration.unMilliseconds)
       ]
 
   , "CirclesPink.Garden.StateMachine.Action" /\ join
@@ -281,6 +296,12 @@ modules =
             (Proxy :: _ Data.Argonaut.Json)
         , R.typeDef "--"
             (Proxy :: _ Data.Argonaut.JsonDecodeError)
+        ]
+
+  , "Data.Int" /\
+      join
+        [ value "toNumber" []
+            Data.Int.toNumber
         ]
 
   , "CirclesPink.Data.Mnemonic" /\

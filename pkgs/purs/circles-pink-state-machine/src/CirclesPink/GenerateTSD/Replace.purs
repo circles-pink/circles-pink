@@ -18,6 +18,7 @@ import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
 import Data.Pair (Pair)
+import Data.Time.Duration (Milliseconds)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Foreign.Object (Object)
@@ -85,6 +86,8 @@ else instance UnsafeReplace FetchImpl (Wrap FetchImpl)
 else instance UnsafeReplace CirclesConfigEffect (Wrap CirclesConfigEffect)
 
 else instance UnsafeReplace Json (Wrap Json)
+
+else instance UnsafeReplace Milliseconds (Wrap Milliseconds)
 
 else instance UnsafeReplace a a' => UnsafeReplace (Object a) (Wrap (Object a'))
 
@@ -196,6 +199,20 @@ instance ToTsDef (Wrap Json) where
   toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap Json) where
+  toPursType = defaultToPursType' []
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap Milliseconds) where
+  toPursNominal _ = PursNominal "Data.Time.Duration" "Milliseconds"
+
+instance ToTsType (Wrap Milliseconds) where
+  toTsType = defaultToTsType' []
+
+instance ToTsDef (Wrap Milliseconds) where
+  toTsDef = defaultToTsDef' []
+
+instance ToPursType (Wrap Milliseconds) where
   toPursType = defaultToPursType' []
 
 --------------------------------------------------------------------------------

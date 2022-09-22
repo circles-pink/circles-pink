@@ -30,7 +30,7 @@ import {
   ROW_HEIGHT,
   TrustRow,
   USERNAME_WIDTH,
-} from './TrustRow';
+} from './TrustList/TrustRow';
 import { Theme } from '../context/theme';
 import { getIncrementor } from 'anima-react';
 import { Conn } from './TrustUserList';
@@ -146,6 +146,8 @@ type UserSearchProps = {
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
+  trustAddResult: DashboardState['trustAddResult'];
+  trustRemoveResult: DashboardState['trustRemoveResult'];
 };
 
 export const UserSearch = (props: UserSearchProps) => {

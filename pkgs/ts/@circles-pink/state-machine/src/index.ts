@@ -4,8 +4,12 @@ import * as Data_Either from "@circles-pink/state-machine/output/Data.Either";
 import * as Simple_Data_Either from "@circles-pink/state-machine/output/Simple.Data.Either";
 import * as Data_Nullable from "@circles-pink/state-machine/output/Data.Nullable";
 import * as Data_Maybe from "@circles-pink/state-machine/output/Data.Maybe";
+import * as Data_Int from "@circles-pink/state-machine/output/Data.Int";
 import * as Data_Tuple from "@circles-pink/state-machine/output/Data.Tuple";
 import * as Simple_Data_Tuple from "@circles-pink/state-machine/output/Simple.Data.Tuple";
+import * as Data_DateTime_Instant from "@circles-pink/state-machine/output/Data.DateTime.Instant";
+import * as Data_Time_Duration from "@circles-pink/state-machine/output/Data.Time.Duration";
+import * as Simple_Data_Duration from "@circles-pink/state-machine/output/Simple.Data.Duration";
 import * as Simple_Network_Ethereum_Core_Signatures from "@circles-pink/state-machine/output/Simple.Network.Ethereum.Core.Signatures";
 import * as Network_Ethereum_Core_Signatures from "@circles-pink/state-machine/output/Network.Ethereum.Core.Signatures";
 import * as Simple_Data_Maybe from "@circles-pink/state-machine/output/Simple.Data.Maybe";
@@ -51,6 +55,7 @@ export type { TrackingEvent } from "@circles-pink/state-machine/output/CirclesPi
 export type { RemoteData } from "@circles-pink/state-machine/output/RemoteData";
 export type { Direction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Direction";
 export type { FetchImpl } from "@circles-pink/state-machine/output/Milkis.Impl";
+export type { Object as ForeignObject } from "@circles-pink/state-machine/output/Foreign.Object";
 export type {
   CirclesState,
   DebugState,
@@ -81,6 +86,8 @@ export type {
 export type { CirclesConfigEffect } from "@circles-pink/state-machine/output/CirclesPink.Garden.TS";
 export type { Resumee } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.TrackingResumee";
 export type { Json } from "@circles-pink/state-machine/output/Data.Argonaut";
+export type { Instant } from "@circles-pink/state-machine/output/Data.DateTime.Instant";
+export type { Int } from "@circles-pink/state-machine/output/PursTsGen.Prim";
 
 // -----------------------------------------------------------------------------
 // Value exports
@@ -120,3 +127,6 @@ export const _StateMachine = {
 };
 export const _TrackingResumee = CirclesPink_Garden_StateMachine_TrackingResumee;
 export const _TS = CirclesPink_TS;
+export const _Instant = Data_DateTime_Instant;
+export const _Duration = { ...Data_Time_Duration, ...Simple_Data_Duration };
+export const _Int = Data_Int;

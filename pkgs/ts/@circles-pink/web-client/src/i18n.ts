@@ -173,6 +173,7 @@ export const resources = {
             loadingUntrust: 'Untrusten ...',
             pendingTrust: 'Bestätige ...',
             pendingUntrust: 'Bestätige ...',
+            trustingFailed: 'Trusten fehlgeschlagen.',
           },
         },
 
@@ -338,6 +339,7 @@ export const resources = {
             loadingUntrust: 'Untrusting ...',
             pendingTrust: 'Confirming ...',
             pendingUntrust: 'Confirming ...',
+            trustingFailed: 'Trusting failed.',
           },
         },
         voucherShop: {
