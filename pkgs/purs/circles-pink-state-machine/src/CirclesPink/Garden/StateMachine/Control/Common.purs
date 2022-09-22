@@ -17,7 +17,7 @@ import Data.Newtype (unwrap)
 import Data.Variant (Variant, default, onMatch)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import RemoteReport (RemoteReport, getData, getData')
+import RemoteReport (RemoteReport, getData')
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 

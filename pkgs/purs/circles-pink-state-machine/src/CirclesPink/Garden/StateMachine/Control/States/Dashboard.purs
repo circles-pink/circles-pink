@@ -5,23 +5,21 @@ module CirclesPink.Garden.StateMachine.Control.States.Dashboard
   ) where
 
 import CirclesPink.Prelude
-import Prelude
 
 import CirclesCore as CC
-import CirclesPink.Data.Address (Address(..), parseAddress)
+import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (TrustNode(..), _userIdent, initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode, initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User(..))
-import CirclesPink.Data.UserIdent (UserIdent(..), UserIdent', getAddress)
+import CirclesPink.Data.UserIdent (UserIdent(..), getAddress)
 import CirclesPink.Data.UserIdent as UserIdent
 import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
-import CirclesPink.Garden.StateMachine.State (CirclesState, DashboardState)
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
@@ -38,7 +36,7 @@ import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
-import Data.Lens (Lens', Prism', Traversal', _Just, lens, prism', set, traversed)
+import Data.Lens (_Just, set, traversed)
 import Data.Lens as L
 import Data.Lens.At (at)
 import Data.Lens.Iso.Newtype (_Newtype)
@@ -52,11 +50,7 @@ import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
 import Data.These (These(..), maybeThese)
-import Data.Variant as V
-import Foreign.Object (insert)
-import Prim.Row (class Cons)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import RemoteReport (RemoteReport)
 import Test.TestUtils (addrA, addrB, userA)
 import Web3 (Message(..))
 
@@ -532,12 +526,6 @@ getVoucherProviders env set st _ =
           # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "voucherProvidersResult")) f)
           # retryUntil env (const { delay: 1000 }) (\_ n -> n == 0) 0
       pure unit
-
-_dashboard :: Prism' CirclesState DashboardState
-_dashboard = prism' constructor focuser
-  where
-  constructor = S._dashboard
-  focuser = V.default Nothing # on (Proxy :: _ "dashboard") Just
 
 --------------------------------------------------------------------------------
 
