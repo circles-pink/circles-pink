@@ -13,5 +13,8 @@
     "editor.defaultFormatter": "dhall.vscode-dhall-lsp-server"
   },
   "purescript.formatter": "purs-tidy",
-  "files.watcherExclude": { "results/**/*": true }
+  "files.watcherExclude": {
+    "results/**/*": true
+  },
+  "purescript.censorWarnings": ["WildcardInferredType"]
 }
