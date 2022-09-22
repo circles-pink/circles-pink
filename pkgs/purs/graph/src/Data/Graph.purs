@@ -25,9 +25,8 @@ module Data.Graph
 
 import Prelude
 
-import Control.Error.Util (hush)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..), either, fromRight')
+import Data.Either (Either(..), hush, either, fromRight')
 import Data.Foldable (class Foldable, fold, foldM)
 import Data.Generic.Rep (class Generic)
 import Data.Graph.Core (EitherV, Graph)
