@@ -34,7 +34,6 @@ import Data.String as St
 import Data.Traversable (foldr, sequence)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested (type (/\), (/\))
-import Debug.Extra (todo)
 import PursTsGen.Class.ToPursNominal (PursNominal(..), class ToPursNominal, toPursNominal)
 import PursTsGen.Class.ToPursNominal (class ToPursNominal, PursNominal(..)) as Exp
 import PursTsGen.Class.ToPursType (class ToPursType, toPursType) as Exp
@@ -202,8 +201,6 @@ newtypeToTsDef xs x =
   ]
   where
   PursNominal m n = toPursNominal x
-
---todo -- unwrap >>> toTsType
 
 defaultToPursType :: PursType -> Array PS.Type -> PS.Type
 defaultToPursType (PursType m n) xs = PS.mkType (PS.qualName m n) xs
