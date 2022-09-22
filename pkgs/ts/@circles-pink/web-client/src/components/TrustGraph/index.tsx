@@ -132,18 +132,7 @@ export const TrustGraph = ({
           })
           .play()
           .promise('done')
-          .then(() => {
-            const trustNode = pipe(
-              graph,
-              _IxGraph.lookupNode(ordAddress)(address),
-              _Either.hush,
-              _Nullable.toNullable
-            );
-            if (!trustNode) return;
-            if (trustNode.isLoading) {
-              return loopAnimation2(address)(ele);
-            }
-          });
+          .then(() => loopAnimation2(address)(ele));
       };
 
     let loopAnimation2 =
@@ -163,9 +152,7 @@ export const TrustGraph = ({
           })
           .play()
           .promise('done')
-          .then(() => {
-            loopAnimation1(address)(ele);
-          });
+          .then(() => loopAnimation1(address)(ele));
       };
 
     cy.on('tap', 'node', evt => {
@@ -179,6 +166,36 @@ export const TrustGraph = ({
       loopAnimation1(address)(evt.target);
     });
   }, [cy]);
+
+  useEffect(() => {
+    if (!cy) return;
+
+    let finishAnim = (ele: any): any => {
+      const duration = 250 + Math.random() * 50;
+      return ele
+        .animation({
+          style: {
+            opacity: 1,
+            'background-color': theme.baseColor,
+            width: ele.data('label').length * 12,
+            height: 15,
+          },
+          duration,
+          easing: 'ease-in-out-sine',
+        })
+        .play();
+    };
+
+    setTimeout(() => {
+      cy.nodes().map(x => {
+        if (x.animated() && !x.data('isLoading')) {
+          x.stop();
+          finishAnim(x);
+        }
+        return x;
+      });
+    }, 1000);
+  });
 
   const stylesheets = [
     {

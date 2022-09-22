@@ -9,6 +9,8 @@ import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (except, lift, runExceptT)
 import Data.Either (note)
+import Data.Lens as L
+import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.Tuple.Nested ((/\))
 import Data.Variant (inj)
@@ -44,7 +46,7 @@ login env =
               _ <- env.saveSession privKey
               pure (taskReturn /\ privKey)
           )
-            # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._login st' { loginResult = r }) x 0)
+            # (\x -> subscribeRemoteReport env (\f -> set $ S._login <<< L.over (prop (Proxy :: _ "loginResult")) f) x 0)
             # dropError
         if safeStatus.isCreated && safeStatus.isDeployed then
           lift $ set \_ -> S.initDashboard { user, privKey }
