@@ -21,7 +21,7 @@ import CirclesPink.Garden.StateMachine.Control.Class (class MonadCircles)
 import CirclesPink.Garden.StateMachine.Control.Common (ActionHandler', deploySafe', dropError, retryUntil, subscribeRemoteReport)
 import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.Control.EnvControl as EnvControl
-import CirclesPink.Garden.StateMachine.State (DashboardState)
+import CirclesPink.Garden.StateMachine.State (CirclesState, DashboardState)
 import CirclesPink.Garden.StateMachine.State as S
 import CirclesPink.Garden.StateMachine.State.Dashboard (CirclesGraph)
 import Control.Monad.Except (runExceptT, withExceptT)
@@ -38,8 +38,9 @@ import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
-import Data.Lens (Lens', Traversal', set, traversed)
+import Data.Lens (Lens', Prism', Traversal', _Just, lens, prism', set, traversed)
 import Data.Lens as L
+import Data.Lens.At (at)
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
 import Data.Map (Map)
@@ -51,8 +52,11 @@ import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
 import Data.These (These(..), maybeThese)
+import Data.Variant as V
 import Foreign.Object (insert)
+import Prim.Row (class Cons)
 import RemoteData (RemoteData, _failure, _loading, _success)
+import RemoteReport (RemoteReport)
 import Test.TestUtils (addrA, addrB, userA)
 import Web3 (Message(..))
 
@@ -239,14 +243,13 @@ dashboard env@{ trustGetNetwork } =
           <<< prop _isLoading
 
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
-      let _ = spy "AA" unit
+      lift $ env.sleep 1000
       syncTrusts set st safeAddress 0 `catchError`
         ( const $ do
-            lift $ env.sleep 2000
+            lift $ env.sleep 1000
             lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
         )
-      lift $ env.sleep 2000
-      let _ = spy "BB" unit
+      lift $ env.sleep 1000
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
       pure unit
 
@@ -291,7 +294,7 @@ dashboard env@{ trustGetNetwork } =
                   Left _ -> S._dashboard st'
         _ <-
           env.addTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustAddResult = insert (show targetAddress) r st.trustAddResult })
+            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustAddResult") <<< at (show targetAddress) <<< _Just) f)
             # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
 
@@ -344,7 +347,10 @@ dashboard env@{ trustGetNetwork } =
                   Left _ -> S._dashboard st'
         _ <-
           env.removeTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustRemoveResult = insert (show targetAddress) r st.trustRemoveResult })
+            # subscribeRemoteReport env
+                ( \f ->
+                    set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustRemoveResult") <<< at (show targetAddress) <<< _Just) f
+                )
             # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
 
@@ -375,7 +381,7 @@ dashboard env@{ trustGetNetwork } =
         signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
         _ <-
           env.getVouchers signatureObj
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { vouchersResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "vouchersResult")) f)
             # retryUntil env (const { delay: 1000 }) (\_ n -> n == 0) 0
         pure unit
 
@@ -384,7 +390,7 @@ dashboard env@{ trustGetNetwork } =
       runExceptT do
         _ <-
           env.getBalance st.privKey (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { getBalanceResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "getBalanceResult")) f)
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         pure unit
 
@@ -393,11 +399,11 @@ dashboard env@{ trustGetNetwork } =
       runExceptT do
         checkPayout <-
           env.checkUBIPayout st.privKey (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { checkUBIPayoutResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "checkUBIPayoutResult")) f)
             # retryUntil env (const { delay: 5000 }) (\r n -> n == 5 || isRight r) 0
         when ((Str.length $ BN.toDecimalStr checkPayout) >= 18) do
           env.requestUBIPayout st.privKey (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { requestUBIPayoutResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "requestUBIPayoutResult")) f)
             # retryUntil env (const { delay: 10000 }) (\r n -> n == 5 || isRight r) 0
             # void
 
@@ -405,7 +411,7 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         env.userSearch st.privKey options
-          # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { userSearchResult = r }) x 0)
+          # (\x -> subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "userSearchResult")) f) x 0)
 
   transfer set st { from, to, value, paymentNote } = do
     set \st' -> S._dashboard st' { transferResult = _loading unit :: RemoteData _ _ _ _ }
@@ -421,7 +427,7 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         _ <- deploySafe' env st.privKey
-          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { redeploySafeResult = r })
+          # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "redeploySafeResult")) f)
           # retryUntil env (const { delay: 250 })
               ( \r _ -> case r of
                   Right res -> res.isCreated && res.isDeployed
@@ -430,7 +436,7 @@ dashboard env@{ trustGetNetwork } =
               0
           # dropError
         _ <- env.deployToken st.privKey
-          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { redeployTokenResult = r })
+          # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "redeployTokenResult")) f)
           # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
           # dropError
         pure unit
@@ -439,7 +445,7 @@ dashboard env@{ trustGetNetwork } =
 
     trustNodes :: Map Address CC.TrustNode <-
       trustGetNetwork st.privKey centerAddress
-        # (\x -> subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { trustsResult = r }) x i)
+        # (\x -> subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustsResult")) f) x i)
         # dropError
         <#> map (\v -> wrap v.safeAddress /\ v)
           >>> M.fromFoldable
@@ -523,11 +529,18 @@ getVoucherProviders env set st _ =
     runExceptT do
       msg <- env.getTimestamp # lift <#> unInstant >>> unwrap >>> N.toString
       signatureObj <- lift $ env.signChallenge (Message msg) st.privKey
-      _ <-
+      _ <- do
+        --let (_x :: ?a)  = _dashboard <<< prop (Proxy :: _ "voucherProvidersResult")
         env.getVoucherProviders signatureObj
-          # subscribeRemoteReport env (\r -> set \st' -> S._dashboard st' { voucherProvidersResult = r })
+          # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "voucherProvidersResult")) f)
           # retryUntil env (const { delay: 1000 }) (\_ n -> n == 0) 0
       pure unit
+
+_dashboard :: Prism' CirclesState DashboardState
+_dashboard = prism' constructor focuser
+  where
+  constructor = S._dashboard
+  focuser = V.default Nothing # on (Proxy :: _ "dashboard") Just
 
 --------------------------------------------------------------------------------
 

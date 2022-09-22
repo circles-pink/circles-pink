@@ -9,8 +9,11 @@ import CirclesPink.Garden.StateMachine.Control.EnvControl (EnvControl)
 import CirclesPink.Garden.StateMachine.State as S
 import Control.Monad.Except (lift, runExceptT)
 import Data.Either (Either(..), isRight)
+import Data.Lens as L
+import Data.Lens.Record (prop)
 import Data.Newtype.Extra ((-#))
 import RemoteData (_failure)
+import Type.Proxy (Proxy(..))
 
 trusts
   :: forall m
@@ -41,7 +44,7 @@ trusts env@{ deployToken } =
       doDeploys =
         do
           _ <- deploySafe' env st.privKey
-            # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deploySafeResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._trusts <<< L.over (prop (Proxy :: _ "deploySafeResult")) f)
             # retryUntil env (const { delay: 250 })
                 ( \r _ -> case r of
                     Right res -> res.isCreated && res.isDeployed
@@ -50,7 +53,7 @@ trusts env@{ deployToken } =
                 0
             # dropError
           _ <- deployToken st.privKey
-            # subscribeRemoteReport env (\r -> set \st' -> S._trusts st' { deployTokenResult = r })
+            # subscribeRemoteReport env (\f -> set $ S._trusts <<< L.over (prop (Proxy :: _ "deployTokenResult")) f)
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
             # dropError
           pure unit

@@ -17,7 +17,7 @@ import Data.Newtype (unwrap)
 import Data.Variant (Variant, default, onMatch)
 import Prim.Row (class Nub)
 import RemoteData (RemoteData, _failure, _loading, _success)
-import RemoteReport (RemoteReport)
+import RemoteReport (RemoteReport, getData, getData')
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -97,18 +97,27 @@ subscribeRemoteReport
   :: forall e a m
    . Monad m
   => EnvControl m
-  -> (RemoteReport e a -> m Unit)
+  -> ((RemoteReport e a -> RemoteReport e a) -> m Unit)
   -> ExceptT e m a
   -> Int
   -> ExceptT e m a
 subscribeRemoteReport { getTimestamp } setCb comp retry = ExceptT do
   startTime <- getTimestamp
-  setCb $ _loading { timestamp: startTime, retry, previousData: Nothing :: Maybe a }
+  setCb \rd -> _loading
+    { timestamp: startTime
+    , retry
+    , previousData: getData' rd
+    }
   result :: Either e a <- runExceptT comp
   endTime <- getTimestamp
-  setCb case result of
+  setCb \rd -> case result of
     Left e -> _failure { error: e, timestamp: endTime, retry }
-    Right d -> _success { data: d, timestamp: endTime, retry }
+    Right d -> _success
+      { data: d
+      , previousData: getData' rd
+      , timestamp: endTime
+      , retry
+      }
   pure result
 
 addPreviousData :: forall e a. a -> RemoteReport e a -> RemoteReport e a
