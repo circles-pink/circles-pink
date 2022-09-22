@@ -439,13 +439,13 @@ dashboard env@{ trustGetNetwork } =
         # (\x -> subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustsResult")) f) x i)
         # dropError
         <#> map (\v -> wrap v.safeAddress /\ v)
-          >>> M.fromFoldable
+        >>> M.fromFoldable
 
     userIdents :: Map Address UserIdent <-
       fetchUsersBinarySearch env st.privKey (Set.toUnfoldable $ M.keys trustNodes)
         # dropError
         <#> map (\v -> getIndex v /\ v)
-          >>> M.fromFoldable
+        >>> M.fromFoldable
 
     lift
       $ set \st' ->
@@ -455,17 +455,17 @@ dashboard env@{ trustGetNetwork } =
               let
                 neighborNodes = G.neighborNodes centerAddress st'.trusts
                   <#> map (\v -> getIndex v /\ v)
-                    >>> M.fromFoldable
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 incomingEdges = G.incomingEdges centerAddress st'.trusts
                   <#> map (\v -> P.fst (getIndex v) /\ v)
-                    >>> M.fromFoldable
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
                 outgoingEdges = G.outgoingEdges centerAddress st'.trusts
                   <#> map (\v -> P.snd (getIndex v) /\ v)
-                    >>> M.fromFoldable
+                  >>> M.fromFoldable
                   # either (const M.empty) identity
 
               st'.trusts

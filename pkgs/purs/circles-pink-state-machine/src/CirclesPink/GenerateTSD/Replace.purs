@@ -207,10 +207,10 @@ instance ToPursNominal (Wrap Milliseconds) where
   toPursNominal _ = PursNominal "Data.Time.Duration" "Milliseconds"
 
 instance ToTsType (Wrap Milliseconds) where
-  toTsType = defaultToTsType' []
+  toTsType = typeRefToTsType' []
 
 instance ToTsDef (Wrap Milliseconds) where
-  toTsDef = defaultToTsDef' []
+  toTsDef = opaqueToTsDef' []
 
 instance ToPursType (Wrap Milliseconds) where
   toPursType = defaultToPursType' []
