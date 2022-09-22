@@ -413,11 +413,11 @@ export const XbgeDashboard = ({
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
                 addTrust={to => act(_dashboardAction._addTrustConnection(to))}
-                // trustAddResult={state.trustAddResult}
+                trustAddResult={state.trustAddResult}
                 removeTrust={to =>
                   act(_dashboardAction._removeTrustConnection(to))
                 }
-                // trustRemoveResult={state.trustRemoveResult}
+                trustRemoveResult={state.trustRemoveResult}
               />
             </FadeIn>
             <FadeIn orientation={'up'} delay={getDelay()}>
@@ -435,9 +435,11 @@ export const XbgeDashboard = ({
                 toggleOverlay={toggleOverlay}
                 setOverwriteTo={setOverwriteTo}
                 addTrust={to => act(_dashboardAction._addTrustConnection(to))}
+                trustAddResult={state.trustAddResult}
                 removeTrust={to =>
                   act(_dashboardAction._removeTrustConnection(to))
                 }
+                trustRemoveResult={state.trustRemoveResult}
                 description={t('dashboard.xbgeSpecial.userSearchDescription')}
                 actionRow={
                   <div>

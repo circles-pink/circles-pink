@@ -14,6 +14,7 @@ import {
   _Address,
   _Array,
   _TrustNode,
+  DashboardState,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
 import { Theme } from '../context/theme';
@@ -33,7 +34,7 @@ import {
   mdiAccountArrowRight,
   mdiAccountCancel,
 } from '@mdi/js';
-import { TrustRow } from './TrustRow';
+import { TrustRow } from './TrustList/TrustRow';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -62,6 +63,8 @@ type Props = {
   setOverwriteTo?: React.Dispatch<SetStateAction<Address | undefined>>;
   addTrust: (to: UserIdent) => void;
   removeTrust: (to: UserIdent) => void;
+  trustAddResult: DashboardState['trustAddResult'];
+  trustRemoveResult: DashboardState['trustRemoveResult'];
 };
 
 export type Conn = {
