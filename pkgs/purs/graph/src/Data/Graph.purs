@@ -20,6 +20,10 @@ module Data.Graph
   , outgoingEdges
   , outgoingEdgesWithNodes
   , outgoingNodes
+  , partLookupEdge
+  , partLookupEdgeIx
+  , partLookupNode
+  , partLookupNodeIx
   , unNeighborConnectivity
   ) where
 
