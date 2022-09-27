@@ -62,16 +62,16 @@ instance (Ord id, Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (Graph id
   arbitrary = sized \size -> do
     count <- chooseInt 0 size
     let (indices :: Array Int) = 0 .. count
-    foldM genAddNode empty indices 
-    
+    foldM genAddNode empty indices
+
     where
-      genAddNode :: Graph id e n -> Int -> Gen (Graph id e n) 
-      genAddNode g _ = do
-        id <- arbitrary
-        node <- arbitrary
-        addNode id node g 
-          # either (const g) identity
-          # pure
+    genAddNode :: Graph id e n -> Int -> Gen (Graph id e n)
+    genAddNode g _ = do
+      id <- arbitrary
+      node <- arbitrary
+      addNode id node g
+        # either (const g) identity
+        # pure
 
 instance Functor (Graph id e) where
   map f (Graph nodes) = Graph $ map (\x -> x { data = f x.data }) nodes
