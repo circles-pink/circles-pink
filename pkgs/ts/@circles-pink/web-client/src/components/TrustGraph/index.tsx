@@ -96,6 +96,8 @@ type TrustGraphProps = {
   theme: Theme;
 };
 
+(window as any).layouts = {concentric}
+
 export const TrustGraph = ({
   graph,
   expandTrustNetwork,
@@ -104,13 +106,24 @@ export const TrustGraph = ({
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
 
-  const elements = getElementsFromData(graph);
+  const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_IxGraph.empty)
 
   useEffect(() => {
-    if (!cy) return;
-    const layout_ = cy.layout(layout);
-    layout_.run();
-  }, [JSON.stringify(elements)]);
+    const diff = getDiff(graph, previousGraph);
+
+    diff.foreach((instr) => {
+      pipe(instr, onDiffInstruction({
+        onAddNode: () => cy.addNode(),
+        onDeleteNode: () => cy.deleteNode(),
+      }))
+    })
+
+    setPrevGraph(graph)
+  }, [graph])
+
+  const elements = [] ; //getElementsFromData(graph);
+
+
 
   useEffect(() => {
     if (!cy) return;
