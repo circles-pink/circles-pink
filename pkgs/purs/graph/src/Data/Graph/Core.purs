@@ -36,15 +36,16 @@ import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrDeleteEdge, ErrDeleteNode, 
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Pair (Pair, (~))
+import Data.Pair (Pair(..), (~))
 import Data.Set (Set)
 import Data.Set as S
+import Data.Set as Set
 import Data.Tuple (uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
 import Data.Variant (Variant, inj)
 import Test.QuickCheck (class Arbitrary, arbitrary)
-import Test.QuickCheck.Gen (Gen, chooseInt, sized)
+import Test.QuickCheck.Gen (Gen, chooseInt, shuffle, sized)
 
 --------------------------------------------------------------------------------
 -- Type
@@ -61,8 +62,17 @@ newtype Graph id e n = Graph
 instance (Ord id, Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (Graph id e n) where
   arbitrary = sized \size -> do
     count <- chooseInt 0 size
-    let (indices :: Array Int) = 0 .. count
-    foldM genAddNode empty indices
+    let indices = 0 .. count
+    graph <- foldM genAddNode empty indices
+    let nodeIds' = Set.toUnfoldable $ nodeIds graph
+    let nodeIdsCount = A.length nodeIds'
+    countEdges <- chooseInt 0 nodeIdsCount
+
+    sourceNodeIds <- A.take countEdges <$> shuffle nodeIds'
+    targetNodeIds <- A.take countEdges <$> shuffle nodeIds'
+
+    A.zipWith Pair sourceNodeIds targetNodeIds
+      # foldM genAddEdge graph
 
     where
     genAddNode :: Graph id e n -> Int -> Gen (Graph id e n)
@@ -72,6 +82,14 @@ instance (Ord id, Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (Graph id
       addNode id node g
         # either (const g) identity
         # pure
+
+    genAddEdge :: Graph id e n -> Pair id -> Gen (Graph id e n)
+    genAddEdge g p = do
+      edge <- arbitrary
+      addEdge p edge g
+        # either (const g) identity
+        # pure
+
 
 instance Functor (Graph id e) where
   map f (Graph nodes) = Graph $ map (\x -> x { data = f x.data }) nodes
