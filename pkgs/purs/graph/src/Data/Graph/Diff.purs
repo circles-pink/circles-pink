@@ -8,14 +8,16 @@ module Data.Graph.Diff
 import Prelude
 
 import Data.Array (catMaybes, foldr)
-import Data.Either (either)
+import Data.Either (Either(..), either)
+import Data.Generic.Rep (class Generic)
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Pair (Pair)
 import Data.Set (difference, intersection, toUnfoldable)
+import Data.Show.Generic (genericShow)
 import Partial.Unsafe (unsafePartial)
-import Test.QuickCheck ((===))
+import Test.QuickCheck (withHelp, (===))
 import Test.Spec (Spec, describe, it)
 import Test.Spec.QuickCheck (quickCheck)
 
@@ -53,13 +55,14 @@ getDiff g1 g2 =
 
 applyDiff :: forall id e n. Ord id => GraphDiff id e n -> Graph id e n -> Graph id e n
 applyDiff di g = foldr applyDiffInstruction g di
-  where
-  applyDiffInstruction :: DiffInstruction id e n -> Graph id e n -> Graph id e n
-  applyDiffInstruction di' g' = case di' of
-    DeleteNode id -> G.deleteNode id g # either (const g) identity
-    AddNode id n -> G.addNode id n g' # either (const g) identity
-    UpdateNode id n -> G.updateNode id n g' # either (const g) identity
-    _ -> g'
+
+applyDiffInstruction :: forall id e n. Ord id => DiffInstruction id e n -> Graph id e n -> Graph id e n
+applyDiffInstruction di g = either (const g) identity
+  case di of
+    DeleteNode id -> G.deleteNode id g
+    AddNode id n -> G.addNode id n g
+    UpdateNode id n -> G.updateNode id n g
+    _ -> Right g
 
 spec :: Spec Unit
 spec = describe "Graph diff" do
@@ -80,11 +83,17 @@ spec = describe "Graph diff" do
     quickCheck \(g1 :: _ Char String Boolean) g2 ->
       let
         diff = getDiff g1 g2
+        g2_ = applyDiff diff g1
       in
-        applyDiff diff g1 === g2
+        (g2_ == g2) `withHelp` (show { diff, g1, g2, g2_ } <> "\n")
 
 -- describe "Math" do
 --   it "works" $
 --     quickCheck (\n -> (n * 2 / 2) === n)
 --   it "works again" $
 --     quickCheck \n -> ((n + 1) * 2) /== n
+
+derive instance Generic (DiffInstruction id e n) _
+
+instance (Show id, Show e, Show n) => Show (DiffInstruction id e n) where
+  show = genericShow
