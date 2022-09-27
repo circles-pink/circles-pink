@@ -13,7 +13,10 @@ import Data.BN (BN)
 import Data.DateTime.Instant (Instant)
 import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
+import Data.Graph (Graph)
+import Data.Graph as Data.Graph
 import Data.HTTP.Method (Method)
+import Data.IxGraph (IxGraph)
 import Data.IxGraph as Data.IxGraph
 import Data.Maybe (Maybe)
 import Data.Newtype (class Newtype)
@@ -22,6 +25,7 @@ import Data.Time.Duration (Milliseconds)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Foreign.Object (Object)
+import Language.Dot (E, N)
 import Milkis.Impl (FetchImpl)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
@@ -31,7 +35,7 @@ import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Data.ABC (A)
+import PursTsGen.Data.ABC (A, I)
 import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
@@ -53,7 +57,14 @@ instance
   , UnsafeReplace b b'
   , UnsafeReplace c c'
   ) =>
-  UnsafeReplace (Data.IxGraph.IxGraph a b c) (W.IxGraph a' b' c')
+  UnsafeReplace (Data.IxGraph.IxGraph a b c) (Wrap (IxGraph a' b' c'))
+
+else instance
+  ( UnsafeReplace a a'
+  , UnsafeReplace b b'
+  , UnsafeReplace c c'
+  ) =>
+  UnsafeReplace (Data.Graph.Graph a b c) (Wrap (Graph a' b' c'))
 
 else instance
   ( UnsafeReplace a a'
@@ -186,6 +197,34 @@ instance ToTsDef (Wrap BN) where
 
 instance ToPursType (Wrap BN) where
   toPursType = defaultToPursType' []
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap (IxGraph id e n)) where
+  toPursNominal _ = PursNominal "Data.IxGraph" "IxGraph"
+
+instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Wrap (IxGraph id e n)) where
+  toTsType = typeRefToTsType' [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
+
+instance ToTsDef (Wrap (IxGraph I E N)) where
+  toTsDef = opaqueToTsDef' [ TS.name "I", TS.name "E", TS.name "N" ]
+
+instance (ToPursType id, ToPursType e, ToPursType n) => ToPursType (Wrap (IxGraph id e n)) where
+  toPursType = defaultToPursType' [ toPursType (Proxy :: _ id), toPursType (Proxy :: _ e), toPursType (Proxy :: _ n) ]
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap (Graph id e n)) where
+  toPursNominal _ = PursNominal "Data.Graph" "Graph"
+
+instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Wrap (Graph id e n)) where
+  toTsType = typeRefToTsType' [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
+
+instance ToTsDef (Wrap (Graph I E N)) where
+  toTsDef = opaqueToTsDef' [ TS.name "I", TS.name "E", TS.name "N" ]
+
+instance (ToPursType id, ToPursType e, ToPursType n) => ToPursType (Wrap (Graph id e n)) where
+  toPursType = defaultToPursType' [ toPursType (Proxy :: _ id), toPursType (Proxy :: _ e), toPursType (Proxy :: _ n) ]
 
 --------------------------------------------------------------------------------
 

@@ -25,6 +25,7 @@ import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
+import Data.Graph.Diff as Data.Graph.Diff
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.HTTP.Method as Data.HTTP.Method
 import Data.Int as Data.Int
@@ -48,7 +49,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, L, N, Z)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, I(..), L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -205,7 +206,7 @@ modules =
   , "Data.IxGraph" /\
       join
         [ R.typeDef "--"
-            (Proxy :: _ (Data.IxGraph.IxGraph A B C))
+            (Proxy :: _ (Data.IxGraph.IxGraph I E N))
         , R.typeDef "--"
             (Proxy :: _ (Data.IxGraph.NeighborConnectivity A))
         , R.value "neighborNodes"
@@ -227,6 +228,14 @@ modules =
         , R.value "nodes"
             [ _Ord ORD ]
             (Data.IxGraph.nodes :: _ ORD E N -> _)
+        , R.value "toGraph" [] (Data.IxGraph.toGraph :: _ I E N -> _)
+        ]
+
+  , "Data.Graph.Diff" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ (Data.Graph.Diff.DiffInstruction I E N))
+        , R.value "unDiffInstruction" [] Data.Graph.Diff.unDiffInstruction
         ]
 
   , "Effect" /\

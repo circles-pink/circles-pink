@@ -28,6 +28,7 @@ module Data.IxGraph
   , outgoingEdgesWithNodes
   , outgoingIds
   , outgoingNodes
+  , toGraph
   , toUnfoldables
   , updateEdge
   , updateNode
@@ -183,3 +184,6 @@ neighborhood id (IxGraph graph) = G.neighborhood id graph <#> (map >>> map) snd
 
 withIndex :: forall i a. Indexed i a => a -> i /\ a
 withIndex x = getIndex x /\ x
+
+toGraph :: forall id e n. IxGraph id e n -> G.Graph id e n
+toGraph (IxGraph g) = g
