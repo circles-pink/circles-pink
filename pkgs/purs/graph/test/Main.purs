@@ -9,5 +9,5 @@ import Test.Spec.Runner (runSpec)
 
 main :: Effect Unit
 main = launchAff_ do
-  specs <- discover """(Test\.Graph\..*|Test\.Data\.Graph\..*)"""
+  specs <- discover """(Test\.Graph\..*|Test\.Data\.Graph\..*|Data\.Graph\..*)"""
   runSpec [consoleReporter] specs

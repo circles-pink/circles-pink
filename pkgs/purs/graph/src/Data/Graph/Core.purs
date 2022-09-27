@@ -23,13 +23,13 @@ module Data.Graph.Core
   , toUnfoldables
   , updateEdge
   , updateNode
-  )
-  where
+  ) where
 
 import Prelude
 
+import Data.Array ((..))
 import Data.Array as A
-import Data.Either (Either(..), isRight, note)
+import Data.Either (Either(..), either, isRight, note)
 import Data.Foldable (class Foldable, fold, foldM, foldMap, foldl, foldr)
 import Data.FoldableWithIndex as F
 import Data.Graph.Errors (ErrAddEdge, ErrAddNode, ErrDeleteEdge, ErrDeleteNode, ErrFromFoldables, ErrIncomingIds, ErrLookupEdge, ErrLookupNode, ErrOutgoingIds, ErrUpdateEdge, ErrUpdateNode, _edgeExists, _edgeNotFound, _endNodeNotFound, _nodeExists, _nodeNotFound, _startNodeNotFound)
@@ -43,6 +43,8 @@ import Data.Tuple (uncurry)
 import Data.Tuple.Nested (type (/\), (/\))
 import Data.Unfoldable (class Unfoldable)
 import Data.Variant (Variant, inj)
+import Test.QuickCheck (class Arbitrary, arbitrary)
+import Test.QuickCheck.Gen (Gen, chooseInt, sized)
 
 --------------------------------------------------------------------------------
 -- Type
@@ -55,6 +57,21 @@ newtype Graph id e n = Graph
       , inIds :: Set id
       }
   )
+
+instance (Ord id, Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (Graph id e n) where
+  arbitrary = sized \size -> do
+    count <- chooseInt 0 size
+    let (indices :: Array Int) = 0 .. count
+    foldM genAddNode empty indices 
+    
+    where
+      genAddNode :: Graph id e n -> Int -> Gen (Graph id e n) 
+      genAddNode g _ = do
+        id <- arbitrary
+        node <- arbitrary
+        addNode id node g 
+          # either (const g) identity
+          # pure
 
 instance Functor (Graph id e) where
   map f (Graph nodes) = Graph $ map (\x -> x { data = f x.data }) nodes
@@ -69,7 +86,7 @@ derive instance (Eq id, Eq e, Eq n) => Eq (Graph id e n)
 instance (Show id, Show e, Show n) => Show (Graph id e n) where
   show g = "(fromFoldables " <> show (toUnfoldables' g) <> ")"
     where
-      toUnfoldables' = toUnfoldables :: _ -> { nodes :: Array _ | _ }
+    toUnfoldables' = toUnfoldables :: _ -> { nodes :: Array _ | _ }
 
 --------------------------------------------------------------------------------
 -- Utils
