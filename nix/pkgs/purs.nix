@@ -32,7 +32,7 @@ let
       };
 
       graph = {
-        censorCodes = [ ];
+        censorCodes = [ "WildcardInferredType" ];
       };
 
       indexed-graph = {
