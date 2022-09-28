@@ -100,12 +100,11 @@ type TrustGraphProps = {
 
 (window as any).layouts = { concentric };
 
-const pairToTsTuple =
-  <A,>(pair: Pair<A>): [A, A] =>
-    pipe(
-      pair,
-      _Pair.unPair(id1 => id2 => [id1, id2])
-    );
+const pairToTsTuple = <A,>(pair: Pair<A>): [A, A] =>
+  pipe(
+    pair,
+    _Pair.unPair(id1 => id2 => [id1, id2])
+  );
 
 const cyAddEdge =
   (cy: Cytoscape.Core) => (ids: Pair<Address>) => (tc: TrustConnection) => {
@@ -115,7 +114,7 @@ const cyAddEdge =
       pair => ts => [pair, ts] as const
     )(tc);
 
-    cyDeleteEdge(cy)(ids)
+    cyDeleteEdge(cy)(ids);
 
     cy.add({
       data: {
@@ -136,33 +135,32 @@ const cyAddNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
   });
 };
 
-const cyUpdateNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
-  cyDeleteNode(cy)(id)
+const cyUpdateNode =
+  (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
+    const ele = cy.getElementById(_Address.addrToString(id));
 
-  cy.forceRender()
-  
-  cy.add({
-    data: {
+    ele.data({
       id: _Address.addrToString(id),
       label: _UserIdent.getIdentifier(n.userIdent),
       isLoading: n.isLoading,
-    },
-  });
+    });
 
-  cy.forceRender()
-};
+    cy.forceRender();
+  };
 
 const cyDeleteEdge = (cy: Cytoscape.Core) => (ids: Pair<Address>) => {
   const [source, target] = pairToTsTuple(ids);
-  cy.remove(`edge[source='${_Address.addrToString(source)}'][target='${_Address.addrToString(target)}']`);
+  cy.remove(
+    `edge[source='${_Address.addrToString(
+      source
+    )}'][target='${_Address.addrToString(target)}']`
+  );
 
-  cy.forceRender()
-
+  cy.forceRender();
 };
 
 const cyDeleteNode = (cy: Cytoscape.Core) => (id: Address) => {
   cy.remove(_Address.addrToString(id));
-
 };
 
 export const TrustGraph = ({
@@ -172,7 +170,7 @@ export const TrustGraph = ({
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
-
+  const [layoutInitialized, setLayoutInitialized] = useState(false);
   const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
 
   console.log('render!');
@@ -200,6 +198,11 @@ export const TrustGraph = ({
       );
     });
     setPrevGraph(graph);
+    if (!layoutInitialized) {
+      const layout_ = cy.layout(layout);
+      layout_.run();
+      setLayoutInitialized(true);
+    }
   }, [graph]);
 
   const elements = getElementsFromData(graph);
@@ -336,7 +339,7 @@ export const TrustGraph = ({
   ];
 
   // Preventing errors in some layouts for an empty graph
-  if (_IxGraph.nodes(ordAddress)(graph).length === 0) return <></>;
+  // if (_IxGraph.nodes(ordAddress)(graph).length === 0) return <></>;
 
   return (
     <>
