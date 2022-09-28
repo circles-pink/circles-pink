@@ -26,6 +26,7 @@ import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
 import Data.Graph.Diff as Data.Graph.Diff
+import CirclesSimple.Data.Graph as CirclesSimple.Data.Graph
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.HTTP.Method as Data.HTTP.Method
 import Data.Int as Data.Int
@@ -49,7 +50,7 @@ import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Prelude as Data.Unit
 import PursTsGen (classDef, defPredicateFn, instanceDef, pursModule, toTsType, typeDef, value)
 import PursTsGen.Class.ToTsType (class ToTsType)
-import PursTsGen.Data.ABC (A(..), B(..), C, E, I(..), L, N, Z)
+import PursTsGen.Data.ABC (A(..), B(..), C, E, I, L, N, Z)
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData (RemoteData)
 import RemoteData as RemoteData
@@ -57,6 +58,7 @@ import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Duration as Simple.Data.Duration
 import Simple.Data.Either as Simple.Data.Either
+import CirclesSimple.Data.Graph.Diff as CirclesSimple.Data.Graph.Diff
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Pair as Simple.Data.Pair
 import Simple.Data.Tuple as Simple.Data.Tuple
@@ -231,11 +233,21 @@ modules =
         , R.value "toGraph" [] (Data.IxGraph.toGraph :: _ I E N -> _)
         ]
 
+  , "CirclesSimple.Data.Graph" /\
+      join
+        [ R.value "empty" [] CirclesSimple.Data.Graph.empty
+        ]
+
   , "Data.Graph.Diff" /\
       join
         [ R.typeDef "--"
             (Proxy :: _ (Data.Graph.Diff.DiffInstruction I E N))
-        , R.value "unDiffInstruction" [] Data.Graph.Diff.unDiffInstruction
+        -- , R.value "unDiffInstruction" [] (Data.Graph.Diff.unDiffInstruction :: _ -> DiffInstruction I E N -> _)
+        ]
+
+  , "CirclesSimple.Data.Graph.Diff" /\
+      join
+        [ R.value "getDiff" [] CirclesSimple.Data.Graph.Diff.getDiff
         ]
 
   , "Effect" /\

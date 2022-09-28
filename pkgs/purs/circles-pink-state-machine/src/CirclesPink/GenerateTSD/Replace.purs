@@ -15,6 +15,8 @@ import Data.Either (Either)
 import Data.Generic.Rep (class Generic, Argument, Constructor, Product, Sum)
 import Data.Graph (Graph)
 import Data.Graph as Data.Graph
+import Data.Graph.Diff (DiffInstruction)
+import Data.Graph.Diff as Data.Graph.Diff
 import Data.HTTP.Method (Method)
 import Data.IxGraph (IxGraph)
 import Data.IxGraph as Data.IxGraph
@@ -25,7 +27,6 @@ import Data.Time.Duration (Milliseconds)
 import Data.Tuple (Tuple)
 import Data.Variant (Variant)
 import Foreign.Object (Object)
-import Language.Dot (E, N)
 import Milkis.Impl (FetchImpl)
 import Network.Ethereum.Core.Signatures as Network.Ethereum.Core.Signatures
 import Network.Ethereum.Core.Signatures.Extra (ChecksumAddress)
@@ -35,7 +36,7 @@ import PursTsGen (class GenToTsDefSum, class ToPursNominal, class ToTsDef, class
 import PursTsGen as PT
 import PursTsGen.Class.ToPursType (class ToPursType)
 import PursTsGen.Class.ToTsDef (genericToTsDef')
-import PursTsGen.Data.ABC (A, I)
+import PursTsGen.Data.ABC (A)
 import PursTsGen.Lang.PureScript.Type as PS
 import PursTsGen.Lang.TypeScript.DSL as TS
 import RemoteData as RemoteData
@@ -65,6 +66,13 @@ else instance
   , UnsafeReplace c c'
   ) =>
   UnsafeReplace (Data.Graph.Graph a b c) (Wrap (Graph a' b' c'))
+
+else instance
+  ( UnsafeReplace a a'
+  , UnsafeReplace b b'
+  , UnsafeReplace c c'
+  ) =>
+  UnsafeReplace (Data.Graph.Diff.DiffInstruction a b c) (Wrap (DiffInstruction a' b' c'))
 
 else instance
   ( UnsafeReplace a a'
@@ -206,7 +214,7 @@ instance ToPursNominal (Wrap (IxGraph id e n)) where
 instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Wrap (IxGraph id e n)) where
   toTsType = typeRefToTsType' [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
 
-instance ToTsDef (Wrap (IxGraph I E N)) where
+instance ToTsDef (Wrap (IxGraph id e n)) where
   toTsDef = opaqueToTsDef' [ TS.name "I", TS.name "E", TS.name "N" ]
 
 instance (ToPursType id, ToPursType e, ToPursType n) => ToPursType (Wrap (IxGraph id e n)) where
@@ -220,10 +228,24 @@ instance ToPursNominal (Wrap (Graph id e n)) where
 instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Wrap (Graph id e n)) where
   toTsType = typeRefToTsType' [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
 
-instance ToTsDef (Wrap (Graph I E N)) where
+instance ToTsDef (Wrap (Graph id e n)) where
   toTsDef = opaqueToTsDef' [ TS.name "I", TS.name "E", TS.name "N" ]
 
 instance (ToPursType id, ToPursType e, ToPursType n) => ToPursType (Wrap (Graph id e n)) where
+  toPursType = defaultToPursType' [ toPursType (Proxy :: _ id), toPursType (Proxy :: _ e), toPursType (Proxy :: _ n) ]
+
+--------------------------------------------------------------------------------
+
+instance ToPursNominal (Wrap (DiffInstruction id e n)) where
+  toPursNominal _ = PursNominal "Data.Graph.Diff" "DiffInstruction"
+
+instance (ToTsType id, ToTsType e, ToTsType n) => ToTsType (Wrap (DiffInstruction id e n)) where
+  toTsType = typeRefToTsType' [ toTsType (Proxy :: _ id), toTsType (Proxy :: _ e), toTsType (Proxy :: _ n) ]
+
+instance ToTsDef (Wrap (DiffInstruction id e n)) where
+  toTsDef = opaqueToTsDef' [ TS.name "I", TS.name "E", TS.name "N" ]
+
+instance (ToPursType id, ToPursType e, ToPursType n) => ToPursType (Wrap (DiffInstruction id e n)) where
   toPursType = defaultToPursType' [ toPursType (Proxy :: _ id), toPursType (Proxy :: _ e), toPursType (Proxy :: _ n) ]
 
 --------------------------------------------------------------------------------
