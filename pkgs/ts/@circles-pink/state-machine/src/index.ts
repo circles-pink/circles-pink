@@ -115,9 +115,9 @@ export const _Mnemonic = CirclesPink_Data_Mnemonic;
 export const _RemoteData = RemoteData;
 export const _IxGraph = Data_IxGraph;
 export const _Graph = {
+  ...Data_Graph_Diff,
   ...CirclesSimple_Data_Graph,
   ...CirclesSimple_Data_Graph_Diff,
-  ...Data_Graph_Diff,
 };
 export const _TrustState = CirclesPink_Data_TrustState;
 export const _Either = { ...Data_Either, ...Simple_Data_Either };

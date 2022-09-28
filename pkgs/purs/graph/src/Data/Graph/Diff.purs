@@ -21,7 +21,8 @@ import Data.Pair (Pair)
 import Data.Set (difference, intersection, toUnfoldable)
 import Data.Show.Generic (genericShow)
 import Partial.Unsafe (unsafePartial)
-import Test.QuickCheck (withHelp)
+import Test.QuickCheck (class Arbitrary, withHelp)
+import Test.QuickCheck.Arbitrary (genericArbitrary)
 import Test.Spec (Spec, describe, it)
 import Test.Spec.QuickCheck (quickCheck)
 
@@ -32,6 +33,7 @@ data DiffInstruction id e n
   | AddNode id n
   | DeleteNode id
   | UpdateNode id n
+
 
 unDiffInstruction
   :: { onAddEdge :: _
@@ -53,7 +55,7 @@ unDiffInstruction on di = case di of
 type GraphDiff id e n = Array (DiffInstruction id e n)
 
 getDiff :: forall id e n. Ord id => Eq n => Eq e => Graph id e n -> Graph id e n -> GraphDiff id e n
-getDiff = getEdgesDiff <> getNodesDiff
+getDiff = getNodesDiff <> getEdgesDiff
 
 getNodesDiff :: forall id e n. Ord id => Eq n => Graph id e n -> Graph id e n -> GraphDiff id e n
 getNodesDiff g1 g2 =
@@ -124,7 +126,21 @@ spec = describe "Graph diff" do
       in
         (g2_ == g2) `withHelp` (show { diff, g1, g2, g2_ } <> "\n")
 
+  -- it "getDiff and applyDiff are correct" do
+  --   quickCheck \(g1 :: _ Char String Boolean) diff ->
+  --     let
+  --       g2 = applyDiff diff g1
+  --       diff_ = getDiff g1 g2
+  --     in
+  --       (diff == diff_) `withHelp` (show { diff, diff_, g1, g2 } <> "\n")
+
+
 derive instance Generic (DiffInstruction id e n) _
+
+derive instance (Eq id, Eq e, Eq n) => Eq (DiffInstruction id e n)
+
+-- instance (Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (DiffInstruction id e n) where
+--   arbitrary = genericArbitrary
 
 instance (Show id, Show e, Show n) => Show (DiffInstruction id e n) where
   show = genericShow
