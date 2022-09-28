@@ -100,11 +100,48 @@ type TrustGraphProps = {
 
 (window as any).layouts = { concentric };
 
-const pairToTsTuple = <A,>(pair: Pair<A>): [A, A] =>
-  pipe(
-    pair,
-    _Pair.unPair(id1 => id2 => [id1, id2])
-  );
+const pairToTsTuple =
+  <A,>(pair: Pair<A>): [A, A] =>
+    pipe(
+      pair,
+      _Pair.unPair(id1 => id2 => [id1, id2])
+    );
+
+const cyAddEdge =
+  (cy: Cytoscape.Core) => (ids: Pair<Address>) => (tc: TrustConnection) => {
+    const [source, target] = pairToTsTuple(ids);
+
+    const [pair, value] = _TrustConnection.unTrustConnection(
+      pair => ts => [pair, ts] as const
+    )(tc);
+
+    cy.add({
+      data: {
+        source: _Address.addrToString(source),
+        target: _Address.addrToString(target),
+        value,
+      },
+    });
+  };
+
+const cyAddNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
+  cy.add({
+    data: {
+      id: _Address.addrToString(id),
+      label: _UserIdent.getIdentifier(n.userIdent),
+      isLoading: n.isLoading,
+    },
+  });
+};
+
+const cyDeleteEdge = (cy: Cytoscape.Core) => (ids: Pair<Address>) => {
+  const [source, target] = pairToTsTuple(ids);
+  cy.remove(`edge[source='${source}'][target='${target}']`);
+};
+
+const cyDeleteNode = (cy: Cytoscape.Core) => (id: Address) => {
+  cy.remove(_Address.addrToString(id));
+};
 
 export const TrustGraph = ({
   graph,
@@ -116,56 +153,25 @@ export const TrustGraph = ({
 
   const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
 
+  console.log('render!');
+
   useEffect(() => {
     if (!cy) return;
 
     const diff = _Graph.getDiff(prevGraph)(graph);
 
+    console.log(diff);
+
     diff.forEach(instr => {
       pipe(
         instr,
         _Graph.unDiffInstruction({
-          onAddEdge: ids => e => {
-            const [source, target] = pairToTsTuple(ids);
-            cy.add({
-              data: {
-                source: _Address.addrToString(source),
-                target: _Address.addrToString(target),
-                e,
-              },
-            });
-          },
-          onDeleteEdge: ids => {
-            const [source, target] = pairToTsTuple(ids);
-            cy.remove("edge[source='" + source + "'][target='" + target + "']");
-          },
-          onUpdateEdge: ids => e => {
-            const [source, target] = pairToTsTuple(ids);
-            cy.add({
-              data: {
-                source: _Address.addrToString(source),
-                target: _Address.addrToString(target),
-                e,
-              },
-            });
-          },
-          onAddNode: id => n =>
-            cy.add({
-              data: {
-                id: _Address.addrToString(id),
-                label: _UserIdent.getIdentifier(n.userIdent),
-                isLoading: n.isLoading,
-              },
-            }),
-          onDeleteNode: id => cy.remove(_Address.addrToString(id)),
-          onUpdateNode: id => n =>
-            cy.add({
-              data: {
-                id: _Address.addrToString(id),
-                label: _UserIdent.getIdentifier(n.userIdent),
-                isLoading: n.isLoading,
-              },
-            }),
+          onAddEdge: cyAddEdge(cy),
+          onDeleteEdge: cyDeleteEdge(cy),
+          onUpdateEdge: cyAddEdge(cy),
+          onAddNode: cyAddNode(cy),
+          onDeleteNode: cyDeleteNode(cy),
+          onUpdateNode: cyAddNode(cy),
         })
       );
     });
@@ -314,7 +320,7 @@ export const TrustGraph = ({
         cy={cy_ => {
           if (!cy) setCy(cy_);
         }}
-        elements={elements}
+        elements={[]}
         style={{
           width: '100%',
           height: '600px',
