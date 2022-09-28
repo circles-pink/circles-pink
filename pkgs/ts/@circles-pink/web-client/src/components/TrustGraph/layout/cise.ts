@@ -50,7 +50,7 @@ export const cise = {
   idealInterClusterEdgeLengthCoefficient: 2.0,
 
   // Whether to pull on-circle nodes inside of the circle
-  allowNodesInsideCircle: false,
+  allowNodesInsideCircle: true,
 
   // Max percentage of the nodes in a circle that can move inside the circle
   maxRatioOfNodesInsideCircle: 0.1,

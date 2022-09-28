@@ -170,19 +170,12 @@ export const TrustGraph = ({
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
-  const [layoutInitialized, setLayoutInitialized] = useState(false);
   const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
-
-  console.log('render!');
 
   useEffect(() => {
     if (!cy) return;
 
-    (window as any).cy = cy;
-
     const diff = _Graph.getDiff(prevGraph)(graph);
-
-    console.log(diff);
 
     diff.forEach(instr => {
       pipe(
@@ -198,14 +191,15 @@ export const TrustGraph = ({
       );
     });
     setPrevGraph(graph);
-    if (!layoutInitialized) {
-      const layout_ = cy.layout(layout);
-      layout_.run();
-      setLayoutInitialized(true);
-    }
   }, [graph]);
 
-  const elements = getElementsFromData(graph);
+  useEffect(() => {
+    if (!cy) return;
+    cy.zoomingEnabled(false);
+    const layout_ = cy.layout(layout);
+    layout_.run();
+    cy.zoomingEnabled(true);
+  }, [prevGraph]);
 
   useEffect(() => {
     if (!cy) return;
@@ -337,9 +331,6 @@ export const TrustGraph = ({
       },
     },
   ];
-
-  // Preventing errors in some layouts for an empty graph
-  // if (_IxGraph.nodes(ordAddress)(graph).length === 0) return <></>;
 
   return (
     <>
