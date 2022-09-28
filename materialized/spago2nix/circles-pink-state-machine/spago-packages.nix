@@ -1345,6 +1345,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "spec-quickcheck" = pkgs.stdenv.mkDerivation {
+        name = "spec-quickcheck";
+        version = "v4.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-spec/purescript-spec-quickcheck.git";
+          rev = "c2991f475b8fa11de8b68bcb5895b36be04d1e82";
+          sha256 = "01xcbfyqzax9c5najbfy12q0nvfklfm37llj2vkmi3wgkskg4prz";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "st" = pkgs.stdenv.mkDerivation {
         name = "st";
         version = "v5.0.1";
