@@ -9,6 +9,7 @@ import { t } from 'i18next';
 import {
   Address,
   CirclesGraph,
+  Pair,
   TrustConnection,
   TrustNode,
   TrustStateType,
@@ -99,6 +100,12 @@ type TrustGraphProps = {
 
 (window as any).layouts = { concentric };
 
+const pairToTsTuple = <A,>(pair: Pair<A>): [A, A] =>
+  pipe(
+    pair,
+    _Pair.unPair(id1 => id2 => [id1, id2])
+  );
+
 export const TrustGraph = ({
   graph,
   expandTrustNetwork,
@@ -112,18 +119,56 @@ export const TrustGraph = ({
   useEffect(() => {
     if (!cy) return;
 
-    const diff = _Graph.getDiff(graph)(prevGraph);
+    const diff = _Graph.getDiff(prevGraph)(graph);
 
     diff.forEach(instr => {
       pipe(
-        instr
-        // _Graph.unDiffInstruction({
-        //   onAddNode: () => cy.add(),
-        //   onDeleteNode: () => cy.remove(),
-        // })
+        instr,
+        _Graph.unDiffInstruction({
+          onAddEdge: ids => e => {
+            const [source, target] = pairToTsTuple(ids);
+            cy.add({
+              data: {
+                source: _Address.addrToString(source),
+                target: _Address.addrToString(target),
+                e,
+              },
+            });
+          },
+          onDeleteEdge: ids => {
+            const [source, target] = pairToTsTuple(ids);
+            cy.remove("edge[source='" + source + "'][target='" + target + "']");
+          },
+          onUpdateEdge: ids => e => {
+            const [source, target] = pairToTsTuple(ids);
+            cy.add({
+              data: {
+                source: _Address.addrToString(source),
+                target: _Address.addrToString(target),
+                e,
+              },
+            });
+          },
+          onAddNode: id => n =>
+            cy.add({
+              data: {
+                id: _Address.addrToString(id),
+                label: _UserIdent.getIdentifier(n.userIdent),
+                isLoading: n.isLoading,
+              },
+            }),
+          onDeleteNode: id => cy.remove(_Address.addrToString(id)),
+          onUpdateNode: id => n =>
+            cy.add({
+              data: {
+                id: _Address.addrToString(id),
+                label: _UserIdent.getIdentifier(n.userIdent),
+                isLoading: n.isLoading,
+              },
+            }),
+        })
       );
     });
-
     setPrevGraph(graph);
   }, [graph]);
 

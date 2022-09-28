@@ -20,13 +20,14 @@ import CirclesPink.Garden.StateMachine.TrackingResumee as CirclesPink.Garden.Sta
 import CirclesPink.Garden.TS as CirclesPink.Garden.TS
 import CirclesPink.GenerateTSD.Replace as R
 import CirclesPink.GenerateTSD.TypeClasses (ClassOrd, ORD(..))
+import CirclesSimple.Data.Graph as CirclesSimple.Data.Graph
+import CirclesSimple.Data.Graph.Diff as CirclesSimple.Data.Graph.Diff
 import Data.Argonaut as Data.Argonaut
 import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
 import Data.Graph.Diff as Data.Graph.Diff
-import CirclesSimple.Data.Graph as CirclesSimple.Data.Graph
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.HTTP.Method as Data.HTTP.Method
 import Data.Int as Data.Int
@@ -58,7 +59,6 @@ import RemoteReport as RemoteReport
 import Simple.Data.Array as Simple.Data.Array
 import Simple.Data.Duration as Simple.Data.Duration
 import Simple.Data.Either as Simple.Data.Either
-import CirclesSimple.Data.Graph.Diff as CirclesSimple.Data.Graph.Diff
 import Simple.Data.Maybe as Simple.Data.Maybe
 import Simple.Data.Pair as Simple.Data.Pair
 import Simple.Data.Tuple as Simple.Data.Tuple
@@ -242,7 +242,7 @@ modules =
       join
         [ R.typeDef "--"
             (Proxy :: _ (Data.Graph.Diff.DiffInstruction I E N))
-        -- , R.value "unDiffInstruction" [] (Data.Graph.Diff.unDiffInstruction :: _ -> DiffInstruction I E N -> _)
+        , R.value "unDiffInstruction" [] (Data.Graph.Diff.unDiffInstruction :: _ -> _ I E N -> Z)
         ]
 
   , "CirclesSimple.Data.Graph.Diff" /\
