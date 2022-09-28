@@ -115,6 +115,8 @@ const cyAddEdge =
       pair => ts => [pair, ts] as const
     )(tc);
 
+    cyDeleteEdge(cy)(ids)
+
     cy.add({
       data: {
         source: _Address.addrToString(source),
@@ -134,13 +136,33 @@ const cyAddNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
   });
 };
 
+const cyUpdateNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
+  cyDeleteNode(cy)(id)
+
+  cy.forceRender()
+  
+  cy.add({
+    data: {
+      id: _Address.addrToString(id),
+      label: _UserIdent.getIdentifier(n.userIdent),
+      isLoading: n.isLoading,
+    },
+  });
+
+  cy.forceRender()
+};
+
 const cyDeleteEdge = (cy: Cytoscape.Core) => (ids: Pair<Address>) => {
   const [source, target] = pairToTsTuple(ids);
-  cy.remove(`edge[source='${source}'][target='${target}']`);
+  cy.remove(`edge[source='${_Address.addrToString(source)}'][target='${_Address.addrToString(target)}']`);
+
+  cy.forceRender()
+
 };
 
 const cyDeleteNode = (cy: Cytoscape.Core) => (id: Address) => {
   cy.remove(_Address.addrToString(id));
+
 };
 
 export const TrustGraph = ({
@@ -158,6 +180,8 @@ export const TrustGraph = ({
   useEffect(() => {
     if (!cy) return;
 
+    (window as any).cy = cy;
+
     const diff = _Graph.getDiff(prevGraph)(graph);
 
     console.log(diff);
@@ -171,7 +195,7 @@ export const TrustGraph = ({
           onUpdateEdge: cyAddEdge(cy),
           onAddNode: cyAddNode(cy),
           onDeleteNode: cyDeleteNode(cy),
-          onUpdateNode: cyAddNode(cy),
+          onUpdateNode: cyUpdateNode(cy),
         })
       );
     });
