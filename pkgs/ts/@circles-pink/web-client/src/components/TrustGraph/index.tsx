@@ -15,6 +15,7 @@ import {
   _Address,
   _Array,
   _Either,
+  _Graph,
   _IxGraph,
   _Maybe,
   _Nullable,
@@ -96,7 +97,7 @@ type TrustGraphProps = {
   theme: Theme;
 };
 
-(window as any).layouts = {concentric}
+(window as any).layouts = { concentric };
 
 export const TrustGraph = ({
   graph,
@@ -106,24 +107,27 @@ export const TrustGraph = ({
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
 
-  const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_IxGraph.empty)
+  const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
 
   useEffect(() => {
-    const diff = getDiff(graph, previousGraph);
+    if (!cy) return;
 
-    diff.foreach((instr) => {
-      pipe(instr, onDiffInstruction({
-        onAddNode: () => cy.addNode(),
-        onDeleteNode: () => cy.deleteNode(),
-      }))
-    })
+    const diff = _Graph.getDiff(graph)(prevGraph);
 
-    setPrevGraph(graph)
-  }, [graph])
+    diff.forEach(instr => {
+      pipe(
+        instr
+        // _Graph.unDiffInstruction({
+        //   onAddNode: () => cy.add(),
+        //   onDeleteNode: () => cy.remove(),
+        // })
+      );
+    });
 
-  const elements = [] ; //getElementsFromData(graph);
+    setPrevGraph(graph);
+  }, [graph]);
 
-
+  const elements = getElementsFromData(graph);
 
   useEffect(() => {
     if (!cy) return;
