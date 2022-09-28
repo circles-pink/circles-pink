@@ -81,9 +81,7 @@ export const TrustUserList = (props: Props) => {
   const neighborhood = _IxGraph.neighborhood(_Address.ordAddress)(address)(
     graph
   );
-  const items_ = pipe(neighborhood, _Either.hush, _Nullable.toNullable);
-
-  if (!items_) return <div>Address not found in graph!</div>;
+  const items_ = pipe(neighborhood, _Either.hush, _Nullable.toNullable) || [];
 
   // Paginate trusts
   const [currentPage, setCurrentPage] = useState<number>(1);
