@@ -4,6 +4,7 @@ import * as Data_Either from "@circles-pink/state-machine/output/Data.Either";
 import * as Simple_Data_Either from "@circles-pink/state-machine/output/Simple.Data.Either";
 import * as CirclesSimple_Data_Graph from "@circles-pink/state-machine/output/CirclesSimple.Data.Graph";
 import * as CirclesSimple_Data_Graph_Diff from "@circles-pink/state-machine/output/CirclesSimple.Data.Graph.Diff";
+import * as Data_Graph_Diff from "@circles-pink/state-machine/output/Data.Graph.Diff";
 import * as Data_Nullable from "@circles-pink/state-machine/output/Data.Nullable";
 import * as Data_Maybe from "@circles-pink/state-machine/output/Data.Maybe";
 import * as Data_Int from "@circles-pink/state-machine/output/Data.Int";
@@ -116,6 +117,7 @@ export const _IxGraph = Data_IxGraph;
 export const _Graph = {
   ...CirclesSimple_Data_Graph,
   ...CirclesSimple_Data_Graph_Diff,
+  ...Data_Graph_Diff,
 };
 export const _TrustState = CirclesPink_Data_TrustState;
 export const _Either = { ...Data_Either, ...Simple_Data_Either };
