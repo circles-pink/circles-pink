@@ -149,6 +149,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "debug" = pkgs.stdenv.mkDerivation {
+        name = "debug";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/garyb/purescript-debug.git";
+          rev = "144305842dba81169a93b3a3cc75429d5c8389e9";
+          sha256 = "09j69bgrq8nzw1l3aj1hka3y5ycmcsn9dlgf22k5ifrd74iic60y";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
   # debug-extra is a Local package in (Local "./../../../pkgs/purs/debug-extra")
 
     "distributive" = pkgs.stdenv.mkDerivation {
@@ -657,6 +669,18 @@ let
         installPhase = "ln -s $src $out";
       };
 
+    "psci-support" = pkgs.stdenv.mkDerivation {
+        name = "psci-support";
+        version = "v5.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript/purescript-psci-support.git";
+          rev = "f26fe8266a63494080476333e22f971404ea8846";
+          sha256 = "16vhf8hapd7rcgmafmjpiq7smhzdh3300f2idk1q4kk01yxn8ddj";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
     "quickcheck" = pkgs.stdenv.mkDerivation {
         name = "quickcheck";
         version = "v7.1.0";
@@ -736,6 +760,18 @@ let
           url = "https://github.com/purescript-spec/purescript-spec-discovery.git";
           rev = "d62f3625861efc9cd61f5fba55c1fdc38b276684";
           sha256 = "11048rrxgr7bgcbrpna6k3zak1h40i2b2arjam7aypbz15ik1v4s";
+        };
+        phases = "installPhase";
+        installPhase = "ln -s $src $out";
+      };
+
+    "spec-quickcheck" = pkgs.stdenv.mkDerivation {
+        name = "spec-quickcheck";
+        version = "v4.0.0";
+        src = pkgs.fetchgit {
+          url = "https://github.com/purescript-spec/purescript-spec-quickcheck.git";
+          rev = "c2991f475b8fa11de8b68bcb5895b36be04d1e82";
+          sha256 = "01xcbfyqzax9c5najbfy12q0nvfklfm37llj2vkmi3wgkskg4prz";
         };
         phases = "installPhase";
         installPhase = "ln -s $src $out";
