@@ -1,7 +1,10 @@
 module Data.Graph.Diff
   ( DiffInstruction(..)
+  , GraphDiff
   , applyDiff
   , getDiff
+  , getEdgesDiff
+  , getNodesDiff
   , spec
   , unDiffInstruction
   ) where
