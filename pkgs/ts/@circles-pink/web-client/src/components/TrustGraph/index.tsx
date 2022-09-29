@@ -170,36 +170,41 @@ export const TrustGraph = ({
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
-  const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
+  const [initial, setInitial] = useState(true);
+
+  // const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
+
+  // useEffect(() => {
+  //   if (!cy) return;
+
+  //   const diff = _Graph.getDiff(prevGraph)(graph);
+
+  //   diff.forEach(instr => {
+  //     pipe(
+  //       instr,
+  //       _Graph.unDiffInstruction({
+  //         onAddEdge: cyAddEdge(cy),
+  //         onDeleteEdge: cyDeleteEdge(cy),
+  //         onUpdateEdge: cyAddEdge(cy),
+  //         onAddNode: cyAddNode(cy),
+  //         onDeleteNode: cyDeleteNode(cy),
+  //         onUpdateNode: cyUpdateNode(cy),
+  //       })
+  //     );
+  //   });
+  //   setPrevGraph(graph);
+  // }, [graph]);
+
+  const elements = getElementsFromData(graph);
 
   useEffect(() => {
     if (!cy) return;
-
-    const diff = _Graph.getDiff(prevGraph)(graph);
-
-    diff.forEach(instr => {
-      pipe(
-        instr,
-        _Graph.unDiffInstruction({
-          onAddEdge: cyAddEdge(cy),
-          onDeleteEdge: cyDeleteEdge(cy),
-          onUpdateEdge: cyAddEdge(cy),
-          onAddNode: cyAddNode(cy),
-          onDeleteNode: cyDeleteNode(cy),
-          onUpdateNode: cyUpdateNode(cy),
-        })
-      );
-    });
-    setPrevGraph(graph);
-  }, [graph]);
-
-  useEffect(() => {
-    if (!cy) return;
-    cy.zoomingEnabled(false);
+    if (!initial) cy.zoomingEnabled(false);
     const layout_ = cy.layout(layout);
     layout_.run();
-    cy.zoomingEnabled(true);
-  }, [prevGraph]);
+    if (!initial) cy.zoomingEnabled(true);
+    setInitial(false);
+  }, [graph]);
 
   useEffect(() => {
     if (!cy) return;
@@ -363,7 +368,7 @@ export const TrustGraph = ({
         cy={cy_ => {
           if (!cy) setCy(cy_);
         }}
-        elements={[]}
+        elements={elements}
         style={{
           width: '100%',
           height: '600px',
