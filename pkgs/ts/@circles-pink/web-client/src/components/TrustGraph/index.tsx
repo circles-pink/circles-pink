@@ -203,6 +203,11 @@ export const TrustGraph = ({
 
   useEffect(() => {
     if (!cy) return;
+    cy.nodes().unlock();
+  }, [layout]);
+
+  useEffect(() => {
+    if (!cy) return;
 
     let loopAnimation1 =
       (address: Address) =>
@@ -253,6 +258,26 @@ export const TrustGraph = ({
       if (!address) return;
       expandTrustNetwork(address);
       loopAnimation1(address)(evt.target);
+    });
+
+    cy.on('mousedown', 'node', evt => {
+      const id = evt.target.id();
+      cy.getElementById(id).unlock();
+    });
+
+    cy.on('mouseup', 'node', evt => {
+      const id = evt.target.id();
+      cy.getElementById(id).lock();
+    });
+
+    cy.on('touchstart', 'node', evt => {
+      const id = evt.target.id();
+      cy.getElementById(id).unlock();
+    });
+
+    cy.on('touched', 'node', evt => {
+      const id = evt.target.id();
+      cy.getElementById(id).lock();
     });
   }, [cy]);
 
