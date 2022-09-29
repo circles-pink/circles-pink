@@ -11,17 +11,18 @@ import { TwoButtonRow } from '../../components/helper';
 import tw, { css, styled } from 'twin.macro';
 import { StateMachineDebugger } from '../../components/StateMachineDebugger';
 import {
+  CirclesAction,
   DebugAction,
   DebugState,
   unit,
   _StateMachine,
 } from '@circles-pink/state-machine/src';
 
-const { _debugAction } = _StateMachine;
+const { _circlesAction, _debugAction } = _StateMachine;
 
 type DebugProps = {
   state: DebugState;
-  act: (ac: DebugAction) => void;
+  act: (ac: CirclesAction) => void;
 };
 
 export const Debug = ({ state, act }: DebugProps): ReactElement => {
@@ -52,10 +53,15 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
               value={state.magicWords}
               placeholder={t('debug.magicWordsPlaceholder')}
               onChange={e =>
-                act(_debugAction._setMagicWords(e.target.value.trim()))
+                act(
+                  _circlesAction._debug(
+                    _debugAction._setMagicWords(e.target.value.trim())
+                  )
+                )
               }
               onKeyPress={e =>
-                e.key === 'Enter' && act(_debugAction._coreToWindow(unit))
+                e.key === 'Enter' &&
+                act(_circlesAction._debug(_debugAction._coreToWindow(unit)))
               }
             />
           </FadeIn>
@@ -65,7 +71,9 @@ export const Debug = ({ state, act }: DebugProps): ReactElement => {
             <TwoButtonRow>
               <Button
                 theme={theme}
-                onClick={() => act(_debugAction._coreToWindow(unit))}
+                onClick={() =>
+                  act(_circlesAction._debug(_debugAction._coreToWindow(unit)))
+                }
               >
                 {t('debugButton')}
               </Button>
