@@ -4,6 +4,7 @@ export const concentric: Partial<ConcentricLayoutOptions> &
   Pick<ConcentricLayoutOptions, 'name'> = {
   name: 'concentric',
   animate: true,
+  fit: true,
   // other options
   // padding: 75,
   // nodeDimensionsIncludeLabels: true,

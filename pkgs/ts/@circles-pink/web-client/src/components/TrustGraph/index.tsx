@@ -171,6 +171,7 @@ export const TrustGraph = ({
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(concentric);
   const [initial, setInitial] = useState(true);
+  const [elements, setElements] = useState(getElementsFromData(graph));
 
   // const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
 
@@ -195,20 +196,22 @@ export const TrustGraph = ({
   //   setPrevGraph(graph);
   // }, [graph]);
 
-  const elements = getElementsFromData(graph);
-
   useEffect(() => {
-    if (!cy) return;
-    if (!initial) cy.zoomingEnabled(false);
-    const layout_ = cy.layout(layout);
-    layout_.run();
-    if (!initial) cy.zoomingEnabled(true);
-    setInitial(false);
+    setElements(getElementsFromData(graph));
   }, [graph]);
 
   useEffect(() => {
     if (!cy) return;
+    if (!initial) cy.zoomingEnabled(false);
+    cy.layout(layout).run();
+    if (!initial) cy.zoomingEnabled(true);
+    setInitial(false);
+  }, [elements]);
+
+  useEffect(() => {
+    if (!cy) return;
     cy.nodes().unlock();
+    cy.layout(layout).run();
   }, [layout]);
 
   useEffect(() => {
@@ -368,14 +371,14 @@ export const TrustGraph = ({
         cy={cy_ => {
           if (!cy) setCy(cy_);
         }}
-        elements={elements}
+        elements={elements.length > 0 ? elements : []}
         style={{
           width: '100%',
           height: '600px',
           backgroundColor: 'rgba(249, 249, 245, 0.5)',
           boxShadow: '0 0 4px 1px rgba(0,0,0,0.05)',
         }}
-        layout={layout}
+        // layout={layout}
         stylesheet={stylesheets}
       />
 
