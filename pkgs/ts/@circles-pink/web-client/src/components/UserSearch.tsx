@@ -148,15 +148,22 @@ type UserSearchProps = {
   removeTrust: (to: UserIdent) => void;
   trustAddResult: DashboardState['trustAddResult'];
   trustRemoveResult: DashboardState['trustRemoveResult'];
+  ownAddress: Address;
 };
 
 export const UserSearch = (props: UserSearchProps) => {
-  const { userSearchResult, onSearch } = props;
+  const { userSearchResult, onSearch, ownAddress } = props;
 
   // animation
   const getDelay = getIncrementor(0, 0.05);
 
-  const users_ = getUsers(userSearchResult);
+  const users__ = getUsers(userSearchResult);
+
+  const users_: readonly UserIdent[] = [...users__].filter(
+    u =>
+      _Address.addrToString(_UserIdent.getAddress(u)) !==
+      _Address.addrToString(ownAddress)
+  );
 
   // Paginate trusts
   const [currentPage, setCurrentPage] = useState<number>(1);
