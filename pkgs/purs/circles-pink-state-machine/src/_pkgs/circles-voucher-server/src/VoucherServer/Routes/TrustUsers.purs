@@ -10,7 +10,7 @@ import Data.Newtype (unwrap)
 import Data.Traversable (for_)
 import VoucherServer.EnvVars (AppEnvVars(..))
 import VoucherServer.MonadApp (class MonadApp, AppEnv(..))
-import VoucherServer.MonadApp.Class (CirclesCoreEnv(..))
+import VoucherServer.MonadApp.Class (AppLog(..), CirclesCoreEnv(..), log)
 
 trustUsers
   :: forall m
@@ -21,7 +21,10 @@ trustUsers
   -> m {}
 trustUsers { body: { safeAddresses } } = do
 
-  for_ safeAddresses (\sa -> (void $ trustUser sa) `catchError` (\_ -> pure unit))
+  for_ safeAddresses
+    ( \sa -> (void $ trustUser sa) `catchError`
+        (log <<< LogAnyError)
+    )
   pure {}
 
 trustUser :: forall m. MonadApp m => Address -> m String

@@ -54,6 +54,7 @@ data AppLog
   | LogFinishFinalizeTx VoucherEncrypted
   | LogCatchedFinalizeTxError AppError
   | LogRedeem
+  | LogAnyError AppError
 
 logToString :: AppLog -> String
 logToString = case _ of
@@ -67,6 +68,7 @@ logToString = case _ of
     , indent 2 $ errorToLog err
     ]
   LogRedeem -> "In the future we'll pay back the amount..."
+  LogAnyError appError -> "App error occured: " <> errorToLog appError
 
 --------------------------------------------------------------------------------
 -- Error
