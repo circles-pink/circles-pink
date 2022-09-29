@@ -439,6 +439,7 @@ export const XbgeDashboard = ({
                 removeTrust={to =>
                   act(_dashboardAction._removeTrustConnection(to))
                 }
+                ownAddress={_Address.Address(state.user.safeAddress)}
                 trustRemoveResult={state.trustRemoveResult}
                 description={t('dashboard.xbgeSpecial.userSearchDescription')}
                 actionRow={
@@ -506,7 +507,7 @@ export const XbgeDashboard = ({
 
                 <TrustGraph
                   graph={state.trusts}
-                  expandTrustNetwork={(addr) =>
+                  expandTrustNetwork={addr =>
                     act(_dashboardAction._expandTrustNetwork(addr))
                   }
                   theme={theme}
