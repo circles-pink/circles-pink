@@ -91,7 +91,12 @@ export const BuyVouchers = ({
 
                     return (
                       <Offer
-                        enabled={userCanBuy && !limitReached}
+                        enabled={
+                          userCanBuy &&
+                          !limitReached &&
+                          _VoucherServer.unVoucherAmount(offer.amount) <=
+                            buyVoucherEurLimit
+                        }
                         theme={theme}
                         key={`${provider.id}-${offer.amount}`}
                         onClick={() =>

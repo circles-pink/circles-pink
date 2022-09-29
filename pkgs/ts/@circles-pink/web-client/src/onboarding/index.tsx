@@ -304,7 +304,7 @@ const OnboardingContent = ({
   );
 };
 
-const mkCfgWithDefaults = (cfg: UserConfig): Required<UserConfig> => {
+export const mkCfgWithDefaults = (cfg: UserConfig): Required<UserConfig> => {
   return {
     lang: 'en',
     content: {},

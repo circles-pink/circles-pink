@@ -173,6 +173,7 @@ _circlesAction
      , _submit :: SubmitAction -> CirclesAction
      , _trusts :: TrustsAction -> CirclesAction
      , _dashboard :: DashboardAction -> CirclesAction
+     , _debug :: DebugAction -> CirclesAction
      }
 _circlesAction =
   { _askUsername
@@ -184,6 +185,7 @@ _circlesAction =
   , _submit
   , _trusts
   , _dashboard
+  , _debug
   }
 
 _debugAction

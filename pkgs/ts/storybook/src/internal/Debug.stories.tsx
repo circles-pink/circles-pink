@@ -2,10 +2,14 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { ComponentMeta } from "@storybook/react";
 import { Debug } from "@circles-pink/web-client/src/onboarding/views/Debug";
 import { useStateMachine } from "@circles-pink/web-client/src/onboarding/useStateMachine";
-import { mkCfg } from "@circles-pink/web-client/src/onboarding";
+import {
+  mkCfg,
+  mkCfgWithDefaults,
+} from "@circles-pink/web-client/src/onboarding";
 import { _StateMachine, _TS } from "@circles-pink/state-machine/src";
 import { env } from "@circles-pink/web-client/src/env";
 import { fromFetchImplNative } from "@circles-pink/web-client/src/safe-as";
+import { _circlesAction } from "@circles-pink/state-machine/output/CirclesPink.Garden.StateMachine.Action";
 
 export default {
   title: "Components/Internal",
@@ -17,7 +21,7 @@ export default {
   },
 } as ComponentMeta<typeof Debug>;
 
-const cfg = mkCfg({});
+const cfg = mkCfg(mkCfgWithDefaults({}));
 
 const control = _TS.mkControl(fromFetchImplNative(window.fetch))(env)(cfg);
 
