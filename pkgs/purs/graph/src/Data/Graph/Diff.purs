@@ -11,7 +11,7 @@ module Data.Graph.Diff
 
 import Prelude
 
-import Data.Array (catMaybes, foldr, sort)
+import Data.Array (catMaybes, foldl, sort)
 import Data.Either (either)
 import Data.Generic.Rep (class Generic)
 import Data.Graph (Graph)
@@ -109,10 +109,10 @@ getEdgesDiff g1 g2 =
     deleteEdges <> addEdges <> updateEdges
 
 applyDiff :: forall id e n. Ord id => GraphDiff id e n -> Graph id e n -> Graph id e n
-applyDiff di g = foldr applyDiffInstruction g di
+applyDiff di g = foldl applyDiffInstruction g di
 
-applyDiffInstruction :: forall id e n. Ord id => DiffInstruction id e n -> Graph id e n -> Graph id e n
-applyDiffInstruction di g = either (const g) identity
+applyDiffInstruction :: forall id e n. Ord id => Graph id e n -> DiffInstruction id e n -> Graph id e n
+applyDiffInstruction g di = either (const g) identity
   case di of
     DeleteEdge id -> G.deleteEdge id g
     AddEdge id n -> G.addEdge id n g
@@ -131,22 +131,11 @@ spec = describe "Graph diff" do
       in
         (g2_ == g2) `withHelp` (show { diff, g1, g2, g2_ } <> "\n")
 
--- it "getDiff and applyDiff are correct" do
---   quickCheck \(g1 :: _ Char String Boolean) diff ->
---     let
---       g2 = applyDiff diff g1
---       diff_ = getDiff g1 g2
---     in
---       (diff == diff_) `withHelp` (show { diff, diff_, g1, g2 } <> "\n")
-
 derive instance Generic (DiffInstruction id e n) _
 
 derive instance (Eq id, Eq e, Eq n) => Eq (DiffInstruction id e n)
 
 derive instance (Ord id, Ord e, Ord n) => Ord (DiffInstruction id e n)
-
--- instance (Arbitrary id, Arbitrary e, Arbitrary n) => Arbitrary (DiffInstruction id e n) where
---   arbitrary = genericArbitrary
 
 instance (Show id, Show e, Show n) => Show (DiffInstruction id e n) where
   show = genericShow
