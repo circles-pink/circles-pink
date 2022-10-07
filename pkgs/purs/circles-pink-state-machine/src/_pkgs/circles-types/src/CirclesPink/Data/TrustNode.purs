@@ -21,6 +21,7 @@ import Type.Proxy (Proxy(..))
 newtype TrustNode = TrustNode
   { userIdent :: UserIdent
   , isLoading :: Boolean
+  , root :: Address
   }
 
 moduleName :: String
@@ -29,15 +30,15 @@ moduleName = "CirclesPink.Data.TrustNode"
 getAddress :: TrustNode -> Address
 getAddress = IxGraph.getIndex
 
-initTrustNode :: UserIdent -> TrustNode
-initTrustNode userIdent' = TrustNode
+initTrustNode :: Address -> UserIdent -> TrustNode
+initTrustNode root userIdent' = TrustNode
   { userIdent: userIdent'
   , isLoading: false
+  , root
   }
 
 _userIdent :: Lens' TrustNode UserIdent
 _userIdent = _Newtype <<< prop (Proxy :: _ "userIdent")
-
 
 derive newtype instance Show TrustNode
 derive newtype instance Eq TrustNode

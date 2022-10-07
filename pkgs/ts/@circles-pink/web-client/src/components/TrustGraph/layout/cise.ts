@@ -15,7 +15,7 @@ export const cise = {
   //    ['n5','n6']                                         }
   //    ['n7', 'n8', 'n9', 'n10'] ]
   clusters: function (node: any) {
-    return node._private.data.label.substring(0, 1).charCodeAt(0);
+    return node._private.data.clusterId;
   },
 
   // -------- Optional parameters --------
@@ -23,13 +23,13 @@ export const cise = {
   // - true : Animate while the layout is running
   // - false : Just show the end result
   // - 'end' : Animate directly to the end result
-  animate: 'end',
+  animate: false,
 
   // number of ticks per frame; higher is faster but more jerky
-  refresh: 30,
+  refresh: 10,
 
   // Animation duration used for animate:'end'
-  animationDuration: 500,
+  animationDuration: undefined,
 
   // Easing for animate:'end'
   animationEasing: undefined,
@@ -47,10 +47,10 @@ export const cise = {
 
   // Inter-cluster edge length factor
   // (2.0 means inter-cluster edges should be twice as long as intra-cluster edges)
-  idealInterClusterEdgeLengthCoefficient: 2.0,
+  idealInterClusterEdgeLengthCoefficient: 1.4,
 
   // Whether to pull on-circle nodes inside of the circle
-  allowNodesInsideCircle: true,
+  allowNodesInsideCircle: false,
 
   // Max percentage of the nodes in a circle that can move inside the circle
   maxRatioOfNodesInsideCircle: 0.1,
