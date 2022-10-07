@@ -239,10 +239,6 @@ dashboard env@{ trustGetNetwork } =
           <<< _Newtype
           <<< prop _isLoading
 
-        _nodeRoot = _targetNode
-          <<< _root
-
-      -- lift $ set $ S._dashboard <<< L.set _nodeRoot safeAddress
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
       syncTrusts set st safeAddress 0 `catchError`
         ( const $ do
@@ -477,6 +473,7 @@ dashboard env@{ trustGetNetwork } =
 
               st'.trusts
                 # getOwnNode st'.user
+                # getFocusedNode centerAddress
                 # (\g -> foldM (getNode centerAddress) g $ mapsToThese userIdents neighborNodes)
                 >>= (\g -> foldM (getIncomingEdge centerAddress) g $ mapsToThese trustNodes incomingEdges)
                 >>= (\g -> foldM (getOutgoingEdge centerAddress) g $ mapsToThese trustNodes outgoingEdges)
@@ -492,6 +489,10 @@ dashboard env@{ trustGetNetwork } =
   getOwnNode usr@(User { safeAddress }) g = g
     # L.over (G._atNode safeAddress)
         (_ `catchError` (const $ Just $ initTrustNode safeAddress $ UserIdent.fromUser usr))
+
+  getFocusedNode :: Address -> CirclesGraph -> CirclesGraph
+  getFocusedNode centerAddress g = g
+    # L.set (G._atNode centerAddress <<< traversed <<< _root) centerAddress
 
   getNode :: Address -> CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getNode root g =
