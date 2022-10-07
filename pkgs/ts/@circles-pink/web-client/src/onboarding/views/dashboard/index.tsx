@@ -357,6 +357,7 @@ export const Dashboard = ({
                     act(_dashboardAction._expandTrustNetwork(addr))
                   }
                   theme={theme}
+                  ownAddress={_Address.Address(state.user.safeAddress)}
                 />
               </LightColorFrame>
             </Margin>

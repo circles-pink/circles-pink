@@ -8,21 +8,19 @@ module Data.Graph.Diff
   , isStructuralChange
   , spec
   , unDiffInstruction
-  )
-  where
+  ) where
 
 import Prelude
 
 import Data.Array (catMaybes, foldl, sort)
 import Data.Either (either)
 import Data.Generic.Rep (class Generic)
-import Data.Graph (Graph, nodeIds)
+import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Pair (Pair)
 import Data.Set (difference, intersection, toUnfoldable)
 import Data.Show.Generic (genericShow)
-import Debug.Extra (todo)
 import Partial.Unsafe (unsafePartial)
 import Test.QuickCheck (withHelp)
 import Test.Spec (Spec, describe, it)
