@@ -27,6 +27,7 @@ import Data.BN as Data.BN
 import Data.DateTime.Instant as Data.DateTime.Instant
 import Data.Either (Either)
 import Data.Either as Data.Either
+import Data.Graph as Data.Graph
 import Data.Graph.Diff as Data.Graph.Diff
 import Data.Graph.Errors (ErrLookupEdge, ErrNeighborNodes, ErrNeighborhood, ErrLookupNode)
 import Data.HTTP.Method as Data.HTTP.Method
@@ -205,6 +206,12 @@ modules =
           (RemoteReport.getData :: _ -> RemoteReport.RemoteReport E A -> _)
       ]
 
+  , "Data.Graph" /\
+      join
+        [ R.typeDef "--"
+            (Proxy :: _ (Data.Graph.Graph I E N))
+        ]
+
   , "Data.IxGraph" /\
       join
         [ R.typeDef "--"
@@ -231,6 +238,7 @@ modules =
             [ _Ord ORD ]
             (Data.IxGraph.nodes :: _ ORD E N -> _)
         , R.value "toGraph" [] (Data.IxGraph.toGraph :: _ I E N -> _)
+        , R.value "empty" [] (Data.IxGraph.empty :: _ I E N )
         ]
 
   , "CirclesSimple.Data.Graph" /\
@@ -248,6 +256,7 @@ modules =
   , "CirclesSimple.Data.Graph.Diff" /\
       join
         [ R.value "getDiff" [] CirclesSimple.Data.Graph.Diff.getDiff
+        , R.value "isStructuralChange" [] (CirclesSimple.Data.Graph.Diff.isStructuralChange)
         ]
 
   , "Effect" /\

@@ -5,21 +5,24 @@ module Data.Graph.Diff
   , getDiff
   , getEdgesDiff
   , getNodesDiff
+  , isStructuralChange
   , spec
   , unDiffInstruction
-  ) where
+  )
+  where
 
 import Prelude
 
 import Data.Array (catMaybes, foldl, sort)
 import Data.Either (either)
 import Data.Generic.Rep (class Generic)
-import Data.Graph (Graph)
+import Data.Graph (Graph, nodeIds)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Pair (Pair)
 import Data.Set (difference, intersection, toUnfoldable)
 import Data.Show.Generic (genericShow)
+import Debug.Extra (todo)
 import Partial.Unsafe (unsafePartial)
 import Test.QuickCheck (withHelp)
 import Test.Spec (Spec, describe, it)
@@ -139,3 +142,6 @@ derive instance (Ord id, Ord e, Ord n) => Ord (DiffInstruction id e n)
 
 instance (Show id, Show e, Show n) => Show (DiffInstruction id e n) where
   show = genericShow
+
+isStructuralChange :: forall id e n. Eq id => Ord id => Graph id e n -> Graph id e n -> Boolean
+isStructuralChange g1 g2 = G.nodeIds g1 == G.nodeIds g2 && G.edgeIds g1 == G.edgeIds g2
