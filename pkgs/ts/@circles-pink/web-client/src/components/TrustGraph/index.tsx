@@ -195,19 +195,19 @@ export const TrustGraph = ({
         );
       });
       console.log('No Repositioning: No structual change');
+
+      if (
+        !initial &&
+        _Graph.rootHasChanged(_IxGraph.toGraph(graph))(
+          _IxGraph.toGraph(prevGraph)
+        )
+      ) {
+        console.log('Repositioning: Root has changed');
+        cy.layout(layout).run();
+      }
     } else {
       setElements(getElementsFromData(graph));
       console.log('Repositioning: Structual change');
-    }
-
-    if (
-      !initial &&
-      _Graph.rootHasChanged(_IxGraph.toGraph(graph))(
-        _IxGraph.toGraph(prevGraph)
-      )
-    ) {
-      console.log('Repositioning: Root has changed');
-      cy.layout(layout).run();
     }
 
     setPrevGraph(graph);
