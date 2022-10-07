@@ -82,7 +82,7 @@ const Row = (props: RowProps) => {
     hush,
     _Maybe.unMaybe({
       onJust: tn => tn,
-      onNothing: () => _TrustNode.initTrustNode(userIdent),
+      onNothing: () => _TrustNode.initTrustNode(centerAddress)(userIdent),
     })
   );
 

@@ -272,7 +272,7 @@ dashboard env@{ trustGetNetwork } =
                   in
                     case eitherNode, eitherEdge of
                       Left _, Left _ -> st'.trusts
-                        # G.addNode (initTrustNode u)
+                        # G.addNode (initTrustNode ownAddress u)
                         >>= G.addEdge (TrustConnection (ownAddress ~ targetAddress) (next initUntrusted))
                       Right _, Left _ -> st'.trusts
                         # G.addEdge (TrustConnection (ownAddress ~ targetAddress) (next initUntrusted))
@@ -470,7 +470,7 @@ dashboard env@{ trustGetNetwork } =
 
               st'.trusts
                 # getOwnNode st'.user
-                # (\g -> foldM getNode g $ mapsToThese userIdents neighborNodes)
+                # (\g -> foldM (getNode centerAddress) g $ mapsToThese userIdents neighborNodes)
                 >>= (\g -> foldM (getIncomingEdge centerAddress) g $ mapsToThese trustNodes incomingEdges)
                 >>= (\g -> foldM (getOutgoingEdge centerAddress) g $ mapsToThese trustNodes outgoingEdges)
 
@@ -484,12 +484,12 @@ dashboard env@{ trustGetNetwork } =
   getOwnNode :: User -> CirclesGraph -> CirclesGraph
   getOwnNode usr@(User { safeAddress }) g = g
     # L.over (G._atNode safeAddress)
-        (_ `catchError` (const $ Just $ initTrustNode $ UserIdent.fromUser usr))
+        (_ `catchError` (const $ Just $ initTrustNode safeAddress $ UserIdent.fromUser usr))
 
-  getNode :: CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getNode g =
+  getNode :: Address -> CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getNode root g =
     case _ of
-      This uiApi -> g # G.insertNode (TN.initTrustNode uiApi) -- use addNode
+      This uiApi -> g # G.insertNode (TN.initTrustNode root uiApi)
       That _ -> Right g
       Both uiApi _ -> G.modifyNode (getIndex uiApi) (set TN._userIdent uiApi) g
 

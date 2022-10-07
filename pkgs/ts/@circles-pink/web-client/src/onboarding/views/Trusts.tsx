@@ -1,10 +1,4 @@
-import React, {
-  ReactElement,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { Button, ButtonLinkLike } from '../../components/forms';
 import { Claim, SubClaim } from '../../components/text';
 import { DialogCard } from '../../components/DialogCard';

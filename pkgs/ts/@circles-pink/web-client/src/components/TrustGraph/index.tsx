@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import Cytoscape, { LayoutOptions } from 'cytoscape';
 import { Theme } from '../../context/theme';
@@ -52,6 +52,10 @@ const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
     id: _Address.addrToString(_TrustNode.getAddress(tn)),
     label: _UserIdent.getIdentifier(tn.userIdent),
     isLoading: tn.isLoading,
+    clusterId: _Address.addrToString(tn.root),
+    isRoot:
+      _Address.addrToString(tn.root) ===
+      _Address.addrToString(_TrustNode.getAddress(tn)),
   },
 });
 
@@ -169,9 +173,9 @@ export const TrustGraph = ({
   theme,
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
-  const [layout, setLayout] = useState<LayoutOptions>(concentric);
+  const [layout, setLayout] = useState<LayoutOptions>(cise);
   const [initial, setInitial] = useState(true);
-  const [elements, setElements] = useState(getElementsFromData(graph));
+  const elements = useMemo(() => getElementsFromData(graph), [graph]);
 
   // const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
 
@@ -197,11 +201,8 @@ export const TrustGraph = ({
   // }, [graph]);
 
   useEffect(() => {
-    setElements(getElementsFromData(graph));
-  }, [graph]);
-
-  useEffect(() => {
     if (!cy) return;
+    (window as any).cy = cy;
     if (!initial) cy.zoomingEnabled(false);
     cy.layout(layout).run();
     if (!initial) cy.zoomingEnabled(true);
@@ -268,25 +269,25 @@ export const TrustGraph = ({
       loopAnimation1(address)(evt.target);
     });
 
-    cy.on('mousedown', 'node', evt => {
-      const id = evt.target.id();
-      cy.getElementById(id).unlock();
-    });
+    // cy.on('mousedown', 'node', evt => {
+    //   const id = evt.target.id();
+    //   cy.getElementById(id).unlock();
+    // });
 
-    cy.on('mouseup', 'node', evt => {
-      const id = evt.target.id();
-      cy.getElementById(id).lock();
-    });
+    // cy.on('mouseup', 'node', evt => {
+    //   const id = evt.target.id();
+    //   cy.getElementById(id).lock();
+    // });
 
-    cy.on('touchstart', 'node', evt => {
-      const id = evt.target.id();
-      cy.getElementById(id).unlock();
-    });
+    // cy.on('touchstart', 'node', evt => {
+    //   const id = evt.target.id();
+    //   cy.getElementById(id).unlock();
+    // });
 
-    cy.on('touched', 'node', evt => {
-      const id = evt.target.id();
-      cy.getElementById(id).lock();
-    });
+    // cy.on('touched', 'node', evt => {
+    //   const id = evt.target.id();
+    //   cy.getElementById(id).lock();
+    // });
   }, [cy]);
 
   useEffect(() => {
@@ -371,7 +372,7 @@ export const TrustGraph = ({
         cy={cy_ => {
           if (!cy) setCy(cy_);
         }}
-        elements={elements.length > 0 ? elements : []}
+        elements={elements}
         style={{
           width: '100%',
           height: '600px',
@@ -382,7 +383,7 @@ export const TrustGraph = ({
         stylesheet={stylesheets}
       />
 
-      <Margin top={0.75} bottom={0.75}>
+      {/* <Margin top={0.75} bottom={0.75}>
         <JustText fontSize={1.25}>{t('trustGraph.switchLayout')}</JustText>
       </Margin>
 
@@ -408,7 +409,7 @@ export const TrustGraph = ({
         >
           {t('trustGraph.layoutOptions.cose')}
         </Button>
-      </ButtonRow>
+      </ButtonRow> */}
     </>
   );
 };
