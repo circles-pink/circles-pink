@@ -211,15 +211,24 @@ export const TrustGraph = ({
       setElements(getElementsFromData(graph));
     }
 
+    if (
+      !initial &&
+      _Graph.rootHasChanged(_IxGraph.toGraph(graph))(
+        _IxGraph.toGraph(prevGraph)
+      )
+    ) {
+      cy.layout(layout).run();
+    }
+
     setPrevGraph(graph);
   }, [graph]);
 
   useEffect(() => {
     if (!cy) return;
     (window as any).cy = cy;
-    if (!initial) cy.zoomingEnabled(false);
+    // if (!initial) cy.zoomingEnabled(false);
     cy.layout(layout).run();
-    if (!initial) cy.zoomingEnabled(true);
+    // if (!initial) cy.zoomingEnabled(true);
     setInitial(false);
   }, [elements]);
 
