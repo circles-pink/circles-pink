@@ -26,9 +26,9 @@ export const useClientPolling = (act: (ac: DashboardAction) => void) => {
       act(_dashboardAction._getBalance(unit));
     }, BALANCE_INTERVAL);
 
-    const trustNetworkPolling = setInterval(() => {
-      act(_dashboardAction._getTrusts(unit));
-    }, TRUST_NETWORK_INTERVAL);
+    // const trustNetworkPolling = setInterval(() => {
+    //   act(_dashboardAction._getTrusts(unit));
+    // }, TRUST_NETWORK_INTERVAL);
 
     const ubiPayoutPolling = setInterval(() => {
       act(_dashboardAction._getTrusts(unit));
@@ -45,7 +45,7 @@ export const useClientPolling = (act: (ac: DashboardAction) => void) => {
     // Clear interval on unmount
     return () => {
       clearInterval(balancePolling);
-      clearInterval(trustNetworkPolling);
+      // clearInterval(trustNetworkPolling);
       clearInterval(ubiPayoutPolling);
       clearInterval(voucherPolling);
       clearInterval(voucherProviderPolling);
