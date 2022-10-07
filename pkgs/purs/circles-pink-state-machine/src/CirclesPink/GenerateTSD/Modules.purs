@@ -238,7 +238,7 @@ modules =
             [ _Ord ORD ]
             (Data.IxGraph.nodes :: _ ORD E N -> _)
         , R.value "toGraph" [] (Data.IxGraph.toGraph :: _ I E N -> _)
-        , R.value "empty" [] (Data.IxGraph.empty :: _ I E N )
+        , R.value "empty" [] (Data.IxGraph.empty :: _ I E N)
         ]
 
   , "CirclesSimple.Data.Graph" /\
@@ -257,6 +257,7 @@ modules =
       join
         [ R.value "getDiff" [] CirclesSimple.Data.Graph.Diff.getDiff
         , R.value "isStructuralChange" [] (CirclesSimple.Data.Graph.Diff.isStructuralChange)
+        , R.value "rootHasChanged" [] (CirclesSimple.Data.Graph.Diff.rootHasChanged)
         ]
 
   , "Effect" /\
