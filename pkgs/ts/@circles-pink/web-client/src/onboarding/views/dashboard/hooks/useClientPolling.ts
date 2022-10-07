@@ -31,7 +31,7 @@ export const useClientPolling = (act: (ac: DashboardAction) => void) => {
     // }, TRUST_NETWORK_INTERVAL);
 
     const ubiPayoutPolling = setInterval(() => {
-      act(_dashboardAction._getTrusts(unit));
+      act(_dashboardAction._getUBIPayout(unit));
     }, UBI_PAYOUT_INTERVAL);
 
     const voucherPolling = setInterval(() => {
