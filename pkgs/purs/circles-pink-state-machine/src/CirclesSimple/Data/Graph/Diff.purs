@@ -8,3 +8,6 @@ import Data.Graph.Diff as D
 
 getDiff :: CirclesGraph' -> CirclesGraph' -> D.GraphDiff Address TrustConnection TrustNode
 getDiff = D.getDiff
+
+isStructuralChange :: CirclesGraph' -> CirclesGraph' -> Boolean
+isStructuralChange = D.isStructuralChange

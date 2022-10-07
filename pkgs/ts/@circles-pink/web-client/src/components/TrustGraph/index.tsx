@@ -175,30 +175,44 @@ export const TrustGraph = ({
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(cise);
   const [initial, setInitial] = useState(true);
-  const elements = useMemo(() => getElementsFromData(graph), [graph]);
 
-  // const [prevGraph, setPrevGraph] = useState<CirclesGraph>(_Graph.empty);
+  const [elements, setElements] = useState<Cytoscape.ElementDefinition[]>([]);
 
-  // useEffect(() => {
-  //   if (!cy) return;
+  const [prevGraph, setPrevGraph] = useState<CirclesGraph>(
+    _IxGraph.empty as unknown as CirclesGraph
+  ); // TODO!!!
 
-  //   const diff = _Graph.getDiff(prevGraph)(graph);
+  useEffect(() => {
+    if (!cy) return;
 
-  //   diff.forEach(instr => {
-  //     pipe(
-  //       instr,
-  //       _Graph.unDiffInstruction({
-  //         onAddEdge: cyAddEdge(cy),
-  //         onDeleteEdge: cyDeleteEdge(cy),
-  //         onUpdateEdge: cyAddEdge(cy),
-  //         onAddNode: cyAddNode(cy),
-  //         onDeleteNode: cyDeleteNode(cy),
-  //         onUpdateNode: cyUpdateNode(cy),
-  //       })
-  //     );
-  //   });
-  //   setPrevGraph(graph);
-  // }, [graph]);
+    if (
+      _Graph.isStructuralChange(_IxGraph.toGraph(graph))(
+        _IxGraph.toGraph(prevGraph)
+      )
+    ) {
+      const diff = _Graph.getDiff(_IxGraph.toGraph(prevGraph))(
+        _IxGraph.toGraph(graph)
+      );
+
+      diff.forEach(instr => {
+        pipe(
+          instr,
+          _Graph.unDiffInstruction({
+            onAddEdge: cyAddEdge(cy),
+            onDeleteEdge: cyDeleteEdge(cy),
+            onUpdateEdge: cyAddEdge(cy),
+            onAddNode: cyAddNode(cy),
+            onDeleteNode: cyDeleteNode(cy),
+            onUpdateNode: cyUpdateNode(cy),
+          })
+        );
+      });
+    } else {
+      setElements(getElementsFromData(graph));
+    }
+
+    setPrevGraph(graph);
+  }, [graph]);
 
   useEffect(() => {
     if (!cy) return;
