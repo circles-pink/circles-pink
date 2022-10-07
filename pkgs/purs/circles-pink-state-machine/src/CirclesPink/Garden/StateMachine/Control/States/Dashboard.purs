@@ -491,7 +491,12 @@ dashboard env@{ trustGetNetwork } =
     case _ of
       This uiApi -> g # G.insertNode (TN.initTrustNode root uiApi)
       That _ -> Right g
-      Both uiApi _ -> G.modifyNode (getIndex uiApi) (set TN._userIdent uiApi) g
+      Both uiApi _ -> g
+        # G.modifyNode (getIndex uiApi)
+            ( \tn -> tn
+                # set TN._userIdent uiApi
+                # set TN._root root
+            )
 
   getOutgoingEdge :: Address -> CirclesGraph -> These CC.TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph
   getOutgoingEdge centerAddress g = case _ of
