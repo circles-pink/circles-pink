@@ -50,7 +50,10 @@ import { pipe } from 'fp-ts/lib/function';
 const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
     id: _Address.addrToString(_TrustNode.getAddress(tn)),
-    label: _UserIdent.getIdentifier(tn.userIdent),
+    label:
+      _UserIdent.getIdentifier(tn.userIdent) +
+      ' - ' +
+      _Address.addrToString(tn.root).substring(0, 5),
     isLoading: tn.isLoading,
     clusterId: _Address.addrToString(tn.root),
     isRoot:
@@ -120,34 +123,18 @@ const cyAddEdge =
 
     cyDeleteEdge(cy)(ids);
 
-    cy.add({
-      data: {
-        source: _Address.addrToString(source),
-        target: _Address.addrToString(target),
-        value,
-      },
-    });
+    cy.add(getEdge(tc));
   };
 
 const cyAddNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
-  cy.add({
-    data: {
-      id: _Address.addrToString(id),
-      label: _UserIdent.getIdentifier(n.userIdent),
-      isLoading: n.isLoading,
-    },
-  });
+  cy.add(getNode(n));
 };
 
 const cyUpdateNode =
   (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
     const ele = cy.getElementById(_Address.addrToString(id));
 
-    ele.data({
-      id: _Address.addrToString(id),
-      label: _UserIdent.getIdentifier(n.userIdent),
-      isLoading: n.isLoading,
-    });
+    ele.data(getNode(n).data);
 
     cy.forceRender();
   };
@@ -207,8 +194,10 @@ export const TrustGraph = ({
           })
         );
       });
+      console.log('No Repositioning: No structual change');
     } else {
       setElements(getElementsFromData(graph));
+      console.log('Repositioning: Structual change');
     }
 
     if (
@@ -217,6 +206,7 @@ export const TrustGraph = ({
         _IxGraph.toGraph(prevGraph)
       )
     ) {
+      console.log('Repositioning: Root has changed');
       cy.layout(layout).run();
     }
 

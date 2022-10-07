@@ -10,7 +10,7 @@ import CirclesCore as CC
 import CirclesPink.Data.Address (Address)
 import CirclesPink.Data.PrivateKey (PrivateKey, sampleKey)
 import CirclesPink.Data.TrustConnection (TrustConnection(..))
-import CirclesPink.Data.TrustNode (TrustNode, initTrustNode)
+import CirclesPink.Data.TrustNode (TrustNode, _root, initTrustNode)
 import CirclesPink.Data.TrustNode as TN
 import CirclesPink.Data.TrustState (initTrusted, initUntrusted, isLoadingTrust, isLoadingUntrust, isPendingTrust, isPendingUntrust, isTrusted, next)
 import CirclesPink.Data.User (User(..))
@@ -230,12 +230,19 @@ dashboard env@{ trustGetNetwork } =
   expandTrustNetwork set st safeAddress =
     void $ runExceptT do
       let
-        _nodeIsLoading = prop _trusts
+
+        _targetNode = prop _trusts
           <<< G._atNode safeAddress
           <<< traversed
+
+        _nodeIsLoading = _targetNode
           <<< _Newtype
           <<< prop _isLoading
 
+        _nodeRoot = _targetNode
+          <<< _root
+
+      -- lift $ set $ S._dashboard <<< L.set _nodeRoot safeAddress
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
       syncTrusts set st safeAddress 0 `catchError`
         ( const $ do
