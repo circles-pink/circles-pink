@@ -218,12 +218,12 @@ dashboard env@{ trustGetNetwork } =
     void do
       runExceptT do
         _ <-
-          syncTrusts set st (st.user -# _.safeAddress)
+          syncTrusts set st false (st.user -# _.safeAddress)
             # retryUntil env (const { delay: 1000 }) (\r _ -> isRight r) 0
         -- let x = todo -- infinite
         -- _ <- lift $ env.sleep 5000
         -- _ <-
-        --   syncTrusts set st st.user.safeAddress
+        --   syncTrusts set st false st.user.safeAddress
         --     # retryUntil env (const { delay: 5000 }) (\_ _ -> false) 0
         pure unit
 
@@ -240,7 +240,7 @@ dashboard env@{ trustGetNetwork } =
           <<< prop _isLoading
 
       lift $ set $ S._dashboard <<< L.set _nodeIsLoading true
-      syncTrusts set st safeAddress 0 `catchError`
+      syncTrusts set st true safeAddress 0 `catchError`
         ( const $ do
             lift $ set $ S._dashboard <<< L.set _nodeIsLoading false
         )
@@ -435,7 +435,7 @@ dashboard env@{ trustGetNetwork } =
           # dropError
         pure unit
 
-  syncTrusts set st centerAddress i = do
+  syncTrusts set st setRootId centerAddress i = do
 
     trustNodes :: Map Address CC.TrustNode <-
       trustGetNetwork st.privKey centerAddress
@@ -473,8 +473,8 @@ dashboard env@{ trustGetNetwork } =
 
               st'.trusts
                 # getOwnNode st'.user
-                # getFocusedNode centerAddress
-                # (\g -> foldM (getNode centerAddress) g $ mapsToThese userIdents neighborNodes)
+                # getFocusedNode setRootId centerAddress
+                # (\g -> foldM (getNode setRootId centerAddress) g $ mapsToThese userIdents neighborNodes)
                 >>= (\g -> foldM (getIncomingEdge centerAddress) g $ mapsToThese trustNodes incomingEdges)
                 >>= (\g -> foldM (getOutgoingEdge centerAddress) g $ mapsToThese trustNodes outgoingEdges)
 
@@ -490,12 +490,14 @@ dashboard env@{ trustGetNetwork } =
     # L.over (G._atNode safeAddress)
         (_ `catchError` (const $ Just $ initTrustNode safeAddress $ UserIdent.fromUser usr))
 
-  getFocusedNode :: Address -> CirclesGraph -> CirclesGraph
-  getFocusedNode centerAddress g = g
-    # L.set (G._atNode centerAddress <<< traversed <<< _root) centerAddress
+  getFocusedNode :: Boolean -> Address -> CirclesGraph -> CirclesGraph
+  getFocusedNode setRootId centerAddress g =
+    if setRootId then g
+      # L.set (G._atNode centerAddress <<< traversed <<< _root) centerAddress
+    else g
 
-  getNode :: Address -> CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
-  getNode root g =
+  getNode :: Boolean -> Address -> CirclesGraph -> These UserIdent TrustNode -> EitherV (GE.ErrAll Address ()) CirclesGraph
+  getNode setRootId root g =
     case _ of
       This uiApi -> g # G.insertNode (TN.initTrustNode root uiApi)
       That _ -> Right g
@@ -503,7 +505,7 @@ dashboard env@{ trustGetNetwork } =
         # G.modifyNode (getIndex uiApi)
             ( \tn -> tn
                 # set TN._userIdent uiApi
-                # set TN._root root
+                # if setRootId then set TN._root root else identity
             )
 
   getOutgoingEdge :: Address -> CirclesGraph -> These CC.TrustNode TrustConnection -> EitherV (GE.ErrAll Address ()) CirclesGraph

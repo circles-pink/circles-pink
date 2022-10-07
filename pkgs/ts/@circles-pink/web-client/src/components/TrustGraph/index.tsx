@@ -50,15 +50,9 @@ import { pipe } from 'fp-ts/lib/function';
 const getNode = (tn: TrustNode): Cytoscape.ElementDefinition => ({
   data: {
     id: _Address.addrToString(_TrustNode.getAddress(tn)),
-    label:
-      _UserIdent.getIdentifier(tn.userIdent) +
-      ' - ' +
-      _Address.addrToString(tn.root).substring(0, 5),
+    label: _UserIdent.getIdentifier(tn.userIdent),
     isLoading: tn.isLoading,
     clusterId: _Address.addrToString(tn.root),
-    isRoot:
-      _Address.addrToString(tn.root) ===
-      _Address.addrToString(_TrustNode.getAddress(tn)),
   },
 });
 
@@ -103,6 +97,7 @@ type TrustGraphProps = {
   graph: CirclesGraph;
   expandTrustNetwork: (addr: Address) => void;
   theme: Theme;
+  ownAddress: Address;
 };
 
 (window as any).layouts = { concentric };
@@ -158,16 +153,19 @@ export const TrustGraph = ({
   graph,
   expandTrustNetwork,
   theme,
+  ownAddress,
 }: TrustGraphProps): ReactElement => {
   const [cy, setCy] = useState<Cytoscape.Core | undefined>();
   const [layout, setLayout] = useState<LayoutOptions>(cise);
   const [initial, setInitial] = useState(true);
-
   const [elements, setElements] = useState<Cytoscape.ElementDefinition[]>([]);
-
   const [prevGraph, setPrevGraph] = useState<CirclesGraph>(
     _IxGraph.empty as unknown as CirclesGraph
   ); // TODO!!!
+
+  const [rootNode, setRootNode] = useState<String>(
+    _Address.addrToString(ownAddress)
+  );
 
   useEffect(() => {
     if (!cy) return;
@@ -194,7 +192,6 @@ export const TrustGraph = ({
           })
         );
       });
-      console.log('No Repositioning: No structual change');
 
       if (
         !initial &&
@@ -202,12 +199,10 @@ export const TrustGraph = ({
           _IxGraph.toGraph(prevGraph)
         )
       ) {
-        console.log('Repositioning: Root has changed');
         cy.layout(layout).run();
       }
     } else {
       setElements(getElementsFromData(graph));
-      console.log('Repositioning: Structual change');
     }
 
     setPrevGraph(graph);
@@ -278,6 +273,7 @@ export const TrustGraph = ({
         _Nullable.toNullable
       );
       if (!address) return;
+      setRootNode(_Address.addrToString(address));
       expandTrustNetwork(address);
       loopAnimation1(address)(evt.target);
     });
@@ -342,6 +338,10 @@ export const TrustGraph = ({
         padding: '4px',
         shape: 'round-rectangle',
         'background-color': theme.baseColor,
+        'border-width': (node: any) =>
+          node.data('clusterId') === rootNode ? 2 : 0,
+        'border-style': 'solid',
+        'border-color': '#1C1C1C',
         label: 'data(label)', // here you can label the nodes
       } as any,
     },
@@ -350,7 +350,7 @@ export const TrustGraph = ({
       style: {
         label: 'data(label)',
         'font-size': '20',
-        color: 'black',
+        color: '#1C1C1C',
         'text-halign': 'center',
         'text-valign': 'center',
       },
