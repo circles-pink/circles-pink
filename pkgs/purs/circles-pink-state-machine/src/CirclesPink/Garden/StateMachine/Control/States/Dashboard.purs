@@ -36,9 +36,8 @@ import Data.Identity (Identity)
 import Data.Int as Int
 import Data.IxGraph (getIndex)
 import Data.IxGraph as G
-import Data.Lens (_Just, set, traversed)
+import Data.Lens (set, traversed)
 import Data.Lens as L
-import Data.Lens.At (at)
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
 import Data.Map (Map)
@@ -50,7 +49,8 @@ import Data.Pair as P
 import Data.Set as Set
 import Data.String as Str
 import Data.These (These(..), maybeThese)
-import RemoteData (RemoteData, _failure, _loading, _success)
+import Foreign.Object as Obj
+import RemoteData (RemoteData, _failure, _loading, _notAsked, _success)
 import Test.TestUtils (addrA, addrB, userA)
 import Web3 (Message(..))
 
@@ -288,7 +288,18 @@ dashboard env@{ trustGetNetwork } =
                   Left _ -> S._dashboard st'
         _ <-
           env.addTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
-            # subscribeRemoteReport env (\f -> set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustAddResult") <<< at (show targetAddress) <<< _Just) f)
+            # subscribeRemoteReport env
+                ( \f ->
+                    set \s -> S._dashboard s
+                      { trustAddResult = Obj.alter
+                          ( case _ of
+                              Nothing -> Just $ f $ _notAsked unit
+                              Just x -> Just $ f x
+                          )
+                          (show targetAddress)
+                          s.trustAddResult
+                      }
+                )
             # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
 
@@ -343,7 +354,15 @@ dashboard env@{ trustGetNetwork } =
           env.removeTrustConnection st.privKey targetAddress (st.user -# _.safeAddress)
             # subscribeRemoteReport env
                 ( \f ->
-                    set $ S._dashboard <<< L.over (prop (Proxy :: _ "trustRemoveResult") <<< at (show targetAddress) <<< _Just) f
+                    set \s -> S._dashboard s
+                      { trustRemoveResult = Obj.alter
+                          ( case _ of
+                              Nothing -> Just $ f $ _notAsked unit
+                              Just x -> Just $ f x
+                          )
+                          (show targetAddress)
+                          s.trustRemoveResult
+                      }
                 )
             # retryUntil env (const { delay: 1000 }) (\r n -> n == 10 || isRight r) 0
             # dropError
