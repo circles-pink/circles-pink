@@ -1,6 +1,7 @@
 module Chance
   ( Casing(..)
   , FirstOpts
+  , Gender(..)
   , Nationality(..)
   , first
   , integer
@@ -36,10 +37,17 @@ data Nationality
   = En
   | It
 
+data Gender
+  = Male
+  | Female
+
 getNationality :: Nationality -> B.Nationality
 getNationality En = inj1of2 $ string' (Proxy :: _ "en")
-
 getNationality It = inj2of2 $ string' (Proxy :: _ "it")
+
+getGender :: Gender -> B.Gender
+getGender Male = inj1of2 $ string' (Proxy :: _ "male")
+getGender Female = inj2of2 $ string' (Proxy :: _ "female")
 
 --------------------------------------------------------------------------------
 type StringOpts = (length :: Int, casing :: Casing, alpha :: Boolean, numeric :: Boolean)
@@ -84,7 +92,7 @@ name x1 = runEffectFn1 chance.name x1' # liftEffect
       # O.modify (Proxy :: _ "nationality") getNationality
 
 --------------------------------------------------------------------------------
-type FirstOpts = (nationality :: Nationality)
+type FirstOpts = (nationality :: Nationality, gender :: Gender)
 
 first :: forall r. FromRecord r () FirstOpts => Record r -> Aff String
 first x1 = runEffectFn1 chance.first x1' # liftEffect
@@ -93,5 +101,6 @@ first x1 = runEffectFn1 chance.first x1' # liftEffect
     x1
       # (O.fromRecord :: _ -> Option FirstOpts)
       # O.modify (Proxy :: _ "nationality") getNationality
+      # O.modify (Proxy :: _ "gender") getGender
 
 --------------------------------------------------------------------------------
