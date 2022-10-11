@@ -54,6 +54,7 @@
   , "psci-support"
   , "quickcheck"
   , "record"
+  , "random"
   , "safe-coerce"
   , "simple-json"
   , "spec"

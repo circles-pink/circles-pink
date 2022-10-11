@@ -23,7 +23,7 @@ type Chance =
         String
   , first ::
       EffectFn1
-        (Option (nationality :: Nationality))
+        (Option (nationality :: Nationality, gender :: Gender))
         String
   , integer ::
       EffectFn1
@@ -34,6 +34,8 @@ type Chance =
 type Casing = Union2 (String' "lower") (String' "upper")
 
 type Nationality = Union2 (String' "en") (String' "it")
+
+type Gender = Union2 (String' "male") (String' "female")
 
 --------------------------------------------------------------------------------
 -- Structural

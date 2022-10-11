@@ -20,6 +20,7 @@ module CirclesPink.Garden.ApiScript
 
 import CirclesPink.Prelude
 
+import Chance (Gender(..))
 import Chance as C
 import CirclesCore (ErrNewWebSocketProvider, ErrSendTransaction)
 import CirclesPink.Data.Address (Address)
@@ -41,6 +42,7 @@ import Data.Int as M
 import Data.Newtype.Extra ((-#))
 import Data.String (joinWith)
 import Effect.Class.Console as E
+import Effect.Random (randomBool)
 import HTTP.Milkis (milkisRequest)
 import Milkis.Impl.Node (nodeFetch)
 import Network.Ethereum.Core.HexString (HexString)
@@ -86,9 +88,12 @@ fundAddress envVars safeAddress =
 genUsername :: forall r. ExceptV r ScriptM String
 genUsername =
   liftAff ado
-    n <- C.first {}
+    nameMale <- C.first { gender: Male }
+    nameFemale <- C.first { gender: Female }
+    randBool <- liftEffect randomBool
+    let name = if randBool then nameMale else nameFemale
     i <- C.integer { min: 1, max: 99 }
-    in n <> show i
+    in name <> show i
 
 --------------------------------------------------------------------------------
 genSignupOpts :: forall r. ExceptV r ScriptM SignUpUserOpts
