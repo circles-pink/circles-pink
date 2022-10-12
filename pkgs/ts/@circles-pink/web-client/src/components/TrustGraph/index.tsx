@@ -121,6 +121,26 @@ const cyAddEdge =
     cy.add(getEdge(tc));
   };
 
+const cyUpdateEdge =
+  (cy: Cytoscape.Core) => (ids: Pair<Address>) => (tc: TrustConnection) => {
+    const [source, target] = pairToTsTuple(ids);
+
+    const elId = (
+      cy
+        .getElementById(_Address.addrToString(source))
+        .connectedEdges()
+        .filter(
+          (e: any) => e._private.data.target === _Address.addrToString(target)
+        )[0] as any
+    )._private.data.id;
+
+    const ele = cy.getElementById(elId);
+
+    ele.data(getEdge(tc).data);
+
+    cy.forceRender();
+  };
+
 const cyAddNode = (cy: Cytoscape.Core) => (id: Address) => (n: TrustNode) => {
   cy.add(getNode(n));
 };
@@ -185,7 +205,7 @@ export const TrustGraph = ({
           _Graph.unDiffInstruction({
             onAddEdge: cyAddEdge(cy),
             onDeleteEdge: cyDeleteEdge(cy),
-            onUpdateEdge: cyAddEdge(cy),
+            onUpdateEdge: cyUpdateEdge(cy),
             onAddNode: cyAddNode(cy),
             onDeleteNode: cyDeleteNode(cy),
             onUpdateNode: cyUpdateNode(cy),
@@ -199,7 +219,7 @@ export const TrustGraph = ({
           _IxGraph.toGraph(prevGraph)
         )
       ) {
-        cy.layout(layout).run();
+        runLayout(cy);
       }
     } else {
       setElements(getElementsFromData(graph));
@@ -211,17 +231,23 @@ export const TrustGraph = ({
   useEffect(() => {
     if (!cy) return;
     (window as any).cy = cy;
-    // if (!initial) cy.zoomingEnabled(false);
-    cy.layout(layout).run();
-    // if (!initial) cy.zoomingEnabled(true);
+    runLayout(cy);
     setInitial(false);
   }, [elements]);
 
-  useEffect(() => {
-    if (!cy) return;
-    cy.nodes().unlock();
-    cy.layout(layout).run();
-  }, [layout]);
+  const runLayout = (cy: Cytoscape.Core) => {
+    const nodes = cy.nodes();
+    const modCise = { ...cise, animate: nodes.length > 50 ? false : 'end' };
+    // if (!initial) cy.zoomingEnabled(false);
+    cy.layout(modCise).run();
+    // if (!initial) cy.zoomingEnabled(true);
+  };
+
+  // useEffect(() => {
+  //   if (!cy) return;
+  //   cy.nodes().unlock();
+  //   runLayout(cy);
+  // }, [layout]);
 
   useEffect(() => {
     if (!cy) return;
