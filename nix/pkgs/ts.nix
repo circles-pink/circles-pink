@@ -23,6 +23,8 @@ rec {
     {
       "@circles-pink/content" =
         cleanSource "${../../pkgs/ts}/@circles-pink/content";
+      "@circles-pink/demo-app" =
+        cleanSource "${../../pkgs/ts}/@circles-pink/demo-app";
       "@circles-pink/zeus-client" = pkgs.runCommand "" { } ''
         cp -r ${cleanSource ../../pkgs/ts/${"@"}circles-pink/zeus-client} $out
         chmod -R +w $out
@@ -264,6 +266,22 @@ rec {
 
       chmod -R +w $tmp
       rm -rf $tmp
+    '';
+
+    demo-app = pkgs.runCommand "demo-app" { buildInputs = [ pkgs.yarn ]; } ''
+      cp -r ${workspaces."@circles-pink/demo-app"}/* -t .
+      chmod -R +w .
+      
+      cp -r ${publicWorkspaces."@circles-pink/web-client"}/dist -t \
+        libexec/@circles-pink/demo-app/deps/@circles-pink/web-client
+
+      cd libexec/@circles-pink/demo-app/deps/@circles-pink/demo-app
+      # yarn build
+      mkdir dist
+      echo 123 > dist/foo
+      
+      mkdir $out
+      cp -r dist/* -t $out
     '';
   };
 
