@@ -276,12 +276,10 @@ rec {
         libexec/@circles-pink/demo-app/deps/@circles-pink/web-client
 
       cd libexec/@circles-pink/demo-app/deps/@circles-pink/demo-app
-      # yarn build
-      mkdir dist
-      echo 123 > dist/foo
+      yarn build
       
       mkdir $out
-      cp -r dist/* -t $out
+      cp -r build/* -t $out
     '';
   };
 
