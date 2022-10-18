@@ -39,8 +39,12 @@ in
   ];
 
   env.services = {
-    storybook = {
+    demo-app = {
       url = config.env.url;
+      port = 80;
+    };
+    storybook = {
+      url = (config.env.url // { subdomain = "storybook"; });
       port = 80;
     };
     docs = {
@@ -100,6 +104,11 @@ in
       # } else { }
       #   //
       {
+        "${lib.mkDomain config.env.services.demo-app.url}" = {
+          locations."/" = {
+            root = pkgs.circles-pink.ts.builds.demo-app;
+          };
+        };
         "${lib.mkDomain config.env.services.storybook.url}" = pkgs.lib.mkIf config.network-config.webserver.services.storybook.enable {
           locations."/" = {
             root = pkgs.circles-pink.publicDir { inherit envVars; };
