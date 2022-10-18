@@ -236,10 +236,8 @@ export const TrustGraph = ({
   }, [elements]);
 
   const runLayout = (cy: Cytoscape.Core) => {
-    const nodes = cy.nodes();
-    const modCise = { ...cise, animate: nodes.length > 50 ? false : 'end' };
     // if (!initial) cy.zoomingEnabled(false);
-    cy.layout(modCise).run();
+    cy.layout(cise).run();
     // if (!initial) cy.zoomingEnabled(true);
   };
 
