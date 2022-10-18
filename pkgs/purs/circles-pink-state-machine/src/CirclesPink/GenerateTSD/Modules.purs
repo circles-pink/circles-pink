@@ -303,6 +303,10 @@ modules =
       join
         [ R.typeAlias "Resumee"
             (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingResumee.Resumee)
+        , R.typeDef "--"
+            (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingResumee.StepName)
+        , R.typeDef "--"
+            (Proxy :: _ CirclesPink.Garden.StateMachine.TrackingResumee.Instant)
         , R.value "init" [] (CirclesPink.Garden.StateMachine.TrackingResumee.init)
         , R.value "encodeJsonResumee" [] (CirclesPink.Garden.StateMachine.TrackingResumee.encodeJsonResumee)
         , R.value "decodeJsonResumee" [] (CirclesPink.Garden.StateMachine.TrackingResumee.decodeJsonResumee)
@@ -357,6 +361,10 @@ modules =
             (Proxy :: _ VoucherServer.Spec.Types.VoucherOffer)
         , R.typeAlias "Voucher"
             (Proxy :: _ VoucherServer.Spec.Types.Voucher)
+        , R.typeDef "--"
+            (Proxy :: _ VoucherServer.Spec.Types.TransferId)
+        , R.typeDef "--"
+            (Proxy :: _ VoucherServer.Spec.Types.VoucherCode)
         , value "unVoucherProviderId" []
             VoucherServer.Spec.Types.unVoucherProviderId
         , value "unVoucherAmount" []
