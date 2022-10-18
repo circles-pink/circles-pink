@@ -22,6 +22,7 @@ module.exports = {
       http: require.resolve('stream-http'),
       os: require.resolve('os-browserify/browser'),
       util: require.resolve('util/'),
+      url: require.resolve('url/'),
       process: false,
     },
   },
