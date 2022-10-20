@@ -47,6 +47,13 @@ export const BuyVouchers = ({
 
   const limitReached = boughtVouchersAmount >= buyVoucherEurLimit;
 
+  const canBuyOffer = (num: number): boolean => {
+    if (boughtVouchersAmount + num <= buyVoucherEurLimit) {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <>
       <Claim color={theme.textColorDark}>
@@ -89,14 +96,13 @@ export const BuyVouchers = ({
                         _VoucherServer.unVoucherAmount(offer.amount) * 10 >
                       0;
 
+                    const offerInLimits =
+                      !limitReached &&
+                      canBuyOffer(_VoucherServer.unVoucherAmount(offer.amount));
+
                     return (
                       <Offer
-                        enabled={
-                          userCanBuy &&
-                          !limitReached &&
-                          _VoucherServer.unVoucherAmount(offer.amount) <=
-                            buyVoucherEurLimit
-                        }
+                        enabled={userCanBuy && offerInLimits}
                         theme={theme}
                         key={`${provider.id}-${offer.amount}`}
                         onClick={() =>
@@ -115,7 +121,7 @@ export const BuyVouchers = ({
                         </VoucherText>
                         <br />
 
-                        {!limitReached ? (
+                        {offerInLimits ? (
                           <VoucherText fontSize={1.5}>
                             {userCanBuy
                               ? `${t('dashboard.voucherShop.buyFor')} ${
