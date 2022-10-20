@@ -1,6 +1,6 @@
 {
   "name": "@circles-pink/web-client",
-  "version": "1.0.53",
+  "version": "1.0.54",
   "main": "./dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc && babel --extensions .ts,.tsx --out-dir dist src",
