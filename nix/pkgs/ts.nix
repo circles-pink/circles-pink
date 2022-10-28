@@ -74,9 +74,18 @@ rec {
       pipe
         workspaces.${name} [
         (x: runCommand name { } ''
-          cp -r ${x}/libexec/${name}/deps/${name} $out
-          chmod -R +w $out
-          rm -rf $out/output/*/externs.cbor
+          cp -r ${x}/* -t .
+          chmod -R +w .
+          cp ${../../tsconfig.json} ./libexec/@circles-pink/tsconfig.json
+          cd ./libexec/${name}/deps/${name}
+          ${pkgs.yarn}/bin/yarn build
+
+          mkdir $out
+          cp package.json -t $out
+          cp tsconfig.json -t $out
+          cp -r dist -t $out
+          cp -r src -t $out
+          cp -r output -t $out
         '')
       ];
 
