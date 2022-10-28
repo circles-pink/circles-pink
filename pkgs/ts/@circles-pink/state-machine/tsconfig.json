@@ -1,7 +1,11 @@
 {
-  "compilerOptions": { "composite": true },
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "dist",
+    "skipLibCheck": true
+  },
   "extends": "../../../../tsconfig.json",
   "exclude": [],
-  "include": [],
-  "files": ["output/Ansi.Codes/index.d.ts"]
+  "include": ["src", "output"],
+  "files": []
 }

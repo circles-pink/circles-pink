@@ -1,6 +1,10 @@
 {
   "name": "@circles-pink/state-machine",
   "version": "1.0.54",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc"
+  },
   "dependencies": {
     "@circles/core": "2.11.1",
     "@circles/timecircles": "^1.0.6",
@@ -17,6 +21,7 @@
     "isomorphic-fetch": "^3.0.0",
     "isomorphic-unfetch": "^3.1.0",
     "node-fetch": "^2.0.0",
+    "typescript": "^4.8.4",
     "web3": "^1.7.1"
   }
 }
