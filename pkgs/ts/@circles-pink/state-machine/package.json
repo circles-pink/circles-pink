@@ -1,6 +1,6 @@
 {
   "name": "@circles-pink/state-machine",
-  "version": "1.0.56",
+  "version": "1.0.57",
   "main": "dist/src/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc"
