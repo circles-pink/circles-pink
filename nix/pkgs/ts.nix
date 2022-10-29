@@ -84,7 +84,7 @@ rec {
           cp package.json -t $out
           cp tsconfig.json -t $out
           mkdir $out/src
-          cp -r dist/* -t $out/src
+          cp -r dist/src/* -t $out/src
           cp -r output -t $out
         '')
       ];
