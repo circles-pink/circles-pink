@@ -26,7 +26,7 @@ import {
   _VoucherServer,
 } from '@circles-pink/state-machine/src';
 import { pipe } from 'fp-ts/lib/function';
-import { fromNativeBN, toNativeBN } from '../../../safe-as';
+import { fromNativeBN } from '../../../safe-as';
 
 const { _dashboardAction } = _StateMachine;
 
@@ -114,11 +114,35 @@ export const ConfirmSend = ({
 
   // Render
 
+  const ConfirmContent = () => (
+    <>
+      <Claim color={theme.baseColor}>
+        {t('dashboard.voucherShop.confirmSendClaim')}
+      </Claim>
+      <ConfirmDialog
+        theme={theme}
+        provider={provider}
+        eurAmount={_VoucherServer.unVoucherAmount(offer.amount)}
+      />
+      <JustifyEnd>
+        <Button
+          prio={'high'}
+          theme={theme}
+          icon={mdiCashFast}
+          state={to ? mapResult(state.transferResult) : 'disabled'}
+          onClick={() => (to ? transact(from, to) : {})}
+        >
+          {t('dashboard.voucherShop.confirmSendButton')}
+        </Button>
+      </JustifyEnd>
+    </>
+  );
+
   return pipe(
     state.transferResult,
     _RemoteData.unRemoteData({
-      onNotAsked: () => null,
-      onLoading: () => null,
+      onNotAsked: () => <ConfirmContent />,
+      onLoading: () => <ConfirmContent />,
       onFailure: () => (
         <Margin top={2} bottom={2}>
           <Claim color={theme.baseColor}>
@@ -126,29 +150,7 @@ export const ConfirmSend = ({
           </Claim>
         </Margin>
       ),
-      onSuccess: () => (
-        <>
-          <Claim color={theme.baseColor}>
-            {t('dashboard.voucherShop.confirmSendClaim')}
-          </Claim>
-          <ConfirmDialog
-            theme={theme}
-            provider={provider}
-            eurAmount={_VoucherServer.unVoucherAmount(offer.amount)}
-          />
-          <JustifyEnd>
-            <Button
-              prio={'high'}
-              theme={theme}
-              icon={mdiCashFast}
-              state={to ? mapResult(state.transferResult) : 'disabled'}
-              onClick={() => (to ? transact(from, to) : {})}
-            >
-              {t('dashboard.voucherShop.confirmSendButton')}
-            </Button>
-          </JustifyEnd>
-        </>
-      ),
+      onSuccess: () => <ConfirmContent />,
     })
   );
 };
